@@ -1,4 +1,5 @@
 image: debian:latest
+
 before_script:
   - apt-get update -qq
   - apt-get install -qq git
@@ -16,4 +17,4 @@ deploy_production:
   script:
     - ssh aiarena@ai-arena.net:2280 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && exit"
   only:
-- master
+    - master
