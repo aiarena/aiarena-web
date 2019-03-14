@@ -8,12 +8,8 @@ https://docs.djangoproject.com/en/2.1/howto/deployment/wsgi/
 """
 
 import os
-import site
-from django.core.wsgi import get_wsgi_application
 
-import sys
-sys.path.append('/home/aiarena/ai-arena/aiarena')
-site.addsitedir('/home/aiarena/ai-arena/python_env/lib/python3.5/site-packages')
+from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'aiarena.settings')
 
