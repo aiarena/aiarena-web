@@ -7,3 +7,6 @@ venv/
 
 # environment specific settings
 aiarena/env.py
+
+# python env
+python_env/
