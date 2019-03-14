@@ -5,7 +5,7 @@ before_script:
   - apt-get install -qq git
   - 'which ssh-agent || ( apt-get install -qq openssh-client )'
   - eval $(ssh-agent -s)
-  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - bash -c "ssh-add <(echo '$SSH_PRIVATE_KEY')"
   - mkdir -p ~/.ssh
   - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     
@@ -15,6 +15,6 @@ deploy_production:
     name: production
     url: ai-arena.net
   script:
-    - ssh aiarena@ai-arena.net -p 2280 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && exit"
+    - ssh aiarena@ai-arena.net -p 2280 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && sudo apachectl graceful && exit"
   only:
     - master
