@@ -11,7 +11,7 @@ before_script:
 deploy_staging:
   type: deploy
   environment:
-    name: staging
+    name: production
     url: ai-arena.net
   script:
     - ssh aiarena@ai-arena.net:2280 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && exit"
