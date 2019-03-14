@@ -4,3 +4,6 @@
 venv/
 
 .idea/
+
+# environment specific settings
+aiarena/env.py
