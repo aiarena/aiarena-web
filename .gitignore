@@ -1,3 +1,6 @@
 **/logs
 *.pyc
 
+venv/
+
+.idea/
