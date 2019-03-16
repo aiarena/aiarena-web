@@ -17,7 +17,7 @@
         (<a href="{% url 'auth_logout' %}">{% trans "Log out" %}</a> | 
         <a href="{% url 'auth_password_change' %}">{% trans "Change password" %}</a>)
     {% else %}
-       <a href="{% url 'auth_login' %}">{% trans "Log in" %}</a>
+       <a href="{% url 'login' %}">{% trans "Log in" %}</a>
     {% endif %}
     <hr />
     {% endblock %}
