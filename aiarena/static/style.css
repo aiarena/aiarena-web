@@ -1,0 +1,219 @@
+body {
+    margin: 25;
+    margin-bottom: 25px;
+    padding: 0;
+    background-color: rgb(0, 4, 1);
+
+    font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.86);
+}
+
+h1 {
+    font-size: 28px;
+    color: rgb(194, 255, 190);
+}
+
+a {
+    color: #97cc8c
+}
+
+a:hover {
+    background-color: rgba(255, 0, 0, 0.57);
+    color: #ffffff;
+    text-decoration: none;
+}
+
+#page {
+    background-color: rgba(0, 0, 0, 0);
+    width: 1200px;
+    margin: auto;
+    margin-left: auto;
+    padding-left: 0px;
+    margin-right: auto;
+}
+
+#content {
+    background-color: rgba(45, 76, 32, 0.52);
+    border: 3px solid rgba(4, 4, 4, 0.45);
+    border-top;
+    padding: 25px;
+    box-sizing: border-box;
+    width: 85.0%;
+}
+
+#sidebar {
+    float: right;
+    width: 12.0%;
+}
+
+#header, #about, #getting-started {
+    padding-left: 75px;
+    padding-right: 30px;
+}
+
+iframe {
+    max-width: 100%;
+}
+
+#header {
+    height: 64px;
+}
+
+#header h1, #header h2 {
+    margin: 0
+}
+
+#header h2 {
+    color: rgba(14, 255, 0, 0.37);
+    font-weight: normal;
+    font-size: 16px;
+}
+
+#about h3 {
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+#about-content {
+    background-color: #ffd;
+    border: 1px solid #fc0;
+    margin-left: -11px;
+}
+
+#about-content table {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    border-collapse: collapse;
+}
+
+#about-content td {
+    padding: 10px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+#about-content td.name {
+    color: #aba1a1
+}
+
+#about-content td.value {
+    color: #866f6f
+}
+
+#about-content.failure {
+    background-color: #fcc;
+    border: 1px solid #fff;
+}
+
+#about-content.failure p {
+    margin: 0;
+    padding: 10px;
+}
+
+#getting-started {
+    border-top: 1px solid #ccc;
+    margin-top: 25px;
+    padding-top: 15px;
+}
+
+#getting-started h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+#getting-started h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: normal;
+    color: #523a3a;
+    margin-bottom: 25px;
+}
+
+#getting-started ol {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+#getting-started li {
+    font-size: 18px;
+    color: rgb(190, 255, 202);
+    margin-bottom: 25px;
+}
+
+#getting-started li h2 {
+    margin: 0;
+    font-weight: normal;
+    font-size: 18px;
+    color: rgba(230, 255, 231, 0.62);
+}
+
+#getting-started li p {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
+}
+
+#search {
+    margin: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 11px;
+}
+
+#search input {
+    font-size: 11px;
+    margin: 2px;
+}
+
+#search-text {
+    width: 170px
+}
+
+#sidebar ul {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+#sidebar ul h3 {
+    margin-top: 25px;
+    font-size: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+#sidebar li {
+    list-style-type: none;
+}
+
+#sidebar ul.links li {
+    margin-bottom: 5px;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: sans-serif;
+    margin: 1.2em 0 0.6em 0;
+}
+
+p {
+    line-height: 1.5em;
+    margin: 1.6em 0;
+}
+
+code, .filepath, .app-info {
+    font-family: 'Andale Mono', Monaco, 'Liberation Mono', 'Bitstream Vera Sans Mono', 'DejaVu Sans Mono', monospace;
+}
+
+#footer {
+    clear: both;
+    padding-top: 2em;
+    text-align: center;
+    padding-right: 160px;
+    font-family: sans-serif;
+    font-size: 10px;
+}
+
+a:hover, a:visited, a:link, a:active {
+    text-decoration: none;
+}
