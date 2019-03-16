@@ -1,8 +1,6 @@
-from django.contrib import admin
-from django.urls import path
 from aiarena.api import views
+from rest_framework.routers import DefaultRouter
 
-
-urlpatterns = [
-    path('hello/', views.hello_world),
-]
+router = DefaultRouter()
+router.register(r'bots', views.BotViewSet, basename='bot')
+urlpatterns = router.urls

@@ -1,8 +1,13 @@
-from django.shortcuts import render
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from aiarena.core.models import Bot
+from rest_framework import viewsets, serializers
 
 
-@api_view()
-def hello_world(request):
-    return Response({"message": "Hello, world!"})
+class BotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bot
+        fields = '__all__'
+
+
+class BotViewSet(viewsets.ModelViewSet):
+    queryset = Bot.objects.all()
+    serializer_class = BotSerializer
