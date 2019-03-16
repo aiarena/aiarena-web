@@ -23,11 +23,11 @@
                     <h3>user</h3>
                     <ul class="links">
                         {% if user.is_authenticated %}
-                            {% trans "Logged in" %}: {{ user.username }}
-                            (<a href="{% url 'logout' %}">{% trans "Log out" %}</a> |
-                            <a href="{% url 'password_change' %}">{% trans "Change password" %}</a>)
+                            <li>{% trans "Logged in" %}: {{ user.username }}</li>
+                            <li><a href="{% url 'logout' %}">{% trans "Log out" %}</a></li>
+                            <li><a href="{% url 'password_change' %}">{% trans "Change password" %}</a></li>
                         {% else %}
-                            <a href="{% url 'login' %}">{% trans "Log in" %}</a>
+                            <li><a href="{% url 'login' %}">{% trans "Log in" %}</a></li>
                         {% endif %}
                     </ul>
                 </li>
