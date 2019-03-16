@@ -1,0 +1,6 @@
+# Files in this folder will be auto-populated with manage.py collectstatic
+
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore
