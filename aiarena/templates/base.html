@@ -3,35 +3,55 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="{{ STATIC_URL }}style.css" />
-    <title>{% block title %}User test{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static "style.css" %}">
+    <title>{% block title %}AI Arena{% endblock %}</title>
 </head>
 
 <body>
+<div id="page">
     <div id="header">
-    {% block header %}
-    <a href="{% url 'index' %}">{% trans "Home" %}</a> | 
-
-    {% if user.is_authenticated %}
-        {% trans "Logged in" %}: {{ user.username }} 
-        (<a href="{% url 'logout' %}">{% trans "Log out" %}</a> |
-        <a href="{% url 'password_change' %}">{% trans "Change password" %}</a>)
-    {% else %}
-       <a href="{% url 'login' %}">{% trans "Log in" %}</a>
-    {% endif %}
-    <hr />
-    {% endblock %}
+        {% block header %}
+        {% endblock %}
+    </div>
+    <div id="sidebar">
+        {% block sidebar %}
+            <ul id="sidebar-items">
+                <li>
+                    <h3>user</h3>
+                    <ul class="links">
+                        {% if user.is_authenticated %}
+                            {% trans "Logged in" %}: {{ user.username }}
+                            (<a href="{% url 'logout' %}">{% trans "Log out" %}</a> |
+                            <a href="{% url 'password_change' %}">{% trans "Change password" %}</a>)
+                        {% else %}
+                            <a href="{% url 'login' %}">{% trans "Log in" %}</a>
+                        {% endif %}
+                    </ul>
+                </li>
+                <li>
+                    <h3>links</h3>
+                    <ul class="links">
+                        <li><a href="https://discord.gg/kQFtbvY"</a>Discord</a></li>
+                        <li><a href="https://github.com/Dentosal/python-sc2">python-sc2</a></li>
+                        <li><a href="https://github.com/Blizzard/s2client-proto#downloads">StarCraft II</a></li>
+                        <li><a href="https://sc2ai.net">Starcraft 2 AI Ladder</a></li>
+                    </ul>
+                </li>
+            </ul>
+        {% endblock %}
     </div>
 
     <div id="content">
-    {% block content %}{% endblock %}
+        {% block content %}
+        {% endblock %}
     </div>
 
     <div id="footer">
-    {% block footer %}
-        <hr />
-    {% endblock %}
+        {% block footer %}
+        {% endblock %}
     </div>
+</div>
 </body>
 
 </html>
