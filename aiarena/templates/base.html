@@ -18,6 +18,12 @@
         {% block sidebar %}
             <ul id="sidebar-items">
                 <li>
+                    <h3>pages</h3>
+                    <ul class="links">
+                        <a href="{% url 'index' %}">{% trans "Home" %}</a>
+                    </ul>
+                </li>
+                <li>
                     <h3>user</h3>
                     <ul class="links">
                         {% if user.is_authenticated %}

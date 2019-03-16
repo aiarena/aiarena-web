@@ -2,5 +2,25 @@
 {% load i18n %}
 
 {% block content %}
-Index page
+    <ol>
+        <h3>Welcome to the Ai-Arena Open Beta!</h3>
+        <b>Open Beta?</b><br>
+        The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.<br>
+        Everyone is invited to upload a Bot to the Ladder :)<br>
+        <br>
+        <br>
+        <b>Known Bugs and limitations:</b><br>
+        Currently only Python Bots are supported. C++, DotNetCore, Java, Golang will be added soon.
+        <br>
+        <br>
+        <b>Instructions:</b><br>
+        <li><a href="{% url 'django_registration_register' %}">{% trans "Register" %}</a></li>
+        <li>Read the <a href="https://ai-arena.net/rules">Rules</a></li>
+        <li><a href="https://ai-arena.net/dl/MapPack.zip">Download</a> the Maps and the <a
+                href="https://ai-arena.net/dl/python-example-bot.zip">Example Bot</a></li>
+        <li>Create a Bot and train against basic Sc2-AI using the training Maps</li>
+        <li>Upload your Bot to the Website and activate it</li>
+        <br>
+        Your Bot will be added to the Pool and starts fighting other Bots on the Ladder.
+    </ol>
 {% endblock %}
