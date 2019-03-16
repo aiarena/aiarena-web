@@ -65,6 +65,13 @@ TEMPLATES = [
     },
 ]
 
+REST_FRAMEWORK = {
+    # Default to allow access only for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated'
+    ]
+}
+
 WSGI_APPLICATION = 'aiarena.wsgi.application'
 
 # Internationalization
