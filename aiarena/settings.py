@@ -107,3 +107,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
 # django-registration
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
+
+# Redirect to index page on login/logout
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
