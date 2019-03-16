@@ -16,7 +16,10 @@
                 <li>
                     <h3>pages</h3>
                     <ul class="links">
-                        <a href="{% url 'index' %}">{% trans "Home" %}</a>
+                        <li><a href="{% url 'index' %}">{% trans "Home" %}</a></li>
+                        {% if user.is_staff %}
+                            <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+                        {% endif %}
                     </ul>
                 </li>
                 <li>
