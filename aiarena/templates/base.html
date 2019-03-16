@@ -19,6 +19,7 @@
                         <li><a href="{% url 'index' %}">{% trans "Home" %}</a></li>
                         {% if user.is_staff %}
                             <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+                            <li><a href="{% url 'api-root' %}">{% trans "API" %}</a></li>
                         {% endif %}
                     </ul>
                 </li>
