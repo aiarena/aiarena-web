@@ -15,6 +15,6 @@ deploy_production:
     name: production
     url: ai-arena.net
   script:
-    - ssh aiarena@ai-arena.net -p 2280 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && /home/aiarena/ai-arena/python_env/bin/pip3 install -r requirements.txt && /home/aiarena/ai-arena/python_env/bin/python3 manage.py collectstatic && /home/aiarena/ai-arena/python_env/bin/python3 manage.py migrate && sudo apachectl graceful && exit"
+    - ssh aiarena@ai-arena.net -p 2280 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && /home/aiarena/ai-arena/python_env/bin/pip3 install -r requirements.txt && /home/aiarena/ai-arena/python_env/bin/python3 manage.py collectstatic --noinput && /home/aiarena/ai-arena/python_env/bin/python3 manage.py migrate && sudo apachectl graceful && exit"
   only:
     - master
