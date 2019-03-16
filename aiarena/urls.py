@@ -23,4 +23,6 @@ urlpatterns = [
     url(r'^accounts/', include('django_registration.backends.activation.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
+    path('api/', include('aiarena.api.urls')),
+    # url(r'^api-auth/', include('rest_framework.urls')), # if we want to use the DRF login/out forms
 ]
