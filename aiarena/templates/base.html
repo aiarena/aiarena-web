@@ -10,10 +10,6 @@
 
 <body>
 <div id="page">
-    <div id="header">
-        {% block header %}
-        {% endblock %}
-    </div>
     <div id="sidebar">
         {% block sidebar %}
             <ul id="sidebar-items">
@@ -45,6 +41,12 @@
                     </ul>
                 </li>
             </ul>
+        {% endblock %}
+    </div>
+
+    <div id="header">
+        {% block header %}
+            <h1 class="site-title">StarCraft II AI Arena</h1>
         {% endblock %}
     </div>
 

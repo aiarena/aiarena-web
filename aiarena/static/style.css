@@ -28,15 +28,13 @@ a:hover {
     background-color: rgba(0, 0, 0, 0);
     width: 1200px;
     margin: auto;
-    margin-left: auto;
     padding-left: 0px;
-    margin-right: auto;
 }
 
 #content {
     background-color: rgba(45, 76, 32, 0.52);
     border: 3px solid rgba(4, 4, 4, 0.45);
-    border-top;
+    border-top: none;
     padding: 25px;
     box-sizing: border-box;
     width: 85.0%;
@@ -47,21 +45,24 @@ a:hover {
     width: 12.0%;
 }
 
-#header, #about, #getting-started {
-    padding-left: 75px;
-    padding-right: 30px;
-}
-
 iframe {
     max-width: 100%;
 }
 
 #header {
     height: 64px;
+    background-color: rgba(45, 76, 32, 0.52);
+    border: 3px solid rgba(4, 4, 4, 0.45);
+    border-bottom: none;
+    padding: 25px;
+    box-sizing: border-box;
+    width: 85.0%;
 }
 
 #header h1, #header h2 {
-    margin: 0
+    text-align:center;
+    vertical-align:middle;
+    margin: 0;
 }
 
 #header h2 {
@@ -194,6 +195,10 @@ iframe {
 h1, h2, h3, h4, h5 {
     font-family: sans-serif;
     margin: 1.2em 0 0.6em 0;
+}
+
+h1 .site-title {
+    text-align:center;
 }
 
 p {
