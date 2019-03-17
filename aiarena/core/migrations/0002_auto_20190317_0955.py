@@ -3,22 +3,38 @@
 from django.db import migrations
 
 
-def seed_data(apps, schema_editor):
+def seed_race_data(apps, schema_editor):
     # We can't import the Sc2Race model directly as it may be a newer
     # version than this migration expects. We use the historical version.
     Sc2Race = apps.get_model('core', 'Sc2Race')
-    Sc2Race(name="Terran").save()
-    Sc2Race(name="Zerg").save()
-    Sc2Race(name="Protoss").save()
-    Sc2Race(name="Random").save()
+    Sc2Race.objects.bulk_create([
+        Sc2Race(name="Terran"),
+        Sc2Race(name="Zerg"),
+        Sc2Race(name="Protoss"),
+        Sc2Race(name="Random"),
+    ])
+
+
+def seed_result_type_data(apps, schema_editor):
+    # We can't import the ResultType model directly as it may be a newer
+    # version than this migration expects. We use the historical version.
+    ResultType = apps.get_model('core', 'ResultType')
+    ResultType.objects.bulk_create([
+        ResultType(name="Player1Win"),
+        ResultType(name="Player2Win"),
+        ResultType(name="GameTimeout"),
+        ResultType(name="Tie"),
+        ResultType(name="Player1Crash"),
+        ResultType(name="Player2Crash"),
+    ])
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0001_initial'),
     ]
 
     operations = [
-        migrations.RunPython(seed_data),
+        migrations.RunPython(seed_race_data),
+        migrations.RunPython(seed_result_type_data),
     ]
