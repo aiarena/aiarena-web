@@ -1,0 +1,6 @@
+# This folder will contain user uploaded files.
+
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore

@@ -17,6 +17,8 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include, url
 from django.views.generic.base import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +27,4 @@ urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
     path('api/', include('aiarena.api.urls')),
     # url(r'^api-auth/', include('rest_framework.urls')), # if we want to use the DRF login/out forms
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) # todo: set this as an environment specific setting
