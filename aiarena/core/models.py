@@ -52,13 +52,6 @@ class Participant(models.Model):
     def __str__(self):
         return self.bot.name
 
-        ResultType(name="Player1Win"),
-        ResultType(name="Player2Win"),
-        ResultType(name="GameTimeout"),
-        ResultType(name="Tie"),
-        ResultType(name="Player1Crash"),
-        ResultType(name="Player2Crash"),
-
 
 class Result(models.Model):
     PLAYER1WIN = 'P1W'
