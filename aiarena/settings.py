@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_registration',
     'rest_framework',
+    'rest_framework.authtoken',
     'aiarena.core',
     'aiarena.api',
 ]
@@ -71,7 +72,11 @@ REST_FRAMEWORK = {
     # Default to allow access only for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated'
-    ]
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    )
 }
 
 WSGI_APPLICATION = 'aiarena.wsgi.application'
