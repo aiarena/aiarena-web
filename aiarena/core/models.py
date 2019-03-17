@@ -2,14 +2,17 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class Sc2Race(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-
-    def __str__(self):
-        return self.name
-
-
 class Bot(models.Model):
+    TERRAN = 'T'
+    ZERG = 'Z'
+    PROTOSS = 'P'
+    RANDOM = 'R'
+    RACES = (
+        (TERRAN, 'Terran'),
+        (ZERG, 'Zerg'),
+        (PROTOSS, 'Protoss'),
+        (RANDOM, 'Random'),
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, unique=True)
     created = models.DateTimeField()
@@ -18,7 +21,7 @@ class Bot(models.Model):
     elo = models.SmallIntegerField(default=1600)
     bot_zip = models.FileField()
     bot_zip_md5hash = models.CharField(max_length=50)
-    plays_race = models.ForeignKey(Sc2Race, on_delete=models.PROTECT)
+    plays_race = models.CharField(max_length=2, choices=RACES)
 
     def __str__(self):
         return self.name
@@ -27,14 +30,6 @@ class Bot(models.Model):
 class Map(models.Model):
     name = models.CharField(max_length=50, unique=True)
     file = models.FileField()
-
-    def __str__(self):
-        return self.name
-
-
-# todo: populate database with result types
-class ResultType(models.Model):
-    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
@@ -57,11 +52,32 @@ class Participant(models.Model):
     def __str__(self):
         return self.bot.name
 
+        ResultType(name="Player1Win"),
+        ResultType(name="Player2Win"),
+        ResultType(name="GameTimeout"),
+        ResultType(name="Tie"),
+        ResultType(name="Player1Crash"),
+        ResultType(name="Player2Crash"),
+
 
 class Result(models.Model):
+    PLAYER1WIN = 'P1W'
+    PLAYER2WIN = 'P2W'
+    PLAYER1CRASH = 'P1C'
+    PLAYER2CRASH = 'P2C'
+    GAMETIMEOUT = 'GTO'
+    TIE = 'TIE'
+    TYPES = (
+        (PLAYER1WIN, 'P1W'),
+        (PLAYER1WIN, 'P2W'),
+        (PLAYER1CRASH, 'P1C'),
+        (PLAYER2CRASH, 'P2C'),
+        (GAMETIMEOUT, 'GTO'),
+        (TIE, 'TIE'),
+    )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won')
-    type = models.ForeignKey(ResultType, on_delete=models.PROTECT)
+    type = models.CharField(max_length=3, choices=TYPES)
     created = models.DateTimeField()
 
     def __str__(self):
