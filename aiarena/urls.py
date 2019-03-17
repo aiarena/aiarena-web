@@ -27,4 +27,4 @@ urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
     path('api/', include('aiarena.api.urls')),
     # url(r'^api-auth/', include('rest_framework.urls')), # if we want to use the DRF login/out forms
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) # todo: set this as an environment specific setting
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
