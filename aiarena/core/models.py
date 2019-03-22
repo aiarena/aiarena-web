@@ -19,7 +19,7 @@ class Bot(models.Model):
     updated = models.DateTimeField()
     active = models.BooleanField(default=False)
     elo = models.SmallIntegerField(default=1600)
-    bot_zip = models.FileField()  # todo: limit public access to this file and customize upload location
+    bot_zip = models.FileField(upload_to='bots')  # todo: limit public access to this file
     bot_zip_md5hash = models.CharField(max_length=50)
     plays_race = models.CharField(max_length=2, choices=RACES)
 
@@ -29,7 +29,7 @@ class Bot(models.Model):
 
 class Map(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    file = models.FileField()
+    file = models.FileField(upload_to='maps')
 
     def __str__(self):
         return self.name
@@ -72,7 +72,7 @@ class Result(models.Model):
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won')
     type = models.CharField(max_length=3, choices=TYPES)
     created = models.DateTimeField()
-    replay_file = models.FileField()  # todo: limit public access to this file and customize upload location
+    replay_file = models.FileField(upload_to='replays')  # todo: limit public access to this file and customize upload location
 
     def __str__(self):
         return self.bot.created
