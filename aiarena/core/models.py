@@ -1,5 +1,9 @@
+from django.contrib.auth.models import AbstractUser, User
 from django.db import models
-from django.contrib.auth.models import User
+
+
+class User(AbstractUser):
+    email = models.EmailField(unique=True)
 
 
 class Bot(models.Model):
@@ -72,7 +76,8 @@ class Result(models.Model):
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won')
     type = models.CharField(max_length=3, choices=TYPES)
     created = models.DateTimeField()
-    replay_file = models.FileField(upload_to='replays')  # todo: limit public access to this file and customize upload location
+    replay_file = models.FileField(
+        upload_to='replays')  # todo: limit public access to this file and customize upload location
 
     def __str__(self):
         return self.bot.created

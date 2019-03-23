@@ -136,6 +136,9 @@ REGISTRATION_DEFAULT_FROM_EMAIL = 'noreply@localhost'
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
 
+# Custom user model
+AUTH_USER_MODEL = "core.User"
+
 # hack to override any of these settings with an env.py file
 try:
     from aiarena.env import *
