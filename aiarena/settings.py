@@ -26,13 +26,13 @@ DATABASES = env.DATABASES
 # Application definition
 
 INSTALLED_APPS = [
+    'registration',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_registration',
 ]
 
 MIDDLEWARE = [
@@ -88,7 +88,7 @@ STATICFILES_DIRS = [
     os.path.join(APP_DIR, "static"),
 ]
 
-# django-registration
+# registration
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 
 # Redirect to index page on login/logout

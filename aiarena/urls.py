@@ -20,7 +20,7 @@ from django.views.generic.base import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^accounts/', include('django_registration.backends.activation.urls')),
+    url(r'^accounts/', include('registration.backends.default.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
 ]
