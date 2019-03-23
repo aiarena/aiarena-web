@@ -16,12 +16,33 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Import environment specific settings
-from . import env
-SECRET_KEY = env.SECRET_KEY
-DEBUG = env.DEBUG
-ALLOWED_HOSTS = env.ALLOWED_HOSTS
-DATABASES = env.DATABASES
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = 't*4r1u49=a!ah1!z8ydsaajr!lv-f(@r07lm)-9fro_9&67xqd'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = ['127.0.0.1']
+
+# Database
+# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'aiarena',
+        'USER': 'aiarena',
+        'PASSWORD': 'aiarena',
+        'HOST': 'localhost',  # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        }
+    }
+}
 
 # Application definition
 
@@ -78,7 +99,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
@@ -89,8 +109,17 @@ STATICFILES_DIRS = [
 ]
 
 # registration
+# https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
+REGISTRATION_DEFAULT_FROM_EMAIL = 'noreply@localhost'
 
 # Redirect to index page on login/logout
 LOGIN_REDIRECT_URL = 'index'
 LOGOUT_REDIRECT_URL = 'index'
+
+# hack to override any of these settings with an env.py file
+try:
+    from aiarena.env import *
+except ImportError as e:
+    if e.name != 'aiarena.env':
+        raise
