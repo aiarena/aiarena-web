@@ -3,15 +3,14 @@ from django.contrib.auth.models import User
 
 
 class Bot(models.Model):
-    TERRAN = 'T'
-    ZERG = 'Z'
-    PROTOSS = 'P'
-    RANDOM = 'R'
     RACES = (
-        (TERRAN, 'Terran'),
-        (ZERG, 'Zerg'),
-        (PROTOSS, 'Protoss'),
-        (RANDOM, 'Random'),
+        ('T', 'Terran'),
+        ('Z', 'Zerg'),
+        ('P', 'Protoss'),
+        ('R', 'Random'),
+    )
+    TYPES = (
+        ('Python', 'Python'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, unique=True)
@@ -22,6 +21,7 @@ class Bot(models.Model):
     bot_zip = models.FileField(upload_to='bots')  # todo: limit public access to this file
     bot_zip_md5hash = models.CharField(max_length=50)
     plays_race = models.CharField(max_length=2, choices=RACES)
+    type = models.CharField(max_length=2, choices=TYPES)
 
     def __str__(self):
         return self.name
