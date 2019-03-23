@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
@@ -58,19 +58,13 @@ class Participant(models.Model):
 
 
 class Result(models.Model):
-    PLAYER1WIN = 'P1W'
-    PLAYER2WIN = 'P2W'
-    PLAYER1CRASH = 'P1C'
-    PLAYER2CRASH = 'P2C'
-    GAMETIMEOUT = 'GTO'
-    TIE = 'TIE'
     TYPES = (
-        (PLAYER1WIN, 'P1W'),
-        (PLAYER1WIN, 'P2W'),
-        (PLAYER1CRASH, 'P1C'),
-        (PLAYER2CRASH, 'P2C'),
-        (GAMETIMEOUT, 'GTO'),
-        (TIE, 'TIE'),
+        ('P1W', 'Player1Win'),
+        ('P2W', 'Player2Win'),
+        ('P1C', 'Player1Crash'),
+        ('P2C', 'Player2Crash'),
+        ('GTO', 'GameTimeout'),
+        ('TIE', 'Tie'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won')
@@ -80,4 +74,4 @@ class Result(models.Model):
         upload_to='replays')  # todo: limit public access to this file and customize upload location
 
     def __str__(self):
-        return self.bot.created
+        return self.created
