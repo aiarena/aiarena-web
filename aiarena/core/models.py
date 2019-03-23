@@ -18,14 +18,14 @@ class Bot(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, unique=True)
-    created = models.DateTimeField()
-    updated = models.DateTimeField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)
-    elo = models.SmallIntegerField(default=1600)
+    elo = models.SmallIntegerField(default=1600)  # todo: auto-generate/readonly
     bot_zip = models.FileField(upload_to='bots')  # todo: limit public access to this file
-    bot_zip_md5hash = models.CharField(max_length=50)
-    plays_race = models.CharField(max_length=2, choices=RACES)
-    type = models.CharField(max_length=2, choices=TYPES)
+    bot_zip_md5hash = models.CharField(max_length=50)  # todo: auto-generate/readonly
+    plays_race = models.CharField(max_length=1, choices=RACES)
+    type = models.CharField(max_length=32, choices=TYPES)
 
     def __str__(self):
         return self.name
@@ -42,7 +42,7 @@ class Map(models.Model):
 # todo: structure for separate ladder types
 class Match(models.Model):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
-    created = models.DateTimeField()
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.created
@@ -69,7 +69,7 @@ class Result(models.Model):
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won')
     type = models.CharField(max_length=3, choices=TYPES)
-    created = models.DateTimeField()
+    created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(
         upload_to='replays')  # todo: limit public access to this file and customize upload location
 
