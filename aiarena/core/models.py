@@ -30,6 +30,17 @@ class Bot(models.Model):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def random():
+        # todo: apparently this is really slow
+        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+        return Bot.objects.filter(active=True).order_by('?').first()
+
+    def random_excluding_self(self):
+        # todo: apparently this is really slow
+        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+        return Bot.objects.filter(active=True).exclude(id=self.id).order_by('?').first()
+
 
 class Map(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -37,6 +48,12 @@ class Map(models.Model):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def random():
+        # todo: apparently this is really slow
+        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+        return Map.objects.order_by('?').first()
 
 
 # todo: structure for separate ladder types

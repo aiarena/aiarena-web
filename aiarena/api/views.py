@@ -1,5 +1,9 @@
-from aiarena.core.models import Bot, Map, Match, Participant, Result
 from rest_framework import viewsets, serializers
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from aiarena.core.models import Bot, Map, Match, Participant, Result
+
 
 # todo: restrict aiarena-client specific endpoints to staff only
 
@@ -34,6 +38,21 @@ class MatchSerializer(serializers.ModelSerializer):
 class MatchViewSet(viewsets.ModelViewSet):
     queryset = Match.objects.all()
     serializer_class = MatchSerializer
+
+    @action(detail=False, methods=['GET'], name='Create next match')
+    def next(self, request, *args, **kwargs):
+        # todo: account for No maps present
+        # todo: account for No Bots present
+        # todo: transaction
+        match = Match.objects.create(map=Map.random())
+
+        # Add participating bots
+        bot1 = Bot.random()
+        Participant.objects.create(match=match, participant_number=1, bot=bot1)
+        Participant.objects.create(match=match, participant_number=2, bot=bot1.random_excluding_self())
+
+        serializer = self.get_serializer(match)
+        return Response(serializer.data)
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
