@@ -45,7 +45,7 @@ class Match(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.created
+        return self.created.__str__()
 
 
 class Participant(models.Model):
@@ -74,4 +74,4 @@ class Result(models.Model):
         upload_to='replays')  # todo: limit public access to this file and customize upload location
 
     def __str__(self):
-        return self.created
+        return self.created.__str__()
