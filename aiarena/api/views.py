@@ -10,7 +10,7 @@ from aiarena.core.models import Bot, Map, Match, Participant, Result
 class BotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bot
-        fields = '__all__'
+        exclude = 'user',
 
 
 class BotViewSet(viewsets.ModelViewSet):
