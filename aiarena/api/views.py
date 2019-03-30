@@ -13,7 +13,7 @@ class BotSerializer(serializers.ModelSerializer):
         exclude = 'user',
 
 
-class BotViewSet(viewsets.ModelViewSet):
+class BotViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Bot.objects.all()
     serializer_class = BotSerializer
 
@@ -24,7 +24,7 @@ class MapSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MapViewSet(viewsets.ModelViewSet):
+class MapViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Map.objects.all()
     serializer_class = MapSerializer
 
@@ -64,7 +64,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ParticipantViewSet(viewsets.ModelViewSet):
+class ParticipantViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Participant.objects.all()
     serializer_class = ParticipantSerializer
 
