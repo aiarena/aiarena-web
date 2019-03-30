@@ -45,16 +45,16 @@ class MatchViewSet(viewsets.ModelViewSet):
     @transaction.atomic
     def next(self, request, *args, **kwargs):
         if Map.objects.count() == 0:
-            raise APIException('There are no maps available for matches.')
-        if Bot.objects.count() == 0:
-            raise APIException('No bots available for matches.')
+            raise APIException('There are no maps available for a match.')
+        if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
+            raise APIException('Not enough active bots available for a match.')
 
         match = Match.objects.create(map=Map.random())
 
         # Add participating bots
-        bot1 = Bot.random()
+        bot1 = Bot.random_active()
         Participant.objects.create(match=match, participant_number=1, bot=bot1)
-        Participant.objects.create(match=match, participant_number=2, bot=bot1.random_excluding_self())
+        Participant.objects.create(match=match, participant_number=2, bot=bot1.random_active_excluding_self())
 
         serializer = self.get_serializer(match)
         return Response(serializer.data)

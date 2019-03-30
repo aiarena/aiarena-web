@@ -20,7 +20,7 @@ class Bot(models.Model):
     name = models.CharField(max_length=50, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    active = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     elo = models.SmallIntegerField(default=1600)  # todo: auto-generate/readonly
     bot_zip = models.FileField(upload_to='bots')  # todo: limit public access to this file
     bot_zip_md5hash = models.CharField(max_length=50)  # todo: auto-generate/readonly
@@ -31,14 +31,18 @@ class Bot(models.Model):
         return self.name
 
     @staticmethod
-    def random():
+    def random_active():
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         return Bot.objects.filter(active=True).order_by('?').first()
 
-    def random_excluding_self(self):
-        # todo: apparently this is really slow
-        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+    @staticmethod
+    def active_count():
+        return Bot.objects.filter(active=True).count()
+
+    def random_active_excluding_self(self):
+        if Bot.active_count() <= 1:
+            raise RuntimeError("I am the only bot.")
         return Bot.objects.filter(active=True).exclude(id=self.id).order_by('?').first()
 
 
