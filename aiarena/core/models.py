@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from aiarena.core.utils import calculate_md5
+
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
@@ -26,6 +28,13 @@ class Bot(models.Model):
     bot_zip_md5hash = models.CharField(max_length=50, editable=False)  # todo: auto-generate
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
+
+    def calc_bot_zip_md5hash(self):
+        self.bot_zip_md5hash = calculate_md5(self.bot_zip.open(mode='rb'))
+
+    def save(self, *args, **kwargs):
+        self.calc_bot_zip_md5hash()
+        super(Bot, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
