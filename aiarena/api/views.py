@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -40,10 +41,10 @@ class MatchViewSet(viewsets.ModelViewSet):
     serializer_class = MatchSerializer
 
     @action(detail=False, methods=['GET'], name='Create next match')
+    @transaction.atomic
     def next(self, request, *args, **kwargs):
         # todo: account for No maps present
         # todo: account for No Bots present
-        # todo: transaction
         match = Match.objects.create(map=Map.random())
 
         # Add participating bots
