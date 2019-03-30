@@ -3,12 +3,24 @@ from django.test import TestCase
 from aiarena.core.models import *
 
 
-class AuthorisedMatchTestCase(TestCase):
+class MatchesTestCase(TestCase):
     def setUp(self):
-        self.testUser = User.objects.create_user(username='test', password='x', is_superuser=True)
-        self.client.login(username='test', password='x')
+        self.staffUser = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
+                                                  is_staff=True)
+        self.regularUser = User.objects.create_user(username='regular_user', password='x',
+                                                    email='regular_user@aiarena.net')
 
-    def test_next_match(self):
+    def test_next_match_not_authorized(self):
+        response = self.client.get('/api/matches/next/')
+        self.assertEqual(response.status_code, 403)
+
+        self.client.login(username='regular_user', password='x')
+        response = self.client.get('/api/matches/next/')
+        self.assertEqual(response.status_code, 403)
+
+    def test_next_match_staff_user(self):
+        self.client.login(username='staff_user', password='x')
+
         # no maps
         response = self.client.get('/api/matches/next/')
         self.assertEqual(response.status_code, 500)
@@ -19,12 +31,12 @@ class AuthorisedMatchTestCase(TestCase):
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot1 = Bot.objects.create(user=self.testUser, name='testbot1')
+        bot1 = Bot.objects.create(user=self.staffUser, name='testbot1')
         response = self.client.get('/api/matches/next/')
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot2 = Bot.objects.create(user=self.testUser, name='testbot2')
+        bot2 = Bot.objects.create(user=self.staffUser, name='testbot2')
         response = self.client.get('/api/matches/next/')
         self.assertEqual(response.status_code, 500)
 
