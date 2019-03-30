@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
+from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
 from aiarena.core.models import Bot, Map, Match, Participant, Result
@@ -43,8 +44,11 @@ class MatchViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'], name='Create next match')
     @transaction.atomic
     def next(self, request, *args, **kwargs):
-        # todo: account for No maps present
-        # todo: account for No Bots present
+        if Map.objects.count() == 0:
+            raise APIException('There are no maps available for matches.')
+        if Bot.objects.count() == 0:
+            raise APIException('No bots available for matches.')
+
         match = Match.objects.create(map=Map.random())
 
         # Add participating bots
