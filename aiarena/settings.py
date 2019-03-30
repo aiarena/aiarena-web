@@ -92,7 +92,7 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     # Default to allow access only for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated'
+        'rest_framework.permissions.IsAdminUser'
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',

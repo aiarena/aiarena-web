@@ -7,8 +7,6 @@ from rest_framework.response import Response
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 
 
-# todo: restrict aiarena-client specific endpoints to staff only
-
 class BotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bot
