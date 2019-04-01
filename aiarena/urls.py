@@ -17,10 +17,14 @@ from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include, url
 from django.views.generic.base import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^accounts/', include('django_registration.backends.activation.urls')),
+    url(r'^accounts/', include('registration.backends.default.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
-]
+    path('api/', include('aiarena.api.urls')),
+    # url(r'^api-auth/', include('rest_framework.urls')), # if we want to use the DRF login/out forms
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
