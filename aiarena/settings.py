@@ -129,7 +129,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
-REGISTRATION_DEFAULT_FROM_EMAIL = 'noreply@localhost'
+DEFAULT_FROM_EMAIL = 'noreply@localhost'
 
 # Redirect to index page on login/logout
 LOGIN_REDIRECT_URL = 'index'
