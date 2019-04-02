@@ -26,7 +26,7 @@ class Bot(models.Model):
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     elo = models.SmallIntegerField(default=1600)  # todo: auto-generate/readonly
     bot_zip = models.FileField(upload_to='bots')  # todo: limit public access to this file
-    bot_zip_md5hash = models.CharField(max_length=50, editable=False)
+    bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
 
