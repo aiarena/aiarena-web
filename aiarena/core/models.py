@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from aiarena.core.utils import calculate_md5
@@ -32,9 +33,19 @@ class Bot(models.Model):
     def calc_bot_zip_md5hash(self):
         self.bot_zip_md5hash = calculate_md5(self.bot_zip.open(mode='rb'))
 
+    # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
+    def validate_one_bot_race_per_user(self):
+        if Bot.objects.filter(user=self.user, plays_race=self.plays_race).count() > 0:
+            raise ValidationError(
+                'A bot playing that race already exists for this user. '
+                'Each user can only have 1 bot per race.')
+
     def save(self, *args, **kwargs):
         self.calc_bot_zip_md5hash()
         super(Bot, self).save(*args, **kwargs)
+
+    def clean(self):
+        self.validate_one_bot_race_per_user()
 
     def __str__(self):
         return self.name
