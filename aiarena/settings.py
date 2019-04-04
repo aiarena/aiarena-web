@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'aiarena.core',
     'aiarena.api',
 ]
@@ -96,7 +97,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    # todo: check that opening this generically doesn't leak sensitive info. Only fields for the ParticipantViewSet have been enabled
+    ),
 }
 
 WSGI_APPLICATION = 'aiarena.wsgi.application'

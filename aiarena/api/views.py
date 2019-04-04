@@ -67,6 +67,7 @@ class ParticipantSerializer(serializers.ModelSerializer):
 class ParticipantViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Participant.objects.all()
     serializer_class = ParticipantSerializer
+    filterset_fields = '__all__'
 
 
 class ResultSerializer(serializers.ModelSerializer):
