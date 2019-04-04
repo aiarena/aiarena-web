@@ -35,7 +35,7 @@ class Bot(models.Model):
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_one_bot_race_per_user(self):
-        if Bot.objects.filter(user=self.user, plays_race=self.plays_race).count() > 0:
+        if Bot.objects.filter(user=self.user, plays_race=self.plays_race).exists() and not self.pk:
             raise ValidationError(
                 'A bot playing that race already exists for this user. '
                 'Each user can only have 1 bot per race.')
