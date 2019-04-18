@@ -108,7 +108,7 @@ class Result(models.Model):
         ('Tie', 'Tie'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
-    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won')
+    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won',  blank=True, null=True)
     type = models.CharField(max_length=12, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(
@@ -116,3 +116,7 @@ class Result(models.Model):
 
     def __str__(self):
         return self.created.__str__()
+
+    # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
+    # todo: use a model form
+
