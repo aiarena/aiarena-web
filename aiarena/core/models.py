@@ -86,7 +86,7 @@ class Match(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.id
+        return self.id.__str__()
 
 
 class Participant(models.Model):
