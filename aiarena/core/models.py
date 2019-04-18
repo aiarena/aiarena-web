@@ -112,7 +112,7 @@ class Result(models.Model):
     type = models.CharField(max_length=12, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(
-        upload_to='replays')  # todo: limit public access to this file and customize upload location
+        upload_to='replays')
 
     def __str__(self):
         return self.created.__str__()
