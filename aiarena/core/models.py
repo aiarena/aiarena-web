@@ -100,16 +100,16 @@ class Participant(models.Model):
 
 class Result(models.Model):
     TYPES = (
-        ('P1W', 'Player1Win'),
-        ('P2W', 'Player2Win'),
-        ('P1C', 'Player1Crash'),
-        ('P2C', 'Player2Crash'),
-        ('GTO', 'GameTimeout'),
-        ('TIE', 'Tie'),
+        ('Player1Win', 'Player1Win'),
+        ('Player2Win', 'Player2Win'),
+        ('Player1Crash', 'Player1Crash'),
+        ('Player2Crash', 'Player2Crash'),
+        ('GameTimeout', 'GameTimeout'),
+        ('Tie', 'Tie'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won')
-    type = models.CharField(max_length=3, choices=TYPES)
+    type = models.CharField(max_length=12, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(
         upload_to='replays')  # todo: limit public access to this file and customize upload location
