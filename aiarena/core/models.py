@@ -105,12 +105,17 @@ class Participant(models.Model):
 
 class Result(models.Model):
     TYPES = (
+        ('InitializationError', 'InitializationError'),
+        ('Timeout', 'Timeout'),
+        ('ProcessingReplay', 'ProcessingReplay'),
         ('Player1Win', 'Player1Win'),
-        ('Player2Win', 'Player2Win'),
         ('Player1Crash', 'Player1Crash'),
+        ('Player1TimeOut', 'Player1TimeOut'),
+        ('Player2Win', 'Player2Win'),
         ('Player2Crash', 'Player2Crash'),
-        ('GameTimeout', 'GameTimeout'),
+        ('Player2Crash', 'Player2TimeOut'),
         ('Tie', 'Tie'),
+        ('Error', 'Error'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won',  blank=True, null=True)
