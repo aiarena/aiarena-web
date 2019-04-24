@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'avatar',
     'aiarena.core',
     'aiarena.api',
+    'private_storage',
 ]
 
 MIDDLEWARE = [
@@ -134,8 +135,13 @@ STATICFILES_DIRS = [
     os.path.join(APP_DIR, "static"),
 ]
 
+# public media
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+
+# private media
+PRIVATE_STORAGE_ROOT = 'private-media/'
+PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_staff'
 
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
