@@ -10,3 +10,7 @@ aiarena/env.py
 
 # python env
 python_env/
+
+# uploaded files
+media/
+private-media/
