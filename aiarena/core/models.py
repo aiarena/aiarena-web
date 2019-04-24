@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
+from private_storage.fields import PrivateFileField
 
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE
@@ -37,7 +38,7 @@ class Bot(models.Model):
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
-    bot_zip = models.FileField(upload_to='bots')  # todo: limit public access to this file
+    bot_zip = PrivateFileField(upload_to='bots')
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
