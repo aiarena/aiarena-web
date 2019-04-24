@@ -17,6 +17,11 @@ class Bot(models.Model):
         ('R', 'Random'),
     )
     TYPES = (
+        ('cppwin32', 'cppwin32'),
+        ('cpplinux', 'cpplinux'),
+        ('dotnetcore', 'dotnetcore'),
+        ('java', 'java'),
+        ('nodejs', 'nodejs'),
         ('python', 'python'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
