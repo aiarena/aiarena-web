@@ -123,6 +123,7 @@ class Result(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(
         upload_to='replays')
+    duration = models.IntegerField()
 
     def __str__(self):
         return self.created.__str__()
