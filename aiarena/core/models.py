@@ -119,7 +119,7 @@ class Result(models.Model):
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won',  blank=True, null=True)
-    type = models.CharField(max_length=12, choices=TYPES)
+    type = models.CharField(max_length=32, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(
         upload_to='replays')
