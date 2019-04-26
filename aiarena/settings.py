@@ -143,6 +143,11 @@ LOGOUT_REDIRECT_URL = 'index'
 # Custom user model
 AUTH_USER_MODEL = "core.User"
 
+# file system permissions of uploaded files
+# this needs to be set, otherwise large files can end up with the wrong permissions.
+# https://code.djangoproject.com/ticket/28540
+FILE_UPLOAD_PERMISSIONS = 0o644
+
 # hack to override any of these settings with an env.py file
 try:
     from aiarena.env import *
