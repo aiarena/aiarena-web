@@ -17,6 +17,7 @@
                     <h3>pages</h3>
                     <ul class="links">
                         <li><a href="{% url 'index' %}">{% trans "Home" %}</a></li>
+                        <li><a href="{% url 'rules' %}">{% trans "Rules" %}</a></li>
                         {% if user.is_staff %}
                             <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
                             <li><a href="{% url 'api-root' %}">{% trans "API" %}</a></li>

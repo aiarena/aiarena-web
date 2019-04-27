@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <h3>General Rules</h3>
+    Bot authors must ensure that their creations are not harming the ladder system in any way, including but not limited to:<br><br>
+    <li>Slowing down the system on purpose</li>
+    <li>Generating huge amounts of data on the disc without purpose</li>
+    <li>Tempering with the filesystem or memory</li>
+    <li>Network access of any kind besides connecting to the local sc2api process is strictly forbidden</li>
+    <li>Uploading copies (clones) of another bot is forbidden</li>
+
+    <h3>Bot Development</h3>
+    The Ladder supports multiple programming languages<br>
+    To make sure the bot is accepted by the ladder you must follow the following standards:<br>
+
+    <br>
+    <b>Python:</b>
+    <li>Version: Python 3.7</li>
+    <li>Bot called via run.py</li>
+    <a href="/dl/python-example-bot.zip">Download</a> example Bot.<br>
+
+    <br>
+    <b>C++:</b>
+    <li>Can be compiled on Windows or Linux</li>
+    <li>Windows: Bot called via botname.exe</li>
+    <li>Linux: Bot called via botname</li>
+    <a href="/dl/cpp-example-bot.zip">Download</a> example Bot.<br>
+
+    <br>
+    <b>Java:</b>
+    <li>Version: Java 10</li>
+    <li>Bot called via botname.jar</li>
+    <a href="/dl/java-example-bot.zip">Download</a> example Bot.<br>
+
+    <br>
+    <b>DotNetCore:</b>
+    <li>Version: DotNetCore 2.1.403</li>
+    <li>Bot called via botname.dll</li>
+    <a href="/dl/dotnetcore-example-bot.zip">Download</a> example Bot.<br>
+
+    <br>
+    <b>GoLang:</b>
+    <li>Bot called via botname</li>
+    <a href="/dl/go-example-bot.zip">Download</a> example Bot.<br>
+
+    <br>
+    <b>NodeJS:</b>
+    <li>Bot called via botname.js</li>
+    <a href="/dl/nodejs-example-bot.zip">Download</a> example Bot.<br>
+
+    <br>
+    For a successful upload the Bot must be packed using zip. (Max 25 MB)
+    <br>
+    The bots may write to a ./data directory, the data can be downloaded via profile page.
+    <br>
+    <br>
+
+    <h3>Security</h3>
+    The Ladder is completely automated and in theory attacks are quite simple to achieve. To counter this the games are
+    played on seperated LadderServers which are firewalled and reset themselves after every game.
+    <br>
+    Network access is denied and will lead to a permanent ban from the ladder.
+    <br>
+    The training data is stored on another server and will be fetched before each game.
+
+    <h3>Match Queue</h3>
+    The match queue makes sure all Bots have to play against every other bot on the ladder.
+    If the queue is empty a fresh one is generated containing all active bots. (Round-Robin)
+{% endblock %}
