@@ -29,5 +29,6 @@ urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
     url('rules', TemplateView.as_view(template_name='rules.html'), name='rules'),
     path('api/', include('aiarena.api.urls')),
+    path('ranking/', core_views.Ranking.as_view(), name='ranking'),
     path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root

@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse
 from django.views.generic import CreateView
-
+from django.shortcuts import render
 from aiarena.core.models import Bot
 
 
@@ -27,3 +27,10 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
             kwargs['instance'] = Bot()
         kwargs['instance'].user = self.request.user
         return kwargs
+
+
+class Ranking(CreateView):
+    def get(self, request):
+        bot_ranking = Bot.objects.filter(active=1).order_by('-elo')
+        context = {'bot_ranking': bot_ranking}
+        return render(request, 'ranking.html', context)
