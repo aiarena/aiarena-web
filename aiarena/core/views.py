@@ -1,10 +1,11 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import reverse
-from django.views.generic import CreateView, ListView
 from django.shortcuts import render
-from aiarena.core.models import Bot
-from aiarena.core.models import Result
+from django.urls import reverse
+from django.views import View
+from django.views.generic import CreateView, ListView
+
+from aiarena.core.models import Bot, Result
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
@@ -30,6 +31,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
         return kwargs
 
 
+# Using a ListView, which has automated behaviour for displaying a list of models
 class Ranking(ListView):
     # If we wanted all the bots, we could just set this and, because we're extending a ListView, it would
     # understand to get all the Bots, which could be referenced as "bot_list" in the template.
@@ -50,8 +52,12 @@ class Ranking(ListView):
     #     return render(request, 'ranking.html', context)
 
 
-class Results(CreateView):
+# Using a View - pretty bare-bones
+class Results(View):
     def get(self, request):
         results = Result.objects.all().order_by('-created')[:100]
-        context = {'results': results}
+        for result in results:
+            result.bot1 = result.match.participant_set.filter(participant_number=1)[0]
+            result.bot2 = result.match.participant_set.filter(participant_number=2)[0]
+        context = {'result_list': results}
         return render(request, 'results.html', context)
