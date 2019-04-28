@@ -39,6 +39,6 @@ class Ranking(CreateView):
 
 class Results(CreateView):
     def get(self, request):
-        results = Result.objects.all().order_by('-match_id')[:100]
+        results = Result.objects.all().order_by('-created')[:100]
         context = {'results': results}
         return render(request, 'results.html', context)
