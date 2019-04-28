@@ -16,7 +16,7 @@
 </tr>
         {%  for result in results %}
 <tr>
-<td align="center">{{ result.created }}</td>
+<td align="center">{{ result.created|date:"d. N Y - G:i:s" }}</td>
 <td align="center">Bot 1 Name</td>
 <td align="center">Bot 2 Name</td>
 <td align="center">{{ result.winner_id }}</td>
