@@ -102,8 +102,6 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
     # todo: check that opening this generically doesn't leak sensitive info. Only fields for the ParticipantViewSet have been enabled
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100
 }
 
 WSGI_APPLICATION = 'aiarena.wsgi.application'
