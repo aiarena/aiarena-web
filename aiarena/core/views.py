@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.views.generic import CreateView
 from django.shortcuts import render
 from aiarena.core.models import Bot
+from aiarena.core.models import Result
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
@@ -34,3 +35,10 @@ class Ranking(CreateView):
         bot_ranking = Bot.objects.filter(active=1).order_by('-elo')
         context = {'bot_ranking': bot_ranking}
         return render(request, 'ranking.html', context)
+
+
+class Results(CreateView):
+    def get(self, request):
+        results = Result.objects.all().order_by('-match_id')[:100]
+        context = {'results': results}
+        return render(request, 'results.html', context)

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<table width="900">
+<tbody>
+<tr>
+<td align="center"><b>Date</b></td>
+<td align="center"><b>Bot 1</b></td>
+<td align="center"><b>Bot 2</b></td>
+<td align="center"><b>Winner</b></td>
+<td align="center"><b>Result</b></td>
+<td align="center"><b>Duration</b></td>
+<td align="center"><b>Replay</b></td>
+</tr>
+        {%  for result in results %}
+<tr>
+<td align="center">{{ result.created }}</td>
+<td align="center">Bot 1 Name</td>
+<td align="center">Bot 2 Name</td>
+<td align="center">{{ result.winner_id }}</td>
+<td align="center">{{ result.type }}</td>
+<td align="center">{{ result.duration }}</td>
+<td align="center"><a href="{{ replay_file }}">Replay</a></td>
+</tr>
+        {% endfor %}
+</tbody>
+</table>
+
+{% endblock %}
