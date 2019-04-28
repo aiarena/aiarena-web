@@ -3,29 +3,29 @@
 
 {% block content %}
 
-<table width="900">
-<tbody>
-<tr>
-<td align="center"><b>Date</b></td>
-<td align="center"><b>Bot 1</b></td>
-<td align="center"><b>Bot 2</b></td>
-<td align="center"><b>Winner</b></td>
-<td align="center"><b>Result</b></td>
-<td align="center"><b>Duration</b></td>
-<td align="center"><b>Replay</b></td>
-</tr>
-        {%  for result in result_list %}
-<tr>
-<td align="center">{{ result.created|date:"d. N Y - H:i:s" }}</td>
-<td align="center">{{ result.bot1 }}</td>
-<td align="center">{{ result.bot2 }}</td>
-<td align="center">{{ result.winner.name }}</td>
-<td align="center">{{ result.type }}</td>
-<td align="center">{{ result.duration }}</td>
-<td align="center"><a href="{{ result.replay_file }}">Replay</a></td>
-</tr>
+    <table width="900">
+        <tbody>
+        <tr>
+            <td align="center"><b>Date</b></td>
+            <td align="center"><b>Bot 1</b></td>
+            <td align="center"><b>Bot 2</b></td>
+            <td align="center"><b>Winner</b></td>
+            <td align="center"><b>Result</b></td>
+            <td align="center"><b>Duration</b></td>
+            <td align="center"><b>Replay</b></td>
+        </tr>
+        {% for result in result_list %}
+            <tr>
+                <td align="center">{{ result.created|date:"d. N Y - H:i:s" }}</td>
+                <td align="center">{{ result.bot1 }}</td>
+                <td align="center">{{ result.bot2 }}</td>
+                <td align="center">{{ result.winner.name }}</td>
+                <td align="center">{{ result.type }}</td>
+                <td align="center">{{ result.duration }}</td>
+                <td align="center"><a href="{{ result.replay_file }}">Replay</a></td>
+            </tr>
         {% endfor %}
-</tbody>
-</table>
+        </tbody>
+    </table>
 
 {% endblock %}
