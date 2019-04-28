@@ -12,12 +12,12 @@
 <td align="center"><b>Author</b></td>
 <td align="center"><b>Type</b></td>
 </tr>
-          {%  for bot in bot_ranking %}
+          {%  for bot in bot_list %}
 <tr>
 <td align="center">{{ bot.elo }}</td>
 <td align="center">{{ bot.name }}</td>
 <td align="center">{{ bot.plays_race }}</td>
-<td align="center">{{ bot.user_id }}</td>
+<td align="center">{{ bot.user.username }}</td>
 <td align="center">{{ bot.type }}</td>
 </tr>
           {% endfor %}
