@@ -21,12 +21,9 @@
                         <li><a href="{% url 'rules' %}">{% trans "Rules" %}</a></li>
                         <li><a href="{% url 'ranking' %}">{% trans "Ranking" %}</a></li>
                         <li><a href="{% url 'results' %}">{% trans "Results" %}</a></li>
-                        {% if user.is_staff %}
-                            <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-                            <li><a href="{% url 'api-root' %}">{% trans "API" %}</a></li>
-                        {% endif %}
                     </ul>
                 </li>
+
                 <li>
                     <h3>user</h3>
                     <ul class="links">
@@ -36,17 +33,28 @@
                             <li><a href="{% url 'password_change' %}">{% trans "Change password" %}</a></li>
                             <li><a href="{% url 'logout' %}">{% trans "Log out" %}</a></li>
                         {% else %}
-                            <li><a href="{% url 'login' %}">{% trans "Log in" %}</a></li>
+                            <li><a href="{% url 'login' %}">{% trans "Login/Register" %}</a></li>
                         {% endif %}
                     </ul>
                 </li>
+
+                {% if user.is_staff %}
+                <li>
+                    <h3>admin</h3>
+                    <ul class="links">
+                            <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
+                            <li><a href="{% url 'api-root' %}">{% trans "API" %}</a></li>
+                    </ul>
+                </li>
+                {% endif %}
+
                 <li>
                     <h3>links</h3>
                     <ul class="links">
-                        <li><a href="https://discord.gg/kQFtbvY"</a>Discord</a></li>
-                        <li><a href="https://github.com/Dentosal/python-sc2">python-sc2</a></li>
-                        <li><a href="https://github.com/Blizzard/s2client-proto#downloads">StarCraft II</a></li>
-                        <li><a href="https://sc2ai.net">Starcraft 2 AI Ladder</a></li>
+                        <li><a href="https://discord.gg/yDBzbtC"</a>Discord</a></li>
+                        <li><a href="https://gitlab.com/aiarena"</a>GitLab</a></li>
+                        <li><a href="https://trello.com/b/qw4DYU9H/ai-arena-website"</a>Trello</a></li>
+                        <li><a href="https://www.twitch.tv/aiarenastream"</a>Twitch</a></li>
                     </ul>
                 </li>
             </ul>
