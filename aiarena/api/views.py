@@ -79,3 +79,16 @@ class ResultSerializer(serializers.ModelSerializer):
 class ResultViewSet(viewsets.ModelViewSet):
     queryset = Result.objects.all()
     serializer_class = ResultSerializer
+
+    def perform_create(self, serializer):
+        self.adjust_elo(serializer.save())
+
+    def adjust_elo(self, result):
+        if result.winner:
+            winner, loser = result.get_winner_loser_bots()
+            # todo: assign elo
+            winner.elo += 1
+            winner.save()
+            loser.elo -= 1
+            loser.save()
+        # todo: adjust on tie?

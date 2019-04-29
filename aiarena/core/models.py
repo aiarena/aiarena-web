@@ -128,6 +128,11 @@ class Result(models.Model):
     def __str__(self):
         return self.created.__str__()
 
+    def get_winner_loser_bots(self):
+        winner = Participant.objects.filter(match=self.match, bot=self.winner)[0].bot
+        loser = Participant.objects.filter(match=self.match).exclude(bot=self.winner)[0].bot
+        return winner, loser
+
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form
 
