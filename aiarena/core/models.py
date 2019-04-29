@@ -113,7 +113,7 @@ class Result(models.Model):
         ('Player1TimeOut', 'Player1TimeOut'),
         ('Player2Win', 'Player2Win'),
         ('Player2Crash', 'Player2Crash'),
-        ('Player2Crash', 'Player2TimeOut'),
+        ('Player2TimeOut', 'Player2TimeOut'),
         ('Tie', 'Tie'),
         ('Error', 'Error'),
     )
@@ -127,6 +127,16 @@ class Result(models.Model):
 
     def __str__(self):
         return self.created.__str__()
+
+    def get_winner_loser_bots(self):
+        winner = Participant.objects.filter(match=self.match, bot=self.winner)[0].bot
+        loser = Participant.objects.filter(match=self.match).exclude(bot=self.winner)[0].bot
+        return winner, loser
+
+    def get_participant_bots(self):
+        first = Participant.objects.filter(match=self.match, participant_number=1)[0].bot
+        second = Participant.objects.filter(match=self.match, participant_number=2)[0].bot
+        return first, second
 
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form

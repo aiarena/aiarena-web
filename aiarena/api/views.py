@@ -5,6 +5,7 @@ from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
 from aiarena.core.models import Bot, Map, Match, Participant, Result
+from aiarena.core.utils import calculate_elo_delta
 
 
 class BotSerializer(serializers.ModelSerializer):
@@ -79,3 +80,21 @@ class ResultSerializer(serializers.ModelSerializer):
 class ResultViewSet(viewsets.ModelViewSet):
     queryset = Result.objects.all()
     serializer_class = ResultSerializer
+
+    def perform_create(self, serializer):
+        self.adjust_elo(serializer.save())
+
+    # todo: write a test which ensures this actually works properly
+    def adjust_elo(self, result):
+        if result.winner:
+            winner, loser = result.get_winner_loser_bots()
+            self.apply_elo_delta(calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
+        elif result.type == 'Tie':
+            first, second = result.get_participant_bots()
+            self.apply_elo_delta(calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
+
+    def apply_elo_delta(self, delta, bot1, bot2):
+        bot1.elo += delta
+        bot1.save()
+        bot2.elo -= delta
+        bot2.save()
