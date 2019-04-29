@@ -150,6 +150,9 @@ AUTH_USER_MODEL = "core.User"
 # https://code.djangoproject.com/ticket/28540
 FILE_UPLOAD_PERMISSIONS = 0o644
 
+# elo_k for calculating ladder ELO updates
+ELO_K = 16
+
 # hack to override any of these settings with an env.py file
 try:
     from aiarena.env import *
