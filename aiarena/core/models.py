@@ -113,7 +113,7 @@ class Result(models.Model):
         ('Player1TimeOut', 'Player1TimeOut'),
         ('Player2Win', 'Player2Win'),
         ('Player2Crash', 'Player2Crash'),
-        ('Player2Crash', 'Player2TimeOut'),
+        ('Player2TimeOut', 'Player2TimeOut'),
         ('Tie', 'Tie'),
         ('Error', 'Error'),
     )
