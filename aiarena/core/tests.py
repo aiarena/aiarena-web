@@ -27,3 +27,12 @@ class BotTestCase(TestCase):
         file = open('./aiarena/core/test_bot.zip', 'rb')
         bot = Bot.objects.create(user=user, name='test', bot_zip=File(file), plays_race='T', type='Python')
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot.bot_zip_md5hash)
+
+
+class PageTestCase(TestCase):
+    """
+    Tests to ensure website pages don't break.
+    """
+    def test_home_page(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
