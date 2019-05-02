@@ -3,7 +3,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, DetailView
 
 from aiarena.core.models import Bot, Result
 
@@ -34,6 +34,23 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 class BotList(ListView):
     model = Bot
     template_name = 'bots.html'
+
+
+class BotDetail(DetailView):
+    model = Bot
+    template_name = 'bot.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(BotDetail, self).get_context_data(**kwargs)
+
+        results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')[:10]
+
+        # retrieve the opponent
+        for result in results:
+            result.opponent = result.match.participant_set.exclude(bot=self.object)[0]
+
+        context['result_list'] = results
+        return context
 
 
 # Using a ListView, which has automated behaviour for displaying a list of models
