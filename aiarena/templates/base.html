@@ -17,7 +17,7 @@
                 <li>
                     <h3>pages</h3>
                     <ul class="links">
-                        <li><a href="{% url 'index' %}">{% trans "Home" %}</a></li>
+                        <li><a href="{% url 'home' %}">{% trans "Home" %}</a></li>
                         <li><a href="{% url 'rules' %}">{% trans "Rules" %}</a></li>
                         <li><a href="{% url 'bots' %}">{% trans "Bots" %}</a></li>
                         <li><a href="{% url 'ranking' %}">{% trans "Ranking" %}</a></li>
@@ -48,6 +48,13 @@
                     </ul>
                 </li>
                 {% endif %}
+
+                <li>
+                    <h3>stats</h3>
+                    <ul class="links">
+                        Matches Today: {{ matches_count }}
+                    </ul>
+                </li>
 
                 <li>
                     <h3>links</h3>
