@@ -32,7 +32,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 
 class BotList(ListView):
-    model = Bot
+    queryset = Bot.objects.all().order_by('name')
     template_name = 'bots.html'
 
 
