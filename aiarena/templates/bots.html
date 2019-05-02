@@ -14,7 +14,7 @@
         </tr>
         {% for bot in bot_list %}
             <tr>
-                <td align="center">{{ bot.name }}</td>
+                <td align="center">{{ bot.as_html_link |safe }}</td>
                 <td align="center">{{ bot.user.username }}</td>
                 <td align="center">{{ bot.get_plays_race_display }}</td>
                 <td align="center">{{ bot.type }}</td>

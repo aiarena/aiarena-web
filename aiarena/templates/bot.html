@@ -43,7 +43,7 @@
                     {% for result in result_list %}
                         <tr>
                             <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
-                            <td>{{ result.opponent }}</td>
+                            <td>{{ result.opponent.bot.as_html_link |safe }}</td>
                             <td>{{ result.type }}</td>
                             <td>{{ result.duration }}</td>
                             <td><a href="{{ result.replay_file.url }}">Download</a></td>
