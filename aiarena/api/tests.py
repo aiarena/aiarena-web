@@ -93,8 +93,9 @@ class ResultsTestCase(LoggedInTestCase):
             return self.client.post('/api/results/',
                                     {'match': match["id"],
                                      'winner': winner.id,
-                                     'type': 'P1W',
-                                     'replay_file': replayFile})
+                                     'type': 'Player1Win',
+                                     'replay_file': replayFile,
+                                     'duration': 500})
 
     def test_create_result(self):
         self.client.login(username='staff_user', password='x')
