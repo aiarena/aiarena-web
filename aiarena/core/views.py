@@ -31,6 +31,11 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
         return kwargs
 
 
+class BotList(ListView):
+    model = Bot
+    template_name = 'bots.html'
+
+
 # Using a ListView, which has automated behaviour for displaying a list of models
 class Ranking(ListView):
     # If we wanted all the bots, we could just set this and, because we're extending a ListView, it would
