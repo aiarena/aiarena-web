@@ -3,22 +3,22 @@
 
 {% block content %}
 
-    <table width="900" id="resultsTable">
+    <table width="900" id="botsTable">
         <tbody>
         <tr>
-            <td><b>ELO</b></td>
             <td><b>Name</b></td>
-            <td><b>Race</b></td>
             <td><b>Author</b></td>
+            <td><b>Race</b></td>
             <td><b>Type</b></td>
+            <td><b>ELO</b></td>
         </tr>
         {% for bot in bot_list %}
             <tr>
-                <td>{{ bot.elo }}</td>
-                <td>{{ bot.name }}</td>
-                <td>{{ bot.get_plays_race_display }}</td>
+                <td>{{ bot.as_html_link |safe }}</td>
                 <td>{{ bot.user.username }}</td>
+                <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.type }}</td>
+                <td>{{ bot.elo }}</td>
             </tr>
         {% endfor %}
         </tbody>

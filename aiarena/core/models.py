@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 
 from aiarena.core.utils import calculate_md5
 
@@ -69,6 +70,12 @@ class Bot(models.Model):
         if Bot.active_count() <= 1:
             raise RuntimeError("I am the only bot.")
         return Bot.objects.filter(active=True).exclude(id=self.id).order_by('?').first()
+
+    def get_absolute_url(self):
+        return reverse('bot', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.__str__())
 
 
 class Map(models.Model):
