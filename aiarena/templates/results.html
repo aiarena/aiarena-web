@@ -6,31 +6,31 @@
     <table width="900">
         <tbody>
         <tr>
-            <td align="center"><b>Date</b></td>
-            <td align="center"><b>Bot 1</b></td>
-            <td align="center"><b>Bot 2</b></td>
-            <td align="center"><b>Result</b></td>
-            <td align="center"><b>Duration</b></td>
-            <td align="center"><b>Replay</b></td>
+            <td><b>Date</b></td>
+            <td><b>Bot 1</b></td>
+            <td><b>Bot 2</b></td>
+            <td><b>Result</b></td>
+            <td><b>Duration</b></td>
+            <td><b>Replay</b></td>
         </tr>
         {% for result in result_list %}
             <tr>
-                <td align="center">{{ result.created|date:"d. N Y - H:i:s" }}</td>
+                <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
 
                 {% if result.winner == result.bot1.bot %}
-                        <td align="center"><b>{{ result.bot1.bot.as_html_link |safe }}</b></td>
-                        <td align="center">{{ result.bot2.bot.as_html_link |safe }}</td>
+                        <td><b>{{ result.bot1.bot.as_html_link |safe }}</b></td>
+                        <td>{{ result.bot2.bot.as_html_link |safe }}</td>
                 {% elif result.winner == result.bot2.bot %}
-                        <td align="center">{{ result.bot1.bot.as_html_link |safe }}</td>
-                        <td align="center"><b>{{ result.bot2.bot.as_html_link |safe }}</b></td>
+                        <td>{{ result.bot1.bot.as_html_link |safe }}</td>
+                        <td><b>{{ result.bot2.bot.as_html_link |safe }}</b></td>
                 {% else %}
-                        <td align="center">{{ result.bot1.bot.as_html_link |safe }}</td>
-                        <td align="center">{{ result.bot2.bot.as_html_link |safe }}</td>
+                        <td>{{ result.bot1.bot.as_html_link |safe }}</td>
+                        <td>{{ result.bot2.bot.as_html_link |safe }}</td>
                 {% endif %}
 
-                <td align="center">{{ result.type }}</td>
-                <td align="center">{{ result.duration }}</td>
-                <td align="center"><a href="{{ result.replay_file.url }}">Replay</a></td>
+                <td>{{ result.type }}</td>
+                <td>{{ result.duration }}</td>
+                <td><a href="{{ result.replay_file.url }}">Replay</a></td>
             </tr>
         {% endfor %}
         </tbody>

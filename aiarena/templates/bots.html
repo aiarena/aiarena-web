@@ -6,19 +6,19 @@
     <table width="900" id="botsTable">
         <tbody>
         <tr>
-            <td align="center"><b>Name</b></td>
-            <td align="center"><b>Author</b></td>
-            <td align="center"><b>Race</b></td>
-            <td align="center"><b>Type</b></td>
-            <td align="center"><b>ELO</b></td>
+            <td><b>Name</b></td>
+            <td><b>Author</b></td>
+            <td><b>Race</b></td>
+            <td><b>Type</b></td>
+            <td><b>ELO</b></td>
         </tr>
         {% for bot in bot_list %}
             <tr>
-                <td align="center">{{ bot.as_html_link |safe }}</td>
-                <td align="center">{{ bot.user.username }}</td>
-                <td align="center">{{ bot.get_plays_race_display }}</td>
-                <td align="center">{{ bot.type }}</td>
-                <td align="center">{{ bot.elo }}</td>
+                <td>{{ bot.as_html_link |safe }}</td>
+                <td>{{ bot.user.username }}</td>
+                <td>{{ bot.get_plays_race_display }}</td>
+                <td>{{ bot.type }}</td>
+                <td>{{ bot.elo }}</td>
             </tr>
         {% endfor %}
         </tbody>
