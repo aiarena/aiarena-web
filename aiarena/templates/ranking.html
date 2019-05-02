@@ -16,15 +16,7 @@
             <tr>
                 <td align="center">{{ bot.elo }}</td>
                 <td align="center">{{ bot.name }}</td>
-                {% if bot.plays_race == 'R' %}
-                    <td align="center">Random</td>
-                {% elif bot.plays_race == 'T' %}
-                    <td align="center">Terran</td>
-                {% elif bot.plays_race == 'P' %}
-                    <td align="center">Protoss</td>
-                {% elif bot.plays_race == 'Z' %}
-                    <td align="center">Zerg</td>
-                {% endif %}
+                <td align="center">{{ bot.get_plays_race_display }}</td>
                 <td align="center">{{ bot.user.username }}</td>
                 <td align="center">{{ bot.type }}</td>
             </tr>
