@@ -154,6 +154,12 @@ FILE_UPLOAD_PERMISSIONS = 0o644
 # elo_k for calculating ladder ELO updates
 ELO_K = 16
 
+# starting ELO for bots
+ELO_START_VALUE = 1600
+
+# Enable a sanity check every time a result is submitted
+ENABLE_ELO_SANITY_CHECK = True
+
 # hack to override any of these settings with an env.py file
 try:
     from aiarena.env import *

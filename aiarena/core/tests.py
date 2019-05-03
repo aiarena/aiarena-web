@@ -3,7 +3,7 @@ import os
 from django.core.files import File
 from django.test import TestCase
 
-from aiarena.core.models import User, Bot
+from aiarena.core.models import User, Bot, Map
 from aiarena.core.utils import calculate_md5
 
 
@@ -36,6 +36,7 @@ class MatchReadyTestCase(LoggedInTestCase):
 
         self.staffUserBot2 = Bot.objects.create(user=self.staffUser, name='staffUserBot2', active=True,
                                                 bot_zip=File(self.test_bot_zip), plays_race='R', type='Python')
+        Map.objects.create(name='testmap')
 
 
 # User this to pre-build a full dataset for testing

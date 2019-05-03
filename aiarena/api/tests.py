@@ -2,10 +2,10 @@ import os
 
 from django.core.files import File
 from django.db.models import Sum
-from django.test import TestCase
 
+from aiarena.api.exceptions import EloSanityCheckException
 from aiarena.core.models import *
-from aiarena.core.tests import LoggedInTestCase
+from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 
 
 class MatchesTestCase(LoggedInTestCase):
@@ -94,3 +94,57 @@ class ResultsTestCase(LoggedInTestCase):
 
         response = self.PostResult(match, bot1)
         self.assertEqual(response.status_code, 201)
+
+
+class EloTestCase(MatchReadyTestCase):
+    """
+    Tests to ensure ELO calculations run fine.
+    """
+
+    def setUp(self):
+        super(EloTestCase, self).setUp()
+        self.client.login(username='staff_user', password='x')
+
+    def CreateMatch(self):
+        response = self.client.get('/api/matches/next/')
+        self.assertEqual(response.status_code, 200)
+
+        matchId = response.data['id']
+
+        response = self.client.get('/api/participants/?match_id={0}&participant_number=1'.format(matchId))
+        self.assertEqual(response.status_code, 200)
+        participant1 = response.data['results'][0]
+
+        response = self.client.get('/api/participants/?match_id={0}&participant_number=2'.format(matchId))
+        self.assertEqual(response.status_code, 200)
+        participant2 = response.data['results'][0]
+
+        return matchId, participant1, participant2
+
+    def CreateResult(self, matchId, winnerId, r_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile:
+            response = self.client.post('/api/results/',
+                                        {'match': matchId,
+                                         'winner': winnerId,
+                                         'type': r_type,
+                                         'replay_file': replayFile,
+                                         'duration': 500})
+        self.assertEqual(response.status_code, 201, response.data)
+
+    def test_elo(self):
+        for x in range(1, 100):
+            m_id, p1, p2 = self.CreateMatch()
+            self.CreateResult(m_id, p1['bot'], 'Player1Win')
+
+        sumElo = Bot.objects.aggregate(Sum('elo'))
+        self.assertEqual(sumElo['elo__sum'],
+                         ELO_START_VALUE * Bot.objects.all().count())  # starting ELO times number of bots
+
+    def test_elo_sanity_check(self):
+        # intentionally cause a sanity check failure
+        self.regularUserBot1.elo = ELO_START_VALUE - 1
+        self.regularUserBot1.save()
+
+        m_id, p1, p2 = self.CreateMatch()
+        self.assertRaises(EloSanityCheckException, self.CreateResult, m_id, p1['bot'], 'Player1Win')

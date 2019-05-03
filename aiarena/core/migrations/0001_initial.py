@@ -7,6 +7,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 
+from aiarena.settings import ELO_START_VALUE
+
 
 class Migration(migrations.Migration):
 
@@ -51,7 +53,7 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
                 ('active', models.BooleanField(default=False)),
-                ('elo', models.SmallIntegerField(default=1600)),
+                ('elo', models.SmallIntegerField(default=ELO_START_VALUE)),
                 ('bot_zip', models.FileField(upload_to='bots')),
                 ('bot_zip_md5hash', models.CharField(editable=False, max_length=50)),
                 ('plays_race', models.CharField(choices=[('T', 'Terran'), ('Z', 'Zerg'), ('P', 'Protoss'), ('R', 'Random')], max_length=1)),

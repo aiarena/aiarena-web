@@ -1,11 +1,14 @@
 from django.db import transaction
+from django.db.models import Sum
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
+from aiarena.api.exceptions import EloSanityCheckException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.core.utils import calculate_elo_delta
+from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK
 
 
 class BotSerializer(serializers.ModelSerializer):
@@ -84,9 +87,15 @@ class ResultViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         self.adjust_elo(serializer.save())
 
+        if ENABLE_ELO_SANITY_CHECK:
+            # test here to check ELO total and ensure no corruption
+            sumElo = Bot.objects.aggregate(Sum('elo'))
+            if sumElo['elo__sum'] != ELO_START_VALUE * Bot.objects.all().count():
+                raise EloSanityCheckException("ELO did not sum to expected value!")
+
     # todo: write a test which ensures this actually works properly
     def adjust_elo(self, result):
-        if result.winner:
+        if result.has_winner():
             winner, loser = result.get_winner_loser_bots()
             self.apply_elo_delta(calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
         elif result.type == 'Tie':
@@ -94,6 +103,7 @@ class ResultViewSet(viewsets.ModelViewSet):
             self.apply_elo_delta(calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
 
     def apply_elo_delta(self, delta, bot1, bot2):
+        delta = int(round(delta))
         bot1.elo += delta
         bot1.save()
         bot2.elo -= delta

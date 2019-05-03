@@ -1,0 +1,2 @@
+class EloSanityCheckException(Exception):
+    pass

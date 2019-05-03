@@ -4,6 +4,7 @@ from django.db import models
 from django.urls import reverse
 
 from aiarena.core.utils import calculate_md5
+from aiarena.settings import ELO_START_VALUE
 
 
 class User(AbstractUser):
@@ -30,7 +31,7 @@ class Bot(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
-    elo = models.SmallIntegerField(default=1600)  # todo: auto-generate/readonly
+    elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = models.FileField(upload_to='bots')  # todo: limit public access to this file
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     plays_race = models.CharField(max_length=1, choices=RACES)
@@ -135,10 +136,24 @@ class Result(models.Model):
     def __str__(self):
         return self.created.__str__()
 
+    def has_winner(self):
+        return self.type in (
+            'Player1Win',
+            'Player1Crash',
+            'Player1TimeOut',
+            'Player2Win',
+            'Player2Crash',
+            'Player2TimeOut')
+
     def get_winner_loser_bots(self):
-        winner = Participant.objects.filter(match=self.match, bot=self.winner)[0].bot
-        loser = Participant.objects.filter(match=self.match).exclude(bot=self.winner)[0].bot
-        return winner, loser
+        bot1 = Participant.objects.filter(match=self.match, participant_number=1)[0].bot
+        bot2 = Participant.objects.filter(match=self.match, participant_number=2)[0].bot
+        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut'):
+            return {bot1: 'winner', bot2: 'loser'}
+        elif self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut'):
+            return {bot2: 'winner', bot1: 'loser'}
+        else:
+            raise Exception('There was no winner or loser for this match.')
 
     def get_participant_bots(self):
         first = Participant.objects.filter(match=self.match, participant_number=1)[0].bot
