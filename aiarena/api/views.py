@@ -85,7 +85,12 @@ class ResultViewSet(viewsets.ModelViewSet):
     serializer_class = ResultSerializer
 
     def perform_create(self, serializer):
-        self.adjust_elo(serializer.save())
+        result = serializer.save()
+        self.adjust_elo(result)
+        p1, p2 = result.get_participants()
+        p1.update_resultant_elo()
+        p2.update_resultant_elo()
+
 
         if ENABLE_ELO_SANITY_CHECK:
             # test here to check ELO total and ensure no corruption

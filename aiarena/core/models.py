@@ -106,6 +106,11 @@ class Participant(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     participant_number = models.PositiveSmallIntegerField()
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='match_participations')
+    resultant_elo = models.SmallIntegerField(null=True)
+
+    def update_resultant_elo(self):
+        self.resultant_elo = self.bot.elo
+        self.save()
 
     def __str__(self):
         return self.bot.name
@@ -153,6 +158,11 @@ class Result(models.Model):
             return {bot2: 'winner', bot1: 'loser'}
         else:
             raise Exception('There was no winner or loser for this match.')
+
+    def get_participants(self):
+        first = Participant.objects.filter(match=self.match, participant_number=1)[0]
+        second = Participant.objects.filter(match=self.match, participant_number=2)[0]
+        return first, second
 
     def get_participant_bots(self):
         first = Participant.objects.filter(match=self.match, participant_number=1)[0].bot
