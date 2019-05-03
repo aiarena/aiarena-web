@@ -148,3 +148,5 @@ class EloTestCase(MatchReadyTestCase):
 
         m_id, p1, p2 = self.CreateMatch()
         self.assertRaises(EloSanityCheckException, self.CreateResult, m_id, p1['bot'], 'Player1Win')
+        # todo: this fails
+        self.assertEqual(Result.objects.count(), 0)  # make sure the result was rolled back.
