@@ -140,8 +140,8 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 DEFAULT_FROM_EMAIL = 'noreply@localhost'
 
 # Redirect to index page on login/logout
-LOGIN_REDIRECT_URL = 'index'
-LOGOUT_REDIRECT_URL = 'index'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 
 # Custom user model
 AUTH_USER_MODEL = "core.User"
