@@ -1,17 +1,11 @@
 import os
 
 from django.core.files import File
+from django.db.models import Sum
 from django.test import TestCase
 
 from aiarena.core.models import *
-
-
-class LoggedInTestCase(TestCase):
-    def setUp(self):
-        self.staffUser = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
-                                                  is_staff=True)
-        self.regularUser = User.objects.create_user(username='regular_user', password='x',
-                                                    email='regular_user@aiarena.net')
+from aiarena.core.tests import LoggedInTestCase
 
 
 class MatchesTestCase(LoggedInTestCase):
@@ -27,10 +21,6 @@ class MatchesTestCase(LoggedInTestCase):
     def test_next_match(self):
         self.client.login(username='staff_user', password='x')
 
-        # For some reason using an absolute file path here for will cause it to mangle the save directory and fail
-        # later whilst handling the bot_zip file save
-        bot_zip = open('./aiarena/api/test_bot.zip', 'rb')
-
         # no maps
         response = self.client.get('/api/matches/next/')
         self.assertEqual(response.status_code, 500)
@@ -41,12 +31,12 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot1 = Bot.objects.create(user=self.staffUser, name='testbot1', bot_zip=File(bot_zip))
+        bot1 = Bot.objects.create(user=self.staffUser, name='testbot1', bot_zip=File(self.test_bot_zip))
         response = self.client.get('/api/matches/next/')
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot2 = Bot.objects.create(user=self.regularUser, name='testbot2', bot_zip=File(bot_zip))
+        bot2 = Bot.objects.create(user=self.regularUser, name='testbot2', bot_zip=File(self.test_bot_zip))
         response = self.client.get('/api/matches/next/')
         self.assertEqual(response.status_code, 500)
 

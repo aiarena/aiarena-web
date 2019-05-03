@@ -10,24 +10,40 @@ from aiarena.core.utils import calculate_md5
 class BaseTestCase(TestCase):
     # For some reason using an absolute file path here for will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
-    file = open('./aiarena/core/test_bot.zip', 'rb')
+    test_bot_zip = open('./aiarena/core/test_bot.zip', 'rb')
 
 
-# User this to pre-build a full dataset for testing
-class FullDataSetTestCase(BaseTestCase):
+class LoggedInTestCase(BaseTestCase):
     def setUp(self):
         self.staffUser = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
                                                   is_staff=True)
         self.regularUser = User.objects.create_user(username='regular_user', password='x',
                                                     email='regular_user@aiarena.net')
 
+
+class MatchReadyTestCase(LoggedInTestCase):
+    def setUp(self):
+        super(MatchReadyTestCase, self).setUp()
+
         self.regularUserBot1 = Bot.objects.create(user=self.regularUser, name='regularUserBot1', active=True,
-                                                  bot_zip=File(self.file), plays_race='T', type='Python')
+                                                  bot_zip=File(self.test_bot_zip), plays_race='T', type='Python')
 
         self.regularUserBot2 = Bot.objects.create(user=self.regularUser, name='regularUserBot2', active=True,
-                                                  bot_zip=File(self.file), plays_race='Z', type='Python')
+                                                  bot_zip=File(self.test_bot_zip), plays_race='Z', type='Python')
 
+        self.staffUserBot1 = Bot.objects.create(user=self.staffUser, name='staffUserBot1', active=True,
+                                                bot_zip=File(self.test_bot_zip), plays_race='P', type='Python')
+
+        self.staffUserBot2 = Bot.objects.create(user=self.staffUser, name='staffUserBot2', active=True,
+                                                bot_zip=File(self.test_bot_zip), plays_race='R', type='Python')
+
+
+# User this to pre-build a full dataset for testing
+class FullDataSetTestCase(MatchReadyTestCase):
+    def setUp(self):
+        super(FullDataSetTestCase, self).setUp()
         # todo: generate some matches and results
+        pass
 
 
 class UtilsTestCase(BaseTestCase):
@@ -47,7 +63,7 @@ class BotTestCase(BaseTestCase):
         user = User.objects.create(username='test user', email='test@test.com')
         # For some reason using an absolute file path here for will cause it to mangle the save directory and fail
         # later whilst handling the bot_zip file save
-        bot = Bot.objects.create(user=user, name='test', bot_zip=File(self.file), plays_race='T', type='Python')
+        bot = Bot.objects.create(user=user, name='test', bot_zip=File(self.test_bot_zip), plays_race='T', type='Python')
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot.bot_zip_md5hash)
 
 
@@ -56,7 +72,7 @@ class PageRenderTestCase(FullDataSetTestCase):
     Tests to ensure website pages don't break.
     """
 
-    def test_home_page(self):
+    def test_index_page(self):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
 
