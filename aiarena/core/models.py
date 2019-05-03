@@ -146,11 +146,10 @@ class Result(models.Model):
             'Player2TimeOut')
 
     def get_winner_loser_bots(self):
-        bot1 = Participant.objects.filter(match=self.match, participant_number=1)[0].bot
-        bot2 = Participant.objects.filter(match=self.match, participant_number=2)[0].bot
+        bot1, bot2 = self.get_participant_bots()
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut'):
             return {bot1: 'winner', bot2: 'loser'}
-        elif self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut'):
+        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut'):
             return {bot2: 'winner', bot1: 'loser'}
         else:
             raise Exception('There was no winner or loser for this match.')
