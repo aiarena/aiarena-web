@@ -8,7 +8,9 @@ from rest_framework.response import Response
 from aiarena.api.exceptions import EloSanityCheckException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
+import logging
 
+logger = logging.getLogger(__name__)
 
 class BotSerializer(serializers.ModelSerializer):
     class Meta:
@@ -84,6 +86,7 @@ class ResultViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         result = serializer.save()
+        logger.error('match id: {0}'.format(result.match_id))  # todo: temp
         self.adjust_elo(result)
         p1, p2 = result.get_participants()
         p1.update_resultant_elo()
@@ -98,12 +101,15 @@ class ResultViewSet(viewsets.ModelViewSet):
     def adjust_elo(self, result):
         if result.has_winner():
             winner, loser = result.get_winner_loser_bots()
+            logger.error('winner id: {0}'.format(winner.id))  # todo: temp
+            logger.error('loser id: {0}'.format(loser.id))  # todo: temp
             self.apply_elo_delta(ELO.calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
         elif result.type == 'Tie':
             first, second = result.get_participant_bots()
             self.apply_elo_delta(ELO.calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
 
     def apply_elo_delta(self, delta, bot1, bot2):
+        logger.error('delta: {0}'.format(delta))  # todo: temp
         delta = int(round(delta))
         bot1.elo += delta
         bot1.save()
