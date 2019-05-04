@@ -160,9 +160,9 @@ class Result(models.Model):
         logger.error('bot2 id: {0}'.format(bot2.id))  # todo: temp
         logger.error('type: {0}'.format(self.type))  # todo: temp
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut'):
-            return {bot1: 'winner', bot2: 'loser'}
+            return bot1, bot2
         elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut'):
-            return {bot2: 'winner', bot1: 'loser'}
+            return bot2, bot1
         else:
             raise Exception('There was no winner or loser for this match.')
 

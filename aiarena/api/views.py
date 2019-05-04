@@ -1,4 +1,5 @@
-from django.db import transaction
+import logging
+
 from django.db.models import Sum
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
@@ -8,7 +9,6 @@ from rest_framework.response import Response
 from aiarena.api.exceptions import EloSanityCheckException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
-import logging
 
 logger = logging.getLogger(__name__)
 
