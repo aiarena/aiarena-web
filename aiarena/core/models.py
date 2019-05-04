@@ -160,14 +160,16 @@ class Result(models.Model):
             raise Exception('There was no winner or loser for this match.')
 
     def get_participants(self):
-        first = Participant.objects.filter(match=self.match, participant_number=1)[0]
-        second = Participant.objects.filter(match=self.match, participant_number=2)[0]
-        return first, second
+        first = Participant.objects.filter(match=self.match, participant_number=1)
+        second = Participant.objects.filter(match=self.match, participant_number=2)
+
+        assert(first.count() == 1)
+        assert(second.count() == 1)
+        return first[0], second[0]
 
     def get_participant_bots(self):
-        first = Participant.objects.filter(match=self.match, participant_number=1)[0].bot
-        second = Participant.objects.filter(match=self.match, participant_number=2)[0].bot
-        return first, second
+        first, second = self.get_participants()
+        return first.bot, second.bot
 
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form
