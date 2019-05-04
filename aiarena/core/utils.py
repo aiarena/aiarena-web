@@ -1,6 +1,3 @@
-from aiarena.settings import ELO_K
-
-
 def calculate_md5(file, block_size=2 ** 20):
     """Returns MD% checksum for given file.
     """
@@ -18,13 +15,16 @@ def calculate_md5(file, block_size=2 ** 20):
 
 # ELO Implementation:
 # http://satirist.org/ai/starcraft/blog/archives/117-Elo-ratings-are-easy-to-calculate.html
-# winIndicator:
-# 1.0 = rating1 won
-# 0.0 = rating2 won
-# 0.5 = draw
-def calculate_elo_delta(rating1, rating2, winIndicator):
-    return ELO_K * (winIndicator - calculate_elo_expected_win_rate(rating1, rating2))
+class Elo:
+    def __init__(self, elo_k):
+        self.elo_k = elo_k
 
+    # winIndicator:
+    # 1.0 = rating1 won
+    # 0.0 = rating2 won
+    # 0.5 = draw
+    def calculate_elo_delta(self, rating1, rating2, winIndicator):
+        return self.elo_k * (winIndicator - self.calculate_elo_expected_win_rate(rating1, rating2))
 
-def calculate_elo_expected_win_rate(rating1, rating2):
-    return 1.0 / (1.0 + 10.0 ** ((rating2 - rating1) / 400.0))
+    def calculate_elo_expected_win_rate(self, rating1, rating2):
+        return 1.0 / (1.0 + 10.0 ** ((rating2 - rating1) / 400.0))

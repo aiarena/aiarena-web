@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from aiarena.core.utils import Elo
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -160,6 +161,9 @@ ELO_START_VALUE = 1600
 
 # Enable a sanity check every time a result is submitted
 ENABLE_ELO_SANITY_CHECK = True
+
+# ELO implementation
+ELO = Elo(ELO_K)
 
 # hack to override any of these settings with an env.py file
 try:

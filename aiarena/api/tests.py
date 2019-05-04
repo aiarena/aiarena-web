@@ -98,12 +98,67 @@ class ResultsTestCase(LoggedInTestCase):
 
 class EloTestCase(MatchReadyTestCase):
     """
-    Tests to ensure ELO calculations run fine.
+    Tests to ensure ELO calculations run properly.
     """
 
     def setUp(self):
         super(EloTestCase, self).setUp()
         self.client.login(username='staff_user', password='x')
+
+        # activate the required bots
+        self.regularUserBot1.active = True
+        self.regularUserBot1.save()
+        self.regularUserBot2.active = True
+        self.regularUserBot2.save()
+
+        # expected_win_sequence and expected_resultant_elos should have this many entries
+        self.num_matches_to_play = 20
+
+        self.expected_win_sequence = [
+            self.regularUserBot1.id,
+            self.regularUserBot2.id,
+            self.regularUserBot1.id,
+            self.regularUserBot1.id,
+            self.regularUserBot1.id,
+            'Tie',
+            'Tie',
+            self.regularUserBot2.id,
+            'Tie',
+            self.regularUserBot2.id,
+            self.regularUserBot1.id,
+            self.regularUserBot1.id,
+            self.regularUserBot1.id,
+            self.regularUserBot2.id,
+            self.regularUserBot1.id,
+            self.regularUserBot1.id,
+            'Tie',
+            self.regularUserBot1.id,
+            self.regularUserBot1.id,
+            self.regularUserBot1.id,
+        ]
+
+        self.expected_resultant_elos = [
+            [1608, 1592],
+            [1600, 1600],
+            [1608, 1592],
+            [1616, 1584],
+            [1623, 1577],
+            [1622, 1578],
+            [1621, 1579],
+            [1612, 1588],
+            [1611, 1589],
+            [1602, 1598],
+            [1610, 1590],
+            [1618, 1582],
+            [1625, 1575],
+            [1616, 1584],
+            [1623, 1577],
+            [1630, 1570],
+            [1629, 1571],
+            [1636, 1564],
+            [1642, 1558],
+            [1648, 1552],
+        ]
 
     def CreateMatch(self):
         response = self.client.get('/api/matches/next/')
@@ -111,11 +166,11 @@ class EloTestCase(MatchReadyTestCase):
 
         matchId = response.data['id']
 
-        response = self.client.get('/api/participants/?match_id={0}&participant_number=1'.format(matchId))
+        response = self.client.get('/api/participants/?match={0}&participant_number=1'.format(matchId))
         self.assertEqual(response.status_code, 200)
         participant1 = response.data['results'][0]
 
-        response = self.client.get('/api/participants/?match_id={0}&participant_number=2'.format(matchId))
+        response = self.client.get('/api/participants/?match={0}&participant_number=2'.format(matchId))
         self.assertEqual(response.status_code, 200)
         participant2 = response.data['results'][0]
 
@@ -132,14 +187,40 @@ class EloTestCase(MatchReadyTestCase):
                                          'duration': 500})
         self.assertEqual(response.status_code, 201, response.data)
 
-    def test_elo(self):
-        for x in range(1, 100):
-            m_id, p1, p2 = self.CreateMatch()
-            self.CreateResult(m_id, p1['bot'], 'Player1Win')
+    def DetermineResultType(self, p1_bot_id, iteration):
+        if self.expected_win_sequence[iteration] == 'Tie':
+            return 'Tie'
+        else:
+            return 'Player1Win' if p1_bot_id == self.expected_win_sequence[iteration] else 'Player2Win'
 
+    def CheckResultantElos(self, match_id, iteration):
+        bot1Participant = Participant.objects.filter(match_id=match_id, bot_id=self.regularUserBot1.id)[0]
+        bot2Participant = Participant.objects.filter(match_id=match_id, bot_id=self.regularUserBot2.id)[0]
+
+        self.assertEqual(self.expected_resultant_elos[iteration][0], bot1Participant.resultant_elo)
+        self.assertEqual(self.expected_resultant_elos[iteration][1], bot2Participant.resultant_elo)
+
+    def CheckFinalElos(self):
+        self.regularUserBot1.refresh_from_db()
+        self.regularUserBot2.refresh_from_db()
+        self.assertEqual(self.regularUserBot1.elo, self.expected_resultant_elos[self.num_matches_to_play-1][0])
+        self.assertEqual(self.regularUserBot2.elo, self.expected_resultant_elos[self.num_matches_to_play-1][1])
+
+    def CheckEloSum(self):
         sumElo = Bot.objects.aggregate(Sum('elo'))
         self.assertEqual(sumElo['elo__sum'],
                          ELO_START_VALUE * Bot.objects.all().count())  # starting ELO times number of bots
+
+    def test_elo(self):
+        for iteration in range(0, self.num_matches_to_play):
+            m_id, p1, p2 = self.CreateMatch()
+            res = self.DetermineResultType(p1['bot'], iteration)
+            self.CreateResult(m_id, p1['bot'], res)
+            self.CheckResultantElos(m_id, iteration)
+
+        self.CheckFinalElos()
+
+        self.CheckEloSum()
 
     def test_elo_sanity_check(self):
         # intentionally cause a sanity check failure

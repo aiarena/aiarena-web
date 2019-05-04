@@ -7,8 +7,7 @@ from rest_framework.response import Response
 
 from aiarena.api.exceptions import EloSanityCheckException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
-from aiarena.core.utils import calculate_elo_delta
-from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK
+from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
 
 
 class BotSerializer(serializers.ModelSerializer):
@@ -90,21 +89,19 @@ class ResultViewSet(viewsets.ModelViewSet):
         p1.update_resultant_elo()
         p2.update_resultant_elo()
 
-
         if ENABLE_ELO_SANITY_CHECK:
             # test here to check ELO total and ensure no corruption
             sumElo = Bot.objects.aggregate(Sum('elo'))
             if sumElo['elo__sum'] != ELO_START_VALUE * Bot.objects.all().count():
                 raise EloSanityCheckException("ELO did not sum to expected value!")
 
-    # todo: write a test which ensures this actually works properly
     def adjust_elo(self, result):
         if result.has_winner():
             winner, loser = result.get_winner_loser_bots()
-            self.apply_elo_delta(calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
+            self.apply_elo_delta(ELO.calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
         elif result.type == 'Tie':
             first, second = result.get_participant_bots()
-            self.apply_elo_delta(calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
+            self.apply_elo_delta(ELO.calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
 
     def apply_elo_delta(self, delta, bot1, bot2):
         delta = int(round(delta))
