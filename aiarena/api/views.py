@@ -44,7 +44,6 @@ class MatchViewSet(viewsets.ModelViewSet):
     serializer_class = MatchSerializer
 
     @action(detail=False, methods=['GET'], name='Create next match')
-    @transaction.atomic
     def next(self, request, *args, **kwargs):
         if Map.objects.count() == 0:
             raise APIException('There are no maps available for a match.')
