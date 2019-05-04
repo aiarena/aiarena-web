@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -5,6 +7,8 @@ from django.urls import reverse
 
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE
+
+logger = logging.getLogger(__name__)
 
 
 class User(AbstractUser):
@@ -131,7 +135,7 @@ class Result(models.Model):
         ('Error', 'Error'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
-    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won',  blank=True, null=True)
+    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
     type = models.CharField(max_length=32, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(
@@ -152,6 +156,8 @@ class Result(models.Model):
 
     def get_winner_loser_bots(self):
         bot1, bot2 = self.get_participant_bots()
+        logger.error('bot1 id: {0}'.format(bot1.id))  # todo: temp
+        logger.error('bot2 id: {0}'.format(bot2.id))  # todo: temp
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut'):
             return {bot1: 'winner', bot2: 'loser'}
         elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut'):
@@ -163,8 +169,11 @@ class Result(models.Model):
         first = Participant.objects.filter(match=self.match, participant_number=1)
         second = Participant.objects.filter(match=self.match, participant_number=2)
 
-        assert(first.count() == 1)
-        assert(second.count() == 1)
+        assert (first.count() == 1)
+        assert (second.count() == 1)
+
+        logger.error('first id: {0}'.format(first[0].id))  # todo: temp
+        logger.error('second id: {0}'.format(second[0].id))  # todo: temp
         return first[0], second[0]
 
     def get_participant_bots(self):
@@ -173,4 +182,3 @@ class Result(models.Model):
 
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form
-
