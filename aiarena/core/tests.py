@@ -25,16 +25,16 @@ class MatchReadyTestCase(LoggedInTestCase):
     def setUp(self):
         super(MatchReadyTestCase, self).setUp()
 
-        self.regularUserBot1 = Bot.objects.create(user=self.regularUser, name='regularUserBot1', active=True,
+        self.regularUserBot1 = Bot.objects.create(user=self.regularUser, name='regularUserBot1', active=False,
                                                   bot_zip=File(self.test_bot_zip), plays_race='T', type='Python')
 
-        self.regularUserBot2 = Bot.objects.create(user=self.regularUser, name='regularUserBot2', active=True,
+        self.regularUserBot2 = Bot.objects.create(user=self.regularUser, name='regularUserBot2', active=False,
                                                   bot_zip=File(self.test_bot_zip), plays_race='Z', type='Python')
 
-        self.staffUserBot1 = Bot.objects.create(user=self.staffUser, name='staffUserBot1', active=True,
+        self.staffUserBot1 = Bot.objects.create(user=self.staffUser, name='staffUserBot1', active=False,
                                                 bot_zip=File(self.test_bot_zip), plays_race='P', type='Python')
 
-        self.staffUserBot2 = Bot.objects.create(user=self.staffUser, name='staffUserBot2', active=True,
+        self.staffUserBot2 = Bot.objects.create(user=self.staffUser, name='staffUserBot2', active=False,
                                                 bot_zip=File(self.test_bot_zip), plays_race='R', type='Python')
         Map.objects.create(name='testmap')
 
