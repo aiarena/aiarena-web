@@ -158,6 +158,7 @@ class Result(models.Model):
         bot1, bot2 = self.get_participant_bots()
         logger.error('bot1 id: {0}'.format(bot1.id))  # todo: temp
         logger.error('bot2 id: {0}'.format(bot2.id))  # todo: temp
+        logger.error('type: {0}'.format(self.type))  # todo: temp
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut'):
             return {bot1: 'winner', bot2: 'loser'}
         elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut'):
