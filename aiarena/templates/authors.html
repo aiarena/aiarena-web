@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+    <table width="900" id="authorsTable">
+        <tbody>
+        {% load avatar_tags %}
+
+            {% for author in user_list %}
+                <tr>
+                    <td>
+                        <center>{% avatar author.id 150 %}</center>
+                        <center><a href="/authors/{{ author.id }}">{{ author.username }}</a></center>
+                        <br>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, ListView, DetailView
 
-from aiarena.core.models import Bot, Result
+from aiarena.core.models import Bot, Result, User
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
@@ -50,6 +50,26 @@ class BotDetail(DetailView):
             result.opponent = result.match.participant_set.exclude(bot=self.object)[0]
 
         context['result_list'] = results
+        return context
+
+
+class AuthorList(ListView):
+    queryset = User.objects.all().order_by('username').filter(is_active=1)
+    template_name = 'authors.html'
+
+
+class AuthorDetail(DetailView):
+    model = User
+    template_name = 'author.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AuthorDetail, self).get_context_data(**kwargs)
+
+        bots = Bot.objects.filter(user_id=self.object.id).order_by('-created')
+        author = User.objects.all().filter(id=self.object.id)
+
+        context['bots'] = bots
+        context['author'] = author
         return context
 
 
