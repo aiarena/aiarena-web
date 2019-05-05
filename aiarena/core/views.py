@@ -54,7 +54,7 @@ class BotDetail(DetailView):
 
 
 class AuthorList(ListView):
-    queryset = User.objects.all().order_by('username').filter(is_active=1)
+    queryset = User.objects.all().order_by('username').filter(is_active=1, serviceaccount=0)
     template_name = 'authors.html'
 
 

@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
+    serviceaccount = models.BooleanField(default=0)
 
 
 class Bot(models.Model):
