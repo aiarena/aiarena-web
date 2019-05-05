@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <table>
+        <tr>
+            <td>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+
+                    <input type=submit value="submit"/>
+                </form>
+            </td>
+        </tr>
+    </table>
+{% endblock %}

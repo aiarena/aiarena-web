@@ -1,11 +1,41 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django import forms
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, UpdateView, FormView
 
-from aiarena.core.models import Bot, Result
+from aiarena.core.models import Bot, Result, User
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
+
+
+class UserProfile(LoginRequiredMixin, UpdateView):
+    form_class = UserProfileForm
+    redirect_field_name = 'next'
+    template_name = 'profile.html'
+    success_message = "Profile saved successfully"
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('profile')
+
+    def get_object(self, *args, **kwargs):
+        return self.request.user
+
+    # todo: user bots
+    # def get_context_data(self, **kwargs):
+    #     context = super(UserProfile, self).get_context_data(**kwargs)
+    #     # Add in the user's bots
+    #     context['bot_list'] = self.request.user.bots
+    #     return context
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
