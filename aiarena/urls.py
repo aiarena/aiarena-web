@@ -37,4 +37,5 @@ urlpatterns = [
     path('authors/<int:pk>/', core_views.AuthorDetail.as_view(), name='author'),
     path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
     url('avatar/', include('avatar.urls')),
+    path('profile/', core_views.UserProfile.as_view(), name='profile'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
