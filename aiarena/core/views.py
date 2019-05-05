@@ -1,10 +1,10 @@
+from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django import forms
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import CreateView, ListView, UpdateView, FormView, DetailView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView
 
 from aiarena.core.models import Bot, Result, User
 
@@ -88,19 +88,14 @@ class AuthorList(ListView):
     template_name = 'authors.html'
 
 
-class AuthorDetail(DetailView):
-    model = User
+class AuthorDetail(ListView):
+    # Even though this is an Author view, we can treat it as a Bot ListView because the logged in user's details
+    # are already present in the template context by default
+    model = Bot
     template_name = 'author.html'
 
-    def get_context_data(self, **kwargs):
-        context = super(AuthorDetail, self).get_context_data(**kwargs)
-
-        bots = Bot.objects.filter(user_id=self.object.id).order_by('-created')
-        author = User.objects.all().filter(id=self.object.id)
-
-        context['bots'] = bots
-        context['author'] = author
-        return context
+    def get_queryset(self):
+        return Bot.objects.filter(user=self.request.user).order_by('-created')
 
 
 # Using a ListView, which has automated behaviour for displaying a list of models

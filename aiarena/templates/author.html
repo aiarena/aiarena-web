@@ -6,7 +6,7 @@
 <table id="author_table" style="width: 50%">
     <tr>
     {% load avatar_tags %}
-        <th rowspan="3">{% avatar author.id 150 %}</th>
+        <th rowspan="3">{% avatar user.id 150 %}</th>
         <th colspan="2"><h2>{{ user.username }}</h2></th>
     </tr>
     <tr>
@@ -28,7 +28,7 @@
         <td><b>Elo</b></td>
         <td><b>Type</b></td>
     </tr>
-    {% for bot in bots %}
+    {% for bot in bot_list %}
     <tr>
         <td><a href="/bots/{{ bot.id }}">{{ bot.name }}</a></td>
         <td>{{ bot.elo }}</td>
