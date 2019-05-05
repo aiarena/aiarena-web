@@ -19,6 +19,7 @@
                     <ul class="links">
                         <li><a href="{% url 'home' %}">{% trans "Home" %}</a></li>
                         <li><a href="{% url 'rules' %}">{% trans "Rules" %}</a></li>
+                        <li><a href="{% url 'authors' %}">{% trans "Authors" %}</a></li>
                         <li><a href="{% url 'bots' %}">{% trans "Bots" %}</a></li>
                         <li><a href="{% url 'ranking' %}">{% trans "Ranking" %}</a></li>
                         <li><a href="{% url 'results' %}">{% trans "Results" %}</a></li>
@@ -52,6 +53,7 @@
                 <li>
                     <h3>stats</h3>
                     <ul class="links">
+                        <li>Date: {% now "d. N Y" %}</li>
                         <li>Time: {% now "H:i:s" %} UTC</li>
                         <li>Matches (1h): {{ match_count_1h }}</li>
                         <li>Matches (24h): {{ match_count_24h }}</li>
