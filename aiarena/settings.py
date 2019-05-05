@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'avatar',
     'aiarena.core',
     'aiarena.api',
 ]

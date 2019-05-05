@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<table id="author_table" style="width: 50%">
+    <tr>
+    {% load avatar_tags %}
+        <th rowspan="3">{% avatar author.id 150 %}</th>
+        <th colspan="2"><h2>{{ user.username }}</h2></th>
+    </tr>
+    <tr>
+        <td><b>Joined</b></td>
+        <td>{{ user.date_joined|date:"d. N Y" }}</td>
+    </tr>
+    <tr>
+        <td><b>Last login</b></td>
+        <td>{{ user.last_login|date:"d. N Y" }}</td>
+    </tr>
+</table>
+
+<br>
+
+<h2>Bots</h2>
+<table id="bot_table" style="width: 50%">
+    <tr>
+        <td><b>Name</b></td>
+        <td><b>Elo</b></td>
+        <td><b>Type</b></td>
+    </tr>
+    {% for bot in bots %}
+    <tr>
+        <td><a href="/bots/{{ bot.id }}">{{ bot.name }}</a></td>
+        <td>{{ bot.elo }}</td>
+        <td>{{ bot.type }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}
