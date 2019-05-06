@@ -2,7 +2,6 @@ import logging
 
 from django.db.models import Sum
 from rest_framework import viewsets, serializers
-from rest_framework.decorators import action
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
@@ -12,16 +11,6 @@ from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
 
 logger = logging.getLogger(__name__)
 
-class BotSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bot
-        exclude = 'user',
-
-
-class BotViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Bot.objects.all()
-    serializer_class = BotSerializer
-
 
 class MapSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,23 +18,30 @@ class MapSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class MapViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Map.objects.all()
-    serializer_class = MapSerializer
+class BotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bot
+        exclude = 'user', 'created', 'updated', 'active', 'elo',
+        read_only_fields = ('name', 'bot_zip', 'plays_race', 'type')
 
 
 class MatchSerializer(serializers.ModelSerializer):
+    bot1 = BotSerializer(read_only=True)
+    bot2 = BotSerializer(read_only=True)
+    map = MapSerializer(read_only=True)
+
     class Meta:
         model = Match
-        fields = '__all__'
+        exclude = 'created',
 
 
-class MatchViewSet(viewsets.ModelViewSet):
-    queryset = Match.objects.all()
+class MatchViewSet(viewsets.GenericViewSet):
+    """
+    MatchViewSet implements a POST method with no field requirements, which will create a match and return the JSON.
+    """
     serializer_class = MatchSerializer
 
-    @action(detail=False, methods=['GET'], name='Create next match')
-    def next(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
         if Map.objects.count() == 0:
             raise APIException('There are no maps available for a match.')
         if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
@@ -55,23 +51,11 @@ class MatchViewSet(viewsets.ModelViewSet):
 
         # Add participating bots
         bot1 = Bot.random_active()
-        Participant.objects.create(match=match, participant_number=1, bot=bot1)
-        Participant.objects.create(match=match, participant_number=2, bot=bot1.random_active_excluding_self())
+        match.bot1 = Participant.objects.create(match=match, participant_number=1, bot=bot1).bot
+        match.bot2 = Participant.objects.create(match=match, participant_number=2, bot=bot1.random_active_excluding_self()).bot
 
         serializer = self.get_serializer(match)
         return Response(serializer.data)
-
-
-class ParticipantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Participant
-        fields = '__all__'
-
-
-class ParticipantViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Participant.objects.all()
-    serializer_class = ParticipantSerializer
-    filterset_fields = '__all__'
 
 
 class ResultSerializer(serializers.ModelSerializer):
