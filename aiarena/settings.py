@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'django_filters',
     'avatar',
     'aiarena.core',
-    'aiarena.api.arenaclient',
+    'aiarena.api',
+    # 'aiarena.api.arenaclient',
     'private_storage',
 ]
 

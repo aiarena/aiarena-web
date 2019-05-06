@@ -5,7 +5,7 @@ from rest_framework import viewsets, serializers, mixins
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
-from aiarena.arenaclientapi.exceptions import EloSanityCheckException
+from aiarena.api.arenaclient.exceptions import EloSanityCheckException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
 
