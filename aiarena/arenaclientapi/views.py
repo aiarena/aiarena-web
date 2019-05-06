@@ -1,7 +1,7 @@
 import logging
 
 from django.db.models import Sum
-from rest_framework import viewsets, serializers
+from rest_framework import viewsets, serializers, mixins
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
@@ -38,6 +38,7 @@ class MatchSerializer(serializers.ModelSerializer):
 class MatchViewSet(viewsets.GenericViewSet):
     """
     MatchViewSet implements a POST method with no field requirements, which will create a match and return the JSON.
+    No reading of models is implemented.
     """
     serializer_class = MatchSerializer
 
@@ -64,8 +65,11 @@ class ResultSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ResultViewSet(viewsets.ModelViewSet):
-    queryset = Result.objects.all()
+class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """
+    ResultViewSet implements a POST method to log a result.
+    No reading of models is implemented.
+    """
     serializer_class = ResultSerializer
 
     def perform_create(self, serializer):
