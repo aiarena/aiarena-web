@@ -28,7 +28,7 @@ urlpatterns = [
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='home'),
     url('rules', TemplateView.as_view(template_name='rules.html'), name='rules'),
-    path('api/', include('aiarena.api.urls')),
+    path('api/', include('aiarena.arenaclientapi.urls')),
     path('ranking/', core_views.Ranking.as_view(), name='ranking'),
     path('results/', core_views.Results.as_view(), name='results'),
     path('bots/', core_views.BotList.as_view(), name='bots'),

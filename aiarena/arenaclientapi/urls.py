@@ -1,4 +1,4 @@
-from aiarena.api import views
+from aiarena.arenaclientapi import views
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()

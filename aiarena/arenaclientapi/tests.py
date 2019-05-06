@@ -3,7 +3,7 @@ import os
 from django.core.files import File
 from django.db.models import Sum
 
-from aiarena.api.exceptions import EloSanityCheckException
+from aiarena.arenaclientapi.exceptions import EloSanityCheckException
 from aiarena.core.models import *
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 
