@@ -114,7 +114,7 @@ class EloTestCase(MatchReadyTestCase):
         # expected_win_sequence and expected_resultant_elos should have this many entries
         self.num_matches_to_play = 20
 
-        self.expected_win_sequence = [
+        self.expected_result_sequence = [
             self.regularUserBot1.id,
             self.regularUserBot2.id,
             self.regularUserBot1.id,
@@ -188,10 +188,10 @@ class EloTestCase(MatchReadyTestCase):
         self.assertEqual(response.status_code, 201, response.data)
 
     def DetermineResultType(self, p1_bot_id, iteration):
-        if self.expected_win_sequence[iteration] == 'Tie':
+        if self.expected_result_sequence[iteration] == 'Tie':
             return 'Tie'
         else:
-            return 'Player1Win' if p1_bot_id == self.expected_win_sequence[iteration] else 'Player2Win'
+            return 'Player1Win' if p1_bot_id == self.expected_result_sequence[iteration] else 'Player2Win'
 
     def CheckResultantElos(self, match_id, iteration):
         bot1Participant = Participant.objects.filter(match_id=match_id, bot_id=self.regularUserBot1.id)[0]
