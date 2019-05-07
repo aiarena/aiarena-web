@@ -95,7 +95,7 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
-    # Default to allow access only for unauthenticated users.
+    # Default to allow access only for admin users
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAdminUser'
     ],
