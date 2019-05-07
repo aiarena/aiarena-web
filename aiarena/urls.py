@@ -24,8 +24,8 @@ import private_storage.urls
 from aiarena.core import views as core_views
 
 urlpatterns = [
-    path('private-media/bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
-    url('^private-media/', include(private_storage.urls)),  # required for django admin
+    path('private/bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
+    url('^private/', include(private_storage.urls)),  # required for django admin
     path('admin/', admin.site.urls),
     url(r'^accounts/', include('registration.backends.default.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
