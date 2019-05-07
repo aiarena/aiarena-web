@@ -140,7 +140,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 # private media
-PRIVATE_STORAGE_ROOT = 'private-media/'
+PRIVATE_STORAGE_ROOT = 'private/'
 
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
