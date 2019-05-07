@@ -84,3 +84,7 @@ class PageRenderTestCase(FullDataSetTestCase):
     def test_bot_page(self):
         response = self.client.get('/bots/{0}/'.format(self.regularUserBot1.id))
         self.assertEqual(response.status_code, 200)
+
+
+class PrivateStorageTestCase(MatchReadyTestCase):
+    pass  # todo

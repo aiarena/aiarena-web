@@ -141,7 +141,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
 # private media
 PRIVATE_STORAGE_ROOT = 'private-media/'
-PRIVATE_STORAGE_AUTH_FUNCTION = 'private_storage.permissions.allow_staff'
 
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
