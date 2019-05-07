@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'avatar',
     'aiarena.core',
     'aiarena.api',
+    'private_storage',
 ]
 
 MIDDLEWARE = [
@@ -94,7 +95,7 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
-    # Default to allow access only for unauthenticated users.
+    # Default to allow access only for admin users
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAdminUser'
     ],
@@ -134,8 +135,12 @@ STATICFILES_DIRS = [
     os.path.join(APP_DIR, "static"),
 ]
 
+# public media
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+
+# private media
+PRIVATE_STORAGE_ROOT = 'private-media/'
 
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html

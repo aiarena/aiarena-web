@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
+from private_storage.views import PrivateStorageDetailView
 
 from aiarena.core.models import Bot, Result, User
 
@@ -128,3 +129,18 @@ class Results(View):
             result.bot2 = result.match.participant_set.filter(participant_number=2)[0]
         context = {'result_list': results}
         return render(request, 'results.html', context)
+
+
+class BotZipDownloadView(PrivateStorageDetailView):
+    model = Bot
+    model_file_field = 'bot_zip'
+
+    content_disposition = 'inner'
+
+    def get_content_disposition_filename(self, private_file):
+        return '{0}.zip'.format(private_file.parent_object.name)
+
+    def can_access_file(self, private_file):
+        user = private_file.request.user
+        # Only allow staff or the owner of the file
+        return user.is_authenticated and user.is_staff or private_file.parent_object.user == user

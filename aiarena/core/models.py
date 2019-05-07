@@ -3,7 +3,10 @@ import logging
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
 from django.urls import reverse
+from private_storage.fields import PrivateFileField
 
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE
@@ -14,6 +17,10 @@ logger = logging.getLogger(__name__)
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     serviceaccount = models.BooleanField(default=0)
+
+
+def bot_zip_upload_to(instance, filename):
+    return '/'.join(['bots', str(instance.id), 'bot_zip'])
 
 
 class Bot(models.Model):
@@ -37,7 +44,7 @@ class Bot(models.Model):
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
-    bot_zip = models.FileField(upload_to='bots')  # todo: limit public access to this file
+    bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
@@ -82,6 +89,26 @@ class Bot(models.Model):
 
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.__str__())
+
+
+_UNSAVED_FILEFIELD = 'unsaved__filefield'
+
+# The following methods will temporarily store the bot_zip file  while we wait for the Bot model to be saved
+# in order to generate an ID, which can then be used in the bot_zip file name
+@receiver(pre_save, sender=Bot)
+def skip_saving_bot_zip_file(sender, instance, **kwargs):
+    if not instance.pk and not hasattr(instance, _UNSAVED_FILEFIELD):
+        setattr(instance, _UNSAVED_FILEFIELD, instance.bot_zip)
+        instance.bot_zip = None
+
+
+@receiver(post_save, sender=Bot)
+def save_bot_zip_file(sender, instance, created, **kwargs):
+    if created and hasattr(instance, _UNSAVED_FILEFIELD):
+        instance.bot_zip = getattr(instance, _UNSAVED_FILEFIELD)
+        instance.save()
+        # delete the saved instance
+        instance.__dict__.pop(_UNSAVED_FILEFIELD)
 
 
 class Map(models.Model):
