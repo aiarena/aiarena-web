@@ -139,8 +139,9 @@ STATICFILES_DIRS = [
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 
-# private media
-PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private/")
+# Private media storage
+# https://github.com/edoburu/django-private-storage
+PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private-media/")
 
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
