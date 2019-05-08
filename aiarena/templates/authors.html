@@ -10,7 +10,7 @@
             {% for author in user_list %}
                 <tr>
                     <td>
-                        <center>{% avatar author.id 150 %}</center>
+                        <center>{% avatar author 150 %}</center>
                         <center><a href="/authors/{{ author.id }}">{{ author.username }}</a></center>
                         <br>
                     </td>
