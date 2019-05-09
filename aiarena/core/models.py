@@ -66,7 +66,7 @@ class Bot(models.Model):
         super(Bot, self).save(*args, **kwargs)
 
     def clean(self):
-        self.validate_one_bot_race_per_user()
+        self.validate_one_bot_race_per_user() # todo: do this on bot activation instead
 
     def __str__(self):
         return self.name
