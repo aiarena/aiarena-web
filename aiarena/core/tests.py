@@ -8,7 +8,7 @@ from aiarena.core.utils import calculate_md5
 
 
 class BaseTestCase(TestCase):
-    # For some reason using an absolute file path here for will cause it to mangle the save directory and fail
+    # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
     test_bot_zip = open('./aiarena/core/test_bot.zip', 'rb')
 
