@@ -45,7 +45,7 @@ class Bot(models.Model):
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
-    bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(),
+    bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     plays_race = models.CharField(max_length=1, choices=RACES)
