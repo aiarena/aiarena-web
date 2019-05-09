@@ -89,14 +89,18 @@ class AuthorList(ListView):
     template_name = 'authors.html'
 
 
-class AuthorDetail(ListView):
-    # Even though this is an Author view, we can treat it as a Bot ListView because the logged in user's details
-    # are already present in the template context by default
-    model = Bot
+class AuthorDetail(DetailView):
+    model = User
     template_name = 'author.html'
+    context_object_name = 'author'  # change the context name to avoid overriding the current user  oontextobject
 
-    def get_queryset(self):
-        return Bot.objects.filter(user=self.request.user).order_by('-created')
+    def get_context_data(self, **kwargs):
+        context = super(AuthorDetail, self).get_context_data(**kwargs)
+
+        bots = Bot.objects.filter(user_id=self.object.id).order_by('-created')
+
+        context['bot_list'] = bots
+        return context
 
 
 # Using a ListView, which has automated behaviour for displaying a list of models

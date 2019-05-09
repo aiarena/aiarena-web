@@ -6,16 +6,16 @@
 <table id="author_table" style="width: 50%">
     <tr>
     {% load avatar_tags %}
-        <th rowspan="3">{% avatar user 150 %}</th>
-        <th colspan="2"><h2>{{ user.username }}</h2></th>
+        <th rowspan="3">{% avatar author 150 %}</th>
+        <th colspan="2"><h2>{{ author.username }}</h2></th>
     </tr>
     <tr>
         <td><b>Joined</b></td>
-        <td>{{ user.date_joined|date:"d. N Y" }}</td>
+        <td>{{ author.date_joined|date:"d. N Y" }}</td>
     </tr>
     <tr>
         <td><b>Last login</b></td>
-        <td>{{ user.last_login|date:"d. N Y" }}</td>
+        <td>{{ author.last_login|date:"d. N Y" }}</td>
     </tr>
 </table>
 
