@@ -44,7 +44,6 @@ class FullDataSetTestCase(MatchReadyTestCase):
     def setUp(self):
         super(FullDataSetTestCase, self).setUp()
         # todo: generate some matches and results
-        pass
 
 
 class UtilsTestCase(BaseTestCase):
@@ -64,6 +63,11 @@ class BotTestCase(BaseTestCase):
         user = User.objects.create(username='test user', email='test@test.com')
         bot = Bot.objects.create(user=user, name='test', bot_zip=File(self.test_bot_zip), plays_race='T', type='Python')
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot.bot_zip_md5hash)
+
+        # check the bot file now exists
+        self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip'.format(bot.id)))
+
+        # todo: check file overwrite functionality
 
 
 class PageRenderTestCase(FullDataSetTestCase):
