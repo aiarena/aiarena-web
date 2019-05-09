@@ -31,12 +31,11 @@ class UserProfile(LoginRequiredMixin, UpdateView):
     def get_object(self, *args, **kwargs):
         return self.request.user
 
-    # todo: user bots
-    # def get_context_data(self, **kwargs):
-    #     context = super(UserProfile, self).get_context_data(**kwargs)
-    #     # Add in the user's bots
-    #     context['bot_list'] = self.request.user.bots
-    #     return context
+    def get_context_data(self, **kwargs):
+        context = super(UserProfile, self).get_context_data(**kwargs)
+        # Add in the user's bots
+        context['bot_list'] = self.request.user.bots.all()
+        return context
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):

@@ -3,31 +3,50 @@
 
 {% block content %}
 
-<table id="author_table_infobox" style="width: 50%">
-    <tr>
-    {% load avatar_tags %}
-        <th rowspan="3">Click to change<br><a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a></th>
-        <th colspan="2"><h2>{{ user.username }}</h2></th>
-    </tr>
-    <tr>
-        <td><b>Joined:</b> {{ user.date_joined|date:"d. N Y" }}</td>
-    </tr>
-    <tr>
-        <td><b>Last login:</b> {{ user.last_login|date:"d. N Y" }}</td>
-    </tr>
-</table>
+    <table id="author_table_infobox" style="width: 50%">
+        <tr>
+            {% load avatar_tags %}
+            <th rowspan="3">Click to change<br><a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a></th>
+            <th colspan="2"><h2>{{ user.username }}</h2></th>
+        </tr>
+        <tr>
+            <td><b>Joined:</b> {{ user.date_joined|date:"d. N Y" }}</td>
+        </tr>
+        <tr>
+            <td><b>Last login:</b> {{ user.last_login|date:"d. N Y" }}</td>
+        </tr>
+    </table>
 
 
-<table id="author_table_contact" style="width: 50%">
-    <tr>
-        <td>
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
+    <table id="author_table_contact" style="width: 50%">
+        <tr>
+            <td>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
 
-                <input type=submit value="submit"/>
-            </form>
-        </td>
-    </tr>
-</table>
+                    <input type=submit value="submit"/>
+                </form>
+            </td>
+        </tr>
+    </table>
+
+    <br>
+
+    <h2>Bots</h2>
+    <table id="bot_table" style="width: 50%">
+        <tr>
+            <td><b>Name</b></td>
+            <td><b>Elo</b></td>
+            <td><b>Type</b></td>
+        </tr>
+        {% for bot in bot_list %}
+            <tr>
+                <td><a href="/bots/{{ bot.id }}">{{ bot.name }}</a></td>
+                <td>{{ bot.elo }}</td>
+                <td>{{ bot.type }}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
 {% endblock %}
