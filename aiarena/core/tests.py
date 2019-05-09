@@ -62,8 +62,6 @@ class UserTestCase(BaseTestCase):
 class BotTestCase(BaseTestCase):
     def test_bot_creation(self):
         user = User.objects.create(username='test user', email='test@test.com')
-        # For some reason using an absolute file path here for will cause it to mangle the save directory and fail
-        # later whilst handling the bot_zip file save
         bot = Bot.objects.create(user=user, name='test', bot_zip=File(self.test_bot_zip), plays_race='T', type='Python')
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot.bot_zip_md5hash)
 
