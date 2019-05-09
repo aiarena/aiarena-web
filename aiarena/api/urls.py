@@ -1,10 +1,14 @@
-from django.conf.urls import include
-from django.urls import path
 from rest_framework.routers import DefaultRouter
 
+from .arenaclient import views
+
 router = DefaultRouter()
-# Register here
+
+# arena client
+router.register(r'arenaclient/matches', views.MatchViewSet, basename='match')
+router.register(r'arenaclient/results', views.ResultViewSet, basename='result')
+
+# todo: public API
 # router.register(r'model', views.ModelViewSet, basename='model')
-urlpatterns = [
-                  path('arenaclient/', include('aiarena.api.arenaclient.urls')),
-              ] + router.urls
+
+urlpatterns = router.urls
