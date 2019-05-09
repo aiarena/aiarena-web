@@ -8,7 +8,7 @@ from aiarena.core.utils import calculate_md5
 
 
 class BaseTestCase(TestCase):
-    # For some reason using an absolute file path here for will cause it to mangle the save directory and fail
+    # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
     test_bot_zip = open('./aiarena/core/test_bot.zip', 'rb')
 
@@ -44,7 +44,6 @@ class FullDataSetTestCase(MatchReadyTestCase):
     def setUp(self):
         super(FullDataSetTestCase, self).setUp()
         # todo: generate some matches and results
-        pass
 
 
 class UtilsTestCase(BaseTestCase):
@@ -62,10 +61,13 @@ class UserTestCase(BaseTestCase):
 class BotTestCase(BaseTestCase):
     def test_bot_creation(self):
         user = User.objects.create(username='test user', email='test@test.com')
-        # For some reason using an absolute file path here for will cause it to mangle the save directory and fail
-        # later whilst handling the bot_zip file save
         bot = Bot.objects.create(user=user, name='test', bot_zip=File(self.test_bot_zip), plays_race='T', type='Python')
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot.bot_zip_md5hash)
+
+        # check the bot file now exists
+        self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip'.format(bot.id)))
+
+        # todo: check file overwrite functionality
 
 
 class PageRenderTestCase(FullDataSetTestCase):
@@ -73,16 +75,48 @@ class PageRenderTestCase(FullDataSetTestCase):
     Tests to ensure website pages don't break.
     """
 
-    def test_index_page(self):
+    def test_get_index_page(self):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
 
-    def test_bots_page(self):
+    def test_get_bots_page(self):
         response = self.client.get('/bots/')
         self.assertEqual(response.status_code, 200)
 
-    def test_bot_page(self):
+    def test_get_bot_page(self):
         response = self.client.get('/bots/{0}/'.format(self.regularUserBot1.id))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_author_page(self):
+        response = self.client.get('/authors/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_authors_page(self):
+        response = self.client.get('/authors/{0}/'.format(self.regularUser.id))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_ranking_page(self):
+        response = self.client.get('/ranking/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_results_page(self):
+        response = self.client.get('/results/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_rules_page(self):
+        response = self.client.get('/rules/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_login_page(self):
+        response = self.client.get('/accounts/login/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_register_page(self):
+        response = self.client.get('/accounts/register/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_reset_password_page(self):
+        response = self.client.get('/accounts/password_reset/')
         self.assertEqual(response.status_code, 200)
 
 
