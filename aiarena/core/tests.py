@@ -73,16 +73,44 @@ class PageRenderTestCase(FullDataSetTestCase):
     Tests to ensure website pages don't break.
     """
 
-    def test_index_page(self):
+    def test_get_index_page(self):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
 
-    def test_bots_page(self):
+    def test_get_bots_page(self):
         response = self.client.get('/bots/')
         self.assertEqual(response.status_code, 200)
 
-    def test_bot_page(self):
+    def test_get_bot_page(self):
         response = self.client.get('/bots/{0}/'.format(self.regularUserBot1.id))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_author_page(self):
+        response = self.client.get('/authors/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_authors_page(self):
+        response = self.client.get('/authors/{0}/'.format(self.regularUser.id))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_ranking_page(self):
+        response = self.client.get('/ranking/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_results_page(self):
+        response = self.client.get('/results/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_login_page(self):
+        response = self.client.get('/accounts/login/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_register_page(self):
+        response = self.client.get('/accounts/register/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_reset_password_page(self):
+        response = self.client.get('/accounts/password_reset/')
         self.assertEqual(response.status_code, 200)
 
 
