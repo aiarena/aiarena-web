@@ -24,6 +24,10 @@ def bot_zip_upload_to(instance, filename):
     return '/'.join(['bots', str(instance.id), 'bot_zip'])
 
 
+def bot_data_upload_to(instance, filename):
+    return '/'.join(['bots', str(instance.id), 'bot_data'])
+
+
 class Bot(models.Model):
     RACES = (
         ('T', 'Terran'),
@@ -48,11 +52,16 @@ class Bot(models.Model):
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
+    bot_data = PrivateFileField(upload_to=bot_data_upload_to, storage=OverwritePrivateStorage(base_url='/'),
+                                null=True, max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
+    bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
 
-    def calc_bot_zip_md5hash(self):
+    def calc_bot_files_md5hash(self):
         self.bot_zip_md5hash = calculate_md5(self.bot_zip.open(mode='rb'))
+        if self.bot_data:
+            self.bot_data_md5hash = calculate_md5(self.bot_data.open(mode='rb'))
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_one_bot_race_per_user(self):
@@ -62,11 +71,11 @@ class Bot(models.Model):
                 'Each user can only have 1 bot per race.')
 
     def save(self, *args, **kwargs):
-        self.calc_bot_zip_md5hash()
+        self.calc_bot_files_md5hash()
         super(Bot, self).save(*args, **kwargs)
 
     def clean(self):
-        self.validate_one_bot_race_per_user() # todo: do this on bot activation instead
+        self.validate_one_bot_race_per_user()  # todo: do this on bot activation instead
 
     def __str__(self):
         return self.name
@@ -93,25 +102,40 @@ class Bot(models.Model):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
-_UNSAVED_FILEFIELD = 'unsaved__filefield'
+_UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
+_UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
 
 
-# The following methods will temporarily store the bot_zip file  while we wait for the Bot model to be saved
-# in order to generate an ID, which can then be used in the bot_zip file name
+# The following methods will temporarily store the bot_zip and bot_data files while we wait for the Bot model to be
+# saved in order to generate an ID, which can then be used in the path for the bot_zip name
 @receiver(pre_save, sender=Bot)
-def skip_saving_bot_zip_file(sender, instance, **kwargs):
-    if not instance.pk and not hasattr(instance, _UNSAVED_FILEFIELD):
-        setattr(instance, _UNSAVED_FILEFIELD, instance.bot_zip)
+def skip_saving_bot_files(sender, instance, **kwargs):
+    # bot zip
+    if not instance.pk and not hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
+        setattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD, instance.bot_zip)
         instance.bot_zip = None
+
+    # bot data
+    if not instance.pk and not hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD):
+        setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
+        instance.bot_data = None
 
 
 @receiver(post_save, sender=Bot)
-def save_bot_zip_file(sender, instance, created, **kwargs):
-    if created and hasattr(instance, _UNSAVED_FILEFIELD):
-        instance.bot_zip = getattr(instance, _UNSAVED_FILEFIELD)
+def save_bot_files(sender, instance, created, **kwargs):
+    # bot zip
+    if created and hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
+        instance.bot_zip = getattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD)
         instance.save()
         # delete the saved instance
-        instance.__dict__.pop(_UNSAVED_FILEFIELD)
+        instance.__dict__.pop(_UNSAVED_BOT_ZIP_FILEFIELD)
+
+    # bot data
+    if created and hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD):
+        instance.bot_data = getattr(instance, _UNSAVED_BOT_DATA_FILEFIELD)
+        instance.save()
+        # delete the saved instance
+        instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
 
 
 class Map(models.Model):
