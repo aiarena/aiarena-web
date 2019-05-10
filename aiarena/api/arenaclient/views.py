@@ -3,6 +3,7 @@ import logging
 from django.db.models import Sum
 from rest_framework import viewsets, serializers, mixins
 from rest_framework.exceptions import APIException
+from rest_framework.fields import FileField
 from rest_framework.response import Response
 
 from aiarena.api.arenaclient.exceptions import EloSanityCheckException
@@ -50,19 +51,24 @@ class MatchViewSet(viewsets.GenericViewSet):
 
         match = Match.objects.create(map=Map.random())
 
+        # todo: filter out checked out bots
         # Add participating bots
         bot1 = Bot.random_active()
         match.bot1 = Participant.objects.create(match=match, participant_number=1, bot=bot1).bot
-        match.bot2 = Participant.objects.create(match=match, participant_number=2, bot=bot1.random_active_excluding_self()).bot
+        match.bot2 = Participant.objects.create(match=match, participant_number=2,
+                                                bot=bot1.random_active_excluding_self()).bot
 
         serializer = self.get_serializer(match)
         return Response(serializer.data)
 
 
 class ResultSerializer(serializers.ModelSerializer):
+    bot1_data = FileField(required=False)
+    bot2_data = FileField(required=False)
+
     class Meta:
         model = Result
-        fields = '__all__'
+        fields = 'type', 'replay_file', 'duration', 'match', 'bot1_data', 'bot2_data'
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -73,6 +79,16 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     serializer_class = ResultSerializer
 
     def perform_create(self, serializer):
+        # pop bot datas so they don't interfere with saving the result
+        process_bot1_data = False
+        process_bot2_data = False
+        if 'bot1_data' in serializer.validated_data:
+            bot1_data = serializer.validated_data.pop('bot1_data')
+            process_bot1_data = True
+        if 'bot2_data' in serializer.validated_data:
+            bot2_data = serializer.validated_data.pop('bot2_data')
+            process_bot2_data = True
+
         result = serializer.save()
         self.adjust_elo(result)
         p1, p2 = result.get_participants()
@@ -84,6 +100,17 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             sumElo = Bot.objects.aggregate(Sum('elo'))
             if sumElo['elo__sum'] != ELO_START_VALUE * Bot.objects.all().count():
                 raise EloSanityCheckException("ELO did not sum to expected value!")
+
+        # save bot datas
+        if process_bot1_data:
+            bot1 = serializer.validated_data['match'].participant_set.get(participant_number=1).bot
+            bot1.bot_data = bot1_data
+            bot1.save()
+
+        if process_bot2_data:
+            bot2 = serializer.validated_data['match'].participant_set.get(participant_number=2).bot
+            bot2.bot_data = bot2_data
+            bot2.save()
 
     def adjust_elo(self, result):
         if result.has_winner():
