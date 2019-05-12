@@ -11,7 +11,7 @@ from private_storage.fields import PrivateFileField
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE
-
+from django.utils.html import escape
 logger = logging.getLogger(__name__)
 
 
@@ -90,7 +90,7 @@ class Bot(models.Model):
         return reverse('bot', kwargs={'pk': self.pk})
 
     def as_html_link(self):
-        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.__str__())
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
 _UNSAVED_FILEFIELD = 'unsaved__filefield'
