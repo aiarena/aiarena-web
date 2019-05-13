@@ -6,7 +6,7 @@ from rest_framework.exceptions import APIException
 from rest_framework.fields import FileField
 from rest_framework.response import Response
 
-from aiarena.api.arenaclient.exceptions import EloSanityCheckException
+from aiarena.api.arenaclient.exceptions import EloSanityCheckException, BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
 
@@ -138,13 +138,17 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             bot1.in_match = False
             bot2.save()
         else:
-            logger.warning('A result was submitted involving a bot not marked as "in_match"')
+            logger.error('A result was submitted involving a bot not marked as "in_match"')
+            raise BotNotInMatchException(
+                'Bot 1 is not currently listed as in a match. Unable to submit result for a bot not in a match.')
 
         if bot2.in_match:
             bot2.in_match = False
             bot2.save()
         else:
-            logger.warning('A result was submitted involving a bot not marked as "in_match"')
+            logger.error('A result was submitted involving a bot not marked as "in_match"')
+            raise BotNotInMatchException(
+                'Bot 2 is not currently listed as in a match. Unable to submit result for a bot not in a match.')
 
     def adjust_elo(self, result):
         if result.has_winner():

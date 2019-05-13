@@ -3,7 +3,7 @@ import os
 from django.core.files import File
 from django.db.models import Sum
 
-from aiarena.api.arenaclient.exceptions import EloSanityCheckException
+from aiarena.api.arenaclient.exceptions import EloSanityCheckException, BotNotInMatchException
 from aiarena.core.models import *
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 
@@ -31,12 +31,12 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot1 = Bot.objects.create(user=self.staffUser, name='testbot1', bot_zip=File(self.test_bot_zip))
+        bot1 = self._create_bot('testbot1')
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot2 = Bot.objects.create(user=self.regularUser, name='testbot2', bot_zip=File(self.test_bot_zip))
+        bot2 = self._create_bot('testbot2')
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 500)
 
@@ -111,6 +111,16 @@ class ResultsTestCase(LoggedInTestCase):
 
         response = self.PostResult(match, bot1)
         self.assertEqual(response.status_code, 201)
+
+    def test_create_result_bot_not_in_match(self):
+        self.client.login(username='staff_user', password='x')
+
+        match, bot1, bot2 = self.CreateMatch()
+
+        bot1.in_match = False  # force the exception
+        bot1.save()
+
+        self.assertRaises(BotNotInMatchException, self.PostResult, match, bot1)
 
 
 class EloTestCase(MatchReadyTestCase):

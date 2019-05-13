@@ -12,6 +12,12 @@ class BaseTestCase(TestCase):
     # later whilst handling the bot_zip file save
     test_bot_zip = open('./aiarena/core/test_bot.zip', 'rb')
 
+    def _create_bot(self, name):
+        return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(self.test_bot_zip))
+
+    def _create_active_bot(self, name):
+        return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(self.test_bot_zip), active=True)
+
 
 class LoggedInTestCase(BaseTestCase):
     def setUp(self):
