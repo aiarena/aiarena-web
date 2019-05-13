@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from private_storage.fields import PrivateFileField
 
+from aiarena.api.arenaclient.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE
@@ -82,6 +83,22 @@ class Bot(models.Model):
 
     def __str__(self):
         return self.name
+
+    def enter_match(self):
+        if not self.in_match:
+            self.in_match = True
+            self.save()
+        else:
+            logger.error('Bot attempted to enter a match whilst already in one.')
+            raise BotAlreadyInMatchException('Cannot enter a match - bot is already in one.')
+
+    def leave_match(self):
+        if self.in_match:
+            self.in_match = False
+            self.save()
+        else:
+            logger.error('Bot attempted to leave a match whilst not in a match.')
+            raise BotNotInMatchException('Cannot leave a match - bot is not in one.')
 
     @staticmethod
     def get_random_available():

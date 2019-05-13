@@ -64,10 +64,8 @@ class MatchViewSet(viewsets.GenericViewSet):
         Participant.objects.create(match=match, participant_number=2, bot=bot2)
 
         # mark bots as in match
-        bot1.in_match = True
-        bot1.save()
-        bot2.in_match = True
-        bot2.save()
+        bot1.enter_match()
+        bot2.enter_match()
 
         # return bot data along with the match
         match.bot1 = bot1
@@ -134,21 +132,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             bot2.bot_data = bot2_data
             bot2.save()
 
-        if bot1.in_match:
-            bot1.in_match = False
-            bot2.save()
-        else:
-            logger.error('A result was submitted involving a bot not marked as "in_match"')
-            raise BotNotInMatchException(
-                'Bot 1 is not currently listed as in a match. Unable to submit result for a bot not in a match.')
-
-        if bot2.in_match:
-            bot2.in_match = False
-            bot2.save()
-        else:
-            logger.error('A result was submitted involving a bot not marked as "in_match"')
-            raise BotNotInMatchException(
-                'Bot 2 is not currently listed as in a match. Unable to submit result for a bot not in a match.')
+        bot1.leave_match()
+        bot2.leave_match()
 
     def adjust_elo(self, result):
         if result.has_winner():
