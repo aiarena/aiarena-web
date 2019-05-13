@@ -52,10 +52,12 @@ class MatchesTestCase(LoggedInTestCase):
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 200)
 
+        # not enough available bots
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 500)
+
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)
-
-        # todo: test game checkout mechanism
 
 
 class ResultsTestCase(LoggedInTestCase):

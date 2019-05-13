@@ -55,12 +55,23 @@ class MatchViewSet(viewsets.GenericViewSet):
 
         match = Match.objects.create(map=Map.random())
 
-        # todo: filter out checked out bots
         # Add participating bots
         bot1 = Bot.get_random_available()
-        match.bot1 = Participant.objects.create(match=match, participant_number=1, bot=bot1).bot
-        match.bot2 = Participant.objects.create(match=match, participant_number=2,
-                                                bot=bot1.get_random_available_excluding_self()).bot
+        bot2 = bot1.get_random_available_excluding_self()
+
+        # create match participants
+        Participant.objects.create(match=match, participant_number=1, bot=bot1)
+        Participant.objects.create(match=match, participant_number=2, bot=bot2)
+
+        # mark bots as in match
+        bot1.in_match = True
+        bot1.save()
+        bot2.in_match = True
+        bot2.save()
+
+        # return bot data along with the match
+        match.bot1 = bot1
+        match.bot2 = bot2
 
         serializer = self.get_serializer(match)
         return Response(serializer.data)
@@ -87,6 +98,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     serializer_class = ResultSerializer
 
+    # todo: avoid results being logged against matches not owned by the submitter
     def perform_create(self, serializer):
         # pop bot datas so they don't interfere with saving the result
         process_bot1_data = False
