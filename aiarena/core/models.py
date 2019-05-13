@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    serviceaccount = models.BooleanField(default=0)
+    service_account = models.BooleanField(default=True)
 
 
 def bot_zip_upload_to(instance, filename):
