@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -6,13 +7,15 @@ from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.html import escape
 from private_storage.fields import PrivateFileField
 
 from aiarena.api.arenaclient.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE
-from django.utils.html import escape
+
 logger = logging.getLogger(__name__)
 
 
@@ -72,7 +75,7 @@ class Bot(models.Model):
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
-    current_match = models.ForeignKey(Match, on_delete=models.PROTECT, null=True)
+    current_match = models.ForeignKey(Match, on_delete=models.PROTECT, null=True, related_name='bots_currently_in_match')
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
@@ -124,6 +127,15 @@ class Bot(models.Model):
         else:
             logger.error('Bot attempted to leave a match whilst not in a match.')
             raise BotNotInMatchException('Cannot leave a match - bot is not in one.')
+
+    # todo: have arena client check in with web service inorder to delay this
+    @staticmethod
+    def timeout_overtime_bot_games():  # todo: register "timeout" result
+        bots_in_matches = Bot.objects.filter(in_match=True,
+                                             current_match__created__lt=timezone.now() - timedelta(hours=1))
+        for bot in bots_in_matches:
+            logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
+            bot.leave_match()
 
     @staticmethod
     def get_random_available():
@@ -181,6 +193,7 @@ def save_bot_files(sender, instance, created, **kwargs):
         instance.save()
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
+
 
 class Participant(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)

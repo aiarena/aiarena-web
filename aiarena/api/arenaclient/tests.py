@@ -59,6 +59,52 @@ class MatchesTestCase(LoggedInTestCase):
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)
 
+    def test_previous_match_timeout(self):
+        self.client.login(username='staff_user', password='x')
+        Map.objects.create(name='testmap')
+        bot1 = self._create_active_bot('testbot1')
+        bot2 = self._create_active_bot('testbot2')
+        bot3 = self._create_active_bot('testbot3')
+        bot4 = self._create_active_bot('testbot4')
+        bot5 = self._create_active_bot('testbot5')
+        bot6 = self._create_active_bot('testbot6')
+        bot7 = self._create_active_bot('testbot7')
+        bot8 = self._create_active_bot('testbot8')
+
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 200)
+
+        # save the match for modification
+        match1 = Match.objects.get(id=response.data['id'])
+
+        # generate a new match so we can check it isn't interfered with
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 200)
+        match2 = Match.objects.get(id=response.data['id'])
+
+        # set the created time back into the past long enough for it to cause a time out
+        match1.created = timezone.now() - timedelta(hours=2)
+        match1.save()
+
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 200)
+
+        # confirm these bots were successfully force removed from their match
+        self.assertEqual(match1.bots_currently_in_match.count(), 0)
+        for bot in match1.bots_currently_in_match.all():
+            self.assertFalse(bot.in_match)
+            self.assertTrue(bot.current_match is None)
+
+        # confirm these bots weren't affected
+        self.assertEqual(match2.bots_currently_in_match.count(), 2)  # paranoid double check
+        for bot in match2.bots_currently_in_match.all():
+            self.assertTrue(bot.in_match)
+            self.assertTrue(bot.current_match is not None)
+
+        # final count double checks
+        self.assertEqual(Bot.objects.filter(in_match=False, current_match=None).count(), 4)
+        self.assertEqual(Bot.objects.filter(in_match=True).exclude(current_match=None).count(), 4)
+
 
 class ResultsTestCase(LoggedInTestCase):
     def test_get_results_not_authorized(self):

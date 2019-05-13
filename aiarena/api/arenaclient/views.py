@@ -49,7 +49,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
             raise APIException('Not enough active bots available for a match.')
 
-        # todo: add in game timeout
+        Bot.timeout_overtime_bot_games()
         if Bot.objects.filter(active=True, in_match=False).count() <= 1:  # need at least 2 bots that aren't in game
             raise APIException('Not enough available bots available for a match.')
 
