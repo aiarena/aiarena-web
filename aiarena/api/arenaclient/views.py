@@ -64,8 +64,8 @@ class MatchViewSet(viewsets.GenericViewSet):
         Participant.objects.create(match=match, participant_number=2, bot=bot2)
 
         # mark bots as in match
-        bot1.enter_match()
-        bot2.enter_match()
+        bot1.enter_match(match)
+        bot2.enter_match(match)
 
         # return bot data along with the match
         match.bot1 = bot1

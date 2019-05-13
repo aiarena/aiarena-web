@@ -16,6 +16,28 @@ from django.utils.html import escape
 logger = logging.getLogger(__name__)
 
 
+class Map(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    file = models.FileField(upload_to='maps')
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def random():
+        # todo: apparently this is really slow
+        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+        return Map.objects.order_by('?').first()
+
+
+# todo: structure for separate ladder types
+class Match(models.Model):
+    map = models.ForeignKey(Map, on_delete=models.PROTECT)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.id.__str__()
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     service_account = models.BooleanField(default=True)
@@ -50,6 +72,7 @@ class Bot(models.Model):
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
+    current_match = models.ForeignKey(Match, on_delete=models.PROTECT, null=True)
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
@@ -84,8 +107,9 @@ class Bot(models.Model):
     def __str__(self):
         return self.name
 
-    def enter_match(self):
+    def enter_match(self, match):
         if not self.in_match:
+            self.current_match = match
             self.in_match = True
             self.save()
         else:
@@ -94,6 +118,7 @@ class Bot(models.Model):
 
     def leave_match(self):
         if self.in_match:
+            self.current_match = None
             self.in_match = False
             self.save()
         else:
@@ -156,30 +181,6 @@ def save_bot_files(sender, instance, created, **kwargs):
         instance.save()
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
-
-
-class Map(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-    file = models.FileField(upload_to='maps')
-
-    def __str__(self):
-        return self.name
-
-    @staticmethod
-    def random():
-        # todo: apparently this is really slow
-        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return Map.objects.order_by('?').first()
-
-
-# todo: structure for separate ladder types
-class Match(models.Model):
-    map = models.ForeignKey(Map, on_delete=models.PROTECT)
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.id.__str__()
-
 
 class Participant(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
