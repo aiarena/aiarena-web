@@ -1,10 +1,14 @@
-from aiarena.api import views
 from rest_framework.routers import DefaultRouter
 
+from .arenaclient import views
+
 router = DefaultRouter()
-router.register(r'bots', views.BotViewSet, basename='bot')
-router.register(r'maps', views.MapViewSet, basename='map')
-router.register(r'matches', views.MatchViewSet, basename='match')
-router.register(r'participants', views.ParticipantViewSet, basename='participant')
-router.register(r'results', views.ResultViewSet, basename='result')
+
+# arena client
+router.register(r'arenaclient/matches', views.MatchViewSet, basename='match')
+router.register(r'arenaclient/results', views.ResultViewSet, basename='result')
+
+# todo: public API
+# router.register(r'model', views.ModelViewSet, basename='model')
+
 urlpatterns = router.urls

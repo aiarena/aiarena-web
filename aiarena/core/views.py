@@ -84,7 +84,7 @@ class BotDetail(DetailView):
 
 
 class AuthorList(ListView):
-    queryset = User.objects.all().order_by('username').filter(is_active=1, serviceaccount=0)
+    queryset = User.objects.all().order_by('username').filter(is_active=1, service_account=True)
     template_name = 'authors.html'
 
 
@@ -142,6 +142,22 @@ class BotZipDownloadView(PrivateStorageDetailView):
 
     def get_content_disposition_filename(self, private_file):
         return '{0}.zip'.format(private_file.parent_object.name)
+
+    def can_access_file(self, private_file):
+        user = private_file.request.user
+        # Only allow staff or the owner of the file
+        # temp hack to get arena clients working again.
+        return True # user.is_authenticated and user.is_staff or private_file.parent_object.user == user
+
+
+class BotDataDownloadView(PrivateStorageDetailView):
+    model = Bot
+    model_file_field = 'bot_data'
+
+    content_disposition = 'inner'
+
+    def get_content_disposition_filename(self, private_file):
+        return '{0}.data'.format(private_file.parent_object.name)
 
     def can_access_file(self, private_file):
         user = private_file.request.user
