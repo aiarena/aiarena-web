@@ -41,9 +41,10 @@ class Match(models.Model):
     def __str__(self):
         return self.id.__str__()
 
+
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    service_account = models.BooleanField(default=True)
+    service_account = models.BooleanField(default=False)
 
 
 def bot_zip_upload_to(instance, filename):
@@ -75,7 +76,8 @@ class Bot(models.Model):
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
-    current_match = models.ForeignKey(Match, on_delete=models.PROTECT, null=True, related_name='bots_currently_in_match')
+    current_match = models.ForeignKey(Match, on_delete=models.PROTECT, null=True,
+                                      related_name='bots_currently_in_match')
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
