@@ -195,8 +195,7 @@ class Result(models.Model):
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
     type = models.CharField(max_length=32, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
-    replay_file = models.FileField(
-        upload_to='replays')
+    replay_file = models.FileField(upload_to='replays', blank=True, null=True)
     duration = models.IntegerField()
 
     def __str__(self):
