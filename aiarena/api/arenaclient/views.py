@@ -49,14 +49,18 @@ class MatchViewSet(viewsets.GenericViewSet):
         if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
             raise APIException('Not enough active bots available for a match.')
 
+        # todo: add in game timeout
+        if Bot.objects.filter(active=True, in_match=False).count() <= 1:  # need at least 2 bots that aren't in game
+            raise APIException('Not enough available bots available for a match.')
+
         match = Match.objects.create(map=Map.random())
 
         # todo: filter out checked out bots
         # Add participating bots
-        bot1 = Bot.random_active()
+        bot1 = Bot.get_random_available()
         match.bot1 = Participant.objects.create(match=match, participant_number=1, bot=bot1).bot
         match.bot2 = Participant.objects.create(match=match, participant_number=2,
-                                                bot=bot1.random_active_excluding_self()).bot
+                                                bot=bot1.get_random_available_excluding_self()).bot
 
         serializer = self.get_serializer(match)
         return Response(serializer.data)
@@ -106,16 +110,29 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             if sumElo['elo__sum'] != ELO_START_VALUE * Bot.objects.all().count():
                 raise EloSanityCheckException("ELO did not sum to expected value!")
 
+        bot1 = serializer.validated_data['match'].participant_set.get(participant_number=1).bot
+        bot2 = serializer.validated_data['match'].participant_set.get(participant_number=2).bot
+
         # save bot datas
         if process_bot1_data:
-            bot1 = serializer.validated_data['match'].participant_set.get(participant_number=1).bot
             bot1.bot_data = bot1_data
             bot1.save()
 
         if process_bot2_data:
-            bot2 = serializer.validated_data['match'].participant_set.get(participant_number=2).bot
             bot2.bot_data = bot2_data
             bot2.save()
+
+        if bot1.in_match:
+            bot1.in_match = False
+            bot2.save()
+        else:
+            logger.warning('A result was submitted involving a bot not marked as "in_match"')
+
+        if bot2.in_match:
+            bot2.in_match = False
+            bot2.save()
+        else:
+            logger.warning('A result was submitted involving a bot not marked as "in_match"')
 
     def adjust_elo(self, result):
         if result.has_winner():

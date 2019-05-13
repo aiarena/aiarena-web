@@ -48,6 +48,7 @@ class Bot(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
+    in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
@@ -83,19 +84,19 @@ class Bot(models.Model):
         return self.name
 
     @staticmethod
-    def random_active():
+    def get_random_available():
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return Bot.objects.filter(active=True).order_by('?').first()
+        return Bot.objects.filter(active=True, in_match=False).order_by('?').first()
 
     @staticmethod
     def active_count():
         return Bot.objects.filter(active=True).count()
 
-    def random_active_excluding_self(self):
+    def get_random_available_excluding_self(self):
         if Bot.active_count() <= 1:
             raise RuntimeError("I am the only bot.")
-        return Bot.objects.filter(active=True).exclude(id=self.id).order_by('?').first()
+        return Bot.objects.filter(active=True, in_match=False).exclude(id=self.id).order_by('?').first()
 
     def get_absolute_url(self):
         return reverse('bot', kwargs={'pk': self.pk})

@@ -55,6 +55,8 @@ class MatchesTestCase(LoggedInTestCase):
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)
 
+        # todo: test game checkout mechanism
+
 
 class ResultsTestCase(LoggedInTestCase):
     def test_get_results_not_authorized(self):
