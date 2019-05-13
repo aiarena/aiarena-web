@@ -201,6 +201,14 @@ class Result(models.Model):
     def __str__(self):
         return self.created.__str__()
 
+    def validate_replay_file_requirement(self):
+        if (self.has_winner() or self.is_tie()) and self.replay_file == None:
+            raise ValidationError('A win/loss or tie result must contain a replay file.')
+
+    def clean(self, *args, **kwargs):
+        self.validate_replay_file_requirement()
+        super().clean(*args, **kwargs)
+
     def has_winner(self):
         return self.type in (
             'Player1Win',
@@ -209,6 +217,9 @@ class Result(models.Model):
             'Player2Win',
             'Player2Crash',
             'Player2TimeOut')
+
+    def is_tie(self):
+        return self.type == 'Tie'
 
     def get_winner_loser_bots(self):
         bot1, bot2 = self.get_participant_bots()
@@ -230,6 +241,10 @@ class Result(models.Model):
     def get_participant_bots(self):
         first, second = self.get_participants()
         return first.bot, second.bot
+
+    def save(self, *args, **kwargs):
+        self.full_clean()  # ensure validation is run on save
+        super().save(*args, **kwargs)
 
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form

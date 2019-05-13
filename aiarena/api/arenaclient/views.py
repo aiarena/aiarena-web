@@ -66,6 +66,11 @@ class ResultSerializer(serializers.ModelSerializer):
     bot1_data = FileField(required=False)
     bot2_data = FileField(required=False)
 
+    def validate(self, attrs):
+        instance = ResultSerializer.Meta.model(**attrs)
+        instance.clean()  # enforce model validation
+        return attrs
+
     class Meta:
         model = Result
         fields = 'type', 'replay_file', 'duration', 'match', 'bot1_data', 'bot2_data'

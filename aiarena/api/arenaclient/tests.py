@@ -77,6 +77,14 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 200)
         return response.data, bot1, bot2
 
+    def PostResultWithoutResultFile(self, match, winner):
+        return self.client.post('/api/arenaclient/results/',
+                                {'match': match["id"],
+                                 'winner': winner.id,
+                                 'type': 'Player1Win',
+                                 'replay_file': '',
+                                 'duration': 500})
+
     def PostResult(self, match, winner):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
         with open(filename) as replayFile:
@@ -91,6 +99,11 @@ class ResultsTestCase(LoggedInTestCase):
         self.client.login(username='staff_user', password='x')
 
         match, bot1, bot2 = self.CreateMatch()
+
+        response = self.PostResultWithoutResultFile(match, bot1)
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue('non_field_errors' in response.data)
+        self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
 
         response = self.PostResult(match, bot1)
         self.assertEqual(response.status_code, 201)

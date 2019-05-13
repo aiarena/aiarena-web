@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'avatar',
     'aiarena.core',
     'aiarena.api',
-    # 'aiarena.api.arenaclient',
     'private_storage',
 ]
 
