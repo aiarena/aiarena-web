@@ -118,7 +118,6 @@ class Bot(models.Model):
             self.in_match = True
             self.save()
         else:
-            logger.error('Bot attempted to enter a match whilst already in one.')
             raise BotAlreadyInMatchException('Cannot enter a match - bot is already in one.')
 
     def leave_match(self):
@@ -127,7 +126,6 @@ class Bot(models.Model):
             self.in_match = False
             self.save()
         else:
-            logger.error('Bot attempted to leave a match whilst not in a match.')
             raise BotNotInMatchException('Cannot leave a match - bot is not in one.')
 
     # todo: have arena client check in with web service inorder to delay this
