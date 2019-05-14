@@ -12,6 +12,9 @@ class BaseTestCase(TestCase):
     # later whilst handling the bot_zip file save
     test_bot_zip = open('./aiarena/core/test_bot.zip', 'rb')
 
+    def _create_map(self, name):
+        return Map.objects.create(name=name)
+
     def _create_bot(self, name):
         return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(self.test_bot_zip))
 

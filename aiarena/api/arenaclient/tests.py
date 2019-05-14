@@ -1,59 +1,82 @@
 import os
+from datetime import timedelta
 
-from django.core.files import File
 from django.db.models import Sum
+from django.utils import timezone
 
-from aiarena.api.arenaclient.exceptions import EloSanityCheckException, BotNotInMatchException
-from aiarena.core.models import *
+from aiarena.api.arenaclient.exceptions import EloSanityCheckException
+from aiarena.core.models import Match, Bot, Participant, Result
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
+from aiarena.settings import ELO_START_VALUE
 
 
-class MatchesTestCase(LoggedInTestCase):
+class BaseApiTestCase(LoggedInTestCase):
+    def _post_to_matches(self):
+        return self.client.post('/api/arenaclient/matches/')
 
-    def test_next_match_not_authorized(self):
-        response = self.client.post('/api/arenaclient/matches/')
+    def _post_to_results(self, match_id, result_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': replayFile,
+                                     'duration': 500})
+
+    def _post_to_results_no_replay(self, match_id, result_type):
+        return self.client.post('/api/arenaclient/results/',
+                                {'match': match_id,
+                                 'type': result_type,
+                                 'replay_file': '',
+                                 'duration': 500})
+
+
+class MatchesTestCase(BaseApiTestCase):
+
+    def test_get_next_match_not_authorized(self):
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 403)
 
         self.client.login(username='regular_user', password='x')
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 403)
 
-    def test_next_match(self):
+    def test_post_next_match(self):
         self.client.login(username='staff_user', password='x')
 
         # no maps
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        Map.objects.create(name='testmap')
-        response = self.client.post('/api/arenaclient/matches/')
+        self._create_map('test_map')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
         bot1 = self._create_bot('testbot1')
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
         bot2 = self._create_bot('testbot2')
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
         bot1.active = True
         bot1.save()
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
         # success
         bot2.active = True
         bot2.save()
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
 
         # not enough available bots
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
         # ensure only 1 match was created
@@ -61,7 +84,7 @@ class MatchesTestCase(LoggedInTestCase):
 
     def test_previous_match_timeout(self):
         self.client.login(username='staff_user', password='x')
-        Map.objects.create(name='testmap')
+        self._create_map('test_map')
         bot1 = self._create_active_bot('testbot1')
         bot2 = self._create_active_bot('testbot2')
         bot3 = self._create_active_bot('testbot3')
@@ -96,7 +119,7 @@ class MatchesTestCase(LoggedInTestCase):
             self.assertTrue(bot.current_match is None)
 
         # confirm these bots weren't affected
-        self.assertEqual(match2.bots_currently_in_match.count(), 2)  # paranoid double check
+        self.assertEqual(match2.bots_currently_in_match.count(), 2)
         for bot in match2.bots_currently_in_match.all():
             self.assertTrue(bot.in_match)
             self.assertTrue(bot.current_match is not None)
@@ -106,7 +129,54 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(Bot.objects.filter(in_match=True).exclude(current_match=None).count(), 4)
 
 
-class ResultsTestCase(LoggedInTestCase):
+class ResultsTestCase(BaseApiTestCase):
+
+    def test_create_result(self):
+        self.client.login(username='staff_user', password='x')
+
+        self._create_active_bot('bot1')
+        self._create_active_bot('bot2')
+        self._create_map('test_map')
+        match = self._post_to_matches().data
+
+        response = self._post_to_results_no_replay(match['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue('non_field_errors' in response.data)
+        self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
+
+        response = self._post_to_results(match['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+    def test_create_result_bot_not_in_match(self):
+        self.client.login(username='staff_user', password='x')
+
+        bot1 = self._create_active_bot('bot1')
+        bot2 = self._create_active_bot('bot2')
+        self._create_map('test_map')
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 200)
+        match = response.data
+
+        bot1.in_match = False  # force the exception
+        bot1.save()
+
+        response = self._post_to_results(match['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 500)
+        self.assertTrue('detail' in response.data)
+        self.assertEqual(u'Unable to log result - one of the bots is not listed as in a match.',
+                         response.data['detail'])
+
+        bot2.in_match = False  # check bot 2 as well
+        bot2.save()
+        bot1.in_match = True
+        bot1.save()
+
+        response = self._post_to_results(match['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 500)
+        self.assertTrue('detail' in response.data)
+        self.assertEqual(u'Unable to log result - one of the bots is not listed as in a match.',
+                         response.data['detail'])
+
     def test_get_results_not_authorized(self):
         response = self.client.get('/api/arenaclient/results/')
         self.assertEqual(response.status_code, 403)
@@ -114,59 +184,6 @@ class ResultsTestCase(LoggedInTestCase):
         self.client.login(username='regular_user', password='x')
         response = self.client.get('/api/arenaclient/results/')
         self.assertEqual(response.status_code, 403)
-
-    def CreateMatch(self):
-        Map.objects.create(name='testmap')
-
-        # For some reason using an absolute file path here for will cause it to mangle the save directory and fail
-        # later whilst handling the bot_zip file save
-        bot_zip = open('./aiarena/api/arenaclient/test_bot.zip', 'rb')
-        bot1 = Bot.objects.create(user=self.regularUser, name='testbot1', bot_zip=File(bot_zip), active=True)
-        bot2 = Bot.objects.create(user=self.staffUser, name='testbot2', bot_zip=File(bot_zip), active=True)
-        response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 200)
-        return response.data, bot1, bot2
-
-    def PostResultWithoutResultFile(self, match, winner):
-        return self.client.post('/api/arenaclient/results/',
-                                {'match': match["id"],
-                                 'winner': winner.id,
-                                 'type': 'Player1Win',
-                                 'replay_file': '',
-                                 'duration': 500})
-
-    def PostResult(self, match, winner):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
-        with open(filename) as replayFile:
-            return self.client.post('/api/arenaclient/results/',
-                                    {'match': match["id"],
-                                     'winner': winner.id,
-                                     'type': 'Player1Win',
-                                     'replay_file': replayFile,
-                                     'duration': 500})
-
-    def test_create_result(self):
-        self.client.login(username='staff_user', password='x')
-
-        match, bot1, bot2 = self.CreateMatch()
-
-        response = self.PostResultWithoutResultFile(match, bot1)
-        self.assertEqual(response.status_code, 400)
-        self.assertTrue('non_field_errors' in response.data)
-        self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
-
-        response = self.PostResult(match, bot1)
-        self.assertEqual(response.status_code, 201)
-
-    def test_create_result_bot_not_in_match(self):
-        self.client.login(username='staff_user', password='x')
-
-        match, bot1, bot2 = self.CreateMatch()
-
-        bot1.in_match = False  # force the exception
-        bot1.save()
-
-        self.assertRaises(BotNotInMatchException, self.PostResult, match, bot1)
 
 
 class EloTestCase(MatchReadyTestCase):
@@ -265,8 +282,8 @@ class EloTestCase(MatchReadyTestCase):
     def CheckFinalElos(self):
         self.regularUserBot1.refresh_from_db()
         self.regularUserBot2.refresh_from_db()
-        self.assertEqual(self.regularUserBot1.elo, self.expected_resultant_elos[self.num_matches_to_play-1][0])
-        self.assertEqual(self.regularUserBot2.elo, self.expected_resultant_elos[self.num_matches_to_play-1][1])
+        self.assertEqual(self.regularUserBot1.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][0])
+        self.assertEqual(self.regularUserBot2.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][1])
 
     def CheckEloSum(self):
         sumElo = Bot.objects.aggregate(Sum('elo'))
