@@ -157,7 +157,7 @@ class BotDataDownloadView(PrivateStorageDetailView):
     content_disposition = 'inner'
 
     def get_content_disposition_filename(self, private_file):
-        return '{0}.data'.format(private_file.parent_object.name)
+        return '{0}_data.zip'.format(private_file.parent_object.name)
 
     def can_access_file(self, private_file):
         user = private_file.request.user
