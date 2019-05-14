@@ -4,11 +4,18 @@ def calculate_md5(file, block_size=2 ** 20):
     import hashlib
 
     md5 = hashlib.md5()
-    while True:
-        data = file.read(block_size)
-        if not data:
-            break
-        md5.update(data)
+    # while True:
+    #     data = file.read(block_size)
+    #     if not data:
+    #         break
+    #     md5.update(data)
+
+    with file.open(mode='rb') as file_data:
+        while True:
+            data = file_data.read(block_size)
+            if not data:
+                break
+            md5.update(data)
 
     return md5.hexdigest()
 

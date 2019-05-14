@@ -10,20 +10,28 @@ from aiarena.core.utils import calculate_md5
 class BaseTestCase(TestCase):
     # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
-    test_bot_zip = open('./aiarena/core/test_bot.zip', 'rb')
+    test_bot_zip_path = 'aiarena/core/test_bot.zip'
+    # test_bot1_data_path = os.path.join(BASE_DIR, 'aiarena/core/test_bot1_data.zip')
+    # test_bot2_data_path = os.path.join(BASE_DIR, 'aiarena/core/test_bot1_data.zip')
+    test_bot1_data_path = 'aiarena/core/test_bot1_data.zip'
+    test_bot2_data_path = 'aiarena/core/test_bot2_data.zip'
 
     def _create_map(self, name):
         return Map.objects.create(name=name)
 
     def _create_bot(self, name):
-        return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(self.test_bot_zip))
+        with open(self.test_bot_zip_path, 'rb') as bot_zip:
+            return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(bot_zip))
 
     def _create_active_bot(self, name):
-        return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(self.test_bot_zip), active=True)
+        with open(self.test_bot_zip_path, 'rb') as bot_zip:
+            return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(bot_zip), active=True)
 
 
 class LoggedInTestCase(BaseTestCase):
     def setUp(self):
+        super(LoggedInTestCase, self).setUp()
+
         self.staffUser = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
                                                   is_staff=True)
         self.regularUser = User.objects.create_user(username='regular_user', password='x',
@@ -35,16 +43,16 @@ class MatchReadyTestCase(LoggedInTestCase):
         super(MatchReadyTestCase, self).setUp()
 
         self.regularUserBot1 = Bot.objects.create(user=self.regularUser, name='regularUserBot1', active=False,
-                                                  bot_zip=File(self.test_bot_zip), plays_race='T', type='Python')
+                                                  bot_zip=File(self.test_bot_zip_path), plays_race='T', type='Python')
 
         self.regularUserBot2 = Bot.objects.create(user=self.regularUser, name='regularUserBot2', active=False,
-                                                  bot_zip=File(self.test_bot_zip), plays_race='Z', type='Python')
+                                                  bot_zip=File(self.test_bot_zip_path), plays_race='Z', type='Python')
 
         self.staffUserBot1 = Bot.objects.create(user=self.staffUser, name='staffUserBot1', active=False,
-                                                bot_zip=File(self.test_bot_zip), plays_race='P', type='Python')
+                                                bot_zip=File(self.test_bot_zip_path), plays_race='P', type='Python')
 
         self.staffUserBot2 = Bot.objects.create(user=self.staffUser, name='staffUserBot2', active=False,
-                                                bot_zip=File(self.test_bot_zip), plays_race='R', type='Python')
+                                                bot_zip=File(self.test_bot_zip_path), plays_race='R', type='Python')
         Map.objects.create(name='testmap')
 
 
@@ -70,7 +78,7 @@ class UserTestCase(BaseTestCase):
 class BotTestCase(BaseTestCase):
     def test_bot_creation(self):
         user = User.objects.create(username='test user', email='test@test.com')
-        bot = Bot.objects.create(user=user, name='test', bot_zip=File(self.test_bot_zip), plays_race='T', type='Python')
+        bot = Bot.objects.create(user=user, name='test', bot_zip=File(self.test_bot_zip_path), plays_race='T', type='Python')
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot.bot_zip_md5hash)
 
         # check the bot file now exists

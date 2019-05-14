@@ -91,9 +91,14 @@ class Bot(models.Model):
     type = models.CharField(max_length=32, choices=TYPES)
 
     def calc_bot_files_md5hash(self):
-        self.bot_zip_md5hash = calculate_md5(self.bot_zip.open(mode='rb'))
+        # self.bot_zip_md5hash = calculate_md5(self.bot_zip.open(mode='rb'))
+        # if self.bot_data:
+        #     self.bot_data_md5hash = calculate_md5(self.bot_data.open(mode='rb'))
+
+        self.bot_zip_md5hash = calculate_md5(self.bot_zip)
+
         if self.bot_data:
-            self.bot_data_md5hash = calculate_md5(self.bot_data.open(mode='rb'))
+            self.bot_data_md5hash = calculate_md5(self.bot_data)
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_one_bot_race_per_user(self):
@@ -103,7 +108,7 @@ class Bot(models.Model):
                 'Each user can only have 1 bot per race.')
 
     def save(self, *args, **kwargs):
-        self.calc_bot_files_md5hash()
+        # self.calc_bot_files_md5hash()
         super(Bot, self).save(*args, **kwargs)
 
     def clean(self):
@@ -193,6 +198,8 @@ def save_bot_files(sender, instance, created, **kwargs):
         instance.save()
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
+
+    instance.calc_bot_files_md5hash()
 
 
 class Participant(models.Model):

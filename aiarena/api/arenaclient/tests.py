@@ -16,12 +16,44 @@ class BaseApiTestCase(LoggedInTestCase):
 
     def _post_to_results(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data, open(
+                self.test_bot2_data_path) as bot2_data:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': replayFile,
+                                     'duration': 500,
+                                     'bot1_data': bot1_data,
+                                     'bot2_data': bot2_data})
+
+    def _post_to_results_no_bot_datas(self, match_id, result_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
         with open(filename) as replayFile:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
                                      'replay_file': replayFile,
                                      'duration': 500})
+
+    def _post_to_results_no_bot1_data(self, match_id, result_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot2_data:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': replayFile,
+                                     'duration': 500,
+                                     'bot2_data': bot2_data})
+
+    def _post_to_results_no_bot2_data(self, match_id, result_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': replayFile,
+                                     'duration': 500,
+                                     'bot1_data': bot1_data})
 
     def _post_to_results_no_replay(self, match_id, result_type):
         return self.client.post('/api/arenaclient/results/',
@@ -131,21 +163,39 @@ class MatchesTestCase(BaseApiTestCase):
 
 class ResultsTestCase(BaseApiTestCase):
 
-    def test_create_result(self):
+    def test_create_results(self):
         self.client.login(username='staff_user', password='x')
 
         self._create_active_bot('bot1')
         self._create_active_bot('bot2')
         self._create_map('test_map')
-        match = self._post_to_matches().data
 
-        response = self._post_to_results_no_replay(match['id'], 'Player1Win')
+        # post a standard result
+        match = self._post_to_matches().data
+        response = self._post_to_results(match['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # post a standard result
+        match = self._post_to_matches().data
+        response = self._post_to_results(match['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # post a standard result with no bot1 data
+        match = self._post_to_matches().data
+        response = self._post_to_results_no_bot1_data(match['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # post a standard result with no bot2 data
+        match = self._post_to_matches().data
+        response = self._post_to_results_no_bot2_data(match['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # post a win without a replay
+        match = self._post_to_matches().data
+        response = self._post_to_results_no_replay(match['id'], 'Player2Win')
         self.assertEqual(response.status_code, 400)
         self.assertTrue('non_field_errors' in response.data)
         self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
-
-        response = self._post_to_results(match['id'], 'Player1Win')
-        self.assertEqual(response.status_code, 201)
 
     def test_create_result_bot_not_in_match(self):
         self.client.login(username='staff_user', password='x')
