@@ -76,7 +76,7 @@ class Bot(models.Model):
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
-    current_match = models.ForeignKey(Match, on_delete=models.PROTECT, null=True,
+    current_match = models.ForeignKey(Match, on_delete=models.PROTECT, blank=True, null=True,
                                       related_name='bots_currently_in_match')
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
@@ -85,7 +85,7 @@ class Bot(models.Model):
     # todo: set a file size limit which will be checked on result submission
     # and the bot deactivated if the file size exceeds it
     bot_data = PrivateFileField(upload_to=bot_data_upload_to, storage=OverwritePrivateStorage(base_url='/'),
-                                null=True)
+                                blank=True, null=True)
     bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
