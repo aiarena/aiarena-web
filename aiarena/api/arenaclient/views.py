@@ -114,7 +114,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         p1.update_resultant_elo()
         p2.update_resultant_elo()
 
-        if ENABLE_ELO_SANITY_CHECK:
+        if ENABLE_ELO_SANITY_CHECK:  # todo remove this condition and log instead of an exception.
             # test here to check ELO total and ensure no corruption
             sumElo = Bot.objects.aggregate(Sum('elo'))
             if sumElo['elo__sum'] != ELO_START_VALUE * Bot.objects.all().count():
