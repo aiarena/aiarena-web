@@ -81,8 +81,15 @@ class ResultSerializer(serializers.ModelSerializer):
     bot2_data = FileField(required=False)
 
     def validate(self, attrs):
-        instance = ResultSerializer.Meta.model(**attrs)
-        instance.clean()  # enforce model validation
+        # remove the bot datas so they don't cause validation failure
+        modified_attrs = attrs.copy()
+        if 'bot1_data' in attrs:
+            modified_attrs.pop('bot1_data')
+        if 'bot2_data' in attrs:
+            modified_attrs.pop('bot2_data')
+        instance = ResultSerializer.Meta.model(**modified_attrs)
+
+        instance.clean()  # enforce model validation because result has some custom checks
         return attrs
 
     class Meta:
