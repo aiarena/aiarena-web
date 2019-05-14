@@ -46,7 +46,11 @@
                             <td>{{ result.opponent.bot.as_html_link |safe }}</td>
                             <td>{{ result.type }}</td>
                             <td>{{ result.duration }}</td>
-                            <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                            {% if result.replay_file %}
+                                <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                            {% else %}
+                                <td>Unavailable</td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
