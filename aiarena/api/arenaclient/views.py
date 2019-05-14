@@ -126,7 +126,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             # test here to check ELO total and ensure no corruption
             sumElo = Bot.objects.aggregate(Sum('elo'))
             if sumElo['elo__sum'] != ELO_START_VALUE * Bot.objects.all().count():
-                raise EloSanityCheckException("ELO did not sum to expected value!")
+                logger.critical("ELO did not sum to expected value upon submission of result {0}".format(result.id))
 
         bot1 = serializer.validated_data['match'].participant_set.get(participant_number=1).bot
         bot2 = serializer.validated_data['match'].participant_set.get(participant_number=2).bot

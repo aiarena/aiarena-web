@@ -19,13 +19,13 @@ class BaseTestCase(TestCase):
     def _create_map(self, name):
         return Map.objects.create(name=name)
 
-    def _create_bot(self, name):
+    def _create_bot(self, user, name):
         with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(bot_zip))
+            return Bot.objects.create(user=user, name=name, bot_zip=File(bot_zip))
 
-    def _create_active_bot(self, name):
+    def _create_active_bot(self, user, name):
         with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            return Bot.objects.create(user=self.staffUser, name=name, bot_zip=File(bot_zip), active=True)
+            return Bot.objects.create(user=user, name=name, bot_zip=File(bot_zip), active=True)
 
 
 class LoggedInTestCase(BaseTestCase):
@@ -42,18 +42,11 @@ class MatchReadyTestCase(LoggedInTestCase):
     def setUp(self):
         super(MatchReadyTestCase, self).setUp()
 
-        self.regularUserBot1 = Bot.objects.create(user=self.regularUser, name='regularUserBot1', active=False,
-                                                  bot_zip=File(self.test_bot_zip_path), plays_race='T', type='Python')
-
-        self.regularUserBot2 = Bot.objects.create(user=self.regularUser, name='regularUserBot2', active=False,
-                                                  bot_zip=File(self.test_bot_zip_path), plays_race='Z', type='Python')
-
-        self.staffUserBot1 = Bot.objects.create(user=self.staffUser, name='staffUserBot1', active=False,
-                                                bot_zip=File(self.test_bot_zip_path), plays_race='P', type='Python')
-
-        self.staffUserBot2 = Bot.objects.create(user=self.staffUser, name='staffUserBot2', active=False,
-                                                bot_zip=File(self.test_bot_zip_path), plays_race='R', type='Python')
-        Map.objects.create(name='testmap')
+        self.regularUserBot1 = self._create_bot(self.regularUser, 'regularUserBot1')
+        self.regularUserBot2 = self._create_bot(self.regularUser, 'regularUserBot2')
+        self.staffUserBot1 = self._create_bot(self.staffUser, 'staffUserBot1')
+        self.staffUserBot2 = self._create_bot(self.staffUser, 'staffUserBot2')
+        self._create_map()
 
 
 # User this to pre-build a full dataset for testing
@@ -78,7 +71,9 @@ class UserTestCase(BaseTestCase):
 class BotTestCase(BaseTestCase):
     def test_bot_creation(self):
         user = User.objects.create(username='test user', email='test@test.com')
-        bot = Bot.objects.create(user=user, name='test', bot_zip=File(self.test_bot_zip_path), plays_race='T', type='Python')
+
+        with open(self.test_bot_zip_path, 'rb') as bot_zip:
+            bot = Bot.objects.create(user=user, name='test', bot_zip=File(bot_zip), plays_race='T', type='Python')
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot.bot_zip_md5hash)
 
         # check the bot file now exists

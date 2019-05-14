@@ -86,12 +86,12 @@ class MatchesTestCase(BaseApiTestCase):
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot1 = self._create_bot('testbot1')
+        bot1 = self._create_bot(self.regularUser, 'testbot1')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot2 = self._create_bot('testbot2')
+        bot2 = self._create_bot(self.regularUser, 'testbot2')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
@@ -117,14 +117,14 @@ class MatchesTestCase(BaseApiTestCase):
     def test_previous_match_timeout(self):
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
-        bot1 = self._create_active_bot('testbot1')
-        bot2 = self._create_active_bot('testbot2')
-        bot3 = self._create_active_bot('testbot3')
-        bot4 = self._create_active_bot('testbot4')
-        bot5 = self._create_active_bot('testbot5')
-        bot6 = self._create_active_bot('testbot6')
-        bot7 = self._create_active_bot('testbot7')
-        bot8 = self._create_active_bot('testbot8')
+        bot1 = self._create_active_bot(self.regularUser, 'testbot1')
+        bot2 = self._create_active_bot(self.regularUser, 'testbot2')
+        bot3 = self._create_active_bot(self.regularUser, 'testbot3')
+        bot4 = self._create_active_bot(self.regularUser, 'testbot4')
+        bot5 = self._create_active_bot(self.regularUser, 'testbot5')
+        bot6 = self._create_active_bot(self.regularUser, 'testbot6')
+        bot7 = self._create_active_bot(self.regularUser, 'testbot7')
+        bot8 = self._create_active_bot(self.regularUser, 'testbot8')
 
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 200)
@@ -169,8 +169,8 @@ class ResultsTestCase(BaseApiTestCase):
     def test_create_results(self):
         self.client.login(username='staff_user', password='x')
 
-        bot1 = self._create_active_bot('bot1')
-        bot2 = self._create_active_bot('bot2')
+        bot1 = self._create_active_bot(self.regularUser, 'bot1')
+        bot2 = self._create_active_bot(self.regularUser, 'bot2')
         self._create_map('test_map')
 
         # post a standard result
@@ -213,8 +213,8 @@ class ResultsTestCase(BaseApiTestCase):
     def test_create_result_bot_not_in_match(self):
         self.client.login(username='staff_user', password='x')
 
-        bot1 = self._create_active_bot('bot1')
-        bot2 = self._create_active_bot('bot2')
+        bot1 = self._create_active_bot(self.regularUser, 'bot1')
+        bot2 = self._create_active_bot(self.regularUser, 'bot2')
         self._create_map('test_map')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
@@ -249,7 +249,7 @@ class ResultsTestCase(BaseApiTestCase):
         self.assertEqual(response.status_code, 403)
 
 
-class EloTestCase(MatchReadyTestCase):
+class EloTestCase(BaseApiTestCase):
     """
     Tests to ensure ELO calculations run properly.
     """
@@ -257,6 +257,10 @@ class EloTestCase(MatchReadyTestCase):
     def setUp(self):
         super(EloTestCase, self).setUp()
         self.client.login(username='staff_user', password='x')
+
+        self.regularUserBot1 = self._create_bot(self.regularUser, 'regularUserBot1')
+        self.regularUserBot2 = self._create_bot(self.regularUser, 'regularUserBot2')
+        self._create_map('testmap')
 
         # activate the required bots
         self.regularUserBot1.active = True
@@ -364,12 +368,12 @@ class EloTestCase(MatchReadyTestCase):
 
         self.CheckEloSum()
 
+    # an exception won't be raised from this - but a log entry will
+    # this is only to ensure no other exception takes place
     def test_elo_sanity_check(self):
         # intentionally cause a sanity check failure
         self.regularUserBot1.elo = ELO_START_VALUE - 1
         self.regularUserBot1.save()
 
-        match = self.CreateMatch()
-        self.assertRaises(EloSanityCheckException, self.CreateResult, match['id'], match['bot1']['id'], 'Player1Win')
-
-        self.assertEqual(Result.objects.count(), 0)  # make sure the result was rolled back.
+        match = self._post_to_matches().data
+        self._post_to_results(match['id'], 'Player1Win')
