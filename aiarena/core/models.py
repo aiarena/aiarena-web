@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.html import escape
 from private_storage.fields import PrivateFileField
 
-from aiarena.api.arenaclient.exceptions import BotNotInMatchException, BotAlreadyInMatchException
+from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE

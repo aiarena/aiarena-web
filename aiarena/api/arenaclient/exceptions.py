@@ -1,10 +1,8 @@
-class EloSanityCheckException(Exception):
+from rest_framework.exceptions import APIException
+
+
+class EloSanityCheckException(APIException):
     pass
 
 
-class BotNotInMatchException(Exception):
-    pass
 
-
-class BotAlreadyInMatchException(Exception):
-    pass

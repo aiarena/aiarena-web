@@ -6,7 +6,8 @@ from rest_framework.exceptions import APIException
 from rest_framework.fields import FileField
 from rest_framework.response import Response
 
-from aiarena.api.arenaclient.exceptions import EloSanityCheckException, BotNotInMatchException
+from aiarena.api.arenaclient.exceptions import EloSanityCheckException
+from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
 
@@ -136,7 +137,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             bot1.leave_match()
             bot2.leave_match()
         except BotNotInMatchException:
-            raise BotNotInMatchException('Unable to log result - one of the bots is not listed as in a match.')
+            raise APIException('Unable to log result - one of the bots is not listed as in a match.')
 
     def adjust_elo(self, result):
         if result.has_winner():
