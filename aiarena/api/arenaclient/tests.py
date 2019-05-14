@@ -7,7 +7,7 @@ from django.utils import timezone
 from aiarena.api.arenaclient.exceptions import EloSanityCheckException
 from aiarena.core.models import Match, Bot, Participant, Result
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
-from aiarena.settings import ELO_START_VALUE
+from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
 
 
 class BaseApiTestCase(LoggedInTestCase):
@@ -163,11 +163,14 @@ class MatchesTestCase(BaseApiTestCase):
 
 class ResultsTestCase(BaseApiTestCase):
 
+    uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data')
+    uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data_backup')
+
     def test_create_results(self):
         self.client.login(username='staff_user', password='x')
 
-        self._create_active_bot('bot1')
-        self._create_active_bot('bot2')
+        bot1 = self._create_active_bot('bot1')
+        bot2 = self._create_active_bot('bot2')
         self._create_map('test_map')
 
         # post a standard result
@@ -175,10 +178,20 @@ class ResultsTestCase(BaseApiTestCase):
         response = self._post_to_results(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
+        # check bot datas exist
+        self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
+        self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
+
         # post a standard result
         match = self._post_to_matches().data
         response = self._post_to_results(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
+
+        # check bot datas and their backups exist
+        self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
+        self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
+        self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot1.id)))
+        self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot2.id)))
 
         # post a standard result with no bot1 data
         match = self._post_to_matches().data
