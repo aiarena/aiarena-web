@@ -95,10 +95,10 @@ class Bot(models.Model):
         # if self.bot_data:
         #     self.bot_data_md5hash = calculate_md5(self.bot_data.open(mode='rb'))
 
-        self.bot_zip_md5hash = calculate_md5(self.bot_zip)
+        self.bot_zip_md5hash = calculate_md5(self.bot_zip.path)
 
         if self.bot_data:
-            self.bot_data_md5hash = calculate_md5(self.bot_data)
+            self.bot_data_md5hash = calculate_md5(self.bot_data.path)
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_one_bot_race_per_user(self):

@@ -46,7 +46,7 @@ class MatchReadyTestCase(LoggedInTestCase):
         self.regularUserBot2 = self._create_bot(self.regularUser, 'regularUserBot2')
         self.staffUserBot1 = self._create_bot(self.staffUser, 'staffUserBot1')
         self.staffUserBot2 = self._create_bot(self.staffUser, 'staffUserBot2')
-        self._create_map()
+        self._create_map('testmap')
 
 
 # User this to pre-build a full dataset for testing
@@ -60,7 +60,7 @@ class UtilsTestCase(BaseTestCase):
     def test_calc_md5(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_bot.zip')
         file = open(filename, 'rb')
-        self.assertEqual('7411028ba931baaad47bf5810215e4f8', calculate_md5(file))
+        self.assertEqual('7411028ba931baaad47bf5810215e4f8', calculate_md5(filename))
 
 
 class UserTestCase(BaseTestCase):

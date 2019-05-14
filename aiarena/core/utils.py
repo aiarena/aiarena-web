@@ -10,7 +10,7 @@ def calculate_md5(file, block_size=2 ** 20):
     #         break
     #     md5.update(data)
 
-    with file.open(mode='rb') as file_data:
+    with open(file, 'rb') as file_data:
         while True:
             data = file_data.read(block_size)
             if not data:
