@@ -37,14 +37,20 @@
     <table id="bot_table" style="width: 50%">
         <tr>
             <td><b>Name</b></td>
-            <td><b>Elo</b></td>
             <td><b>Type</b></td>
+            <td><b>Bot Zip</b></td>
+            <td><b>Data</b></td>
         </tr>
         {% for bot in bot_list %}
             <tr>
                 <td><a href="/bots/{{ bot.id }}">{{ bot.name }}</a></td>
-                <td>{{ bot.elo }}</td>
                 <td>{{ bot.type }}</td>
+                <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
+                {% if bot.bot_data %}
+                    <td><a href="{{ bot.bot_data.url }}">Download</a></td>
+                {% else %}
+                    <td>No bot data</td>
+                {% endif %}
             </tr>
         {% endfor %}
 
