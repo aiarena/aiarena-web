@@ -14,7 +14,7 @@ from private_storage.fields import PrivateFileField
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import ELO_START_VALUE
+from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT
 
 logger = logging.getLogger(__name__)
 
@@ -101,18 +101,27 @@ class Bot(models.Model):
             self.bot_data_md5hash = calculate_md5(self.bot_data.path)
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
-    def validate_one_bot_race_per_user(self):
-        if Bot.objects.filter(user=self.user, plays_race=self.plays_race).exists() and not self.pk:
+    def validate_one_active_bot_race_per_user(self):
+        # if there is already an active bot for this user playing the same race, and this bot is also marked as active
+        # then back out
+        if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(id=self.id).exists() \
+                and self.active:
             raise ValidationError(
-                'A bot playing that race already exists for this user. '
-                'Each user can only have 1 bot per race.')
+                'An active bot playing that race already exists for this user.'
+                'Each user can only have 1 active bot per race.')
+
+    def validate_max_bot_count(self):
+        if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= MAX_USER_BOT_COUNT:
+            raise ValidationError(
+                'Maximum bot count of {0} already reached. No more bots may be added for this user.'.format(
+                    MAX_USER_BOT_COUNT))
 
     def save(self, *args, **kwargs):
-        # self.calc_bot_files_md5hash()
         super(Bot, self).save(*args, **kwargs)
 
     def clean(self):
-        self.validate_one_bot_race_per_user()  # todo: do this on bot activation instead
+        self.validate_max_bot_count()
+        self.validate_one_active_bot_race_per_user()
 
     def __str__(self):
         return self.name
@@ -178,7 +187,8 @@ def skip_saving_bot_files(sender, instance, **kwargs):
         instance.bot_zip = None
 
     # bot data
-    if not instance.pk and not hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD):
+    if not instance.pk and not hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD)\
+            and instance.bot_data:
         setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
         instance.bot_data = None
 
@@ -188,18 +198,21 @@ def save_bot_files(sender, instance, created, **kwargs):
     # bot zip
     if created and hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         instance.bot_zip = getattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD)
-        instance.save()
+        instance.save()  # so the file is saved to disk
+        instance.bot_zip_md5hash = calculate_md5(instance.bot_zip.path)
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_ZIP_FILEFIELD)
 
     # bot data
     if created and hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD):
         instance.bot_data = getattr(instance, _UNSAVED_BOT_DATA_FILEFIELD)
-        instance.save()
+        instance.save()  # so the file is saved to disk
+        instance.bot_data_md5hash = calculate_md5(instance.bot_data.path)
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
 
-    instance.calc_bot_files_md5hash()
+    # instance.calc_bot_files_md5hash()
+    # instance.full_clean()
 
 
 class Participant(models.Model):

@@ -1,10 +1,12 @@
 import os
 
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.test import TestCase
 
 from aiarena.core.models import User, Bot, Map
 from aiarena.core.utils import calculate_md5
+from aiarena.settings import MAX_USER_BOT_COUNT
 
 
 class BaseTestCase(TestCase):
@@ -19,13 +21,16 @@ class BaseTestCase(TestCase):
     def _create_map(self, name):
         return Map.objects.create(name=name)
 
-    def _create_bot(self, user, name):
+    def _create_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            return Bot.objects.create(user=user, name=name, bot_zip=File(bot_zip))
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python')
+            bot.full_clean()
+            bot.save()
+            return bot
 
-    def _create_active_bot(self, user, name):
+    def _create_active_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            return Bot.objects.create(user=user, name=name, bot_zip=File(bot_zip), active=True)
+            return Bot.objects.create(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python', active=True)
 
     def _post_to_matches(self):
         return self.client.post('/api/arenaclient/matches/')
@@ -167,11 +172,11 @@ class FullDataSetTestCase(MatchReadyTestCase):
 
     def _generate_extra_bots(self):
         self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1')
-        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2')
+        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
         self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
         self.regularUser2Bot2 = self._create_active_bot(self.regularUser2, 'regularUser2Bot2')
         self.regularUser3Bot1 = self._create_active_bot(self.regularUser3, 'regularUser3Bot1')
-        self.regularUser3Bot2 = self._create_active_bot(self.regularUser3, 'regularUser3Bot2')
+        self.regularUser3Bot2 = self._create_active_bot(self.regularUser3, 'regularUser3Bot2', 'Z')
         self.regularUser4Bot1 = self._create_bot(self.regularUser4, 'regularUser4Bot1')
         self.regularUser4Bot2 = self._create_bot(self.regularUser4, 'regularUser4Bot2')
 
@@ -196,18 +201,38 @@ class UserTestCase(BaseTestCase):
         User.objects.create(username='test user', email='test@test.com')
 
 
-class BotTestCase(BaseTestCase):
+class BotTestCase(LoggedInTestCase):
     def test_bot_creation(self):
-        user = User.objects.create(username='test user', email='test@test.com')
-
-        with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            bot = Bot.objects.create(user=user, name='test', bot_zip=File(bot_zip), plays_race='T', type='Python')
-        self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot.bot_zip_md5hash)
+        bot1 = self._create_active_bot(self.regularUser1, 'testbot')
+        # check hash
+        self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot1.bot_zip_md5hash)
 
         # check the bot file now exists
-        self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip'.format(bot.id)))
+        self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip'.format(bot1.id)))
 
-        # todo: check file overwrite functionality
+        with open(self.test_bot_zip_path, 'rb') as bot_zip:
+            bot1.bot_zip = File(bot_zip)
+            bot1.save()
+
+        # check the bot file backup now exists
+        self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip_backup'.format(bot1.id)))
+
+        # test max bots for user
+        for i in range(1, MAX_USER_BOT_COUNT):
+            self._create_bot(self.regularUser1, 'testbot{0}'.format(i))
+        with self.assertRaisesMessage(ValidationError,
+                                      'Maximum bot count of {0} already reached. '
+                                      'No more bots may be added for this user.'.format(MAX_USER_BOT_COUNT)):
+            self._create_bot(self.regularUser1, 'testbot{0}'.format(MAX_USER_BOT_COUNT))
+
+        # test active bots per race limit for user
+        # all bots should be the same race, so just pick any
+        inactive_bot = Bot.objects.filter(user=self.regularUser1, active=False)[0]
+        with self.assertRaisesMessage(ValidationError,
+                                      'An active bot playing that race already exists for this user.'
+                                      'Each user can only have 1 active bot per race.'):
+            inactive_bot.active = True
+            inactive_bot.full_clean()  # run validation
 
 
 class PageRenderTestCase(FullDataSetTestCase):

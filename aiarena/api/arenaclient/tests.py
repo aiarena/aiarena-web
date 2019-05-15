@@ -88,7 +88,7 @@ class MatchesTestCase(LoggedInTestCase):
         match1.save()
 
         response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
 
         # confirm these bots were successfully force removed from their match
         self.assertEqual(match1.bots_currently_in_match.count(), 0)

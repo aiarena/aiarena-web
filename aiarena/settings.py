@@ -172,6 +172,8 @@ ENABLE_ELO_SANITY_CHECK = True
 # ELO implementation
 ELO = Elo(ELO_K)
 
+MAX_USER_BOT_COUNT = 6
+
 # hack to override any of these settings with an env.py file
 try:
     from aiarena.env import *
