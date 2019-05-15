@@ -1,7 +1,7 @@
 import logging
 
 from django.db.models import Sum
-from rest_framework import viewsets, serializers, mixins
+from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.exceptions import APIException
 from rest_framework.fields import FileField
 from rest_framework.response import Response
@@ -73,7 +73,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         match.bot2 = bot2
 
         serializer = self.get_serializer(match)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ResultSerializer(serializers.ModelSerializer):

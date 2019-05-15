@@ -4,66 +4,12 @@ from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
 
-from aiarena.api.arenaclient.exceptions import EloSanityCheckException
-from aiarena.core.models import Match, Bot, Participant, Result
-from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
+from aiarena.core.models import Match, Bot, Participant
+from aiarena.core.tests import LoggedInTestCase
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
 
 
-class BaseApiTestCase(LoggedInTestCase):
-    def _post_to_matches(self):
-        return self.client.post('/api/arenaclient/matches/')
-
-    def _post_to_results(self, match_id, result_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data, open(
-                self.test_bot2_data_path) as bot2_data:
-            return self.client.post('/api/arenaclient/results/',
-                                    {'match': match_id,
-                                     'type': result_type,
-                                     'replay_file': replayFile,
-                                     'duration': 500,
-                                     'bot1_data': bot1_data,
-                                     'bot2_data': bot2_data})
-
-    def _post_to_results_no_bot_datas(self, match_id, result_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
-        with open(filename) as replayFile:
-            return self.client.post('/api/arenaclient/results/',
-                                    {'match': match_id,
-                                     'type': result_type,
-                                     'replay_file': replayFile,
-                                     'duration': 500})
-
-    def _post_to_results_no_bot1_data(self, match_id, result_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot2_data:
-            return self.client.post('/api/arenaclient/results/',
-                                    {'match': match_id,
-                                     'type': result_type,
-                                     'replay_file': replayFile,
-                                     'duration': 500,
-                                     'bot2_data': bot2_data})
-
-    def _post_to_results_no_bot2_data(self, match_id, result_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data:
-            return self.client.post('/api/arenaclient/results/',
-                                    {'match': match_id,
-                                     'type': result_type,
-                                     'replay_file': replayFile,
-                                     'duration': 500,
-                                     'bot1_data': bot1_data})
-
-    def _post_to_results_no_replay(self, match_id, result_type):
-        return self.client.post('/api/arenaclient/results/',
-                                {'match': match_id,
-                                 'type': result_type,
-                                 'replay_file': '',
-                                 'duration': 500})
-
-
-class MatchesTestCase(BaseApiTestCase):
+class MatchesTestCase(LoggedInTestCase):
 
     def test_get_next_match_not_authorized(self):
         response = self._post_to_matches()
@@ -86,12 +32,12 @@ class MatchesTestCase(BaseApiTestCase):
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot1 = self._create_bot(self.regularUser, 'testbot1')
+        bot1 = self._create_bot(self.regularUser1, 'testbot1')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
         # not enough active bots
-        bot2 = self._create_bot(self.regularUser, 'testbot2')
+        bot2 = self._create_bot(self.regularUser1, 'testbot2')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 500)
 
@@ -105,7 +51,7 @@ class MatchesTestCase(BaseApiTestCase):
         bot2.active = True
         bot2.save()
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
 
         # not enough available bots
         response = self._post_to_matches()
@@ -117,17 +63,17 @@ class MatchesTestCase(BaseApiTestCase):
     def test_previous_match_timeout(self):
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
-        bot1 = self._create_active_bot(self.regularUser, 'testbot1')
-        bot2 = self._create_active_bot(self.regularUser, 'testbot2')
-        bot3 = self._create_active_bot(self.regularUser, 'testbot3')
-        bot4 = self._create_active_bot(self.regularUser, 'testbot4')
-        bot5 = self._create_active_bot(self.regularUser, 'testbot5')
-        bot6 = self._create_active_bot(self.regularUser, 'testbot6')
-        bot7 = self._create_active_bot(self.regularUser, 'testbot7')
-        bot8 = self._create_active_bot(self.regularUser, 'testbot8')
+        bot1 = self._create_active_bot(self.regularUser1, 'testbot1')
+        bot2 = self._create_active_bot(self.regularUser1, 'testbot2')
+        bot3 = self._create_active_bot(self.regularUser1, 'testbot3')
+        bot4 = self._create_active_bot(self.regularUser1, 'testbot4')
+        bot5 = self._create_active_bot(self.regularUser1, 'testbot5')
+        bot6 = self._create_active_bot(self.regularUser1, 'testbot6')
+        bot7 = self._create_active_bot(self.regularUser1, 'testbot7')
+        bot8 = self._create_active_bot(self.regularUser1, 'testbot8')
 
         response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
 
         # save the match for modification
         match1 = Match.objects.get(id=response.data['id'])
@@ -161,7 +107,7 @@ class MatchesTestCase(BaseApiTestCase):
         self.assertEqual(Bot.objects.filter(in_match=True).exclude(current_match=None).count(), 4)
 
 
-class ResultsTestCase(BaseApiTestCase):
+class ResultsTestCase(LoggedInTestCase):
 
     uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data')
     uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data_backup')
@@ -169,8 +115,8 @@ class ResultsTestCase(BaseApiTestCase):
     def test_create_results(self):
         self.client.login(username='staff_user', password='x')
 
-        bot1 = self._create_active_bot(self.regularUser, 'bot1')
-        bot2 = self._create_active_bot(self.regularUser, 'bot2')
+        bot1 = self._create_active_bot(self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot(self.regularUser1, 'bot2')
         self._create_map('test_map')
 
         # post a standard result
@@ -213,11 +159,11 @@ class ResultsTestCase(BaseApiTestCase):
     def test_create_result_bot_not_in_match(self):
         self.client.login(username='staff_user', password='x')
 
-        bot1 = self._create_active_bot(self.regularUser, 'bot1')
-        bot2 = self._create_active_bot(self.regularUser, 'bot2')
+        bot1 = self._create_active_bot(self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot(self.regularUser1, 'bot2')
         self._create_map('test_map')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         match = response.data
 
         bot1.in_match = False  # force the exception
@@ -249,7 +195,7 @@ class ResultsTestCase(BaseApiTestCase):
         self.assertEqual(response.status_code, 403)
 
 
-class EloTestCase(BaseApiTestCase):
+class EloTestCase(LoggedInTestCase):
     """
     Tests to ensure ELO calculations run properly.
     """
@@ -258,8 +204,8 @@ class EloTestCase(BaseApiTestCase):
         super(EloTestCase, self).setUp()
         self.client.login(username='staff_user', password='x')
 
-        self.regularUserBot1 = self._create_bot(self.regularUser, 'regularUserBot1')
-        self.regularUserBot2 = self._create_bot(self.regularUser, 'regularUserBot2')
+        self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
+        self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
         self._create_map('testmap')
 
         # activate the required bots
@@ -319,11 +265,11 @@ class EloTestCase(BaseApiTestCase):
 
     def CreateMatch(self):
         response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         return response.data
 
     def CreateResult(self, match_id, winner_id, r_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../core/testReplay.SC2Replay')
         with open(filename) as replayFile:
             response = self.client.post('/api/arenaclient/results/',
                                         {'match': match_id,

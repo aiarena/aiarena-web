@@ -27,33 +27,128 @@ class BaseTestCase(TestCase):
         with open(self.test_bot_zip_path, 'rb') as bot_zip:
             return Bot.objects.create(user=user, name=name, bot_zip=File(bot_zip), active=True)
 
+    def _post_to_matches(self):
+        return self.client.post('/api/arenaclient/matches/')
+
+    def _post_to_results(self, match_id, result_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data, open(
+                self.test_bot2_data_path) as bot2_data:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': replayFile,
+                                     'duration': 500,
+                                     'bot1_data': bot1_data,
+                                     'bot2_data': bot2_data})
+
+    def _post_to_results_no_bot_datas(self, match_id, result_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': replayFile,
+                                     'duration': 500})
+
+    def _post_to_results_no_bot1_data(self, match_id, result_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot2_data:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': replayFile,
+                                     'duration': 500,
+                                     'bot2_data': bot2_data})
+
+    def _post_to_results_no_bot2_data(self, match_id, result_type):
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
+        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': replayFile,
+                                     'duration': 500,
+                                     'bot1_data': bot1_data})
+
+    def _post_to_results_no_replay(self, match_id, result_type):
+        return self.client.post('/api/arenaclient/results/',
+                                {'match': match_id,
+                                 'type': result_type,
+                                 'replay_file': '',
+                                 'duration': 500})
+
 
 class LoggedInTestCase(BaseTestCase):
     def setUp(self):
         super(LoggedInTestCase, self).setUp()
 
-        self.staffUser = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
-                                                  is_staff=True)
-        self.regularUser = User.objects.create_user(username='regular_user', password='x',
-                                                    email='regular_user@aiarena.net')
+        self.staffUser1 = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
+                                                   is_staff=True)
+        self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
+                                                     email='regular_user1@aiarena.net')
 
 
 class MatchReadyTestCase(LoggedInTestCase):
     def setUp(self):
         super(MatchReadyTestCase, self).setUp()
 
-        self.regularUserBot1 = self._create_bot(self.regularUser, 'regularUserBot1')
-        self.regularUserBot2 = self._create_bot(self.regularUser, 'regularUserBot2')
-        self.staffUserBot1 = self._create_bot(self.staffUser, 'staffUserBot1')
-        self.staffUserBot2 = self._create_bot(self.staffUser, 'staffUserBot2')
-        self._create_map('testmap')
+        self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
+        self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
+        self.staffUserBot1 = self._create_bot(self.staffUser1, 'staffUserBot1')
+        self.staffUserBot2 = self._create_bot(self.staffUser1, 'staffUserBot2')
+        self._create_map('testmap1')
 
 
 # User this to pre-build a full dataset for testing
 class FullDataSetTestCase(MatchReadyTestCase):
+
     def setUp(self):
         super(FullDataSetTestCase, self).setUp()
-        # todo: generate some matches and results
+        self.client.login(username='staff_user', password='x')
+
+        self._create_map('testmap2')
+        self._generate_extra_users()
+        self._generate_extra_bots()
+
+        self._generate_match_activity()
+        self.client.logout()  # child tests can login if they require
+
+    def _generate_match(self, result_type):
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], result_type)
+        self.assertEqual(response.status_code, 201)
+
+    def _generate_match_activity(self):
+        self._generate_match('InitializationError')
+        self._generate_match('Timeout')
+        self._generate_match('Player1Win')
+        self._generate_match('Player1Crash')
+        self._generate_match('Player1TimeOut')
+        self._generate_match('Player2Win')
+        self._generate_match('Player2Crash')
+        self._generate_match('Player2TimeOut')
+        self._generate_match('Tie')
+        self._generate_match('Error')
+
+    def _generate_extra_bots(self):
+        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1')
+        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2')
+        self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
+        self.regularUser2Bot2 = self._create_active_bot(self.regularUser2, 'regularUser2Bot2')
+        self.regularUser3Bot1 = self._create_active_bot(self.regularUser3, 'regularUser3Bot1')
+        self.regularUser3Bot2 = self._create_active_bot(self.regularUser3, 'regularUser3Bot2')
+        self.regularUser4Bot1 = self._create_bot(self.regularUser4, 'regularUser4Bot1')
+        self.regularUser4Bot2 = self._create_bot(self.regularUser4, 'regularUser4Bot2')
+
+    def _generate_extra_users(self):
+        self.regularUser2 = User.objects.create_user(username='regular_user2', password='x',
+                                                     email='regular_user2@aiarena.net')
+        self.regularUser3 = User.objects.create_user(username='regular_user3', password='x',
+                                                     email='regular_user3@aiarena.net')
+        self.regularUser4 = User.objects.create_user(username='regular_user4', password='x',
+                                                     email='regular_user4@aiarena.net')
 
 
 class UtilsTestCase(BaseTestCase):
@@ -104,7 +199,7 @@ class PageRenderTestCase(FullDataSetTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_authors_page(self):
-        response = self.client.get('/authors/{0}/'.format(self.regularUser.id))
+        response = self.client.get('/authors/{0}/'.format(self.regularUser1.id))
         self.assertEqual(response.status_code, 200)
 
     def test_get_ranking_page(self):
