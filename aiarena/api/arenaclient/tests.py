@@ -4,12 +4,16 @@ from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
 
-from aiarena.core.models import Match, Bot, Participant
+from aiarena.core.models import Match, Bot, Participant, User
 from aiarena.core.tests import LoggedInTestCase
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
 
 
 class MatchesTestCase(LoggedInTestCase):
+    def setUp(self):
+        super(MatchesTestCase, self).setUp()
+        self.regularUser2 = User.objects.create_user(username='regular_user2', password='x',
+                                                     email='regular_user2@aiarena.net')
 
     def test_get_next_match_not_authorized(self):
         response = self._post_to_matches()
@@ -63,14 +67,14 @@ class MatchesTestCase(LoggedInTestCase):
     def test_previous_match_timeout(self):
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
-        bot1 = self._create_active_bot(self.regularUser1, 'testbot1')
-        bot2 = self._create_active_bot(self.regularUser1, 'testbot2')
-        bot3 = self._create_active_bot(self.regularUser1, 'testbot3')
-        bot4 = self._create_active_bot(self.regularUser1, 'testbot4')
-        bot5 = self._create_active_bot(self.regularUser1, 'testbot5')
-        bot6 = self._create_active_bot(self.regularUser1, 'testbot6')
-        bot7 = self._create_active_bot(self.regularUser1, 'testbot7')
-        bot8 = self._create_active_bot(self.regularUser1, 'testbot8')
+        bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
+        bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
+        bot3 = self._create_active_bot(self.regularUser1, 'testbot3', 'P')
+        bot4 = self._create_active_bot(self.regularUser1, 'testbot4', 'R')
+        bot5 = self._create_active_bot(self.regularUser2, 'testbot5', 'T')
+        bot6 = self._create_active_bot(self.regularUser2, 'testbot6', 'Z')
+        bot7 = self._create_active_bot(self.regularUser2, 'testbot7', 'P')
+        bot8 = self._create_active_bot(self.regularUser2, 'testbot8', 'R')
 
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 201)
@@ -116,7 +120,7 @@ class ResultsTestCase(LoggedInTestCase):
         self.client.login(username='staff_user', password='x')
 
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot(self.regularUser1, 'bot2')
+        bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
         self._create_map('test_map')
 
         # post a standard result
@@ -127,6 +131,9 @@ class ResultsTestCase(LoggedInTestCase):
         # check bot datas exist
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
+        # check hashes
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
 
         # post a standard result
         match = self._post_to_matches().data
@@ -138,16 +145,28 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot1.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot2.id)))
+        # todo: change bot_data content so hashes are alterred
+        # check hashes - nothing should have changed
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
 
         # post a standard result with no bot1 data
         match = self._post_to_matches().data
         response = self._post_to_results_no_bot1_data(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
+        # check hashes - nothing should have changed
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+
         # post a standard result with no bot2 data
         match = self._post_to_matches().data
         response = self._post_to_results_no_bot2_data(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
+
+        # check hashes - nothing should have changed
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
 
         # post a win without a replay
         match = self._post_to_matches().data
@@ -156,11 +175,15 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertTrue('non_field_errors' in response.data)
         self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
 
+        # check hashes - nothing should have changed
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
+        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+
     def test_create_result_bot_not_in_match(self):
         self.client.login(username='staff_user', password='x')
 
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot(self.regularUser1, 'bot2')
+        bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
         self._create_map('test_map')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)

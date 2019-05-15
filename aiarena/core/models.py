@@ -95,9 +95,14 @@ class Bot(models.Model):
         # if self.bot_data:
         #     self.bot_data_md5hash = calculate_md5(self.bot_data.open(mode='rb'))
 
-        self.bot_zip_md5hash = calculate_md5(self.bot_zip.path)
+        # we technically shouldn't be accessing _committed, but it was the only way I could fine to know
+        # when the bot_zip was actually saved so I could load it off the disk
+        # todo: probably shouldn't be loading via the path?
+        # todo: attempt with django filefield open, and close it during rename phase?
+        if self.bot_zip._committed:
+            self.bot_zip_md5hash = calculate_md5(self.bot_zip.path)
 
-        if self.bot_data:
+        if self.bot_data and self.bot_data._committed:
             self.bot_data_md5hash = calculate_md5(self.bot_data.path)
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
@@ -117,6 +122,7 @@ class Bot(models.Model):
                     MAX_USER_BOT_COUNT))
 
     def save(self, *args, **kwargs):
+        self.calc_bot_files_md5hash()
         super(Bot, self).save(*args, **kwargs)
 
     def clean(self):
@@ -187,8 +193,7 @@ def skip_saving_bot_files(sender, instance, **kwargs):
         instance.bot_zip = None
 
     # bot data
-    if not instance.pk and not hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD)\
-            and instance.bot_data:
+    if not instance.pk and not hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD) and instance.bot_data:
         setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
         instance.bot_data = None
 
@@ -200,6 +205,7 @@ def save_bot_files(sender, instance, created, **kwargs):
         instance.bot_zip = getattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD)
         instance.save()  # so the file is saved to disk
         instance.bot_zip_md5hash = calculate_md5(instance.bot_zip.path)
+        instance.save()
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_ZIP_FILEFIELD)
 
@@ -208,10 +214,12 @@ def save_bot_files(sender, instance, created, **kwargs):
         instance.bot_data = getattr(instance, _UNSAVED_BOT_DATA_FILEFIELD)
         instance.save()  # so the file is saved to disk
         instance.bot_data_md5hash = calculate_md5(instance.bot_data.path)
+        instance.save()
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
 
     # instance.calc_bot_files_md5hash()
+    # instance.save()
     # instance.full_clean()
 
 

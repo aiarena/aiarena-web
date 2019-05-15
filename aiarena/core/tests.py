@@ -206,9 +206,16 @@ class UserTestCase(BaseTestCase):
 
 class BotTestCase(LoggedInTestCase):
     def test_bot_creation(self):
-        bot1 = self._create_active_bot(self.regularUser1, 'testbot')
-        # check hash
+
+        # create bot along with bot data
+        with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
+            bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race='T', type='python', active=True)
+            bot1.full_clean()
+            bot1.save()
+
+        # check hashes
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot1.bot_zip_md5hash)
+        self.assertEqual('6cc8ec3fa50d069eab74835757807ef2', bot1.bot_data_md5hash)
 
         # check the bot file now exists
         self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip'.format(bot1.id)))
