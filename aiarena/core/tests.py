@@ -30,7 +30,10 @@ class BaseTestCase(TestCase):
 
     def _create_active_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            return Bot.objects.create(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python', active=True)
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python', active=True)
+            bot.full_clean()
+            bot.save()
+            return bot
 
     def _post_to_matches(self):
         return self.client.post('/api/arenaclient/matches/')
