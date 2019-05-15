@@ -114,23 +114,56 @@ class FullDataSetTestCase(MatchReadyTestCase):
         self._generate_match_activity()
         self.client.logout()  # child tests can login if they require
 
-    def _generate_match(self, result_type):
+    def _generate_match_activity(self):
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data['id'], result_type)
+        response = self._post_to_results_no_replay(response.data['id'], 'InitializationError')
         self.assertEqual(response.status_code, 201)
 
-    def _generate_match_activity(self):
-        self._generate_match('InitializationError')
-        self._generate_match('Timeout')
-        self._generate_match('Player1Win')
-        self._generate_match('Player1Crash')
-        self._generate_match('Player1TimeOut')
-        self._generate_match('Player2Win')
-        self._generate_match('Player2Crash')
-        self._generate_match('Player2TimeOut')
-        self._generate_match('Tie')
-        self._generate_match('Error')
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Timeout')
+        self.assertEqual(response.status_code, 201)
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results_no_bot1_data(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results_no_bot2_data(response.data['id'], 'Player1Crash')
+        self.assertEqual(response.status_code, 201)
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Player1TimeOut')
+        self.assertEqual(response.status_code, 201)
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results_no_bot_datas(response.data['id'], 'Player2Win')
+        self.assertEqual(response.status_code, 201)
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results_no_bot_datas(response.data['id'], 'Player2Crash')
+        self.assertEqual(response.status_code, 201)
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Player2TimeOut')
+        self.assertEqual(response.status_code, 201)
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Tie')
+        self.assertEqual(response.status_code, 201)
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results_no_replay(response.data['id'], 'Error')
+        self.assertEqual(response.status_code, 201)
 
     def _generate_extra_bots(self):
         self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1')

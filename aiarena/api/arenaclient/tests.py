@@ -80,7 +80,7 @@ class MatchesTestCase(LoggedInTestCase):
 
         # generate a new match so we can check it isn't interfered with
         response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         match2 = Match.objects.get(id=response.data['id'])
 
         # set the created time back into the past long enough for it to cause a time out
