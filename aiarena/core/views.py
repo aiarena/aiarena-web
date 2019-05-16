@@ -83,6 +83,29 @@ class BotDetail(DetailView):
         return context
 
 
+# class BotUpdateForm(forms.ModelForm):
+    # class Meta:
+    #     model = Bot
+    #     fields = ['active', 'active', 'bot_zip', 'bot_data']
+
+
+# todo: don't allow editing a bot when in a match
+class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    # form_class = BotUpdateForm
+    model = Bot
+    fields = ['active', 'active', 'bot_zip', 'bot_data']
+    template_name = 'bot_edit.html'
+
+    redirect_field_name = 'next'
+    success_message = "Bot saved successfully"
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('bot_edit', kwargs={'pk': self.object.pk})
+
+
 class AuthorList(ListView):
     queryset = User.objects.all().order_by('username').filter(is_active=1, service_account=False)
     template_name = 'authors.html'

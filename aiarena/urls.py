@@ -33,6 +33,7 @@ urlpatterns = [
                   path('results/', core_views.Results.as_view(), name='results'),
                   path('bots/', core_views.BotList.as_view(), name='bots'),
                   path('bots/<int:pk>/', core_views.BotDetail.as_view(), name='bot'),
+                  path('bots/<int:pk>/edit', core_views.BotUpdate.as_view(), name='bot_edit'),
                   path('bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
                   path('bots/<int:pk>/bot_data', core_views.BotDataDownloadView.as_view()),
                   path('authors/', core_views.AuthorList.as_view(), name='authors'),
