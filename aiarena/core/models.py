@@ -91,11 +91,7 @@ class Bot(models.Model):
     type = models.CharField(max_length=32, choices=TYPES)
 
     def calc_bot_files_md5hash(self):
-        # self.bot_zip_md5hash = calculate_md5(self.bot_zip.open(mode='rb'))
-        # if self.bot_data:
-        #     self.bot_data_md5hash = calculate_md5(self.bot_data.open(mode='rb'))
-
-        # we technically shouldn't be accessing _committed, but it was the only way I could fine to know
+        # we technically shouldn't be accessing _committed, but it was the only way I could find to know
         # when the bot_zip was actually saved so I could load it off the disk
         # todo: probably shouldn't be loading via the path?
         # todo: attempt with django filefield open, and close it during rename phase?
@@ -217,10 +213,6 @@ def save_bot_files(sender, instance, created, **kwargs):
         instance.save()
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
-
-    # instance.calc_bot_files_md5hash()
-    # instance.save()
-    # instance.full_clean()
 
 
 class Participant(models.Model):

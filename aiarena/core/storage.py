@@ -8,6 +8,7 @@ class OverwritePrivateStorage(PrivateFileSystemStorage):
     """
     This file storage solves overwrite on upload problem for private storage files.
     """
+
     def __init__(self, location=None, base_url=None, **kwargs):
         super(OverwritePrivateStorage, self).__init__(
             location=location,

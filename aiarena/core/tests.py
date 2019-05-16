@@ -13,8 +13,6 @@ class BaseTestCase(TestCase):
     # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
     test_bot_zip_path = 'aiarena/core/test_bot.zip'
-    # test_bot1_data_path = os.path.join(BASE_DIR, 'aiarena/core/test_bot1_data.zip')
-    # test_bot2_data_path = os.path.join(BASE_DIR, 'aiarena/core/test_bot1_data.zip')
     test_bot1_data_path = 'aiarena/core/test_bot1_data.zip'
     test_bot2_data_path = 'aiarena/core/test_bot2_data.zip'
 
@@ -195,7 +193,6 @@ class FullDataSetTestCase(MatchReadyTestCase):
 class UtilsTestCase(BaseTestCase):
     def test_calc_md5(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_bot.zip')
-        file = open(filename, 'rb')
         self.assertEqual('7411028ba931baaad47bf5810215e4f8', calculate_md5(filename))
 
 
@@ -206,10 +203,10 @@ class UserTestCase(BaseTestCase):
 
 class BotTestCase(LoggedInTestCase):
     def test_bot_creation(self):
-
         # create bot along with bot data
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
-            bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race='T', type='python', active=True)
+            bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data),
+                       plays_race='T', type='python', active=True)
             bot1.full_clean()
             bot1.save()
 

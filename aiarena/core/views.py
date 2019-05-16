@@ -116,12 +116,6 @@ class Ranking(ListView):
     # In this case, that would be "core/bot_list.html"
     template_name = 'ranking.html'
 
-    # Old code for reference.
-    # def get(self, request):
-    #     bot_ranking = Bot.objects.filter(active=1).order_by('-elo')
-    #     context = {'bot_ranking': bot_ranking}
-    #     return render(request, 'ranking.html', context)
-
 
 # Using a View - pretty bare-bones
 class Results(View):
@@ -147,7 +141,7 @@ class BotZipDownloadView(PrivateStorageDetailView):
         user = private_file.request.user
         # Only allow staff or the owner of the file
         # temp hack to get arena clients working again.
-        return True # user.is_authenticated and user.is_staff or private_file.parent_object.user == user
+        return True  # user.is_authenticated and user.is_staff or private_file.parent_object.user == user
 
 
 class BotDataDownloadView(PrivateStorageDetailView):
@@ -163,4 +157,4 @@ class BotDataDownloadView(PrivateStorageDetailView):
         user = private_file.request.user
         # Only allow staff or the owner of the file
         # temp hack to get arena clients working again.
-        return True # user.is_authenticated and user.is_staff or private_file.parent_object.user == user
+        return True  # user.is_authenticated and user.is_staff or private_file.parent_object.user == user

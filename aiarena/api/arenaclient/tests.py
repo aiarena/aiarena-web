@@ -112,7 +112,6 @@ class MatchesTestCase(LoggedInTestCase):
 
 
 class ResultsTestCase(LoggedInTestCase):
-
     uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data')
     uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data_backup')
 

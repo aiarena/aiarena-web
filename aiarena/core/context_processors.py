@@ -1,7 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+
 from django.utils import timezone
 
 from aiarena.core.models import Match, Bot
+
 
 # these are available globally in the django templates
 def stats(request):
