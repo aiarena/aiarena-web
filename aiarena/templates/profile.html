@@ -51,7 +51,7 @@
         </tr>
         {% for bot in bot_list %}
             <tr>
-                <td><a href="/bots/{{ bot.id }}">{{ bot.name }}</a></td>
+                <td><a href="{% url 'bot' bot.pk %}">{{ bot.name }}</a></td>
                 <td>{{ bot.type }}</td>
                 <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
                 {% if bot.bot_data %}
