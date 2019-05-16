@@ -16,7 +16,7 @@ class UserProfileForm(forms.ModelForm):
         fields = ['first_name', 'last_name']
 
 
-class UserProfile(LoginRequiredMixin, UpdateView):
+class UserProfile(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     form_class = UserProfileForm
     redirect_field_name = 'next'
     template_name = 'profile.html'
