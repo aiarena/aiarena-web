@@ -28,28 +28,28 @@ class MatchesTestCase(LoggedInTestCase):
 
         # no maps
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 409)
 
         # not enough active bots
         self._create_map('test_map')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 409)
 
         # not enough active bots
         bot1 = self._create_bot(self.regularUser1, 'testbot1')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 409)
 
         # not enough active bots
         bot2 = self._create_bot(self.regularUser1, 'testbot2')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 409)
 
         # not enough active bots
         bot1.active = True
         bot1.save()
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 409)
 
         # success
         bot2.active = True
@@ -59,7 +59,7 @@ class MatchesTestCase(LoggedInTestCase):
 
         # not enough available bots
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 409)
 
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)

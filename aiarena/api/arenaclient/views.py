@@ -6,6 +6,7 @@ from rest_framework.exceptions import APIException
 from rest_framework.fields import FileField
 from rest_framework.response import Response
 
+from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NotEnoughActiveBots, NoMaps
 from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
@@ -45,13 +46,13 @@ class MatchViewSet(viewsets.GenericViewSet):
 
     def create(self, request, *args, **kwargs):
         if Map.objects.count() == 0:
-            raise APIException('There are no maps available for a match.')
+            raise NoMaps()
         if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
-            raise APIException('Not enough active bots available for a match.')
+            raise NotEnoughActiveBots()
 
         Bot.timeout_overtime_bot_games()
         if Bot.objects.filter(active=True, in_match=False).count() <= 1:  # need at least 2 bots that aren't in game
-            raise APIException('Not enough available bots available for a match.')
+            raise NotEnoughAvailableBots()
 
         match = Match.objects.create(map=Map.random())
 
