@@ -99,6 +99,9 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     redirect_field_name = 'next'
     success_message = "Bot saved successfully"
 
+    def get_queryset(self):
+        return Bot.objects.filter(user=self.request.user)
+
     def get_login_url(self):
         return reverse('login')
 
