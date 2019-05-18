@@ -82,11 +82,13 @@ class Bot(models.Model):
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
+    bot_zip_publicly_downloadable = models.BooleanField(default=False)
     # todo: set a file size limit which will be checked on result submission
     # and the bot deactivated if the file size exceeds it
     bot_data = PrivateFileField(upload_to=bot_data_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                 blank=True, null=True)
     bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
+    bot_data_publicly_downloadable = models.BooleanField(default=False)
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
 

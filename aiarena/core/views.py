@@ -86,7 +86,8 @@ class BotDetail(DetailView):
 class StandardBotUpdateForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = ['active', 'active', 'bot_zip', 'bot_data']
+        fields = ['active', 'active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
+                  'bot_data_publicly_downloadable']
 
 
 class FrozenDataBotUpdateForm(forms.ModelForm):
@@ -94,7 +95,8 @@ class FrozenDataBotUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Bot
-        fields = ['active', 'active', 'bot_zip', 'bot_data']
+        fields = ['active', 'active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
+                  'bot_data_publicly_downloadable']
 
 
 # todo: don't allow editing a bot when in a match
@@ -174,9 +176,8 @@ class BotZipDownloadView(PrivateStorageDetailView):
 
     def can_access_file(self, private_file):
         user = private_file.request.user
-        # Only allow staff or the owner of the file
-        # temp hack to get arena clients working again.
-        return True  # user.is_authenticated and user.is_staff or private_file.parent_object.user == user
+        # Allow if staff, the owner of the file, or the file is marked as publicly downloadable
+        return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_zip_publicly_downloadable
 
 
 class BotDataDownloadView(PrivateStorageDetailView):
@@ -190,6 +191,5 @@ class BotDataDownloadView(PrivateStorageDetailView):
 
     def can_access_file(self, private_file):
         user = private_file.request.user
-        # Only allow staff or the owner of the file
-        # temp hack to get arena clients working again.
-        return True  # user.is_authenticated and user.is_staff or private_file.parent_object.user == user
+        # Allow if staff, the owner of the file, or the file is marked as publicly downloadable
+        return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_data_publicly_downloadable
