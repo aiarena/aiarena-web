@@ -144,6 +144,10 @@ class Bot(models.Model):
         else:
             raise BotNotInMatchException('Cannot leave a match - bot is not in one.')
 
+    def bot_data_is_currently_frozen(self):
+        # dont alter bot_data while a bot is in a match, unless there was no bot_data initially
+        return self.in_match and self.bot_data
+
     # todo: have arena client check in with web service inorder to delay this
     @staticmethod
     def timeout_overtime_bot_games():  # todo: register "timeout" result

@@ -83,15 +83,22 @@ class BotDetail(DetailView):
         return context
 
 
-# class BotUpdateForm(forms.ModelForm):
-    # class Meta:
-    #     model = Bot
-    #     fields = ['active', 'active', 'bot_zip', 'bot_data']
+class StandardBotUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Bot
+        fields = ['active', 'active', 'bot_zip', 'bot_data']
+
+
+class FrozenDataBotUpdateForm(forms.ModelForm):
+    bot_data = forms.FileField(disabled=True)
+
+    class Meta:
+        model = Bot
+        fields = ['active', 'active', 'bot_zip', 'bot_data']
 
 
 # todo: don't allow editing a bot when in a match
 class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
-    # form_class = BotUpdateForm
     model = Bot
     fields = ['active', 'active', 'bot_zip', 'bot_data']
     template_name = 'bot_edit.html'
@@ -107,6 +114,13 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('bot_edit', kwargs={'pk': self.object.pk})
+
+    # change the available fields based upon whether the bot_data is available for editing or not.
+    def get_form_class(self):
+        if self.object.bot_data_is_currently_frozen():
+            return FrozenDataBotUpdateForm
+        else:
+            return StandardBotUpdateForm
 
 
 class AuthorList(ListView):

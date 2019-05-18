@@ -7,9 +7,12 @@
         <tr>
             <td></td>
             <td>
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}
+                    {% if object.bot_data_is_currently_frozen %}
+                        <p>NOTE: This bot is currently in a match. Bot data cannot be altered at this time.</p>
+                    {% endif %}
 
                     <input type=submit value="submit"/>
 
