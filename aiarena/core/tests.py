@@ -106,7 +106,7 @@ class MatchReadyTestCase(LoggedInTestCase):
         self._create_map('testmap1')
 
 
-# User this to pre-build a full dataset for testing
+# Use this to pre-build a full dataset for testing
 class FullDataSetTestCase(MatchReadyTestCase):
 
     def setUp(self):
