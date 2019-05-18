@@ -1,0 +1,6 @@
+# This folder will contain temporary files, such as ones saved during tests.
+
+# Ignore everything in this directory
+*
+# Except this file
+!.gitignore

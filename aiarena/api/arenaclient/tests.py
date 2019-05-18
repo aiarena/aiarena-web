@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from aiarena.core.models import Match, Bot, Participant, User
 from aiarena.core.tests import LoggedInTestCase
+from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
 
 
@@ -56,6 +57,38 @@ class MatchesTestCase(LoggedInTestCase):
         bot2.save()
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
+
+        # test download files
+
+        # zip
+        bot1_zip = self.client.get(response.data['bot1']['bot_zip'])
+        bot1_zip_path = "./tmp/bot1.zip"
+        with open(bot1_zip_path, "wb") as bot1_zip_file:  # todo: this can probably be done without saving to file
+            bot1_zip_file.write(bot1_zip.content)
+            bot1_zip_file.close()
+        self.assertEqual(response.data['bot1']['bot_zip_md5hash'], calculate_md5(bot1_zip_path))
+
+        bot1_zip = self.client.get(response.data['bot2']['bot_zip'])
+        bot1_zip_path = "./tmp/bot2.zip"
+        with open(bot1_zip_path, "wb") as bot1_zip_file:
+            bot1_zip_file.write(bot1_zip.content)
+            bot1_zip_file.close()
+        self.assertEqual(response.data['bot2']['bot_zip_md5hash'], calculate_md5(bot1_zip_path))
+
+        # data
+        bot1_zip = self.client.get(response.data['bot1']['bot_data'])
+        bot1_zip_path = "./tmp/bot1_data.zip"
+        with open(bot1_zip_path, "wb") as bot1_zip_file:
+            bot1_zip_file.write(bot1_zip.content)
+            bot1_zip_file.close()
+        self.assertEqual(response.data['bot1']['bot_data_md5hash'], calculate_md5(bot1_zip_path))
+
+        bot1_zip = self.client.get(response.data['bot2']['bot_data'])
+        bot1_zip_path = "./tmp/bot2_data.zip"
+        with open(bot1_zip_path, "wb") as bot1_zip_file:
+            bot1_zip_file.write(bot1_zip.content)
+            bot1_zip_file.close()
+        self.assertEqual(response.data['bot2']['bot_data_md5hash'], calculate_md5(bot1_zip_path))
 
         # not enough available bots
         response = self._post_to_matches()

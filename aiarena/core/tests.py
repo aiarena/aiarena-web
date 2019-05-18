@@ -20,8 +20,8 @@ class BaseTestCase(TestCase):
         return Map.objects.create(name=name)
 
     def _create_bot(self, user, name, plays_race='T'):
-        with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python')
+        with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
             bot.full_clean()
             bot.save()
             return bot
