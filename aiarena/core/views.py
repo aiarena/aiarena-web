@@ -99,8 +99,6 @@ class FrozenDataBotUpdateForm(forms.ModelForm):
 
 # todo: don't allow editing a bot when in a match
 class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
-    model = Bot
-    fields = ['active', 'active', 'bot_zip', 'bot_data']
     template_name = 'bot_edit.html'
 
     redirect_field_name = 'next'
