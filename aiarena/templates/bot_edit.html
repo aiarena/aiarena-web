@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <h2 align="center">Editing: <b>{{ bot.name }}</b></h2>
+    <table id="bot_table_edit">
+        <tr>
+            <td></td>
+            <td>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    {% if object.bot_data_is_currently_frozen %}
+                        <p>NOTE: This bot is currently in a match. Bot data cannot be altered at this time.</p>
+                    {% endif %}
+
+                    <input type=submit value="submit"/>
+
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </form>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+
+{% endblock %}

@@ -83,6 +83,46 @@ class BotDetail(DetailView):
         return context
 
 
+class StandardBotUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Bot
+        fields = ['active', 'active', 'bot_zip', 'bot_data']
+
+
+class FrozenDataBotUpdateForm(forms.ModelForm):
+    bot_data = forms.FileField(disabled=True)
+
+    class Meta:
+        model = Bot
+        fields = ['active', 'active', 'bot_zip', 'bot_data']
+
+
+# todo: don't allow editing a bot when in a match
+class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    model = Bot
+    fields = ['active', 'active', 'bot_zip', 'bot_data']
+    template_name = 'bot_edit.html'
+
+    redirect_field_name = 'next'
+    success_message = "Bot saved successfully"
+
+    def get_queryset(self):
+        return Bot.objects.filter(user=self.request.user)
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('bot_edit', kwargs={'pk': self.object.pk})
+
+    # change the available fields based upon whether the bot_data is available for editing or not.
+    def get_form_class(self):
+        if self.object.bot_data_is_currently_frozen():
+            return FrozenDataBotUpdateForm
+        else:
+            return StandardBotUpdateForm
+
+
 class AuthorList(ListView):
     queryset = User.objects.all().order_by('username').filter(is_active=1, service_account=False)
     template_name = 'authors.html'
@@ -91,14 +131,11 @@ class AuthorList(ListView):
 class AuthorDetail(DetailView):
     model = User
     template_name = 'author.html'
-    context_object_name = 'author'  # change the context name to avoid overriding the current user  oontextobject
+    context_object_name = 'author'  # change the context name to avoid overriding the current user oontext object
 
     def get_context_data(self, **kwargs):
         context = super(AuthorDetail, self).get_context_data(**kwargs)
-
-        bots = Bot.objects.filter(user_id=self.object.id).order_by('-created')
-
-        context['bot_list'] = bots
+        context['bot_list'] = Bot.objects.filter(user_id=self.object.id).order_by('-created')
         return context
 
 

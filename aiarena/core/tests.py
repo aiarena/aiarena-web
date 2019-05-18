@@ -259,6 +259,20 @@ class PageRenderTestCase(FullDataSetTestCase):
         response = self.client.get('/bots/{0}/'.format(self.regularUserBot1.id))
         self.assertEqual(response.status_code, 200)
 
+    def test_get_bot_edit_page(self):
+        self.client.login(username='regular_user1', password='x')
+        # test bot edit pages we can access
+        bots = Bot.objects.filter(user=self.regularUser1)
+        for bot in bots:
+            response = self.client.get('/bots/{0}/edit'.format(bot.pk))
+            self.assertEqual(response.status_code, 200)
+
+        # test bot edit pages we can't access
+        bots = Bot.objects.exclude(user=self.regularUser1)
+        for bot in bots:
+            response = self.client.get('/bots/{0}/edit'.format(bot.pk))
+            self.assertEqual(response.status_code, 404)
+
     def test_get_author_page(self):
         response = self.client.get('/authors/')
         self.assertEqual(response.status_code, 200)

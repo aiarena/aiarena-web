@@ -48,10 +48,11 @@
             <td><b>Type</b></td>
             <td><b>Bot Zip</b></td>
             <td><b>Data</b></td>
+            <td></td>
         </tr>
         {% for bot in bot_list %}
             <tr>
-                <td><a href="/bots/{{ bot.id }}">{{ bot.name }}</a></td>
+                <td><a href="{% url 'bot' bot.pk %}">{{ bot.name }}</a></td>
                 <td>{{ bot.type }}</td>
                 <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
                 {% if bot.bot_data %}
@@ -59,6 +60,7 @@
                 {% else %}
                     <td>No bot data</td>
                 {% endif %}
+                <td><a href="{% url 'bot_edit' bot.pk %}">Edit</a></td>
             </tr>
         {% endfor %}
 
