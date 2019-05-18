@@ -24,6 +24,16 @@
                     <tr>
                         <td><h3>ELO</h3> {{ bot.elo }}</td>
                     </tr>
+                    {% if bot.bot_zip_publicly_downloadable %}
+                    <tr>
+                        <td><h3>Bot Zip</h3><a href="{{ bot.bot_zip.url }}">Download</a></td>
+                    </tr>
+                    {% endif %}
+                    {% if bot.bot_data and bot.bot_data_publicly_downloadable %}
+                    <tr>
+                        <td><h3>Bot data</h3><a href="{{ bot.bot_data.url }}">Download</a></td>
+                    </tr>
+                    {% endif %}
                     </tbody>
                 </table>
             </td>
