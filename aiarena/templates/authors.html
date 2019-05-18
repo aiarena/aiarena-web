@@ -11,7 +11,7 @@
                 <tr>
                     <td>
                         <center>{% avatar author 150 %}</center>
-                        <center><a href="/authors/{{ author.id }}">{{ author.username }}</a></center>
+                        <center><a href="{% url 'author' author.id %}">{{ author.username }}</a></center>
                         <br>
                     </td>
                 </tr>

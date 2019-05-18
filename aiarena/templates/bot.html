@@ -13,7 +13,7 @@
                         <td><h3><b><u>Details</u></b></h3></td>
                     </tr>
                     <tr>
-                        <td><h3>Author</h3> <a href="/authors/{{ bot.user.id }}/">{{ bot.user.username }}</a></td>
+                        <td><h3>Author</h3><a href="{% url 'author' bot.user.id %}">{{ bot.user.username }}</a></td>
                     </tr>
                     <tr>
                         <td><h3>Race</h3> {{ bot.get_plays_race_display }}</td>
