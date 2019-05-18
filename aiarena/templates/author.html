@@ -30,7 +30,7 @@
     </tr>
     {% for bot in bot_list %}
     <tr>
-        <td><a href="{% url 'bot' bot.pk %}">{{ bot.name }}</a></td>
+        <td>{{ bot.as_html_link |safe }}</td>
         <td>{{ bot.elo }}</td>
         <td>{{ bot.type }}</td>
     </tr>

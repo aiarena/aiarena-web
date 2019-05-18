@@ -11,7 +11,7 @@
                 <tr>
                     <td>
                         <center>{% avatar author 150 %}</center>
-                        <center><a href="{% url 'author' author.id %}">{{ author.username }}</a></center>
+                        <center>{{ author.as_html_link |safe }}</center>
                         <br>
                     </td>
                 </tr>

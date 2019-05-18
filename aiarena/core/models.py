@@ -46,6 +46,12 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     service_account = models.BooleanField(default=False)
 
+    def get_absolute_url(self):
+        return reverse('author', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
 
 def bot_zip_upload_to(instance, filename):
     return '/'.join(['bots', str(instance.id), 'bot_zip'])
