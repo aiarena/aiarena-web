@@ -117,14 +117,11 @@ class AuthorList(ListView):
 class AuthorDetail(DetailView):
     model = User
     template_name = 'author.html'
-    context_object_name = 'author'  # change the context name to avoid overriding the current user  oontextobject
+    context_object_name = 'author'  # change the context name to avoid overriding the current user oontext object
 
     def get_context_data(self, **kwargs):
         context = super(AuthorDetail, self).get_context_data(**kwargs)
-
-        bots = Bot.objects.filter(user_id=self.object.id).order_by('-created')
-
-        context['bot_list'] = bots
+        context['bot_list'] = Bot.objects.filter(user_id=self.object.id).order_by('-created')
         return context
 
 
