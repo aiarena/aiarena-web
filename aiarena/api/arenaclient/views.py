@@ -102,7 +102,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     def download_zip(self, request, *args, **kwargs):
         p = Participant.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
         response = HttpResponse(FileWrapper(p.bot.bot_zip), content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename="{0}.zip"'.format(p.bot.name)
+        response['Content-Disposition'] = 'inline; filename="{0}.zip"'.format(p.bot.name)
         return response
 
     # todo: check match is in progress/bot is in this match
@@ -110,7 +110,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     def download_data(self, request, *args, **kwargs):
         p = Participant.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
         response = HttpResponse(FileWrapper(p.bot.bot_data), content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename="{0}_data.zip"'.format(p.bot.name)
+        response['Content-Disposition'] = 'inline; filename="{0}_data.zip"'.format(p.bot.name)
         return response
 
 
