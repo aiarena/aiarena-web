@@ -132,7 +132,7 @@ class BotZipDownloadView(PrivateStorageDetailView):
     model = Bot
     model_file_field = 'bot_zip'
 
-    content_disposition = 'inner'
+    content_disposition = 'attachment'
 
     def get_content_disposition_filename(self, private_file):
         return '{0}.zip'.format(private_file.parent_object.name)
@@ -148,7 +148,7 @@ class BotDataDownloadView(PrivateStorageDetailView):
     model = Bot
     model_file_field = 'bot_data'
 
-    content_disposition = 'inner'
+    content_disposition = 'attachment'
 
     def get_content_disposition_filename(self, private_file):
         return '{0}_data.zip'.format(private_file.parent_object.name)

@@ -1,10 +1,14 @@
 import logging
+from wsgiref.util import FileWrapper
 
 from django.db.models import Sum
+from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import APIException
 from rest_framework.fields import FileField
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NotEnoughActiveBots, NoMaps
 from aiarena.core.exceptions import BotNotInMatchException
@@ -21,10 +25,28 @@ class MapSerializer(serializers.ModelSerializer):
 
 
 class BotSerializer(serializers.ModelSerializer):
+    # Dynamically regenerate bot_zip and bot_data urls to point to the API endpoints
+    # Otherwise they will point to the front-end download views, which the API client won't
+    # be authenticated for.
+    bot_zip = serializers.SerializerMethodField()
+    bot_data = serializers.SerializerMethodField()
+
+    def get_bot_zip(self, obj):
+        p = Participant.objects.get(bot=obj, match=obj.current_match)
+        return reverse('match-download-zip', kwargs={'pk': obj.current_match.pk, 'p_num': p.participant_number},
+                       request=self.context['request'])
+
+    def get_bot_data(self, obj):
+        p = Participant.objects.get(bot=obj, match=obj.current_match)
+        if p.bot.bot_data:
+            return reverse('match-download-data', kwargs={'pk': obj.current_match.pk, 'p_num': p.participant_number},
+                           request=self.context['request'])
+        else:
+            return None
+
     class Meta:
         model = Bot
-        exclude = 'user', 'created', 'updated', 'active', 'elo',
-        read_only_fields = ('name', 'bot_zip', 'plays_race', 'type')
+        fields = ('id', 'name', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race', 'type')
 
 
 class MatchSerializer(serializers.ModelSerializer):
@@ -34,7 +56,7 @@ class MatchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Match
-        exclude = 'created',
+        fields = ('id', 'bot1', 'bot2', 'map')
 
 
 class MatchViewSet(viewsets.GenericViewSet):
@@ -74,6 +96,22 @@ class MatchViewSet(viewsets.GenericViewSet):
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    # todo: check match is in progress/bot is in this match
+    @action(detail=True, methods=['GET'], name='Download a participant\'s zip file', url_path='(?P<p_num>\d+)/zip')
+    def download_zip(self, request, *args, **kwargs):
+        p = Participant.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
+        response = HttpResponse(FileWrapper(p.bot.bot_zip), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="{0}.zip"'.format(p.bot.name)
+        return response
+
+    # todo: check match is in progress/bot is in this match
+    @action(detail=True, methods=['GET'], name='Download a participant\'s data file', url_path='(?P<p_num>\d+)/data')
+    def download_data(self, request, *args, **kwargs):
+        p = Participant.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
+        response = HttpResponse(FileWrapper(p.bot.bot_data), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="{0}_data.zip"'.format(p.bot.name)
+        return response
 
 
 class ResultSerializer(serializers.ModelSerializer):
