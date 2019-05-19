@@ -7,6 +7,7 @@ from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
 
+from aiarena import settings
 from aiarena.core.models import Bot, Result, User
 
 
@@ -35,6 +36,7 @@ class UserProfile(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context = super(UserProfile, self).get_context_data(**kwargs)
         # Add in the user's bots
         context['bot_list'] = self.request.user.bots.all()
+        context['max_user_bot_count'] = settings.MAX_USER_BOT_COUNT
         return context
 
 
