@@ -177,6 +177,15 @@ ELO = Elo(ELO_K)
 
 MAX_USER_BOT_COUNT = 6
 
+# django-avatar
+# https://django-avatar.readthedocs.io/en/latest/
+# Cleanup avatar images on deletion
+AVATAR_CLEANUP_DELETED = True
+# disable the cache until we need it - it causes a user's avatar change to take a while to be reflected
+AVATAR_CACHE_ENABLED = False
+# pre-generate the most commonly used size
+AVATAR_AUTO_GENERATE_SIZES = (150,)
+
 # hack to override any of these settings with an env.py file
 try:
     from aiarena.env import *
