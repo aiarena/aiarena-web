@@ -77,9 +77,14 @@ class BotDetail(DetailView):
 
         results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')[:10]
 
-        # retrieve the opponent
+        # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
             result.opponent = result.match.participant_set.exclude(bot=self.object)[0]
+            if result.winner is not None:
+                if result.winner == self.object:
+                    result.type = 'Win'
+                else:
+                    result.type = 'Loss'
 
         context['result_list'] = results
         return context

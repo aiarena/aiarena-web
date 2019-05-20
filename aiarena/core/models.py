@@ -256,7 +256,8 @@ class Result(models.Model):
         ('Error', 'Error'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
-    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
+    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True,
+                               editable=False)
     type = models.CharField(max_length=32, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(upload_to='replays', blank=True, null=True)
@@ -281,6 +282,20 @@ class Result(models.Model):
             'Player2Win',
             'Player2Crash',
             'Player2TimeOut')
+
+    def winner_participant_number(self):
+        if self.type in (
+                'Player1Win',
+                'Player2Crash',
+                'Player2TimeOut'):
+            return 1
+        elif self.type in (
+                'Player1Crash',
+                'Player1TimeOut',
+                'Player2Win'):
+            return 2
+        else:
+            return 0
 
     def is_tie(self):
         return self.type == 'Tie'
@@ -307,6 +322,10 @@ class Result(models.Model):
         return first.bot, second.bot
 
     def save(self, *args, **kwargs):
+        # set winner
+        if self.has_winner():
+            self.winner = Participant.objects.get(match=self.match, participant_number=self.winner_participant_number()).bot
+
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)
 
