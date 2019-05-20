@@ -16,8 +16,8 @@
             {% endif %}
             <td>
                 <center>{% avatar author 150 %}</center>
-                <br>
-                <center>{{ author.as_html_link |safe }}</center>
+                <p><center>{{ author.as_html_link |safe }}</center></p>
+                <br/>
             </td>
             {% if forloop.last %}
                 </tr>
