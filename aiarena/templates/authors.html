@@ -6,16 +6,23 @@
     <table width="900" id="authorsTable">
         <tbody>
         {% load avatar_tags %}
-
-            {% for author in user_list %}
+        {% for author in user_list %}
+            {% if forloop.first %}
                 <tr>
-                    <td>
-                        <center>{% avatar author 150 %}</center>
-                        <center>{{ author.as_html_link |safe }}</center>
-                        <br>
-                    </td>
+            {# Start a new row every 3 authors #}
+            {% elif forloop.counter|divisibleby:5 %}
                 </tr>
-            {% endfor %}
+                <tr>
+            {% endif %}
+            <td>
+                <center>{% avatar author 150 %}</center>
+                <br>
+                <center>{{ author.as_html_link |safe }}</center>
+            </td>
+            {% if forloop.last %}
+                </tr>
+            {% endif %}
+        {% endfor %}
         </tbody>
     </table>
 
