@@ -168,6 +168,7 @@ class Results(View):
         for result in results:
             result.bot1 = result.match.participant_set.filter(participant_number=1)[0]
             result.bot2 = result.match.participant_set.filter(participant_number=2)[0]
+            result.mapname = result.match.map.name
         context = {'result_list': results}
         return render(request, 'results.html', context)
 
