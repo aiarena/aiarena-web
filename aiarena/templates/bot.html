@@ -47,6 +47,7 @@
                         <td><b>Date</b></td>
                         <td><b>Opponent</b></td>
                         <td><b>Result</b></td>
+                        <td><b>Map</b></td>
                         <td><b>Duration</b></td>
                         <td><b>Replay</b></td>
                     </tr>
@@ -55,6 +56,7 @@
                             <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
                             <td>{{ result.opponent.bot.as_html_link |safe }}</td>
                             <td>{{ result.type }}</td>
+                            <td>{{ result.mapname }}</td>
                             <td>{{ result.duration }}</td>
                             {% if result.replay_file %}
                                 <td><a href="{{ result.replay_file.url }}">Download</a></td>

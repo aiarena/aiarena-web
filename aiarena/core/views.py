@@ -79,6 +79,7 @@ class BotDetail(DetailView):
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
+            result.mapname = result.match.map.name
             result.opponent = result.match.participant_set.exclude(bot=self.object)[0]
             if result.winner is not None:
                 if result.winner == self.object:
