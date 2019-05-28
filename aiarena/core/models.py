@@ -14,7 +14,7 @@ from private_storage.fields import PrivateFileField
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT
+from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
 
 logger = logging.getLogger(__name__)
 
@@ -110,10 +110,11 @@ class Bot(models.Model):
             self.bot_data_md5hash = calculate_md5(self.bot_data.path)
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
-    def validate_one_active_bot_race_per_user(self):
+    def validate_active_bot_race_per_user(self):
         # if there is already an active bot for this user playing the same race, and this bot is also marked as active
         # then back out
-        if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(id=self.id).exists() \
+        if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
+                id=self.id).count() >= MAX_USER_BOT_COUNT_ACTIVE_PER_RACE \
                 and self.active:
             raise ValidationError(
                 'An active bot playing that race already exists for this user.'
@@ -131,7 +132,7 @@ class Bot(models.Model):
 
     def clean(self):
         self.validate_max_bot_count()
-        self.validate_one_active_bot_race_per_user()
+        self.validate_active_bot_race_per_user()
 
     def __str__(self):
         return self.name
@@ -324,7 +325,8 @@ class Result(models.Model):
     def save(self, *args, **kwargs):
         # set winner
         if self.has_winner():
-            self.winner = Participant.objects.get(match=self.match, participant_number=self.winner_participant_number()).bot
+            self.winner = Participant.objects.get(match=self.match,
+                                                  participant_number=self.winner_participant_number()).bot
 
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)

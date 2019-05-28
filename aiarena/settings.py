@@ -176,6 +176,7 @@ ENABLE_ELO_SANITY_CHECK = True
 ELO = Elo(ELO_K)
 
 MAX_USER_BOT_COUNT = 6
+MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
 
 # django-avatar
 # https://django-avatar.readthedocs.io/en/latest/
