@@ -37,6 +37,7 @@ class UserProfile(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         # Add in the user's bots
         context['bot_list'] = self.request.user.bots.all()
         context['max_user_bot_count'] = settings.MAX_USER_BOT_COUNT
+        context['max_active_per_race_bot_count'] = settings.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
         return context
 
 

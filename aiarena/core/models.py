@@ -117,8 +117,8 @@ class Bot(models.Model):
                 id=self.id).count() >= MAX_USER_BOT_COUNT_ACTIVE_PER_RACE \
                 and self.active:
             raise ValidationError(
-                'An active bot playing that race already exists for this user.'
-                'Each user can only have 1 active bot per race.')
+                'Too many active bots playing that race already exist for this user.'
+                ' Each user can only have ' + str(MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
 
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= MAX_USER_BOT_COUNT:
