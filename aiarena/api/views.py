@@ -7,15 +7,7 @@ from aiarena.core.models import Match, Result
 logger = logging.getLogger(__name__)
 
 
-class ResultSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Result
-        fields = 'id', 'created', 'winner', 'type', 'replay_file', 'duration'
-
-
 class MatchSerializer(serializers.ModelSerializer):
-    result = ResultSerializer()
-
     class Meta:
         model = Match
         fields = 'id', 'created', 'map', 'result'
@@ -28,3 +20,17 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Match.objects.all()
     serializer_class = MatchSerializer
+
+
+class ResultSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Result
+        fields = 'id', 'created', 'match', 'winner', 'type', 'replay_file', 'duration'
+
+
+class ResultViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Public MatchViewSet for viewing match data
+    """
+    queryset = Result.objects.all()
+    serializer_class = ResultSerializer

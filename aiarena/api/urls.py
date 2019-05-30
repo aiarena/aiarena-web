@@ -7,6 +7,7 @@ router = DefaultRouter()
 
 # todo: add more models/endpoints
 router.register(r'matches', publicapi_views.MatchViewSet, basename='api_match')
+router.register(r'results', publicapi_views.ResultViewSet, basename='api_result')
 
 # arena client
 router.register(r'arenaclient/matches', arenaclient_views.MatchViewSet, basename='match')  # todo: prefix basename with arenaclient
