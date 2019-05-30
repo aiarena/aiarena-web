@@ -162,7 +162,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         p2.update_resultant_elo()
         # calculate the change in ELO
         p1.elo_change = p1.resultant_elo - p1_initial_elo
+        p1.save()
         p2.elo_change = p2.resultant_elo - p2_initial_elo
+        p2.save()
 
         if ENABLE_ELO_SANITY_CHECK:  # todo remove this condition and log instead of an exception.
             # test here to check ELO total and ensure no corruption
