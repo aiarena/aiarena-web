@@ -155,10 +155,14 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             process_bot2_data = True
 
         result = serializer.save()
+        p1_initial_elo, p2_initial_elo = self.get_initial_elos(result)
         self.adjust_elo(result)
         p1, p2 = result.get_participants()
         p1.update_resultant_elo()
         p2.update_resultant_elo()
+        # calculate the change in ELO
+        p1.elo_change = p1.resultant_elo - p1_initial_elo
+        p2.elo_change = p2.resultant_elo - p2_initial_elo
 
         if ENABLE_ELO_SANITY_CHECK:  # todo remove this condition and log instead of an exception.
             # test here to check ELO total and ensure no corruption
@@ -198,3 +202,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         bot1.save()
         bot2.elo -= delta
         bot2.save()
+
+    def get_initial_elos(self, result):
+        first, second = result.get_participant_bots()
+        return first.elo, second.elo

@@ -233,6 +233,7 @@ class Participant(models.Model):
     participant_number = models.PositiveSmallIntegerField()
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='match_participations')
     resultant_elo = models.SmallIntegerField(null=True)
+    elo_change = models.SmallIntegerField(null=True)
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo
