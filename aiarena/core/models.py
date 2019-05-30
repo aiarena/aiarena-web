@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
@@ -97,6 +98,8 @@ class Bot(models.Model):
     bot_data_publicly_downloadable = models.BooleanField(default=False)
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
+    # the ID displayed to other bots during a game so they can recognize their opponent
+    game_display_id = models.UUIDField(default=uuid.uuid4)
 
     def calc_bot_files_md5hash(self):
         # we technically shouldn't be accessing _committed, but it was the only way I could find to know
