@@ -16,7 +16,7 @@ class MatchSerializer(serializers.ModelSerializer):
 # todo: make publicly accessible
 class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Public MatchViewSet for viewing match data
+    Match data view
     """
     queryset = Match.objects.all()
     serializer_class = MatchSerializer
@@ -30,7 +30,7 @@ class ResultSerializer(serializers.ModelSerializer):
 
 class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Public MatchViewSet for viewing match data
+    Result data view
     """
     queryset = Result.objects.all()
     serializer_class = ResultSerializer
