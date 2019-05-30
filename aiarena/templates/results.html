@@ -26,11 +26,7 @@
                     <td>{{ result.participant1.bot.as_html_link |safe }}</td>
                 {% endif %}
 
-                {% if result.participant1.elo_change %}
-                    <td>{{ result.participant1.elo_change |format_elo_change }}</td>
-                {% else %}
-                    <td></td>
-                {% endif %}
+                <td>{{ result.participant1.elo_change |format_elo_change }}</td>
 
                 {% if result.winner == result.participant2.bot %}
                     <td><b>{{ result.participant2.bot.as_html_link |safe }}</b></td>
@@ -38,11 +34,7 @@
                     <td>{{ result.participant2.bot.as_html_link |safe }}</td>
                 {% endif %}
 
-                {% if result.participant2.elo_change %}
-                    <td>{{ result.participant2.elo_change |format_elo_change }}</td>
-                {% else %}
-                    <td></td>
-                {% endif %}
+                <td>{{ result.participant2.elo_change |format_elo_change }}</td>
 
                 <td>{{ result.type }}</td>
                 <td>{{ result.mapname }}</td>
