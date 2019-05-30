@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load core_filters %}
 
 {% block content %}
 
@@ -8,7 +9,9 @@
         <tr>
             <td><b>Date</b></td>
             <td><b>Bot 1</b></td>
+            <td><b>+/-</b></td>
             <td><b>Bot 2</b></td>
+            <td><b>+/-</b></td>
             <td><b>Result</b></td>
             <td><b>Map</b></td>
             <td><b>Duration</b></td>
@@ -18,15 +21,28 @@
             <tr>
                 <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
 
-                {% if result.winner == result.bot1.bot %}
-                    <td><b>{{ result.bot1.bot.as_html_link |safe }}</b></td>
-                    <td>{{ result.bot2.bot.as_html_link |safe }}</td>
-                {% elif result.winner == result.bot2.bot %}
-                    <td>{{ result.bot1.bot.as_html_link |safe }}</td>
-                    <td><b>{{ result.bot2.bot.as_html_link |safe }}</b></td>
+                {% if result.winner == result.participant1.bot %}
+                    <td><b>{{ result.participant1.bot.as_html_link |safe }}</b></td>
                 {% else %}
-                    <td>{{ result.bot1.bot.as_html_link |safe }}</td>
-                    <td>{{ result.bot2.bot.as_html_link |safe }}</td>
+                    <td>{{ result.participant1.bot.as_html_link |safe }}</td>
+                {% endif %}
+
+                {% if result.participant1.elo_change %}
+                    <td>{{ result.participant1.elo_change |with_symbol }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+
+                {% if result.winner == result.participant2.bot %}
+                    <td><b>{{ result.participant2.bot.as_html_link |safe }}</b></td>
+                {% else %}
+                    <td>{{ result.participant2.bot.as_html_link |safe }}</td>
+                {% endif %}
+
+                {% if result.participant2.elo_change %}
+                    <td>{{ result.participant2.elo_change |with_symbol }}</td>
+                {% else %}
+                    <td></td>
                 {% endif %}
 
                 <td>{{ result.type }}</td>

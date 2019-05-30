@@ -168,8 +168,8 @@ class Results(View):
     def get(self, request):
         results = Result.objects.all().order_by('-created')[:100]
         for result in results:
-            result.bot1 = result.match.participant_set.filter(participant_number=1)[0]
-            result.bot2 = result.match.participant_set.filter(participant_number=2)[0]
+            result.participant1 = result.match.participant_set.filter(participant_number=1)[0]
+            result.participant2 = result.match.participant_set.filter(participant_number=2)[0]
             result.mapname = result.match.map.name
         context = {'result_list': results}
         return render(request, 'results.html', context)
