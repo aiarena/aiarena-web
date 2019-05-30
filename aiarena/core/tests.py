@@ -21,7 +21,8 @@ class BaseTestCase(TestCase):
 
     def _create_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race,
+                      type='python')
             bot.full_clean()
             bot.save()
             return bot
@@ -236,8 +237,8 @@ class BotTestCase(LoggedInTestCase):
         # all bots should be the same race, so just pick any
         inactive_bot = Bot.objects.filter(user=self.regularUser1, active=False)[0]
         with self.assertRaisesMessage(ValidationError,
-                                      'An active bot playing that race already exists for this user.'
-                                      'Each user can only have 1 active bot per race.'):
+                                      'Too many active bots playing that race already exist for this user.'
+                                      ' Each user can only have 1 active bot(s) per race.'):
             inactive_bot.active = True
             inactive_bot.full_clean()  # run validation
 
