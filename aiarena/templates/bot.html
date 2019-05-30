@@ -57,7 +57,7 @@
                             <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
                             <td>{{ result.opponent.bot.as_html_link |safe }}</td>
                             <td>{{ result.type }}</td>
-                            <td>{{ result.me.elo_change |with_symbol }}</td>
+                            <td>{{ result.me.elo_change |format_elo_change }}</td>
                             <td>{{ result.mapname }}</td>
                             <td>{{ result.duration }}</td>
                             {% if result.replay_file %}

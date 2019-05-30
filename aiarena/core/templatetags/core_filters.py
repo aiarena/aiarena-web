@@ -1,13 +1,15 @@
 from django import template
 
 
-def with_symbol(value):
-    """Formats an integer so as to include the positive or negative symbol"""
+def format_elo_change(value):
+    """Custom formatting for ELO change integers"""
     if value is None:
         return ""
+    elif value == 0:
+        return "--"
     else:
         return "%+d" % value
 
 
 register = template.Library()
-register.filter('with_symbol', with_symbol)
+register.filter('format_elo_change', format_elo_change)

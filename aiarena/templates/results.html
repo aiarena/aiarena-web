@@ -27,7 +27,7 @@
                 {% endif %}
 
                 {% if result.participant1.elo_change %}
-                    <td>{{ result.participant1.elo_change |with_symbol }}</td>
+                    <td>{{ result.participant1.elo_change |format_elo_change }}</td>
                 {% else %}
                     <td></td>
                 {% endif %}
@@ -39,7 +39,7 @@
                 {% endif %}
 
                 {% if result.participant2.elo_change %}
-                    <td>{{ result.participant2.elo_change |with_symbol }}</td>
+                    <td>{{ result.participant2.elo_change |format_elo_change }}</td>
                 {% else %}
                     <td></td>
                 {% endif %}
