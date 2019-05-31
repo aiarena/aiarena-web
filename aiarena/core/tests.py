@@ -1,7 +1,9 @@
 import os
+from io import StringIO
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.core.management import call_command, CommandError
 from django.test import TestCase
 
 from aiarena.core.models import User, Bot, Map
@@ -100,10 +102,10 @@ class MatchReadyTestCase(LoggedInTestCase):
     def setUp(self):
         super(MatchReadyTestCase, self).setUp()
 
-        self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
-        self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
-        self.staffUserBot1 = self._create_bot(self.staffUser1, 'staffUserBot1')
-        self.staffUserBot2 = self._create_bot(self.staffUser1, 'staffUserBot2')
+        self.regularUserBot1 = self._create_active_bot(self.regularUser1, 'regularUserBot1', 'T')
+        self.regularUserBot2 = self._create_active_bot(self.regularUser1, 'regularUserBot2', 'Z')
+        self.staffUserBot1 = self._create_active_bot(self.staffUser1, 'staffUserBot1', 'P')
+        self.staffUserBot2 = self._create_active_bot(self.staffUser1, 'staffUserBot2', 'R')
         self._create_map('testmap1')
 
 
@@ -309,3 +311,28 @@ class PageRenderTestCase(FullDataSetTestCase):
 
 class PrivateStorageTestCase(MatchReadyTestCase):
     pass  # todo
+
+
+class ManagementCommandTests(MatchReadyTestCase):
+    """
+    Tests for management commands
+    """
+
+    def test_cancel_matches(self):
+        # test match doesn't exist
+        with self.assertRaisesMessage(CommandError, 'Match "12345" does not exist'):
+            call_command('cancelmatches', '12345')
+
+        # test match successfully cancelled
+        self.client.login(username='staff_user', password='x')
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        match_id = response.data['id']
+
+        out = StringIO()
+        call_command('cancelmatches', match_id, stdout=out)
+        self.assertIn('Successfully marked match "{0}" with an InitializationError'.format(match_id), out.getvalue())
+
+        # test result already exists
+        with self.assertRaisesMessage(CommandError, 'A result already exists for match "{0}"'.format(match_id)):
+            call_command('cancelmatches', match_id)
