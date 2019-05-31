@@ -76,7 +76,7 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')[:10]
+        results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')[:50]
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
