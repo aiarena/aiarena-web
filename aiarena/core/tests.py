@@ -102,14 +102,14 @@ class MatchReadyTestCase(LoggedInTestCase):
     def setUp(self):
         super(MatchReadyTestCase, self).setUp()
 
-        self.regularUserBot1 = self._create_active_bot(self.regularUser1, 'regularUserBot1', 'T')
-        self.regularUserBot2 = self._create_active_bot(self.regularUser1, 'regularUserBot2', 'Z')
-        self.staffUserBot1 = self._create_active_bot(self.staffUser1, 'staffUserBot1', 'P')
-        self.staffUserBot2 = self._create_active_bot(self.staffUser1, 'staffUserBot2', 'R')
+        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
+        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
+        self.staffUser1Bot1 = self._create_active_bot(self.staffUser1, 'staffUser1Bot1', 'T')
+        self.staffUser1Bot2 = self._create_active_bot(self.staffUser1, 'staffUser1Bot2', 'Z')
         self._create_map('testmap1')
 
 
-# Use this to pre-build a full dataset for testing
+# Use this to pre-build a fuller dataset for testing
 class FullDataSetTestCase(MatchReadyTestCase):
 
     def setUp(self):
@@ -175,8 +175,6 @@ class FullDataSetTestCase(MatchReadyTestCase):
         self.assertEqual(response.status_code, 201)
 
     def _generate_extra_bots(self):
-        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1')
-        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
         self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
         self.regularUser2Bot2 = self._create_active_bot(self.regularUser2, 'regularUser2Bot2')
         self.regularUser3Bot1 = self._create_active_bot(self.regularUser3, 'regularUser3Bot1')
@@ -259,7 +257,7 @@ class PageRenderTestCase(FullDataSetTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_bot_page(self):
-        response = self.client.get('/bots/{0}/'.format(self.regularUserBot1.id))
+        response = self.client.get('/bots/{0}/'.format(self.regularUser1Bot1.id))
         self.assertEqual(response.status_code, 200)
 
     def test_get_bot_edit_page(self):
