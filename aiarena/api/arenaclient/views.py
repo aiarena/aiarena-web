@@ -185,10 +185,10 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             bot2.save()
 
         try:
-            bot1.leave_match()
-            bot2.leave_match()
+            bot1.leave_match(result.match_id)
+            bot2.leave_match(result.match_id)
         except BotNotInMatchException:
-            raise APIException('Unable to log result - one of the bots is not listed as in a match.')
+            raise APIException('Unable to log result - one of the bots is not listed as in this match.')
 
     def adjust_elo(self, result):
         if result.has_winner():

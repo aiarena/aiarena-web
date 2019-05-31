@@ -148,13 +148,16 @@ class Bot(models.Model):
         else:
             raise BotAlreadyInMatchException('Cannot enter a match - bot is already in one.')
 
-    def leave_match(self):
-        if self.in_match:
+    def leave_match(self, match_id=None):
+        if self.in_match and (match_id is None or self.current_match_id == match_id):
             self.current_match = None
             self.in_match = False
             self.save()
         else:
-            raise BotNotInMatchException('Cannot leave a match - bot is not in one.')
+            if match_id is None:
+                raise BotNotInMatchException('Cannot leave match - bot is not in one.')
+            else:
+                raise BotNotInMatchException('Cannot leave match - bot is not in match "{0}".'.format(match_id))
 
     def bot_data_is_currently_frozen(self):
         # dont alter bot_data while a bot is in a match, unless there was no bot_data initially

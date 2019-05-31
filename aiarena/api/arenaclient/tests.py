@@ -227,7 +227,7 @@ class ResultsTestCase(LoggedInTestCase):
         response = self._post_to_results(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 500)
         self.assertTrue('detail' in response.data)
-        self.assertEqual(u'Unable to log result - one of the bots is not listed as in a match.',
+        self.assertEqual(u'Unable to log result - one of the bots is not listed as in this match.',
                          response.data['detail'])
 
         bot2.in_match = False  # check bot 2 as well
@@ -238,7 +238,7 @@ class ResultsTestCase(LoggedInTestCase):
         response = self._post_to_results(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 500)
         self.assertTrue('detail' in response.data)
-        self.assertEqual(u'Unable to log result - one of the bots is not listed as in a match.',
+        self.assertEqual(u'Unable to log result - one of the bots is not listed as in this match.',
                          response.data['detail'])
 
     def test_get_results_not_authorized(self):

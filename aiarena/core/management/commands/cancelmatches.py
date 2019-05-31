@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
+from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Match, Result
 
 
@@ -21,4 +22,19 @@ class Command(BaseCommand):
 
             Result.objects.create(match=match, type='InitializationError', duration=0)
 
-            self.stdout.write(self.style.SUCCESS('Successfully marked match "%s" with an InitializationError' % match_id))
+            # attempt to kick the bots from the match
+            bot1 = match.participant_set.get(participant_number=1).bot
+            bot2 = match.participant_set.get(participant_number=2).bot
+            try:
+                bot1.leave_match(match_id)
+            except BotNotInMatchException:
+                self.stdout.write(
+                    'WARNING! Match "{1}": Participant 1 bot "{0}" was not registered as in this match.'.format(bot1.id, match_id))
+            try:
+                bot2.leave_match(match_id)
+            except BotNotInMatchException:
+                self.stdout.write(
+                    'WARNING! Match "{1}": Participant 2 bot "{0}" was not registered as in this match.'.format(bot1.id, match_id))
+
+            self.stdout.write(
+                self.style.SUCCESS('Successfully marked match "%s" with an InitializationError' % match_id))
