@@ -5,27 +5,29 @@
     <table>
         <tr>
             <td valign="top">
-                <ol>
-                    <h2>Under Construction</h2>
-                    <b>This website is currently under construction. Please feel free to have a look around, but be
-                        aware that things are likely to break currently.</b>
-                    <h3>Welcome to the Ai-Arena Open Beta!</h3>
-                    <b>Open Beta?</b><br>
-                    The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.<br>
-                    Everyone is invited to upload a Bot to the Ladder :)<br>
-                    <br>
-                    <br>
-                    <b>Instructions:</b><br>
-                    <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
-                    <li>Read the <a href="{% url 'rules' %}">Rules</a></li>
-                    <li>Upload your Bot to the Website and activate it</li>
-                    <br>
-                    Your Bot will be added to the Pool and starts fighting other Bots on the Ladder.
-                </ol>
+                <div style="margin-right: 15px">
+                    <ol>
+                        <h2>Under Construction</h2>
+                        <b>This website is currently under construction. Please feel free to have a look around, but be
+                            aware that things are likely to break currently.</b>
+                        <h3>Welcome to the Ai-Arena Open Beta!</h3>
+                        <b>Open Beta?</b><br>
+                        The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.<br>
+                        Everyone is invited to upload a Bot to the Ladder :)<br>
+                        <br>
+                        <br>
+                        <b>Instructions:</b><br>
+                        <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
+                        <li>Read the <a href="{% url 'rules' %}">Rules</a></li>
+                        <li>Upload your Bot to the Website and activate it</li>
+                        <br>
+                        Your Bot will be added to the Pool and starts fighting other Bots on the Ladder.
+                    </ol>
+                </div>
             </td>
             <td valign="top">
                 <h2>Top 10 bots</h2>
-                <table id="resultsTable" cellpadding="2px">
+                <table id="resultsTable" cellpadding="2px" style="min-width: 200px">
                     <tbody>
                     <tr>
                         <td><b>ELO</b></td>
