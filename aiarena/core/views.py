@@ -204,3 +204,8 @@ class BotDataDownloadView(PrivateStorageDetailView):
         user = private_file.request.user
         # Allow if staff, the owner of the file, or the file is marked as publicly downloadable
         return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_data_publicly_downloadable
+
+
+class Index(ListView):
+    queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]
+    template_name = 'index.html'

@@ -2,20 +2,44 @@
 {% load i18n %}
 
 {% block content %}
-    <ol>
-        <h2>Under Construction</h2>
-        <b>This website is currently under construction. Please feel free to have a look around, but be aware that things are likely to break currently.</b>
-        <h3>Welcome to the Ai-Arena Open Beta!</h3>
-        <b>Open Beta?</b><br>
-        The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.<br>
-        Everyone is invited to upload a Bot to the Ladder :)<br>
-        <br>
-        <br>
-        <b>Instructions:</b><br>
-        <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
-        <li>Read the <a href="{% url 'rules' %}">Rules</a></li>
-        <li>Upload your Bot to the Website and activate it</li>
-        <br>
-        Your Bot will be added to the Pool and starts fighting other Bots on the Ladder.
-    </ol>
+    <table>
+        <tr>
+            <td valign="top">
+                <ol>
+                    <h2>Under Construction</h2>
+                    <b>This website is currently under construction. Please feel free to have a look around, but be
+                        aware that things are likely to break currently.</b>
+                    <h3>Welcome to the Ai-Arena Open Beta!</h3>
+                    <b>Open Beta?</b><br>
+                    The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.<br>
+                    Everyone is invited to upload a Bot to the Ladder :)<br>
+                    <br>
+                    <br>
+                    <b>Instructions:</b><br>
+                    <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
+                    <li>Read the <a href="{% url 'rules' %}">Rules</a></li>
+                    <li>Upload your Bot to the Website and activate it</li>
+                    <br>
+                    Your Bot will be added to the Pool and starts fighting other Bots on the Ladder.
+                </ol>
+            </td>
+            <td valign="top">
+                <h2>Top 10 bots</h2>
+                <table id="resultsTable" cellpadding="2px">
+                    <tbody>
+                    <tr>
+                        <td><b>ELO</b></td>
+                        <td><b>Name</b></td>
+                    </tr>
+                    {% for bot in bot_list %}
+                        <tr>
+                            <td>{{ bot.elo }}</td>
+                            <td>{{ bot.as_html_link |safe }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
 {% endblock %}
