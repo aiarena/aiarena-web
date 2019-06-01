@@ -34,15 +34,6 @@ class Map(models.Model):
         return Map.objects.order_by('?').first()
 
 
-# todo: structure for separate ladder types
-class Match(models.Model):
-    map = models.ForeignKey(Map, on_delete=models.PROTECT)
-    created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.id.__str__()
-
-
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     service_account = models.BooleanField(default=False)
@@ -52,6 +43,16 @@ class User(AbstractUser):
 
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
+
+# todo: structure for separate ladder types
+class Match(models.Model):
+    map = models.ForeignKey(Map, on_delete=models.PROTECT)
+    created = models.DateTimeField(auto_now_add=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+
+    def __str__(self):
+        return self.id.__str__()
 
 
 def bot_zip_upload_to(instance, filename):
@@ -269,6 +270,7 @@ class Result(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(upload_to='replays', blank=True, null=True)
     duration = models.IntegerField()
+    submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return self.created.__str__()

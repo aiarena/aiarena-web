@@ -46,7 +46,9 @@ class BotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bot
-        fields = ('id', 'name', 'game_display_id', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race', 'type')
+        fields = (
+            'id', 'name', 'game_display_id', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race',
+            'type')
 
 
 class MatchSerializer(serializers.ModelSerializer):
@@ -76,7 +78,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         if Bot.objects.filter(active=True, in_match=False).count() <= 1:  # need at least 2 bots that aren't in game
             raise NotEnoughAvailableBots()
 
-        match = Match.objects.create(map=Map.random())
+        match = Match.objects.create(map=Map.random(), assigned_to=request.user)
 
         # Add participating bots
         bot1 = Bot.get_random_available()
@@ -117,6 +119,7 @@ class MatchViewSet(viewsets.GenericViewSet):
 class ResultSerializer(serializers.ModelSerializer):
     bot1_data = FileField(required=False)
     bot2_data = FileField(required=False)
+    submitted_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     def validate(self, attrs):
         # remove the bot datas so they don't cause validation failure
@@ -132,7 +135,7 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
-        fields = 'type', 'replay_file', 'duration', 'match', 'bot1_data', 'bot2_data'
+        fields = 'type', 'replay_file', 'duration', 'submitted_by', 'match', 'bot1_data', 'bot2_data'
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
