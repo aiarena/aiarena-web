@@ -27,16 +27,18 @@
             </td>
             <td valign="top">
                 <h2>Top 10 bots</h2>
-                <table id="resultsTable" cellpadding="2px" style="min-width: 200px">
+                <table id="resultsTable" cellpadding="2px" style="min-width: 250px">
                     <tbody>
                     <tr>
-                        <td><b>ELO</b></td>
+                        <td><b>Rank</b></td>
                         <td><b>Name</b></td>
+                        <td><b>ELO</b></td>
                     </tr>
                     {% for bot in bot_list %}
                         <tr>
-                            <td>{{ bot.elo }}</td>
+                            <td>{{ forloop.counter }}</td>
                             <td>{{ bot.as_html_link |safe }}</td>
+                            <td>{{ bot.elo }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
