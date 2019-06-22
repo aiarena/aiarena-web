@@ -6,16 +6,32 @@
     {% load static %}
     <link rel="stylesheet" href="{% static "style.css" %}">
     <link rel="shortcut icon" href="{%  static 'favicon.ico' %}">
+    <link href="https://fonts.googleapis.com/css?family=Gugi&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
     <title>{% block title %}AI Arena{% endblock %}</title>
 </head>
 
 <body>
 <div id="page">
-    <div id="sidebar">
+
+
+    <div id="header">
+        {% block header %}
+        <img src= ../static/img/ai-arena-logo.png alt="AI Arena Logo" class="center">
+        <br>
+        <h1 class="site-title">StarCraft II AI Arena</h1>
+        {% endblock %}
+    </div>
+      <div id="sidebar">
         {% block sidebar %}
             <ul id="sidebar-items">
                 <li>
-                    <h3>pages</h3>
+                    <div id="sidebar-header">
+                    <i class="material-icons">pages</i>
+                    <h3> pages</h3>
+                        </div>
                     <ul class="links">
                         <li><a href="{% url 'home' %}">{% trans "Home" %}</a></li>
                         <li><a href="{% url 'rules' %}">{% trans "Rules" %}</a></li>
@@ -27,7 +43,10 @@
                 </li>
 
                 <li>
+                    <div id="sidebar-header">
+                        <i class="material-icons">person</i>
                     <h3>user</h3>
+                    </div>
                     <ul class="links">
                         {% if user.is_authenticated %}
                             <li>{% trans "Logged in" %}: {{ user.username }}</li>
@@ -43,7 +62,10 @@
 
                 {% if user.is_staff %}
                 <li>
+                    <div id="sidebar-header">
+                        <i class="material-icons">bug_report</i>
                     <h3>admin</h3>
+                    </div>
                     <ul class="links">
                             <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
                             <li><a href="{% url 'api-root' %}">{% trans "API" %}</a></li>
@@ -55,7 +77,10 @@
                 {% endif %}
 
                 <li>
+                    <div id="sidebar-header">
+                        <i class="material-icons">show_chart</i>
                     <h3>stats</h3>
+                    </div>
                     <ul class="links">
                         <li>Date: {% now "d. N Y" %}</li>
                         <li>Time: {% now "H:i:s" %} UTC</li>
@@ -66,7 +91,10 @@
                 </li>
 
                 <li>
+                    <div id="sidebar-header">
+                        <i class="material-icons">link</i>
                     <h3>links</h3>
+                    </div>
                     <ul class="links">
                         <li><a href="https://discord.gg/yDBzbtC">Discord</a></li>
                         <li><a href="https://gitlab.com/aiarena">GitLab</a></li>
@@ -78,16 +106,11 @@
         {% endblock %}
     </div>
 
-    <div id="header">
-        {% block header %}
-            <h1 class="site-title">StarCraft II AI Arena</h1>
-        {% endblock %}
-    </div>
-
     <div id="content">
         {% block content %}
         {% endblock %}
     </div>
+
 
     <div id="footer">
         {% block footer %}

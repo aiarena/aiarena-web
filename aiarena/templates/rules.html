@@ -2,75 +2,108 @@
 {% load i18n %}
 
 {% block content %}
-    <h3>General Rules</h3>
+ <div class="divider"><span></span><span><h2>General Rules</h2></span><span></span></div>
+<div id="rules-content">
     Bot authors must ensure that their creations are not harming the ladder system in any way, including but not limited to:<br><br>
+<ul>
     <li>Slowing down the system on purpose</li>
     <li>Generating huge amounts of data on the disc without purpose</li>
     <li>Tempering with the filesystem or memory</li>
     <li>Network access of any kind besides connecting to the local sc2api process is strictly forbidden</li>
     <li>Uploading copies (clones) of another bot is forbidden</li>
     <li>Users can activate one Bot per Race</li>
+    </ul>
+    </div>
 
-    <h3>Bot Development</h3>
-    The Ladder supports multiple programming languages<br>
+<div class="divider"><span></span><span><h2>Bot Development</h2></span><span></span></div>
+<div id="rules-content">
+    The Ladder supports multiple programming languages.<br>
     To make sure the bot works on the ladder you must follow the following standards:<br>
-
     <br>
-    <b>Python:</b>
-    <li>Version: Python 3.7</li>
-    <li>Python Modules: sc2, pysc2, numpy, tensorflow (cpu), scipy</li>
-    <li>Bot called via run.py</li>
-    Website: <a href="https://github.com/Dentosal/python-sc2">python-sc2</a><br>
+</div>
 
-    <br>
-    <b>C++:</b>
-    <li>Can be compiled on Windows or Linux</li>
-    <li>Windows: Bot called via botname.exe</li>
-    <li>Linux: Bot called via botname</li>
-    Website: <a href="https://github.com/Blizzard/s2client-api">s2client-api</a><br>
+<div id="rules-content">
+    <div id="type-left">
+        <h3>Python:</h3>
+        <ul>
+            <li>Version: Python 3.7</li>
+            <li>Python Modules: sc2, pysc2, numpy, tensorflow (cpu), scipy</li>
+            <li>Bot called via run.py</li>
+            <li>Website: <a href="https://github.com/Dentosal/python-sc2">python-sc2</a></li>
+            </ul>
+        <div class="divider-full div-transparent-full "></div>
+        </div>
 
-    <br>
-    <b>Java:</b>
-    <li>Version: Java 11</li>
-    <li>Bot called via botname.jar</li>
-    Website: <a href="https://ocraft.github.io/ocraft-s2client/">ocraft-s2client</a><br>
+    <div id="type-middle">
+        <h3>C++:</h3>
+        <ul>
+            <li>Can be compiled on Windows or Linux</li>
+            <li>Windows: Bot called via botname.exe</li>
+            <li>Linux: Bot called via botname</li>
+            <li>Website: <a href="https://github.com/Blizzard/s2client-api">s2client-api</a></li>
+        </ul>
+        <div class="divider-full div-transparent-full "></div>
+    </div>
+    <div id="type-right">
+    <h3>Java:</h3>
+        <ul>
+            <li>Version: Java 11</li>
+            <li>Bot called via botname.jar</li>
+            <li>Website: <a href="https://ocraft.github.io/ocraft-s2client/">ocraft-s2client</a></li>
+        </ul>
+        <div class="divider-full div-transparent-full "></div>
+    </div>
+    <div id="type-left">
+    <h3>DotNetCore:</h3>
+        <ul>
+            <li>Version: DotNetCore 2.2</li>
+            <li>Bot called via botname.dll</li>
+            <li>Website: <a href="https://github.com/NikEyX/SC2-CSharpe-Starterkit">SC2-CSharpe-Starterkit</a></li>
+        </ul>
+        <div class="divider-full div-transparent-full "></div>
+    </div>
+    <div id="type-middle">
+    <h3>GoLang:</h3>
+        <ul>
+            <li>Bot called via botname</li>
+            <li>Website: <a href="https://github.com/chippydip/go-sc2ai">go-sc2ai</a></li>
+        </ul>
+        <div class="divider-full div-transparent-full "></div>
+    </div>
+    <div id="type-right">
+    <h3>NodeJS:</h3>
+        <ul>
+            <li>Bot called via botname.js</li>
+            <li>Website: <a href="https://github.com/node-sc2/core">node-sc2/core</a></li>
+            </ul>
+        <div class="divider-full div-transparent-full "></div>
+    </div>
+</div>
 
-    <br>
-    <b>DotNetCore:</b>
-    <li>Version: DotNetCore 2.2</li>
-    <li>Bot called via botname.dll</li>
-    Website: <a href="https://github.com/NikEyX/SC2-CSharpe-Starterkit">SC2-CSharpe-Starterkit</a><br>
 
-    <br>
-    <b>GoLang:</b>
-    <li>Bot called via botname</li>
-    Website: <a href="https://github.com/chippydip/go-sc2ai">go-sc2ai</a><br>
-
-    <br>
-    <b>NodeJS:</b>
-    <li>Bot called via botname.js</li>
-    Website: <a href="https://github.com/node-sc2/core">node-sc2/core</a><br>
-
-    <br>
-    For a successful upload the Bot must be packed using zip. (Max 25 MB)<br>
+    <div id="asshole"> <br><br>For a successful upload the Bot must be packed using zip. (Max 25 MB)<br>
     Please make sure the executable is in root path after extraction (Don't zip the directory)<br>
     <br>
-    The bots may write to a data directory, the data can be downloaded via profile page.
-    <br>
-    <br>
+        The bots may write to a data directory, the data can be downloaded via profile page.</div>
 
-    <h3>Maps</h3>
+<div class="divider"><span></span><span><h2>Maps</h2></span><span></span></div>
+<div id="rules-content">
     Download the latest ladder pack from the <a href="https://github.com/Blizzard/s2client-proto#downloads">GitHub</a> Repository.
+</div>
 
-    <h3>Security</h3>
+   <div class="divider"><span></span><span><h2>Security</h2></span><span></span></div>
+<div id="rules-content">
     The Ladder is completely automated and in theory attacks are quite simple to achieve. To counter this the games are
     played on seperated LadderServers which are firewalled and reset themselves after every game.
     <br>
     Network access is denied and will lead to a permanent ban from the ladder.
     <br>
     The training data is stored on another server and will be fetched before each game.
-
-    <h3>Match Queue (Coming soon)</h3>
+</div>
+<div class="divider"><span></span><span><h2>Match Queue (Coming soon)</h2></span><span></span></div>
+<div id="rules-content">
     The match queue makes sure all Bots have to play against every other bot on the ladder.
     If the queue is empty a fresh one is generated containing all active bots. (Round-Robin)
+</div>
+<div class="divider-full div-transparent-full"></div>
 {% endblock %}
