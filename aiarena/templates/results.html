@@ -41,6 +41,8 @@
                 <td>{{ result.duration }}</td>
                 {% if result.replay_file %}
                     <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                {% elif result.replay_file_corruption_detected %}
+                    <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
                 {% else %}
                     <td>Unavailable</td>
                 {% endif %}

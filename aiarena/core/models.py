@@ -275,13 +275,20 @@ class Result(models.Model):
     def __str__(self):
         return self.created.__str__()
 
+    # this is not checked while the replay corruption is happening
     def validate_replay_file_requirement(self):
-        if (self.has_winner() or self.is_tie()) and self.replay_file == None:
+        if (self.has_winner() or self.is_tie()) and not self.replay_file:
             raise ValidationError('A win/loss or tie result must contain a replay file.')
 
     def clean(self, *args, **kwargs):
-        self.validate_replay_file_requirement()
+        # self.validate_replay_file_requirement() # disabled for now
         super().clean(*args, **kwargs)
+
+    # some replays corrupt under linux currently.
+    # if a replay file isn't supplied when it should be, then we assume it was corrupted
+    # and therefore not uploaded with the result.
+    def replay_file_corruption_detected(self):
+        return (self.has_winner() or self.is_tie()) and not self.replay_file
 
     def has_winner(self):
         return self.type in (
