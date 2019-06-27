@@ -56,12 +56,14 @@
                         <tr>
                             <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
                             <td>{{ result.opponent.bot.as_html_link |safe }}</td>
-                            <td>{{ result.type }}</td>
+                            <td>{{ result.relative_type }}</td>
                             <td>{{ result.me.elo_change |format_elo_change }}</td>
                             <td>{{ result.mapname }}</td>
                             <td>{{ result.duration }}</td>
                             {% if result.replay_file %}
                                 <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                            {% elif result.replay_file_corruption_detected %}
+                                <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
                             {% else %}
                                 <td>Unavailable</td>
                             {% endif %}

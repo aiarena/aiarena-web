@@ -85,9 +85,9 @@ class BotDetail(DetailView):
             result.me = result.match.participant_set.filter(bot=self.object)[0]
             if result.winner is not None:
                 if result.winner == self.object:
-                    result.type = 'Win'
+                    result.relative_type = 'Win'
                 else:
-                    result.type = 'Loss'
+                    result.relative_type = 'Loss'
 
         context['result_list'] = results
         return context
