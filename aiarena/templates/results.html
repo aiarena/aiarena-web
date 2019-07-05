@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n core_filters %}
 
 {% block content %}
 
@@ -8,8 +8,11 @@
         <tr>
             <td><b>Date</b></td>
             <td><b>Bot 1</b></td>
+            <td><b>+/-</b></td>
             <td><b>Bot 2</b></td>
+            <td><b>+/-</b></td>
             <td><b>Result</b></td>
+            <td><b>Map</b></td>
             <td><b>Duration</b></td>
             <td><b>Replay</b></td>
         </tr>
@@ -17,21 +20,29 @@
             <tr>
                 <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
 
-                {% if result.winner == result.bot1.bot %}
-                    <td><b>{{ result.bot1.bot.as_html_link |safe }}</b></td>
-                    <td>{{ result.bot2.bot.as_html_link |safe }}</td>
-                {% elif result.winner == result.bot2.bot %}
-                    <td>{{ result.bot1.bot.as_html_link |safe }}</td>
-                    <td><b>{{ result.bot2.bot.as_html_link |safe }}</b></td>
+                {% if result.winner == result.participant1.bot %}
+                    <td><b>{{ result.participant1.bot.as_html_link |safe }}</b></td>
                 {% else %}
-                    <td>{{ result.bot1.bot.as_html_link |safe }}</td>
-                    <td>{{ result.bot2.bot.as_html_link |safe }}</td>
+                    <td>{{ result.participant1.bot.as_html_link |safe }}</td>
                 {% endif %}
 
+                <td>{{ result.participant1.elo_change |format_elo_change }}</td>
+
+                {% if result.winner == result.participant2.bot %}
+                    <td><b>{{ result.participant2.bot.as_html_link |safe }}</b></td>
+                {% else %}
+                    <td>{{ result.participant2.bot.as_html_link |safe }}</td>
+                {% endif %}
+
+                <td>{{ result.participant2.elo_change |format_elo_change }}</td>
+
                 <td>{{ result.type }}</td>
+                <td>{{ result.mapname }}</td>
                 <td>{{ result.duration }}</td>
                 {% if result.replay_file %}
                     <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                {% elif result.replay_file_corruption_detected %}
+                    <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
                 {% else %}
                     <td>Unavailable</td>
                 {% endif %}

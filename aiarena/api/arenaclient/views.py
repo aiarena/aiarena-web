@@ -47,7 +47,9 @@ class BotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bot
-        fields = ('id', 'name', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race', 'type')
+        fields = (
+            'id', 'name', 'game_display_id', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race',
+            'type')
 
 
 class MatchSerializer(serializers.ModelSerializer):
@@ -152,6 +154,7 @@ class MatchViewSet(viewsets.GenericViewSet):
 class ResultSerializer(serializers.ModelSerializer):
     bot1_data = FileField(required=False)
     bot2_data = FileField(required=False)
+    submitted_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     def validate(self, attrs):
         # remove the bot datas so they don't cause validation failure
@@ -167,7 +170,7 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
-        fields = 'type', 'replay_file', 'duration', 'match', 'bot1_data', 'bot2_data'
+        fields = 'type', 'replay_file', 'duration', 'submitted_by', 'match', 'bot1_data', 'bot2_data'
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -190,16 +193,26 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             process_bot2_data = True
 
         result = serializer.save()
+        p1_initial_elo, p2_initial_elo = self.get_initial_elos(result)
         self.adjust_elo(result)
         p1, p2 = result.get_participants()
         p1.update_resultant_elo()
         p2.update_resultant_elo()
+        # calculate the change in ELO
+        p1.elo_change = p1.resultant_elo - p1_initial_elo
+        p1.save()
+        p2.elo_change = p2.resultant_elo - p2_initial_elo
+        p2.save()
 
         if ENABLE_ELO_SANITY_CHECK:  # todo remove this condition and log instead of an exception.
             # test here to check ELO total and ensure no corruption
-            sumElo = Bot.objects.aggregate(Sum('elo'))
-            if sumElo['elo__sum'] != ELO_START_VALUE * Bot.objects.all().count():
-                logger.critical("ELO did not sum to expected value upon submission of result {0}".format(result.id))
+            expectedEloSum = ELO_START_VALUE * Bot.objects.all().count()
+            actualEloSum = Bot.objects.aggregate(Sum('elo'))
+
+            if actualEloSum['elo__sum'] != expectedEloSum:
+                logger.critical(
+                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
+                        actualEloSum['elo__sum'], expectedEloSum, result.id))
 
         bot1 = serializer.validated_data['match'].participant_set.get(participant_number=1).bot
         bot2 = serializer.validated_data['match'].participant_set.get(participant_number=2).bot
@@ -214,10 +227,10 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             bot2.save()
 
         try:
-            bot1.leave_match()
-            bot2.leave_match()
+            bot1.leave_match(result.match_id)
+            bot2.leave_match(result.match_id)
         except BotNotInMatchException:
-            raise APIException('Unable to log result - one of the bots is not listed as in a match.')
+            raise APIException('Unable to log result - one of the bots is not listed as in this match.')
 
     def adjust_elo(self, result):
         if result.has_winner():
@@ -233,3 +246,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         bot1.save()
         bot2.elo -= delta
         bot2.save()
+
+    def get_initial_elos(self, result):
+        first, second = result.get_participant_bots()
+        return first.elo, second.elo

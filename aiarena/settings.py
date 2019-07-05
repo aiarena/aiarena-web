@@ -106,10 +106,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    # 'DEFAULT_FILTER_BACKENDS': (
-    #     'django_filters.rest_framework.DjangoFilterBackend',
-    # # todo: check that opening this generically doesn't leak sensitive info.
-    # ),
+    'DEFAULT_FILTER_BACKENDS': (
+        'rest_framework.filters.OrderingFilter',
+        # 'django_filters.rest_framework.DjangoFilterBackend',
+    # todo: check that opening this generically doesn't leak sensitive info.
+    ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 100
 }
@@ -176,6 +177,7 @@ ENABLE_ELO_SANITY_CHECK = True
 ELO = Elo(ELO_K)
 
 MAX_USER_BOT_COUNT = 6
+MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
 
 # django-avatar
 # https://django-avatar.readthedocs.io/en/latest/

@@ -1,4 +1,5 @@
 import logging
+import uuid
 from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
@@ -14,7 +15,7 @@ from private_storage.fields import PrivateFileField
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT
+from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,17 @@ class Map(models.Model):
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         return Map.objects.order_by('?').first()
+
+
+class User(AbstractUser):
+    email = models.EmailField(unique=True)
+    service_account = models.BooleanField(default=False)
+
+    def get_absolute_url(self):
+        return reverse('author', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
 # todo: structure for separate ladder types
@@ -67,17 +79,6 @@ class Match(models.Model):
         # create match participants
         Participant.objects.create(match=match, participant_number=1, bot=bot1)
         Participant.objects.create(match=match, participant_number=2, bot=bot2)
-
-
-class User(AbstractUser):
-    email = models.EmailField(unique=True)
-    service_account = models.BooleanField(default=False)
-
-    def get_absolute_url(self):
-        return reverse('author', kwargs={'pk': self.pk})
-
-    def as_html_link(self):
-        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
 def bot_zip_upload_to(instance, filename):
@@ -124,6 +125,8 @@ class Bot(models.Model):
     bot_data_publicly_downloadable = models.BooleanField(default=False)
     plays_race = models.CharField(max_length=1, choices=RACES)
     type = models.CharField(max_length=32, choices=TYPES)
+    # the ID displayed to other bots during a game so they can recognize their opponent
+    game_display_id = models.UUIDField(default=uuid.uuid4)
 
     def calc_bot_files_md5hash(self):
         # we technically shouldn't be accessing _committed, but it was the only way I could find to know
@@ -137,14 +140,15 @@ class Bot(models.Model):
             self.bot_data_md5hash = calculate_md5(self.bot_data.path)
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
-    def validate_one_active_bot_race_per_user(self):
+    def validate_active_bot_race_per_user(self):
         # if there is already an active bot for this user playing the same race, and this bot is also marked as active
         # then back out
-        if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(id=self.id).exists() \
+        if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
+                id=self.id).count() >= MAX_USER_BOT_COUNT_ACTIVE_PER_RACE \
                 and self.active:
             raise ValidationError(
-                'An active bot playing that race already exists for this user.'
-                'Each user can only have 1 active bot per race.')
+                'Too many active bots playing that race already exist for this user.'
+                ' Each user can only have ' + str(MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
 
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= MAX_USER_BOT_COUNT:
@@ -158,7 +162,7 @@ class Bot(models.Model):
 
     def clean(self):
         self.validate_max_bot_count()
-        self.validate_one_active_bot_race_per_user()
+        self.validate_active_bot_race_per_user()
 
     def __str__(self):
         return self.name
@@ -171,13 +175,16 @@ class Bot(models.Model):
         else:
             raise BotAlreadyInMatchException('Cannot enter a match - bot is already in one.')
 
-    def leave_match(self):
-        if self.in_match:
+    def leave_match(self, match_id=None):
+        if self.in_match and (match_id is None or self.current_match_id == match_id):
             self.current_match = None
             self.in_match = False
             self.save()
         else:
-            raise BotNotInMatchException('Cannot leave a match - bot is not in one.')
+            if match_id is None:
+                raise BotNotInMatchException('Cannot leave match - bot is not in one.')
+            else:
+                raise BotNotInMatchException('Cannot leave match - bot is not in match "{0}".'.format(match_id))
 
     def bot_data_is_currently_frozen(self):
         # dont alter bot_data while a bot is in a match, unless there was no bot_data initially
@@ -261,6 +268,7 @@ class Participant(models.Model):
     participant_number = models.PositiveSmallIntegerField()
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='match_participations')
     resultant_elo = models.SmallIntegerField(null=True)
+    elo_change = models.SmallIntegerField(null=True)
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo
@@ -285,23 +293,30 @@ class Result(models.Model):
         ('Error', 'Error'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
-    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True,
-                               editable=False)
+    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
     type = models.CharField(max_length=32, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(upload_to='replays', blank=True, null=True)
     duration = models.IntegerField()
+    submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return self.created.__str__()
 
+    # this is not checked while the replay corruption is happening
     def validate_replay_file_requirement(self):
-        if (self.has_winner() or self.is_tie()) and self.replay_file == None:
+        if (self.has_winner() or self.is_tie()) and not self.replay_file:
             raise ValidationError('A win/loss or tie result must contain a replay file.')
 
     def clean(self, *args, **kwargs):
-        self.validate_replay_file_requirement()
+        # self.validate_replay_file_requirement() # disabled for now
         super().clean(*args, **kwargs)
+
+    # some replays corrupt under linux currently.
+    # if a replay file isn't supplied when it should be, then we assume it was corrupted
+    # and therefore not uploaded with the result.
+    def replay_file_corruption_detected(self):
+        return (self.has_winner() or self.is_tie()) and not self.replay_file
 
     def has_winner(self):
         return self.type in (
@@ -353,7 +368,8 @@ class Result(models.Model):
     def save(self, *args, **kwargs):
         # set winner
         if self.has_winner():
-            self.winner = Participant.objects.get(match=self.match, participant_number=self.winner_participant_number()).bot
+            self.winner = Participant.objects.get(match=self.match,
+                                                  participant_number=self.winner_participant_number()).bot
 
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)

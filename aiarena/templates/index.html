@@ -2,20 +2,63 @@
 {% load i18n %}
 
 {% block content %}
-    <ol>
-        <h2>Under Construction</h2>
-        <b>This website is currently under construction. Please feel free to have a look around, but be aware that things are likely to break currently.</b>
-        <h3>Welcome to the Ai-Arena Open Beta!</h3>
+
+    <div class="divider"><span></span><span><h2>Under Construction</h2></span><span></span></div>
+
+    <div id="construction">
+        <div class="construction-content">
+            <span><i class="material-icons">build</i></span>
+            <span> <h3>This website is currently under construction. </h3>
+                    Please feel free to have a look around, but be aware that things are likely to break currently.</span>
+        </div>
+    </div>
+
+    <div class="divider"><span></span><span><h2>Welcome to the Ai-Arena Open Beta!</h2></span><span></span></div>
+    <div id="rules-short">
         <b>Open Beta?</b><br>
         The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.<br>
         Everyone is invited to upload a Bot to the Ladder :)<br>
         <br>
         <br>
         <b>Instructions:</b><br>
-        <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
-        <li>Read the <a href="{% url 'rules' %}">Rules</a></li>
-        <li>Upload your Bot to the Website and activate it</li>
-        <br>
-        Your Bot will be added to the Pool and starts fighting other Bots on the Ladder.
-    </ol>
+        <ol>
+            <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
+            <li>Read the <a href="{% url 'rules' %}">Rules</a></li>
+            <li>Upload your Bot to the Website and activate it</li>
+            <br>
+        </ol>
+        <div>Your Bot will be added to the Pool and starts fighting other Bots on the Ladder.</div>
+    </div>
+
+    <div id="float-half-left">
+        <div class="divider"><span></span><span><h2>Problems?</h2></span><span></span></div>
+        <div id="problems">
+            Any problems with the website can be reported in our <a href="https://discord.gg/yDBzbtC">Discord</a>
+        </div>
+        <br> <!-- extra space -->
+        <div class="divider-full div-transparent-full "></div>
+    </div>
+    <div id="float-half-left">
+        <div class="divider"><span></span><span><h2>Top 10 bots</h2></span><span></span></div>
+        <div id="top10">
+            <table id="resultsTable" cellpadding="2px" style="min-width: 250px">
+                <tbody>
+                <tr>
+                    <td><b>Rank</b></td>
+                    <td><b>Name</b></td>
+                    <td><b>ELO</b></td>
+                </tr>
+                {% for bot in bot_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ bot.as_html_link |safe }}</td>
+                        <td>{{ bot.elo }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <br> <!-- extra space -->
+            <div class="divider-full div-transparent-full "></div>
+        </div>
+    </div>
 {% endblock %}

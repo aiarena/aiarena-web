@@ -37,6 +37,7 @@ class UserProfile(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         # Add in the user's bots
         context['bot_list'] = self.request.user.bots.all()
         context['max_user_bot_count'] = settings.MAX_USER_BOT_COUNT
+        context['max_active_per_race_bot_count'] = settings.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
         return context
 
 
@@ -75,16 +76,18 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')[:10]
+        results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')[:50]
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
+            result.mapname = result.match.map.name
             result.opponent = result.match.participant_set.exclude(bot=self.object)[0]
+            result.me = result.match.participant_set.filter(bot=self.object)[0]
             if result.winner is not None:
                 if result.winner == self.object:
-                    result.type = 'Win'
+                    result.relative_type = 'Win'
                 else:
-                    result.type = 'Loss'
+                    result.relative_type = 'Loss'
 
         context['result_list'] = results
         return context
@@ -166,8 +169,9 @@ class Results(View):
     def get(self, request):
         results = Result.objects.all().order_by('-created')[:100]
         for result in results:
-            result.bot1 = result.match.participant_set.filter(participant_number=1)[0]
-            result.bot2 = result.match.participant_set.filter(participant_number=2)[0]
+            result.participant1 = result.match.participant_set.filter(participant_number=1)[0]
+            result.participant2 = result.match.participant_set.filter(participant_number=2)[0]
+            result.mapname = result.match.map.name
         context = {'result_list': results}
         return render(request, 'results.html', context)
 
@@ -200,3 +204,8 @@ class BotDataDownloadView(PrivateStorageDetailView):
         user = private_file.request.user
         # Allow if staff, the owner of the file, or the file is marked as publicly downloadable
         return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_data_publicly_downloadable
+
+
+class Index(ListView):
+    queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]
+    template_name = 'index.html'

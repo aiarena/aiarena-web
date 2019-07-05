@@ -1,7 +1,9 @@
 import os
+from io import StringIO
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.core.management import call_command, CommandError
 from django.test import TestCase
 
 from aiarena.core.models import User, Bot, Map
@@ -21,7 +23,8 @@ class BaseTestCase(TestCase):
 
     def _create_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race,
+                      type='python')
             bot.full_clean()
             bot.save()
             return bot
@@ -99,14 +102,14 @@ class MatchReadyTestCase(LoggedInTestCase):
     def setUp(self):
         super(MatchReadyTestCase, self).setUp()
 
-        self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
-        self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
-        self.staffUserBot1 = self._create_bot(self.staffUser1, 'staffUserBot1')
-        self.staffUserBot2 = self._create_bot(self.staffUser1, 'staffUserBot2')
+        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
+        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
+        self.staffUser1Bot1 = self._create_active_bot(self.staffUser1, 'staffUser1Bot1', 'T')
+        self.staffUser1Bot2 = self._create_active_bot(self.staffUser1, 'staffUser1Bot2', 'Z')
         self._create_map('testmap1')
 
 
-# Use this to pre-build a full dataset for testing
+# Use this to pre-build a fuller dataset for testing
 class FullDataSetTestCase(MatchReadyTestCase):
 
     def setUp(self):
@@ -172,8 +175,6 @@ class FullDataSetTestCase(MatchReadyTestCase):
         self.assertEqual(response.status_code, 201)
 
     def _generate_extra_bots(self):
-        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1')
-        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
         self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
         self.regularUser2Bot2 = self._create_active_bot(self.regularUser2, 'regularUser2Bot2')
         self.regularUser3Bot1 = self._create_active_bot(self.regularUser3, 'regularUser3Bot1')
@@ -236,8 +237,8 @@ class BotTestCase(LoggedInTestCase):
         # all bots should be the same race, so just pick any
         inactive_bot = Bot.objects.filter(user=self.regularUser1, active=False)[0]
         with self.assertRaisesMessage(ValidationError,
-                                      'An active bot playing that race already exists for this user.'
-                                      'Each user can only have 1 active bot per race.'):
+                                      'Too many active bots playing that race already exist for this user.'
+                                      ' Each user can only have 1 active bot(s) per race.'):
             inactive_bot.active = True
             inactive_bot.full_clean()  # run validation
 
@@ -256,7 +257,7 @@ class PageRenderTestCase(FullDataSetTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_bot_page(self):
-        response = self.client.get('/bots/{0}/'.format(self.regularUserBot1.id))
+        response = self.client.get('/bots/{0}/'.format(self.regularUser1Bot1.id))
         self.assertEqual(response.status_code, 200)
 
     def test_get_bot_edit_page(self):
@@ -308,3 +309,28 @@ class PageRenderTestCase(FullDataSetTestCase):
 
 class PrivateStorageTestCase(MatchReadyTestCase):
     pass  # todo
+
+
+class ManagementCommandTests(MatchReadyTestCase):
+    """
+    Tests for management commands
+    """
+
+    def test_cancel_matches(self):
+        # test match doesn't exist
+        with self.assertRaisesMessage(CommandError, 'Match "12345" does not exist'):
+            call_command('cancelmatches', '12345')
+
+        # test match successfully cancelled
+        self.client.login(username='staff_user', password='x')
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        match_id = response.data['id']
+
+        out = StringIO()
+        call_command('cancelmatches', match_id, stdout=out)
+        self.assertIn('Successfully marked match "{0}" with an InitializationError'.format(match_id), out.getvalue())
+
+        # test result already exists
+        with self.assertRaisesMessage(CommandError, 'A result already exists for match "{0}"'.format(match_id)):
+            call_command('cancelmatches', match_id)

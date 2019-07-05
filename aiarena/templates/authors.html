@@ -9,8 +9,8 @@
         {% for author in user_list %}
             {% if forloop.first %}
                 <tr>
-            {# Start a new row every 4 authors #}
-            {% elif forloop.counter|divisibleby:5 %}
+            {# Start a new row every 5 authors #}
+            {% elif forloop.counter0|divisibleby:5 %}
                 </tr>
                 <tr>
             {% endif %}

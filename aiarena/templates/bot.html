@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n core_filters %}
 
 {% block content %}
     <h2 align="center"><b>{{ bot.name }}</b></h2>
     <table id="bot_table" style="width: 100%">
         <tbody>
         <tr>
-            <td style="width: 30%;">
-                <table id="bot_details" style="width: 100%; padding: 0em 1em 1em 2em;">
+            <td style="width: 25%; vertical-align: top">
+                <table id="bot_details" style="width: 100%; padding: 0em 1em 1em 2em">
                     <tbody>
                     <tr>
                         <td><h3><b><u>Details</u></b></h3></td>
@@ -37,7 +37,7 @@
                     </tbody>
                 </table>
             </td>
-            <td style="width: 70%; vertical-align: top">
+            <td style="width: 75%; vertical-align: top">
                 <table id="bot_results" style="width: 100%; vertical-align: top">
                     <tbody>
                     <tr>
@@ -47,6 +47,8 @@
                         <td><b>Date</b></td>
                         <td><b>Opponent</b></td>
                         <td><b>Result</b></td>
+                        <td><b>+/-</b></td>
+                        <td><b>Map</b></td>
                         <td><b>Duration</b></td>
                         <td><b>Replay</b></td>
                     </tr>
@@ -54,10 +56,14 @@
                         <tr>
                             <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
                             <td>{{ result.opponent.bot.as_html_link |safe }}</td>
-                            <td>{{ result.type }}</td>
+                            <td>{{ result.relative_type }}</td>
+                            <td>{{ result.me.elo_change |format_elo_change }}</td>
+                            <td>{{ result.mapname }}</td>
                             <td>{{ result.duration }}</td>
                             {% if result.replay_file %}
                                 <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                            {% elif result.replay_file_corruption_detected %}
+                                <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
                             {% else %}
                                 <td>Unavailable</td>
                             {% endif %}
