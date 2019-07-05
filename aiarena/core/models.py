@@ -50,11 +50,12 @@ class Match(models.Model):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     started = models.DateTimeField(blank=True, null=True, editable=False)
+    assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return self.id.__str__()
 
-    def start(self):
+    def start(self, assign_to):
         with transaction.atomic():
             self.objects.select_for_update().get(match=self)  # lock self to avoid race conditions
             if self.started is None:
@@ -68,6 +69,7 @@ class Match(models.Model):
                     p.bot.enter_match(self)
 
                 self.started = timezone.now()
+                self.assigned_to=assign_to
                 self.save()
                 return True  # started match successfully
             else:

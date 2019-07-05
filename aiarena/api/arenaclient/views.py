@@ -87,7 +87,7 @@ class MatchViewSet(viewsets.GenericViewSet):
             for bot2 in Bot.objects.exclude(active=True, id__in=already_processed_bots):
                 Match.create(Map.random(), bot1, bot2)
 
-    def _get_next_match(self):
+    def _start_next_match(self, requesting_user):
         with connection.cursor() as cursor:
             # Lock the matches table
             # this needs to happen so that if we end up having to generate a new set of matches
@@ -103,7 +103,7 @@ class MatchViewSet(viewsets.GenericViewSet):
 
                 # todo: has count now changed?
                 for match in queued_matches:
-                    if match.start():
+                    if match.start(requesting_user):
                         return match
 
                 raise NotEnoughAvailableBots()
@@ -111,25 +111,7 @@ class MatchViewSet(viewsets.GenericViewSet):
                 cursor.execute("UNLOCK TABLES;")
 
     def create(self, request, *args, **kwargs):
-
-        # match = Match.objects.create(map=Map.random())
-        #
-        # # Add participating bots
-        # bot1 = Bot.get_random_available()
-        # bot2 = bot1.get_random_available_excluding_self()
-        #
-        # # create match participants
-        # Participant.objects.create(match=match, participant_number=1, bot=bot1)
-        # Participant.objects.create(match=match, participant_number=2, bot=bot2)
-        #
-        # # mark bots as in match
-        # bot1.enter_match(match)
-        # bot2.enter_match(match)
-        #
-        # # return bot data along with the match
-        # match.bot1 = bot1
-        # match.bot2 = bot2
-        match = self._get_next_match()
+        match = self._start_next_match(request.user)
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
