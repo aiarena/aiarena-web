@@ -171,9 +171,13 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
         if ENABLE_ELO_SANITY_CHECK:  # todo remove this condition and log instead of an exception.
             # test here to check ELO total and ensure no corruption
-            sumElo = Bot.objects.aggregate(Sum('elo'))
-            if sumElo['elo__sum'] != ELO_START_VALUE * Bot.objects.all().count():
-                logger.critical("ELO did not sum to expected value upon submission of result {0}".format(result.id))
+            expectedEloSum = ELO_START_VALUE * Bot.objects.all().count()
+            actualEloSum = Bot.objects.aggregate(Sum('elo'))
+
+            if actualEloSum['elo__sum'] != expectedEloSum:
+                logger.critical(
+                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
+                        actualEloSum['elo__sum'], expectedEloSum, result.id))
 
         bot1 = serializer.validated_data['match'].participant_set.get(participant_number=1).bot
         bot2 = serializer.validated_data['match'].participant_set.get(participant_number=2).bot
