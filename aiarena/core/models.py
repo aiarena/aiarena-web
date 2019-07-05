@@ -57,7 +57,7 @@ class Match(models.Model):
 
     def start(self, assign_to):
         with transaction.atomic():
-            self.objects.select_for_update().get(match=self)  # lock self to avoid race conditions
+            Match.objects.select_for_update().get(id=self.id)  # lock self to avoid race conditions
             if self.started is None:
                 # is a bot currently in a match?
                 participants = Participant.objects.select_for_update().filter(match=self)

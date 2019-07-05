@@ -88,14 +88,20 @@ class MatchViewSet(viewsets.GenericViewSet):
                 Match.create(Map.random(), bot1, bot2)
 
     def _start_next_match(self, requesting_user):
+
+        Bot.timeout_overtime_bot_games()
+
         with connection.cursor() as cursor:
             # Lock the matches table
             # this needs to happen so that if we end up having to generate a new set of matches
             # then we don't hit a race condition
-            cursor.execute("LOCK TABLES %s WRITE", Match._meta.db_table)
+            # MySql also requires we lock any other tables we access as well.
+            cursor.execute(
+                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} READ".format(Match._meta.db_table,
+                                                                              Participant._meta.db_table,
+                                                                              Bot._meta.db_table,
+                                                                              Map._meta.db_table))
             try:
-                Bot.timeout_overtime_bot_games()
-
                 queued_matches = Match.objects.filter(started__isnull=True)
 
                 if queued_matches.count() == 0:

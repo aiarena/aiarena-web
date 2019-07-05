@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from aiarena.core.models import Match, Bot, Participant, User
-from aiarena.core.tests import LoggedInTestCase, FullDataSetTestCase
+from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
 
@@ -380,19 +380,9 @@ class EloTestCase(LoggedInTestCase):
         self._post_to_results(match['id'], 'Player1Win')
 
 
-class ApiFullDataSetTestCase(FullDataSetTestCase):
+class RoundRobinGenerationTestCase(MatchReadyTestCase):
     def setUp(self):
-        super(ApiFullDataSetTestCase, self).setUp()
-
-    def _create_match(self):
-        response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 201)
-        return response.data
-
-
-class RoundRobinTestCase(ApiFullDataSetTestCase):
-    def setUp(self):
-        super(RoundRobinTestCase, self).setUp()
+        super(RoundRobinGenerationTestCase, self).setUp()
         self.client.login(username='staff_user', password='x')
 
     def test_round_robin_generation(self):
@@ -402,7 +392,8 @@ class RoundRobinTestCase(ApiFullDataSetTestCase):
 
         self.assertEqual(Match.objects.count(), 0)  # starting with 0
 
-        self._create_match()  # this should trigger a new round robin generation
+        response = self._post_to_matches()  # this should trigger a new round robin generation
+        self.assertEqual(response.status_code, 201)
 
         self.assertEqual(Match.objects.count(), expectedMatchcount)
 
