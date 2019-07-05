@@ -107,7 +107,6 @@ class MatchViewSet(viewsets.GenericViewSet):
                 if queued_matches.count() == 0:
                     self._queue_round_robin_matches_for_all_active_bots()
 
-                # todo: has count now changed?
                 for match in queued_matches:
                     if match.start(requesting_user):
                         return match
