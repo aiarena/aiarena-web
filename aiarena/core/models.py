@@ -45,12 +45,26 @@ class User(AbstractUser):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
+class Round(models.Model):
+    started = models.DateTimeField(auto_now_add=True)
+    finished = models.DateTimeField(blank=True, null=True)
+    complete = models.BooleanField(default=False)
+
+    # if all the matches have been run, mark this as complete
+    def update_if_completed(self):
+        # if these are no matches without results, this round is complete
+        if Match.objects.filter(round=self, result__isnull=True).count() == 0:
+            self.complete = True
+            self.finished = timezone.now()
+
+
 # todo: structure for separate ladder types
 class Match(models.Model):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     started = models.DateTimeField(blank=True, null=True, editable=False)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    round = models.ForeignKey(Round, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.id.__str__()
@@ -69,15 +83,15 @@ class Match(models.Model):
                     p.bot.enter_match(self)
 
                 self.started = timezone.now()
-                self.assigned_to=assign_to
+                self.assigned_to = assign_to
                 self.save()
                 return True  # started match successfully
             else:
                 return False  # match is already started
 
     @staticmethod
-    def create(map, bot1, bot2):
-        match = Match.objects.create(map=map)
+    def create(round, map, bot1, bot2):
+        match = Match.objects.create(map=map, round=round)
         # create match participants
         Participant.objects.create(match=match, participant_number=1, bot=bot1)
         Participant.objects.create(match=match, participant_number=2, bot=bot2)

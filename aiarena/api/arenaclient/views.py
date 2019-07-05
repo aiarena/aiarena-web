@@ -13,7 +13,7 @@ from rest_framework.reverse import reverse
 
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NotEnoughActiveBots, NoMaps
 from aiarena.core.exceptions import BotNotInMatchException
-from aiarena.core.models import Bot, Map, Match, Participant, Result
+from aiarena.core.models import Bot, Map, Match, Participant, Result, Round
 from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
 
 logger = logging.getLogger(__name__)
@@ -75,8 +75,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
             raise NotEnoughActiveBots()
 
-        # if Bot.objects.filter(active=True, in_match=False).count() <= 1:  # need at least 2 bots that aren't in game
-        #     raise NotEnoughAvailableBots()
+        round = Round.objects.create()
 
         active_bots = Bot.objects.filter(active=True)
         already_processed_bots = []
@@ -85,7 +84,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
             for bot2 in Bot.objects.exclude(active=True, id__in=already_processed_bots):
-                Match.create(Map.random(), bot1, bot2)
+                Match.create(round, Map.random(), bot1, bot2)
 
     def _start_next_match(self, requesting_user):
 
@@ -97,10 +96,11 @@ class MatchViewSet(viewsets.GenericViewSet):
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} READ".format(Match._meta.db_table,
-                                                                              Participant._meta.db_table,
-                                                                              Bot._meta.db_table,
-                                                                              Map._meta.db_table))
+                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ".format(Match._meta.db_table,
+                                                                                          Round._meta.db_table,
+                                                                                          Participant._meta.db_table,
+                                                                                          Bot._meta.db_table,
+                                                                                          Map._meta.db_table))
             try:
                 queued_matches = Match.objects.filter(started__isnull=True)
 
@@ -221,6 +221,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             bot2.leave_match(result.match_id)
         except BotNotInMatchException:
             raise APIException('Unable to log result - one of the bots is not listed as in this match.')
+
+        result.match.round.update_if_completed()
 
     def adjust_elo(self, result):
         if result.has_winner():
