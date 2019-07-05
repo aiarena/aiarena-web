@@ -84,6 +84,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4c4c4c', end
     margin-left: 75px;
     margin-right: 75px;
 }
+#problems {
+    margin-left: 75px;
+    margin-right: 75px;
+}
 
 #sidebar {
     float: right;
@@ -109,6 +113,16 @@ background: -o-linear-gradient(left, rgba(76,76,76,0) 0%, rgba(0,0,0,0.3) 50%, r
 background: -ms-linear-gradient(left, rgba(76,76,76,0) 0%, rgba(0,0,0,0.3) 50%, rgba(19,19,19,0.05) 100%);
 background: linear-gradient(to right, rgba(76,76,76,0) 0%, rgba(0,0,0,0.3) 50%, rgba(19,19,19,0.05) 100%);
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4c4c4c', endColorstr='#131313', GradientType=1 );
+}
+
+#float-half-left {
+     float: left;
+     width: 50%;
+}
+
+#float-half-right {
+     float: right;
+     width: 50%;
 }
 
 #type-left {
