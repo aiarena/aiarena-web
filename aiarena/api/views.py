@@ -23,9 +23,18 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ResultSerializer(serializers.ModelSerializer):
+    bot1_name = serializers.SerializerMethodField()
+    bot2_name = serializers.SerializerMethodField()
+
+    def get_bot1_name(self, obj):
+        return obj.match.participant_set.get(participant_number=1).bot.name
+
+    def get_bot2_name(self, obj):
+        return obj.match.participant_set.get(participant_number=2).bot.name
+
     class Meta:
         model = Result
-        fields = 'id', 'created', 'match', 'winner', 'type', 'replay_file', 'duration'
+        fields = 'id', 'created', 'match', 'winner', 'type', 'replay_file', 'duration', 'bot1_name', 'bot2_name'
 
 
 class ResultViewSet(viewsets.ReadOnlyModelViewSet):
