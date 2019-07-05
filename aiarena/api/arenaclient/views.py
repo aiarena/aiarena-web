@@ -119,6 +119,9 @@ class MatchViewSet(viewsets.GenericViewSet):
     def create(self, request, *args, **kwargs):
         match = self._start_next_match(request.user)
 
+        match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
+        match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot
+
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
