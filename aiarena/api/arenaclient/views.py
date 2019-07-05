@@ -1,6 +1,7 @@
 import logging
 from wsgiref.util import FileWrapper
 
+from django.db import connection
 from django.db.models import Sum
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
@@ -66,33 +67,67 @@ class MatchViewSet(viewsets.GenericViewSet):
     """
     serializer_class = MatchSerializer
 
-    def create(self, request, *args, **kwargs):
+    def _queue_round_robin_matches_for_all_active_bots(self):
         if Map.objects.count() == 0:
             raise NoMaps()
         if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
             raise NotEnoughActiveBots()
 
-        Bot.timeout_overtime_bot_games()
-        if Bot.objects.filter(active=True, in_match=False).count() <= 1:  # need at least 2 bots that aren't in game
-            raise NotEnoughAvailableBots()
+        # if Bot.objects.filter(active=True, in_match=False).count() <= 1:  # need at least 2 bots that aren't in game
+        #     raise NotEnoughAvailableBots()
 
-        match = Match.objects.create(map=Map.random())
+        active_bots = Bot.objects.filter(active=True)
+        already_processed_bots = []
 
-        # Add participating bots
-        bot1 = Bot.get_random_available()
-        bot2 = bot1.get_random_available_excluding_self()
+        # loop through and generate matches for all active bots
+        for bot1 in active_bots:
+            already_processed_bots.append(bot1.id)
+            for bot2 in Bot.objects.exclude(active=True, id__in=already_processed_bots):
+                Match.create(Map.random(), bot1, bot2)
 
-        # create match participants
-        Participant.objects.create(match=match, participant_number=1, bot=bot1)
-        Participant.objects.create(match=match, participant_number=2, bot=bot2)
+    def _get_next_match(self):
+        with connection.cursor() as cursor:
+            # Lock the matches table
+            # this needs to happen so that if we end up having to generate a new set of matches
+            # then we don't hit a race condition
+            cursor.execute("LOCK TABLES %s WRITE", Match._meta.db_table)
+            try:
+                Bot.timeout_overtime_bot_games()
 
-        # mark bots as in match
-        bot1.enter_match(match)
-        bot2.enter_match(match)
+                queued_matches = Match.objects.filter(started__isnull=True)
 
-        # return bot data along with the match
-        match.bot1 = bot1
-        match.bot2 = bot2
+                if queued_matches.count() == 0:
+                    self._queue_round_robin_matches_for_all_active_bots()
+
+                # todo: has count now changed?
+                for match in queued_matches:
+                    if match.start():
+                        return match
+
+                raise NotEnoughAvailableBots()
+            finally:
+                cursor.execute("UNLOCK TABLES;")
+
+    def create(self, request, *args, **kwargs):
+
+        # match = Match.objects.create(map=Map.random())
+        #
+        # # Add participating bots
+        # bot1 = Bot.get_random_available()
+        # bot2 = bot1.get_random_available_excluding_self()
+        #
+        # # create match participants
+        # Participant.objects.create(match=match, participant_number=1, bot=bot1)
+        # Participant.objects.create(match=match, participant_number=2, bot=bot2)
+        #
+        # # mark bots as in match
+        # bot1.enter_match(match)
+        # bot2.enter_match(match)
+        #
+        # # return bot data along with the match
+        # match.bot1 = bot1
+        # match.bot2 = bot2
+        match = self._get_next_match()
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

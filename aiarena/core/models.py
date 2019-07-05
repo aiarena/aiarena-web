@@ -3,7 +3,7 @@ from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -37,9 +37,36 @@ class Map(models.Model):
 class Match(models.Model):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
+    started = models.DateTimeField(blank=True, null=True, editable=False)
 
     def __str__(self):
         return self.id.__str__()
+
+    def start(self):
+        with transaction.atomic():
+            self.objects.select_for_update().get(match=self)  # lock self to avoid race conditions
+            if self.started is None:
+                # is a bot currently in a match?
+                participants = Participant.objects.select_for_update().filter(match=self)
+                for p in participants:
+                    if p.bot.in_match:
+                        return False  # can't start
+
+                for p in participants:
+                    p.bot.enter_match(self)
+
+                self.started = timezone.now()
+                self.save()
+                return True  # started match successfully
+            else:
+                return False  # match is already started
+
+    @staticmethod
+    def create(map, bot1, bot2):
+        match = Match.objects.create(map=map)
+        # create match participants
+        Participant.objects.create(match=match, participant_number=1, bot=bot1)
+        Participant.objects.create(match=match, participant_number=2, bot=bot2)
 
 
 class User(AbstractUser):
@@ -159,11 +186,13 @@ class Bot(models.Model):
     # todo: have arena client check in with web service inorder to delay this
     @staticmethod
     def timeout_overtime_bot_games():  # todo: register "timeout" result
-        bots_in_matches = Bot.objects.filter(in_match=True,
-                                             current_match__created__lt=timezone.now() - timedelta(hours=1))
-        for bot in bots_in_matches:
-            logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
-            bot.leave_match()
+        with transaction.atomic():
+            bots_in_matches = Bot.objects.select_for_update().filter(in_match=True,
+                                                                     current_match__created__lt=timezone.now() - timedelta(
+                                                                         hours=1))
+            for bot in bots_in_matches:
+                logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
+                bot.leave_match()
 
     @staticmethod
     def get_random_available():

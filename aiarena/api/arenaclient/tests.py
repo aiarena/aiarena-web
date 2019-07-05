@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from aiarena.core.models import Match, Bot, Participant, User
-from aiarena.core.tests import LoggedInTestCase
+from aiarena.core.tests import LoggedInTestCase, FullDataSetTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
 
@@ -378,3 +378,31 @@ class EloTestCase(LoggedInTestCase):
 
         match = self._post_to_matches().data
         self._post_to_results(match['id'], 'Player1Win')
+
+
+class ApiFullDataSetTestCase(FullDataSetTestCase):
+    def setUp(self):
+        super(ApiFullDataSetTestCase, self).setUp()
+
+    def _create_match(self):
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 201)
+        return response.data
+
+
+class RoundRobinTestCase(ApiFullDataSetTestCase):
+    def setUp(self):
+        super(RoundRobinTestCase, self).setUp()
+        self.client.login(username='staff_user', password='x')
+
+    def test_round_robin_generation(self):
+        botCount = Bot.objects.count()
+        expectedMatchcount = botCount/2*(botCount-1)
+        self.assertGreater(botCount, 1)  # check we have more than 1 bot
+
+        self.assertEqual(Match.objects.count(), 0)  # starting with 0
+
+        self._create_match()  # this should trigger a new round robin generation
+
+        self.assertEqual(Match.objects.count(), expectedMatchcount)
+
