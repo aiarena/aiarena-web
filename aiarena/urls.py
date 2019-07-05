@@ -32,6 +32,7 @@ urlpatterns = [
                   path('api/', include('aiarena.api.urls')),
                   path('ranking/', core_views.Ranking.as_view(), name='ranking'),
                   path('results/', core_views.Results.as_view(), name='results'),
+                  url('stream/', TemplateView.as_view(template_name='stream.html'), name='stream'),
                   path('bots/', core_views.BotList.as_view(), name='bots'),
                   path('bots/<int:pk>/', core_views.BotDetail.as_view(), name='bot'),
                   path('bots/<int:pk>/edit', core_views.BotUpdate.as_view(), name='bot_edit'),
