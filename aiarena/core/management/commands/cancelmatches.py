@@ -40,7 +40,7 @@ class Command(BaseCommand):
                     except BotNotInMatchException:
                         self.stdout.write(
                             'WARNING! Match "{1}": Participant 2 bot "{0}" was not registered as in this match, despite the match having started.'.format(
-                                bot1.id, match_id))
+                                bot2.id, match_id))
                 else:
                     match.started = timezone.now()
                     match.save()
