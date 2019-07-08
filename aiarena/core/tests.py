@@ -7,7 +7,7 @@ from django.core.management import call_command, CommandError
 from django.test import TransactionTestCase
 
 from aiarena import settings
-from aiarena.core.models import User, Bot, Map
+from aiarena.core.models import User, Bot, Map, Match
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import MAX_USER_BOT_COUNT
 
@@ -344,6 +344,10 @@ class ManagementCommandTests(MatchReadyTestCase):
         # test result already exists
         with self.assertRaisesMessage(CommandError, 'A result already exists for match "{0}"'.format(match_id)):
             call_command('cancelmatches', match_id)
+
+        # test that cancelling the match marks it as started.
+        self.assertIsNotNone(Match.objects.get(id=match_id).started)
+
 
     def test_reset_elo(self):
         # test match successfully cancelled

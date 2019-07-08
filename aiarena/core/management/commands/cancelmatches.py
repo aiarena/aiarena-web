@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils import timezone
 
 from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Match, Result
@@ -40,6 +41,9 @@ class Command(BaseCommand):
                         self.stdout.write(
                             'WARNING! Match "{1}": Participant 2 bot "{0}" was not registered as in this match, despite the match having started.'.format(
                                 bot1.id, match_id))
+                else:
+                    match.started = timezone.now()
+                    match.save()
 
                 self.stdout.write(
                     self.style.SUCCESS('Successfully marked match "%s" with an InitializationError' % match_id))
