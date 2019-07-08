@@ -387,7 +387,7 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
 
     def test_round_robin_generation(self):  # todo: test for round generation and completion
         botCount = Bot.objects.count()
-        expectedMatchcount = botCount/2*(botCount-1)
+        expectedMatchCountPerRound = int(botCount/2*(botCount-1))
         self.assertGreater(botCount, 1)  # check we have more than 1 bot
 
         self.assertEqual(Match.objects.count(), 0)  # starting with 0
@@ -395,5 +395,23 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         response = self._post_to_matches()  # this should trigger a new round robin generation
         self.assertEqual(response.status_code, 201)
 
-        self.assertEqual(Match.objects.count(), expectedMatchcount)
+        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound)
+
+        # finish the match
+        response = self._post_to_results(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # start and finish all the rest of the generated matches
+        for x in range(1, expectedMatchCountPerRound):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+            response = self._post_to_results(response.data['id'], 'Player1Win')
+            self.assertEqual(response.status_code, 201)
+            # double check the match count
+            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound-x-1)
+
+        response = self._post_to_matches()  # this should trigger another new round robin generation
+        self.assertEqual(response.status_code, 201)
+
+        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound*2)
 
