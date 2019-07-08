@@ -8,7 +8,7 @@ from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
 
 from aiarena import settings
-from aiarena.core.models import Bot, Result, User
+from aiarena.core.models import Bot, Result, User, Round, Match
 
 
 class UserProfileForm(forms.ModelForm):
@@ -209,3 +209,17 @@ class BotDataDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]
     template_name = 'index.html'
+
+
+class MatchQueue(View):
+    def get(self, request):
+        rounds = Round.objects.filter(complete=False).order_by('id')
+        for round in rounds:
+            round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by('started')
+            for match in round.matches:
+                match.participant1 = match.participant_set.get(participant_number=1)
+                match.participant2 = match.participant_set.get(participant_number=2)
+                match.mapname = match.map.name
+
+        context = {'round_list': rounds}
+        return render(request, 'match_queue.html', context)
