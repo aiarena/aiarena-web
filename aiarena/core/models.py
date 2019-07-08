@@ -1,10 +1,11 @@
 import logging
 import uuid
 from datetime import timedelta
+from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -45,14 +46,62 @@ class User(AbstractUser):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
+class Round(models.Model):
+    started = models.DateTimeField(auto_now_add=True)
+    finished = models.DateTimeField(blank=True, null=True)
+    complete = models.BooleanField(default=False)
+
+    # if all the matches have been run, mark this as complete
+    def update_if_completed(self):
+        # if these are no matches without results, this round is complete
+        if Match.objects.filter(round=self, result__isnull=True).count() == 0:
+            self.complete = True
+            self.finished = timezone.now()
+            self.save()
+
+
 # todo: structure for separate ladder types
 class Match(models.Model):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
+    started = models.DateTimeField(blank=True, null=True, editable=False)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    round = models.ForeignKey(Round, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.id.__str__()
+
+    class StartResult(Enum):
+        SUCCESS = 1
+        FAIL_NO_BOTS_AVAILABLE = 2
+        FAIL_ALREADY_STARTED = 3
+
+    def start(self, assign_to):
+        with transaction.atomic():
+            Match.objects.select_for_update().get(id=self.id)  # lock self to avoid race conditions
+            if self.started is None:
+                # is a bot currently in a match?
+                participants = Participant.objects.select_for_update().filter(match=self)
+                for p in participants:
+                    if p.bot.in_match:
+                        return Match.StartResult.FAIL_NO_BOTS_AVAILABLE
+
+                for p in participants:
+                    p.bot.enter_match(self)
+
+                self.started = timezone.now()
+                self.assigned_to = assign_to
+                self.save()
+                return Match.StartResult.SUCCESS
+            else:
+                return Match.StartResult.FAIL_ALREADY_STARTED
+
+    @staticmethod
+    def create(round, map, bot1, bot2):
+        match = Match.objects.create(map=map, round=round)
+        # create match participants
+        Participant.objects.create(match=match, participant_number=1, bot=bot1)
+        Participant.objects.create(match=match, participant_number=2, bot=bot2)
 
 
 def bot_zip_upload_to(instance, filename):
@@ -167,11 +216,13 @@ class Bot(models.Model):
     # todo: have arena client check in with web service inorder to delay this
     @staticmethod
     def timeout_overtime_bot_games():  # todo: register "timeout" result
-        bots_in_matches = Bot.objects.filter(in_match=True,
-                                             current_match__created__lt=timezone.now() - timedelta(hours=1))
-        for bot in bots_in_matches:
-            logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
-            bot.leave_match()
+        with transaction.atomic():
+            bots_in_matches = Bot.objects.select_for_update().filter(in_match=True,
+                                                                     current_match__created__lt=timezone.now() - timedelta(
+                                                                         hours=1))
+            for bot in bots_in_matches:
+                logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
+                bot.leave_match()
 
     @staticmethod
     def get_random_available():

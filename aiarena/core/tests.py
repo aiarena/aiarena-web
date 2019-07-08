@@ -4,14 +4,14 @@ from io import StringIO
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.management import call_command, CommandError
-from django.test import TestCase
+from django.test import TransactionTestCase
 
 from aiarena.core.models import User, Bot, Map
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import MAX_USER_BOT_COUNT
 
 
-class BaseTestCase(TestCase):
+class BaseTestCase(TransactionTestCase):
     # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
     test_bot_zip_path = 'aiarena/core/test_bot.zip'

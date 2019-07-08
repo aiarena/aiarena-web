@@ -4,8 +4,8 @@ from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
 
-from aiarena.core.models import Match, Bot, Participant, User
-from aiarena.core.tests import LoggedInTestCase
+from aiarena.core.models import Match, Bot, Participant, User, Round, Result
+from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
 
@@ -200,12 +200,12 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
         self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
 
-        # post a win without a replay
-        match = self._post_to_matches().data
-        response = self._post_to_results_no_replay(match['id'], 'Player2Win')
-        self.assertEqual(response.status_code, 400)
-        self.assertTrue('non_field_errors' in response.data)
-        self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
+        # post a win without a replay - now allowed due to corrupt replays being omitted
+        # match = self._post_to_matches().data
+        # response = self._post_to_results_no_replay(match['id'], 'Player2Win')
+        # self.assertEqual(response.status_code, 400)
+        # self.assertTrue('non_field_errors' in response.data)
+        # self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
 
         # check hashes - nothing should have changed
         self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
@@ -378,3 +378,127 @@ class EloTestCase(LoggedInTestCase):
 
         match = self._post_to_matches().data
         self._post_to_results(match['id'], 'Player1Win')
+
+
+class RoundRobinGenerationTestCase(MatchReadyTestCase):
+    def setUp(self):
+        super(RoundRobinGenerationTestCase, self).setUp()
+        self.client.login(username='staff_user', password='x')
+
+    def test_round_robin_generation(self):  # todo: test for round generation and completion
+        botCount = Bot.objects.count()
+        expectedMatchCountPerRound = int(botCount/2*(botCount-1))
+        self.assertGreater(botCount, 1)  # check we have more than 1 bot
+
+        self.assertEqual(Match.objects.count(), 0)  # starting with 0 matches
+        self.assertEqual(Round.objects.count(), 0)  # starting with 0 rounds
+
+        response = self._post_to_matches()  # this should trigger a new round robin generation
+        self.assertEqual(response.status_code, 201)
+
+        # check match count
+        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound)
+
+        # check round data
+        self.assertEqual(Round.objects.count(), 1)
+        round = Round.objects.get(id=1)
+        self.assertIsNotNone(round.started)
+        self.assertIsNone(round.finished)
+        self.assertFalse(round.complete)
+
+        # finish the initial match
+        response = self._post_to_results(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # start and finish all the rest of the generated matches
+        for x in range(1, expectedMatchCountPerRound):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+            response = self._post_to_results(response.data['id'], 'Player1Win')
+            self.assertEqual(response.status_code, 201)
+            # double check the match count
+            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound-x-1)
+
+        # check round is finished
+        self.assertEqual(Round.objects.count(), 1)
+        round = Round.objects.get(id=1)
+        self.assertIsNotNone(round.finished)
+        self.assertTrue(round.complete)
+
+        # Repeat again but with quirks
+
+        response = self._post_to_matches()  # this should trigger another new round robin generation
+        self.assertEqual(response.status_code, 201)
+
+        # check match count
+        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound*2)
+
+        # check round data
+        self.assertEqual(Round.objects.count(), 2)
+        round = Round.objects.get(id=2)
+        self.assertIsNotNone(round.started)
+        self.assertIsNone(round.finished)
+        self.assertFalse(round.complete)
+
+        # finish the initial match
+        response = self._post_to_results(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # start and finish all except one the rest of the generated matches
+        for x in range(1, expectedMatchCountPerRound-1):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+            response = self._post_to_results(response.data['id'], 'Player1Win')
+            self.assertEqual(response.status_code, 201)
+            # double check the match count
+            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound-x-1)
+
+        # at this stage there should be one unstarted match left
+        self.assertEqual(Match.objects.filter(started__isnull=True).count(), 1)
+
+        # start the last match
+        response2ndRoundLastMatch = self._post_to_matches()
+        self.assertEqual(response2ndRoundLastMatch.status_code, 201)
+        self.assertEqual(Match.objects.filter(started__isnull=True).count(), 0)
+
+        # the following part ensures round generation is properly handled when an old round in not yet finished
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+
+        # check match count
+        self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound-1)
+        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound*3)
+
+        # check round data
+        self.assertEqual(Round.objects.count(), 3)
+
+        # check 2nd round data is still the same
+        round = Round.objects.get(id=2)
+        self.assertIsNotNone(round.started)
+        self.assertIsNone(round.finished)
+        self.assertFalse(round.complete)
+
+        # check 3rd round data
+        round = Round.objects.get(id=3)
+        self.assertIsNotNone(round.started)
+        self.assertIsNone(round.finished)
+        self.assertFalse(round.complete)
+
+        # now finish the 2nd round
+        response = self._post_to_results(response2ndRoundLastMatch.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # check round is finished
+        round = Round.objects.get(id=2)
+        self.assertIsNotNone(round.finished)
+        self.assertTrue(round.complete)
+
+        # check 3rd round data remains unmodified
+        round = Round.objects.get(id=3)
+        self.assertIsNotNone(round.started)
+        self.assertIsNone(round.finished)
+        self.assertFalse(round.complete)
+
+        # check result count - should have 2 rounds worth of results
+        self.assertEqual(Result.objects.count(), expectedMatchCountPerRound*2)
+
