@@ -108,11 +108,15 @@ class MatchViewSet(viewsets.GenericViewSet):
                     self._queue_round_robin_matches_for_all_active_bots()
 
                 for match in queued_matches:
-                    if match.start(requesting_user):
+                    if match.start(requesting_user) == Match.StartResult.SUCCESS:
                         return match
 
+                # Here we can assume there wasn't any bots available
+                # ROLLBACK here so the UNLOCK statement doesn't commit changes
+                cursor.execute("ROLLBACK")
                 raise NotEnoughAvailableBots()
             finally:
+                # pass
                 cursor.execute("UNLOCK TABLES;")
 
     def create(self, request, *args, **kwargs):

@@ -1,6 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
+from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
@@ -69,6 +70,11 @@ class Match(models.Model):
     def __str__(self):
         return self.id.__str__()
 
+    class StartResult(Enum):
+        SUCCESS = 1
+        FAIL_NO_BOTS_AVAILABLE = 2
+        FAIL_ALREADY_STARTED = 3
+
     def start(self, assign_to):
         with transaction.atomic():
             Match.objects.select_for_update().get(id=self.id)  # lock self to avoid race conditions
@@ -77,7 +83,7 @@ class Match(models.Model):
                 participants = Participant.objects.select_for_update().filter(match=self)
                 for p in participants:
                     if p.bot.in_match:
-                        return False  # can't start
+                        return Match.StartResult.FAIL_NO_BOTS_AVAILABLE
 
                 for p in participants:
                     p.bot.enter_match(self)
@@ -85,9 +91,9 @@ class Match(models.Model):
                 self.started = timezone.now()
                 self.assigned_to = assign_to
                 self.save()
-                return True  # started match successfully
+                return Match.StartResult.SUCCESS
             else:
-                return False  # match is already started
+                return Match.StartResult.FAIL_ALREADY_STARTED
 
     @staticmethod
     def create(round, map, bot1, bot2):

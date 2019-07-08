@@ -95,7 +95,8 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 409)
 
         # ensure only 1 match was created
-        self.assertEqual(Match.objects.count(), 1)
+        matchCount = Match.objects.count()
+        self.assertEqual(matchCount, 1)
 
     def test_previous_match_timeout(self):
         self.client.login(username='staff_user', password='x')
@@ -385,7 +386,7 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         super(RoundRobinGenerationTestCase, self).setUp()
         self.client.login(username='staff_user', password='x')
 
-    def test_round_robin_generation(self):
+    def test_round_robin_generation(self):  # todo: test for round generation and completion
         botCount = Bot.objects.count()
         expectedMatchcount = botCount/2*(botCount-1)
         self.assertGreater(botCount, 1)  # check we have more than 1 bot
