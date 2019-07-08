@@ -95,8 +95,7 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 409)
 
         # ensure only 1 match was created
-        matchCount = Match.objects.count()
-        self.assertEqual(matchCount, 1)
+        self.assertEqual(Match.objects.count(), 1)
 
     def test_previous_match_timeout(self):
         self.client.login(username='staff_user', password='x')
