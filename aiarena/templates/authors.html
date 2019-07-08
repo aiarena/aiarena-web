@@ -2,8 +2,8 @@
 {% load i18n %}
 
 {% block content %}
-
-    <table width="900" id="authorsTable">
+<div class="divider"><span></span><span><h2>Authors</h2></span><span></span></div>
+    <table style="min-width: 900px; margin: 0 auto;" id="authorsTable">
         <tbody>
         {% load avatar_tags %}
         {% for author in user_list %}
