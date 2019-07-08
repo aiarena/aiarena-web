@@ -83,7 +83,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         # loop through and generate matches for all active bots
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
-            for bot2 in Bot.objects.exclude(active=True, id__in=already_processed_bots):
+            for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
                 Match.create(round, Map.random(), bot1, bot2)
 
     def _start_next_match(self, requesting_user):

@@ -386,7 +386,7 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         self.client.login(username='staff_user', password='x')
 
     def test_round_robin_generation(self):  # todo: test for round generation and completion
-        botCount = Bot.objects.count()
+        botCount = Bot.objects.filter(active=True).count()
         expectedMatchCountPerRound = int(botCount/2*(botCount-1))
         self.assertGreater(botCount, 1)  # check we have more than 1 bot
 
