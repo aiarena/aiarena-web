@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
 
-from aiarena.core.models import Match, Bot, Participant, User, Round
+from aiarena.core.models import Match, Bot, Participant, User, Round, Result
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
@@ -498,4 +498,7 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         self.assertIsNotNone(round.started)
         self.assertIsNone(round.finished)
         self.assertFalse(round.complete)
+
+        # check result count - should have 2 rounds worth of results
+        self.assertEqual(Result.objects.count(), expectedMatchCountPerRound*2)
 
