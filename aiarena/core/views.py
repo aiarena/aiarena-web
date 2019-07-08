@@ -215,7 +215,7 @@ class MatchQueue(View):
     def get(self, request):
         rounds = Round.objects.filter(complete=False).order_by('id')
         for round in rounds:
-            round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by('started')
+            round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by('-started')
             for match in round.matches:
                 match.participant1 = match.participant_set.get(participant_number=1)
                 match.participant2 = match.participant_set.get(participant_number=2)
