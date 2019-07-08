@@ -6,6 +6,7 @@ from django.core.files import File
 from django.core.management import call_command, CommandError
 from django.test import TransactionTestCase
 
+from aiarena import settings
 from aiarena.core.models import User, Bot, Map
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import MAX_USER_BOT_COUNT
@@ -306,6 +307,14 @@ class PageRenderTestCase(FullDataSetTestCase):
         response = self.client.get('/accounts/password_reset/')
         self.assertEqual(response.status_code, 200)
 
+    def test_get_stream_page(self):
+        response = self.client.get('/stream/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_match_queue_page(self):
+        response = self.client.get('/match-queue/')
+        self.assertEqual(response.status_code, 200)
+
 
 class PrivateStorageTestCase(MatchReadyTestCase):
     pass  # todo
@@ -334,3 +343,18 @@ class ManagementCommandTests(MatchReadyTestCase):
         # test result already exists
         with self.assertRaisesMessage(CommandError, 'A result already exists for match "{0}"'.format(match_id)):
             call_command('cancelmatches', match_id)
+
+    def test_reset_elo(self):
+        # test match successfully cancelled
+        self.client.login(username='staff_user', password='x')
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        out = StringIO()
+        call_command('resetelo', stdout=out)
+        self.assertIn('ELO values have been reset.', out.getvalue())
+
+        for bot in Bot.objects.all():
+            self.assertEqual(bot.elo, settings.ELO_START_VALUE)
