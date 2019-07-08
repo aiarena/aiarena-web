@@ -57,6 +57,7 @@ class Round(models.Model):
         if Match.objects.filter(round=self, result__isnull=True).count() == 0:
             self.complete = True
             self.finished = timezone.now()
+            self.save()
 
 
 # todo: structure for separate ladder types
