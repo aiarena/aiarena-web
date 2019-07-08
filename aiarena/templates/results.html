@@ -2,10 +2,11 @@
 {% load i18n core_filters %}
 
 {% block content %}
-
+<div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <table width="900">
         <tbody>
         <tr>
+            <td><b>Match ID</b></td>
             <td><b>Date</b></td>
             <td><b>Bot 1</b></td>
             <td><b>+/-</b></td>
@@ -18,6 +19,7 @@
         </tr>
         {% for result in result_list %}
             <tr>
+                <td>{{ result.match_id }}</td>
                 <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
 
                 {% if result.winner == result.participant1.bot %}
