@@ -83,11 +83,15 @@ class BotDetail(DetailView):
             result.mapname = result.match.map.name
             result.opponent = result.match.participant_set.exclude(bot=self.object)[0]
             result.me = result.match.participant_set.filter(bot=self.object)[0]
+
+            # convert the type to be reletive to this bot
             if result.winner is not None:
                 if result.winner == self.object:
                     result.relative_type = 'Win'
                 else:
                     result.relative_type = 'Loss'
+            else:
+                result.relative_type = result.type
 
         context['result_list'] = results
         return context
