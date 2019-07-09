@@ -1,13 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.utils import timezone
-
-from aiarena.core.exceptions import BotNotInMatchException
-from aiarena.core.models import Match, Result
+from aiarena.core.models import Match
 
 
 class Command(BaseCommand):
-    help = 'Registers an InitializationError result for all current matches.'
+    help = 'Registers a MatchCancelled result for all current matches.'
 
     def add_arguments(self, parser):
         parser.add_argument('match_ids', nargs='+', type=int)
@@ -20,30 +17,14 @@ class Command(BaseCommand):
                 except Match.DoesNotExist:
                     raise CommandError('Match "%s" does not exist' % match_id)
 
-                if Result.objects.filter(match=match).count() > 0:
-                    raise CommandError('A result already exists for match "%s"' % match_id)
+                cancel_result = match.cancel()
 
-                Result.objects.create(match=match, type='InitializationError', duration=0)
-
-                # attempt to kick the bots from the match
-                if match.started:
-                    try:
-                        bot1 = match.participant_set.select_related().select_for_update().get(participant_number=1).bot
-                        bot1.leave_match(match_id)
-                    except BotNotInMatchException:
-                        self.stdout.write(
-                            'WARNING! Match "{1}": Participant 1 bot "{0}" was not registered as in this match, despite the match having started.'.format(
-                                bot1.id, match_id))
-                    try:
-                        bot2 = match.participant_set.select_related().select_for_update().get(participant_number=2).bot
-                        bot2.leave_match(match_id)
-                    except BotNotInMatchException:
-                        self.stdout.write(
-                            'WARNING! Match "{1}": Participant 2 bot "{0}" was not registered as in this match, despite the match having started.'.format(
-                                bot2.id, match_id))
+                if cancel_result == Match.CancelResult.SUCCESS:
+                    self.stdout.write(
+                        self.style.SUCCESS('SUCCESS: Marked match "%s" with a MatchCancelled result.' % match_id))
+                elif cancel_result == Match.CancelResult.FAIL_ALREADY_HAS_RESULT:
+                    self.stdout.write(
+                        self.style.SUCCESS('FAIL: Match "%s" already has a result.' % match_id))
                 else:
-                    match.started = timezone.now()
-                    match.save()
-
-                self.stdout.write(
-                    self.style.SUCCESS('Successfully marked match "%s" with an InitializationError' % match_id))
+                    self.stdout.write(
+                        self.style.SUCCESS('FAIL: Could not cancel match "%s" due to unknown reason.' % match_id))

@@ -88,7 +88,7 @@ class MatchViewSet(viewsets.GenericViewSet):
 
     def _start_next_match(self, requesting_user):
 
-        Bot.timeout_overtime_bot_games()
+        Match.timeout_overtime_matches()
 
         with connection.cursor() as cursor:
             # Lock the matches table
@@ -176,6 +176,10 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     # todo: avoid results being logged against matches not owned by the submitter
     def perform_create(self, serializer):
+        # IMPORTANT before we do anything, lock the match in question to avoid race conditions
+        # using this convention we try to avoid having to to lock the entire result table
+        Match.objects.select_for_update().get(id=serializer.validated_data['match'].id)
+
         # pop bot datas so they don't interfere with saving the result
         process_bot1_data = False
         process_bot2_data = False

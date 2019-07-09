@@ -339,15 +339,14 @@ class ManagementCommandTests(MatchReadyTestCase):
 
         out = StringIO()
         call_command('cancelmatches', match_id, stdout=out)
-        self.assertIn('Successfully marked match "{0}" with an InitializationError'.format(match_id), out.getvalue())
+        self.assertIn('SUCCESS: Marked match "{0}" with a MatchCancelled result.'.format(match_id), out.getvalue())
 
         # test result already exists
-        with self.assertRaisesMessage(CommandError, 'A result already exists for match "{0}"'.format(match_id)):
-            call_command('cancelmatches', match_id)
+        call_command('cancelmatches', match_id, stdout=out)
+        self.assertIn('FAIL: Match "{0}" already has a result.'.format(match_id), out.getvalue())
 
         # test that cancelling the match marks it as started.
         self.assertIsNotNone(Match.objects.get(id=match_id).started)
-
 
     def test_reset_elo(self):
         # test match successfully cancelled
