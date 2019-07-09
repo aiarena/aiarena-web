@@ -113,30 +113,21 @@ class Match(models.Model):
 
             # attempt to kick the bots from the match
             if match.started:
+                bot1 = match.participant_set.select_related().select_for_update().get(participant_number=1).bot
                 try:
-                    bot1 = match.participant_set.select_related().select_for_update().get(participant_number=1).bot
                     bot1.leave_match(match.id)
-                except Participant.DoesNotExist:
-                    logger.critical(
-                        'ERROR: Match "{0}": No Participant 1 present.'.format(
-                            match.id))
                 except BotNotInMatchException:
                     logger.warning(
-                        'WARNING: Match "{1}": Participant 1 bot "{0}" was not registered as in this match, despite the match having started.'.format(
+                        'WARNING! Match "{1}": Participant 1 bot "{0}" was not registered as in this match, despite the match having started.'.format(
                             bot1.id, match.id))
 
+                bot2 = match.participant_set.select_related().select_for_update().get(participant_number=2).bot
                 try:
-                    bot2 = match.participant_set.select_related().select_for_update().get(participant_number=2).bot
                     bot2.leave_match(match.id)
-                except Participant.DoesNotExist:
-                    logger.critical(
-                        'ERROR: Match "{0}": No Participant 2 present.'.format(
-                            match.id))
                 except BotNotInMatchException:
                     logger.warning(
-                        'WARNING: Match "{1}": Participant 2 bot "{0}" was not registered as in this match, despite the match having started.'.format(
+                        'WARNING! Match "{1}": Participant 2 bot "{0}" was not registered as in this match, despite the match having started.'.format(
                             bot2.id, match.id))
-
             else:
                 match.started = timezone.now()
                 match.save()
