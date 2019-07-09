@@ -303,6 +303,7 @@ class Participant(models.Model):
 
 class Result(models.Model):
     TYPES = (
+        ('MatchCancelled', 'MatchCancelled'),
         ('InitializationError', 'InitializationError'),
         ('Timeout', 'Timeout'),
         ('ProcessingReplay', 'ProcessingReplay'),
