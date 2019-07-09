@@ -88,7 +88,7 @@ class Match(models.Model):
                 participants = Participant.objects.select_for_update().filter(match=self)
                 for p in participants:
                     if p.bot.in_match:
-                        return Match.StartResult.FAIL_BOT_ALREADY_IN_MATCH
+                        return Match.StartResult.FAIL_BOT_ALREADY_IN_MATCH  # todo write a test that this rolls back the transaction
 
                 for p in participants:
                     p.bot.enter_match(self)
@@ -137,10 +137,11 @@ class Match(models.Model):
     # todo: have arena client check in with web service inorder to delay this
     @staticmethod
     def timeout_overtime_matches():
-        # get matches started over an hour ago
-        matches_to_timeout = Match.objects.filter(started__lt=timezone.now() - timedelta(hours=1)).select_for_update()
-        for match in matches_to_timeout:
-            match.cancel()
+        with transaction.atomic():
+            # get matches started over an hour ago
+            matches_to_timeout = Match.objects.filter(started__lt=timezone.now() - timedelta(hours=1)).select_for_update()
+            for match in matches_to_timeout:
+                match.cancel()
 
 
     @staticmethod
