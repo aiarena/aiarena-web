@@ -73,12 +73,8 @@ class Match(models.Model):
 
     class StartResult(Enum):
         SUCCESS = 1
-        FAIL_BOT_ALREADY_IN_MATCH = 2
+        BOT_ALREADY_IN_MATCH = 2
         FAIL_ALREADY_STARTED = 3
-
-    class CancelResult(Enum):
-        SUCCESS = 1
-        FAIL_ALREADY_HAS_RESULT = 2
 
     def start(self, assign_to):
         with transaction.atomic():
@@ -88,7 +84,7 @@ class Match(models.Model):
                 participants = Participant.objects.select_for_update().filter(match=self)
                 for p in participants:
                     if p.bot.in_match:
-                        return Match.StartResult.FAIL_BOT_ALREADY_IN_MATCH
+                        return Match.StartResult.BOT_ALREADY_IN_MATCH
 
                 for p in participants:
                     p.bot.enter_match(self)
@@ -99,49 +95,6 @@ class Match(models.Model):
                 return Match.StartResult.SUCCESS
             else:
                 return Match.StartResult.FAIL_ALREADY_STARTED
-
-    def cancel(self):
-        with transaction.atomic():
-            # IMPORTANT before we do anything, lock the match in question to avoid race conditions
-            # using this convention we try to avoid having to to lock the entire result table
-            match = Match.objects.select_for_update().get(id=self.id)
-
-            if Result.objects.filter(match=self).count() > 0:
-                return Match.CancelResult.FAIL_ALREADY_HAS_RESULT
-
-            Result.objects.create(match=self, type='MatchCancelled', duration=0)
-
-            # attempt to kick the bots from the match
-            if match.started:
-                bot1 = match.participant_set.select_related().select_for_update().get(participant_number=1).bot
-                try:
-                    bot1.leave_match(match.id)
-                except BotNotInMatchException:
-                    logger.warning(
-                        'WARNING! Match "{1}": Participant 1 bot "{0}" was not registered as in this match, despite the match having started.'.format(
-                            bot1.id, match.id))
-
-                bot2 = match.participant_set.select_related().select_for_update().get(participant_number=2).bot
-                try:
-                    bot2.leave_match(match.id)
-                except BotNotInMatchException:
-                    logger.warning(
-                        'WARNING! Match "{1}": Participant 2 bot "{0}" was not registered as in this match, despite the match having started.'.format(
-                            bot2.id, match.id))
-            else:
-                match.started = timezone.now()
-                match.save()
-
-            return Match.CancelResult.SUCCESS
-
-    # todo: have arena client check in with web service inorder to delay this
-    @staticmethod
-    def timeout_overtime_matches():
-        # get matches started over an hour ago
-        matches_to_timeout = Match.objects.filter(started__lt=timezone.now() - timedelta(hours=1)).select_for_update()
-        for match in matches_to_timeout:
-            match.cancel()
-
 
     @staticmethod
     def create(round, map, bot1, bot2):
@@ -260,6 +213,17 @@ class Bot(models.Model):
         # dont alter bot_data while a bot is in a match, unless there was no bot_data initially
         return self.in_match and self.bot_data
 
+    # todo: have arena client check in with web service inorder to delay this
+    @staticmethod
+    def timeout_overtime_bot_games():  # todo: register "timeout" result
+        with transaction.atomic():
+            bots_in_matches = Bot.objects.select_for_update().filter(in_match=True,
+                                                                     current_match__created__lt=timezone.now() - timedelta(
+                                                                         hours=1))
+            for bot in bots_in_matches:
+                logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
+                bot.leave_match()
+
     @staticmethod
     def get_random_available():
         # todo: apparently this is really slow
@@ -339,7 +303,6 @@ class Participant(models.Model):
 
 class Result(models.Model):
     TYPES = (
-        ('MatchCancelled', 'MatchCancelled'),
         ('InitializationError', 'InitializationError'),
         ('Timeout', 'Timeout'),
         ('ProcessingReplay', 'ProcessingReplay'),
