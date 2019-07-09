@@ -73,7 +73,7 @@ class Match(models.Model):
 
     class StartResult(Enum):
         SUCCESS = 1
-        FAIL_NO_BOTS_AVAILABLE = 2
+        BOT_ALREADY_IN_MATCH = 2
         FAIL_ALREADY_STARTED = 3
 
     def start(self, assign_to):
@@ -84,7 +84,7 @@ class Match(models.Model):
                 participants = Participant.objects.select_for_update().filter(match=self)
                 for p in participants:
                     if p.bot.in_match:
-                        return Match.StartResult.FAIL_NO_BOTS_AVAILABLE
+                        return Match.StartResult.BOT_ALREADY_IN_MATCH
 
                 for p in participants:
                     p.bot.enter_match(self)
