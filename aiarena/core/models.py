@@ -53,7 +53,7 @@ class Round(models.Model):
 
     # if all the matches have been run, mark this as complete
     def update_if_completed(self):
-        # if these are no matches without results, this round is complete
+        # if there are no matches without results, this round is complete
         if Match.objects.filter(round=self, result__isnull=True).count() == 0:
             self.complete = True
             self.finished = timezone.now()

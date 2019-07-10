@@ -327,6 +327,9 @@ class ManagementCommandTests(MatchReadyTestCase):
     """
 
     def test_cancel_matches(self):
+        botCount = Bot.objects.filter(active=True).count()
+        expectedMatchCountPerRound = int(botCount/2*(botCount-1))
+
         # test match doesn't exist
         with self.assertRaisesMessage(CommandError, 'Match "12345" does not exist'):
             call_command('cancelmatches', '12345')
@@ -347,6 +350,30 @@ class ManagementCommandTests(MatchReadyTestCase):
 
         # test that cancelling the match marks it as started.
         self.assertIsNotNone(Match.objects.get(id=match_id).started)
+
+        # cancel the rest of the matches.
+        for x in range(1, expectedMatchCountPerRound):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+            match_id = response.data['id']
+
+            out = StringIO()
+            call_command('cancelmatches', match_id, stdout=out)
+            self.assertIn('Successfully marked match "{0}" with an InitializationError'.format(match_id),
+                          out.getvalue())
+
+            # test result already exists
+            with self.assertRaisesMessage(CommandError, 'A result already exists for match "{0}"'.format(match_id)):
+                call_command('cancelmatches', match_id)
+
+            # test that cancelling the match marks it as started.
+            self.assertIsNotNone(Match.objects.get(id=match_id).started)
+
+        # check that the round was correctly marked as finished
+        round = Match.objects.get(id=match_id).round
+        self.assertTrue(round.complete)
+        self.assertIsNotNone(round.finished)
+
 
 
     def test_reset_elo(self):

@@ -13,10 +13,11 @@ class Command(BaseCommand):
         parser.add_argument('match_ids', nargs='+', type=int)
 
     def handle(self, *args, **options):
-        with transaction.atomic():
-            for match_id in options['match_ids']:
+        for match_id in options['match_ids']:
+            with transaction.atomic():
                 try:
-                    match = Match.objects.select_for_update().get(pk=match_id)
+                    # select_related() for the round data
+                    match = Match.objects.select_related('round').select_for_update().get(pk=match_id)
                 except Match.DoesNotExist:
                     raise CommandError('Match "%s" does not exist' % match_id)
 
@@ -44,6 +45,8 @@ class Command(BaseCommand):
                 else:
                     match.started = timezone.now()
                     match.save()
+
+                match.round.update_if_completed()
 
                 self.stdout.write(
                     self.style.SUCCESS('Successfully marked match "%s" with an InitializationError' % match_id))
