@@ -218,7 +218,7 @@ class Bot(models.Model):
     def timeout_overtime_bot_games():  # todo: register "timeout" result
         with transaction.atomic():
             bots_in_matches = Bot.objects.select_for_update().filter(in_match=True,
-                                                                     current_match__created__lt=timezone.now() - timedelta(
+                                                                     current_match__started__lt=timezone.now() - timedelta(
                                                                          hours=1))
             for bot in bots_in_matches:
                 logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))

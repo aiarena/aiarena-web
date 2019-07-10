@@ -121,7 +121,7 @@ class MatchesTestCase(LoggedInTestCase):
         match2 = Match.objects.get(id=response.data['id'])
 
         # set the created time back into the past long enough for it to cause a time out
-        match1.created = timezone.now() - timedelta(hours=2)
+        match1.started = timezone.now() - timedelta(hours=2)
         match1.save()
 
         response = self.client.post('/api/arenaclient/matches/')
