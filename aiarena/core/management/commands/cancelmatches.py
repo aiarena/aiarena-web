@@ -7,7 +7,7 @@ from aiarena.core.models import Match, Result
 
 
 class Command(BaseCommand):
-    help = 'Registers an InitializationError result for all current matches.'
+    help = 'Registers a MatchCancelled result for all current matches.'
 
     def add_arguments(self, parser):
         parser.add_argument('match_ids', nargs='+', type=int)
@@ -24,7 +24,7 @@ class Command(BaseCommand):
                 if Result.objects.filter(match=match).count() > 0:
                     raise CommandError('A result already exists for match "%s"' % match_id)
 
-                Result.objects.create(match=match, type='InitializationError', duration=0)
+                Result.objects.create(match=match, type='MatchCancelled', duration=0)
 
                 # attempt to kick the bots from the match
                 if match.started:
@@ -49,4 +49,4 @@ class Command(BaseCommand):
                 match.round.update_if_completed()
 
                 self.stdout.write(
-                    self.style.SUCCESS('Successfully marked match "%s" with an InitializationError' % match_id))
+                    self.style.SUCCESS('Successfully marked match "%s" with MatchCancelled' % match_id))
