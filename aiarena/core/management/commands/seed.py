@@ -89,6 +89,6 @@ class Command(BaseCommand):
             self.stdout.write('Generating {0} round(s)...'.format(rounds))
             run_seed(rounds)
 
-            self.stdout.write('Done. User logins have a password of "x"')
+            self.stdout.write('Done. User logins have a password of "x".')
         else:
             self.stdout.write('Seeding failed: This is not a development environment!')

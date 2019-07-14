@@ -394,3 +394,9 @@ class ManagementCommandTests(MatchReadyTestCase):
 
         for bot in Bot.objects.all():
             self.assertEqual(bot.elo, settings.ELO_START_VALUE)
+
+    def test_seed(self):
+        # test match successfully cancelled
+        out = StringIO()
+        call_command('seed', stdout=out)
+        self.assertIn('Done. User logins have a password of "x".', out.getvalue())
