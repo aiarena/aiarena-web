@@ -10,7 +10,7 @@ from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
 
 from aiarena import settings
-from aiarena.core.models import Bot, Result, User, Round, Match
+from aiarena.core.models import Bot, Result, User, Round, Match, Participant
 
 
 class UserProfileForm(forms.ModelForm):
@@ -229,6 +229,21 @@ class BotDataDownloadView(PrivateStorageDetailView):
         user = private_file.request.user
         # Allow if staff, the owner of the file, or the file is marked as publicly downloadable
         return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_data_publicly_downloadable
+
+
+class MatchLogDownloadView(PrivateStorageDetailView):
+    model = Participant
+    model_file_field = 'match_log'
+
+    content_disposition = 'attachment'
+
+    def get_content_disposition_filename(self, private_file):
+        return '{0}_{1}_log.zip'.format(private_file.parent_object.bot.name, private_file.parent_object.id)
+
+    def can_access_file(self, private_file):
+        user = private_file.request.user
+        # Allow if staff or the owner of the file
+        return user.is_authenticated and user.is_staff or private_file.parent_object.bot.user == user
 
 
 class Index(ListView):

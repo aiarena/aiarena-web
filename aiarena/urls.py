@@ -39,6 +39,7 @@ urlpatterns = [
                   path('bots/<int:pk>/edit', core_views.BotUpdate.as_view(), name='bot_edit'),
                   path('bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
                   path('bots/<int:pk>/bot_data', core_views.BotDataDownloadView.as_view()),
+                  path('match-logs/<int:pk>/', core_views.MatchLogDownloadView.as_view()),
                   path('authors/', core_views.AuthorList.as_view(), name='authors'),
                   path('authors/<int:pk>/', core_views.AuthorDetail.as_view(), name='author'),
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),

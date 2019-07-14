@@ -342,7 +342,7 @@ def save_bot_files(sender, instance, created, **kwargs):
 
 
 def match_log_upload_to(instance, filename):
-    return '/'.join(['bots', str(instance.bot.id), 'match-logs', str(instance.match.id)])
+    return '/'.join(['match-logs', str(instance.id)])
 
 
 class Participant(models.Model):
