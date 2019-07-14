@@ -18,6 +18,7 @@ class BaseTestCase(TransactionTestCase):
     test_bot_zip_path = 'aiarena/core/test_bot.zip'
     test_bot1_data_path = 'aiarena/core/test_bot1_data.zip'
     test_bot2_data_path = 'aiarena/core/test_bot2_data.zip'
+    test_replay_path = 'aiarena/core/testReplay.SC2Replay'
 
     def _create_map(self, name):
         return Map.objects.create(name=name)

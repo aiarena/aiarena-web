@@ -5,7 +5,8 @@ from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import models, transaction, connection
+from django.db.models import Sum
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -13,10 +14,12 @@ from django.utils import timezone
 from django.utils.html import escape
 from private_storage.fields import PrivateFileField
 
+from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
+from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, \
+    ENABLE_ELO_SANITY_CHECK, ELO
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +98,58 @@ class Match(models.Model):
                 return Match.StartResult.SUCCESS
             else:
                 return Match.StartResult.FAIL_ALREADY_STARTED
+
+    @staticmethod
+    def _queue_round_robin_matches_for_all_active_bots():
+        if Map.objects.count() == 0:
+            raise NoMaps()
+        if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
+            raise NotEnoughActiveBots()
+
+        round = Round.objects.create()
+
+        active_bots = Bot.objects.filter(active=True)
+        already_processed_bots = []
+
+        # loop through and generate matches for all active bots
+        for bot1 in active_bots:
+            already_processed_bots.append(bot1.id)
+            for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
+                Match.create(round, Map.random(), bot1, bot2)
+
+    @staticmethod
+    def start_next_match(requesting_user):
+
+        Bot.timeout_overtime_bot_games()
+
+        with connection.cursor() as cursor:
+            # Lock the matches table
+            # this needs to happen so that if we end up having to generate a new set of matches
+            # then we don't hit a race condition
+            # MySql also requires we lock any other tables we access as well.
+            cursor.execute(
+                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ".format(Match._meta.db_table,
+                                                                                          Round._meta.db_table,
+                                                                                          Participant._meta.db_table,
+                                                                                          Bot._meta.db_table,
+                                                                                          Map._meta.db_table))
+            try:
+                queued_matches = Match.objects.filter(started__isnull=True)
+
+                if queued_matches.count() == 0:
+                    Match._queue_round_robin_matches_for_all_active_bots()
+
+                for match in queued_matches:
+                    if match.start(requesting_user) == Match.StartResult.SUCCESS:
+                        return match
+
+                # Here we can assume there wasn't any bots available
+                # ROLLBACK here so the UNLOCK statement doesn't commit changes
+                cursor.execute("ROLLBACK")
+                raise NotEnoughAvailableBots()
+            finally:
+                # pass
+                cursor.execute("UNLOCK TABLES;")
 
     @staticmethod
     def create(round, map, bot1, bot2):
@@ -397,6 +452,66 @@ class Result(models.Model):
 
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)
+
+    def _adjust_elo(self):
+        if self.has_winner():
+            winner, loser = self.get_winner_loser_bots()
+            self._apply_elo_delta(ELO.calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
+        elif self.type == 'Tie':
+            first, second = self.get_participant_bots()
+            self._apply_elo_delta(ELO.calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
+
+    def _get_initial_elos(self):
+        first, second = self.get_participant_bots()
+        return first.elo, second.elo
+
+    def _apply_elo_delta(self, delta, bot1, bot2):
+        delta = int(round(delta))
+        bot1.elo += delta
+        bot1.save()
+        bot2.elo -= delta
+        bot2.save()
+
+    def finalize_submission(self, bot1_data, bot2_data):
+        p1_initial_elo, p2_initial_elo = self._get_initial_elos()
+        self._adjust_elo()
+        p1, p2 = self.get_participants()
+        p1.update_resultant_elo()
+        p2.update_resultant_elo()
+        # calculate the change in ELO
+        p1.elo_change = p1.resultant_elo - p1_initial_elo
+        p1.save()
+        p2.elo_change = p2.resultant_elo - p2_initial_elo
+        p2.save()
+
+        if ENABLE_ELO_SANITY_CHECK:  # todo remove this condition and log instead of an exception.
+            # test here to check ELO total and ensure no corruption
+            expectedEloSum = ELO_START_VALUE * Bot.objects.all().count()
+            actualEloSum = Bot.objects.aggregate(Sum('elo'))
+
+            if actualEloSum['elo__sum'] != expectedEloSum:
+                logger.critical(
+                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
+                        actualEloSum['elo__sum'], expectedEloSum, self.id))
+
+        bot1 = self.match.participant_set.get(participant_number=1).bot
+        bot2 = self.match.participant_set.get(participant_number=2).bot
+
+        # save bot datas
+        if bot1_data is not None:
+            bot1.bot_data = bot1_data
+            bot1.save()
+
+        if bot2_data is not None:
+            bot2.bot_data = bot2_data
+            bot2.save()
+
+        bot1.leave_match(self.match_id)
+        bot2.leave_match(self.match_id)
+
+        self.match.round.update_if_completed()
+
+
 
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form

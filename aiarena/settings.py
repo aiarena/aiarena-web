@@ -11,8 +11,9 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from enum import Enum
 
-from aiarena.core.utils import Elo
+from aiarena.core.utils import Elo, EnvironmentType
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -109,7 +110,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'rest_framework.filters.OrderingFilter',
         # 'django_filters.rest_framework.DjangoFilterBackend',
-    # todo: check that opening this generically doesn't leak sensitive info.
+        # todo: check that opening this generically doesn't leak sensitive info.
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 100
@@ -188,7 +189,9 @@ AVATAR_CACHE_ENABLED = False
 # pre-generate the most commonly used size
 AVATAR_AUTO_GENERATE_SIZES = (150,)
 
-# hack to override any of these settings with an env.py file
+ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
+
+# override any of these settings with an env.py file
 try:
     from aiarena.env import *
 except ImportError as e:

@@ -1,8 +1,6 @@
 import logging
 from wsgiref.util import FileWrapper
 
-from django.db import connection
-from django.db.models import Sum
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
@@ -11,10 +9,8 @@ from rest_framework.fields import FileField
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NotEnoughActiveBots, NoMaps
 from aiarena.core.exceptions import BotNotInMatchException
-from aiarena.core.models import Bot, Map, Match, Participant, Result, Round
-from aiarena.settings import ELO_START_VALUE, ENABLE_ELO_SANITY_CHECK, ELO
+from aiarena.core.models import Bot, Map, Match, Participant, Result
 
 logger = logging.getLogger(__name__)
 
@@ -69,58 +65,8 @@ class MatchViewSet(viewsets.GenericViewSet):
     """
     serializer_class = MatchSerializer
 
-    def _queue_round_robin_matches_for_all_active_bots(self):
-        if Map.objects.count() == 0:
-            raise NoMaps()
-        if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
-            raise NotEnoughActiveBots()
-
-        round = Round.objects.create()
-
-        active_bots = Bot.objects.filter(active=True)
-        already_processed_bots = []
-
-        # loop through and generate matches for all active bots
-        for bot1 in active_bots:
-            already_processed_bots.append(bot1.id)
-            for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
-                Match.create(round, Map.random(), bot1, bot2)
-
-    def _start_next_match(self, requesting_user):
-
-        Bot.timeout_overtime_bot_games()
-
-        with connection.cursor() as cursor:
-            # Lock the matches table
-            # this needs to happen so that if we end up having to generate a new set of matches
-            # then we don't hit a race condition
-            # MySql also requires we lock any other tables we access as well.
-            cursor.execute(
-                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ".format(Match._meta.db_table,
-                                                                                          Round._meta.db_table,
-                                                                                          Participant._meta.db_table,
-                                                                                          Bot._meta.db_table,
-                                                                                          Map._meta.db_table))
-            try:
-                queued_matches = Match.objects.filter(started__isnull=True)
-
-                if queued_matches.count() == 0:
-                    self._queue_round_robin_matches_for_all_active_bots()
-
-                for match in queued_matches:
-                    if match.start(requesting_user) == Match.StartResult.SUCCESS:
-                        return match
-
-                # Here we can assume there wasn't any bots available
-                # ROLLBACK here so the UNLOCK statement doesn't commit changes
-                cursor.execute("ROLLBACK")
-                raise NotEnoughAvailableBots()
-            finally:
-                # pass
-                cursor.execute("UNLOCK TABLES;")
-
     def create(self, request, *args, **kwargs):
-        match = self._start_next_match(request.user)
+        match = Match.start_next_match(request.user)
 
         match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
         match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot
@@ -177,72 +123,15 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     # todo: avoid results being logged against matches not owned by the submitter
     def perform_create(self, serializer):
         # pop bot datas so they don't interfere with saving the result
-        process_bot1_data = False
-        process_bot2_data = False
+        bot1_data = None
+        bot2_data = None
         if 'bot1_data' in serializer.validated_data:
             bot1_data = serializer.validated_data.pop('bot1_data')
-            process_bot1_data = True
         if 'bot2_data' in serializer.validated_data:
             bot2_data = serializer.validated_data.pop('bot2_data')
-            process_bot2_data = True
-
-        result = serializer.save()
-        p1_initial_elo, p2_initial_elo = self.get_initial_elos(result)
-        self.adjust_elo(result)
-        p1, p2 = result.get_participants()
-        p1.update_resultant_elo()
-        p2.update_resultant_elo()
-        # calculate the change in ELO
-        p1.elo_change = p1.resultant_elo - p1_initial_elo
-        p1.save()
-        p2.elo_change = p2.resultant_elo - p2_initial_elo
-        p2.save()
-
-        if ENABLE_ELO_SANITY_CHECK:  # todo remove this condition and log instead of an exception.
-            # test here to check ELO total and ensure no corruption
-            expectedEloSum = ELO_START_VALUE * Bot.objects.all().count()
-            actualEloSum = Bot.objects.aggregate(Sum('elo'))
-
-            if actualEloSum['elo__sum'] != expectedEloSum:
-                logger.critical(
-                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
-                        actualEloSum['elo__sum'], expectedEloSum, result.id))
-
-        bot1 = serializer.validated_data['match'].participant_set.get(participant_number=1).bot
-        bot2 = serializer.validated_data['match'].participant_set.get(participant_number=2).bot
-
-        # save bot datas
-        if process_bot1_data:
-            bot1.bot_data = bot1_data
-            bot1.save()
-
-        if process_bot2_data:
-            bot2.bot_data = bot2_data
-            bot2.save()
 
         try:
-            bot1.leave_match(result.match_id)
-            bot2.leave_match(result.match_id)
+            result = serializer.save()
+            result.finalize_submission(bot1_data, bot2_data)
         except BotNotInMatchException:
             raise APIException('Unable to log result - one of the bots is not listed as in this match.')
-
-        result.match.round.update_if_completed()
-
-    def adjust_elo(self, result):
-        if result.has_winner():
-            winner, loser = result.get_winner_loser_bots()
-            self.apply_elo_delta(ELO.calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
-        elif result.type == 'Tie':
-            first, second = result.get_participant_bots()
-            self.apply_elo_delta(ELO.calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
-
-    def apply_elo_delta(self, delta, bot1, bot2):
-        delta = int(round(delta))
-        bot1.elo += delta
-        bot1.save()
-        bot2.elo -= delta
-        bot2.save()
-
-    def get_initial_elos(self, result):
-        first, second = result.get_participant_bots()
-        return first.elo, second.elo
