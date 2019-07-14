@@ -18,6 +18,8 @@ class BaseTestCase(TransactionTestCase):
     test_bot_zip_path = 'aiarena/core/test_bot.zip'
     test_bot1_data_path = 'aiarena/core/test_bot1_data.zip'
     test_bot2_data_path = 'aiarena/core/test_bot2_data.zip'
+    test_bot1_match_log_path = 'aiarena/core/test_bot1_match_log.zip'
+    test_bot2_match_log_path = 'aiarena/core/test_bot2_match_log.zip'
     test_replay_path = 'aiarena/core/testReplay.SC2Replay'
 
     def _create_map(self, name):
@@ -44,14 +46,17 @@ class BaseTestCase(TransactionTestCase):
     def _post_to_results(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
         with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data, open(
-                self.test_bot2_data_path) as bot2_data:
+                self.test_bot2_data_path) as bot2_data, open(self.test_bot1_match_log_path) as bot1_log, open(
+                self.test_bot2_match_log_path) as bot2_log:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
                                      'replay_file': replayFile,
                                      'duration': 500,
                                      'bot1_data': bot1_data,
-                                     'bot2_data': bot2_data})
+                                     'bot2_data': bot2_data,
+                                     'bot1_log': bot1_log,
+                                     'bot2_log': bot2_log})
 
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
@@ -329,7 +334,7 @@ class ManagementCommandTests(MatchReadyTestCase):
 
     def test_cancel_matches(self):
         botCount = Bot.objects.filter(active=True).count()
-        expectedMatchCountPerRound = int(botCount/2*(botCount-1))
+        expectedMatchCountPerRound = int(botCount / 2 * (botCount - 1))
 
         # test match doesn't exist
         with self.assertRaisesMessage(CommandError, 'Match "12345" does not exist'):
@@ -374,8 +379,6 @@ class ManagementCommandTests(MatchReadyTestCase):
         round = Match.objects.get(id=match_id).round
         self.assertTrue(round.complete)
         self.assertIsNotNone(round.finished)
-
-
 
     def test_reset_elo(self):
         # test match successfully cancelled

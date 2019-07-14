@@ -341,12 +341,18 @@ def save_bot_files(sender, instance, created, **kwargs):
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
 
 
+def match_log_upload_to(instance, filename):
+    return '/'.join(['bots', str(instance.bot.id), 'match_logs', str(instance.match.id)])
+
+
 class Participant(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     participant_number = models.PositiveSmallIntegerField()
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='match_participations')
     resultant_elo = models.SmallIntegerField(null=True)
     elo_change = models.SmallIntegerField(null=True)
+    match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
+                                 blank=True, null=True)
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo
@@ -472,7 +478,7 @@ class Result(models.Model):
         bot2.elo -= delta
         bot2.save()
 
-    def finalize_submission(self, bot1_data, bot2_data):
+    def finalize_submission(self, bot1_data, bot2_data, bot1_log, bot2_log):
         p1_initial_elo, p2_initial_elo = self._get_initial_elos()
         self._adjust_elo()
         p1, p2 = self.get_participants()
@@ -494,8 +500,10 @@ class Result(models.Model):
                     "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
                         actualEloSum['elo__sum'], expectedEloSum, self.id))
 
-        bot1 = self.match.participant_set.get(participant_number=1).bot
-        bot2 = self.match.participant_set.get(participant_number=2).bot
+        participant1 = self.match.participant_set.get(participant_number=1)
+        participant2 = self.match.participant_set.get(participant_number=2)
+        bot1 = participant1.bot
+        bot2 = participant2.bot
 
         # save bot datas
         if bot1_data is not None:
@@ -506,12 +514,18 @@ class Result(models.Model):
             bot2.bot_data = bot2_data
             bot2.save()
 
+        if bot1_log is not None:
+            participant1.match_log = bot1_log
+            participant1.save()
+
+        if bot2_log is not None:
+            participant2.match_log = bot2_log
+            participant2.save()
+
         bot1.leave_match(self.match_id)
         bot2.leave_match(self.match_id)
 
         self.match.round.update_if_completed()
-
-
 
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form

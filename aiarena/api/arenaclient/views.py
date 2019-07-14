@@ -96,21 +96,28 @@ class ResultSerializer(serializers.ModelSerializer):
     bot2_data = FileField(required=False)
     submitted_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
+    bot1_log = FileField(required=False)
+    bot2_log = FileField(required=False)
+
     def validate(self, attrs):
-        # remove the bot datas so they don't cause validation failure
+        # temporarily remove the extra fields so they don't cause validation failure
         modified_attrs = attrs.copy()
         if 'bot1_data' in attrs:
             modified_attrs.pop('bot1_data')
         if 'bot2_data' in attrs:
             modified_attrs.pop('bot2_data')
+        if 'bot1_log' in attrs:
+            modified_attrs.pop('bot1_log')
+        if 'bot2_log' in attrs:
+            modified_attrs.pop('bot2_log')
         instance = ResultSerializer.Meta.model(**modified_attrs)
 
-        instance.clean()  # enforce model validation because result has some custom checks
+        instance.clean()  # enforce model validation because the result model has some custom checks
         return attrs
 
     class Meta:
         model = Result
-        fields = 'type', 'replay_file', 'duration', 'submitted_by', 'match', 'bot1_data', 'bot2_data'
+        fields = 'type', 'replay_file', 'duration', 'submitted_by', 'match', 'bot1_data', 'bot2_data', 'bot1_log', 'bot2_log'
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -122,16 +129,22 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     # todo: avoid results being logged against matches not owned by the submitter
     def perform_create(self, serializer):
-        # pop bot datas so they don't interfere with saving the result
+        # pop extra fields so they don't interfere with saving the result
         bot1_data = None
         bot2_data = None
+        bot1_log = None
+        bot2_log = None
         if 'bot1_data' in serializer.validated_data:
             bot1_data = serializer.validated_data.pop('bot1_data')
         if 'bot2_data' in serializer.validated_data:
             bot2_data = serializer.validated_data.pop('bot2_data')
+        if 'bot1_log' in serializer.validated_data:
+            bot1_log = serializer.validated_data.pop('bot1_log')
+        if 'bot2_log' in serializer.validated_data:
+            bot2_log = serializer.validated_data.pop('bot2_log')
 
         try:
             result = serializer.save()
-            result.finalize_submission(bot1_data, bot2_data)
+            result.finalize_submission(bot1_data, bot2_data, bot1_log, bot2_log)
         except BotNotInMatchException:
             raise APIException('Unable to log result - one of the bots is not listed as in this match.')

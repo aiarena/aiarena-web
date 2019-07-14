@@ -147,6 +147,7 @@ class MatchesTestCase(LoggedInTestCase):
 class ResultsTestCase(LoggedInTestCase):
     uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data')
     uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data_backup')
+    uploaded_match_log_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/match_logs/{1}')
 
     def test_create_results(self):
         self.client.login(username='staff_user', password='x')
@@ -166,6 +167,9 @@ class ResultsTestCase(LoggedInTestCase):
         # check hashes
         self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
         self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        # check match logs exist
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot1.id, match['id'])))
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot2.id, match['id'])))
 
         # post a standard result
         match = self._post_to_matches().data
@@ -181,6 +185,9 @@ class ResultsTestCase(LoggedInTestCase):
         # check hashes - nothing should have changed
         self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
         self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        # check match logs exist
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot1.id, match['id'])))
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot2.id, match['id'])))
 
         # post a standard result with no bot1 data
         match = self._post_to_matches().data
