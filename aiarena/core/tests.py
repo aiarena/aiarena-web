@@ -267,8 +267,14 @@ class PageRenderTestCase(FullDataSetTestCase):
         response = self.client.get('/bots/')
         self.assertEqual(response.status_code, 200)
 
-    def test_get_bot_page(self):
-        response = self.client.get('/bots/{0}/'.format(self.regularUser1Bot1.id))
+    def test_get_bot_page_active(self):
+        active_bot = Bot.objects.filter(active=True)[0]
+        response = self.client.get('/bots/{0}/'.format(active_bot.id))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_bot_page_inactive(self):
+        inactive_bot = Bot.objects.filter(active=False)[0]
+        response = self.client.get('/bots/{0}/'.format(inactive_bot.id))
         self.assertEqual(response.status_code, 200)
 
     def test_get_bot_edit_page(self):
