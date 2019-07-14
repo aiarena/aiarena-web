@@ -82,7 +82,7 @@ class BotDetail(DetailView):
 
         # paginate the results
         page = self.request.GET.get('page', 1)
-        paginator = Paginator(results, 20)
+        paginator = Paginator(results, 30)
         try:
             results = paginator.page(page)
         except PageNotAnInteger:
