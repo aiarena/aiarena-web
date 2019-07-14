@@ -81,9 +81,8 @@ class BotDetail(DetailView):
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
-            result.mapname = result.match.map.name
-            result.opponent = result.match.participant_set.exclude(bot=self.object)[0]
-            result.me = result.match.participant_set.filter(bot=self.object)[0]
+            result.opponent = result.match.participant_set.exclude(bot=self.object).get()
+            result.me = result.match.participant_set.get(bot=self.object)
 
             # convert the type to be reletive to this bot
             if result.winner is not None:
@@ -114,7 +113,6 @@ class FrozenDataBotUpdateForm(forms.ModelForm):
                   'bot_data_publicly_downloadable']
 
 
-# todo: don't allow editing a bot when in a match
 class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = 'bot_edit.html'
 

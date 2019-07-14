@@ -12,11 +12,22 @@ def create_match(as_user):
     return Match.start_next_match(as_user)
 
 
+def create_result_with_bot_data_and_logs(match, type, as_user):
+    with open(BaseTestCase.test_replay_path, 'rb') as result_replay,\
+            open(BaseTestCase.test_bot1_data_path,'rb') as bot1_data,\
+            open(BaseTestCase.test_bot2_data_path, 'rb') as bot2_data,\
+            open(BaseTestCase.test_bot1_match_log_path,'rb') as bot1_log,\
+            open(BaseTestCase.test_bot2_match_log_path, 'rb') as bot2_log:
+        result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), duration=1,
+                                       submitted_by=as_user)
+        result.finalize_submission(File(bot1_data), File(bot2_data), File(bot1_log), File(bot2_log))
+
+
 def create_result(match, type, as_user):
     with open(BaseTestCase.test_replay_path, 'rb') as result_replay:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), duration=1,
                                        submitted_by=as_user)
-        result.finalize_submission(None, None)
+        result.finalize_submission(None, None, None, None)
 
 
 def run_seed():
@@ -47,11 +58,11 @@ def run_seed():
     match = create_match(devadmin)
     create_result(match, 'Player2Win', devadmin)
     match = create_match(devadmin)
-    create_result(match, 'Player1Crash', devadmin)
+    create_result_with_bot_data_and_logs(match, 'Player1Crash', devadmin)
     match = create_match(devadmin)
     create_result(match, 'Player1TimeOut', devadmin)
     match = create_match(devadmin)
-    create_result(match, 'Tie', devadmin)
+    create_result_with_bot_data_and_logs(match, 'Tie', devadmin)
     match = create_match(devadmin)
     create_result(match, 'Timeout', devadmin)
     # Round 2
@@ -60,7 +71,7 @@ def run_seed():
     match = create_match(devadmin)
     create_result(match, 'InitializationError', devadmin)
     match = create_match(devadmin)
-    create_result(match, 'Player2Crash', devadmin)
+    create_result_with_bot_data_and_logs(match, 'Player2Crash', devadmin)
 
 
 class Command(BaseCommand):
