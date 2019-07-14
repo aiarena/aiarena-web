@@ -119,11 +119,11 @@
                                                 {% else %}
                                                     <li class="disabled"><span>&laquo;</span></li>
                                                 {% endif %}
-                                                {% for i in result_list.paginator.page_range %}
-                                                    {% if result_list.number == i %}
-                                                        <li class="active"><span>{{ i }}</span></li>
+                                                {% for page_num in results_page_range %}
+                                                    {% if result_list.number == page_num %}
+                                                        <li class="active"><span>{{ page_num }}</span></li>
                                                     {% else %}
-                                                        <li><a href="?page={{ i }}">{{ i }}</a></li>
+                                                        <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
                                                     {% endif %}
                                                 {% endfor %}
                                                 {% if result_list.has_next %}

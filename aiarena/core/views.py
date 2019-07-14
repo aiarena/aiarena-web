@@ -90,6 +90,16 @@ class BotDetail(DetailView):
         except EmptyPage:
             results = paginator.page(paginator.num_pages)
 
+        page_number = results.number
+
+        # limit displayed page numbers
+        if paginator.num_pages <= 11 or page_number <= 6:  # case 1 and 2
+            results_page_range = [x for x in range(1, min(paginator.num_pages + 1, 12))]
+        elif page_number > paginator.num_pages - 6:  # case 4
+            results_page_range = [x for x in range(paginator.num_pages - 10, paginator.num_pages + 1)]
+        else:  # case 3
+            results_page_range = [x for x in range(page_number - 5, page_number + 6)]
+
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
             result.opponent = result.match.participant_set.exclude(bot=self.object).get()
@@ -105,6 +115,7 @@ class BotDetail(DetailView):
                 result.relative_type = result.type
 
         context['result_list'] = results
+        context['results_page_range'] = results_page_range
         return context
 
 
