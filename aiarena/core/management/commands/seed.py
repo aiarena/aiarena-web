@@ -30,7 +30,7 @@ def create_result(match, type, as_user):
         result.finalize_submission(None, None, None, None)
 
 
-def run_seed():
+def run_seed(rounds):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@aiarena.net')
     Token.objects.create(user=devadmin)
     devuser = User.objects.create(username='devuser', password='x', email='devuser@aiarena.net')
@@ -51,37 +51,43 @@ def run_seed():
         Bot.objects.create(user=devuser, name='devuser_bot3', plays_race='T', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-    # 4 active bots - 6 games per round
-    # Round 1
-    match = create_match(devadmin)
-    create_result(match, 'Player1Win', devadmin)
-    match = create_match(devadmin)
-    create_result(match, 'Player2Win', devadmin)
-    match = create_match(devadmin)
-    create_result_with_bot_data_and_logs(match, 'Player1Crash', devadmin)
-    match = create_match(devadmin)
-    create_result(match, 'Player1TimeOut', devadmin)
-    match = create_match(devadmin)
-    create_result_with_bot_data_and_logs(match, 'Tie', devadmin)
-    match = create_match(devadmin)
-    create_result(match, 'Timeout', devadmin)
-    # Round 2
-    match = create_match(devadmin)
-    create_result(match, 'MatchCancelled', devadmin)
-    match = create_match(devadmin)
-    create_result(match, 'InitializationError', devadmin)
-    match = create_match(devadmin)
-    create_result_with_bot_data_and_logs(match, 'Player2Crash', devadmin)
+    for x in range(rounds-1):  # 4 active bots - 6 games per round
+        match = create_match(devadmin)
+        create_result(match, 'Player1Win', devadmin)
+        match = create_match(devadmin)
+        create_result(match, 'Player2Win', devadmin)
+        match = create_match(devadmin)
+        create_result_with_bot_data_and_logs(match, 'Player1Crash', devadmin)
+        match = create_match(devadmin)
+        create_result(match, 'Player1TimeOut', devadmin)
+        match = create_match(devadmin)
+        create_result_with_bot_data_and_logs(match, 'Tie', devadmin)
+        match = create_match(devadmin)
+        create_result(match, 'Timeout', devadmin)
+
+    # one last to tick over into the final round so we don't have an empty match queue
+    create_match(devadmin)
 
 
 class Command(BaseCommand):
     help = "Seed database for testing and development."
 
+    _DEFAULT_ROUNDS_TO_GENERATE = 10
+
+    def add_arguments(self, parser):
+        parser.add_argument('--rounds', type=int, help="Number of rounds to generate")
+
     def handle(self, *args, **options):
         self.stdout.write('Seeding data...')
 
         if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT:
-            run_seed()
+            if options['rounds'] is not None:
+                rounds = options['rounds']
+            else:
+                rounds = self._DEFAULT_ROUNDS_TO_GENERATE
+
+            self.stdout.write('Generating {0} round(s)...'.format(rounds))
+            run_seed(rounds)
         else:
             self.stdout.write('Seeding failed: This is not a development environment!')
 
