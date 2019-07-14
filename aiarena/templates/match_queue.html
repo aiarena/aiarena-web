@@ -13,6 +13,7 @@
                 <td><b>Bot 2</b></td>
                 <td><b>Map</b></td>
                 <td><b>Started at</b></td>
+                <td><b>Assigned to</b></td>
             </tr>
             {% for match in round.matches %}
                 <tr>
@@ -23,7 +24,12 @@
                     {% if match.started %}
                         <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
                     {% else %}
-                        <td>Queued</td>
+                        <td>queued...</td>
+                    {% endif %}
+                    {% if match.assigned_to %}
+                        <td>{{ match.assigned_to }}</td>
+                    {% else %}
+                        <td>queued...</td>
                     {% endif %}
                 </tr>
             {% endfor %}
