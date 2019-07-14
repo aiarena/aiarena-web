@@ -33,7 +33,7 @@ def create_result(match, type, as_user):
 def run_seed(rounds):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@aiarena.net')
     Token.objects.create(user=devadmin)
-    devuser = User.objects.create(username='devuser', password='x', email='devuser@aiarena.net')
+    devuser = User.objects.create_user(username='devuser', password='x', email='devuser@aiarena.net')
     Map.objects.create(name='test_map')
 
     with open(BaseTestCase.test_bot_zip_path, 'rb') as bot_zip:
