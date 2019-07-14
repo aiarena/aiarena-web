@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result
+from aiarena.core.models import User, Bot, Map, Match, Result, Participant
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import MAX_USER_BOT_COUNT
 
@@ -403,25 +403,38 @@ class ManagementCommandTests(MatchReadyTestCase):
         call_command('seed', stdout=out)
         self.assertIn('Done. User logins have a password of "x".', out.getvalue())
 
-    def test_cleanup_replays(self):
+    def test_cleanup_replays_and_logs(self):
+        NUM_MATCHES = 12
         self.client.login(username='staff_user', password='x')
         # generate some matches so we have replays to delete...
-        for x in range(10):
+        for x in range(NUM_MATCHES):  # 12 = two rounds
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
             match_id = response.data['id']
             self._post_to_results(match_id, 'Player1Win')
 
-        # double check the replay files exist
+        # double check the replay and log files exist
         results = Result.objects.filter(replay_file__isnull=False)
-        self.assertEqual(results.count(), 10)
-        results.update(created=timezone.now() - timedelta(days=cleanupreplays.Command._DEFAULT_DAYS_LOOKBACK+1))
+        self.assertEqual(results.count(), NUM_MATCHES)
+        participants = Participant.objects.filter(match_log__isnull=False)
+        self.assertEqual(participants.count(), NUM_MATCHES * 2)
+
+        # set the created time so they'll be purged
+        results.update(created=timezone.now() - timedelta(days=cleanupreplays.Command._DEFAULT_DAYS_LOOKBACK + 1))
 
         out = StringIO()
         call_command('cleanupreplays', stdout=out)
-        self.assertIn('Cleaning up replays starting from 30 days into the past...\nCleaned up 10 replays.', out.getvalue())
+        self.assertIn('Cleaning up replays starting from 30 days into the past...\nCleaned up {0} replays.'.format(NUM_MATCHES),
+                      out.getvalue())
 
-        self.assertEqual(results.count(), 10)
+        self.assertEqual(results.count(), NUM_MATCHES)
         for result in results:
             self.assertFalse(result.replay_file)
 
+        call_command('cleanupmatchlogfiles', stdout=out)
+        self.assertIn('Cleaning up match logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(NUM_MATCHES*2),
+                      out.getvalue())
+
+        self.assertEqual(participants.count(), NUM_MATCHES * 2)
+        for participant in participants:
+            self.assertFalse(participant.match_log)

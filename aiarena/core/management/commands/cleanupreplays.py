@@ -27,6 +27,5 @@ class Command(BaseCommand):
     def cleanup_replays(self, days):
         results = Result.objects.filter(replay_file__isnull=False, created__lt=timezone.now() - timedelta(days=days))
         for result in results:
-            if result.replay_file:
-                result.replay_file.delete()  # why doesn't this clear the file field itself?
+            result.replay_file.delete()
         return results.count()
