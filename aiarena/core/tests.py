@@ -1,13 +1,16 @@
 import os
+from datetime import timedelta
 from io import StringIO
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.management import call_command, CommandError
 from django.test import TransactionTestCase
+from django.utils import timezone
 
 from aiarena import settings
-from aiarena.core.models import User, Bot, Map, Match
+from aiarena.core.management.commands import cleanupreplays
+from aiarena.core.models import User, Bot, Map, Match, Result
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import MAX_USER_BOT_COUNT
 
@@ -47,7 +50,7 @@ class BaseTestCase(TransactionTestCase):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
         with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data, open(
                 self.test_bot2_data_path) as bot2_data, open(self.test_bot1_match_log_path) as bot1_log, open(
-                self.test_bot2_match_log_path) as bot2_log:
+            self.test_bot2_match_log_path) as bot2_log:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
@@ -396,7 +399,29 @@ class ManagementCommandTests(MatchReadyTestCase):
             self.assertEqual(bot.elo, settings.ELO_START_VALUE)
 
     def test_seed(self):
-        # test match successfully cancelled
         out = StringIO()
         call_command('seed', stdout=out)
         self.assertIn('Done. User logins have a password of "x".', out.getvalue())
+
+    def test_cleanup_replays(self):
+        self.client.login(username='staff_user', password='x')
+        # generate some matches so we have replays to delete...
+        for x in range(10):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+            match_id = response.data['id']
+            self._post_to_results(match_id, 'Player1Win')
+
+        # double check the replay files exist
+        results = Result.objects.filter(replay_file__isnull=False)
+        self.assertEqual(results.count(), 10)
+        results.update(created=timezone.now() - timedelta(days=cleanupreplays.Command._DEFAULT_DAYS_LOOKBACK+1))
+
+        out = StringIO()
+        call_command('cleanupreplays', stdout=out)
+        self.assertIn('Cleaning up replays starting from 30 days into the past...\nCleaned up 10 replays.', out.getvalue())
+
+        self.assertEqual(results.count(), 10)
+        for result in results:
+            self.assertFalse(result.replay_file)
+

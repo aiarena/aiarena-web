@@ -13,10 +13,10 @@ def create_match(as_user):
 
 
 def create_result_with_bot_data_and_logs(match, type, as_user):
-    with open(BaseTestCase.test_replay_path, 'rb') as result_replay,\
-            open(BaseTestCase.test_bot1_data_path,'rb') as bot1_data,\
-            open(BaseTestCase.test_bot2_data_path, 'rb') as bot2_data,\
-            open(BaseTestCase.test_bot1_match_log_path,'rb') as bot1_log,\
+    with open(BaseTestCase.test_replay_path, 'rb') as result_replay, \
+            open(BaseTestCase.test_bot1_data_path, 'rb') as bot1_data, \
+            open(BaseTestCase.test_bot2_data_path, 'rb') as bot2_data, \
+            open(BaseTestCase.test_bot1_match_log_path, 'rb') as bot1_log, \
             open(BaseTestCase.test_bot2_match_log_path, 'rb') as bot2_log:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), duration=1,
                                        submitted_by=as_user)
@@ -51,7 +51,7 @@ def run_seed(rounds):
         Bot.objects.create(user=devuser, name='devuser_bot3', plays_race='T', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-    for x in range(rounds-1):  # 4 active bots - 6 games per round
+    for x in range(rounds - 1):  # 4 active bots - 6 games per round
         match = create_match(devadmin)
         create_result(match, 'Player1Win', devadmin)
         match = create_match(devadmin)
@@ -75,7 +75,8 @@ class Command(BaseCommand):
     _DEFAULT_ROUNDS_TO_GENERATE = 10
 
     def add_arguments(self, parser):
-        parser.add_argument('--rounds', type=int, help="Number of rounds to generate")
+        parser.add_argument('--rounds', type=int, help="Number of rounds to generate. Default is {0}.".format(
+            self._DEFAULT_ROUNDS_TO_GENERATE))
 
     def handle(self, *args, **options):
         self.stdout.write('Seeding data...')
