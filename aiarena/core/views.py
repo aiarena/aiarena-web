@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import F
 from django.shortcuts import render
 from django.urls import reverse
@@ -77,7 +78,17 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')[:50]
+        results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')
+
+        # paginate the results
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(results, 20)
+        try:
+            results = paginator.page(page)
+        except PageNotAnInteger:
+            results = paginator.page(1)
+        except EmptyPage:
+            results = paginator.page(paginator.num_pages)
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:

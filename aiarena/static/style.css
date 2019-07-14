@@ -1,5 +1,35 @@
+ul.pagination {
+    display: table;
+    padding: 0;
+}
+
+ul.pagination li {
+    display: table-cell;
+    font-weight: normal;
+    text-align: center;
+}
+
+ul.pagination li.active {
+    display: table-cell;
+    font-weight: bold;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+ul.pagination li.disabled {
+    display: table-cell;
+    font-weight: bold;
+    padding: 8px 16px;
+    text-decoration: none;
+}
+
+ul.pagination a {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #7da630;
+}
+
 body {
-    margin: 25;
     margin-bottom: 25px;
     padding: 0;
     background-color: rgb(0, 4, 1);
