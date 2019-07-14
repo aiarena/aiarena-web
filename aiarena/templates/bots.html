@@ -10,6 +10,7 @@
             <td><b>Author</b></td>
             <td><b>Race</b></td>
             <td><b>Type</b></td>
+            <td><b>Active</b></td>
             <td><b>ELO</b></td>
         </tr>
         {% for bot in bot_list %}
@@ -18,6 +19,7 @@
                 <td>{{ bot.user.as_html_link |safe }}</td>
                 <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.type }}</td>
+                <td>{{ bot.active }}</td>
                 <td>{{ bot.elo }}</td>
             </tr>
         {% endfor %}

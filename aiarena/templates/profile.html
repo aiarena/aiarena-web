@@ -46,8 +46,8 @@
     <table id="bot_table" style="width: 50%">
         <tr>
             <td><b>Name</b></td>
-            <td><b>Type</b></td>
             <td><b>Race</b></td>
+            <td><b>Type</b></td>
             <td><b>Active</b></td>
             <td><b>Bot Zip</b></td>
             <td><b>Data</b></td>
@@ -56,8 +56,8 @@
         {% for bot in bot_list %}
             <tr>
                 <td>{{ bot.as_html_link |safe }}</td>
-                <td>{{ bot.type }}</td>
                 <td>{{ bot.get_plays_race_display }}</td>
+                <td>{{ bot.type }}</td>
                 <td>{{ bot.active }}</td>
                 <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
                 {% if bot.bot_data %}

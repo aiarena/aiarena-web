@@ -67,7 +67,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 
 class BotList(ListView):
-    queryset = Bot.objects.filter(active=1).order_by('name')
+    queryset = Bot.objects.all().order_by('name')
     template_name = 'bots.html'
 
 
