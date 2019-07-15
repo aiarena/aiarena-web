@@ -414,6 +414,7 @@ a:hover, a:visited, a:link, a:active {
             text-align: center;
             width: 90%; 						/* divider width */
             margin: 10px auto;					/* spacing above/below */
+            pointer-events: none;			    /* Fix this blocking clicks on other elements */
         }
         .divider span { display: table-cell; position: relative; }
         .divider span:first-child, .divider span:last-child {
