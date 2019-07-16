@@ -414,9 +414,11 @@ a:hover, a:visited, a:link, a:active {
             text-align: center;
             width: 90%; 						/* divider width */
             margin: 10px auto;					/* spacing above/below */
-            pointer-events: none;			    /* Fix this blocking clicks on other elements */
         }
-        .divider span { display: table-cell; position: relative; }
+        .divider span {
+            display: table-cell;
+            position: relative;
+        }
         .divider span:first-child, .divider span:last-child {
             width: 50%;
             top: 30px;							/* adjust vertical align */
@@ -424,6 +426,7 @@ a:hover, a:visited, a:link, a:active {
             background-size: 100% 1px; 			/* line width */
             background-position: 0 0, 0 100%;
             background-repeat: no-repeat;
+            pointer-events: none;			    /* Fix this blocking clicks on other elements */
         }
         .divider span:first-child {				/* color changes in here */
             background-image: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), to(rgb(134,194,50)));
