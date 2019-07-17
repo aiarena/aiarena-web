@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import APIException
-from rest_framework.fields import FileField
+from rest_framework.fields import FileField, FloatField
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
@@ -99,6 +99,9 @@ class ResultSerializer(serializers.ModelSerializer):
     bot1_log = FileField(required=False)
     bot2_log = FileField(required=False)
 
+    bot1_avg_step_time = FloatField(required=False)
+    bot2_avg_step_time = FloatField(required=False)
+
     def validate(self, attrs):
         # temporarily remove the extra fields so they don't cause validation failure
         modified_attrs = attrs.copy()
@@ -110,6 +113,10 @@ class ResultSerializer(serializers.ModelSerializer):
             modified_attrs.pop('bot1_log')
         if 'bot2_log' in attrs:
             modified_attrs.pop('bot2_log')
+        if 'bot1_avg_step_time' in attrs:
+            modified_attrs.pop('bot1_avg_step_time')
+        if 'bot2_avg_step_time' in attrs:
+            modified_attrs.pop('bot2_avg_step_time')
         instance = ResultSerializer.Meta.model(**modified_attrs)
 
         instance.clean()  # enforce model validation because the result model has some custom checks
@@ -118,7 +125,7 @@ class ResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
         fields = 'type', 'replay_file', 'game_steps', 'realtime_duration', 'submitted_by', 'match', 'bot1_data',\
-                 'bot2_data', 'bot1_log', 'bot2_log'
+                 'bot2_data', 'bot1_log', 'bot2_log', 'bot1_avg_step_time', 'bot2_avg_step_time'
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):

@@ -333,15 +333,8 @@ class EloTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
         return response.data
 
-    def CreateResult(self, match_id, winner_id, r_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../core/testReplay.SC2Replay')
-        with open(filename) as replayFile:
-            response = self.client.post('/api/arenaclient/results/',
-                                        {'match': match_id,
-                                         'winner': winner_id,
-                                         'type': r_type,
-                                         'replay_file': replayFile,
-                                         'game_steps': 500})
+    def CreateResult(self, match_id, r_type):
+        response = self._post_to_results(match_id, r_type)
         self.assertEqual(response.status_code, 201, response.data)
 
     def DetermineResultType(self, bot1_id, iteration):
@@ -372,7 +365,7 @@ class EloTestCase(LoggedInTestCase):
         for iteration in range(0, self.num_matches_to_play):
             match = self.CreateMatch()
             res = self.DetermineResultType(match['bot1']['id'], iteration)
-            self.CreateResult(match['id'], match['bot1']['id'], res)
+            self.CreateResult(match['id'], res)
             self.CheckResultantElos(match['id'], iteration)
 
         self.CheckFinalElos()
