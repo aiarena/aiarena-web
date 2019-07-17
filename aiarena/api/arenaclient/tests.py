@@ -139,6 +139,9 @@ class MatchesTestCase(LoggedInTestCase):
             self.assertTrue(bot.in_match)
             self.assertTrue(bot.current_match is not None)
 
+        # confirm a result was registered
+        self.assertTrue(match1.result is not None)
+
         # final count double checks
         self.assertEqual(Bot.objects.filter(in_match=False, current_match=None).count(), 4)
         self.assertEqual(Bot.objects.filter(in_match=True).exclude(current_match=None).count(), 4)

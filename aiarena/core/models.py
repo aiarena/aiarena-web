@@ -270,7 +270,7 @@ class Bot(models.Model):
 
     # todo: have arena client check in with web service inorder to delay this
     @staticmethod
-    def timeout_overtime_bot_games():  # todo: register "timeout" result
+    def timeout_overtime_bot_games():
         with transaction.atomic():
             bots_in_matches = Bot.objects.select_for_update().filter(in_match=True,
                                                                      current_match__started__lt=timezone.now() - timedelta(
@@ -278,6 +278,12 @@ class Bot(models.Model):
             for bot in bots_in_matches:
                 logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
                 bot.leave_match()
+
+            matches_without_result = Match.objects.select_related('round').select_for_update().filter(
+                started__lt=timezone.now() - timedelta(hours=1), result__isnull=True)
+            for match in matches_without_result:
+                Result.objects.create(match=match, type='MatchCancelled', duration=0)
+                match.round.update_if_completed()
 
     @staticmethod
     def get_random_available():
