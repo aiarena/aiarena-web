@@ -486,7 +486,7 @@ class Result(models.Model):
         bot2.elo -= delta
         bot2.save()
 
-    def finalize_submission(self, bot1_data, bot2_data, bot1_log, bot2_log):
+    def finalize_submission(self, bot1_data, bot2_data, bot1_log, bot2_log, bot1_avg_step_time, bot2_avg_step_time):
         p1_initial_elo, p2_initial_elo = self._get_initial_elos()
         self._adjust_elo()
         p1, p2 = self.get_participants()
@@ -522,12 +522,22 @@ class Result(models.Model):
             bot2.bot_data = bot2_data
             bot2.save()
 
+        # save logs
         if bot1_log is not None:
             participant1.match_log = bot1_log
             participant1.save()
 
         if bot2_log is not None:
             participant2.match_log = bot2_log
+            participant2.save()
+
+        # save avg step times
+        if bot1_avg_step_time is not None:
+            participant1.avg_step_time = bot1_avg_step_time
+            participant1.save()
+
+        if bot2_avg_step_time is not None:
+            participant2.avg_step_time = bot2_avg_step_time
             participant2.save()
 
         bot1.leave_match(self.match_id)

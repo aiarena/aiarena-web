@@ -136,6 +136,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         bot2_data = None
         bot1_log = None
         bot2_log = None
+        bot1_avg_step_time = None
+        bot2_avg_step_time = None
         if 'bot1_data' in serializer.validated_data:
             bot1_data = serializer.validated_data.pop('bot1_data')
         if 'bot2_data' in serializer.validated_data:
@@ -144,9 +146,13 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             bot1_log = serializer.validated_data.pop('bot1_log')
         if 'bot2_log' in serializer.validated_data:
             bot2_log = serializer.validated_data.pop('bot2_log')
+        if 'bot1_avg_step_time' in serializer.validated_data:
+            bot1_avg_step_time = serializer.validated_data.pop('bot1_avg_step_time')
+        if 'bot2_avg_step_time' in serializer.validated_data:
+            bot2_avg_step_time = serializer.validated_data.pop('bot2_avg_step_time')
 
         try:
             result = serializer.save()
-            result.finalize_submission(bot1_data, bot2_data, bot1_log, bot2_log)
+            result.finalize_submission(bot1_data, bot2_data, bot1_log, bot2_log, bot1_avg_step_time, bot2_avg_step_time)
         except BotNotInMatchException:
             raise APIException('Unable to log result - one of the bots is not listed as in this match.')
