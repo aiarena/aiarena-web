@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='participant',
             name='average_step_time',
-            field=models.FloatField(default=0),
+            field=models.FloatField(blank=True, null=True),
             preserve_default=False,
         ),
     ]
