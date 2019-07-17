@@ -359,7 +359,7 @@ class Participant(models.Model):
     elo_change = models.SmallIntegerField(null=True)
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                  blank=True, null=True)
-    average_step_time = models.FloatField()
+    avg_step_time = models.FloatField()
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo
