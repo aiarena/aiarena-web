@@ -341,7 +341,7 @@ class EloTestCase(LoggedInTestCase):
                                          'winner': winner_id,
                                          'type': r_type,
                                          'replay_file': replayFile,
-                                         'duration': 500})
+                                         'game_steps': 500})
         self.assertEqual(response.status_code, 201, response.data)
 
     def DetermineResultType(self, bot1_id, iteration):

@@ -117,7 +117,8 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
-        fields = 'type', 'replay_file', 'duration', 'submitted_by', 'match', 'bot1_data', 'bot2_data', 'bot1_log', 'bot2_log'
+        fields = 'type', 'replay_file', 'game_steps', 'realtime_duration', 'submitted_by', 'match', 'bot1_data',\
+                 'bot2_data', 'bot1_log', 'bot2_log'
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -130,6 +131,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     # todo: avoid results being logged against matches not owned by the submitter
     def perform_create(self, serializer):
         # pop extra fields so they don't interfere with saving the result
+        # todo: override serializer save method instead of having to do this?
         bot1_data = None
         bot2_data = None
         bot1_log = None

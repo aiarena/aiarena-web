@@ -282,7 +282,7 @@ class Bot(models.Model):
             matches_without_result = Match.objects.select_related('round').select_for_update().filter(
                 started__lt=timezone.now() - timedelta(hours=1), result__isnull=True)
             for match in matches_without_result:
-                Result.objects.create(match=match, type='MatchCancelled', duration=0)
+                Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
                 match.round.update_if_completed()
 
     @staticmethod
@@ -359,6 +359,7 @@ class Participant(models.Model):
     elo_change = models.SmallIntegerField(null=True)
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                  blank=True, null=True)
+    average_step_time = models.FloatField()
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo

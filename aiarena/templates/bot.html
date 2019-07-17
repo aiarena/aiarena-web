@@ -74,7 +74,7 @@
                                     <td><b>Result</b></td>
                                     <td><b>+/-</b></td>
                                     <td><b>Map</b></td>
-                                    <td><b>Duration</b></td>
+                                    <td><b>Game Steps</b></td>
                                     <td><b>Replay</b></td>
                                     {% if request.user == bot.user %}
                                         <td><b>Log</b></td>
@@ -87,7 +87,7 @@
                                         <td>{{ result.relative_type }}</td>
                                         <td>{{ result.me.elo_change |format_elo_change }}</td>
                                         <td>{{ result.match.map.name }}</td>
-                                        <td>{{ result.duration }}</td>
+                                        <td>{{ result.game_steps }}</td>
                                         {% if result.replay_file %}
                                             <td><a href="{{ result.replay_file.url }}">Download</a></td>
                                         {% elif result.replay_file_corruption_detected %}
