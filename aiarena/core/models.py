@@ -388,7 +388,8 @@ class Result(models.Model):
     type = models.CharField(max_length=32, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(upload_to='replays', blank=True, null=True)
-    duration = models.IntegerField()
+    game_steps = models.IntegerField()
+    realtime_duration = models.IntegerField()
     submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):

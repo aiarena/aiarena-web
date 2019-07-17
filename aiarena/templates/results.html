@@ -14,7 +14,7 @@
             <td><b>+/-</b></td>
             <td><b>Result</b></td>
             <td><b>Map</b></td>
-            <td><b>Duration</b></td>
+            <td><b>Game Steps</b></td>
             <td><b>Replay</b></td>
         </tr>
         {% for result in result_list %}
@@ -40,7 +40,7 @@
 
                 <td>{{ result.type }}</td>
                 <td>{{ result.mapname }}</td>
-                <td>{{ result.duration }}</td>
+                <td>{{ result.game_steps }}</td>
                 {% if result.replay_file %}
                     <td><a href="{{ result.replay_file.url }}">Download</a></td>
                 {% elif result.replay_file_corruption_detected %}
