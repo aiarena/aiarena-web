@@ -31,7 +31,7 @@ class MatchAdmin(admin.ModelAdmin):
             elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
                 raise Exception('A result already exists for match "%s"' % match.id)
 
-    cancel_matches.short_description = "Cancel matches"
+    cancel_matches.short_description = "Cancel selected matches"
 
 
 class ParticipantAdmin(admin.ModelAdmin):
