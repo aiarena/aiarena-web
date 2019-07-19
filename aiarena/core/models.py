@@ -158,6 +158,45 @@ class Match(models.Model):
         Participant.objects.create(match=match, participant_number=1, bot=bot1)
         Participant.objects.create(match=match, participant_number=2, bot=bot2)
 
+    class CancelResult(Enum):
+        SUCCESS = 1
+        MATCH_DOES_NOT_EXIST = 3
+        RESULT_ALREADY_EXISTS = 2
+
+    def cancel(self):
+        with transaction.atomic():
+            try:
+                # do this to lock the record
+                # select_related() for the round data
+                match = Match.objects.select_related('round').select_for_update().get(pk=self.id)
+            except Match.DoesNotExist:
+                return Match.CancelResult.MATCH_DOES_NOT_EXIST   # should basically not happen, but just in case
+
+            if Result.objects.filter(match=match).count() > 0:
+                return Match.CancelResult.RESULT_ALREADY_EXISTS
+
+            Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
+
+            # attempt to kick the bots from the match
+            if match.started:
+                try:
+                    bot1 = match.participant_set.select_related().select_for_update().get(participant_number=1).bot
+                    bot1.leave_match(match.id)
+                except BotNotInMatchException:
+                    pass
+                try:
+                    bot2 = match.participant_set.select_related().select_for_update().get(participant_number=2).bot
+                    bot2.leave_match(match.id)
+                except BotNotInMatchException:
+                    pass
+            else:
+                match.started = timezone.now()
+                match.save()
+
+            match.round.update_if_completed()
+
+
+
 
 def bot_zip_upload_to(instance, filename):
     return '/'.join(['bots', str(instance.id), 'bot_zip'])
