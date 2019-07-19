@@ -34,7 +34,7 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
-        fields = 'id', 'created', 'match', 'winner', 'type', 'replay_file', 'duration', 'bot1_name', 'bot2_name'
+        fields = 'id', 'created', 'match', 'winner', 'type', 'replay_file', 'game_steps', 'bot1_name', 'bot2_name'
 
 
 class ResultViewSet(viewsets.ReadOnlyModelViewSet):

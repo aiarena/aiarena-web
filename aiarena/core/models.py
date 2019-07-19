@@ -282,7 +282,7 @@ class Bot(models.Model):
             matches_without_result = Match.objects.select_related('round').select_for_update().filter(
                 started__lt=timezone.now() - timedelta(hours=1), result__isnull=True)
             for match in matches_without_result:
-                Result.objects.create(match=match, type='MatchCancelled', duration=0)
+                Result.objects.create(match=match, type='MatchCancelled', game_steps=0, realtime_duration=0)
                 match.round.update_if_completed()
 
     @staticmethod
@@ -359,6 +359,7 @@ class Participant(models.Model):
     elo_change = models.SmallIntegerField(null=True)
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                  blank=True, null=True)
+    avg_step_time = models.FloatField(blank=True, null=True)
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo
@@ -388,7 +389,8 @@ class Result(models.Model):
     type = models.CharField(max_length=32, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(upload_to='replays', blank=True, null=True)
-    duration = models.IntegerField()
+    game_steps = models.IntegerField()
+    realtime_duration = models.IntegerField()
     submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
@@ -484,7 +486,7 @@ class Result(models.Model):
         bot2.elo -= delta
         bot2.save()
 
-    def finalize_submission(self, bot1_data, bot2_data, bot1_log, bot2_log):
+    def finalize_submission(self, bot1_data, bot2_data, bot1_log, bot2_log, bot1_avg_step_time, bot2_avg_step_time):
         p1_initial_elo, p2_initial_elo = self._get_initial_elos()
         self._adjust_elo()
         p1, p2 = self.get_participants()
@@ -520,12 +522,22 @@ class Result(models.Model):
             bot2.bot_data = bot2_data
             bot2.save()
 
+        # save logs
         if bot1_log is not None:
             participant1.match_log = bot1_log
             participant1.save()
 
         if bot2_log is not None:
             participant2.match_log = bot2_log
+            participant2.save()
+
+        # save avg step times
+        if bot1_avg_step_time is not None:
+            participant1.avg_step_time = bot1_avg_step_time
+            participant1.save()
+
+        if bot2_avg_step_time is not None:
+            participant2.avg_step_time = bot2_avg_step_time
             participant2.save()
 
         bot1.leave_match(self.match_id)

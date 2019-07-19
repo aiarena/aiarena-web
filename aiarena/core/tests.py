@@ -55,11 +55,14 @@ class BaseTestCase(TransactionTestCase):
                                     {'match': match_id,
                                      'type': result_type,
                                      'replay_file': replayFile,
-                                     'duration': 500,
+                                     'game_steps': 500,
+                                     'realtime_duration': 30,
                                      'bot1_data': bot1_data,
                                      'bot2_data': bot2_data,
                                      'bot1_log': bot1_log,
-                                     'bot2_log': bot2_log})
+                                     'bot2_log': bot2_log,
+                                     'bot1_avg_step_time': 0.2,
+                                     'bot2_avg_step_time': 0.1})
 
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
@@ -68,7 +71,8 @@ class BaseTestCase(TransactionTestCase):
                                     {'match': match_id,
                                      'type': result_type,
                                      'replay_file': replayFile,
-                                     'duration': 500})
+                                     'game_steps': 500,
+                                     'realtime_duration': 30})
 
     def _post_to_results_no_bot1_data(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testReplay.SC2Replay')
@@ -77,7 +81,8 @@ class BaseTestCase(TransactionTestCase):
                                     {'match': match_id,
                                      'type': result_type,
                                      'replay_file': replayFile,
-                                     'duration': 500,
+                                     'game_steps': 500,
+                                     'realtime_duration': 30,
                                      'bot2_data': bot2_data})
 
     def _post_to_results_no_bot2_data(self, match_id, result_type):
@@ -87,7 +92,8 @@ class BaseTestCase(TransactionTestCase):
                                     {'match': match_id,
                                      'type': result_type,
                                      'replay_file': replayFile,
-                                     'duration': 500,
+                                     'game_steps': 500,
+                                     'realtime_duration': 30,
                                      'bot1_data': bot1_data})
 
     def _post_to_results_no_replay(self, match_id, result_type):
@@ -95,7 +101,8 @@ class BaseTestCase(TransactionTestCase):
                                 {'match': match_id,
                                  'type': result_type,
                                  'replay_file': '',
-                                 'duration': 500})
+                                 'game_steps': 500,
+                                 'realtime_duration': 30})
 
 
 class LoggedInTestCase(BaseTestCase):
