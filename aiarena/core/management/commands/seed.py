@@ -19,14 +19,14 @@ def create_result_with_bot_data_and_logs(match, type, as_user):
             open(BaseTestCase.test_bot1_match_log_path, 'rb') as bot1_log, \
             open(BaseTestCase.test_bot2_match_log_path, 'rb') as bot2_log:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
-                                       realtime_duration=1, submitted_by=as_user)
+                                       submitted_by=as_user)
         result.finalize_submission(File(bot1_data), File(bot2_data), File(bot1_log), File(bot2_log), 0.1, 0.2)
 
 
 def create_result(match, type, as_user):
     with open(BaseTestCase.test_replay_path, 'rb') as result_replay:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
-                                       realtime_duration=1, submitted_by=as_user)
+                                       submitted_by=as_user)
         result.finalize_submission(None, None, None, None, None, None)
 
 

@@ -24,7 +24,7 @@ class Command(BaseCommand):
                 if Result.objects.filter(match=match).count() > 0:
                     raise CommandError('A result already exists for match "%s"' % match_id)
 
-                Result.objects.create(match=match, type='MatchCancelled', game_steps=0, realtime_duration=0)
+                Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
 
                 # attempt to kick the bots from the match
                 if match.started:

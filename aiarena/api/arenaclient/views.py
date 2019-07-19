@@ -124,7 +124,7 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
-        fields = 'type', 'replay_file', 'game_steps', 'realtime_duration', 'submitted_by', 'match', 'bot1_data',\
+        fields = 'type', 'replay_file', 'game_steps', 'submitted_by', 'match', 'bot1_data',\
                  'bot2_data', 'bot1_log', 'bot2_log', 'bot1_avg_step_time', 'bot2_avg_step_time'
 
 

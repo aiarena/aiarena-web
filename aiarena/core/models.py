@@ -282,7 +282,7 @@ class Bot(models.Model):
             matches_without_result = Match.objects.select_related('round').select_for_update().filter(
                 started__lt=timezone.now() - timedelta(hours=1), result__isnull=True)
             for match in matches_without_result:
-                Result.objects.create(match=match, type='MatchCancelled', game_steps=0, realtime_duration=0)
+                Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
                 match.round.update_if_completed()
 
     @staticmethod
@@ -390,11 +390,14 @@ class Result(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(upload_to='replays', blank=True, null=True)
     game_steps = models.IntegerField()
-    realtime_duration = models.IntegerField()
     submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         return self.created.__str__()
+
+    @property
+    def duration_seconds(self):
+        return (self.created - self.match.started).total_seconds()
 
     # this is not checked while the replay corruption is happening
     def validate_replay_file_requirement(self):
