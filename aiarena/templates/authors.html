@@ -3,27 +3,25 @@
 
 {% block content %}
 <div class="divider"><span></span><span><h2>Authors</h2></span><span></span></div>
-    <table style="min-width: 900px; margin: 0 auto;" id="authorsTable">
-        <tbody>
-        {% load avatar_tags %}
+
+
+        <div id="authors_table">
+            {% load avatar_tags %}
         {% for author in user_list %}
-            {% if forloop.first %}
-                <tr>
-            {# Start a new row every 5 authors #}
-            {% elif forloop.counter0|divisibleby:5 %}
-                </tr>
-                <tr>
+        {% if forloop.first %}
+        {# Start a new row every 5 authors #}
+        {% elif forloop.counter0|divisibleby:5 %}
             {% endif %}
-            <td>
-                <center>{% avatar author 150 %}</center>
-                <p><center>{{ author.as_html_link |safe }}</center></p>
+            <div class="author">
+                <div class="author-image">{% avatar author 150 %}</div>
+                <div class="author-name">{{ author.as_html_link |safe }}</div>
                 <br/>
-            </td>
+            </div>
             {% if forloop.last %}
-                </tr>
+                </div>
             {% endif %}
         {% endfor %}
-        </tbody>
-    </table>
+
+    </div>
 
 {% endblock %}
