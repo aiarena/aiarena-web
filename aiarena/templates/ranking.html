@@ -5,14 +5,14 @@
 <div class="divider"><span></span><span><h2>Ranking</h2></span><span></span></div>
     <table style="min-width: 900px; margin: 0 auto;" id="resultsTable">
         <tbody>
-        <tr>
+        <thead>
             <td><b>Rank</b></td>
             <td><b>Name</b></td>
             <td><b>Race</b></td>
             <td><b>Author</b></td>
             <td><b>Type</b></td>
             <td><b>ELO</b></td>
-        </tr>
+        </thead>
         {% for bot in bot_list %}
             <tr>
                 <td>{{ forloop.counter }}</td>

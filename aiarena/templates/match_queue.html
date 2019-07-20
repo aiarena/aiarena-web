@@ -7,14 +7,14 @@
         <div class="divider"><span></span><span><h2>Round {{ round.id }}</h2></span><span></span></div>
         <table style="min-width: 900px; margin: 0 auto;">
             <tbody>
-            <tr>
+            <thead>
                 <td><b>Match ID</b></td>
                 <td><b>Bot 1</b></td>
                 <td><b>Bot 2</b></td>
                 <td><b>Map</b></td>
                 <td><b>Started at</b></td>
                 <td><b>Assigned to</b></td>
-            </tr>
+            </thead>
             {% for match in round.matches %}
                 <tr>
                     <td>{{ match.id }}</td>

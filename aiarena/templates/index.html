@@ -16,7 +16,7 @@
     <div class="divider"><span></span><span><h2>Welcome to the Ai-Arena Open Beta!</h2></span><span></span></div>
     <div id="rules-short">
         <b>Open Beta?</b><br>
-        The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.<br>
+        The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.
         Everyone is invited to upload a Bot to the Ladder :)<br>
         <br>
         <br>
@@ -41,13 +41,13 @@
     <div id="float-half-left">
         <div class="divider"><span></span><span><h2>Top 10 bots</h2></span><span></span></div>
         <div id="top10">
-            <table id="resultsTable" cellpadding="2px" style="min-width: 250px">
+            <table id="resultsTable" cellpadding="2px" style="min-width: 400px">
                 <tbody>
-                <tr>
+                <thead>
                     <td><b>Rank</b></td>
                     <td><b>Name</b></td>
                     <td><b>ELO</b></td>
-                </tr>
+                </thead>
                 {% for bot in bot_list %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
@@ -58,7 +58,8 @@
                 </tbody>
             </table>
             <br> <!-- extra space -->
-            <div class="divider-full div-transparent-full "></div>
+
         </div>
+        <div class="divider-full div-transparent-full "></div>
     </div>
 {% endblock %}

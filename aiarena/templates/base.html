@@ -5,11 +5,10 @@
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static "style.css" %}">
-    <link rel="shortcut icon" href="{%  static 'favicon.ico' %}">
+    <link rel="shortcut icon" href="{%  static 'img/favicon.ico' %}">
     <link href="https://fonts.googleapis.com/css?family=Gugi&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>{% block title %}AI Arena{% endblock %}</title>
 </head>
 
@@ -19,7 +18,7 @@
 
     <div id="header">
         {% block header %}
-        <img src="/static/img/ai-arena-logo.png" alt="AI Arena Logo" class="center">
+        <a href="https://ai-arena.net/"><img src="/static/img/ai-arena-logo.png" alt="AI Arena Logo" class="center"></a>
         <br>
         <h1 class="site-title">StarCraft II AI Arena</h1>
         {% endblock %}

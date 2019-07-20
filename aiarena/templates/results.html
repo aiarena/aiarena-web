@@ -5,7 +5,7 @@
 <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <table style="min-width: 900px; margin: 0 auto;">
         <tbody>
-        <tr>
+        <thead>
             <td><b>Match ID</b></td>
             <td><b>Date</b></td>
             <td><b>Bot 1</b></td>
@@ -16,7 +16,7 @@
             <td><b>Map</b></td>
             <td><b>Game Steps</b></td>
             <td><b>Replay</b></td>
-        </tr>
+        </thead>
         {% for result in result_list %}
             <tr>
                 <td>{{ result.match_id }}</td>
