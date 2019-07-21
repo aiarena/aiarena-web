@@ -2,150 +2,123 @@
 {% load i18n core_filters %}
 
 {% block content %}
-    <h1 align="center">{{ bot.name }}</h1>
-    <table id="bot_table" style="width: 100%">
-        <tbody>
-        <tr>
-            <td style="width: 25%; vertical-align: top; text-align: center">
-                <table id="bot_details" style="width: 100%; padding: 0em 1em 1em 2em">
-                    <tbody>
-                    <tr>
-                        <td>
-                            <div class="divider"><span></span><span>
-                            <h2>Details
-                                {% if request.user == bot.user %}
-                                    [<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]
-                                {% endif %}
-                            </h2>
-                        </span><span></span></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><h3>Author</h3>{{ bot.user.as_html_link |safe }}</td>
-                    </tr>
-                    <tr>
-                        <td><h3>Race</h3>{{ bot.get_plays_race_display }}</td>
-                    </tr>
-                    <tr>
-                        <td><h3>Type</h3>{{ bot.type }}</td>
-                    </tr>
-                    <tr>
-                        <td><h3>ELO</h3>{{ bot.elo }}</td>
-                    </tr>
-                    <tr>
-                        <td><h3>Active</h3>{{ bot.active }}</td>
-                    </tr>
-                    {% if request.user == bot.user or bot.bot_zip_publicly_downloadable %}
-                        <tr>
-                            <td><h3>Bot Zip</h3><a href="{{ bot.bot_zip.url }}">Download</a></td>
-                        </tr>
-                    {% endif %}
-                    {% if bot.bot_data%}
-                        {% if request.user == bot.user or bot.bot_data_publicly_downloadable %}
-                            <tr>
-                                <td><h3>Bot data</h3><a href="{{ bot.bot_data.url }}">Download</a></td>
-                            </tr>
-                        {% endif %}
-                    {% endif %}
-                    <tr>
-                        <td>
-                            <br/>
-                            <div class="divider-full div-transparent-full"></div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </td>
+ <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
 
-            <td style="width: 75%; vertical-align: top">
-                <table id="bot_results" style="width: 100%; vertical-align: top">
-                    <tbody>
-                    <tr>
-                        <td>
-                            <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <table style="width: 100%; vertical-align: top">
-                                <tr>
-                                    <td><b>Date</b></td>
-                                    <td><b>Opponent</b></td>
-                                    <td><b>Result</b></td>
-                                    <td><b>+/-</b></td>
-                                    <td><b>Map</b></td>
-                                    <td><b>Game Steps</b></td>
-                                    <td><b>Replay</b></td>
-                                    {% if request.user == bot.user %}
-                                        <td><b>Log</b></td>
-                                    {% endif %}
-                                </tr>
-                                {% for result in result_list %}
-                                    <tr>
-                                        <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
-                                        <td>{{ result.opponent.bot.as_html_link |safe }}</td>
-                                        <td>{{ result.relative_type }}</td>
-                                        <td>{{ result.me.elo_change |format_elo_change }}</td>
-                                        <td>{{ result.match.map.name }}</td>
-                                        <td>{{ result.game_steps }}</td>
-                                        {% if result.replay_file %}
-                                            <td><a href="{{ result.replay_file.url }}">Download</a></td>
-                                        {% elif result.replay_file_corruption_detected %}
-                                            <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
-                                        {% else %}
-                                            <td>Unavailable</td>
-                                        {% endif %}
-                                        {% if request.user == bot.user %}
-                                            {% if result.me.match_log %}
-                                                <td><a href="{{ result.me.match_log.url }}">Download</a></td>
-                                            {% else %}
-                                                <td>None</td>
-                                            {% endif %}
-                                        {% endif %}
-                                    </tr>
-                                {% endfor %}
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <table style="width: 100%; vertical-align: top;">
-                                <tr>
-                                    <td>
-                                        {% if result_list.has_other_pages %}
-                                            <ul class="pagination" style="width: 100%;">
-                                                {% if result_list.has_previous %}
-                                                    <li>
-                                                        <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
-                                                    </li>
-                                                {% else %}
-                                                    <li class="disabled"><span>&laquo;</span></li>
-                                                {% endif %}
-                                                {% for page_num in results_page_range %}
-                                                    {% if result_list.number == page_num %}
-                                                        <li class="active"><span>{{ page_num }}</span></li>
-                                                    {% else %}
-                                                        <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
-                                                    {% endif %}
-                                                {% endfor %}
-                                                {% if result_list.has_next %}
-                                                    <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
-                                                    </li>
-                                                {% else %}
-                                                    <li class="disabled"><span>&raquo;</span></li>
-                                                {% endif %}
-                                            </ul>
-                                        {% endif %}
-                                        <div class="divider-full div-transparent-full"></div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+<div id="sidebar_left">
+    <table id="bot_details">
+        <tbody>
+            <thead>
+                <tr>
+                    <td> <b>Details</b></td>
+                    <td><b>Author:</b></td>
+                    <td><b>Race:</b></td>
+                    <td><b>Type:</b></td>
+                    <td><b>Type:</b></td>
+                    <td><b>ELO:</b></td>
+                    <td><b>Active:</b></td>
+                    <td><b>Bot Zip:</b></td>
+                    <td><b>Bot data:</b></td>
+                </tr>
+            </thead>
+        <tr>
+            <td>{% if request.user == bot.user %}
+                    [<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]
+                    {% endif %}
             </td>
+            <td>{{ bot.user.as_html_link |safe }} </td>
+            <td>{{ bot.get_plays_race_display }}</td>
+            <td>{{ bot.type }} </td>
+            <td>{{ bot.elo }}</td>
+            <td>{{ bot.active }}</td>
+            {% if request.user == bot.user or bot.bot_zip_publicly_downloadable %}
+            <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
+            {% endif %}
+            {% if bot.bot_data%}
+            {% if request.user == bot.user or bot.bot_data_publicly_downloadable %}
+            <td><a href="{{ bot.bot_data.url }}">Download</a></td>
+            {% endif %}
+        {% endif %}
         </tr>
         </tbody>
     </table>
+  </div>
+<div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+
+ <div id="bot_results" style="float:right;">
+    <table>
+        <tbody>
+            <table>
+                <thead>
+                    <td><b>Date</b></td>
+                    <td><b>Opponent</b></td>
+                    <td><b>Result</b></td>
+                    <td><b>+/-</b></td>
+                    <td><b>Map</b></td>
+                    <td><b>Game Steps</b></td>
+                    <td><b>Replay</b></td>
+                    {% if request.user == bot.user %}
+                    <td><b>Log</b></td>
+                    {% endif %}
+                </thead>
+                {% for result in result_list %}
+                <tr>
+                    <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
+                    <td>{{ result.opponent.bot.as_html_link |safe }}</td>
+                    <td>{{ result.relative_type }}</td>
+                    <td>{{ result.me.elo_change |format_elo_change }}</td>
+                    <td>{{ result.match.map.name }}</td>
+                    <td>{{ result.game_steps }}</td>
+                    {% if result.replay_file %}
+                    <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                    {% elif result.replay_file_corruption_detected %}
+                    <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
+                    {% else %}
+                    <td>Unavailable</td>
+                    {% endif %}
+                    {% if request.user == bot.user %}
+                    {% if result.me.match_log %}
+                    <td><a href="{{ result.me.match_log.url }}">Download</a></td>
+                    {% else %}
+                    <td>None</td>
+                    {% endif %}
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+     </tbody>
+        <tfoot>
+        <div class="pagination">
+     {% if result_list.has_other_pages %}
+     <ul class="pagination">
+         {% if result_list.has_previous %}
+         <li>
+             <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
+         </li>
+         {% else %}
+         <li class="disabled"><span>&laquo;</span></li>
+         {% endif %}
+         {% for page_num in results_page_range %}
+         {% if result_list.number == page_num %}
+         <li class="active"><span>{{ page_num }}</span></li>
+         {% else %}
+         <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+         {% endif %}
+         {% endfor %}
+         {% if result_list.has_next %}
+         <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
+         </li>
+         {% else %}
+         <li class="disabled"><span>&raquo;</span></li>
+         {% endif %}
+     </ul>
+     {% endif %}
+ </div>
+        </tfoot>
+    </table>
+ </div>
+
+
+
+
 {% endblock %}
+
