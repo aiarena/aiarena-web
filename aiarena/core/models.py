@@ -139,7 +139,9 @@ class Match(models.Model):
                 if queued_matches.count() == 0:
                     Match._queue_round_robin_matches_for_all_active_bots()
 
-                for match in queued_matches:
+                # todo: apparently order_by('?') is really slow
+                # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+                for match in queued_matches.order_by('?'):
                     if match.start(requesting_user) == Match.StartResult.SUCCESS:
                         return match
 
