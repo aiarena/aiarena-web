@@ -19,7 +19,7 @@ from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchExc
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, \
-    ENABLE_ELO_SANITY_CHECK, ELO
+    ENABLE_ELO_SANITY_CHECK, ELO, TIMEOUT_MATCHES_AFTER
 
 logger = logging.getLogger(__name__)
 
@@ -172,7 +172,7 @@ class Match(models.Model):
                 # select_related() for the round data
                 match = Match.objects.select_related('round').select_for_update().get(pk=self.id)
             except Match.DoesNotExist:
-                return Match.CancelResult.MATCH_DOES_NOT_EXIST   # should basically not happen, but just in case
+                return Match.CancelResult.MATCH_DOES_NOT_EXIST  # should basically not happen, but just in case
 
             if Result.objects.filter(match=match).count() > 0:
                 return Match.CancelResult.RESULT_ALREADY_EXISTS
@@ -314,8 +314,8 @@ class Bot(models.Model):
     def timeout_overtime_bot_games():
         with transaction.atomic():
             bots_in_matches = Bot.objects.select_for_update().filter(in_match=True,
-                                                                     current_match__started__lt=timezone.now() - timedelta(
-                                                                         hours=1))
+                                                                     current_match__started__lt=timezone.now()
+                                                                                                - TIMEOUT_MATCHES_AFTER)
             for bot in bots_in_matches:
                 logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
                 bot.leave_match()
