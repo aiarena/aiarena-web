@@ -134,21 +134,23 @@ class Match(models.Model):
                                                                                           Bot._meta.db_table,
                                                                                           Map._meta.db_table))
             try:
-                queued_matches = Match.objects.filter(started__isnull=True)
+                match = Match._locate_and_return_started_match(requesting_user)
+                if match is None:
+                    if Bot.objects.filter(active=True, in_match=False).count() < 2:
+                        # All the active bots are already in a match
+                        # ROLLBACK here so the UNLOCK statement doesn't commit changes
+                        cursor.execute("ROLLBACK")
+                        raise NotEnoughAvailableBots()
+                    else:
+                        Match._queue_round_robin_matches_for_all_active_bots()
+                        match = Match._locate_and_return_started_match(requesting_user)
+                        if match is None:
+                            raise Exception("Failed to start match for unknown reason.")
+                        else:
+                            return match
+                else:
+                    return match
 
-                if queued_matches.count() == 0:
-                    Match._queue_round_robin_matches_for_all_active_bots()
-
-                # todo: apparently order_by('?') is really slow
-                # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-                for match in queued_matches.order_by('?'):
-                    if match.start(requesting_user) == Match.StartResult.SUCCESS:
-                        return match
-
-                # Here we can assume there wasn't any bots available
-                # ROLLBACK here so the UNLOCK statement doesn't commit changes
-                cursor.execute("ROLLBACK")
-                raise NotEnoughAvailableBots()
             finally:
                 # pass
                 cursor.execute("UNLOCK TABLES;")
@@ -197,7 +199,14 @@ class Match(models.Model):
 
             match.round.update_if_completed()
 
-
+    @classmethod
+    def _locate_and_return_started_match(cls, requesting_user):
+        # todo: apparently order_by('?') is really slow
+        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+        for match in Match.objects.filter(started__isnull=True).order_by('?'):
+            if match.start(requesting_user) == Match.StartResult.SUCCESS:
+                return match
+        return None
 
 
 def bot_zip_upload_to(instance, filename):
