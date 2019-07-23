@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from datetime import timedelta
 from enum import Enum
 
 from aiarena.core.utils import Elo, EnvironmentType
@@ -180,9 +179,6 @@ ELO = Elo(ELO_K)
 
 MAX_USER_BOT_COUNT = 6
 MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
-
-# how long to wait before the website should time out a running match
-TIMEOUT_MATCHES_AFTER = timedelta(hours=1)
 
 # django-avatar
 # https://django-avatar.readthedocs.io/en/latest/
