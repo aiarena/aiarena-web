@@ -188,6 +188,8 @@ AVATAR_CLEANUP_DELETED = True
 AVATAR_CACHE_ENABLED = False
 # pre-generate the most commonly used size
 AVATAR_AUTO_GENERATE_SIZES = (150,)
+# this fixes PNGs breaking when uploaded
+AVATAR_THUMB_FORMAT = 'PNG'
 
 ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
