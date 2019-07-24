@@ -172,7 +172,7 @@ class Match(models.Model):
                 # select_related() for the round data
                 match = Match.objects.select_related('round').select_for_update().get(pk=self.id)
             except Match.DoesNotExist:
-                return Match.CancelResult.MATCH_DOES_NOT_EXIST   # should basically not happen, but just in case
+                return Match.CancelResult.MATCH_DOES_NOT_EXIST  # should basically not happen, but just in case
 
             if Result.objects.filter(match=match).count() > 0:
                 return Match.CancelResult.RESULT_ALREADY_EXISTS
@@ -196,8 +196,6 @@ class Match(models.Model):
                 match.save()
 
             match.round.update_if_completed()
-
-
 
 
 def bot_zip_upload_to(instance, filename):
@@ -590,3 +588,20 @@ class Result(models.Model):
 
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form
+
+
+class StatsBots(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
+    win_perc = models.FloatField()
+    crash_perc = models.FloatField()
+    game_count = models.IntegerField()
+    generated_at = models.DateTimeField()
+
+
+class StatsBotMatchups(models.Model):
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
+    opponent = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='opponent_stats')
+    win_perc = models.FloatField()
+    win_count = models.IntegerField()
+    game_count = models.IntegerField()
+    generated_at = models.DateTimeField()
