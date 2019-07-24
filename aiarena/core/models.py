@@ -318,7 +318,7 @@ class Bot(models.Model):
                 bot.leave_match()
 
             matches_without_result = Match.objects.select_related('round').select_for_update().filter(
-                started__lt=timezone.now() - timedelta(hours=1), result__isnull=True)
+                started__lt=timezone.now() - TIMEOUT_MATCHES_AFTER, result__isnull=True)
             for match in matches_without_result:
                 Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
                 match.round.update_if_completed()
