@@ -15,6 +15,10 @@ class MapAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Map._meta.fields]
 
 
+class RoundAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Round._meta.fields]
+
+
 class MatchAdmin(admin.ModelAdmin):
     actions = ['cancel_matches']
     list_display = [field.name for field in Match._meta.fields]
@@ -45,6 +49,7 @@ class ResultAdmin(admin.ModelAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(Bot, BotAdmin)
 admin.site.register(Map, MapAdmin)
+admin.site.register(Round, RoundAdmin)
 admin.site.register(Match, MatchAdmin)
 admin.site.register(Participant, ParticipantAdmin)
 admin.site.register(Result, ResultAdmin)
