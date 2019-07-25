@@ -69,7 +69,7 @@ class Match(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     started = models.DateTimeField(blank=True, null=True, editable=False)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
-    round = models.ForeignKey(Round, on_delete=models.PROTECT)
+    round = models.ForeignKey(Round, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.id.__str__()
