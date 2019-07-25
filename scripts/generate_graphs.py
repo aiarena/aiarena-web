@@ -46,13 +46,18 @@ def generate_and_save_plot(df, path):
     ax = plt.gca()
     graph=df.plot(kind='line',x='Date',y='ELO',ax=ax,figsize=(12, 9),color=('#86c232'))
     graph.spines["top"].set_visible(False)   
-    graph.spines["right"].set_visible(False) 
+    graph.spines["right"].set_visible(False)
+    graph.spines["left"].set_color('#86c232')
+    graph.spines["bottom"].set_color('#86c232')
     graph.autoscale(enable=True, axis='x')
     graph.get_xaxis().tick_bottom()    
     graph.get_yaxis().tick_left()
 
     plt.title('ELO over time', fontsize=20,color=('#86c232'))
     plt.xticks(rotation=60)
+    ax.xaxis.label.set_color('#86c232')
+    ax.tick_params(axis='x', colors='#86c232')
+    ax.tick_params(axis='y', colors='#86c232')
     plt.tight_layout() #Avoids savefig cutting off x-label
     plt.savefig(path, transparent=True)
     plt.cla() #Clears axis in preparation for new graph
