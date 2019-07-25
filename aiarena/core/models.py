@@ -539,7 +539,7 @@ class Result(models.Model):
         p2.elo_change = p2.resultant_elo - p2_initial_elo
         p2.save()
 
-        if ENABLE_ELO_SANITY_CHECK:  # todo remove this condition and log instead of an exception.
+        if ENABLE_ELO_SANITY_CHECK:
             # test here to check ELO total and ensure no corruption
             expectedEloSum = ELO_START_VALUE * Bot.objects.all().count()
             actualEloSum = Bot.objects.aggregate(Sum('elo'))
