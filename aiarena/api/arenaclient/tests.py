@@ -7,7 +7,7 @@ from django.utils import timezone
 from aiarena.core.models import Match, Bot, Participant, User, Round, Result
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT
+from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, TIMEOUT_MATCHES_AFTER
 
 
 class MatchesTestCase(LoggedInTestCase):
@@ -120,10 +120,17 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
         match2 = Match.objects.get(id=response.data['id'])
 
+        # confirm these bots are currently in the match
+        self.assertEqual(match1.bots_currently_in_match.count(), 2)
+        for bot in match1.bots_currently_in_match.all():
+            self.assertTrue(bot.in_match)
+            self.assertFalse(bot.current_match is None)
+
         # set the created time back into the past long enough for it to cause a time out
-        match1.started = timezone.now() - timedelta(hours=2)
+        match1.started = timezone.now() - (TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
         match1.save()
 
+        # this should trigger the bots to be forced out of the match
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 201)
 
