@@ -25,7 +25,7 @@ class MatchAdmin(admin.ModelAdmin):
 
         """
         for match in queryset:
-            result = match.cancel()
+            result = match.cancel(request.user)
             if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
                 raise Exception('Match "%s" does not exist' % match.id)
             elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:

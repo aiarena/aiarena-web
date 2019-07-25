@@ -13,7 +13,7 @@ class Command(BaseCommand):
         for match_id in options['match_ids']:
             try:
                 match = Match.objects.get(pk=match_id)
-                result = match.cancel()
+                result = match.cancel(None)
                 if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
                     raise CommandError('Match "%s" does not exist' % match_id)
                 elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:

@@ -165,7 +165,7 @@ class Match(models.Model):
         MATCH_DOES_NOT_EXIST = 3
         RESULT_ALREADY_EXISTS = 2
 
-    def cancel(self):
+    def cancel(self, requesting_user):
         with transaction.atomic():
             try:
                 # do this to lock the record
@@ -177,7 +177,7 @@ class Match(models.Model):
             if Result.objects.filter(match=match).count() > 0:
                 return Match.CancelResult.RESULT_ALREADY_EXISTS
 
-            Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
+            Result.objects.create(match=match, type='MatchCancelled', game_steps=0, submitted_by=requesting_user)
 
             # attempt to kick the bots from the match
             if match.started:
