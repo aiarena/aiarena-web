@@ -149,6 +149,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
 # https://github.com/edoburu/django-private-storage
 PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private-media/")
 
+# Random scripts such as SQL
+SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts/")
+
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
