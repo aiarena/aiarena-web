@@ -204,7 +204,7 @@ class Match(models.Model):
     def _locate_and_return_started_match(cls, requesting_user):
         # todo: apparently order_by('?') is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        for match in Match.objects.filter(started__isnull=True).order_by('?'):
+        for match in Match.objects.filter(started__isnull=True).order_by('round', '?'):
             if match.start(requesting_user) == Match.StartResult.SUCCESS:
                 return match
         return None
