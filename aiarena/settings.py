@@ -178,6 +178,9 @@ ELO_START_VALUE = 1600
 # Enable a sanity check every time a result is submitted
 ENABLE_ELO_SANITY_CHECK = True
 
+# If an arena client requests a match when it has unfinished matches in the queue, reissue it one of the unfinished ones
+REISSUE_UNFINISHED_MATCHES = True
+
 # ELO implementation
 ELO = Elo(ELO_K)
 

@@ -4,11 +4,11 @@ from datetime import timedelta
 from django.db.models import Sum
 from django.utils import timezone
 
+from aiarena import settings
 from aiarena.core.models import Match, Bot, Participant, User, Round, Result
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, TIMEOUT_MATCHES_AFTER
-
 
 class MatchesTestCase(LoggedInTestCase):
     def setUp(self):
@@ -25,6 +25,9 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_post_next_match(self):
+        # avoid old tests breaking that were pre-this feature
+        settings.REISSUE_UNFINISHED_MATCHES = False
+
         self.client.login(username='staff_user', password='x')
 
         # no maps
@@ -98,6 +101,9 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(Match.objects.count(), 1)
 
     def test_previous_match_timeout(self):
+        # avoid old tests breaking that were pre-this feature
+        settings.REISSUE_UNFINISHED_MATCHES = False
+
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
@@ -152,6 +158,21 @@ class MatchesTestCase(LoggedInTestCase):
         # final count double checks
         self.assertEqual(Bot.objects.filter(in_match=False, current_match=None).count(), 4)
         self.assertEqual(Bot.objects.filter(in_match=True).exclude(current_match=None).count(), 4)
+
+    def test_match_reissue(self):
+        self.client.login(username='staff_user', password='x')
+        self._create_map('test_map')
+        self._create_active_bot(self.regularUser1, 'testbot1', 'T')
+        self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
+
+        response_m1 = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response_m1.status_code, 201)
+
+        # should be the same match reissued
+        response_m2 = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response_m2.status_code, 200)
+
+        self.assertEqual(response_m1.data['id'], response_m2.data['id'])
 
 
 class ResultsTestCase(LoggedInTestCase):
@@ -395,7 +416,10 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         super(RoundRobinGenerationTestCase, self).setUp()
         self.client.login(username='staff_user', password='x')
 
-    def test_round_robin_generation(self):  # todo: test for round generation and completion
+    def test_round_robin_generation(self):
+        # avoid old tests breaking that were pre-this feature
+        settings.REISSUE_UNFINISHED_MATCHES = False
+
         botCount = Bot.objects.filter(active=True).count()
         expectedMatchCountPerRound = int(botCount/2*(botCount-1))
         self.assertGreater(botCount, 1)  # check we have more than 1 bot

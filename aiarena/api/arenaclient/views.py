@@ -9,6 +9,7 @@ from rest_framework.fields import FileField, FloatField
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
+from aiarena import settings
 from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 
@@ -65,14 +66,26 @@ class MatchViewSet(viewsets.GenericViewSet):
     """
     serializer_class = MatchSerializer
 
-    def create(self, request, *args, **kwargs):
-        match = Match.start_next_match(request.user)
+    def create_new_match(self, requesting_user):
+        match = Match.start_next_match(requesting_user)
 
         match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
         match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def create(self, request, *args, **kwargs):
+        if settings.REISSUE_UNFINISHED_MATCHES:
+            # Check for any unfinished matches assigned to this user. If any are present, return that.
+            unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user, result__isnull=True)
+            if unfinished_matches.count() > 0:
+                serializer = self.get_serializer(unfinished_matches[0])
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return self.create_new_match(request.user)
+        else:
+            return self.create_new_match(request.user)
 
     # todo: check match is in progress/bot is in this match
     @action(detail=True, methods=['GET'], name='Download a participant\'s zip file', url_path='(?P<p_num>\d+)/zip')
