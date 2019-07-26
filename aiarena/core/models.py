@@ -145,6 +145,7 @@ class Match(models.Model):
                         Match._queue_round_robin_matches_for_all_active_bots()
                         match = Match._locate_and_return_started_match(requesting_user)
                         if match is None:
+                            cursor.execute("ROLLBACK")
                             raise Exception("Failed to start match for unknown reason.")
                         else:
                             return match
