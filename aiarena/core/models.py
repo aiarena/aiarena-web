@@ -419,7 +419,7 @@ class Participant(models.Model):
 
 
 def arenaclient_log_upload_to(instance, filename):
-    return '/'.join(['areanclient-logs', str(instance.match_id)])
+    return '/'.join(['areanclient-logs', '{0}_arenaclientlog.zip'.format(instance.match_id)])
 
 
 class Result(models.Model):
