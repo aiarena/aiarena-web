@@ -117,6 +117,53 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100
 }
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'warning-file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': './logs/django-warning.log',
+            'formatter': 'verbose',
+        },
+        'critical-file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': './logs/django-critical.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['warning-file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'aiarena': {
+            'handlers': ['warning-file'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['critical-file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'aiarena': {
+            'handlers': ['critical-file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
+
 WSGI_APPLICATION = 'aiarena.wsgi.application'
 
 # Internationalization
