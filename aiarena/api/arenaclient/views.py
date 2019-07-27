@@ -80,7 +80,12 @@ class MatchViewSet(viewsets.GenericViewSet):
             # Check for any unfinished matches assigned to this user. If any are present, return that.
             unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user, result__isnull=True)
             if unfinished_matches.count() > 0:
-                serializer = self.get_serializer(unfinished_matches[0])
+                match = unfinished_matches[0]
+
+                match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
+                match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot
+
+                serializer = self.get_serializer(match)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return self.create_new_match(request.user)
