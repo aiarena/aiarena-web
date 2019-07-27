@@ -23,6 +23,7 @@ class BaseTestCase(TransactionTestCase):
     test_bot2_data_path = 'aiarena/core/test-media/test_bot2_data.zip'
     test_bot1_match_log_path = 'aiarena/core/test-media/test_bot1_match_log.zip'
     test_bot2_match_log_path = 'aiarena/core/test-media/test_bot2_match_log.zip'
+    test_arenaclient_log_path = 'aiarena/core/test-media/test_arenaclient_log.zip'
     test_replay_path = 'aiarena/core/test-media/testReplay.SC2Replay'
     test_map_path = 'aiarena/core/test-media/AutomatonLE.SC2Map'
 
@@ -51,7 +52,7 @@ class BaseTestCase(TransactionTestCase):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
         with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data, open(
                 self.test_bot2_data_path) as bot2_data, open(self.test_bot1_match_log_path) as bot1_log, open(
-            self.test_bot2_match_log_path) as bot2_log:
+            self.test_bot2_match_log_path) as bot2_log, open(self.test_arenaclient_log_path) as arenaclient_log:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
@@ -62,7 +63,8 @@ class BaseTestCase(TransactionTestCase):
                                      'bot1_log': bot1_log,
                                      'bot2_log': bot2_log,
                                      'bot1_avg_step_time': 0.2,
-                                     'bot2_avg_step_time': 0.1})
+                                     'bot2_avg_step_time': 0.1,
+                                     'arenaclient_log': arenaclient_log})
 
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')

@@ -1,6 +1,5 @@
 import logging
 import uuid
-from datetime import timedelta
 from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
@@ -208,7 +207,6 @@ class Match(models.Model):
             if match.start(requesting_user) == Match.StartResult.SUCCESS:
                 return match
         return None
-
 
 
 def bot_zip_upload_to(instance, filename):
@@ -420,6 +418,10 @@ class Participant(models.Model):
         return self.bot.name
 
 
+def arenaclient_log_upload_to(instance, filename):
+    return '/'.join(['areanclient-logs', str(instance.match_id)])
+
+
 class Result(models.Model):
     TYPES = (
         ('MatchCancelled', 'MatchCancelled'),
@@ -442,6 +444,7 @@ class Result(models.Model):
     replay_file = models.FileField(upload_to='replays', blank=True, null=True)
     game_steps = models.IntegerField()
     submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    arenaclient_log = models.FileField(upload_to=arenaclient_log_upload_to, blank=True, null=True)
 
     def __str__(self):
         return self.created.__str__()
