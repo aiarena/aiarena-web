@@ -32,9 +32,11 @@ def create_result(match, type, as_user):
 
 def run_seed(rounds):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@aiarena.net')
-    Token.objects.create(user=devadmin)
+    token = Token.objects.create(user=devadmin)
     devuser = User.objects.create_user(username='devuser', password='x', email='devuser@aiarena.net')
-    Map.objects.create(name='test_map')
+
+    with open(BaseTestCase.test_map_path, 'rb') as map:
+        Map.objects.create(name='test_map', file=File(map))
 
     with open(BaseTestCase.test_bot_zip_path, 'rb') as bot_zip:
         Bot.objects.create(user=devadmin, name='devadmin_bot1', active=True, plays_race='T', type='python',
@@ -68,6 +70,8 @@ def run_seed(rounds):
     # one last to tick over into the final round so we don't have an empty match queue
     create_match(devadmin)
 
+    return token
+
 
 class Command(BaseCommand):
     help = "Seed database for testing and development."
@@ -88,8 +92,9 @@ class Command(BaseCommand):
                 rounds = self._DEFAULT_ROUNDS_TO_GENERATE
 
             self.stdout.write('Generating {0} round(s)...'.format(rounds))
-            run_seed(rounds)
+            api_token = run_seed(rounds)
 
             self.stdout.write('Done. User logins have a password of "x".')
+            self.stdout.write('API Token is {0}.'.format(api_token))
         else:
             self.stdout.write('Seeding failed: This is not a development environment!')
