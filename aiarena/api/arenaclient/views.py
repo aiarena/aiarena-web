@@ -1,6 +1,7 @@
 import logging
 from wsgiref.util import FileWrapper
 
+from django.db.models import F
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
@@ -78,7 +79,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     def create(self, request, *args, **kwargs):
         if settings.REISSUE_UNFINISHED_MATCHES:
             # Check for any unfinished matches assigned to this user. If any are present, return that.
-            unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user, result__isnull=True)
+            unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user, result__isnull=True).order_by(F('round').asc())
             if unfinished_matches.count() > 0:
                 match = unfinished_matches[0]
 

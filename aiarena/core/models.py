@@ -5,7 +5,7 @@ from enum import Enum
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models, transaction, connection
-from django.db.models import Sum
+from django.db.models import Sum, F
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -203,7 +203,7 @@ class Match(models.Model):
     def _locate_and_return_started_match(cls, requesting_user):
         # todo: apparently order_by('?') is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        for match in Match.objects.filter(started__isnull=True).order_by('round', '?'):
+        for match in Match.objects.filter(started__isnull=True).order_by(F('round').asc(), '?'):
             if match.start(requesting_user) == Match.StartResult.SUCCESS:
                 return match
         return None
