@@ -210,7 +210,7 @@ class FullDataSetTestCase(MatchReadyTestCase):
 class UtilsTestCase(BaseTestCase):
     def test_calc_md5(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/test_bot.zip')
-        self.assertEqual('7411028ba931baaad47bf5810215e4f8', calculate_md5(filename))
+        self.assertEqual('42d25655e278ebac732d3bd8e21dc107', calculate_md5(filename))
 
 
 class UserTestCase(BaseTestCase):
@@ -228,7 +228,7 @@ class BotTestCase(LoggedInTestCase):
             bot1.save()
 
         # check hashes
-        self.assertEqual('7411028ba931baaad47bf5810215e4f8', bot1.bot_zip_md5hash)
+        self.assertEqual('42d25655e278ebac732d3bd8e21dc107', bot1.bot_zip_md5hash)
         self.assertEqual('6cc8ec3fa50d069eab74835757807ef2', bot1.bot_data_md5hash)
 
         # check the bot file now exists
