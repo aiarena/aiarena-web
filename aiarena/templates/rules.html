@@ -101,8 +101,8 @@
 </div>
 <div class="divider"><span></span><span><h2>Match Queue</h2></span><span></span></div>
 <div id="rules-content">
-    The match queue makes sure all Bots have to play against every other bot on the ladder.
-    If the queue is empty a fresh one is generated containing all active bots. (Round-Robin)
+    The match queue makes sure all Bots have to play against every other bot on the ladder once per round (Round-Robin).
+    If the queue is empty or the remaining matches in a round only contain bots who are already busy playing other matches, a fresh round is generated containing all active bots.
 </div>
 <div class="divider-full div-transparent-full"></div>
 {% endblock %}
