@@ -10,6 +10,7 @@ from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, TIMEOUT_MATCHES_AFTER
 
+# todo: test to esnure that matches are served for earlier rounds first
 class MatchesTestCase(LoggedInTestCase):
     def setUp(self):
         super(MatchesTestCase, self).setUp()

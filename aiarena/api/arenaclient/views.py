@@ -79,9 +79,11 @@ class MatchViewSet(viewsets.GenericViewSet):
     def create(self, request, *args, **kwargs):
         if settings.REISSUE_UNFINISHED_MATCHES:
             # Check for any unfinished matches assigned to this user. If any are present, return that.
-            unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user, result__isnull=True).order_by(F('round_id').asc())
+            # Wrapping the model call here in list() fixes the ordering not being applied.
+            # Probably due to Django's lazy evaluation - it forces evaluation thus ensuring the order by is processed
+            unfinished_matches = list(Match.objects.filter(started__isnull=False, assigned_to=request.user, result__isnull=True).order_by(F('round_id').asc()))
             if unfinished_matches.count() > 0:
-                match = unfinished_matches[0]
+                match = unfinished_matches[0]  # todo: re-set started time?
 
                 match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
                 match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot

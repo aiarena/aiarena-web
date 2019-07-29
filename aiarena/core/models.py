@@ -203,7 +203,9 @@ class Match(models.Model):
     def _locate_and_return_started_match(cls, requesting_user):
         # todo: apparently order_by('?') is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        for match in Match.objects.filter(started__isnull=True).order_by(F('round_id').asc(), '?'):
+        # Wrapping the model call here in list() fixes the ordering not being applied.
+        # Probably due to Django's lazy evaluation - it forces evaluation thus ensuring the order by is processed
+        for match in list(Match.objects.filter(started__isnull=True).order_by(F('round_id').asc(), '?')):
             if match.start(requesting_user) == Match.StartResult.SUCCESS:
                 return match
         return None
