@@ -2,6 +2,7 @@ from mysql import connector
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# ToDo: Use django configuration
 config = {
   'user': 'root',
   'password': '',
@@ -58,13 +59,13 @@ def generate_and_save_plot(df, path):
     ax.xaxis.label.set_color('#86c232')
     ax.tick_params(axis='x', colors='#86c232')
     ax.tick_params(axis='y', colors='#86c232')
-    plt.tight_layout() #Avoids savefig cutting off x-label
+    plt.tight_layout() # Avoids savefig cutting off x-label
     plt.savefig(path, transparent=True)
-    plt.cla() #Clears axis in preparation for new graph
+    plt.cla() # Clears axis in preparation for new graph
     
 def main():
     for bot_id in get_active_bot_ids():
-        path = './graph/'+ str(bot_id) +"/elo.png"
+        path = '../static/graph/' + str(bot_id) + "/elo.png"
         
         df=get_data(bot_id)
 
