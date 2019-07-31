@@ -68,6 +68,17 @@ INSTALLED_APPS = [
     'aiarena.core',
     'aiarena.api',
     'private_storage',
+    'django.contrib.sites.apps.SitesConfig',
+    'django.contrib.humanize.apps.HumanizeConfig',
+    'django_nyt.apps.DjangoNytConfig',
+    'mptt',
+    'sekizai',
+    'sorl.thumbnail',
+    'wiki.apps.WikiConfig',
+    'wiki.plugins.attachments.apps.AttachmentsConfig',
+    'wiki.plugins.notifications.apps.NotificationsConfig',
+    'wiki.plugins.images.apps.ImagesConfig',
+    'wiki.plugins.macros.apps.MacrosConfig',
 ]
 
 MIDDLEWARE = [
@@ -94,6 +105,11 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'aiarena.core.context_processors.stats',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                "sekizai.context_processors.sekizai",
             ],
         },
     },
@@ -249,6 +265,11 @@ AVATAR_AUTO_GENERATE_SIZES = (150,)
 AVATAR_THUMB_FORMAT = 'PNG'
 
 ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
+
+# django wiki
+WIKI_ACCOUNT_HANDLING = True
+WIKI_ACCOUNT_SIGNUP_ALLOWED = True
+SITE_ID = 1
 
 # override any of these settings with an env.py file
 try:
