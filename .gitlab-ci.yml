@@ -8,12 +8,23 @@ before_script:
   - bash -c "ssh-add <(echo '$SSH_PRIVATE_KEY')"
   - mkdir -p ~/.ssh
   - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    
+
+deploy_staging:
+  type: deploy
+  environment:
+    name: staging
+    url: ai-arena.net
+  script:
+    - ssh aiarena@ai-arena.net -p 2281 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && /home/aiarena/ai-arena/venv/bin/pip3 install -r requirements.txt && /home/aiarena/ai-arena/venv/bin/python3 manage.py collectstatic --noinput && /home/aiarena/ai-arena/venv/bin/python3 manage.py migrate && sudo apachectl graceful && exit"
+  only:
+    - master
+
 deploy_production:
   type: deploy
   environment:
     name: production
     url: ai-arena.net
+  when: manual
   script:
     - ssh aiarena@ai-arena.net -p 2280 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && /home/aiarena/ai-arena/venv/bin/pip3 install -r requirements.txt && /home/aiarena/ai-arena/venv/bin/python3 manage.py collectstatic --noinput && /home/aiarena/ai-arena/venv/bin/python3 manage.py migrate && sudo apachectl graceful && exit"
   only:
