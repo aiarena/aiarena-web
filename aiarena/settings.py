@@ -79,6 +79,7 @@ INSTALLED_APPS = [
     'wiki.plugins.notifications.apps.NotificationsConfig',
     'wiki.plugins.images.apps.ImagesConfig',
     'wiki.plugins.macros.apps.MacrosConfig',
+    'wiki.plugins.help.apps.HelpConfig',
 ]
 
 MIDDLEWARE = [
@@ -268,7 +269,7 @@ ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
 # django wiki
 WIKI_ACCOUNT_HANDLING = True
-WIKI_ACCOUNT_SIGNUP_ALLOWED = True
+WIKI_ACCOUNT_SIGNUP_ALLOWED = False
 SITE_ID = 1
 
 # override any of these settings with an env.py file
