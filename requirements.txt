@@ -7,6 +7,7 @@ django-private-storage==2.2
 django-registration-redux==2.5
 django-avatar==4.1.0
 djangorestframework==3.9.2
+wheel
 Markdown==3.0.1
 mysqlclient==1.4.2.post1
 pinax-theme-bootstrap==8.0.1
