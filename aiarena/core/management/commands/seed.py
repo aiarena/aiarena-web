@@ -32,8 +32,12 @@ def create_result(match, type, as_user):
 
 def run_seed(rounds):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@aiarena.net')
-    token = Token.objects.create(user=devadmin)
-    devuser = User.objects.create_user(username='devuser', password='x', email='devuser@aiarena.net')
+
+    arenaclient = User.objects.create_user(username='aiarenaclient-000', password='x', email='aiarenaclient-000@aiarena.net', service_account=True)
+    token = Token.objects.create(user=arenaclient)
+
+    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@aiarena.net')
+    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@aiarena.net')
 
     with open(BaseTestCase.test_map_path, 'rb') as map:
         Map.objects.create(name='test_map', file=File(map))
@@ -46,11 +50,18 @@ def run_seed(rounds):
         Bot.objects.create(user=devadmin, name='devadmin_bot3', plays_race='P', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        Bot.objects.create(user=devuser, name='devuser_bot1', active=True, plays_race='P', type='python',
+        Bot.objects.create(user=devuser1, name='devuser1_bot1', active=True, plays_race='P', type='python',
                            bot_zip=File(bot_zip))
-        Bot.objects.create(user=devuser, name='devuser_bot2', active=True, plays_race='Z', type='python',
+        Bot.objects.create(user=devuser1, name='devuser1_bot2', active=True, plays_race='Z', type='python',
                            bot_zip=File(bot_zip))
-        Bot.objects.create(user=devuser, name='devuser_bot3', plays_race='T', type='python',
+        Bot.objects.create(user=devuser1, name='devuser1_bot3', plays_race='T', type='python',
+                           bot_zip=File(bot_zip))  # inactive bot
+
+        Bot.objects.create(user=devuser2, name='devuser2_bot1', active=True, plays_race='P', type='python',
+                           bot_zip=File(bot_zip))
+        Bot.objects.create(user=devuser2, name='devuser2_bot2', active=True, plays_race='T', type='python',
+                           bot_zip=File(bot_zip))
+        Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
     for x in range(rounds - 1):  # 4 active bots - 6 games per round
