@@ -85,7 +85,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Seeding data...')
 
-        if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT:
+        if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT\
+                or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING:
             if options['rounds'] is not None:
                 rounds = options['rounds']
             else:
@@ -97,4 +98,4 @@ class Command(BaseCommand):
             self.stdout.write('Done. User logins have a password of "x".')
             self.stdout.write('API Token is {0}.'.format(api_token))
         else:
-            self.stdout.write('Seeding failed: This is not a development environment!')
+            self.stdout.write('Seeding failed: This is not a development or staging environment!')
