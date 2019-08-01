@@ -38,3 +38,4 @@ class Elo:
 class EnvironmentType(Enum):
     DEVELOPMENT = 1
     PRODUCTION = 2
+    STAGING = 3
