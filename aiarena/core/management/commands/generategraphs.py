@@ -1,5 +1,8 @@
+from aiarena import settings
 from django.db import connection
 from django.core.management.base import BaseCommand
+
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -71,12 +74,18 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Generating graphs...')
         for bot_id in self.get_active_bot_ids():
-            path = '../static/graph/' + str(bot_id) + "/elo.png"
             
-            df=self.get_data(bot_id)
-
+            root_path = os.path.join(settings.STATIC_ROOT, str(bot_id)) 
+            
+            if not os.path.exists(root_path):
+                os.mkdir(root_path)
+            
+            path = os.path.join(root_path, "elo.png")
+            
+            df = self.get_data(bot_id)
             df[1] = pd.to_numeric(df[1])
             df.columns = ['Name','ELO','Date']
 
+            
             self.generate_and_save_plot(df, path)
         self.stdout.write('Done')
