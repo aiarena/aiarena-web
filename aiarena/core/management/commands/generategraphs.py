@@ -22,7 +22,7 @@ class Command(BaseCommand):
             query =('''
             SELECT 
             ID 
-            FROM AIARENA_BETA.CORE_BOT
+            FROM CORE_BOT
             WHERE ACTIVE = 1''')
             cursor.execute(query)
             bots = [x[0] for x in cursor.fetchall()]
@@ -36,9 +36,9 @@ class Command(BaseCommand):
                 CB.NAME, 
                 AVG(CP.RESULTANT_ELO) AS ELO, 
                 DATE(CM.CREATED) AS DATE 
-                FROM AIARENA_BETA.CORE_PARTICIPANT CP
-                    LEFT JOIN AIARENA_BETA.CORE_MATCH CM ON CP.MATCH_ID = CM.ID
-                    LEFT JOIN AIARENA_BETA.CORE_BOT CB ON CP.BOT_ID = CB.ID
+                FROM CORE_PARTICIPANT CP
+                    LEFT JOIN CORE_MATCH CM ON CP.MATCH_ID = CM.ID
+                    LEFT JOIN CORE_BOT CB ON CP.BOT_ID = CB.ID
                 WHERE RESULTANT_ELO IS NOT NULL 
                     AND BOT_ID = """+str(bot_id)+""" 
                 GROUP BY DATE(CM.CREATED) 
