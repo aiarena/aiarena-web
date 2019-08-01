@@ -1,4 +1,4 @@
-﻿confusable-homoglyphs==3.2.0
+confusable-homoglyphs==3.2.0
 Django==2.1.7
 django-appconf==1.0.3
 django-bootstrap-form==3.4
@@ -16,3 +16,4 @@ Markdown==2.6
 wiki==0.4.5
 mysql-connector
 matplotlib
+pandas==0.25.0
