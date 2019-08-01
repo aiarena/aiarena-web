@@ -20,10 +20,10 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             #cursor = cnx.cursor()
             query =('''
-            SELECT 
-            ID 
-            FROM CORE_BOT
-            WHERE ACTIVE = 1''')
+            select 
+            id 
+            from core_bot
+            where active = 1''')
             cursor.execute(query)
             bots = [x[0] for x in cursor.fetchall()]
         return bots
@@ -32,17 +32,17 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
         #cursor = cnx.cursor()
             query = ("""
-                SELECT DISTINCT 
-                CB.NAME, 
-                AVG(CP.RESULTANT_ELO) AS ELO, 
-                DATE(CM.CREATED) AS DATE 
-                FROM CORE_PARTICIPANT CP
-                    LEFT JOIN CORE_MATCH CM ON CP.MATCH_ID = CM.ID
-                    LEFT JOIN CORE_BOT CB ON CP.BOT_ID = CB.ID
-                WHERE RESULTANT_ELO IS NOT NULL 
-                    AND BOT_ID = """+str(bot_id)+""" 
-                GROUP BY DATE(CM.CREATED) 
-                ORDER BY CM.CREATED
+                select distinct
+                cb.name, 
+                avg(cp.resultant_elo) as elo, 
+                date(cm.created) as date 
+                from core_participant cp
+                    left join core_match cm on cp.match_id = cm.id
+                    left join core_bot cb on cp.bot_id = cb.id
+                where resultant_elo is not null 
+                    and bot_id = """+str(bot_id)+""" 
+                group by date(cm.created) 
+                order by cm.created
                 """)
             cursor.execute(query)
             elo_over_time = pd.DataFrame(cursor.fetchall())
