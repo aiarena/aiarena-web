@@ -1,4 +1,5 @@
 from django.db import connection
+from django.core.management.base import BaseCommand
 import pandas as pd
 import matplotlib.pyplot as plt
 
