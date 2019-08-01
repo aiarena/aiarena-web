@@ -75,7 +75,7 @@ class Command(BaseCommand):
         self.stdout.write('Generating graphs...')
         for bot_id in self.get_active_bot_ids():
             
-            root_path = os.path.join(settings.STATIC_ROOT, str(bot_id)) 
+            root_path = os.path.join(settings.STATIC_ROOT,'graph', str(bot_id)) 
             
             if not os.path.exists(root_path):
                 os.mkdir(root_path)
