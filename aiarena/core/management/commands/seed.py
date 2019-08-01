@@ -30,11 +30,14 @@ def create_result(match, type, as_user):
         result.finalize_submission(None, None, None, None, 0.111111, 0.222222)
 
 
-def run_seed(rounds):
+def run_seed(rounds, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@aiarena.net')
 
-    arenaclient = User.objects.create_user(username='aiarenaclient-000', password='x', email='aiarenaclient-000@aiarena.net', service_account=True)
-    token = Token.objects.create(user=arenaclient)
+    arenaclient = User.objects.create_user(username='aiarenaclient-000', password='x',
+                                           email='aiarenaclient-000@aiarena.net', service_account=True)
+
+    # if token is None it will generate a new one, otherwise it will use the one specified
+    new_token = Token.objects.create(user=arenaclient, key=token)
 
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@aiarena.net')
     devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@aiarena.net')
@@ -81,7 +84,7 @@ def run_seed(rounds):
     # one last to tick over into the final round so we don't have an empty match queue
     create_match(devadmin)
 
-    return token
+    return new_token
 
 
 class Command(BaseCommand):
@@ -92,19 +95,28 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--rounds', type=int, help="Number of rounds to generate. Default is {0}.".format(
             self._DEFAULT_ROUNDS_TO_GENERATE))
+        parser.add_argument('--token', type=str,
+                            help="Specify the token to use for the arena client."
+                                 " Useful to avoid having to reconfigure arena clients in testing".format(
+                                self._DEFAULT_ROUNDS_TO_GENERATE))
 
     def handle(self, *args, **options):
         self.stdout.write('Seeding data...')
 
-        if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT\
+        if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT \
                 or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING:
             if options['rounds'] is not None:
                 rounds = options['rounds']
             else:
                 rounds = self._DEFAULT_ROUNDS_TO_GENERATE
 
+            if options['token'] is not None:
+                token = options['token']
+            else:
+                token = None
+
             self.stdout.write('Generating {0} round(s)...'.format(rounds))
-            api_token = run_seed(rounds)
+            api_token = run_seed(rounds, token)
 
             self.stdout.write('Done. User logins have a password of "x".')
             self.stdout.write('API Token is {0}.'.format(api_token))
