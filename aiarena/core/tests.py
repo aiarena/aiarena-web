@@ -394,26 +394,6 @@ class ManagementCommandTests(MatchReadyTestCase):
         self.assertTrue(round.complete)
         self.assertIsNotNone(round.finished)
 
-    def test_reset_elo(self):
-        # test match successfully cancelled
-        self.client.login(username='staff_user', password='x')
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data['id'], 'Player1Win')
-        self.assertEqual(response.status_code, 201)
-
-        out = StringIO()
-        call_command('resetelo', stdout=out)
-        self.assertIn('ELO values have been reset.', out.getvalue())
-
-        for bot in Bot.objects.all():
-            self.assertEqual(bot.elo, settings.ELO_START_VALUE)
-
-    def test_seed(self):
-        out = StringIO()
-        call_command('seed', stdout=out)
-        self.assertIn('Done. User logins have a password of "x".', out.getvalue())
-
     def test_cleanup_replays_and_logs(self):
         NUM_MATCHES = 12
         self.client.login(username='staff_user', password='x')
@@ -435,17 +415,50 @@ class ManagementCommandTests(MatchReadyTestCase):
 
         out = StringIO()
         call_command('cleanupreplays', stdout=out)
-        self.assertIn('Cleaning up replays starting from 30 days into the past...\nCleaned up {0} replays.'.format(NUM_MATCHES),
-                      out.getvalue())
+        self.assertIn(
+            'Cleaning up replays starting from 30 days into the past...\nCleaned up {0} replays.'.format(NUM_MATCHES),
+            out.getvalue())
 
         self.assertEqual(results.count(), NUM_MATCHES)
         for result in results:
             self.assertFalse(result.replay_file)
 
         call_command('cleanupmatchlogfiles', stdout=out)
-        self.assertIn('Cleaning up match logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(NUM_MATCHES*2),
-                      out.getvalue())
+        self.assertIn(
+            'Cleaning up match logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(
+                NUM_MATCHES * 2),
+            out.getvalue())
 
         self.assertEqual(participants.count(), NUM_MATCHES * 2)
         for participant in participants:
             self.assertFalse(participant.match_log)
+
+    def test_generategraphs(self):
+        out = StringIO()
+        call_command('generategraphs', stdout=out)
+        self.assertIn('Generating graphs...\nDone', out.getvalue())
+
+    def test_generatestats(self):
+        out = StringIO()
+        call_command('generatestats', stdout=out)
+        self.assertIn('Generating stats...\nDone', out.getvalue())
+
+    def test_reset_elo(self):
+        # test match successfully cancelled
+        self.client.login(username='staff_user', password='x')
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        out = StringIO()
+        call_command('resetelo', stdout=out)
+        self.assertIn('ELO values have been reset.', out.getvalue())
+
+        for bot in Bot.objects.all():
+            self.assertEqual(bot.elo, settings.ELO_START_VALUE)
+
+    def test_seed(self):
+        out = StringIO()
+        call_command('seed', stdout=out)
+        self.assertIn('Done. User logins have a password of "x".', out.getvalue())
