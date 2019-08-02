@@ -97,7 +97,7 @@ ROOT_URLCONF = 'aiarena.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(APP_DIR, 'templates/')],
+        'DIRS': [os.path.join(APP_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -200,21 +200,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = [
     os.path.join(APP_DIR, "static"),
 ]
 
 # public media
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Private media storage
 # https://github.com/edoburu/django-private-storage
-PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private-media/")
+PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private-media")
 
 # Random scripts such as SQL
-SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts/")
+SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts")
 
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
