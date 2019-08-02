@@ -78,7 +78,7 @@ class Command(BaseCommand):
             root_path = os.path.join(settings.STATIC_ROOT,'graph', str(bot_id)) 
             
             if not os.path.exists(root_path):
-                os.mkdir(root_path)
+                os.makedirs(root_path)
             
             path = os.path.join(root_path, "elo.png")
             
