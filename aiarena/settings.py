@@ -251,6 +251,11 @@ ELO = Elo(ELO_K)
 MAX_USER_BOT_COUNT = 6
 MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
 
+# For convenience
+BOT_ZIP_MAX_SIZE_MB = 50
+# this is the setting that actually dictates the max zip size
+BOT_ZIP_MAX_SIZE = 1024 * 1024 * BOT_ZIP_MAX_SIZE_MB
+
 # how long to wait before the website should time out a running match
 TIMEOUT_MATCHES_AFTER = timedelta(hours=1)
 

@@ -18,7 +18,7 @@ from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchExc
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, \
-    ENABLE_ELO_SANITY_CHECK, ELO, TIMEOUT_MATCHES_AFTER
+    ENABLE_ELO_SANITY_CHECK, ELO, TIMEOUT_MATCHES_AFTER, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
 
@@ -244,7 +244,7 @@ class Bot(models.Model):
                                       related_name='bots_currently_in_match')
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
-                               max_file_size=1024 * 1024 * 50)  # max_file_size = 50MB
+                               max_file_size=BOT_ZIP_MAX_SIZE)
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     bot_zip_publicly_downloadable = models.BooleanField(default=False)
     # todo: set a file size limit which will be checked on result submission
