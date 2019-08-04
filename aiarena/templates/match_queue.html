@@ -17,7 +17,7 @@
             </thead>
             {% for match in round.matches %}
                 <tr>
-                    <td>{{ match.id }}</td>
+                    <td>{{ match.as_html_link |safe }}</td>
                     <td>{{ match.participant1.bot.as_html_link |safe }}</td>
                     <td>{{ match.participant2.bot.as_html_link |safe }}</td>
                     <td>{{ match.map }}</td>
