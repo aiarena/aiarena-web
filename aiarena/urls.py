@@ -42,6 +42,7 @@ urlpatterns = [
                   path('match-logs/<int:pk>/', core_views.MatchLogDownloadView.as_view()),
                   path('authors/', core_views.AuthorList.as_view(), name='authors'),
                   path('authors/<int:pk>/', core_views.AuthorDetail.as_view(), name='author'),
+                  path('matches/<int:pk>/', core_views.MatchDetail.as_view(), name='match'),
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   url('avatar/', include('avatar.urls')),
                   path('profile/', core_views.UserProfile.as_view(), name='profile'),

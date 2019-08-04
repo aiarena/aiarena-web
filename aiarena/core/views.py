@@ -264,3 +264,23 @@ class MatchQueue(View):
 
         context = {'round_list': rounds}
         return render(request, 'match_queue.html', context)
+
+
+class MatchDetail(DetailView):
+    model = Match
+    template_name = 'match.html'
+    context_object_name = 'author'  # change the context name to avoid overriding the current user oontext object
+
+    def get_object(self, queryset=None):
+        match = super(MatchDetail, self).get_object(queryset)
+        # add extra info
+        match.participant1 = match.participant_set.get(participant_number=1)
+        match.participant2 = match.participant_set.get(participant_number=2)
+        match.mapname = match.map.name
+        return match
+
+
+    def get_context_data(self, **kwargs):
+        context = super(AuthorDetail, self).get_context_data(**kwargs)
+        context['bot_list'] = Bot.objects.filter(user_id=self.object.id).order_by('-created')
+        return context
