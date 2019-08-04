@@ -237,6 +237,10 @@ MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
 # how long to wait before the website should time out a running match
 TIMEOUT_MATCHES_AFTER = timedelta(hours=1)
 
+# This will post results received to another webserver
+# if this is None, it is disabled
+POST_SUBMITTED_RESULTS_TO_ADDRESS = None
+
 # django-avatar
 # https://django-avatar.readthedocs.io/en/latest/
 # Cleanup avatar images on deletion
