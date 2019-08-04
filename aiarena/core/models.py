@@ -210,6 +210,12 @@ class Match(models.Model):
                 return match
         return None
 
+    def get_absolute_url(self):
+        return reverse('match', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
 
 def bot_zip_upload_to(instance, filename):
     return '/'.join(['bots', str(instance.id), 'bot_zip'])
