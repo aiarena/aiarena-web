@@ -13,6 +13,7 @@ from rest_framework.reverse import reverse
 from aiarena import settings
 from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
+from aiarena.core.utils import post_result_to_discord_bot
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +80,8 @@ class MatchViewSet(viewsets.GenericViewSet):
     def create(self, request, *args, **kwargs):
         if settings.REISSUE_UNFINISHED_MATCHES:
             # Check for any unfinished matches assigned to this user. If any are present, return that.
-            unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user, result__isnull=True).order_by(F('round_id').asc())
+            unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user,
+                                                      result__isnull=True).order_by(F('round_id').asc())
             if unfinished_matches.count() > 0:
                 match = unfinished_matches[0]  # todo: re-set started time?
 
@@ -143,7 +145,7 @@ class ResultSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Result
-        fields = 'type', 'replay_file', 'game_steps', 'submitted_by', 'match', 'bot1_data',\
+        fields = 'type', 'replay_file', 'game_steps', 'submitted_by', 'match', 'bot1_data', \
                  'bot2_data', 'bot1_log', 'bot2_log', 'bot1_avg_step_time', 'bot2_avg_step_time', 'arenaclient_log'
 
 
@@ -180,5 +182,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         try:
             result = serializer.save()
             result.finalize_submission(bot1_data, bot2_data, bot1_log, bot2_log, bot1_avg_step_time, bot2_avg_step_time)
+
+            post_result_to_discord_bot(result)
         except BotNotInMatchException:
             raise APIException('Unable to log result - one of the bots is not listed as in this match.')
