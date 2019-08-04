@@ -19,7 +19,7 @@
         </thead>
         {% for result in result_list %}
             <tr>
-                <td>{{ result.match_id }}</td>
+                <td>{{ result.match.as_html_link |safe }}</td>
                 <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
 
                 {% if result.winner == result.participant1.bot %}

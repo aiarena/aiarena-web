@@ -51,12 +51,11 @@
         <tbody>
             <table>
                 <thead>
+                    <td><b>Match ID</b></td>
                     <td><b>Date</b></td>
                     <td><b>Opponent</b></td>
                     <td><b>Result</b></td>
                     <td><b>+/-</b></td>
-                    <td><b>Map</b></td>
-                    <td><b>Game Steps</b></td>
                     <td><b>Avg Step<br/>(ms)</b></td>
                     <td><b>Replay</b></td>
                     {% if request.user == bot.user %}
@@ -65,12 +64,11 @@
                 </thead>
                 {% for result in result_list %}
                 <tr>
+                    <td>{{ result.match.as_html_link |safe }}</td>
                     <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
                     <td>{{ result.opponent.bot.as_html_link |safe }}</td>
                     <td>{{ result.relative_type }}</td>
                     <td>{{ result.me.elo_change |format_elo_change }}</td>
-                    <td>{{ result.match.map.name }}</td>
-                    <td>{{ result.game_steps }}</td>
                     <td>{{ result.me.avg_step_time|floatformat:2 }}</td>
                     {% if result.replay_file %}
                     <td><a href="{{ result.replay_file.url }}">Download</a></td>
