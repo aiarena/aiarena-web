@@ -97,8 +97,7 @@ class Command(BaseCommand):
             self._DEFAULT_ROUNDS_TO_GENERATE))
         parser.add_argument('--token', type=str,
                             help="Specify the token to use for the arena client."
-                                 " Useful to avoid having to reconfigure arena clients in testing".format(
-                                self._DEFAULT_ROUNDS_TO_GENERATE))
+                                 " Useful to avoid having to reconfigure arena clients in testing")
 
     def handle(self, *args, **options):
         self.stdout.write('Seeding data...')
