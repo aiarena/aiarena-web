@@ -68,7 +68,7 @@ class Match(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     started = models.DateTimeField(blank=True, null=True, editable=False)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
-    round = models.ForeignKey(Round, on_delete=models.CASCADE)
+    round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.id.__str__()
@@ -161,6 +161,14 @@ class Match(models.Model):
         # create match participants
         Participant.objects.create(match=match, participant_number=1, bot=bot1)
         Participant.objects.create(match=match, participant_number=2, bot=bot2)
+        return match
+
+    # todo: let us specify the map
+    @staticmethod
+    def request_bot_match(bot, opponent=None):
+        return Match.create(None, Map.random(), bot,
+                            opponent if opponent is not None else bot.get_random_available_excluding_self())
+
 
     class CancelResult(Enum):
         SUCCESS = 1
@@ -205,7 +213,7 @@ class Match(models.Model):
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         # Wrapping the model call here in list() fixes the ordering not being applied.
         # Probably due to Django's lazy evaluation - it forces evaluation thus ensuring the order by is processed
-        for match in list(Match.objects.filter(started__isnull=True).order_by(F('round_id').asc(), '?')):
+        for match in list(Match.objects.filter(started__isnull=True).order_by(F('round_id').asc(nulls_last=False), '?')):
             if match.start(requesting_user) == Match.StartResult.SUCCESS:
                 return match
         return None

@@ -137,6 +137,11 @@ class FullDataSetTestCase(MatchReadyTestCase):
         self._generate_extra_bots()
 
         self._generate_match_activity()
+
+        # generate a bot match request to ensure it doesn't bug things out
+        bot = Bot.get_random_available()
+        call_command('requestbotmatch', bot.id)
+
         self.client.logout()  # child tests can login if they require
 
     def _generate_match_activity(self):
@@ -446,6 +451,11 @@ class ManagementCommandTests(MatchReadyTestCase):
         out = StringIO()
         call_command('generatestats', stdout=out)
         self.assertIn('Generating stats...\nDone', out.getvalue())
+
+    def test_request_bot_match_random_opponent(self):
+        out = StringIO()
+        call_command('requestbotmatch', '1', stdout=out)
+        self.assertIn('Successfully requested match. Match ID:', out.getvalue())
 
     def test_reset_elo(self):
         # test match successfully cancelled

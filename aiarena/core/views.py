@@ -253,7 +253,7 @@ class Index(ListView):
 
 class MatchQueue(View):
     def get(self, request):
-        rounds = Round.objects.filter(complete=False).order_by('id')
+        rounds = Round.objects.filter(complete=False).order_by('id').asc()
         for round in rounds:
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
                 F('started').asc(nulls_last=True), F('id').asc())
