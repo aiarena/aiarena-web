@@ -9,8 +9,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('botid', type=int, help="The id of the bot to request a match for.")
-        parser.add_argument('opponentid', type=int, nargs='?', default=None,
-                            help="Optional: The id of the opponent to fight. Default: A random active bot")
+        parser.add_argument('--opponentid', type=int, default=None,
+                            help="The id of the opponent to fight. Default: A random active bot")
 
     def handle(self, *args, **options):
         with transaction.atomic():
