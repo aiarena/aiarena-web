@@ -7,7 +7,7 @@ class Command(BaseCommand):
     help = 'Registers a MatchCancelled result for all current matches.'
 
     def add_arguments(self, parser):
-        parser.add_argument('match_ids', nargs='+', type=int)
+        parser.add_argument('match_ids', nargs='+', type=int, help="A space separated list of match ids to cancel.")
 
     def handle(self, *args, **options):
         for match_id in options['match_ids']:
