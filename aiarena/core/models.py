@@ -607,10 +607,12 @@ class Result(models.Model):
         # save avg step times
         if bot1_avg_step_time is not None:
             participant1.avg_step_time = bot1_avg_step_time
+            logger.critical("participant1.avg_step_time: {0}".format(participant1.avg_step_time))
             participant1.save()
 
         if bot2_avg_step_time is not None:
             participant2.avg_step_time = bot2_avg_step_time
+            logger.critical("participant2.avg_step_time: {0}".format(participant2.avg_step_time))
             participant2.save()
 
         bot1.leave_match(self.match_id)
