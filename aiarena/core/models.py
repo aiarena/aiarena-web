@@ -475,6 +475,8 @@ class Result(models.Model):
             raise ValidationError('A win/loss or tie result must contain a replay file.')
 
     def clean(self, *args, **kwargs):
+        # todo: if we ever re-enable this, then it needs to be
+        # todo: called upon serializer validation in the arenaclient API
         # self.validate_replay_file_requirement() # disabled for now
         super().clean(*args, **kwargs)
 
@@ -540,7 +542,7 @@ class Result(models.Model):
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)
 
-    def _adjust_elo(self):
+    def adjust_elo(self):
         if self.has_winner():
             winner, loser = self.get_winner_loser_bots()
             self._apply_elo_delta(ELO.calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
@@ -548,7 +550,7 @@ class Result(models.Model):
             first, second = self.get_participant_bots()
             self._apply_elo_delta(ELO.calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
 
-    def _get_initial_elos(self):
+    def get_initial_elos(self):
         first, second = self.get_participant_bots()
         return first.elo, second.elo
 
@@ -558,70 +560,6 @@ class Result(models.Model):
         bot1.save()
         bot2.elo -= delta
         bot2.save()
-
-    def finalize_submission(self, bot1_data, bot2_data, bot1_log, bot2_log, bot1_avg_step_time, bot2_avg_step_time):
-        p1_initial_elo, p2_initial_elo = self._get_initial_elos()
-        self._adjust_elo()
-        p1, p2 = self.get_participants()
-        p1.update_resultant_elo()
-        p2.update_resultant_elo()
-        # calculate the change in ELO
-        p1.elo_change = p1.resultant_elo - p1_initial_elo
-        p1.save()
-        p2.elo_change = p2.resultant_elo - p2_initial_elo
-        p2.save()
-
-        if ENABLE_ELO_SANITY_CHECK:
-            # test here to check ELO total and ensure no corruption
-            expectedEloSum = ELO_START_VALUE * Bot.objects.all().count()
-            actualEloSum = Bot.objects.aggregate(Sum('elo'))
-
-            if actualEloSum['elo__sum'] != expectedEloSum:
-                logger.critical(
-                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
-                        actualEloSum['elo__sum'], expectedEloSum, self.id))
-
-        participant1 = self.match.participant_set.get(participant_number=1)
-        participant2 = self.match.participant_set.get(participant_number=2)
-        bot1 = participant1.bot
-        bot2 = participant2.bot
-
-        # save bot datas
-        if bot1_data is not None:
-            bot1.bot_data = bot1_data
-            bot1.save()
-
-        if bot2_data is not None:
-            bot2.bot_data = bot2_data
-            bot2.save()
-
-        # save logs
-        if bot1_log is not None:
-            participant1.match_log = bot1_log
-            participant1.save()
-
-        if bot2_log is not None:
-            participant2.match_log = bot2_log
-            participant2.save()
-
-        # save avg step times
-        if bot1_avg_step_time is not None:
-            participant1.avg_step_time = bot1_avg_step_time
-            logger.critical("participant1.avg_step_time: {0}".format(participant1.avg_step_time))
-            participant1.save()
-
-        if bot2_avg_step_time is not None:
-            participant2.avg_step_time = bot2_avg_step_time
-            logger.critical("participant2.avg_step_time: {0}".format(participant2.avg_step_time))
-            participant2.save()
-
-        bot1.leave_match(self.match_id)
-        bot2.leave_match(self.match_id)
-
-        self.match.round.update_if_completed()
-
-    # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
-    # todo: use a model form
 
 
 class StatsBots(models.Model):

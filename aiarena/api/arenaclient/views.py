@@ -1,7 +1,7 @@
 import logging
 from wsgiref.util import FileWrapper
 
-from django.db.models import F
+from django.db.models import Sum, F
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
@@ -112,41 +112,40 @@ class MatchViewSet(viewsets.GenericViewSet):
         return response
 
 
-class ResultSerializer(serializers.ModelSerializer):
-    bot1_data = FileField(required=False)
-    bot2_data = FileField(required=False)
-    submitted_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
-    bot1_log = FileField(required=False)
-    bot2_log = FileField(required=False)
-
-    bot1_avg_step_time = FloatField(required=False)
-    bot2_avg_step_time = FloatField(required=False)
-
-    def validate(self, attrs):
-        # temporarily remove the extra fields so they don't cause validation failure
-        modified_attrs = attrs.copy()
-        if 'bot1_data' in attrs:
-            modified_attrs.pop('bot1_data')
-        if 'bot2_data' in attrs:
-            modified_attrs.pop('bot2_data')
-        if 'bot1_log' in attrs:
-            modified_attrs.pop('bot1_log')
-        if 'bot2_log' in attrs:
-            modified_attrs.pop('bot2_log')
-        if 'bot1_avg_step_time' in attrs:
-            modified_attrs.pop('bot1_avg_step_time')
-        if 'bot2_avg_step_time' in attrs:
-            modified_attrs.pop('bot2_avg_step_time')
-        instance = ResultSerializer.Meta.model(**modified_attrs)
-
-        instance.clean()  # enforce model validation because the result model has some custom checks
-        return attrs
-
+class SubmitResultResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-        fields = 'type', 'replay_file', 'game_steps', 'submitted_by', 'match', 'bot1_data', \
-                 'bot2_data', 'bot1_log', 'bot2_log', 'bot1_avg_step_time', 'bot2_avg_step_time', 'arenaclient_log'
+        fields = 'match', 'type', 'replay_file', 'game_steps', 'submitted_by'
+
+
+class SubmitResultBotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bot
+        fields = 'bot_data',
+
+
+class SubmitResultParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = 'avg_step_time', 'match_log'
+
+
+# Front facing serializer used by the view. Combines the other serializers together.
+class SubmitResultCombinedSerializer(serializers.Serializer):
+    # Result
+    match = serializers.IntegerField()
+    type = serializers.ChoiceField(choices=Result.TYPES)
+    replay_file = serializers.FileField(required=False)
+    game_steps = serializers.IntegerField()
+    submitted_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    # Bot
+    bot1_data = FileField(required=False)
+    bot2_data = FileField(required=False)
+    # Participant
+    bot1_log = FileField(required=False)
+    bot2_log = FileField(required=False)
+    bot1_avg_step_time = FloatField(required=False)
+    bot2_avg_step_time = FloatField(required=False)
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -154,35 +153,81 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     ResultViewSet implements a POST method to log a result.
     No reading of models is implemented.
     """
-    serializer_class = ResultSerializer
+    serializer_class = SubmitResultCombinedSerializer
 
-    # todo: avoid results being logged against matches not owned by the submitter
-    def perform_create(self, serializer):
-        # pop extra fields so they don't interfere with saving the result
-        # todo: override serializer save method instead of having to do this?
-        bot1_data = None
-        bot2_data = None
-        bot1_log = None
-        bot2_log = None
-        bot1_avg_step_time = None
-        bot2_avg_step_time = None
-        if 'bot1_data' in serializer.validated_data:
-            bot1_data = serializer.validated_data.pop('bot1_data')
-        if 'bot2_data' in serializer.validated_data:
-            bot2_data = serializer.validated_data.pop('bot2_data')
-        if 'bot1_log' in serializer.validated_data:
-            bot1_log = serializer.validated_data.pop('bot1_log')
-        if 'bot2_log' in serializer.validated_data:
-            bot2_log = serializer.validated_data.pop('bot2_log')
-        if 'bot1_avg_step_time' in serializer.validated_data:
-            bot1_avg_step_time = serializer.validated_data.pop('bot1_avg_step_time')
-        if 'bot2_avg_step_time' in serializer.validated_data:
-            bot2_avg_step_time = serializer.validated_data.pop('bot2_avg_step_time')
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # validate result
+        result = SubmitResultResultSerializer(data={'match': serializer.validated_data['match'],
+                                                    'type': serializer.validated_data['type'],
+                                                    'replay_file': serializer.validated_data.get('replay_file'),
+                                                    'game_steps': serializer.validated_data['game_steps'],
+                                                    'submitted_by': serializer.validated_data['submitted_by'].pk})
+        result.is_valid(raise_exception=True)
+
+        # validate participants
+        p1Instance = Participant.objects.get(match_id=serializer.validated_data['match'], participant_number=1)
+        participant1 = SubmitResultParticipantSerializer(instance=p1Instance, data={
+            'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
+            'match_log': serializer.validated_data.get('bot1_log')}, partial=True)
+        participant1.is_valid(raise_exception=True)
+        p2Instance = Participant.objects.get(match_id=serializer.validated_data['match'], participant_number=2)
+        participant2 = SubmitResultParticipantSerializer(instance=p2Instance, data={
+            'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
+            'match_log': serializer.validated_data.get('bot2_log')}, partial=True)
+        participant2.is_valid(raise_exception=True)
+
+        # validate bots
+        bot1 = SubmitResultBotSerializer(instance=p1Instance.bot,
+                                         data={'bot_data': serializer.validated_data.get('bot1_data')}, partial=True)
+        bot1.is_valid(raise_exception=True)
+        bot2 = SubmitResultBotSerializer(instance=p2Instance.bot,
+                                         data={'bot_data': serializer.validated_data.get('bot2_data')}, partial=True)
+        bot2.is_valid(raise_exception=True)
+
+        # save models
+        result = result.save()
+        participant1 = participant1.save()
+        participant2 = participant2.save()
+        bot1 = bot1.save()
+        bot2 = bot2.save()
+
+        # Update and record ELO figures
+        p1_initial_elo, p2_initial_elo = result.get_initial_elos()
+        result.adjust_elo()
+        participant1.update_resultant_elo()
+        participant2.update_resultant_elo()
+        # calculate the change in ELO
+        participant1.elo_change = participant1.resultant_elo - p1_initial_elo
+        participant1.save()
+        participant2.elo_change = participant2.resultant_elo - p2_initial_elo
+        participant2.save()
+
+        if settings.ENABLE_ELO_SANITY_CHECK:
+            # test here to check ELO total and ensure no corruption
+            expectedEloSum = settings.ELO_START_VALUE * Bot.objects.all().count()
+            actualEloSum = Bot.objects.aggregate(Sum('elo'))
+
+            if actualEloSum['elo__sum'] != expectedEloSum:
+                logger.critical(
+                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
+                        actualEloSum['elo__sum'], expectedEloSum, result.id))
 
         try:
-            result = serializer.save()
-            result.finalize_submission(bot1_data, bot2_data, bot1_log, bot2_log, bot1_avg_step_time, bot2_avg_step_time)
+            bot1.leave_match(result.match_id)
+            bot2.leave_match(result.match_id)
 
             post_result_to_discord_bot(result)
         except BotNotInMatchException:
             raise APIException('Unable to log result - one of the bots is not listed as in this match.')
+
+        result.match.round.update_if_completed()
+
+        headers = self.get_success_headers(serializer.data)
+        return Response({'result_id': result.id}, status=status.HTTP_201_CREATED, headers=headers)
+
+    # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
+    # todo: use a model form
+    # todo: avoid results being logged against matches not owned by the submitter
