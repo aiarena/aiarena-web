@@ -522,12 +522,9 @@ class Result(models.Model):
             raise Exception('There was no winner or loser for this match.')
 
     def get_participants(self):
-        first = Participant.objects.filter(match=self.match, participant_number=1)
-        second = Participant.objects.filter(match=self.match, participant_number=2)
-
-        assert (first.count() == 1)
-        assert (second.count() == 1)
-        return first[0], second[0]
+        first = Participant.objects.get(match=self.match, participant_number=1)
+        second = Participant.objects.get(match=self.match, participant_number=2)
+        return first, second
 
     def get_participant_bots(self):
         first, second = self.get_participants()
