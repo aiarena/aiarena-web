@@ -1,6 +1,7 @@
 import logging
 from wsgiref.util import FileWrapper
 
+from django.db import transaction
 from django.db.models import Sum, F
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
@@ -155,6 +156,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     serializer_class = SubmitResultCombinedSerializer
 
+    @transaction.atomic()
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
