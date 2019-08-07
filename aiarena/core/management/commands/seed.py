@@ -67,22 +67,26 @@ def create_result(match, type, as_user):
 
 
 def finalize_result(result, p1, p2, bot1, bot2):
-    # copied from the arenaclient result view
+    # imitates the arenaclient result view
+
+    bot1.leave_match(result.match_id)
+    bot2.leave_match(result.match_id)
 
     # Update and record ELO figures
     p1_initial_elo, p2_initial_elo = result.get_initial_elos()
     result.adjust_elo()
-    p1.update_resultant_elo()
-    p2.update_resultant_elo()
 
-    # calculate the change in ELO
+    # Calculate the change in ELO
+    # the bot elos have changed so refresh them
+    # todo: instead of having to refresh, return data from adjust_elo and apply it here
+    bot1.refresh_from_db()
+    bot2.refresh_from_db()
+    p1.resultant_elo = bot1.elo
+    p2.resultant_elo = bot2.elo
     p1.elo_change = p1.resultant_elo - p1_initial_elo
-    p1.save()
     p2.elo_change = p2.resultant_elo - p2_initial_elo
+    p1.save()
     p2.save()
-
-    bot1.leave_match(result.match_id)
-    bot2.leave_match(result.match_id)
 
     result.match.round.update_if_completed()
 

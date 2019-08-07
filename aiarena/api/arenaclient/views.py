@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from aiarena import settings
-from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.core.utils import post_result_to_discord_bot
 
@@ -122,7 +121,7 @@ class SubmitResultResultSerializer(serializers.ModelSerializer):
 class SubmitResultBotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bot
-        fields = 'bot_data',
+        fields = 'bot_data', 'in_match', 'current_match'
 
 
 class SubmitResultParticipantSerializer(serializers.ModelSerializer):
@@ -182,11 +181,22 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         participant2.is_valid(raise_exception=True)
 
         # validate bots
+        if p1Instance.bot.current_match_id != result.validated_data['match'].id:
+            raise APIException('Unable to log result: Bot {0} is not currently in this match!'
+                               .format(p1Instance.bot.name))
         bot1 = SubmitResultBotSerializer(instance=p1Instance.bot,
-                                         data={'bot_data': serializer.validated_data.get('bot1_data')}, partial=True)
+                                         data={'bot_data': serializer.validated_data.get('bot1_data'),
+                                               'in_match': False,
+                                               'current_match': None}, partial=True)
         bot1.is_valid(raise_exception=True)
+
+        if p2Instance.bot.current_match_id != result.validated_data['match'].id:
+            raise APIException('Unable to log result: Bot {0} is not currently in this match!'
+                               .format(p2Instance.bot.name))
         bot2 = SubmitResultBotSerializer(instance=p2Instance.bot,
-                                         data={'bot_data': serializer.validated_data.get('bot2_data')}, partial=True)
+                                         data={'bot_data': serializer.validated_data.get('bot2_data'),
+                                               'in_match': False,
+                                               'current_match': None}, partial=True)
         bot2.is_valid(raise_exception=True)
 
         # save models
@@ -199,12 +209,17 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         # Update and record ELO figures
         p1_initial_elo, p2_initial_elo = result.get_initial_elos()
         result.adjust_elo()
-        participant1.update_resultant_elo()
-        participant2.update_resultant_elo()
-        # calculate the change in ELO
+
+        # Calculate the change in ELO
+        # the bot elos have changed so refresh them
+        # todo: instead of having to refresh, return data from adjust_elo and apply it here
+        bot1.refresh_from_db()
+        bot2.refresh_from_db()
+        participant1.resultant_elo = bot1.elo
+        participant2.resultant_elo = bot2.elo
         participant1.elo_change = participant1.resultant_elo - p1_initial_elo
-        participant1.save()
         participant2.elo_change = participant2.resultant_elo - p2_initial_elo
+        participant1.save()
         participant2.save()
 
         if settings.ENABLE_ELO_SANITY_CHECK:
@@ -216,12 +231,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 logger.critical(
                     "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
                         actualEloSum['elo__sum'], expectedEloSum, result.id))
-
-        try:
-            bot1.leave_match(result.match_id)
-            bot2.leave_match(result.match_id)
-        except BotNotInMatchException:
-            raise APIException('Unable to log result - one of the bots is not listed as in this match.')
 
         result.match.round.update_if_completed()
 
