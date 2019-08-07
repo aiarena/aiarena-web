@@ -220,12 +220,12 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         try:
             bot1.leave_match(result.match_id)
             bot2.leave_match(result.match_id)
-
-            post_result_to_discord_bot(result)
         except BotNotInMatchException:
             raise APIException('Unable to log result - one of the bots is not listed as in this match.')
 
         result.match.round.update_if_completed()
+
+        post_result_to_discord_bot(result)
 
         headers = self.get_success_headers(serializer.data)
         return Response({'result_id': result.id}, status=status.HTTP_201_CREATED, headers=headers)
