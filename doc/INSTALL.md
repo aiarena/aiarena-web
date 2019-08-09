@@ -6,7 +6,7 @@
     Using SQL:
     ```
     CREATE DATABASE aiarena;
-    CREATE USER aiarena INDENTIFIED BY 'aiarena';
+    CREATE USER aiarena IDENTIFIED BY 'aiarena';
     GRANT ALL PRIVILEGES ON aiarena.* TO aiarena WITH GRANT OPTION;
     ```
 
