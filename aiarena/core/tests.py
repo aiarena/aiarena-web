@@ -416,6 +416,9 @@ class ManagementCommandTests(MatchReadyTestCase):
         # double check the replay and log files exist
         results = Result.objects.filter(replay_file__isnull=False)
         self.assertEqual(results.count(), NUM_MATCHES)
+        # after we ensure the arena client log count matches, we can safely just use the above results list
+        results_logs = Result.objects.filter(arenaclient_log__isnull=False)
+        self.assertEqual(results_logs.count(), NUM_MATCHES)
         participants = Participant.objects.filter(match_log__isnull=False)
         self.assertEqual(participants.count(), NUM_MATCHES * 2)
 
@@ -426,6 +429,15 @@ class ManagementCommandTests(MatchReadyTestCase):
         call_command('cleanupreplays', stdout=out)
         self.assertIn(
             'Cleaning up replays starting from 30 days into the past...\nCleaned up {0} replays.'.format(NUM_MATCHES),
+            out.getvalue())
+
+        self.assertEqual(results.count(), NUM_MATCHES)
+        for result in results:
+            self.assertFalse(result.replay_file)
+
+        call_command('cleanuparenaclientlogfiles', stdout=out)
+        self.assertIn(
+            'Cleaning up arena client logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(NUM_MATCHES),
             out.getvalue())
 
         self.assertEqual(results.count(), NUM_MATCHES)
