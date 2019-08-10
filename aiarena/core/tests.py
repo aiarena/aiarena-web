@@ -19,8 +19,13 @@ class BaseTestCase(TransactionTestCase):
     # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
     test_bot_zip_path = 'aiarena/core/test-media/test_bot.zip'
+    test_bot_zip_hash = 'c96bcfc79318a8b50b0b2c8696400d06'
+    test_bot_zip_updated_path = 'aiarena/core/test-media/test_bot_updated.zip'
+    test_bot_zip_updated_hash = '685dba7a89511157a6594c20c50397d3'
     test_bot1_data_path = 'aiarena/core/test-media/test_bot1_data.zip'
+    test_bot1_data_hash = '855994f4cb90e1220b3b2819a0ed1cc7'
     test_bot2_data_path = 'aiarena/core/test-media/test_bot2_data.zip'
+    test_bot2_data_hash = '0579988bdab3a23cdf54998ae1d531db'
     test_bot1_match_log_path = 'aiarena/core/test-media/test_bot1_match_log.zip'
     test_bot2_match_log_path = 'aiarena/core/test-media/test_bot2_match_log.zip'
     test_arenaclient_log_path = 'aiarena/core/test-media/test_arenaclient_log.zip'
@@ -215,7 +220,7 @@ class FullDataSetTestCase(MatchReadyTestCase):
 class UtilsTestCase(BaseTestCase):
     def test_calc_md5(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/test_bot.zip')
-        self.assertEqual('42d25655e278ebac732d3bd8e21dc107', calculate_md5(filename))
+        self.assertEqual('c96bcfc79318a8b50b0b2c8696400d06', calculate_md5(filename))
 
 
 class UserTestCase(BaseTestCase):
@@ -224,7 +229,7 @@ class UserTestCase(BaseTestCase):
 
 
 class BotTestCase(LoggedInTestCase):
-    def test_bot_creation(self):
+    def test_bot_creation_and_update(self):
         # create bot along with bot data
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
             bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data),
@@ -232,9 +237,10 @@ class BotTestCase(LoggedInTestCase):
             bot1.full_clean()
             bot1.save()
 
+        bot1.refresh_from_db()
         # check hashes
-        self.assertEqual('42d25655e278ebac732d3bd8e21dc107', bot1.bot_zip_md5hash)
-        self.assertEqual('6cc8ec3fa50d069eab74835757807ef2', bot1.bot_data_md5hash)
+        self.assertEqual(self.test_bot_zip_hash, bot1.bot_zip_md5hash)
+        self.assertEqual(self.test_bot1_data_hash, bot1.bot_data_md5hash)
 
         # check the bot file now exists
         self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip'.format(bot1.id)))
@@ -262,6 +268,24 @@ class BotTestCase(LoggedInTestCase):
                                       ' Each user can only have 1 active bot(s) per race.'):
             inactive_bot.active = True
             inactive_bot.full_clean()  # run validation
+
+        # test updating bot_zip
+        with open(self.test_bot_zip_updated_path, 'rb') as bot_zip_updated:
+            bot1.bot_zip = File(bot_zip_updated)
+            bot1.save()
+
+        bot1.refresh_from_db()
+        self.assertEqual(self.test_bot_zip_updated_hash, bot1.bot_zip_md5hash)
+
+        # test updating bot_data
+        # using bot2's data instead here so it's different
+        with open(self.test_bot2_data_path, 'rb') as bot_data_updated:
+            bot1.bot_data = File(bot_data_updated)
+            bot1.save()
+
+        bot1.refresh_from_db()
+        self.assertEqual(self.test_bot2_data_hash, bot1.bot_data_md5hash)
+
 
 
 class PageRenderTestCase(FullDataSetTestCase):

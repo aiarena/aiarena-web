@@ -16,7 +16,7 @@ from private_storage.fields import PrivateFileField
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
-from aiarena.core.utils import calculate_md5
+from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, \
     ENABLE_ELO_SANITY_CHECK, ELO, TIMEOUT_MATCHES_AFTER, BOT_ZIP_MAX_SIZE
 
@@ -273,15 +273,9 @@ class Bot(models.Model):
     game_display_id = models.UUIDField(default=uuid.uuid4)
 
     def calc_bot_files_md5hash(self):
-        # we technically shouldn't be accessing _committed, but it was the only way I could find to know
-        # when the bot_zip was actually saved so I could load it off the disk
-        # todo: probably shouldn't be loading via the path?
-        # todo: attempt with django filefield open, and close it during rename phase?
-        if self.bot_zip._committed:
-            self.bot_zip_md5hash = calculate_md5(self.bot_zip.path)
-
-        if self.bot_data and self.bot_data._committed:
-            self.bot_data_md5hash = calculate_md5(self.bot_data.path)
+        self.bot_zip_md5hash = calculate_md5_django_filefield(self.bot_zip)
+        if self.bot_data:
+            self.bot_data_md5hash = calculate_md5_django_filefield(self.bot_data)
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_active_bot_race_per_user(self):
@@ -384,32 +378,43 @@ def skip_saving_bot_files(sender, instance, **kwargs):
     if not instance.pk and not hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         setattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD, instance.bot_zip)
         instance.bot_zip = None
+    # else:
+    #     instance.bot_zip_md5hash = calculate_md5(instance.bot_zip.path)
 
     # bot data
     if not instance.pk and not hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD) and instance.bot_data:
         setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
         instance.bot_data = None
+    # elif instance.bot_data:
+    #     instance.bot_data_md5hash = calculate_md5(instance.bot_data.path)
 
 
 @receiver(post_save, sender=Bot)
 def save_bot_files(sender, instance, created, **kwargs):
+    save = False
+
     # bot zip
     if created and hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         instance.bot_zip = getattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD)
-        instance.save()  # so the file is saved to disk
-        instance.bot_zip_md5hash = calculate_md5(instance.bot_zip.path)
-        instance.save()
+        # instance.bot_zip_md5hash = calculate_md5_django_filefield(instance.bot_zip)
+        save = True  # so the file is saved to disk
+        # instance.save()
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_ZIP_FILEFIELD)
+
 
     # bot data
     if created and hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD):
         instance.bot_data = getattr(instance, _UNSAVED_BOT_DATA_FILEFIELD)
-        instance.save()  # so the file is saved to disk
-        instance.bot_data_md5hash = calculate_md5(instance.bot_data.path)
-        instance.save()
+        save = True  # so the file is saved to disk
+        # instance.bot_data_md5hash = calculate_md5(instance.bot_data.path)
+        # instance.save()
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
+
+
+    if save:  # only save if something got updated
+        instance.save()
 
 
 def match_log_upload_to(instance, filename):

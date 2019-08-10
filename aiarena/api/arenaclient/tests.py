@@ -197,8 +197,12 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
         # check hashes
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        if Participant.objects.get(pk=bot1.id, match_id=match['id']).participant_number == 1:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        else:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
         # check match logs exist
         self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot1.id, match['id'])))
         self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot2.id, match['id'])))
