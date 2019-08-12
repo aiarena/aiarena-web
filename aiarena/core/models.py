@@ -348,7 +348,8 @@ class Bot(models.Model):
                 started__lt=timezone.now() - TIMEOUT_MATCHES_AFTER, result__isnull=True)
             for match in matches_without_result:
                 Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
-                match.round.update_if_completed()
+                if match.round is not None: # if the match is part of a round, check for round completion
+                    match.round.update_if_completed()
 
     @staticmethod
     def get_random_available():
