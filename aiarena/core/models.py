@@ -205,7 +205,8 @@ class Match(models.Model):
                 match.started = timezone.now()
                 match.save()
 
-            match.round.update_if_completed()
+            if match.round is not None:
+                match.round.update_if_completed()
 
     @classmethod
     def _locate_and_return_started_match(cls, requesting_user):
@@ -619,7 +620,8 @@ class Result(models.Model):
         bot1.leave_match(self.match_id)
         bot2.leave_match(self.match_id)
 
-        self.match.round.update_if_completed()
+        if self.match.round is not None:
+            self.match.round.update_if_completed()
 
     # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form
