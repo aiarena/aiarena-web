@@ -105,12 +105,19 @@ class BotDetail(DetailView):
             result.opponent = result.match.participant_set.exclude(bot=self.object).get()
             result.me = result.match.participant_set.get(bot=self.object)
 
-            # convert the type to be reletive to this bot
+            # convert the type to be relative to this bot
+            typeSuffix = ''
+            if result.type in ['Player1Crash', 'Player2Crash']:
+                typeSuffix = ' - Crash'
+            elif result.type in ['Player1TimeOut', 'Player2TimeOut']:
+                typeSuffix = ' - TimeOut'
+
             if result.winner is not None:
+
                 if result.winner == self.object:
-                    result.relative_type = 'Win'
+                    result.relative_type = 'Win' + typeSuffix
                 else:
-                    result.relative_type = 'Loss'
+                    result.relative_type = 'Loss' + typeSuffix
             else:
                 result.relative_type = result.type
 
