@@ -260,6 +260,11 @@ class Index(ListView):
 
 class MatchQueue(View):
     def get(self, request):
+        # Matches without a round are requested ones
+        requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
+                F('started').asc(nulls_last=True), F('id').asc())
+
+        # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
         for round in rounds:
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
@@ -269,7 +274,7 @@ class MatchQueue(View):
                 match.participant2 = match.participant_set.get(participant_number=2)
                 match.mapname = match.map.name
 
-        context = {'round_list': rounds}
+        context = {'round_list': rounds, 'requested_matches': requested_matches}
         return render(request, 'match_queue.html', context)
 
 
