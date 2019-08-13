@@ -263,6 +263,10 @@ class MatchQueue(View):
         # Matches without a round are requested ones
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
                 F('started').asc(nulls_last=True), F('id').asc())
+        for match in requested_matches:
+            match.participant1 = match.participant_set.get(participant_number=1)
+            match.participant2 = match.participant_set.get(participant_number=2)
+            match.mapname = match.map.name
 
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
