@@ -276,6 +276,9 @@ AVATAR_THUMB_FORMAT = 'PNG'
 
 ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
+# whether to run matches
+LADDER_ENABLED = True
+
 # django wiki
 WIKI_ACCOUNT_HANDLING = True
 WIKI_ACCOUNT_SIGNUP_ALLOWED = False

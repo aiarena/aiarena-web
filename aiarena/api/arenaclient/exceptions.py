@@ -21,3 +21,9 @@ class NotEnoughAvailableBots(APIException):
     status_code = 409  # Conflict https://httpstatuses.com/409
     default_detail = 'Not enough available bots for a match. Wait until more bots become available.'
     default_code = 'not_enough_available_bots'
+
+
+class LadderDisabled(APIException):
+    status_code = 503  # Conflict https://httpstatuses.com/503
+    default_detail = 'The ladder is currently disabled.'
+    default_code = 'ladder_disabled'

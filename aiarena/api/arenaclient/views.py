@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from aiarena import settings
+from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.core.utils import post_result_to_discord_bot
@@ -78,22 +79,25 @@ class MatchViewSet(viewsets.GenericViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def create(self, request, *args, **kwargs):
-        if settings.REISSUE_UNFINISHED_MATCHES:
-            # Check for any unfinished matches assigned to this user. If any are present, return that.
-            unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user,
-                                                      result__isnull=True).order_by(F('round_id').asc())
-            if unfinished_matches.count() > 0:
-                match = unfinished_matches[0]  # todo: re-set started time?
+        if settings.LADDER_ENABLED:
+            if settings.REISSUE_UNFINISHED_MATCHES:
+                # Check for any unfinished matches assigned to this user. If any are present, return that.
+                unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user,
+                                                          result__isnull=True).order_by(F('round_id').asc())
+                if unfinished_matches.count() > 0:
+                    match = unfinished_matches[0]  # todo: re-set started time?
 
-                match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
-                match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot
+                    match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
+                    match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot
 
-                serializer = self.get_serializer(match)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                    serializer = self.get_serializer(match)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return self.create_new_match(request.user)
             else:
                 return self.create_new_match(request.user)
         else:
-            return self.create_new_match(request.user)
+            raise LadderDisabled()
 
     # todo: check match is in progress/bot is in this match
     @action(detail=True, methods=['GET'], name='Download a participant\'s zip file', url_path='(?P<p_num>\d+)/zip')
@@ -155,6 +159,14 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     No reading of models is implemented.
     """
     serializer_class = ResultSerializer
+
+
+    def create(self, request, *args, **kwargs):
+        if settings.LADDER_ENABLED:
+            super(ResultViewSet, self).create(*args, **kwargs)
+        else:
+            raise LadderDisabled()
+
 
     # todo: avoid results being logged against matches not owned by the submitter
     def perform_create(self, serializer):
