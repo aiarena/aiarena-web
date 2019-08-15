@@ -120,7 +120,7 @@ class MatchViewSet(viewsets.GenericViewSet):
 class SubmitResultResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = Result
-        fields = 'match', 'type', 'replay_file', 'game_steps', 'submitted_by'
+        fields = 'match', 'type', 'replay_file', 'game_steps', 'submitted_by', 'arenaclient_log'
 
 
 class SubmitResultBotSerializer(serializers.ModelSerializer):
@@ -143,6 +143,7 @@ class SubmitResultCombinedSerializer(serializers.Serializer):
     replay_file = serializers.FileField(required=False)
     game_steps = serializers.IntegerField()
     submitted_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    arenaclient_log = FileField(required=False)
     # Bot
     bot1_data = FileField(required=False)
     bot2_data = FileField(required=False)
@@ -171,7 +172,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                                         'type': serializer.validated_data['type'],
                                                         'replay_file': serializer.validated_data.get('replay_file'),
                                                         'game_steps': serializer.validated_data['game_steps'],
-                                                        'submitted_by': serializer.validated_data['submitted_by'].pk})
+                                                        'submitted_by': serializer.validated_data['submitted_by'].pk,
+                                                        'arenaclient_log': serializer.validated_data.get('arenaclient_log')})
             result.is_valid(raise_exception=True)
 
             # validate participants
