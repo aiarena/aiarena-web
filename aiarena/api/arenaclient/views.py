@@ -163,7 +163,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     def create(self, request, *args, **kwargs):
         if settings.LADDER_ENABLED:
-            super(ResultViewSet, self).create(*args, **kwargs)
+            return super(ResultViewSet, self).create(request, *args, **kwargs)
         else:
             raise LadderDisabled()
 
