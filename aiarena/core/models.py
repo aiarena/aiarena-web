@@ -13,7 +13,8 @@ from django.utils import timezone
 from django.utils.html import escape
 from private_storage.fields import PrivateFileField
 
-from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots
+from aiarena import settings
+from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5
@@ -60,6 +61,10 @@ class Round(models.Model):
             self.complete = True
             self.finished = timezone.now()
             self.save()
+
+    @staticmethod
+    def max_active_rounds_reached():
+        return Round.objects.filter(complete=False).count() >= settings.MAX_ACTIVE_ROUNDS
 
 
 # todo: structure for separate ladder types
@@ -140,7 +145,11 @@ class Match(models.Model):
                         # ROLLBACK here so the UNLOCK statement doesn't commit changes
                         cursor.execute("ROLLBACK")
                         raise NotEnoughAvailableBots()
-                    else:
+                    elif Round.max_active_rounds_reached():
+                        # ROLLBACK here so the UNLOCK statement doesn't commit changes
+                        cursor.execute("ROLLBACK")
+                        raise MaxActiveRounds()
+                    else:  # generate new round
                         Match._queue_round_robin_matches_for_all_active_bots()
                         match = Match._locate_and_return_started_match(requesting_user)
                         if match is None:

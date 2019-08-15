@@ -251,6 +251,10 @@ ELO = Elo(ELO_K)
 MAX_USER_BOT_COUNT = 6
 MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
 
+# The maximum active rounds allowed at any one time.
+# The ladder will stop generating new rounds once this number is reached until previous active rounds are finished off.
+MAX_ACTIVE_ROUNDS = 2
+
 # For convenience
 BOT_ZIP_MAX_SIZE_MB = 50
 # this is the setting that actually dictates the max zip size

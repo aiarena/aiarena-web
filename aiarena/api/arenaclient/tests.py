@@ -10,6 +10,7 @@ from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, TIMEOUT_MATCHES_AFTER
 
+
 # todo: test to esnure that matches are served for earlier rounds first
 class MatchesTestCase(LoggedInTestCase):
     def setUp(self):
@@ -174,6 +175,43 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response_m2.status_code, 200)
 
         self.assertEqual(response_m1.data['id'], response_m2.data['id'])
+
+    def test_max_active_rounds(self):
+        # we don't want to have to create lots of arenaclients for multiple matches
+        settings.REISSUE_UNFINISHED_MATCHES = False
+        settings.MAX_ACTIVE_ROUNDS = 2
+
+        self.client.login(username='staff_user', password='x')
+        self._create_map('test_map')
+        bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
+        bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
+        bot3 = self._create_active_bot(self.regularUser1, 'testbot3', 'P')
+        bot4 = self._create_active_bot(self.regularUser1, 'testbot4', 'R')
+
+        # Round 1
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 201)
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # Match 1 has started, Match 2 is finished.
+
+        # Round 2
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
+
+        # Round 3 - should fail due to active round limit
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 409)
+        self.assertTrue('detail' in response.data)
+        self.assertEqual(u'There are available bots, but the ladder has reached the maximum active rounds allowed and ' \
+                         'serving a new match would require generating a new one. Please wait until matches from current ' \
+                         'rounds become available.',
+                         response.data['detail'])
 
 
 class ResultsTestCase(LoggedInTestCase):
