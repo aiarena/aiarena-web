@@ -24,6 +24,6 @@ class NotEnoughAvailableBots(APIException):
 
 
 class LadderDisabled(APIException):
-    status_code = 503  # Conflict https://httpstatuses.com/503
+    status_code = 503  # Service Unavailable https://httpstatuses.com/503
     default_detail = 'The ladder is currently disabled.'
     default_code = 'ladder_disabled'
