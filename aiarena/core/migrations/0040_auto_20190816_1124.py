@@ -5,6 +5,9 @@ from django.db import migrations
 from aiarena.scripts import run_usp_generate_stats_sql
 
 
+def update_generate_stats(apps, schema_editor):
+    run_usp_generate_stats_sql()
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -12,5 +15,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(run_usp_generate_stats_sql),
+        migrations.RunPython(update_generate_stats),
     ]
