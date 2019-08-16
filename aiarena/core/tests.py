@@ -4,6 +4,7 @@ from io import StringIO
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command, CommandError
 from django.test import TransactionTestCase
 from django.utils import timezone
@@ -19,8 +20,13 @@ class BaseTestCase(TransactionTestCase):
     # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
     test_bot_zip_path = 'aiarena/core/test-media/test_bot.zip'
+    test_bot_zip_hash = 'c96bcfc79318a8b50b0b2c8696400d06'
+    test_bot_zip_updated_path = 'aiarena/core/test-media/test_bot_updated.zip'
+    test_bot_zip_updated_hash = '685dba7a89511157a6594c20c50397d3'
     test_bot1_data_path = 'aiarena/core/test-media/test_bot1_data.zip'
+    test_bot1_data_hash = '855994f4cb90e1220b3b2819a0ed1cc7'
     test_bot2_data_path = 'aiarena/core/test-media/test_bot2_data.zip'
+    test_bot2_data_hash = '0579988bdab3a23cdf54998ae1d531db'
     test_bot1_match_log_path = 'aiarena/core/test-media/test_bot1_match_log.zip'
     test_bot2_match_log_path = 'aiarena/core/test-media/test_bot2_match_log.zip'
     test_arenaclient_log_path = 'aiarena/core/test-media/test_arenaclient_log.zip'
@@ -50,50 +56,51 @@ class BaseTestCase(TransactionTestCase):
 
     def _post_to_results(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data, open(
-                self.test_bot2_data_path) as bot2_data, open(self.test_bot1_match_log_path) as bot1_log, open(
-            self.test_bot2_match_log_path) as bot2_log, open(self.test_arenaclient_log_path) as arenaclient_log:
+        with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot1_data, open(
+                self.test_bot2_data_path, 'rb') as bot2_data, open(self.test_bot1_match_log_path, 'rb') as bot1_log, open(
+            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path, 'rb') as arenaclient_log:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
-                                     'replay_file': replayFile,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500,
-                                     'bot1_data': bot1_data,
-                                     'bot2_data': bot2_data,
-                                     'bot1_log': bot1_log,
-                                     'bot2_log': bot2_log,
+                                     'bot1_data': SimpleUploadedFile("bot1_data.zip", bot1_data.read()),
+                                     'bot2_data': SimpleUploadedFile("bot2_data.zip", bot2_data.read()),
+                                     'bot1_log': SimpleUploadedFile("bot1_log.zip", bot1_log.read()),
+                                     'bot2_log': SimpleUploadedFile("bot2_log.zip", bot2_log.read()),
                                      'bot1_avg_step_time': 0.2,
                                      'bot2_avg_step_time': 0.1,
-                                     'arenaclient_log': arenaclient_log})
+                                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.zip", arenaclient_log.read())})
 
+# todo:
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
-        with open(filename) as replayFile:
+        with open(filename, 'rb') as replayFile:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
-                                     'replay_file': replayFile,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500})
 
     def _post_to_results_no_bot1_data(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot2_data:
+        with open(filename, 'rb') as replayFile, open(self.test_bot2_data_path, 'rb') as bot2_data:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
-                                     'replay_file': replayFile,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500,
-                                     'bot2_data': bot2_data})
+                                     'bot2_data': SimpleUploadedFile("bot2_data.zip", bot2_data.read())})
 
     def _post_to_results_no_bot2_data(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data:
+        with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot1_data:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
-                                     'replay_file': replayFile,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500,
-                                     'bot1_data': bot1_data})
+                                     'bot1_data': SimpleUploadedFile("bot1_data.zip", bot1_data.read())})
 
     def _post_to_results_no_replay(self, match_id, result_type):
         return self.client.post('/api/arenaclient/results/',
@@ -215,7 +222,7 @@ class FullDataSetTestCase(MatchReadyTestCase):
 class UtilsTestCase(BaseTestCase):
     def test_calc_md5(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/test_bot.zip')
-        self.assertEqual('42d25655e278ebac732d3bd8e21dc107', calculate_md5(filename))
+        self.assertEqual('c96bcfc79318a8b50b0b2c8696400d06', calculate_md5(filename))
 
 
 class UserTestCase(BaseTestCase):
@@ -224,7 +231,7 @@ class UserTestCase(BaseTestCase):
 
 
 class BotTestCase(LoggedInTestCase):
-    def test_bot_creation(self):
+    def test_bot_creation_and_update(self):
         # create bot along with bot data
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
             bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data),
@@ -232,9 +239,10 @@ class BotTestCase(LoggedInTestCase):
             bot1.full_clean()
             bot1.save()
 
+        bot1.refresh_from_db()
         # check hashes
-        self.assertEqual('42d25655e278ebac732d3bd8e21dc107', bot1.bot_zip_md5hash)
-        self.assertEqual('6cc8ec3fa50d069eab74835757807ef2', bot1.bot_data_md5hash)
+        self.assertEqual(self.test_bot_zip_hash, bot1.bot_zip_md5hash)
+        self.assertEqual(self.test_bot1_data_hash, bot1.bot_data_md5hash)
 
         # check the bot file now exists
         self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip'.format(bot1.id)))
@@ -262,6 +270,24 @@ class BotTestCase(LoggedInTestCase):
                                       ' Each user can only have 1 active bot(s) per race.'):
             inactive_bot.active = True
             inactive_bot.full_clean()  # run validation
+
+        # test updating bot_zip
+        with open(self.test_bot_zip_updated_path, 'rb') as bot_zip_updated:
+            bot1.bot_zip = File(bot_zip_updated)
+            bot1.save()
+
+        bot1.refresh_from_db()
+        self.assertEqual(self.test_bot_zip_updated_hash, bot1.bot_zip_md5hash)
+
+        # test updating bot_data
+        # using bot2's data instead here so it's different
+        with open(self.test_bot2_data_path, 'rb') as bot_data_updated:
+            bot1.bot_data = File(bot_data_updated)
+            bot1.save()
+
+        bot1.refresh_from_db()
+        self.assertEqual(self.test_bot2_data_hash, bot1.bot_data_md5hash)
+
 
 
 class PageRenderTestCase(FullDataSetTestCase):
