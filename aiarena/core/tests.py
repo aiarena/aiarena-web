@@ -4,6 +4,7 @@ from io import StringIO
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command, CommandError
 from django.test import TransactionTestCase
 from django.utils import timezone
@@ -55,50 +56,51 @@ class BaseTestCase(TransactionTestCase):
 
     def _post_to_results(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data, open(
-                self.test_bot2_data_path) as bot2_data, open(self.test_bot1_match_log_path) as bot1_log, open(
-            self.test_bot2_match_log_path) as bot2_log, open(self.test_arenaclient_log_path) as arenaclient_log:
+        with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot1_data, open(
+                self.test_bot2_data_path, 'rb') as bot2_data, open(self.test_bot1_match_log_path, 'rb') as bot1_log, open(
+            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path, 'rb') as arenaclient_log:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
-                                     'replay_file': replayFile,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500,
-                                     'bot1_data': bot1_data,
-                                     'bot2_data': bot2_data,
-                                     'bot1_log': bot1_log,
-                                     'bot2_log': bot2_log,
+                                     'bot1_data': SimpleUploadedFile("bot1_data.zip", bot1_data.read()),
+                                     'bot2_data': SimpleUploadedFile("bot2_data.zip", bot2_data.read()),
+                                     'bot1_log': SimpleUploadedFile("bot1_log.zip", bot1_log.read()),
+                                     'bot2_log': SimpleUploadedFile("bot2_log.zip", bot2_log.read()),
                                      'bot1_avg_step_time': 0.2,
                                      'bot2_avg_step_time': 0.1,
-                                     'arenaclient_log': arenaclient_log})
+                                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.zip", arenaclient_log.read())})
 
+# todo:
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
-        with open(filename) as replayFile:
+        with open(filename, 'rb') as replayFile:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
-                                     'replay_file': replayFile,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500})
 
     def _post_to_results_no_bot1_data(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot2_data:
+        with open(filename, 'rb') as replayFile, open(self.test_bot2_data_path, 'rb') as bot2_data:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
-                                     'replay_file': replayFile,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500,
-                                     'bot2_data': bot2_data})
+                                     'bot2_data': SimpleUploadedFile("bot2_data.zip", bot2_data.read())})
 
     def _post_to_results_no_bot2_data(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
-        with open(filename) as replayFile, open(self.test_bot1_data_path) as bot1_data:
+        with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot1_data:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
-                                     'replay_file': replayFile,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500,
-                                     'bot1_data': bot1_data})
+                                     'bot1_data': SimpleUploadedFile("bot1_data.zip", bot1_data.read())})
 
     def _post_to_results_no_replay(self, match_id, result_type):
         return self.client.post('/api/arenaclient/results/',

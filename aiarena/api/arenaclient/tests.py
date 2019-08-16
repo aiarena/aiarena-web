@@ -8,7 +8,8 @@ from aiarena import settings
 from aiarena.core.models import Match, Bot, Participant, User, Round, Result
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, TIMEOUT_MATCHES_AFTER
+from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, TIMEOUT_MATCHES_AFTER, MEDIA_ROOT
+
 
 # todo: test to esnure that matches are served for earlier rounds first
 class MatchesTestCase(LoggedInTestCase):
@@ -177,9 +178,10 @@ class MatchesTestCase(LoggedInTestCase):
 
 
 class ResultsTestCase(LoggedInTestCase):
-    uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data')
-    uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/bot_data_backup')
-    uploaded_match_log_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots/{0}/match_logs/{1}')
+    uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data')
+    uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data_backup')
+    uploaded_match_log_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'match-logs', '{0}')
+    uploaded_arenaclient_log_path = os.path.join(MEDIA_ROOT, 'arenaclient-logs', '{0}_arenaclientlog.zip')
 
     def test_create_results(self):
         self.client.login(username='staff_user', password='x')
@@ -197,15 +199,17 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
         # check hashes
-        if Participant.objects.get(pk=bot1.id, match_id=match['id']).participant_number == 1:
+        match1bot1 = Participant.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        if match1bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
         else:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
         # check match logs exist
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot1.id, match['id'])))
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot2.id, match['id'])))
+        self.assertTrue(os.path.exists(self.uploaded_arenaclient_log_path.format(match['id'])))
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(Participant.objects.get(match_id=match['id'], participant_number=1).id)))
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(Participant.objects.get(match_id=match['id'], participant_number=2).id)))
 
         # post a standard result
         match = self._post_to_matches().data
@@ -219,11 +223,16 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot2.id)))
         # todo: change bot_data content so hashes are alterred
         # check hashes - nothing should have changed
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        if match1bot1.participant_number == 1:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        else:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
         # check match logs exist
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot1.id, match['id'])))
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(bot2.id, match['id'])))
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(match['id'])))
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(Participant.objects.get(match_id=match['id'], participant_number=1).id)))
+        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(Participant.objects.get(match_id=match['id'], participant_number=2).id)))
 
         # post a standard result with no bot1 data
         match = self._post_to_matches().data
@@ -231,8 +240,13 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        match3bot1 = Participant.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        if match3bot1.participant_number == 1:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        else:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
 
         # post a standard result with no bot2 data
         match = self._post_to_matches().data
@@ -240,8 +254,13 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        match4bot1 = Participant.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        if match4bot1.participant_number == 1:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        else:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
 
         # post a win without a replay - now allowed due to corrupt replays being omitted
         # match = self._post_to_matches().data
@@ -251,8 +270,12 @@ class ResultsTestCase(LoggedInTestCase):
         # self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
 
         # check hashes - nothing should have changed
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot1.id).bot_data_md5hash)
-        self.assertEqual('85c200fd57f605a3a333302e5df2bc24', Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        # if participant.participant_number == 1:
+        #     self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+        #     self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        # else:
+        #     self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        #     self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
 
     def test_create_result_bot_not_in_match(self):
         self.client.login(username='staff_user', password='x')

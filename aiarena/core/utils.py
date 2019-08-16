@@ -29,13 +29,15 @@ def calculate_md5_django_filefield(file, block_size=2 ** 20):
 
     md5 = hashlib.md5()
 
-    while True:
-        data = file.read(block_size)
-        if not data:
-            break
-        md5.update(data)
+    with file.open() as file_stream:
+        while True:
+            data = file_stream.read(block_size)
+            if not data:
+                break
+            md5.update(data)
 
     return md5.hexdigest()
+
 
 def post_result_to_discord_bot(result):
     if settings.POST_SUBMITTED_RESULTS_TO_ADDRESS:
