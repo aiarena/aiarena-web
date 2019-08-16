@@ -467,7 +467,7 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         settings.REISSUE_UNFINISHED_MATCHES = False
 
         botCount = Bot.objects.filter(active=True).count()
-        expectedMatchCountPerRound = int(botCount/2*(botCount-1))
+        expectedMatchCountPerRound = int(botCount / 2 * (botCount - 1))
         self.assertGreater(botCount, 1)  # check we have more than 1 bot
 
         self.assertEqual(Match.objects.count(), 0)  # starting with 0 matches
@@ -497,7 +497,7 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
             response = self._post_to_results(response.data['id'], 'Player1Win')
             self.assertEqual(response.status_code, 201)
             # double check the match count
-            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound-x-1)
+            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound - x - 1)
 
         # check round is finished
         self.assertEqual(Round.objects.count(), 1)
@@ -511,7 +511,7 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         self.assertEqual(response.status_code, 201)
 
         # check match count
-        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound*2)
+        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound * 2)
 
         # check round data
         self.assertEqual(Round.objects.count(), 2)
@@ -525,13 +525,13 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         self.assertEqual(response.status_code, 201)
 
         # start and finish all except one the rest of the generated matches
-        for x in range(1, expectedMatchCountPerRound-1):
+        for x in range(1, expectedMatchCountPerRound - 1):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
             response = self._post_to_results(response.data['id'], 'Player1Win')
             self.assertEqual(response.status_code, 201)
             # double check the match count
-            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound-x-1)
+            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound - x - 1)
 
         # at this stage there should be one unstarted match left
         self.assertEqual(Match.objects.filter(started__isnull=True).count(), 1)
@@ -546,8 +546,8 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         self.assertEqual(response.status_code, 201)
 
         # check match count
-        self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound-1)
-        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound*3)
+        self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound - 1)
+        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound * 3)
 
         # check round data
         self.assertEqual(Round.objects.count(), 3)
@@ -580,5 +580,4 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
         self.assertFalse(round.complete)
 
         # check result count - should have 2 rounds worth of results
-        self.assertEqual(Result.objects.count(), expectedMatchCountPerRound*2)
-
+        self.assertEqual(Result.objects.count(), expectedMatchCountPerRound * 2)
