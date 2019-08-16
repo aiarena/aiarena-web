@@ -416,11 +416,6 @@ def save_bot_files(sender, instance, created, **kwargs):
             post_save.disconnect(save_bot_files, sender=sender)
             instance.save()
             post_save.connect(save_bot_files, sender=sender)
-    else:
-        instance.bot_zip_md5hash = None
-        post_save.disconnect(save_bot_files, sender=sender)
-        instance.save()
-        post_save.connect(save_bot_files, sender=sender)
 
     if instance.bot_data:
         bot_data_hash = calculate_md5_django_filefield(instance.bot_data)
@@ -429,11 +424,6 @@ def save_bot_files(sender, instance, created, **kwargs):
             post_save.disconnect(save_bot_files, sender=sender)
             instance.save()
             post_save.connect(save_bot_files, sender=sender)
-    else:
-        instance.bot_data_md5hash = None
-        post_save.disconnect(save_bot_files, sender=sender)
-        instance.save()
-        post_save.connect(save_bot_files, sender=sender)
 
 
 def match_log_upload_to(instance, filename):
