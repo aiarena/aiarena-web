@@ -2,11 +2,11 @@
 {% load i18n core_filters %}
 
 {% block content %}
- <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
 
-<div id="sidebar_left">
-    <table id="bot_details">
-        <thead>
+    <div id="sidebar_left">
+        <table id="bot_details">
+            <thead>
             <tr>
                 <td><b>Author</b></td>
                 <td><b>Race</b></td>
@@ -17,43 +17,43 @@
                 <td><b>Bot data</b></td>
                 {# Bot author edit link - blank header#}
                 {% if request.user == bot.user %}
-                <td></td>
+                    <td></td>
                 {% endif %}
             </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>{{ bot.user.as_html_link |safe }} </td>
-            <td>{{ bot.get_plays_race_display }}</td>
-            <td>{{ bot.type }} </td>
-            <td>{{ bot.elo }}</td>
-            <td>{{ bot.active }}</td>
-            {% if request.user == bot.user or bot.bot_zip_publicly_downloadable %}
-                <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
-            {% endif %}
-            {% if bot.bot_data%} {# Done with two if statements because templates don't allow parentheses #}
-                {% if request.user == bot.user or bot.bot_data_publicly_downloadable %}
-                    <td><a href="{{ bot.bot_data.url }}">Download</a></td>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ bot.user.as_html_link |safe }} </td>
+                <td>{{ bot.get_plays_race_display }}</td>
+                <td>{{ bot.type }} </td>
+                <td>{{ bot.elo }}</td>
+                <td>{{ bot.active }}</td>
+                {% if request.user == bot.user or bot.bot_zip_publicly_downloadable %}
+                    <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
                 {% endif %}
-            {% endif %}
-            {# Bot author edit link #}
-            {% if request.user == bot.user %}
-                <td>[<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]</td>
-            {% endif %}
-        </tr>
-        </tbody>
-    </table>
-</div>
-<div class="divider"><span></span><span><h2>Stats</h2></span><span></span></div>
-<div id="bot_stats">
-    <table>
-        <thead>
+                {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
+                    {% if request.user == bot.user or bot.bot_data_publicly_downloadable %}
+                        <td><a href="{{ bot.bot_data.url }}">Download</a></td>
+                    {% endif %}
+                {% endif %}
+                {# Bot author edit link #}
+                {% if request.user == bot.user %}
+                    <td>[<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]</td>
+                {% endif %}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="divider"><span></span><span><h2>Stats</h2></span><span></span></div>
+    <div id="bot_stats">
+        <table>
+            <thead>
             <tr>
                 <td><b>Stat</b></td>
                 <td><b>Value</b></td>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             <tr>
                 <td>Win %</td>
                 <td>{{ bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
@@ -70,108 +70,104 @@
                 <td>Last generated</td>
                 <td>{{ bot.statsbots_set.get.generated_at|date:"d. N Y - H:i:s" }}</td>
             </tr>
-        </tbody>
-    </table>
-</div>
-<div id="bot_stats_matchups">
-    <table>
-        <thead>
+            </tbody>
+        </table>
+    </div>
+    <div id="bot_stats_matchups">
+        <table>
+            <thead>
             <tr>
                 <td><b>Opponent</b></td>
                 <td><b>Games</b></td>
                 <td><b>Wins</b></td>
                 <td><b>Win %</b></td>
             </tr>
-        </thead>
-        <tbody>
-        {% for bot_matchup in stats_bot_matchups %}
-            <tr>
-                <td>{{bot_matchup.opponent.as_html_link |safe}}</td>
-                <td>{{bot_matchup.game_count}}</td>
-                <td>{{bot_matchup.win_count}}</td>
-                <td>{{bot_matchup.win_perc|floatformat:2}}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-<div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+            </thead>
+            <tbody>
+            {% for bot_matchup in stats_bot_matchups %}
+                <tr>
+                    <td>{{ bot_matchup.opponent.as_html_link |safe }}</td>
+                    <td>{{ bot_matchup.game_count }}</td>
+                    <td>{{ bot_matchup.win_count }}</td>
+                    <td>{{ bot_matchup.win_perc|floatformat:2 }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
 
- <div id="bot_results">
-    <table>
-        <tbody>
+    <div id="bot_results">
+        <table>
+            <tbody>
             <table>
                 <thead>
-                    <td><b>Match ID</b></td>
-                    <td><b>Date</b></td>
-                    <td><b>Opponent</b></td>
-                    <td><b>Result</b></td>
-                    <td><b>+/-</b></td>
-                    <td><b>Avg Step<br/>(ms)</b></td>
-                    <td><b>Replay</b></td>
-                    {% if request.user == bot.user %}
+                <td><b>Match ID</b></td>
+                <td><b>Date</b></td>
+                <td><b>Opponent</b></td>
+                <td><b>Result</b></td>
+                <td><b>+/-</b></td>
+                <td><b>Avg Step<br/>(ms)</b></td>
+                <td><b>Replay</b></td>
+                {% if request.user == bot.user %}
                     <td><b>Log</b></td>
-                    {% endif %}
+                {% endif %}
                 </thead>
                 {% for result in result_list %}
-                <tr>
-                    <td>{{ result.match.as_html_link |safe }}</td>
-                    <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
-                    <td>{{ result.opponent.bot.as_html_link |safe }}</td>
-                    <td>{{ result.relative_type }}</td>
-                    <td>{{ result.me.elo_change |format_elo_change }}</td>
-                    <td>{{ result.me.avg_step_time|floatformat:2 }}</td>
-                    {% if result.replay_file %}
-                    <td><a href="{{ result.replay_file.url }}">Download</a></td>
-                    {% elif result.replay_file_corruption_detected %}
-                    <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
-                    {% else %}
-                    <td>Unavailable</td>
-                    {% endif %}
-                    {% if request.user == bot.user %}
-                    {% if result.me.match_log %}
-                    <td><a href="{{ result.me.match_log.url }}">Download</a></td>
-                    {% else %}
-                    <td>None</td>
-                    {% endif %}
-                    {% endif %}
-                </tr>
+                    <tr>
+                        <td>{{ result.match.as_html_link |safe }}</td>
+                        <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
+                        <td>{{ result.opponent.bot.as_html_link |safe }}</td>
+                        <td>{{ result.relative_type }}</td>
+                        <td>{{ result.me.elo_change |format_elo_change }}</td>
+                        <td>{{ result.me.avg_step_time|floatformat:2 }}</td>
+                        {% if result.replay_file %}
+                            <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                        {% elif result.replay_file_corruption_detected %}
+                            <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
+                        {% else %}
+                            <td>Unavailable</td>
+                        {% endif %}
+                        {% if request.user == bot.user %}
+                            {% if result.me.match_log %}
+                                <td><a href="{{ result.me.match_log.url }}">Download</a></td>
+                            {% else %}
+                                <td>None</td>
+                            {% endif %}
+                        {% endif %}
+                    </tr>
                 {% endfor %}
             </table>
-     </tbody>
-        <tfoot>
-        <div class="pagination">
-     {% if result_list.has_other_pages %}
-     <ul class="pagination">
-         {% if result_list.has_previous %}
-         <li>
-             <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
-         </li>
-         {% else %}
-         <li class="disabled"><span>&laquo;</span></li>
-         {% endif %}
-         {% for page_num in results_page_range %}
-         {% if result_list.number == page_num %}
-         <li class="active"><span>{{ page_num }}</span></li>
-         {% else %}
-         <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
-         {% endif %}
-         {% endfor %}
-         {% if result_list.has_next %}
-         <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
-         </li>
-         {% else %}
-         <li class="disabled"><span>&raquo;</span></li>
-         {% endif %}
-     </ul>
-     {% endif %}
- </div>
-        </tfoot>
-    </table>
- </div>
-
-
-
-
+            </tbody>
+            <tfoot>
+            <div class="pagination">
+                {% if result_list.has_other_pages %}
+                    <ul class="pagination">
+                        {% if result_list.has_previous %}
+                            <li>
+                                <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
+                            </li>
+                        {% else %}
+                            <li class="disabled"><span>&laquo;</span></li>
+                        {% endif %}
+                        {% for page_num in results_page_range %}
+                            {% if result_list.number == page_num %}
+                                <li class="active"><span>{{ page_num }}</span></li>
+                            {% else %}
+                                <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if result_list.has_next %}
+                            <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
+                            </li>
+                        {% else %}
+                            <li class="disabled"><span>&raquo;</span></li>
+                        {% endif %}
+                    </ul>
+                {% endif %}
+            </div>
+            </tfoot>
+        </table>
+    </div>
 {% endblock %}
 
