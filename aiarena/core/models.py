@@ -374,11 +374,11 @@ _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
 
 # The following methods will temporarily store the bot_zip and bot_data files while we wait for the Bot model to be
 # saved in order to generate an ID, which can then be used in the path for the bot_zip name
+# This needs to happen because we want to use the model ID in the file path, but until the model is saved, it doesn't
+# have an ID.
 @receiver(pre_save, sender=Bot)
 def skip_saving_bot_files(sender, instance, **kwargs):
     # If the Bot model hasn't been created yet (i.e. it's missing its ID) then set any files aside for the time being
-
-
     if not instance.pk and not hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         setattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD, instance.bot_zip)
         instance.bot_zip = None
@@ -388,6 +388,7 @@ def skip_saving_bot_files(sender, instance, **kwargs):
         setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
         instance.bot_data = None
 
+# todo: currently this doesn't wipe the bot_data hash if the data file is being cleared. Ideally it should.
 @receiver(post_save, sender=Bot)
 def save_bot_files(sender, instance, created, **kwargs):
     # bot zip
@@ -409,6 +410,7 @@ def save_bot_files(sender, instance, created, **kwargs):
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
 
+    # Re-calculate the file hashes if required.
     if instance.bot_zip:
         bot_zip_hash = calculate_md5_django_filefield(instance.bot_zip)
         if instance.bot_zip_md5hash != bot_zip_hash:
