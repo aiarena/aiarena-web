@@ -44,59 +44,81 @@
             </tbody>
         </table>
     </div>
-    <div class="divider"><span></span><span><h2>Stats</h2></span><span></span></div>
-    <div id="bot_stats">
-        <table>
-            <thead>
-            <tr>
-                <td><b>Stat</b></td>
-                <td><b>Value</b></td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>Win %</td>
-                <td>{{ bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
-            </tr>
-            <tr>
-                <td>Crash %</td>
-                <td>{{ bot.statsbots_set.get.crash_perc|floatformat:2 }}</td>
-            </tr>
-            <tr>
-                <td>Games</td>
-                <td>{{ bot.statsbots_set.get.game_count }}</td>
-            </tr>
-            <tr>
-                <td>Last generated</td>
-                <td>{{ bot.statsbots_set.get.generated_at|date:"d. N Y - H:i:s" }}</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <div id="bot_stats_matchups">
-        <table>
-            <thead>
-            <tr>
-                <td><b>Opponent</b></td>
-                <td><b>Games</b></td>
-                <td><b>Wins</b></td>
-                <td><b>Win %</b></td>
-            </tr>
-            </thead>
-            <tbody>
-            {% for bot_matchup in stats_bot_matchups %}
-                <tr>
-                    <td>{{ bot_matchup.opponent.as_html_link |safe }}</td>
-                    <td>{{ bot_matchup.game_count }}</td>
-                    <td>{{ bot_matchup.win_count }}</td>
-                    <td>{{ bot_matchup.win_perc|floatformat:2 }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
 
+    <div class="divider"><span></span><span><h2>Stats</h2></span><span></span></div>
+        <div id="bot_stats">
+            <table>
+                <thead>
+                <tr>
+                    <td><b>Stat</b></td>
+                    <td><b>Value</b></td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Win %</td>
+                    {% if bot.statsbots_set.count > 0%}
+                        <td>{{ bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
+                    {% else %}
+                        <td>No stats</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Crash %</td>
+                    {% if bot.statsbots_set.count > 0%}
+                    <td>{{ bot.statsbots_set.get.crash_perc|floatformat:2 }}</td>
+                    {% else %}
+                        <td>No stats</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Games</td>
+                    {% if bot.statsbots_set.count > 0%}
+                    <td>{{ bot.statsbots_set.get.game_count }}</td>
+                    {% else %}
+                        <td>No stats</td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td>Last generated</td>
+                    {% if bot.statsbots_set.count > 0%}
+                    <td>{{ bot.statsbots_set.get.generated_at|date:"d. N Y - H:i:s" }}</td>
+                    {% else %}
+                        <td>No stats</td>
+                    {% endif %}
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="bot_stats_matchups">
+            <table>
+                <thead>
+                <tr>
+                    <td><b>Opponent</b></td>
+                    <td><b>Games</b></td>
+                    <td><b>Wins</b></td>
+                    <td><b>Win %</b></td>
+                </tr>
+                </thead>
+                <tbody>
+                {% if stats_bot_matchups.count > 0 %}
+                    {% for bot_matchup in stats_bot_matchups %}
+                        <tr>
+                            <td>{{ bot_matchup.opponent.as_html_link |safe }}</td>
+                            <td>{{ bot_matchup.game_count }}</td>
+                            <td>{{ bot_matchup.win_count }}</td>
+                            <td>{{ bot_matchup.win_perc|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4">No stats</td>
+                    </tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
         <table>
             <tbody>
@@ -113,30 +135,34 @@
                     <td><b>Log</b></td>
                 {% endif %}
                 </thead>
-                {% for result in result_list %}
-                    <tr>
-                        <td>{{ result.match.as_html_link |safe }}</td>
-                        <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
-                        <td>{{ result.opponent.bot.as_html_link |safe }}</td>
-                        <td>{{ result.relative_type }}</td>
-                        <td>{{ result.me.elo_change |format_elo_change }}</td>
-                        <td>{{ result.me.avg_step_time|floatformat:2 }}</td>
-                        {% if result.replay_file %}
-                            <td><a href="{{ result.replay_file.url }}">Download</a></td>
-                        {% elif result.replay_file_corruption_detected %}
-                            <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
-                        {% else %}
-                            <td>Unavailable</td>
-                        {% endif %}
-                        {% if request.user == bot.user %}
-                            {% if result.me.match_log %}
-                                <td><a href="{{ result.me.match_log.url }}">Download</a></td>
+                {% if result_list.count > 0 %}
+                    {% for result in result_list %}
+                        <tr>
+                            <td>{{ result.match.as_html_link |safe }}</td>
+                            <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
+                            <td>{{ result.opponent.bot.as_html_link |safe }}</td>
+                            <td>{{ result.relative_type }}</td>
+                            <td>{{ result.me.elo_change |format_elo_change }}</td>
+                            <td>{{ result.me.avg_step_time|floatformat:2 }}</td>
+                            {% if result.replay_file %}
+                                <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                            {% elif result.replay_file_corruption_detected %}
+                                <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
                             {% else %}
-                                <td>None</td>
+                                <td>Unavailable</td>
                             {% endif %}
-                        {% endif %}
-                    </tr>
-                {% endfor %}
+                            {% if request.user == bot.user %}
+                                {% if result.me.match_log %}
+                                    <td><a href="{{ result.me.match_log.url }}">Download</a></td>
+                                {% else %}
+                                    <td>None</td>
+                                {% endif %}
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="8">No results</td></tr>
+                {% endif %}
             </table>
             </tbody>
             <tfoot>
