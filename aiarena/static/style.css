@@ -143,40 +143,26 @@ a:hover {
 
 #bot_stats {
     float: left;
-    width: 35.0%;
-}
-
-#bot_stats thead {
-    background-color: rgba(97, 137, 47, 0.7)
-}
-
-#bot_stats table {
-    text-align: justify;
+    width: 32.0%;
     margin-left: 73px;
 }
 
-#bot_stats thead {
-    background-color: rgba(97, 137, 47, 0.7)
+#bot_stats table {
+    margin: 0;
+    padding: 0;
 }
 
 #bot_stats_matchups {
     float: right;
-    width: 65.0%;
+    width: 55.0%;
+    margin: 0 0 0 27px;
 }
 
-#bot_stats_matchups thead {
-    background-color: rgba(97, 137, 47, 0.7)
-}
 
 #bot_stats_matchups table {
-    text-align: justify;
-    margin-right: 73px;
+    margin: 0;
+    padding: 0;
 }
-
-#bot_stats_matchups thead {
-    background-color: rgba(97, 137, 47, 0.7)
-}
-
 
 iframe {
     max-width: 100%;
