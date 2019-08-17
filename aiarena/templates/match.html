@@ -71,7 +71,7 @@
         </tr>
         <tr>
             <td><b>Winner</b></td>
-            {% if match.result and match.result.winner %}
+            {% if match.result.winner %}
                 <td>{{ match.result.winner }}</td>
             {% else %}
                 <td>None</td>
@@ -83,6 +83,16 @@
                 <td>{{ match.result.game_steps }}</td>
             {% else %}
                 <td>None</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <td><b>Replay</b></td>
+            {% if match.result.replay_file %}
+                <td><a href="{{ match.result.replay_file.url }}">Download</a></td>
+            {% elif match.result.replay_file_corruption_detected %}
+                <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
+            {% else %}
+                <td>Unavailable</td>
             {% endif %}
         </tr>
         <tbody>
