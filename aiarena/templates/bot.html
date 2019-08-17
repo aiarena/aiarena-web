@@ -121,49 +121,47 @@
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
         <table>
+            <thead>
+            <td><b>Match ID</b></td>
+            <td><b>Date</b></td>
+            <td><b>Opponent</b></td>
+            <td><b>Result</b></td>
+            <td><b>+/-</b></td>
+            <td><b>Avg Step<br/>(ms)</b></td>
+            <td><b>Replay</b></td>
+            {% if request.user == bot.user %}
+                <td><b>Log</b></td>
+            {% endif %}
+            </thead>
             <tbody>
-            <table>
-                <thead>
-                <td><b>Match ID</b></td>
-                <td><b>Date</b></td>
-                <td><b>Opponent</b></td>
-                <td><b>Result</b></td>
-                <td><b>+/-</b></td>
-                <td><b>Avg Step<br/>(ms)</b></td>
-                <td><b>Replay</b></td>
-                {% if request.user == bot.user %}
-                    <td><b>Log</b></td>
-                {% endif %}
-                </thead>
-                {% if result_list.count > 0 %}
-                    {% for result in result_list %}
-                        <tr>
-                            <td>{{ result.match.as_html_link |safe }}</td>
-                            <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
-                            <td>{{ result.opponent.bot.as_html_link |safe }}</td>
-                            <td>{{ result.relative_type }}</td>
-                            <td>{{ result.me.elo_change |format_elo_change }}</td>
-                            <td>{{ result.me.avg_step_time|floatformat:2 }}</td>
-                            {% if result.replay_file %}
-                                <td><a href="{{ result.replay_file.url }}">Download</a></td>
-                            {% elif result.replay_file_corruption_detected %}
-                                <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
+            {% if result_list.paginator.count > 0 %}
+                {% for result in result_list %}
+                    <tr>
+                        <td>{{ result.match.as_html_link |safe }}</td>
+                        <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
+                        <td>{{ result.opponent.bot.as_html_link |safe }}</td>
+                        <td>{{ result.relative_type }}</td>
+                        <td>{{ result.me.elo_change |format_elo_change }}</td>
+                        <td>{{ result.me.avg_step_time|floatformat:2 }}</td>
+                        {% if result.replay_file %}
+                            <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                        {% elif result.replay_file_corruption_detected %}
+                            <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
+                        {% else %}
+                            <td>Unavailable</td>
+                        {% endif %}
+                        {% if request.user == bot.user %}
+                            {% if result.me.match_log %}
+                                <td><a href="{{ result.me.match_log.url }}">Download</a></td>
                             {% else %}
-                                <td>Unavailable</td>
+                                <td>None</td>
                             {% endif %}
-                            {% if request.user == bot.user %}
-                                {% if result.me.match_log %}
-                                    <td><a href="{{ result.me.match_log.url }}">Download</a></td>
-                                {% else %}
-                                    <td>None</td>
-                                {% endif %}
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr><td colspan="8">No results</td></tr>
-                {% endif %}
-            </table>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td colspan="8">No results</td></tr>
+            {% endif %}
             </tbody>
             <tfoot>
             <div class="pagination">
