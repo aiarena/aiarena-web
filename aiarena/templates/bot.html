@@ -6,22 +6,22 @@
 
 <div id="sidebar_left">
     <table id="bot_details">
+        <thead>
+            <tr>
+                <td><b>Author</b></td>
+                <td><b>Race</b></td>
+                <td><b>Type</b></td>
+                <td><b>ELO</b></td>
+                <td><b>Active</b></td>
+                <td><b>Bot Zip</b></td>
+                <td><b>Bot data</b></td>
+                {# Bot author edit link - blank header#}
+                {% if request.user == bot.user %}
+                <td></td>
+                {% endif %}
+            </tr>
+        </thead>
         <tbody>
-            <thead>
-                <tr>
-                    <td><b>Author</b></td>
-                    <td><b>Race</b></td>
-                    <td><b>Type</b></td>
-                    <td><b>ELO</b></td>
-                    <td><b>Active</b></td>
-                    <td><b>Bot Zip</b></td>
-                    <td><b>Bot data</b></td>
-                    {# Bot author edit link - blank header#}
-                    {% if request.user == bot.user %}
-                    <td></td>
-                    {% endif %}
-                </tr>
-            </thead>
         <tr>
             <td>{{ bot.user.as_html_link |safe }} </td>
             <td>{{ bot.get_plays_race_display }}</td>
@@ -43,10 +43,61 @@
         </tr>
         </tbody>
     </table>
-  </div>
+</div>
+<div class="divider"><span></span><span><h2>Stats</h2></span><span></span></div>
+<div id="bot_stats">
+    <table>
+        <thead>
+            <tr>
+                <td><b>Stat</b></td>
+                <td><b>Value</b></td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Win %</td>
+                <td>{{ bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Crash %</td>
+                <td>{{ bot.statsbots_set.get.crash_perc|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Games</td>
+                <td>{{ bot.statsbots_set.get.game_count }}</td>
+            </tr>
+            <tr>
+                <td>Last generated</td>
+                <td>{{ bot.statsbots_set.get.generated_at|date:"d. N Y - H:i:s" }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div id="bot_stats_matchups">
+    <table>
+        <thead>
+            <tr>
+                <td><b>Opponent</b></td>
+                <td><b>Games</b></td>
+                <td><b>Wins</b></td>
+                <td><b>Win %</b></td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for bot_matchup in stats_bot_matchups %}
+            <tr>
+                <td>{{bot_matchup.opponent.as_html_link |safe}}</td>
+                <td>{{bot_matchup.game_count}}</td>
+                <td>{{bot_matchup.win_count}}</td>
+                <td>{{bot_matchup.win_perc|floatformat:2}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
 
- <div id="bot_results" style="float:right;">
+ <div id="bot_results">
     <table>
         <tbody>
             <table>

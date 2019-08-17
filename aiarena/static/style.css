@@ -133,6 +133,37 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4c4c4c', end
     width: 12.0%;
 }
 
+#bot_stats {
+    float: left;
+    width: 35.0%;
+}
+#bot_stats thead{
+background-color: rgba(97, 137, 47, 0.7)
+}
+#bot_stats table {
+text-align: justify;
+margin-left: 73px;
+}
+#bot_stats thead {
+background-color: rgba(97, 137, 47, 0.7)
+}
+
+#bot_stats_matchups {
+    float: right;
+    width: 65.0%;
+}
+#bot_stats_matchups thead {
+background-color: rgba(97, 137, 47, 0.7)
+}
+#bot_stats_matchups table {
+text-align: justify;
+margin-right: 73px;
+}
+#bot_stats_matchups thead {
+background-color: rgba(97, 137, 47, 0.7)
+}
+
+
 iframe {
     max-width: 100%;
 }
@@ -154,12 +185,12 @@ background: linear-gradient(to right, rgba(76,76,76,0) 0%, rgba(0,0,0,0.4) 50%, 
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4c4c4c', endColorstr='#131313', GradientType=1 );
 }
 
-#float-half-left {
+.float-half-left {
      float: left;
      width: 50%;
 }
 
-#float-half-right {
+.float-half-right {
      float: right;
      width: 50%;
 }
