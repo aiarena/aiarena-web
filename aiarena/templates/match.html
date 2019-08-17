@@ -3,31 +3,88 @@
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Match {{ match.id }}</h2></span><span></span></div>
+    <div style="text-align: center">
+        <h3>
+            {# Highlight the winner #}
+            {% if match.result %}
+                {% if match.result.has_winner or match.result.is_tie %}
+                    ({{ match.participant1.elo_change|format_elo_change }})
+                {% endif %}
+                {% if match.result.winner_participant_number == 1 %}
+                    [{{ match.participant1.bot.as_html_link |safe }}]
+                {% else %}
+                    {{ match.participant1.bot.as_html_link |safe }}
+                {% endif %}
+            {% else %}
+                {{ match.participant1.bot.as_html_link |safe }}
+            {% endif %}
+            - VS -
+            {% if match.result %}
+                {% if match.result.winner_participant_number == 2 %}
+                    [{{ match.participant2.bot.as_html_link |safe }}]
+                {% else %}
+                    {{ match.participant2.bot.as_html_link |safe }}
+                {% endif %}
+                {% if match.result.has_winner or match.result.is_tie %}
+                    ({{ match.participant2.elo_change|format_elo_change }})
+                {% endif %}
+            {% else %}
+                {{ match.participant2.bot.as_html_link |safe }}
+            {% endif %}
+        </h3>
+        <h3>ON {{ match.map }}</h3>
+
+    </div>
     <table style="min-width: 900px; margin: 0 auto;">
         <tbody>
-        <thead>
-            <td><b>Bot 1</b></td>
-            <td><b>Bot 2</b></td>
-            <td><b>Map</b></td>
+        <tr>
             <td><b>Started at</b></td>
+            {% if match.started %}
+                <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
+            {% else %}
+                <td>queued...</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <td><b>Finished at</b></td>
+            {% if match.result %}
+                <td>{{ match.result.created|date:"d. N Y - H:i:s" }}</td>
+            {% else %}
+                <td>None</td>
+            {% endif %}
+        </tr>
+        <tr>
             <td><b>Assigned to</b></td>
-        </thead>
-            <tr>
-                <td>{{ match.participant1.bot.as_html_link |safe }}</td>
-                <td>{{ match.participant2.bot.as_html_link |safe }}</td>
-                <td>{{ match.map }}</td>
-                {% if match.started %}
-                    <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
-                {% else %}
-                    <td>queued...</td>
-                {% endif %}
-                {% if match.assigned_to %}
-                    <td>{{ match.assigned_to }}</td>
-                {% else %}
-                    <td>queued...</td>
-                {% endif %}
-            </tr>
+            {% if match.assigned_to %}
+                <td>{{ match.assigned_to }}</td>
+            {% else %}
+                <td>queued...</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <td><b>Result</b></td>
+            {% if match.result %}
+                <td>{{ match.result.type }}</td>
+            {% else %}
+                <td>None</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <td><b>Winner</b></td>
+            {% if match.result and match.result.winner %}
+                <td>{{ match.result.winner }}</td>
+            {% else %}
+                <td>None</td>
+            {% endif %}
+        </tr>
+        <tr>
+            <td><b>Game Steps</b></td>
+            {% if match.result %}
+                <td>{{ match.result.game_steps }}</td>
+            {% else %}
+                <td>None</td>
+            {% endif %}
+        </tr>
         <tbody>
     </table>
-
 {% endblock %}
