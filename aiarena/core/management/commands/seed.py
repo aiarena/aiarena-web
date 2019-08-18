@@ -90,6 +90,7 @@ def finalize_result(result, p1, p2, bot1, bot2):
 
     result.match.round.update_if_completed()
 
+
 def run_seed(rounds, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@aiarena.net')
 
@@ -127,22 +128,26 @@ def run_seed(rounds, token):
         Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-    for x in range(rounds - 1):  # 4 active bots - 6 games per round
-        match = create_match(devadmin)
-        create_result(match, 'Player1Win', devadmin)
-        match = create_match(devadmin)
-        create_result(match, 'Player2Win', devadmin)
-        match = create_match(devadmin)
-        create_result_with_bot_data_and_logs(match, 'Player1Crash', devadmin)
-        match = create_match(devadmin)
-        create_result(match, 'Player1TimeOut', devadmin)
-        match = create_match(devadmin)
-        create_result_with_bot_data_and_logs(match, 'Tie', devadmin)
-        match = create_match(devadmin)
-        create_result(match, 'Timeout', devadmin)
+    for x in range(rounds - 1):  # 6 active bots - 15 games per round
+        create_result(create_match(devadmin), 'Player1Win', devadmin)  # 1
+        create_result(create_match(devadmin), 'Player2Win', devadmin)  # 2
+        create_result_with_bot_data_and_logs(create_match(devadmin), 'Player1Crash', devadmin)  # 3
+        create_result(create_match(devadmin), 'Player1TimeOut', devadmin)  # 4
+        create_result_with_bot_data_and_logs(create_match(devadmin), 'Tie', devadmin)  # 5
+        create_result(create_match(devadmin), 'Timeout', devadmin)  # 6
+        create_result(create_match(devadmin), 'Player1Win', devadmin)  # 7
+        create_result(create_match(devadmin), 'Player2Win', devadmin)  # 8
+        create_result_with_bot_data_and_logs(create_match(devadmin), 'Player1Crash', devadmin)  # 9
+        create_result(create_match(devadmin), 'Player1TimeOut', devadmin)  # 10
+        create_result_with_bot_data_and_logs(create_match(devadmin), 'Tie', devadmin)  # 11
+        create_result(create_match(devadmin), 'Timeout', devadmin)  # 12
+        create_result(create_match(devadmin), 'Player1Win', devadmin)  # 13
+        create_result(create_match(devadmin), 'Player2Win', devadmin)  # 14
+        create_result_with_bot_data_and_logs(create_match(devadmin), 'Player1Crash', devadmin)  # 15
 
     # one last to tick over into the final round so we don't have an empty match queue
-    create_match(devadmin)
+    if rounds != 0:
+        create_match(devadmin)
 
     return new_token
 
