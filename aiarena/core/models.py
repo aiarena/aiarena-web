@@ -5,7 +5,7 @@ from enum import Enum
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models, transaction, connection
-from django.db.models import Sum, F
+from django.db.models import F
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -16,10 +16,10 @@ from private_storage.fields import PrivateFileField
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
-from aiarena.core.storage import OverwritePrivateStorage
+from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, \
-    ENABLE_ELO_SANITY_CHECK, ELO, TIMEOUT_MATCHES_AFTER, BOT_ZIP_MAX_SIZE
+    ELO, TIMEOUT_MATCHES_AFTER, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +178,6 @@ class Match(models.Model):
         return Match.create(None, Map.random(), bot,
                             opponent if opponent is not None else bot.get_random_available_excluding_self())
 
-
     class CancelResult(Enum):
         SUCCESS = 1
         MATCH_DOES_NOT_EXIST = 3
@@ -223,7 +222,8 @@ class Match(models.Model):
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         # Wrapping the model call here in list() fixes the ordering not being applied.
         # Probably due to Django's lazy evaluation - it forces evaluation thus ensuring the order by is processed
-        for match in list(Match.objects.filter(started__isnull=True).order_by(F('round_id').asc(nulls_last=False), '?')):
+        for match in list(
+                Match.objects.filter(started__isnull=True).order_by(F('round_id').asc(nulls_last=False), '?')):
             if match.start(requesting_user) == Match.StartResult.SUCCESS:
                 return match
         return None
@@ -343,7 +343,7 @@ class Bot(models.Model):
                 started__lt=timezone.now() - TIMEOUT_MATCHES_AFTER, result__isnull=True)
             for match in matches_without_result:
                 Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
-                if match.round is not None: # if the match is part of a round, check for round completion
+                if match.round is not None:  # if the match is part of a round, check for round completion
                     match.round.update_if_completed()
 
     @staticmethod
@@ -355,6 +355,10 @@ class Bot(models.Model):
     @staticmethod
     def active_count():
         return Bot.objects.filter(active=True).count()
+
+    @staticmethod
+    def get_active():
+        return Bot.objects.filter(active=True)
 
     def get_random_available_excluding_self(self):
         if Bot.active_count() <= 1:
@@ -388,6 +392,7 @@ def skip_saving_bot_files(sender, instance, **kwargs):
         setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
         instance.bot_data = None
 
+
 # todo: currently this doesn't wipe the bot_data hash if the data file is being cleared. Ideally it should.
 @receiver(post_save, sender=Bot)
 def save_bot_files(sender, instance, created, **kwargs):
@@ -399,7 +404,6 @@ def save_bot_files(sender, instance, created, **kwargs):
         post_save.connect(save_bot_files, sender=sender)
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_ZIP_FILEFIELD)
-
 
     # bot data
     if created and hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD):
@@ -575,12 +579,18 @@ class Result(models.Model):
         bot2.save()
 
 
+def elo_graph_upload_to(instance, filename):
+    return '/'.join(['graphs', '{0}.png'.format(instance.id)])
+
+
 class StatsBots(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
     win_perc = models.FloatField()
     crash_perc = models.FloatField()
     game_count = models.IntegerField()
     generated_at = models.DateTimeField()
+    elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True,
+                                  null=True)
 
 
 class StatsBotMatchups(models.Model):

@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from django.db import connection
+
+from aiarena.core.stats.stats_generator import StatsGenerator
 
 
 class Command(BaseCommand):
@@ -7,6 +8,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write('Generating stats...')
-        with connection.cursor() as c:
-            c.callproc("generate_stats")
+        StatsGenerator.generate_stats()
         self.stdout.write('Done')

@@ -46,78 +46,85 @@
     </div>
 
     <div class="divider"><span></span><span><h2>Stats</h2></span><span></span></div>
-        <div id="bot_stats">
-            <table>
-                <thead>
-                <tr>
-                    <td><b>Stat</b></td>
-                    <td><b>Value</b></td>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>Win %</td>
-                    {% if bot.statsbots_set.count > 0%}
-                        <td>{{ bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
-                    {% else %}
-                        <td>No stats</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <td>Crash %</td>
-                    {% if bot.statsbots_set.count > 0%}
-                    <td>{{ bot.statsbots_set.get.crash_perc|floatformat:2 }}</td>
-                    {% else %}
-                        <td>No stats</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <td>Games</td>
-                    {% if bot.statsbots_set.count > 0%}
-                    <td>{{ bot.statsbots_set.get.game_count }}</td>
-                    {% else %}
-                        <td>No stats</td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    <td>Last generated</td>
-                    {% if bot.statsbots_set.count > 0%}
-                    <td>{{ bot.statsbots_set.get.generated_at|date:"d. N Y - H:i:s" }}</td>
-                    {% else %}
-                        <td>No stats</td>
-                    {% endif %}
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div id="bot_stats_matchups">
-            <table>
-                <thead>
-                <tr>
-                    <td><b>Opponent</b></td>
-                    <td><b>Games</b></td>
-                    <td><b>Wins</b></td>
-                    <td><b>Win %</b></td>
-                </tr>
-                </thead>
-                <tbody>
-                {% if stats_bot_matchups.count > 0 %}
-                    {% for bot_matchup in stats_bot_matchups %}
-                        <tr>
-                            <td>{{ bot_matchup.opponent.as_html_link |safe }}</td>
-                            <td>{{ bot_matchup.game_count }}</td>
-                            <td>{{ bot_matchup.win_count }}</td>
-                            <td>{{ bot_matchup.win_perc|floatformat:2 }}</td>
-                        </tr>
-                    {% endfor %}
+    <div id="bot_stats">
+        <table>
+            <thead>
+            <tr>
+                <td><b>Stat</b></td>
+                <td><b>Value</b></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>Win %</td>
+                {% if bot.statsbots_set.count > 0 %}
+                    <td>{{ bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
                 {% else %}
-                    <tr>
-                        <td colspan="4">No stats</td>
-                    </tr>
+                    <td>No stats</td>
                 {% endif %}
-                </tbody>
-            </table>
-        </div>
+            </tr>
+            <tr>
+                <td>Crash %</td>
+                {% if bot.statsbots_set.count > 0 %}
+                <td>{{ bot.statsbots_set.get.crash_perc|floatformat:2 }}</td>
+                {% else %}
+                    <td>No stats</td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>Games</td>
+                {% if bot.statsbots_set.count > 0 %}
+                <td>{{ bot.statsbots_set.get.game_count }}</td>
+                {% else %}
+                    <td>No stats</td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>Last generated</td>
+                {% if bot.statsbots_set.count > 0 %}
+                <td>{{ bot.statsbots_set.get.generated_at|date:"d. N Y - H:i:s" }}</td>
+                {% else %}
+                    <td>No stats</td>
+                {% endif %}
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="bot_stats_matchups">
+        <table>
+            <thead>
+            <tr>
+                <td><b>Opponent</b></td>
+                <td><b>Race</b></td>
+                <td><b>Games</b></td>
+                <td><b>Wins</b></td>
+                <td><b>Win %</b></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% if stats_bot_matchups.count > 0 %}
+                {% for bot_matchup in stats_bot_matchups %}
+                    <tr>
+                        <td>{{ bot_matchup.opponent.as_html_link |safe }}</td>
+                        <td>{{ bot_matchup.opponent.get_plays_race_display }}</td>
+                        <td>{{ bot_matchup.game_count }}</td>
+                        <td>{{ bot_matchup.win_count }}</td>
+                        <td>{{ bot_matchup.win_perc|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4">No stats</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+    {% if bot.statsbots_set.count > 0 and bot.statsbots_set.get.elo_graph %}
+    <div id="elo_graph">
+        <img src="{{ stats_bot.elo_graph.url }}" alt="ELOGraph"/>
+    </div>
+    {% endif %}
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
         <table>
