@@ -164,6 +164,12 @@ a:hover {
     padding: 0;
 }
 
+#elo_graph img{
+    margin: 0 0 0 73px;
+    width: 900px;
+    height: auto;
+}
+
 iframe {
     max-width: 100%;
 }
