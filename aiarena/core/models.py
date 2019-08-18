@@ -589,7 +589,7 @@ class StatsBots(models.Model):
     crash_perc = models.FloatField()
     game_count = models.IntegerField()
     generated_at = models.DateTimeField()
-    elo_graph = models.ImageField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(base_url='/'), blank=True,
+    elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True,
                                   null=True)
 
 

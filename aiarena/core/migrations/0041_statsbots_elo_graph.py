@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='statsbots',
             name='elo_graph',
-            field=models.ImageField(blank=True, null=True, storage=aiarena.core.storage.OverwriteStorage(base_url='/'), upload_to=aiarena.core.models.elo_graph_upload_to),
+            field=models.FileField(blank=True, null=True, storage=aiarena.core.storage.OverwriteStorage(), upload_to=aiarena.core.models.elo_graph_upload_to),
         ),
     ]
