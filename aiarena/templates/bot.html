@@ -122,7 +122,7 @@
     </div>
     {% if bot.statsbots_set.count > 0 and bot.statsbots_set.get.elo_graph %}
     <div id="elo_graph">
-        <img src="{{ stats_bot.elo_graph.url }}" alt="ELOGraph"/>
+        <img src="{{ bot.statsbots_set.get.elo_graph.url }}" alt="ELOGraph"/>
     </div>
     {% endif %}
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
