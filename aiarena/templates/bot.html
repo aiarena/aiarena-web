@@ -30,11 +30,15 @@
                 <td>{{ bot.active }}</td>
                 {% if request.user == bot.user or bot.bot_zip_publicly_downloadable %}
                     <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
+                {% else %}
+                    <td>--</td>
                 {% endif %}
                 {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
                     {% if request.user == bot.user or bot.bot_data_publicly_downloadable %}
                         <td><a href="{{ bot.bot_data.url }}">Download</a></td>
                     {% endif %}
+                {% else %}
+                    <td>--</td>
                 {% endif %}
                 {# Bot author edit link #}
                 {% if request.user == bot.user %}
