@@ -150,7 +150,7 @@ def run_seed(rounds, token):
 class Command(BaseCommand):
     help = "Seed database for testing and development."
 
-    _DEFAULT_ROUNDS_TO_GENERATE = 10
+    _DEFAULT_ROUNDS_TO_GENERATE = 20
 
     def add_arguments(self, parser):
         parser.add_argument('--rounds', type=int, help="Number of rounds to generate. Default is {0}.".format(
