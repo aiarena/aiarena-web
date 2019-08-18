@@ -8,12 +8,12 @@ from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import APIException
 from rest_framework.fields import FileField, FloatField
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import LadderDisabled
-from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.core.utils import post_result_to_discord_bot
 
@@ -69,6 +69,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     No reading of models is implemented.
     """
     serializer_class = MatchSerializer
+    permission_classes = [IsAdminUser]
 
     def create_new_match(self, requesting_user):
         match = Match.start_next_match(requesting_user)
@@ -160,6 +161,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     No reading of models is implemented.
     """
     serializer_class = SubmitResultCombinedSerializer
+    permission_classes = [IsAdminUser]
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
