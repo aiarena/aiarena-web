@@ -1,4 +1,5 @@
 from django.core.files import File
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from rest_framework.authtoken.models import Token
 
@@ -163,12 +164,18 @@ class Command(BaseCommand):
         parser.add_argument('--token', type=str,
                             help="Specify the token to use for the arena client."
                                  " Useful to avoid having to reconfigure arena clients in testing")
+        parser.add_argument('--flush', action='store_true', help="Whether to flush the existing database data.")
 
     def handle(self, *args, **options):
-        self.stdout.write('Seeding data...')
 
         if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT \
                 or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING:
+            if options['flush'] is not None:
+                self.stdout.write('Flushing data...')
+                call_command('flush', '--noinput')
+
+            self.stdout.write('Seeding data...')
+
             if options['rounds'] is not None:
                 rounds = options['rounds']
             else:
