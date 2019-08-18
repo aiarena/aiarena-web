@@ -175,34 +175,36 @@
             {% endif %}
             </tbody>
             <tfoot>
-            <div class="pagination">
-                {% if result_list.has_other_pages %}
-                    <ul class="pagination">
-                        {% if result_list.has_previous %}
-                            <li>
-                                <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
-                            </li>
-                        {% else %}
-                            <li class="disabled"><span>&laquo;</span></li>
-                        {% endif %}
-                        {% for page_num in results_page_range %}
-                            {% if result_list.number == page_num %}
-                                <li class="active"><span>{{ page_num }}</span></li>
-                            {% else %}
-                                <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
-                            {% endif %}
-                        {% endfor %}
-                        {% if result_list.has_next %}
-                            <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
-                            </li>
-                        {% else %}
-                            <li class="disabled"><span>&raquo;</span></li>
-                        {% endif %}
-                    </ul>
-                {% endif %}
-            </div>
             </tfoot>
         </table>
+        {# I had to move the pagination outside the above tfoot for now #}
+        {# because it was appearing at the top of the table. Not sure why? #}
+        <div class="pagination">
+            {% if result_list.has_other_pages %}
+                <ul class="pagination">
+                    {% if result_list.has_previous %}
+                        <li>
+                            <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                    {% for page_num in results_page_range %}
+                        {% if result_list.number == page_num %}
+                            <li class="active"><span>{{ page_num }}</span></li>
+                        {% else %}
+                            <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if result_list.has_next %}
+                        <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
 
