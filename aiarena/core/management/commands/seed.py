@@ -159,9 +159,9 @@ class Command(BaseCommand):
     _DEFAULT_ROUNDS_TO_GENERATE = 20
 
     def add_arguments(self, parser):
-        parser.add_argument('--rounds', type=int, help="Number of rounds to generate. Default is {0}.".format(
-            self._DEFAULT_ROUNDS_TO_GENERATE))
-        parser.add_argument('--token', type=str,
+        parser.add_argument('--rounds', type=int, default=self._DEFAULT_ROUNDS_TO_GENERATE,
+                            help="Number of rounds to generate. Default is {0}.".format(self._DEFAULT_ROUNDS_TO_GENERATE))
+        parser.add_argument('--token', type=str, default=None,
                             help="Specify the token to use for the arena client."
                                  " Useful to avoid having to reconfigure arena clients in testing")
         parser.add_argument('--flush', action='store_true', help="Whether to flush the existing database data.")
@@ -176,18 +176,8 @@ class Command(BaseCommand):
 
             self.stdout.write('Seeding data...')
 
-            if options['rounds'] is not None:
-                rounds = options['rounds']
-            else:
-                rounds = self._DEFAULT_ROUNDS_TO_GENERATE
-
-            if options['token'] is not None:
-                token = options['token']
-            else:
-                token = None
-
-            self.stdout.write('Generating {0} round(s)...'.format(rounds))
-            api_token = run_seed(rounds, token)
+            self.stdout.write('Generating {0} round(s)...'.format(options['rounds']))
+            api_token = run_seed(options['rounds'], options['token'])
 
             self.stdout.write('Done. User logins have a password of "x".')
             self.stdout.write('API Token is {0}.'.format(api_token))
