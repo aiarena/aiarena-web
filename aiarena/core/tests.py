@@ -109,34 +109,7 @@ class BaseTestCase(TransactionTestCase):
                                  'replay_file': '',
                                  'game_steps': 500})
 
-
-class LoggedInTestCase(BaseTestCase):
-    def setUp(self):
-        super(LoggedInTestCase, self).setUp()
-
-        self.staffUser1 = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
-                                                   is_staff=True)
-        self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
-                                                     email='regular_user1@aiarena.net')
-
-
-class MatchReadyTestCase(LoggedInTestCase):
-    def setUp(self):
-        super(MatchReadyTestCase, self).setUp()
-
-        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
-        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
-        self.regularUser1Bot2 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
-        self.staffUser1Bot1 = self._create_active_bot(self.staffUser1, 'staffUser1Bot1', 'T')
-        self.staffUser1Bot2 = self._create_active_bot(self.staffUser1, 'staffUser1Bot2', 'Z')
-        self._create_map('testmap1')
-
-
-# Use this to pre-build a fuller dataset for testing
-class FullDataSetTestCase(MatchReadyTestCase):
-
-    def setUp(self):
-        super(FullDataSetTestCase, self).setUp()
+    def _generate_full_data_set(self):
         self.client.login(username='staff_user', password='x')
 
         self._create_map('testmap2')
@@ -217,6 +190,36 @@ class FullDataSetTestCase(MatchReadyTestCase):
                                                      email='regular_user3@aiarena.net')
         self.regularUser4 = User.objects.create_user(username='regular_user4', password='x',
                                                      email='regular_user4@aiarena.net')
+
+
+class LoggedInTestCase(BaseTestCase):
+    def setUp(self):
+        super(LoggedInTestCase, self).setUp()
+
+        self.staffUser1 = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
+                                                   is_staff=True)
+        self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
+                                                     email='regular_user1@aiarena.net')
+
+
+class MatchReadyTestCase(LoggedInTestCase):
+    def setUp(self):
+        super(MatchReadyTestCase, self).setUp()
+
+        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
+        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
+        self.regularUser1Bot2 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
+        self.staffUser1Bot1 = self._create_active_bot(self.staffUser1, 'staffUser1Bot1', 'T')
+        self.staffUser1Bot2 = self._create_active_bot(self.staffUser1, 'staffUser1Bot2', 'Z')
+        self._create_map('testmap1')
+
+
+# Use this to pre-build a fuller dataset for testing
+class FullDataSetTestCase(MatchReadyTestCase):
+    def setUp(self):
+        super(FullDataSetTestCase, self).setUp()
+        self._generate_full_data_set()
+
 
 
 class UtilsTestCase(BaseTestCase):
@@ -480,12 +483,8 @@ class ManagementCommandTests(MatchReadyTestCase):
         for participant in participants:
             self.assertFalse(participant.match_log)
 
-    def test_generategraphs(self):
-        out = StringIO()
-        call_command('generategraphs', stdout=out)
-        self.assertIn('Generating graphs...\nDone', out.getvalue())
-
     def test_generatestats(self):
+        self._generate_full_data_set()
         out = StringIO()
         call_command('generatestats', stdout=out)
         self.assertIn('Generating stats...\nDone', out.getvalue())
@@ -496,6 +495,7 @@ class ManagementCommandTests(MatchReadyTestCase):
         self.assertIn('Successfully requested match. Match ID:', out.getvalue())
 
     def test_reset_elo(self):
+        self._generate_full_data_set()
         # test match successfully cancelled
         self.client.login(username='staff_user', password='x')
         response = self._post_to_matches()
