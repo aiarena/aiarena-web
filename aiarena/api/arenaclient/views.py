@@ -167,6 +167,12 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 
+            logger.critical(
+                "Bot1 avg_step_size: {0}".format(serializer.validated_data.get('bot1_avg_step_time')))
+            logger.critical(
+                "Bot2 avg_step_size: {0}".format(serializer.validated_data.get('bot2_avg_step_time')))
+
+
             # validate result
             result = SubmitResultResultSerializer(data={'match': serializer.validated_data['match'],
                                                         'type': serializer.validated_data['type'],
