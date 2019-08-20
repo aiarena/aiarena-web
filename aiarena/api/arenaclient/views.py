@@ -13,9 +13,9 @@ from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import LadderDisabled
-from aiarena.core.exceptions import BotNotInMatchException
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.core.utils import post_result_to_discord_bot
+from aiarena.core.validators import validate_not_inf, validate_not_nan
 
 logger = logging.getLogger(__name__)
 
@@ -150,8 +150,8 @@ class SubmitResultCombinedSerializer(serializers.Serializer):
     # Participant
     bot1_log = FileField(required=False)
     bot2_log = FileField(required=False)
-    bot1_avg_step_time = FloatField(required=False)
-    bot2_avg_step_time = FloatField(required=False)
+    bot1_avg_step_time = FloatField(required=False, validators=[validate_not_nan, validate_not_inf])
+    bot2_avg_step_time = FloatField(required=False, validators=[validate_not_nan, validate_not_inf])
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -172,14 +172,14 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             logger.critical(
                 "Bot2 avg_step_size: {0}".format(serializer.validated_data.get('bot2_avg_step_time')))
 
-
             # validate result
             result = SubmitResultResultSerializer(data={'match': serializer.validated_data['match'],
                                                         'type': serializer.validated_data['type'],
                                                         'replay_file': serializer.validated_data.get('replay_file'),
                                                         'game_steps': serializer.validated_data['game_steps'],
                                                         'submitted_by': serializer.validated_data['submitted_by'].pk,
-                                                        'arenaclient_log': serializer.validated_data.get('arenaclient_log')})
+                                                        'arenaclient_log': serializer.validated_data.get(
+                                                            'arenaclient_log')})
             result.is_valid(raise_exception=True)
 
             # validate participants
@@ -256,7 +256,5 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         else:
             raise LadderDisabled()
 
-
-    # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form
     # todo: avoid results being logged against matches not owned by the submitter

@@ -18,6 +18,7 @@ from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, N
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
+from aiarena.core.validators import validate_not_nan, validate_not_inf
 from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, \
     ELO, TIMEOUT_MATCHES_AFTER, BOT_ZIP_MAX_SIZE
 
@@ -444,7 +445,7 @@ class Participant(models.Model):
     elo_change = models.SmallIntegerField(null=True)
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                  blank=True, null=True)
-    avg_step_time = models.FloatField(blank=True, null=True)
+    avg_step_time = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo
@@ -585,18 +586,18 @@ def elo_graph_upload_to(instance, filename):
 
 class StatsBots(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
-    win_perc = models.FloatField()
-    crash_perc = models.FloatField()
+    win_perc = models.FloatField(validators=[validate_not_nan, validate_not_inf])
+    crash_perc = models.FloatField(validators=[validate_not_nan, validate_not_inf])
     game_count = models.IntegerField()
     generated_at = models.DateTimeField()
     elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True,
-                                  null=True)
+                                 null=True)
 
 
 class StatsBotMatchups(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
     opponent = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='opponent_stats')
-    win_perc = models.FloatField()
+    win_perc = models.FloatField(validators=[validate_not_nan, validate_not_inf])
     win_count = models.IntegerField()
     game_count = models.IntegerField()
     generated_at = models.DateTimeField()
