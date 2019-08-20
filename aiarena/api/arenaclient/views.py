@@ -1,6 +1,7 @@
 import logging
 from wsgiref.util import FileWrapper
 
+from constance import config
 from django.db import transaction
 from django.db.models import Sum, F
 from django.http import HttpResponse
@@ -80,7 +81,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def create(self, request, *args, **kwargs):
-        if settings.LADDER_ENABLED:
+        if config.LADDER_ENABLED:
             if settings.REISSUE_UNFINISHED_MATCHES:
                 # Check for any unfinished matches assigned to this user. If any are present, return that.
                 unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user,

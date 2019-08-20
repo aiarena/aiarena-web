@@ -1,0 +1,2 @@
+django-constance[redis]
+redis==3.3.8

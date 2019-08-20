@@ -80,6 +80,8 @@ INSTALLED_APPS = [
     'wiki.plugins.images.apps.ImagesConfig',
     'wiki.plugins.macros.apps.MacrosConfig',
     'wiki.plugins.help.apps.HelpConfig',
+    'constance',
+    'constance.backends.database',
 ]
 
 MIDDLEWARE = [
@@ -132,6 +134,16 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 100
+}
+
+# Constance https://github.com/jazzband/django-constance
+
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+# This is the dynamic config, update-able during runtime
+CONSTANCE_CONFIG = {
+    'LADDER_ENABLED': (
+    True, 'Whether the ladder is currently enabled. This will control whether matches are run or not.'),
 }
 
 LOGGING = {
@@ -279,9 +291,6 @@ AVATAR_AUTO_GENERATE_SIZES = (150,)
 AVATAR_THUMB_FORMAT = 'PNG'
 
 ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
-
-# whether to run matches
-LADDER_ENABLED = True
 
 # django wiki
 WIKI_ACCOUNT_HANDLING = True
