@@ -7,6 +7,9 @@ from subprocess import run
 
 from aiarena.settings import ENVIRONMENT_TYPE
 
+_LOCAL_DIRECTORY = os.path.dirname(__file__)
+_STANDARD_REQUIREMENTS_FILE = os.path.join(_LOCAL_DIRECTORY, "requirements.txt")
+_ENVIRONMENT_REQUIREMENTS_FILE = os.path.join(_LOCAL_DIRECTORY, f"requirements.{ENVIRONMENT_TYPE.name}.txt")
 _DEFAULT_PIP_BINARY = "pip3"
 
 # Require Python 3.7
@@ -26,11 +29,11 @@ def verify_python_version():
 
 
 def run_install(pip_binary_name):
-    run(pip_binary_name + " install -r requirements.txt --no-input", shell=True, check=True)
+    # requirements - standard across all environments
+    run(pip_binary_name + " install -r " + _STANDARD_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
-    # environment specific requirements
-    run(pip_binary_name + " install -r requirements." + ENVIRONMENT_TYPE.name + ".txt --no-input", shell=True,
-        check=True)
+    # environment type specific requirements
+    run(pip_binary_name + " install -r " + _ENVIRONMENT_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
 
 if __name__ == "__main__":
