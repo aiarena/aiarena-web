@@ -2,6 +2,7 @@ import logging
 import uuid
 from enum import Enum
 
+from constance import config
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models, transaction, connection
@@ -19,8 +20,7 @@ from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchExc
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_not_nan, validate_not_inf
-from aiarena.settings import ELO_START_VALUE, MAX_USER_BOT_COUNT, MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, \
-    ELO, TIMEOUT_MATCHES_AFTER, BOT_ZIP_MAX_SIZE
+from aiarena.settings import ELO_START_VALUE, ELO, TIMEOUT_MATCHES_AFTER, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
 
@@ -288,17 +288,17 @@ class Bot(models.Model):
         # if there is already an active bot for this user playing the same race, and this bot is also marked as active
         # then back out
         if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
-                id=self.id).count() >= MAX_USER_BOT_COUNT_ACTIVE_PER_RACE \
+                id=self.id).count() >= config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE \
                 and self.active:
             raise ValidationError(
                 'Too many active bots playing that race already exist for this user.'
-                ' Each user can only have ' + str(MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
+                ' Each user can only have ' + str(config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
 
     def validate_max_bot_count(self):
-        if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= MAX_USER_BOT_COUNT:
+        if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
             raise ValidationError(
                 'Maximum bot count of {0} already reached. No more bots may be added for this user.'.format(
-                    MAX_USER_BOT_COUNT))
+                    config.MAX_USER_BOT_COUNT))
 
     def clean(self):
         self.validate_max_bot_count()

@@ -1,3 +1,4 @@
+from constance import config
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -38,8 +39,8 @@ class UserProfile(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context = super(UserProfile, self).get_context_data(**kwargs)
         # Add in the user's bots
         context['bot_list'] = self.request.user.bots.all()
-        context['max_user_bot_count'] = settings.MAX_USER_BOT_COUNT
-        context['max_active_per_race_bot_count'] = settings.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
+        context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
+        context['max_active_per_race_bot_count'] = config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
         return context
 
 

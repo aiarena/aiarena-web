@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from io import StringIO
 
+from constance import config
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -13,7 +14,6 @@ from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, Participant
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import MAX_USER_BOT_COUNT
 
 
 class BaseTestCase(TransactionTestCase):
@@ -258,12 +258,12 @@ class BotTestCase(LoggedInTestCase):
         self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip_backup'.format(bot1.id)))
 
         # test max bots for user
-        for i in range(1, MAX_USER_BOT_COUNT):
+        for i in range(1, config.MAX_USER_BOT_COUNT):
             self._create_bot(self.regularUser1, 'testbot{0}'.format(i))
         with self.assertRaisesMessage(ValidationError,
                                       'Maximum bot count of {0} already reached. '
-                                      'No more bots may be added for this user.'.format(MAX_USER_BOT_COUNT)):
-            self._create_bot(self.regularUser1, 'testbot{0}'.format(MAX_USER_BOT_COUNT))
+                                      'No more bots may be added for this user.'.format(config.MAX_USER_BOT_COUNT)):
+            self._create_bot(self.regularUser1, 'testbot{0}'.format(config.MAX_USER_BOT_COUNT))
 
         # test active bots per race limit for user
         # all bots should be the same race, so just pick any

@@ -145,6 +145,12 @@ CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
     'LADDER_ENABLED': (
     True, 'Whether the ladder is currently enabled. This will control whether matches are run or not.'),
+    'MAX_USER_BOT_COUNT': (2, 'Maximum bots a user can have uploaded.'),
+    'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE': (1, 'Maximum active bots a user can have per race.'),
+    'MAX_ACTIVE_ROUNDS': (1, 'The maximum rounds the ladder can run simultaneously. '
+                             'The ladder will stop generating new rounds once this number '
+                             'is reached until previous active rounds are finished off.'),
+    'BOT_ZIP_MAX_SIZE_MB': (1, 'Maximum active bots a user can have per race.'),
 }
 
 LOGGING = {
@@ -260,13 +266,6 @@ REISSUE_UNFINISHED_MATCHES = True
 
 # ELO implementation
 ELO = Elo(ELO_K)
-
-MAX_USER_BOT_COUNT = 6
-MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
-
-# The maximum active rounds allowed at any one time.
-# The ladder will stop generating new rounds once this number is reached until previous active rounds are finished off.
-MAX_ACTIVE_ROUNDS = 2
 
 # For convenience
 BOT_ZIP_MAX_SIZE_MB = 50
