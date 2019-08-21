@@ -47,11 +47,14 @@ def post_result_to_discord_bot(result):
             wl_bots = result.get_winner_loser_bots()
             json = { # todo: nested json
                 'match_id': result.match_id,
+                'round_id': result.match.round_id,
                 'bot1': bots[0].name,
+                'bot1_id': bots[0].id,
                 'bot1_resultant_elo': participants[0].resultant_elo,
                 'bot1_elo_change': participants[0].elo_change,
                 'bot1_avg_step_time': participants[0].avg_step_time,
                 'bot2': bots[1].name,
+                'bot2_id': bots[1].id,
                 'bot2_resultant_elo': participants[1].resultant_elo,
                 'bot2_elo_change': participants[1].elo_change,
                 'bot2_avg_step_time': participants[1].avg_step_time,
