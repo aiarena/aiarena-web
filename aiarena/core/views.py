@@ -209,6 +209,11 @@ class Results(View):
         return render(request, 'results.html', context)
 
 
+class RoundDetail(DetailView):
+    model = Round
+    template_name = 'round.html'
+
+
 class BotZipDownloadView(PrivateStorageDetailView):
     model = Bot
     model_file_field = 'bot_zip'
@@ -255,7 +260,7 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 
 
 class Index(ListView):
-    queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]
+    queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]  # top 10 bots
     template_name = 'index.html'
 
 
@@ -263,7 +268,7 @@ class MatchQueue(View):
     def get(self, request):
         # Matches without a round are requested ones
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
-                F('started').asc(nulls_last=True), F('id').asc())
+            F('started').asc(nulls_last=True), F('id').asc())
         for match in requested_matches:
             match.participant1 = match.participant_set.get(participant_number=1)
             match.participant2 = match.participant_set.get(participant_number=2)

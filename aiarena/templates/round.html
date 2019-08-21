@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<div class="divider"><span></span><span><h2>Round {{ round.id }}</h2></span><span></span></div>
+<table id="round_table" style="min-width: 900px; margin: 0 auto;">
+    <tr>
+        <td><b>Started at</b></td>
+        <td><b>Finished at</b></td>
+    </tr>
+    <tr>
+        <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
+        <td>{{ round.finished|date:"d. N Y - H:i:s" }}</td>
+    </tr>
+</table>
+<br>
+<div class="divider"><span></span><span><h2>Matches</h2></span><span></span></div>
+<table id="matches_table" style="min-width: 900px; margin: 0 auto;">
+    <tbody>
+    <thead>
+        <td><b>Match ID</b></td>
+        <td><b>Bot 1</b></td>
+        <td><b>Bot 2</b></td>
+        <td><b>Map</b></td>
+        <td><b>Started at</b></td>
+        <td><b>Finished at</b></td>
+        <td><b>Assigned to</b></td>
+    </thead>
+    {% for match in round.match_set.all %}
+        <tr>
+            <td>{{ match.as_html_link |safe }}</td>
+            <td>{{ match.get_participant1.bot.as_html_link |safe }}</td>
+            <td>{{ match.get_participant2.bot.as_html_link |safe }}</td>
+            <td>{{ match.map }}</td>
+            {% if match.started %}
+                <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
+            {% else %}
+                <td>queued...</td>
+            {% endif %}
+            {% if match.finished %}
+                <td>{{ match.finished|date:"d. N Y - H:i:s" }}</td>
+            {% elif match.started %}
+                <td>started...</td>
+            {% else %}
+                <td>queued...</td>
+            {% endif %}
+            {% if match.assigned_to %}
+                <td>{{ match.assigned_to }}</td>
+            {% else %}
+                <td>queued...</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    <tbody>
+</table>
+{% endblock %}

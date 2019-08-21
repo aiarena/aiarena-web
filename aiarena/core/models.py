@@ -104,6 +104,12 @@ class Match(models.Model):
             else:
                 return Match.StartResult.FAIL_ALREADY_STARTED
 
+    def get_participant1(self):
+        return Participant.objects.get(match=self, participant_number=1)
+
+    def get_participant2(self):
+        return Participant.objects.get(match=self, participant_number=2)
+
     @staticmethod
     def _queue_round_robin_matches_for_all_active_bots():
         if Map.objects.count() == 0:

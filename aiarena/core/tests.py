@@ -11,7 +11,7 @@ from django.utils import timezone
 
 from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, Participant
+from aiarena.core.models import User, Bot, Map, Match, Result, Participant, Round
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import MAX_USER_BOT_COUNT
 
@@ -339,7 +339,7 @@ class PageRenderTestCase(FullDataSetTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_match_page(self):
-        response = self.client.get('/matches/{0}/'.format(Match.objects.all()[0]))
+        response = self.client.get('/matches/{0}/'.format(Match.objects.all()[0].id))
         self.assertEqual(response.status_code, 200)
 
     def test_get_ranking_page(self):
@@ -372,6 +372,10 @@ class PageRenderTestCase(FullDataSetTestCase):
 
     def test_get_match_queue_page(self):
         response = self.client.get('/match-queue/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_round_page(self):
+        response = self.client.get('/rounds/{0}/'.format(Round.objects.all()[0].id))
         self.assertEqual(response.status_code, 200)
 
 
