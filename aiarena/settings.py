@@ -138,6 +138,7 @@ REST_FRAMEWORK = {
 
 # Constance https://github.com/jazzband/django-constance
 
+# Use the database backend in dev for ease of use. We will use Redis in staging/prod.
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
 # This is the dynamic config, update-able during runtime
