@@ -151,7 +151,6 @@ CONSTANCE_CONFIG = {
     'MAX_ACTIVE_ROUNDS': (1, 'The maximum rounds the ladder can run simultaneously. '
                              'The ladder will stop generating new rounds once this number '
                              'is reached until previous active rounds are finished off.'),
-    'BOT_ZIP_MAX_SIZE_MB': (1, 'Maximum active bots a user can have per race.'),
 }
 
 LOGGING = {
