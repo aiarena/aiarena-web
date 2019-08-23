@@ -81,7 +81,7 @@ INSTALLED_APPS = [
     'wiki.plugins.macros.apps.MacrosConfig',
     'wiki.plugins.help.apps.HelpConfig',
     'constance',
-    'constance.backends.database',
+    'constance.backends.database',  # this should be removed by any env.py file overriding the constance backend
 ]
 
 MIDDLEWARE = [
@@ -137,7 +137,8 @@ REST_FRAMEWORK = {
 }
 
 # Constance https://github.com/jazzband/django-constance
-
+# !IMPORTANT! If you override this setting in an env.py,
+# don't forget to remove 'constance.backends.database' from the INSTALLED_APPS array
 # Use the database backend in dev for ease of use. We will use Redis in staging/prod.
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
