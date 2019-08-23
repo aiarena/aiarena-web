@@ -65,7 +65,7 @@ class Round(models.Model):
 
     @staticmethod
     def max_active_rounds_reached():
-        return Round.objects.filter(complete=False).count() >= settings.MAX_ACTIVE_ROUNDS
+        return Round.objects.filter(complete=False).count() >= config.MAX_ACTIVE_ROUNDS
 
 
 # todo: structure for separate ladder types

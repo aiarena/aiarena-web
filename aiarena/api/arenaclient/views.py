@@ -164,7 +164,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
-        if settings.LADDER_ENABLED:
+        if config.LADDER_ENABLED:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
 

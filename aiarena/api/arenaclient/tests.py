@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 
+from constance import config
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -180,7 +181,7 @@ class MatchesTestCase(LoggedInTestCase):
     def test_max_active_rounds(self):
         # we don't want to have to create lots of arenaclients for multiple matches
         settings.REISSUE_UNFINISHED_MATCHES = False
-        settings.MAX_ACTIVE_ROUNDS = 2
+        config.MAX_ACTIVE_ROUNDS = 2
 
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
