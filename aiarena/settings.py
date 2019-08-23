@@ -145,17 +145,21 @@ CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 # This is the dynamic config, update-able during runtime
 CONSTANCE_CONFIG = {
     'LADDER_ENABLED': (
-    True, 'Whether the ladder is currently enabled. This will control whether matches are run or not.'),
+        True, 'Whether the ladder is currently enabled. This will control whether matches are run or not.'),
     'MAX_ACTIVE_ROUNDS': (1, 'The maximum rounds the ladder can run simultaneously. '
                              'The ladder will stop generating new rounds once this number '
                              'is reached until previous active rounds are finished off.'),
     'MAX_USER_BOT_COUNT': (2, 'Maximum bots a user can have uploaded.'),
     'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE': (1, 'Maximum active bots a user can have per race.'),
+    'ARENACLIENT_DEBUG_ENABLED': (False, 'Enable debugging for arena clients. '
+                                         'This will log extra data in the arena client API. '
+                                         'It will also propagate the setting to the arena clients'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
+    'Bot Options': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
+    'General Options': ('ARENACLIENT_DEBUG_ENABLED',),
     'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS'),
-    'Bot Options': ('MAX_USER_BOT_COUNT','MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
 }
 
 LOGGING = {
