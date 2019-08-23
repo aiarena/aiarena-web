@@ -168,38 +168,28 @@ LOGGING = {
         },
     },
     'handlers': {
-        'warning-file': {
+        'django-file': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': './logs/django-warning.log',
+            'filename': './logs/django.log',
             'formatter': 'verbose',
         },
-        'critical-file': {
-            'level': 'ERROR',
+        'aiarena-file': {
+            'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': './logs/django-critical.log',
+            'filename': './logs/aiarena.log',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['warning-file'],
+            'handlers': ['django-file'],
             'level': 'WARNING',
             'propagate': True,
         },
         'aiarena': {
-            'handlers': ['warning-file'],
+            'handlers': ['aiarena-file'],
             'level': 'WARNING',
-            'propagate': True,
-        },
-        'django': {
-            'handlers': ['critical-file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'aiarena': {
-            'handlers': ['critical-file'],
-            'level': 'ERROR',
             'propagate': True,
         },
     },
