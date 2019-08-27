@@ -146,6 +146,9 @@ CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 CONSTANCE_CONFIG = {
     'LADDER_ENABLED': (
         True, 'Whether the ladder is currently enabled. This will control whether matches are run or not.'),
+    'TIMEOUT_MATCHES_AFTER': (
+        timedelta(hours=1),
+        'How long to wait before the website should time out a running match.', timedelta),
     'MAX_ACTIVE_ROUNDS': (1, 'The maximum rounds the ladder can run simultaneously. '
                              'The ladder will stop generating new rounds once this number '
                              'is reached until previous active rounds are finished off.'),
@@ -159,7 +162,7 @@ CONSTANCE_CONFIG = {
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bot Options': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
     'General Options': ('ARENACLIENT_DEBUG_ENABLED',),
-    'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS'),
+    'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',),
 }
 
 LOGGING = {
@@ -270,9 +273,6 @@ ELO = Elo(ELO_K)
 BOT_ZIP_MAX_SIZE_MB = 50
 # this is the setting that actually dictates the max zip size
 BOT_ZIP_MAX_SIZE = 1024 * 1024 * BOT_ZIP_MAX_SIZE_MB
-
-# how long to wait before the website should time out a running match
-TIMEOUT_MATCHES_AFTER = timedelta(hours=1)
 
 # This will post results received to another webserver
 # if this is None, it is disabled
