@@ -400,7 +400,7 @@ AVATAR_AUTO_GENERATE_SIZES = (150,)
 AVATAR_THUMB_FORMAT = 'PNG'
 
 AVATAR_GRAVATAR_FORCEDEFAULT = False
-AVATAR_DEFAULT_URL = "/avatar/img/default.jpg"
+AVATAR_DEFAULT_URL = "/static/img/default_avatar.jpg"
 
 AVATAR_PROVIDERS = (
     'avatar.providers.PrimaryAvatarProvider',
