@@ -12,7 +12,7 @@
 
 3. Install python modules
     ```
-    pip install -r requirements.txt
+    python ./pip/pip-install.py
     ```
 
 4. Modify the Website config to use your Database.  
