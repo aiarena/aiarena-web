@@ -24,7 +24,6 @@
 5. Initialize Website DB:
     ```
     python manage.py migrate
-    python manage.py makemigrations
     ```
 
 6. Create static files
