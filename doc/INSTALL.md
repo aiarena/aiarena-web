@@ -1,6 +1,6 @@
 # Install
 
-1. Install python 3.7. We suggest using a virtual environment if you know how.
+1. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
 
 2. Install MySQL and create a Database and a User who can access it  
     Using SQL:
