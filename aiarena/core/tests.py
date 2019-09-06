@@ -357,10 +357,6 @@ class PageRenderTestCase(FullDataSetTestCase):
         response = self.client.get('/results/')
         self.assertEqual(response.status_code, 200)
 
-    def test_get_rules_page(self):
-        response = self.client.get('/rules/')
-        self.assertEqual(response.status_code, 200)
-
     def test_get_login_page(self):
         response = self.client.get('/accounts/login/')
         self.assertEqual(response.status_code, 200)
