@@ -474,9 +474,11 @@ class Result(models.Model):
         ('Player1Win', 'Player1Win'),
         ('Player1Crash', 'Player1Crash'),
         ('Player1TimeOut', 'Player1TimeOut'),
+        ('Player1RaceMismatch', 'Player1RaceMismatch'),
         ('Player2Win', 'Player2Win'),
         ('Player2Crash', 'Player2Crash'),
         ('Player2TimeOut', 'Player2TimeOut'),
+        ('Player2RaceMismatch', 'Player2RaceMismatch'),
         ('Tie', 'Tie'),
         ('Error', 'Error'),
     )
