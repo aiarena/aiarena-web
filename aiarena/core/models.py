@@ -461,6 +461,9 @@ class Participant(models.Model):
         return self.bot.name
 
 
+def replay_file_upload_to(instance, filename):
+    return '/'.join(['replays', f'{instance.match_id}_{instance.match.get_participant1().bot.name}vs{instance.match.get_participant2().bot.name}_{instance.match.map.name}.SC2Replay'])
+
 def arenaclient_log_upload_to(instance, filename):
     return '/'.join(['arenaclient-logs', '{0}_arenaclientlog.zip'.format(instance.match_id)])
 
@@ -486,7 +489,7 @@ class Result(models.Model):
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
     type = models.CharField(max_length=32, choices=TYPES)
     created = models.DateTimeField(auto_now_add=True)
-    replay_file = models.FileField(upload_to='replays', blank=True, null=True)
+    replay_file = models.FileField(upload_to=replay_file_upload_to, blank=True, null=True)
     game_steps = models.IntegerField()
     submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     arenaclient_log = models.FileField(upload_to=arenaclient_log_upload_to, blank=True, null=True)
