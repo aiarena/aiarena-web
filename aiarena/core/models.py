@@ -19,7 +19,7 @@ from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, N
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
-from aiarena.core.validators import validate_not_nan, validate_not_inf
+from aiarena.core.validators import validate_not_nan, validate_not_inf, is_valid_bot_name
 from aiarena.settings import ELO_START_VALUE, ELO, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
@@ -266,7 +266,7 @@ class Bot(models.Model):
         ('python', 'python'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, unique=True, validators=[is_valid_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
