@@ -14,12 +14,11 @@ from django.utils import timezone
 from django.utils.html import escape
 from private_storage.fields import PrivateFileField
 
-from aiarena import settings
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
-from aiarena.core.validators import validate_not_nan, validate_not_inf, is_valid_bot_name
+from aiarena.core.validators import validate_not_nan, validate_not_inf, validate_bot_name, validate_bot_zip_file
 from aiarena.settings import ELO_START_VALUE, ELO, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
@@ -266,7 +265,7 @@ class Bot(models.Model):
         ('python', 'python'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
-    name = models.CharField(max_length=50, unique=True, validators=[is_valid_bot_name, ])
+    name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
@@ -275,7 +274,7 @@ class Bot(models.Model):
                                       related_name='bots_currently_in_match')
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
-                               max_file_size=BOT_ZIP_MAX_SIZE)
+                               max_file_size=BOT_ZIP_MAX_SIZE, validators=[validate_bot_zip_file, ])
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     bot_zip_publicly_downloadable = models.BooleanField(default=False)
     # todo: set a file size limit which will be checked on result submission
@@ -377,6 +376,25 @@ class Bot(models.Model):
 
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
+    def expected_executable_filename(self):
+        """
+        The expected file name that should be run to start the bot.
+        e.g. for a cpp binary bot, this would be Bot.exe
+        :return:
+        """
+        if self.type == 'cppwin32':
+            return f'{self.name}.exe'
+        elif self.type == 'cpplinux':
+            return self.name
+        elif self.type == 'dotnetcore':
+            return f'{self.name}.dll'
+        elif self.type == 'java':
+            return f'{self.name}.jar'
+        elif self.type == 'nodejs':
+            return f'{self.name}.js'
+        elif self.type == 'python':
+            return 'run.py'
 
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
