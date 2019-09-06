@@ -26,6 +26,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('admin/', admin.site.urls),
                   url(r'^accounts/', include('registration.backends.default.urls')),
                   url(r'^accounts/', include('django.contrib.auth.urls')),
+                  url(r'^$', core_views.Index.as_view(), name='home'),
                   # path('rules/', TemplateView.as_view(template_name='rules.html'), name='rules'),
                   url('corrupt-replays', TemplateView.as_view(template_name='corrupt_replays.html'), name='corrupt_replays'),
                   path('api/', include('aiarena.api.urls')),
