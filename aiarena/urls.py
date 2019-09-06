@@ -22,7 +22,7 @@ from django.views.generic.base import TemplateView
 
 from aiarena.core import views as core_views
 
-urlpatterns = [
+urlpatterns = [  # todo: replace usage of url with path for all these
                   path('admin/', admin.site.urls),
                   url(r'^accounts/', include('registration.backends.default.urls')),
                   url(r'^accounts/', include('django.contrib.auth.urls')),
