@@ -142,7 +142,7 @@
             <td><b>+/-</b></td>
             <td><b>Avg Step<br/>(ms)</b></td>
             <td><b>Replay</b></td>
-            {% if request.user == bot.user %}
+            {% if request.user == bot.user or request.user.is_staff %}
                 <td><b>Log</b></td>
             {% endif %}
             </thead>
@@ -163,7 +163,7 @@
                         {% else %}
                             <td>Unavailable</td>
                         {% endif %}
-                        {% if request.user == bot.user %}
+                        {% if request.user == bot.user or request.user.is_staff %}
                             {% if result.me.match_log %}
                                 <td><a href="{{ result.me.match_log.url }}">Download</a></td>
                             {% else %}
