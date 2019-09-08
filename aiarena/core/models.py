@@ -39,15 +39,23 @@ class Map(models.Model):
 
 
 class User(AbstractUser):
+    PATREON_LEVELS = (
+        ('None', 'None'),
+        ('Bronze', 'Bronze'),
+        ('Silver', 'Silver'),
+        ('Gold', 'Gold'),
+        ('Platinum', 'Platinum'),
+        ('Diamond', 'Diamond'),
+    )
     email = models.EmailField(unique=True)
     service_account = models.BooleanField(default=False)
+    patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='None')
 
     def get_absolute_url(self):
         return reverse('author', kwargs={'pk': self.pk})
 
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
-
 
 class Round(models.Model):
     started = models.DateTimeField(auto_now_add=True)
