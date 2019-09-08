@@ -245,6 +245,10 @@ SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts")
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 DEFAULT_FROM_EMAIL = 'noreply@localhost'
 
+# Save emails to file by default. This will be overridden in production.
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = './tmp/emails'
+
 # Redirect to index page on login/logout
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
