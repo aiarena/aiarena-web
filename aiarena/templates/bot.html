@@ -1,7 +1,19 @@
 {% extends "base.html" %}
 {% load i18n core_filters %}
 
+
 {% block content %}
+<div class="bot_anker">
+    <div class="anker_header"><i class="material-icons">swap_vert</i><h3>Go to:</h3></div>
+    <div><a href="#bot_top_anker"><b>Top</b></a></div>
+    <div><a href="#bot_stats_anker"><b>Stats</b></a></div>
+    <div><a href="#elo_graph_anker"><b>ELO <br/>over time</b></a></div>
+    <div><a href="#bot_results_anker"><b>Results</b></a></div>
+</div>
+
+
+
+    <div id="bot_top_anker"></div>
     <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
 
     <div id="sidebar_left">
@@ -51,6 +63,8 @@
         </table>
     </div>
 
+
+    <div id="bot_stats_anker"></div>
     <div class="divider"><span></span><span><h2>Stats</h2></span><span></span></div>
     <div id="bot_stats">
         <table>
@@ -125,13 +139,17 @@
             {% endif %}
             </tbody>
         </table>
+        <br/>
     </div>
+<div id="elo_graph_anker"></div>
+<div class="divider"><span></span><span><h2>ELO over time</h2></span><span></span></div>
     {% if bot.statsbots_set.count > 0 and bot.statsbots_set.get.elo_graph %}
     <div id="elo_graph">
         <img src="{{ bot.statsbots_set.get.elo_graph.url }}" alt="ELOGraph"/>
     </div>
     {% endif %}
-    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+<div id="bot_results_anker"></div>
+<div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
         <table>
             <thead>

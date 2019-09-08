@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css?family=Quicksand&display=swap');
+
 ul.pagination {
     display: table;
     padding: 0;
@@ -39,7 +41,6 @@ body {
     padding: 0;
     background-color: rgb(0, 4, 1);
     background-image: url("/static/img/background.gif");
-
     font-family: 'Quicksand', sans-serif;
     font-size: 14px;
     color: rgba(255, 255, 255, 0.86);
@@ -165,9 +166,12 @@ a:hover {
 }
 
 #elo_graph img{
-    margin: 0 0 0 73px;
-    width: 900px;
+    margin: 0, 0, 0, 0;
+    margin-left: 80px;
+    padding: 15px;
+    width: 870px;
     height: auto;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
 iframe {
@@ -655,3 +659,55 @@ thead tr:hover {
     text-align: center;
 }
 
+.author-detail-img{
+float: left;
+margin-left: 80px;
+margin-bottom: 0;
+
+}
+.author-detail-img img{
+border: 1px solid #86c232;
+}
+
+.author-detail-info{
+float: left;
+padding-left: 30px;
+}
+
+#author-bot_table{
+width: 85%;
+margin: 0px;
+    padding: 0px;
+    margin-left: 80px;
+
+}
+
+.bot_anker {
+margin-top: 20px;
+position:fixed;
+margin-left:-60px;
+padding-left: 0px;
+}
+.bot_anker h3{
+font-size: 16px;
+float:left;
+padding-bottom: -10px;
+}
+
+.anker_header{
+
+border-bottom: 1px solid #ccc;
+padding-bottom: 40px;
+padding-right:3px;
+}
+
+.bot_anker div{
+margin-right: 8px;
+margin-bottom: 5px;
+text-align: right;
+}
+.bot_anker i {
+    padding-top: 12px;
+    float: left;
+
+    }
