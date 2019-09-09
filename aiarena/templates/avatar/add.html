@@ -2,6 +2,8 @@
 {% load i18n avatar_tags %}
 
 {% block content %}
+<div class="divider"><span></span><span><h2>Add Avatar</h2></span><span></span></div>
+<div class="registration-form">
     <p>{% trans "Your current avatar: " %}</p>
     {% avatar user %}
     {% if not avatars %}
@@ -10,6 +12,7 @@
     <form enctype="multipart/form-data" method="POST" action="{% url 'avatar_add' %}">
         <p>Attention: We are having issues with displaying non-JPG image formats currently.</p>
         {{ upload_avatar_form.as_p }}
-        <p>{% csrf_token %}<input type="submit" value="{% trans "Upload New Image" %}" /></p>
+        <p>{% csrf_token %}<input id="submit-button" type="submit" value="{% trans "Upload New Image" %}" /></p>
     </form>
+</div>
 {% endblock %}
