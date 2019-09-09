@@ -20,7 +20,7 @@
    pip install -r ./pip/requirements.txt
    pip install -r ./pip/requirements.DEVELOPMENT.txt
    ```
-   If these commands fail, then you likely have an issue with your environment (is `pip` in your PATH?).
+   If these commands fail, then you likely have an issue with your environment (is `pip3` in your PATH?).
    
 
 4. Modify the Website config to use your Database.  
