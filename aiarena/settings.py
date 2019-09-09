@@ -296,7 +296,6 @@ AVATAR_AUTO_GENERATE_SIZES = (150,)
 # this fixes PNGs breaking when uploaded
 AVATAR_THUMB_FORMAT = 'PNG'
 
-AVATAR_AUTO_GENERATE_SIZES = (150,)
 AVATAR_GRAVATAR_FORCEDEFAULT = False
 AVATAR_DEFAULT_URL = "https://ai-arena.net/static/avatar/img/default.jpg"
 
