@@ -14,6 +14,14 @@
     ```
     python ./pip/pip-install.py
     ```
+   The `pip-install.py` script runs a pip install using the generic and environment specific `requirements.txt` files.
+   If you experience issues with it, you can simply run the commands manually instead:
+   ```
+   pip install -r ./pip/requirements.txt
+   pip install -r ./pip/requirements.DEVELOPMENT.txt
+   ```
+   If these commands fail, then you likely have an issue with your environment (is `pip` in your PATH?).
+   
 
 4. Modify the Website config to use your Database.  
     If you are using a standard mysql setup at localhost:3306 and step 2's SQL script, then you can skip this step -
