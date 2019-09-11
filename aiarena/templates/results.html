@@ -9,9 +9,7 @@
             <td><b>Match ID</b></td>
             <td><b>Date</b></td>
             <td><b>Bot 1</b></td>
-            <td><b>+/-</b></td>
             <td><b>Bot 2</b></td>
-            <td><b>+/-</b></td>
             <td><b>Result</b></td>
             <td><b>Map</b></td>
             <td><b>Game Steps</b></td>
@@ -23,20 +21,20 @@
                 <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
 
                 {% if result.winner == result.participant1.bot %}
-                    <td><b>[{{ result.participant1.bot.as_html_link |safe }}]</b></td>
+                    <td><b>[{{ result.participant1.bot.as_html_link |safe }}]</b>
                 {% else %}
-                    <td>{{ result.participant1.bot.as_html_link |safe }}</td>
+                    <td>{{ result.participant1.bot.as_html_link |safe }}
                 {% endif %}
 
-                <td>{{ result.participant1.elo_change |format_elo_change }}</td>
+                {{ result.participant1.elo_change |format_elo_change }}</td>
 
                 {% if result.winner == result.participant2.bot %}
-                    <td><b>[{{ result.participant2.bot.as_html_link |safe }}]</b></td>
+                    <td><b>[{{ result.participant2.bot.as_html_link |safe }}]</b>
                 {% else %}
-                    <td>{{ result.participant2.bot.as_html_link |safe }}</td>
+                    <td>{{ result.participant2.bot.as_html_link |safe }}
                 {% endif %}
 
-                <td>{{ result.participant2.elo_change |format_elo_change }}</td>
+                {{ result.participant2.elo_change |format_elo_change }}</td>
 
                 <td>{{ result.type }}</td>
                 <td>{{ result.mapname }}</td>
