@@ -38,8 +38,8 @@
             {% else %}
                 <td>queued...</td>
             {% endif %}
-            {% if match.finished %}
-                <td>{{ match.finished|date:"d. N Y - H:i:s" }}</td>
+            {% if match.result %}
+                <td>{{ match.result.created|date:"d. N Y - H:i:s" }}</td>
             {% elif match.started %}
                 <td>started...</td>
             {% else %}
