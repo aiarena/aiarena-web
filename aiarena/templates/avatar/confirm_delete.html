@@ -2,6 +2,8 @@
 {% load i18n %}
 
 {% block content %}
+<div class="divider"><span></span><span><h2>Delete Avatar</h2></span><span></span></div>
+<div class="registration-form">
     <p>{% trans "Please select the avatars that you would like to delete." %}</p>
     {% if not avatars %}
         {% url 'avatar_change' as avatar_change_url %}
@@ -11,7 +13,8 @@
             <ul>
                 {{ delete_avatar_form.as_ul }}
             </ul>
-            <p>{% csrf_token %}<input type="submit" value="{% trans "Delete These" %}" /></p>
+            <p>{% csrf_token %}<input id="submit-button" type="submit" value="{% trans "Delete These" %}" /></p>
         </form>
     {% endif %}
+</div>
 {% endblock %}

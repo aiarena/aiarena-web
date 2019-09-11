@@ -2,14 +2,28 @@
 {% load i18n %}
 
 {% block content %}
+<div class="divider"><span></span><span><h2>Login</h2></span><span></span></div>
+<div class="login-form">
+<div class="form-box">
 <form method="post" action="">
-  {% csrf_token %} 
+  <i class="material-icons" style="padding:0px; font-size:32px; float:left; padding-right:12x;">how_to_reg</i>
+  <h2 style="padding-top:5px;">Credentials</h2>
+  {% csrf_token %}
   {{ form.as_p }}
 
-  <input type="submit" value="{% trans 'Log in' %}" />
+  <input id="submit-button" type="submit" value="{% trans 'Log in' %}" />
   <input type="hidden" name="next" value="{{ next }}" />
 </form>
+  </div>
+  <div class="pw-reg-box">
+<div class="login-icon"> <i class="material-icons" style="padding:0px; font-size:32px;">mood_bad</i></div>
+  <div id="pw-reset">  {% trans "Forgot password" %}? <br/><a href="{% url 'password_reset' %}">{% trans "Reset it" %}</a>!</div>
+    <br/>
+  <div class="regi-icon"> <i class="material-icons" style="padding:0px;font-size:32px;">sentiment_very_dissatisfied</i></div>
+<div id="register"> {% trans "Not member" %}? <br/><a href="{% url 'registration_register' %}">{% trans "Register" %}</a>!</div>
+</div>
+  <br/>
 
-<p>{% trans "Forgot password" %}? <a href="{% url 'password_reset' %}">{% trans "Reset it" %}</a>!</p>
-<p>{% trans "Not member" %}? <a href="{% url 'registration_register' %}">{% trans "Register" %}</a>!</p>
+  </div>
+
 {% endblock %}

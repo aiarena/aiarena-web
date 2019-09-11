@@ -711,3 +711,76 @@ text-align: right;
     float: left;
 
     }
+
+.login-form {
+    margin-left: 75px;
+    margin-right: 75px;
+    border: 2px solid #86c232;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding-top: 10px;
+    padding-left: 30px;
+    padding-bottom: 20px;
+height: 210px;
+}
+.form-box {
+float: left;}
+
+#pw-reset {
+float:left;
+margin-bottom: 20px;
+padding-top: 15px;
+
+}
+#register{
+float: left;
+margin-bottom: 20px;
+
+}
+
+.login-icon{
+float: left;
+padding:0px;
+margin: 0px;
+padding-top: 15px;
+padding-right: 10px;
+}
+
+.regi-icon{
+float: left;
+padding:0px;
+margin: 0px;
+
+padding-right: 10px;
+
+}
+.pw-reg-box{
+float: left;
+    margin-right: 90px;
+    padding-top: 50px;
+    margin-left: 70px;
+}
+
+input{
+margin-right:10px;}
+
+#submit-button {
+text-align: center;
+width: 220px;
+height: 35px;
+font-size: 18px;
+background-color: #61892f;
+color: white;
+font-family: 'Quicksand', sans-serif;
+font-weight: bold;
+border: 0;
+}
+
+.registration-form{
+    margin-left: 75px;
+    margin-right: 75px;
+    border: 2px solid #86c232;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding-top: 10px;
+    padding-left: 30px;
+    padding-bottom: 30px;
+}
