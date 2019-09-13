@@ -6,48 +6,59 @@
     <div class="registration-form" style="text-align: center; margin-bottom: 40px;">
         <h2>
             <i class="material-icons" style="font-size: 48px; padding-bottom:15px;">emoji_events</i><br/>
-            {# Highlight the winner #}
-            {% if match.result %}
-                {% if match.result.has_winner %}
-                    {% if match.result.winner_participant_number == 1 %}
-                         <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">trending_up</i>
-                        ({{ match.participant1.elo_change|format_elo_change }})
-                         {{ match.participant1.bot.as_html_link |safe }}
-                    {% elif match.result.is_tie %}
-                         <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em; ">fast_forward</i>
-                        ({{ match.participant1.elo_change|format_elo_change }})
-                    {% else %}
-                        <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">trending_down</i>
-                        ({{ match.participant1.elo_change|format_elo_change }})
-                        {{ match.participant1.bot.as_html_link |safe }}
-                    {% endif %}
 
+            {# Participant 1 #}
+            {% if match.result %}
+                {# ELO movement indicator #}
+                {% if match.participant1.elo_change != 0 %}
+                    {% if match.participant1.elo_change > 0 %}
+                        <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                    {% elif match.participant1.elo_change < 0 %}
+                        <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                    {% endif %}
                 {% else %}
-                    <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em; ">fast_forward</i>
-                    ({{ match.participant1.elo_change|format_elo_change }})
+                    <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_forward</i>
+                {% endif %}
+
+                {# ELO change #}
+                ({{ match.participant1.elo_change|format_elo_change }})
+
+                {# Hight winner bot name #}
+                {% if match.result.winner_participant_number == 1 %}
+                     {{ match.participant1.bot.as_html_link |safe }}
+                {% else %}
                     {{ match.participant1.bot.as_html_link |safe }}
                 {% endif %}
+            {% else %}
+                {# Bot name #}
+                {{ match.participant1.bot.as_html_link |safe }}
             {% endif %}
             - VS -
+            {# Participant 2 #}
             {% if match.result %}
-                {% if match.result.has_winner %}
-                    {% if match.result.winner_participant_number == 2 %}
-                        {{ match.participant2.bot.as_html_link |safe }}
-                        ({{ match.participant2.elo_change|format_elo_change }})
-                        <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">trending_up</i>
-                    {% elif match.result.is_tie %}
-                        ({{ match.participant2.elo_change|format_elo_change }})
-                        <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em; ">fast_rewind</i>
-                    {% else %}
-                        {{ match.participant2.bot.as_html_link |safe }}
-                        ({{ match.participant2.elo_change|format_elo_change }})
-                        <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">trending_down</i>
-                    {% endif %}
+                {# Hight winner bot name #}
+                {% if match.result.winner_participant_number == 2 %}
+                     {{ match.participant2.bot.as_html_link |safe }}
                 {% else %}
                     {{ match.participant2.bot.as_html_link |safe }}
-                    ({{ match.participant2.elo_change|format_elo_change }})
-                    <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">fast_rewind</i>
                 {% endif %}
+
+                {# ELO change #}
+                ({{ match.participant2.elo_change|format_elo_change }})
+
+                {# ELO movement indicator #}
+                {% if match.participant2.elo_change != 0 %}
+                    {% if match.participant2.elo_change > 0 %}
+                        <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                    {% elif match.participant2.elo_change < 0 %}
+                        <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                    {% endif %}
+                {% else %}
+                    <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                {% endif %}
+            {% else %}
+                {# Bot name #}
+                {{ match.participant2.bot.as_html_link |safe }}
             {% endif %}
         </h2>
         <h3>On:</h3>
