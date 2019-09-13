@@ -527,6 +527,10 @@ class Result(models.Model):
     def duration_seconds(self):
         return (self.created - self.match.started).total_seconds()
 
+    @property
+    def game_time(self):
+        return self.game_steps/22.4
+
     # this is not checked while the replay corruption is happening
     def validate_replay_file_requirement(self):
         if (self.has_winner() or self.is_tie()) and not self.replay_file:
