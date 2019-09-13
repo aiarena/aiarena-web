@@ -14,7 +14,6 @@
             <td style="padding-right: 0"><b>Bot 2</b></td>
             <td style="padding-left: 0"></td>
             <td><b>Result</b></td>
-            <td><b>Map</b></td>
             <td><b>Replay</b></td>
         </thead>
         {% for result in result_list %}
@@ -65,7 +64,6 @@
                 </td>
 
                 <td>{{ result.type }}</td>
-                <td>{{ result.mapname }}</td>
                 {% if result.replay_file %}
                     <td><a href="{{ result.replay_file.url }}">Download</a></td>
                 {% elif result.replay_file_corruption_detected %}
