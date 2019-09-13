@@ -11,7 +11,7 @@
 
             {% if match.result %}
                 {# ELO movement indicator #}
-                {% if match.participant1.elo_change != 0 %}
+                {% if match.participant1.elo_change and match.participant1.elo_change != 0 %}
                     {% if match.participant1.elo_change > 0 %}
                         <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
                     {% elif match.participant1.elo_change < 0 %}
@@ -40,7 +40,7 @@
                 ({{ match.participant2.elo_change|format_elo_change }})
 
                 {# ELO movement indicator #}
-                {% if match.participant2.elo_change != 0 %}
+                {% if match.participant2.elo_change and match.participant2.elo_change != 0 %}
                     {% if match.participant2.elo_change > 0 %}
                         <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
                     {% elif match.participant2.elo_change < 0 %}
