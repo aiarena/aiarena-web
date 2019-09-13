@@ -774,6 +774,9 @@ font-family: 'Quicksand', sans-serif;
 font-weight: bold;
 border: 0;
 }
+#submit-button:hover {
+background-color: #86c232;
+}
 
 .registration-form{
     margin-left: 75px;

@@ -3,98 +3,113 @@
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Match {{ match.id }}</h2></span><span></span></div>
-    <div style="text-align: center">
-        <h3>
+    <div class="registration-form" style="text-align: center; margin-bottom: 40px;">
+        <h2>
+            <i class="material-icons" style="font-size: 48px; padding-bottom:15px;">emoji_events</i><br/>
             {# Highlight the winner #}
             {% if match.result %}
-                {% if match.result.has_winner or match.result.is_tie %}
-                    ({{ match.participant1.elo_change|format_elo_change }})
-                {% endif %}
-                {% if match.result.winner_participant_number == 1 %}
-                    [{{ match.participant1.bot.as_html_link |safe }}]
+                {% if match.result.has_winner %}
+                    {% if match.result.winner_participant_number == 1 %}
+                         <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">trending_up</i>
+                        ({{ match.participant1.elo_change|format_elo_change }})
+                         {{ match.participant1.bot.as_html_link |safe }}
+                    {% elif match.result.is_tie %}
+                         <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em; ">fast_forward</i>
+                        ({{ match.participant1.elo_change|format_elo_change }})
+                    {% else %}
+                        <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">trending_down</i>
+                        ({{ match.participant1.elo_change|format_elo_change }})
+                        {{ match.participant1.bot.as_html_link |safe }}
+                    {% endif %}
+
                 {% else %}
+                    <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em; ">fast_forward</i>
+                    ({{ match.participant1.elo_change|format_elo_change }})
                     {{ match.participant1.bot.as_html_link |safe }}
                 {% endif %}
-            {% else %}
-                {{ match.participant1.bot.as_html_link |safe }}
             {% endif %}
             - VS -
             {% if match.result %}
-                {% if match.result.winner_participant_number == 2 %}
-                    [{{ match.participant2.bot.as_html_link |safe }}]
+                {% if match.result.has_winner %}
+                    {% if match.result.winner_participant_number == 2 %}
+                        {{ match.participant2.bot.as_html_link |safe }}
+                        ({{ match.participant2.elo_change|format_elo_change }})
+                        <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">trending_up</i>
+                    {% elif match.result.is_tie %}
+                        ({{ match.participant2.elo_change|format_elo_change }})
+                        <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em; ">fast_rewind</i>
+                    {% else %}
+                        {{ match.participant2.bot.as_html_link |safe }}
+                        ({{ match.participant2.elo_change|format_elo_change }})
+                        <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">trending_down</i>
+                    {% endif %}
                 {% else %}
                     {{ match.participant2.bot.as_html_link |safe }}
-                {% endif %}
-                {% if match.result.has_winner or match.result.is_tie %}
                     ({{ match.participant2.elo_change|format_elo_change }})
+                    <i class="material-icons" style="font-size: 32px; padding: 0px; margin:0px; vertical-align: -0.3em;">fast_rewind</i>
                 {% endif %}
-            {% else %}
-                {{ match.participant2.bot.as_html_link |safe }}
             {% endif %}
-        </h3>
-        <h3>ON {{ match.map }}</h3>
+        </h2>
+        <h3>On:</h3>
+        <h2>{{ match.map }}</h2>
+
 
     </div>
-    <table style="min-width: 900px; margin: 0 auto;">
-        <tbody>
+   <div id="sidebar_left">
+        <table id="bot_details">
+        <thead>
         <tr>
             <td><b>Started at</b></td>
-            {% if match.started %}
+            <td><b>Finished at</b></td>
+            <td><b>Assigned to</b></td>
+            <td><b>Result</b></td>
+            <td><b>Winner</b></td>
+            <td><b>Game Steps</b></td>
+            <td><b>Replay</b></td>
+        </tr>
+        <thead>
+        <tbody>
+            <tr>{% if match.started %}
                 <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
             {% else %}
                 <td>queued...</td>
             {% endif %}
-        </tr>
-        <tr>
-            <td><b>Finished at</b></td>
-            {% if match.result %}
+           {% if match.result %}
                 <td>{{ match.result.created|date:"d. N Y - H:i:s" }}</td>
             {% else %}
                 <td>None</td>
             {% endif %}
-        </tr>
-        <tr>
-            <td><b>Assigned to</b></td>
-            {% if match.assigned_to %}
+
+                    {% if match.assigned_to %}
                 <td>{{ match.assigned_to }}</td>
             {% else %}
                 <td>queued...</td>
             {% endif %}
-        </tr>
-        <tr>
-            <td><b>Result</b></td>
+
             {% if match.result %}
                 <td>{{ match.result.type }}</td>
             {% else %}
                 <td>None</td>
             {% endif %}
-        </tr>
-        <tr>
-            <td><b>Winner</b></td>
             {% if match.result.winner %}
                 <td>{{ match.result.winner }}</td>
             {% else %}
                 <td>None</td>
             {% endif %}
-        </tr>
-        <tr>
-            <td><b>Game Steps</b></td>
-            {% if match.result %}
+    {% if match.result %}
                 <td>{{ match.result.game_steps }}</td>
             {% else %}
                 <td>None</td>
             {% endif %}
-        </tr>
-        <tr>
-            <td><b>Replay</b></td>
-            {% if match.result.replay_file %}
+   {% if match.result.replay_file %}
                 <td><a href="{{ match.result.replay_file.url }}">Download</a></td>
             {% elif match.result.replay_file_corruption_detected %}
                 <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
             {% else %}
                 <td>Unavailable</td>
-            {% endif %}
-        </tr>
-        <tbody>
+            {% endif %}</tr>
+
+    </tbody>
     </table>
+   </div>
 {% endblock %}
