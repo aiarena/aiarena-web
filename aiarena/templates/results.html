@@ -14,7 +14,8 @@
             <td style="padding-right: 0"><b>Bot 2</b></td>
             <td style="padding-left: 0"></td>
             <td><b>Result</b></td>
-            <td><b>Replay</b></td>
+            <td><b>Duration</b></td>
+            <td><b>Replay</b></td>            
         </thead>
         {% for result in result_list %}
             <tr>
@@ -64,13 +65,16 @@
                 </td>
 
                 <td>{{ result.type }}</td>
+
+                <td>{{ result.game_time_formatted}}</td>
+                
                 {% if result.replay_file %}
                     <td><a href="{{ result.replay_file.url }}">Download</a></td>
                 {% elif result.replay_file_corruption_detected %}
                     <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
                 {% else %}
                     <td>Unavailable</td>
-                {% endif %}
+                {% endif %}                
             </tr>
         {% endfor %}
         </tbody>
