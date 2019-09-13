@@ -8,6 +8,7 @@
             <i class="material-icons" style="font-size: 48px; padding-bottom:15px;">emoji_events</i><br/>
 
             {# Participant 1 #}
+
             {% if match.result %}
                 {# ELO movement indicator #}
                 {% if match.participant1.elo_change != 0 %}
@@ -22,27 +23,19 @@
 
                 {# ELO change #}
                 ({{ match.participant1.elo_change|format_elo_change }})
-
-                {# Hight winner bot name #}
-                {% if match.result.winner_participant_number == 1 %}
-                     {{ match.participant1.bot.as_html_link |safe }}
-                {% else %}
-                    {{ match.participant1.bot.as_html_link |safe }}
-                {% endif %}
-            {% else %}
-                {# Bot name #}
-                {{ match.participant1.bot.as_html_link |safe }}
             {% endif %}
-            - VS -
-            {# Participant 2 #}
-            {% if match.result %}
-                {# Hight winner bot name #}
-                {% if match.result.winner_participant_number == 2 %}
-                     {{ match.participant2.bot.as_html_link |safe }}
-                {% else %}
-                    {{ match.participant2.bot.as_html_link |safe }}
-                {% endif %}
 
+            {# Bot name #}
+            {{ match.participant1.bot.as_html_link |safe }}
+
+            - VS -
+
+            {# Participant 2 #}
+
+            {# Bot name #}
+            {{ match.participant2.bot.as_html_link |safe }}
+
+            {% if match.result %}
                 {# ELO change #}
                 ({{ match.participant2.elo_change|format_elo_change }})
 
@@ -57,8 +50,6 @@
                     <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
                 {% endif %}
             {% else %}
-                {# Bot name #}
-                {{ match.participant2.bot.as_html_link |safe }}
             {% endif %}
         </h2>
         <h3>On:</h3>
