@@ -1,6 +1,7 @@
 import logging
 import uuid
 from enum import Enum
+import time
 
 from constance import config
 from django.contrib.auth.models import AbstractUser
@@ -528,8 +529,9 @@ class Result(models.Model):
         return (self.created - self.match.started).total_seconds()
 
     @property
-    def game_time(self):
-        return self.game_steps/22.4
+    def game_time_formatted(self):
+        return time.strftime("%H:%M:%S",time.gmtime(self.game_steps/22.4))
+
 
     # this is not checked while the replay corruption is happening
     def validate_replay_file_requirement(self):
