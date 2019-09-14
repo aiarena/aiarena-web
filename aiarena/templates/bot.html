@@ -173,7 +173,7 @@
                         <td>{{ result.opponent.bot.as_html_link |safe }}</td>
                         <td>{{ result.relative_type }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
-                        <td>{{ result.me.step_time_ms|floatformat:2}}</td>
+                        <td>{{ result.me.step_time_ms|floatformat:3}}</td>
                         {% if result.replay_file %}
                             <td><a href="{{ result.replay_file.url }}">Download</a></td>
                         {% elif result.replay_file_corruption_detected %}
