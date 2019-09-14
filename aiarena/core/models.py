@@ -487,6 +487,10 @@ class Participant(models.Model):
     def __str__(self):
         return self.bot.name
 
+    @property
+    def step_time_ms(self):
+        return self.avg_step_time * 1000
+
 
 def replay_file_upload_to(instance, filename):
     return '/'.join(['replays', f'{instance.match_id}_{instance.match.get_participant1().bot.name}vs{instance.match.get_participant2().bot.name}_{instance.match.map.name}.SC2Replay'])
