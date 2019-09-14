@@ -489,7 +489,7 @@ class Participant(models.Model):
 
     @property
     def step_time_ms(self):
-        return self.avg_step_time * 1000
+        return (self.avg_step_time if self.avg_step_time is not None else 0) * 1000
 
 
 def replay_file_upload_to(instance, filename):
