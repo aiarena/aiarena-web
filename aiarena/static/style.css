@@ -787,3 +787,8 @@ background-color: #86c232;
     padding-left: 30px;
     padding-bottom: 30px;
 }
+
+.mono{
+font-family: 'Cutive Mono', monospace;
+font-size: 14px;
+}
