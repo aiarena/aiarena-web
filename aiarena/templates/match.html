@@ -67,7 +67,7 @@
             <td><b>Result</b></td>
             <td><b>Winner</b></td>
             <td><b>Game Steps</b></td>
-            <td><b>Replay</b></td>
+            <td><b>Download</b></td>
         </tr>
         <thead>
         <tbody>
@@ -98,18 +98,30 @@
             {% else %}
                 <td>None</td>
             {% endif %}
-    {% if match.result %}
+            {% if match.result %}
                 <td>{{ match.result.game_steps }}</td>
             {% else %}
                 <td>None</td>
             {% endif %}
-   {% if match.result.replay_file %}
-                <td><a href="{{ match.result.replay_file.url }}">Download</a></td>
-            {% elif match.result.replay_file_corruption_detected %}
-                <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
+
+            <td> {# Download #}
+            {% if not match.result.replay_file and not match.result.arenaclient_log %}
+            None
             {% else %}
-                <td>Unavailable</td>
-            {% endif %}</tr>
+                {% if match.result.replay_file %}
+                    <a href="{{ match.result.replay_file.url }}">Replay</a>
+                {% elif match.result.replay_file_corruption_detected %}
+                    Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)
+                {% endif %}
+                {% if match.result.replay_file and match.result.arenaclient_log %}
+                |
+                {% endif %}
+                {% if match.result.arenaclient_log %}
+                    <a href="{{ match.result.arenaclient_log.url }}">Log</a>
+                {% endif %}
+            {% endif %}
+            </td>
+        </tr>
 
     </tbody>
     </table>
