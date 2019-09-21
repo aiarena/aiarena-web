@@ -58,6 +58,7 @@ class User(AbstractUser):
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
+
 class Round(models.Model):
     started = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(blank=True, null=True)
@@ -112,11 +113,13 @@ class Match(models.Model):
             else:
                 return Match.StartResult.FAIL_ALREADY_STARTED
 
-    def get_participant1(self):
-        return Participant.objects.get(match=self, participant_number=1)
+    @property
+    def participant1(self):
+        return self.participant_set.get(participant_number=1)
 
-    def get_participant2(self):
-        return Participant.objects.get(match=self, participant_number=2)
+    @property
+    def participant2(self):
+        return self.participant_set.get(participant_number=2)
 
     @staticmethod
     def _queue_round_robin_matches_for_all_active_bots():
@@ -493,7 +496,8 @@ class Participant(models.Model):
 
 
 def replay_file_upload_to(instance, filename):
-    return '/'.join(['replays', f'{instance.match_id}_{instance.match.get_participant1().bot.name}vs{instance.match.get_participant2().bot.name}_{instance.match.map.name}.SC2Replay'])
+    return '/'.join(['replays', f'{instance.match_id}_{instance.match.participant1.bot.name}vs{instance.match.participant2.bot.name}_{instance.match.map.name}.SC2Replay'])
+
 
 def arenaclient_log_upload_to(instance, filename):
     return '/'.join(['arenaclient-logs', '{0}_arenaclientlog.zip'.format(instance.match_id)])
@@ -535,6 +539,14 @@ class Result(models.Model):
     @property
     def game_time_formatted(self):
         return time.strftime("%H:%M:%S",time.gmtime(self.game_steps/22.4))
+
+    @property
+    def participant1(self):
+        return self.match.participant1
+
+    @property
+    def participant2(self):
+        return self.match.participant2
 
 
     # this is not checked while the replay corruption is happening
