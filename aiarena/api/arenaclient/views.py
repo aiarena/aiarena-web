@@ -1,6 +1,7 @@
 import logging
 from wsgiref.util import FileWrapper
 
+from constance import config
 from django.db import transaction
 from django.db.models import Sum, F
 from django.http import HttpResponse
@@ -16,6 +17,7 @@ from aiarena import settings
 from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.models import Bot, Map, Match, Participant, Result
 from aiarena.core.utils import post_result_to_discord_bot
+from aiarena.core.validators import validate_not_inf, validate_not_nan
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +83,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def create(self, request, *args, **kwargs):
-        if settings.LADDER_ENABLED:
+        if config.LADDER_ENABLED:
             if settings.REISSUE_UNFINISHED_MATCHES:
                 # Check for any unfinished matches assigned to this user. If any are present, return that.
                 unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user,
@@ -151,8 +153,8 @@ class SubmitResultCombinedSerializer(serializers.Serializer):
     # Participant
     bot1_log = FileField(required=False)
     bot2_log = FileField(required=False)
-    bot1_avg_step_time = FloatField(required=False)
-    bot2_avg_step_time = FloatField(required=False)
+    bot1_avg_step_time = FloatField(required=False, validators=[validate_not_nan, validate_not_inf])
+    bot2_avg_step_time = FloatField(required=False, validators=[validate_not_nan, validate_not_inf])
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -165,9 +167,15 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
-        if settings.LADDER_ENABLED:
+        if config.LADDER_ENABLED:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
+
+            if config.ARENACLIENT_DEBUG_ENABLED:  # todo: make this an INFO or DEBUG level log?
+                logger.critical(
+                    "Bot1 avg_step_size: {0}".format(serializer.validated_data.get('bot1_avg_step_time')))
+                logger.critical(
+                    "Bot2 avg_step_size: {0}".format(serializer.validated_data.get('bot2_avg_step_time')))
 
             # validate result
             result = SubmitResultResultSerializer(data={'match': serializer.validated_data['match'],
@@ -175,7 +183,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                                         'replay_file': serializer.validated_data.get('replay_file'),
                                                         'game_steps': serializer.validated_data['game_steps'],
                                                         'submitted_by': serializer.validated_data['submitted_by'].pk,
-                                                        'arenaclient_log': serializer.validated_data.get('arenaclient_log')})
+                                                        'arenaclient_log': serializer.validated_data.get(
+                                                            'arenaclient_log')})
             result.is_valid(raise_exception=True)
 
             # validate participants
@@ -252,7 +261,5 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         else:
             raise LadderDisabled()
 
-
-    # todo: validate that if the result type is either a timeout or tie, then there's no winner set etc
     # todo: use a model form
     # todo: avoid results being logged against matches not owned by the submitter

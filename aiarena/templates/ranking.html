@@ -11,6 +11,7 @@
             <td><b>Race</b></td>
             <td><b>Author</b></td>
             <td><b>Type</b></td>
+            <td><b>Win %</b></td>
             <td><b>ELO</b></td>
         </thead>
         {% for bot in bot_list %}
@@ -20,6 +21,11 @@
                 <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.user.as_html_link |safe }}</td>
                 <td>{{ bot.type }}</td>
+                {% if bot.statsbots_set.count > 0 %}
+                    <td>{{ bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
+                {% else %}
+                    <td>No stats</td>
+                {% endif %}
                 <td>{{ bot.elo }}</td>
             </tr>
         {% endfor %}

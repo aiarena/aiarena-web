@@ -1,3 +1,4 @@
+from constance import config
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -38,8 +39,8 @@ class UserProfile(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context = super(UserProfile, self).get_context_data(**kwargs)
         # Add in the user's bots
         context['bot_list'] = self.request.user.bots.all()
-        context['max_user_bot_count'] = settings.MAX_USER_BOT_COUNT
-        context['max_active_per_race_bot_count'] = settings.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
+        context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
+        context['max_active_per_race_bot_count'] = config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
         return context
 
 
@@ -197,16 +198,14 @@ class Ranking(ListView):
     template_name = 'ranking.html'
 
 
-# Using a View - pretty bare-bones
-class Results(View):
-    def get(self, request):
-        results = Result.objects.all().order_by('-created')[:100]
-        for result in results:
-            result.participant1 = result.match.participant_set.filter(participant_number=1)[0]
-            result.participant2 = result.match.participant_set.filter(participant_number=2)[0]
-            result.mapname = result.match.map.name
-        context = {'result_list': results}
-        return render(request, 'results.html', context)
+class Results(ListView):
+    queryset = Result.objects.all().prefetch_related('match__participant_set').order_by('-created')[:100]
+    template_name = 'results.html'
+
+
+class RoundDetail(DetailView):
+    model = Round
+    template_name = 'round.html'
 
 
 class BotZipDownloadView(PrivateStorageDetailView):
@@ -255,7 +254,7 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 
 
 class Index(ListView):
-    queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]
+    queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]  # top 10 bots
     template_name = 'index.html'
 
 
@@ -263,21 +262,13 @@ class MatchQueue(View):
     def get(self, request):
         # Matches without a round are requested ones
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
-                F('started').asc(nulls_last=True), F('id').asc())
-        for match in requested_matches:
-            match.participant1 = match.participant_set.get(participant_number=1)
-            match.participant2 = match.participant_set.get(participant_number=2)
-            match.mapname = match.map.name
+            F('started').asc(nulls_last=True), F('id').asc())
 
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
         for round in rounds:
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
                 F('started').asc(nulls_last=True), F('id').asc())
-            for match in round.matches:
-                match.participant1 = match.participant_set.get(participant_number=1)
-                match.participant2 = match.participant_set.get(participant_number=2)
-                match.mapname = match.map.name
 
         context = {'round_list': rounds, 'requested_matches': requested_matches}
         return render(request, 'match_queue.html', context)
@@ -287,10 +278,3 @@ class MatchDetail(DetailView):
     model = Match
     template_name = 'match.html'
 
-    def get_object(self, queryset=None):
-        match = super(MatchDetail, self).get_object(queryset)
-        # add extra info
-        match.participant1 = match.participant_set.get(participant_number=1)
-        match.participant2 = match.participant_set.get(participant_number=2)
-        match.mapname = match.map.name
-        return match

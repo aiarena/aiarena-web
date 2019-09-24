@@ -6,48 +6,75 @@
     <table style="min-width: 900px; margin: 0 auto;">
         <tbody>
         <thead>
-            <td><b>Match ID</b></td>
+            <td><b>ID</b></td>
             <td><b>Date</b></td>
-            <td><b>Bot 1</b></td>
-            <td><b>+/-</b></td>
-            <td><b>Bot 2</b></td>
-            <td><b>+/-</b></td>
+            {# Remove padding so the bot name and ELO change sit closer together #}
+            <td style="padding-right: 0"><b>Bot 1</b></td>
+            <td style="padding-left: 0"></td>
+            <td style="padding-right: 0"><b>Bot 2</b></td>
+            <td style="padding-left: 0"></td>
             <td><b>Result</b></td>
-            <td><b>Map</b></td>
-            <td><b>Game Steps</b></td>
-            <td><b>Replay</b></td>
+            <td><b>Duration</b></td>
+            <td><b>Replay</b></td>            
         </thead>
         {% for result in result_list %}
             <tr>
                 <td>{{ result.match.as_html_link |safe }}</td>
                 <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
 
-                {% if result.winner == result.participant1.bot %}
-                    <td><b>[{{ result.participant1.bot.as_html_link |safe }}]</b></td>
-                {% else %}
-                    <td>{{ result.participant1.bot.as_html_link |safe }}</td>
-                {% endif %}
+                <td style="padding-right: 0">
+                    {% if result.winner == result.participant1.bot %}
+                        <b>[{{ result.participant1.bot.as_html_link |safe }}]</b>
+                    {% else %}
+                        {{ result.participant1.bot.as_html_link |safe }}
+                    {% endif %}
+                </td>
 
-                <td>{{ result.participant1.elo_change |format_elo_change }}</td>
+                <td style="padding-left: 0">
+                    {{ result.participant1.elo_change |format_elo_change }}
+                    {% if result.participant1.elo_change and result.participant1.elo_change != 0 %}
+                        {% if result.participant1.elo_change > 0 %}
+                            <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                        {% elif result.participant1.elo_change < 0 %}
+                            <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                        {% endif %}
+                    {% else %}
+                        <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                    {% endif %}
+                </td>
 
-                {% if result.winner == result.participant2.bot %}
-                    <td><b>[{{ result.participant2.bot.as_html_link |safe }}]</b></td>
-                {% else %}
-                    <td>{{ result.participant2.bot.as_html_link |safe }}</td>
-                {% endif %}
+                <td style="padding-right: 0">
+                    {% if result.winner == result.participant2.bot %}
+                        <b>[{{ result.participant2.bot.as_html_link |safe }}]</b>
+                    {% else %}
+                        {{ result.participant2.bot.as_html_link |safe }}
+                    {% endif %}
+                </td>
 
-                <td>{{ result.participant2.elo_change |format_elo_change }}</td>
+                <td style="padding-left: 0">
+                    {{ result.participant2.elo_change |format_elo_change }}
+                    {% if result.participant2.elo_change and result.participant2.elo_change != 0 %}
+                        {% if result.participant2.elo_change > 0 %}
+                            <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                        {% elif result.participant2.elo_change < 0 %}
+                            <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                        {% endif %}
+                    {% else %}
+                        <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                    {% endif %}
+                </td>
 
                 <td>{{ result.type }}</td>
-                <td>{{ result.mapname }}</td>
-                <td>{{ result.game_steps }}</td>
+
+                <td>{{ result.game_time_formatted}}</td>
+                
                 {% if result.replay_file %}
                     <td><a href="{{ result.replay_file.url }}">Download</a></td>
                 {% elif result.replay_file_corruption_detected %}
                     <td>Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)</td>
                 {% else %}
                     <td>Unavailable</td>
-                {% endif %}
+                {% endif %}                
             </tr>
         {% endfor %}
         </tbody>

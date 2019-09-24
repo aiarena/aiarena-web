@@ -80,6 +80,8 @@ INSTALLED_APPS = [
     'wiki.plugins.images.apps.ImagesConfig',
     'wiki.plugins.macros.apps.MacrosConfig',
     'wiki.plugins.help.apps.HelpConfig',
+    'constance',
+    'constance.backends.database',  # this should be removed by any env.py file overriding the constance backend
 ]
 
 MIDDLEWARE = [
@@ -101,6 +103,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'constance.context_processors.config',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -134,6 +137,37 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100
 }
 
+# Constance https://github.com/jazzband/django-constance
+# !IMPORTANT! If you override this setting in an env.py,
+# don't forget to remove 'constance.backends.database' from the INSTALLED_APPS array
+# Use the database backend in dev for ease of use. We will use Redis in staging/prod.
+CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+# This is the dynamic config, update-able during runtime
+CONSTANCE_CONFIG = {
+    'LADDER_ENABLED': (
+        True, 'Whether the ladder is currently enabled. This will control whether matches are run or not.'),
+    'TIMEOUT_MATCHES_AFTER': (
+        timedelta(hours=1),
+        'How long to wait before the website should time out a running match.', timedelta),
+    'MAX_ACTIVE_ROUNDS': (1, 'The maximum rounds the ladder can run simultaneously. '
+                             'The ladder will stop generating new rounds once this number '
+                             'is reached until previous active rounds are finished off.'),
+    'MAX_USER_BOT_COUNT': (2, 'Maximum bots a user can have uploaded.'),
+    'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE': (1, 'Maximum active bots a user can have per race.'),
+    'ARENACLIENT_DEBUG_ENABLED': (False, 'Enable debugging for arena clients. '
+                                         'This will log extra data in the arena client API. '
+                                         'It will also propagate the setting to the arena clients'),
+    'GETTING_STARTED_URL': ('https://ai-arena.net/wiki/getting-started/',
+                            'The URL to send new users to in order to get started.'),
+}
+
+CONSTANCE_CONFIG_FIELDSETS = {
+    'Bot Options': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
+    'General Options': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL'),
+    'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',),
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -144,38 +178,28 @@ LOGGING = {
         },
     },
     'handlers': {
-        'warning-file': {
+        'django-file': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': './logs/django-warning.log',
+            'filename': './logs/django.log',
             'formatter': 'verbose',
         },
-        'critical-file': {
-            'level': 'ERROR',
+        'aiarena-file': {
+            'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': './logs/django-critical.log',
+            'filename': './logs/aiarena.log',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['warning-file'],
+            'handlers': ['django-file'],
             'level': 'WARNING',
             'propagate': True,
         },
         'aiarena': {
-            'handlers': ['warning-file'],
+            'handlers': ['aiarena-file'],
             'level': 'WARNING',
-            'propagate': True,
-        },
-        'django': {
-            'handlers': ['critical-file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'aiarena': {
-            'handlers': ['critical-file'],
-            'level': 'ERROR',
             'propagate': True,
         },
     },
@@ -221,6 +245,10 @@ SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts")
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 DEFAULT_FROM_EMAIL = 'noreply@localhost'
 
+# Save emails to file by default. This will be overridden in production.
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = './tmp/emails'
+
 # Redirect to index page on login/logout
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
@@ -248,20 +276,10 @@ REISSUE_UNFINISHED_MATCHES = True
 # ELO implementation
 ELO = Elo(ELO_K)
 
-MAX_USER_BOT_COUNT = 6
-MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
-
-# The maximum active rounds allowed at any one time.
-# The ladder will stop generating new rounds once this number is reached until previous active rounds are finished off.
-MAX_ACTIVE_ROUNDS = 2
-
 # For convenience
 BOT_ZIP_MAX_SIZE_MB = 50
 # this is the setting that actually dictates the max zip size
 BOT_ZIP_MAX_SIZE = 1024 * 1024 * BOT_ZIP_MAX_SIZE_MB
-
-# how long to wait before the website should time out a running match
-TIMEOUT_MATCHES_AFTER = timedelta(hours=1)
 
 # This will post results received to another webserver
 # if this is None, it is disabled
@@ -278,10 +296,15 @@ AVATAR_AUTO_GENERATE_SIZES = (150,)
 # this fixes PNGs breaking when uploaded
 AVATAR_THUMB_FORMAT = 'PNG'
 
-ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
+AVATAR_GRAVATAR_FORCEDEFAULT = False
+AVATAR_DEFAULT_URL = "https://ai-arena.net/static/avatar/img/default.jpg"
 
-# whether to run matches
-LADDER_ENABLED = True
+AVATAR_PROVIDERS = (
+    'avatar.providers.PrimaryAvatarProvider',
+    'avatar.providers.DefaultAvatarProvider',
+)
+
+ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
 # django wiki
 WIKI_ACCOUNT_HANDLING = True

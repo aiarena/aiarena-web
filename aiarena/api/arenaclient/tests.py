@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 
+from constance import config
 from django.db.models import Sum
 from django.utils import timezone
 
@@ -8,7 +9,7 @@ from aiarena import settings
 from aiarena.core.models import Match, Bot, Participant, User, Round, Result
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, TIMEOUT_MATCHES_AFTER, MEDIA_ROOT
+from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
 
 
 
@@ -136,7 +137,7 @@ class MatchesTestCase(LoggedInTestCase):
             self.assertFalse(bot.current_match is None)
 
         # set the created time back into the past long enough for it to cause a time out
-        match1.started = timezone.now() - (TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
+        match1.started = timezone.now() - (config.TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
         match1.save()
 
         # this should trigger the bots to be forced out of the match
@@ -180,7 +181,7 @@ class MatchesTestCase(LoggedInTestCase):
     def test_max_active_rounds(self):
         # we don't want to have to create lots of arenaclients for multiple matches
         settings.REISSUE_UNFINISHED_MATCHES = False
-        settings.MAX_ACTIVE_ROUNDS = 2
+        config.MAX_ACTIVE_ROUNDS = 2
 
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')

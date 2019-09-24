@@ -9,7 +9,12 @@
     <link href="https://fonts.googleapis.com/css?family=Gugi&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cutive+Mono&display=swap" rel="stylesheet">
+
+
     <title>{% block title %}AI Arena{% endblock %}</title>
+
+
 </head>
 
 <body>
@@ -35,17 +40,16 @@
                         </div>
                     <ul class="links">
                         <li><a href="{% url 'home' %}">{% trans "Home" %}</a></li>
-                        <li><a href="{% url 'rules' %}">{% trans "Rules" %}</a></li>
+                        <li><a href="{% url 'wiki:root' %}">{% trans "Wiki" %}</a></li>
                         <li><a href="{% url 'authors' %}">{% trans "Authors" %}</a></li>
                         <li><a href="{% url 'bots' %}">{% trans "Bots" %}</a></li>
                         <li><a href="{% url 'ranking' %}">{% trans "Ranking" %}</a></li>
                         <li><a href="{% url 'match_queue' %}">{% trans "Match Queue" %}</a></li>
                         <li><a href="{% url 'results' %}">{% trans "Results" %}</a></li>
-                        <li><a href="{% url 'wiki:root' %}">{% trans "Wiki" %}</a></li>
+                        <li><a href="{% url 'stream' %}">{% trans "Live Stream" %}</a></li>
                         {% if user.is_authenticated %}
                             <li><a href="{% url 'api-root' %}">{% trans "API" %}</a></li>
                         {% endif %}
-                        <li><a href="{% url 'stream' %}">{% trans "Live Stream" %}</a></li>
                     </ul>
                 </li>
 
@@ -103,11 +107,11 @@
                     <h3>links</h3>
                     </div>
                     <ul class="links">
-                        <li><a href="https://discord.gg/yDBzbtC">Discord</a></li>
-                        <li><a href="https://www.patreon.com/user/overview?u=19819889">Patreon</a></li>
-                        <li><a href="https://gitlab.com/aiarena">GitLab</a></li>
-                        <li><a href="https://trello.com/b/qw4DYU9H/ai-arena-website">Trello</a></li>
-                        <li><a href="https://www.twitch.tv/aiarenastream">Twitch</a></li>
+                        <li><a href="https://discord.gg/yDBzbtC"> Discord <i class="material-icons md-18" style="font-size: 18px; padding: 0px; padding-right:5px;">launch</i></a>  </li>
+                        <li><a href="https://www.patreon.com/user/overview?u=19819889"> Patreon <i class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</i></a></li>
+                        <li><a href="https://gitlab.com/aiarena"> GitLab <i class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</i></a></li>
+                        <li><a href="https://trello.com/b/qw4DYU9H/ai-arena-website"> Trello <i class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</i></a></li>
+                        <li><a href="https://www.twitch.tv/aiarenastream"> Twitch <i class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</i></a></li>
                     </ul>
                 </li>
             </ul>

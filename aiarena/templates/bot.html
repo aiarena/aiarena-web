@@ -1,7 +1,19 @@
 {% extends "base.html" %}
 {% load i18n core_filters %}
 
+
 {% block content %}
+<div class="bot_anker">
+    <div class="anker_header"><i class="material-icons">swap_vert</i><h3>Go to:</h3></div>
+    <div><a href="#bot_top_anker"><b>Top</b></a></div>
+    <div><a href="#bot_stats_anker"><b>Stats</b></a></div>
+    <div><a href="#elo_graph_anker"><b>ELO <br/>over time</b></a></div>
+    <div><a href="#bot_results_anker"><b>Results</b></a></div>
+</div>
+
+
+
+    <div id="bot_top_anker"></div>
     <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
 
     <div id="sidebar_left">
@@ -28,14 +40,16 @@
                 <td>{{ bot.type }} </td>
                 <td>{{ bot.elo }}</td>
                 <td>{{ bot.active }}</td>
-                {% if request.user == bot.user or bot.bot_zip_publicly_downloadable %}
+                {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
                     <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
                 {% else %}
                     <td>--</td>
                 {% endif %}
                 {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
-                    {% if request.user == bot.user or bot.bot_data_publicly_downloadable %}
+                    {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_staff %}
                         <td><a href="{{ bot.bot_data.url }}">Download</a></td>
+                    {% else %}
+                        <td>--</td>
                     {% endif %}
                 {% else %}
                     <td>--</td>
@@ -49,6 +63,8 @@
         </table>
     </div>
 
+
+    <div id="bot_stats_anker"></div>
     <div class="divider"><span></span><span><h2>Stats</h2></span><span></span></div>
     <div id="bot_stats">
         <table>
@@ -123,24 +139,28 @@
             {% endif %}
             </tbody>
         </table>
+        <br/>
     </div>
+<div id="elo_graph_anker"></div>
+<div class="divider"><span></span><span><h2>ELO over time</h2></span><span></span></div>
     {% if bot.statsbots_set.count > 0 and bot.statsbots_set.get.elo_graph %}
     <div id="elo_graph">
         <img src="{{ bot.statsbots_set.get.elo_graph.url }}" alt="ELOGraph"/>
     </div>
     {% endif %}
-    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+<div id="bot_results_anker"></div>
+<div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
         <table>
             <thead>
-            <td><b>Match ID</b></td>
+            <td><b>ID</b></td>
             <td><b>Date</b></td>
             <td><b>Opponent</b></td>
             <td><b>Result</b></td>
             <td><b>+/-</b></td>
             <td><b>Avg Step<br/>(ms)</b></td>
             <td><b>Replay</b></td>
-            {% if request.user == bot.user %}
+            {% if request.user == bot.user or request.user.is_staff %}
                 <td><b>Log</b></td>
             {% endif %}
             </thead>
@@ -153,7 +173,7 @@
                         <td>{{ result.opponent.bot.as_html_link |safe }}</td>
                         <td>{{ result.relative_type }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
-                        <td>{{ result.me.avg_step_time|floatformat:2 }}</td>
+                        <td>{{ result.me.step_time_ms|floatformat:3}}</td>
                         {% if result.replay_file %}
                             <td><a href="{{ result.replay_file.url }}">Download</a></td>
                         {% elif result.replay_file_corruption_detected %}
@@ -161,7 +181,7 @@
                         {% else %}
                             <td>Unavailable</td>
                         {% endif %}
-                        {% if request.user == bot.user %}
+                        {% if request.user == bot.user or request.user.is_staff %}
                             {% if result.me.match_log %}
                                 <td><a href="{{ result.me.match_log.url }}">Download</a></td>
                             {% else %}

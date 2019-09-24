@@ -13,7 +13,11 @@
         {% elif forloop.counter0|divisibleby:5 %}
             {% endif %}
             <div class="author">
-                <div class="author-image">{% avatar author 150 %}</div>
+                                <div class="author-image-container>">
+                    <a href="{{ author.id }}">
+                        <div class="author-image">{% avatar author 150 %}</div>
+                    </a>
+                </div>
                 <div class="author-name">{{ author.as_html_link |safe }}</div>
                 <br/>
             </div>

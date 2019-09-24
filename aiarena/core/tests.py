@@ -2,6 +2,7 @@ import os
 from datetime import timedelta
 from io import StringIO
 
+from constance import config
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -11,9 +12,8 @@ from django.utils import timezone
 
 from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, Participant
+from aiarena.core.models import User, Bot, Map, Match, Result, Participant, Round
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import MAX_USER_BOT_COUNT
 
 
 class BaseTestCase(TransactionTestCase):
@@ -206,6 +206,10 @@ class MatchReadyTestCase(LoggedInTestCase):
     def setUp(self):
         super(MatchReadyTestCase, self).setUp()
 
+        # raise the configured per user limits
+        config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
+        config.MAX_USER_BOT_COUNT = 10
+
         self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
         self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
         self.regularUser1Bot2 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
@@ -221,7 +225,6 @@ class FullDataSetTestCase(MatchReadyTestCase):
         self._generate_full_data_set()
 
 
-
 class UtilsTestCase(BaseTestCase):
     def test_calc_md5(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/test_bot.zip')
@@ -235,6 +238,11 @@ class UserTestCase(BaseTestCase):
 
 class BotTestCase(LoggedInTestCase):
     def test_bot_creation_and_update(self):
+
+        # set the configured per user limits for this test
+        config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
+        config.MAX_USER_BOT_COUNT = 4
+
         # create bot along with bot data
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
             bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data),
@@ -258,12 +266,12 @@ class BotTestCase(LoggedInTestCase):
         self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip_backup'.format(bot1.id)))
 
         # test max bots for user
-        for i in range(1, MAX_USER_BOT_COUNT):
+        for i in range(1, config.MAX_USER_BOT_COUNT):
             self._create_bot(self.regularUser1, 'testbot{0}'.format(i))
         with self.assertRaisesMessage(ValidationError,
                                       'Maximum bot count of {0} already reached. '
-                                      'No more bots may be added for this user.'.format(MAX_USER_BOT_COUNT)):
-            self._create_bot(self.regularUser1, 'testbot{0}'.format(MAX_USER_BOT_COUNT))
+                                      'No more bots may be added for this user.'.format(config.MAX_USER_BOT_COUNT)):
+            self._create_bot(self.regularUser1, 'testbot{0}'.format(config.MAX_USER_BOT_COUNT))
 
         # test active bots per race limit for user
         # all bots should be the same race, so just pick any
@@ -290,7 +298,6 @@ class BotTestCase(LoggedInTestCase):
 
         bot1.refresh_from_db()
         self.assertEqual(self.test_bot2_data_hash, bot1.bot_data_md5hash)
-
 
 
 class PageRenderTestCase(FullDataSetTestCase):
@@ -339,7 +346,7 @@ class PageRenderTestCase(FullDataSetTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_get_match_page(self):
-        response = self.client.get('/matches/{0}/'.format(Match.objects.all()[0]))
+        response = self.client.get('/matches/{0}/'.format(Match.objects.all()[0].id))
         self.assertEqual(response.status_code, 200)
 
     def test_get_ranking_page(self):
@@ -348,10 +355,6 @@ class PageRenderTestCase(FullDataSetTestCase):
 
     def test_get_results_page(self):
         response = self.client.get('/results/')
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_rules_page(self):
-        response = self.client.get('/rules/')
         self.assertEqual(response.status_code, 200)
 
     def test_get_login_page(self):
@@ -372,6 +375,10 @@ class PageRenderTestCase(FullDataSetTestCase):
 
     def test_get_match_queue_page(self):
         response = self.client.get('/match-queue/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_round_page(self):
+        response = self.client.get('/rounds/{0}/'.format(Round.objects.all()[0].id))
         self.assertEqual(response.status_code, 200)
 
 
