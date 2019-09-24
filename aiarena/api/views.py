@@ -8,20 +8,20 @@ from aiarena.core.models import Match, Result, Bot, Map, User, Round, Participan
 
 logger = logging.getLogger(__name__)
 
-
 # !IMPORTANT!
 # Serializer and Filter/etc fields are manually specified for security reasons
 # Allowing filtering/etc on sensitive fields could leak information.
 # Serializer fields are also manually specified so new private fields don't accidentally get leaked.
 
 bot_include_fields = 'id', 'user', 'name', 'created', 'updated', 'active', 'in_match', \
-                 'current_match', 'elo', 'plays_race', 'type', 'game_display_id',
+                     'current_match', 'elo', 'plays_race', 'type', 'game_display_id',
 map_include_fields = 'id', 'name',
-match_include_fields ='id', 'map', 'created', 'started', 'assigned_to', 'round',
-participant_include_fields ='id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
-result_include_fields ='id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by', 'arenaclient_log',
+match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
+participant_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
+result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by', 'arenaclient_log',
 round_include_fields = 'id', 'started', 'finished', 'complete',
 user_include_fields = 'id', 'name', 'service_account'
+
 
 class BotSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,7 +47,7 @@ class MapSerializer(serializers.ModelSerializer):
         model = Map
         # todo: The file isn't used by the arena clients currently, so exclude it to avoid confusion.
         # todo: Eventually the arena clients will download maps from the website
-        exclude = map_include_fields
+        fields = map_include_fields
 
 
 class MapViewSet(viewsets.ReadOnlyModelViewSet):
@@ -85,7 +85,7 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
 class ParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
-        exclude = participant_include_fields
+        fields = participant_include_fields
 
 
 class ParticipantViewSet(viewsets.ReadOnlyModelViewSet):
@@ -135,8 +135,8 @@ class RoundViewSet(viewsets.ReadOnlyModelViewSet):
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = round_include_fields
-    search_fields =round_include_fields
-    ordering_fields =round_include_fields
+    search_fields = round_include_fields
+    ordering_fields = round_include_fields
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -156,4 +156,3 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = user_include_fields
     search_fields = user_include_fields
     ordering_fields = user_include_fields
-
