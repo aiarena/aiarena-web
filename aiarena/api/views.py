@@ -19,7 +19,9 @@ map_include_fields = 'id', 'name',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
 participant_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
 # todo: add 'arenaclient_log',
-result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by',
+result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', \
+                        'game_steps', 'submitted_by', 'arenaclient_log',
+result_filter_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by',
 round_include_fields = 'id', 'started', 'finished', 'complete',
 user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', \
                       'service_account', 'patreon_level'
@@ -117,9 +119,9 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ResultSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = result_include_fields
-    search_fields = result_include_fields
-    ordering_fields = result_include_fields
+    filterset_fields = result_filter_fields
+    search_fields = result_filter_fields
+    ordering_fields = result_filter_fields
 
 
 class RoundSerializer(serializers.ModelSerializer):
