@@ -20,7 +20,7 @@ match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round'
 participant_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
 result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by', 'arenaclient_log',
 round_include_fields = 'id', 'started', 'finished', 'complete',
-user_include_fields = 'id', 'name', 'service_account'
+user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', 'service_account', 'patreon_level'
 
 
 class BotSerializer(serializers.ModelSerializer):
@@ -149,7 +149,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     User data view
     """
-    queryset = User.objects.filter(is_active=True)
+    queryset = User.objects.all()
     serializer_class = UserSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
