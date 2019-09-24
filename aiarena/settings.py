@@ -122,16 +122,11 @@ TEMPLATES = [
 REST_FRAMEWORK = {
     # Default to allow access only for admin users
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAdminUser'
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
-    ),
-    'DEFAULT_FILTER_BACKENDS': (
-        'rest_framework.filters.OrderingFilter',
-        # 'django_filters.rest_framework.DjangoFilterBackend',
-        # todo: check that opening this generically doesn't leak sensitive info.
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 100
