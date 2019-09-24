@@ -104,11 +104,20 @@ class ParticipantViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = participant_include_fields
     ordering_fields = participant_include_fields
 
-
+# todo: bot names are included for the stream to use. Ideally the the stream should properly utilize the API
 class ResultSerializer(serializers.ModelSerializer):
+    bot1_name = serializers.SerializerMethodField()
+    bot2_name = serializers.SerializerMethodField()
+
+    def get_bot1_name(self, obj):
+        return obj.match.participant_set.get(participant_number=1).bot.name
+
+    def get_bot2_name(self, obj):
+        return obj.match.participant_set.get(participant_number=2).bot.name
+
     class Meta:
         model = Result
-        fields = result_include_fields
+        fields = result_include_fields + ('bot1_name', 'bot2_name')
 
 
 class ResultViewSet(viewsets.ReadOnlyModelViewSet):
