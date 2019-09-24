@@ -18,9 +18,11 @@ bot_include_fields = 'id', 'user', 'name', 'created', 'updated', 'active', 'in_m
 map_include_fields = 'id', 'name',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
 participant_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
-result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by', 'arenaclient_log',
+# todo: add 'arenaclient_log',
+result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by',
 round_include_fields = 'id', 'started', 'finished', 'complete',
-user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', 'service_account', 'patreon_level'
+user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', \
+                      'service_account', 'patreon_level'
 
 
 class BotSerializer(serializers.ModelSerializer):
