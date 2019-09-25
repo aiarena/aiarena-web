@@ -124,7 +124,7 @@ class Match(models.Model):
 
     @staticmethod
     def _queue_round_robin_matches_for_all_active_bots():
-        if Map.objects.count() == 0:
+        if Map.objects.filter(active=True).count() == 0:
             raise NoMaps()
         if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
             raise NotEnoughActiveBots()

@@ -7,7 +7,7 @@ class EloSanityCheckException(APIException):
 
 class NoMaps(APIException):
     status_code = 409  # Conflict https://httpstatuses.com/409
-    default_detail = 'There are no maps available for a match.'
+    default_detail = 'There are no active maps available for a match.'
     default_code = 'no_maps'
 
 
