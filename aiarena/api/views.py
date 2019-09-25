@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 bot_include_fields = 'id', 'user', 'name', 'created', 'updated', 'active', 'in_match', \
                      'current_match', 'elo', 'plays_race', 'type', 'game_display_id',
-map_include_fields = 'id', 'name',
+map_include_fields = 'id', 'name', 'active',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
 participant_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
 # todo: add 'arenaclient_log',
