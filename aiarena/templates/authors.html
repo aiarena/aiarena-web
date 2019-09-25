@@ -6,10 +6,6 @@
     <div id="authors_table">
         {% load avatar_tags %}
         {% for author in user_list %}
-            {% if forloop.first %}
-                {# Start a new row every 5 authors #}
-            {% elif forloop.counter0|divisibleby:5 %}
-            {% endif %}
             <div class="author patreon-{{ author.patreon_level }}">
                 <div class="author-image-container>">
                     <a href="{{ author.id }}">
@@ -19,9 +15,6 @@
                 <div class="author-name">{{ author.as_html_link |safe }}</div>
                 <br/>
             </div>
-            {% if forloop.last %}
-                </div>
-            {% endif %}
         {% endfor %}
     </div>
 {% endblock %}
