@@ -2,18 +2,16 @@
 {% load i18n %}
 
 {% block content %}
-<div class="divider"><span></span><span><h2>Authors</h2></span><span></span></div>
-
-
-        <div id="authors_table">
-            {% load avatar_tags %}
+    <div class="divider"><span></span><span><h2>Authors</h2></span><span></span></div>
+    <div id="authors_table">
+        {% load avatar_tags %}
         {% for author in user_list %}
-        {% if forloop.first %}
-        {# Start a new row every 5 authors #}
-        {% elif forloop.counter0|divisibleby:5 %}
+            {% if forloop.first %}
+                {# Start a new row every 5 authors #}
+            {% elif forloop.counter0|divisibleby:5 %}
             {% endif %}
-            <div class="author">
-                                <div class="author-image-container>">
+            <div class="author patreon-{{ author.patreon_level }}">
+                <div class="author-image-container>">
                     <a href="{{ author.id }}">
                         <div class="author-image">{% avatar author 150 %}</div>
                     </a>
@@ -25,7 +23,5 @@
                 </div>
             {% endif %}
         {% endfor %}
-
     </div>
-
 {% endblock %}

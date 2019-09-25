@@ -2,48 +2,41 @@
 {% load i18n %}
 
 {% block content %}
-<div class="divider"><span></span><span><h2>Author</h2></span><span></span></div>
-
-<div id="author_detail">
-
-    {% load avatar_tags %}
-    <div class="author-detail-img">
-    {% avatar author 150 %}
+    <div class="divider"><span></span><span><h2>Author</h2></span><span></span></div>
+    <div id="author_detail">
+        {% load avatar_tags %}
+        <div class="author-detail-img patreon-{{ author.patreon_level }}">
+            {% avatar author 150 %}
         </div>
-    <div class="author-detail-info">
-    <h2>{{ author.username }}</h2>
+        <div class="author-detail-info">
+            <h2>{{ author.username }}</h2>
 
-        <b>Joined</b><br/>
-        {{ author.date_joined|date:"d. N Y" }}
-        <br/>
+            <b>Joined</b><br/>
+            {{ author.date_joined|date:"d. N Y" }}
+            <br/>
 
-    <b>Last login</b><br/>
-    {{ author.last_login|date:"d. N Y" }}
+            <b>Last login</b><br/>
+            {{ author.last_login|date:"d. N Y" }}
         </div>
-
-</div>
-
-<br>
-
-<div class="divider"><span></span><span><h2>Bots</h2></span><span></span></div>
-<table id="author-bot_table">
-    <thead>
+    </div>
+    <br>
+    <div class="divider"><span></span><span><h2>Bots</h2></span><span></span></div>
+    <table id="author-bot_table">
+        <thead>
         <td><b>Name</b></td>
         <td><b>Elo</b></td>
         <td><b>Type</b></td>
         <td><b>Race</b></td>
         <td><b>Active</b></td>
-    </thead>
-    {% for bot in bot_list %}
-    <tr>
-        <td>{{ bot.as_html_link |safe }}</td>
-        <td>{{ bot.elo }}</td>
-        <td>{{ bot.type }}</td>
-        <td>{{ bot.get_plays_race_display }}</td>
-        <td>{{ bot.active }}</td>
-    </tr>
-    {% endfor %}
-
-</table>
-
+        </thead>
+        {% for bot in bot_list %}
+            <tr>
+                <td>{{ bot.as_html_link |safe }}</td>
+                <td>{{ bot.elo }}</td>
+                <td>{{ bot.type }}</td>
+                <td>{{ bot.get_plays_race_display }}</td>
+                <td>{{ bot.active }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 {% endblock %}
