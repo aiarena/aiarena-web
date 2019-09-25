@@ -292,7 +292,7 @@ AVATAR_AUTO_GENERATE_SIZES = (150,)
 AVATAR_THUMB_FORMAT = 'PNG'
 
 AVATAR_GRAVATAR_FORCEDEFAULT = False
-AVATAR_DEFAULT_URL = "https://ai-arena.net/static/avatar/img/default.jpg"
+AVATAR_DEFAULT_URL = "/avatar/img/default.jpg"
 
 AVATAR_PROVIDERS = (
     'avatar.providers.PrimaryAvatarProvider',

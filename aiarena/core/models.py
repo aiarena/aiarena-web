@@ -28,15 +28,16 @@ logger = logging.getLogger(__name__)
 class Map(models.Model):
     name = models.CharField(max_length=50, unique=True)
     file = models.FileField(upload_to='maps')
+    active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
 
     @staticmethod
-    def random():
+    def random_active():
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return Map.objects.order_by('?').first()
+        return Map.objects.filter(active=True).order_by('?').first()
 
 
 class User(AbstractUser):
@@ -137,7 +138,7 @@ class Match(models.Model):
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
             for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
-                Match.create(round, Map.random(), bot1, bot2)
+                Match.create(round, Map.random_active(), bot1, bot2)
 
     @staticmethod
     def start_next_match(requesting_user):
@@ -193,7 +194,7 @@ class Match(models.Model):
     # todo: let us specify the map
     @staticmethod
     def request_bot_match(bot, opponent=None):
-        return Match.create(None, Map.random(), bot,
+        return Match.create(None, Map.random_active(), bot,
                             opponent if opponent is not None else bot.get_random_available_excluding_self())
 
     class CancelResult(Enum):
