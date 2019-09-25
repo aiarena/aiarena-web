@@ -41,16 +41,16 @@ class Map(models.Model):
 
 class User(AbstractUser):
     PATREON_LEVELS = (
-        ('None', 'None'),
-        ('Bronze', 'Bronze'),
-        ('Silver', 'Silver'),
-        ('Gold', 'Gold'),
-        ('Platinum', 'Platinum'),
-        ('Diamond', 'Diamond'),
+        ('none', 'None'),
+        ('bronze', 'Bronze'),
+        ('silver', 'Silver'),
+        ('gold', 'Gold'),
+        ('platinum', 'Platinum'),
+        ('diamond', 'Diamond'),
     )
     email = models.EmailField(unique=True)
     service_account = models.BooleanField(default=False)
-    patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='None')
+    patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
 
     def get_absolute_url(self):
         return reverse('author', kwargs={'pk': self.pk})
