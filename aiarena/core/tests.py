@@ -34,7 +34,7 @@ class BaseTestCase(TransactionTestCase):
     test_map_path = 'aiarena/core/test-media/AutomatonLE.SC2Map'
 
     def _create_map(self, name):
-        return Map.objects.create(name=name)
+        return Map.objects.create(name=name, active=True)
 
     def _create_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:

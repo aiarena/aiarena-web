@@ -105,7 +105,7 @@ def run_seed(rounds, token):
     devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@aiarena.net')
 
     with open(BaseTestCase.test_map_path, 'rb') as map:
-        Map.objects.create(name='test_map', file=File(map))
+        Map.objects.create(name='test_map', file=File(map), active=True)
 
     with open(BaseTestCase.test_bot_zip_path, 'rb') as bot_zip:
         Bot.objects.create(user=devadmin, name='devadmin_bot1', active=True, plays_race='T', type='python',
