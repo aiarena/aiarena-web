@@ -311,6 +311,8 @@ WIKI_ACCOUNT_HANDLING = True
 WIKI_ACCOUNT_SIGNUP_ALLOWED = False
 SITE_ID = 1
 
+SITE_PROTOCOL = 'https'
+
 # override any of these settings with an env.py file
 try:
     from aiarena.env import *

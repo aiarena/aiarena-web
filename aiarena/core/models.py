@@ -5,6 +5,7 @@ from enum import Enum
 
 from constance import config
 from django.contrib.auth.models import AbstractUser
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.db import models, transaction, connection
@@ -424,6 +425,7 @@ class Bot(models.Model):
                 '"' + self.name + '" has reached our consecutive crash limit and hence been deactivated.\n'
                 'Please log into ai-arena.net at your convenience to address the issue.\n'
                 'Bot logs are available for download when logged in on the bot''s page here: '
+                + settings.SITE_PROTOCOL + '://' + Site.objects.get_current().domain
                 + reverse('bot', kwargs={'pk': self.id}) + '\n'
                 '\n'
                 'Kind regards,\n'
