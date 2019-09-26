@@ -282,17 +282,17 @@ def run_consecutive_crashes_check(triggering_participant: Participation):
     :return:
     """
 
-    if config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES < 1:
+    if config.BOT_CONSECUTIVE_CRASH_LIMIT < 1:
         return  # Check is disabled
 
     # Get recent match participation records for this bot
     recent_participations = Participation.objects.filter(bot=triggering_participant.bot,
                                                        match__result__isnull=False).order_by(
-        '-match__result__created')[:config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES]
+        '-match__result__created')[:config.BOT_CONSECUTIVE_CRASH_LIMIT]
 
     # if there's not enough participations yet, then exit without action
     count = recent_participations.count()
-    if recent_participations.count() < config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES:
+    if recent_participations.count() < config.BOT_CONSECUTIVE_CRASH_LIMIT:
         return
 
     # if any of the previous results weren't a crash, then exit without action

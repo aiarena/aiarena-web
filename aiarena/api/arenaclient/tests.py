@@ -363,7 +363,7 @@ class ResultsTestCase(LoggedInTestCase):
 
     def test_bot_disable_on_consecutive_crashes(self):
         # This is the feature we're testing, so turn it on
-        config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES = 3
+        config.BOT_CONSECUTIVE_CRASH_LIMIT = 3
 
         self.client.login(username='staff_user', password='x')
 
@@ -372,7 +372,7 @@ class ResultsTestCase(LoggedInTestCase):
         self._create_map('test_map')
 
         # log more crashes than should be allowed
-        for count in range(config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES):
+        for count in range(config.BOT_CONSECUTIVE_CRASH_LIMIT):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
             match = response.data
@@ -401,7 +401,7 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
 
         # once again log more crashes than should be allowed
-        for count in range(config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES):
+        for count in range(config.BOT_CONSECUTIVE_CRASH_LIMIT):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
             match = response.data

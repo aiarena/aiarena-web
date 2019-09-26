@@ -148,8 +148,8 @@ CONSTANCE_CONFIG = {
     'MAX_ACTIVE_ROUNDS': (1, 'The maximum rounds the ladder can run simultaneously. '
                              'The ladder will stop generating new rounds once this number '
                              'is reached until previous active rounds are finished off.'),
-    'DISABLE_BOT_ON_CONSECUTIVE_CRASHES': (0, 'The number of consecutive crashes after which a bot is disabled. '
-                                         'Any value below 1 will disable this check. Default: 0'),
+    'BOT_CONSECUTIVE_CRASH_LIMIT': (0, 'The number of consecutive crashes after which a bot is deactivated. '
+                                       'Any value below 1 will disable the check for this feature. Default: 0'),
     'MAX_USER_BOT_COUNT': (2, 'Maximum bots a user can have uploaded.'),
     'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE': (1, 'Maximum active bots a user can have per race.'),
     'ARENACLIENT_DEBUG_ENABLED': (False, 'Enable debugging for arena clients. '
@@ -163,7 +163,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'Bot Options': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
     'General Options': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL'),
     'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',
-                       'DISABLE_BOT_ON_CONSECUTIVE_CRASHES', ),
+                       'BOT_CONSECUTIVE_CRASH_LIMIT',),
 }
 
 LOGGING = {
@@ -241,6 +241,8 @@ SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts")
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
+
+# This is the default address to send emails from
 DEFAULT_FROM_EMAIL = 'noreply@localhost'
 
 # Save emails to file by default. This will be overridden in production.
