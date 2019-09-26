@@ -26,8 +26,8 @@ class ApiReadTestCase(FullDataSetTestCase):
         response = self.client.get('/api/matches/')
         self.assertEqual(response.status_code, 200)
 
-    def test_get_api_participants_page(self):
-        response = self.client.get('/api/participants/')
+    def test_get_api_participations_page(self):
+        response = self.client.get('/api/participations/')
         self.assertEqual(response.status_code, 200)
 
     def test_get_api_results_page(self):

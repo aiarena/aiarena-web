@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, serializers
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, Participant
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, Participation
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ bot_include_fields = 'id', 'user', 'name', 'created', 'updated', 'active', 'in_m
                      'current_match', 'elo', 'plays_race', 'type', 'game_display_id',
 map_include_fields = 'id', 'name', 'active',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
-participant_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
+participation_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
 # todo: add 'arenaclient_log',
 result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', \
                         'game_steps', 'submitted_by', 'arenaclient_log',
@@ -86,23 +86,23 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = match_include_fields
 
 
-class ParticipantSerializer(serializers.ModelSerializer):
+class ParticipationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Participant
-        fields = participant_include_fields
+        model = Participation
+        fields = participation_include_fields
 
 
-class ParticipantViewSet(viewsets.ReadOnlyModelViewSet):
+class ParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
-    queryset = Participant.objects.all()
-    serializer_class = ParticipantSerializer
+    queryset = Participation.objects.all()
+    serializer_class = ParticipationSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = participant_include_fields
-    search_fields = participant_include_fields
-    ordering_fields = participant_include_fields
+    filterset_fields = participation_include_fields
+    search_fields = participation_include_fields
+    ordering_fields = participation_include_fields
 
 # todo: bot names are included for the stream to use. Ideally the the stream should properly utilize the API
 class ResultSerializer(serializers.ModelSerializer):
@@ -110,10 +110,10 @@ class ResultSerializer(serializers.ModelSerializer):
     bot2_name = serializers.SerializerMethodField()
 
     def get_bot1_name(self, obj):
-        return obj.match.participant_set.get(participant_number=1).bot.name
+        return obj.match.participation_set.get(participant_number=1).bot.name
 
     def get_bot2_name(self, obj):
-        return obj.match.participant_set.get(participant_number=2).bot.name
+        return obj.match.participation_set.get(participant_number=2).bot.name
 
     class Meta:
         model = Result

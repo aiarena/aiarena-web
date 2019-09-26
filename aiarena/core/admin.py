@@ -38,8 +38,8 @@ class MatchAdmin(admin.ModelAdmin):
     cancel_matches.short_description = "Cancel selected matches"
 
 
-class ParticipantAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in Participant._meta.fields]
+class ParticipationAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Participation._meta.fields]
 
 
 class ResultAdmin(admin.ModelAdmin):
@@ -51,5 +51,5 @@ admin.site.register(Bot, BotAdmin)
 admin.site.register(Map, MapAdmin)
 admin.site.register(Round, RoundAdmin)
 admin.site.register(Match, MatchAdmin)
-admin.site.register(Participant, ParticipantAdmin)
+admin.site.register(Participation, ParticipationAdmin)
 admin.site.register(Result, ResultAdmin)

@@ -6,7 +6,7 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from aiarena import settings
-from aiarena.core.models import Match, Bot, Participant, User, Round, Result
+from aiarena.core.models import Match, Bot, Participation, User, Round, Result
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
@@ -234,14 +234,14 @@ class ResultsTestCase(LoggedInTestCase):
         response = self._post_to_results(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
-        p1 = Participant.objects.get(match_id=match['id'], participant_number=1)
-        p2 = Participant.objects.get(match_id=match['id'], participant_number=2)
+        p1 = Participation.objects.get(match_id=match['id'], participant_number=1)
+        p2 = Participation.objects.get(match_id=match['id'], participant_number=2)
 
         # check bot datas exist
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
         # check hashes
-        match1bot1 = Participant.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        match1bot1 = Participation.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
         if match1bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
@@ -282,7 +282,7 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
-        match3bot1 = Participant.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        match3bot1 = Participation.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
         if match3bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
@@ -296,7 +296,7 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
-        match4bot1 = Participant.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        match4bot1 = Participation.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
         if match4bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
@@ -506,8 +506,8 @@ class EloTestCase(LoggedInTestCase):
             return 'Player1Win' if bot1_id == self.expected_result_sequence[iteration] else 'Player2Win'
 
     def CheckResultantElos(self, match_id, iteration):
-        bot1_participant = Participant.objects.filter(match_id=match_id, bot_id=self.regularUserBot1.id)[0]
-        bot2_participant = Participant.objects.filter(match_id=match_id, bot_id=self.regularUserBot2.id)[0]
+        bot1_participant = Participation.objects.filter(match_id=match_id, bot_id=self.regularUserBot1.id)[0]
+        bot2_participant = Participation.objects.filter(match_id=match_id, bot_id=self.regularUserBot2.id)[0]
 
         self.assertEqual(self.expected_resultant_elos[iteration][0], bot1_participant.resultant_elo)
         self.assertEqual(self.expected_resultant_elos[iteration][1], bot2_participant.resultant_elo)

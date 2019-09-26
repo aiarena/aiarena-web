@@ -99,12 +99,12 @@ class Match(models.Model):
             Match.objects.select_for_update().get(id=self.id)  # lock self to avoid race conditions
             if self.started is None:
                 # is a bot currently in a match?
-                participants = Participant.objects.select_for_update().filter(match=self)
-                for p in participants:
+                participations = Participation.objects.select_for_update().filter(match=self)
+                for p in participations:
                     if p.bot.in_match:
                         return Match.StartResult.BOT_ALREADY_IN_MATCH
 
-                for p in participants:
+                for p in participations:
                     p.bot.enter_match(self)
 
                 self.started = timezone.now()
@@ -116,11 +116,11 @@ class Match(models.Model):
 
     @property
     def participant1(self):
-        return self.participant_set.get(participant_number=1)
+        return self.participation_set.get(participant_number=1)
 
     @property
     def participant2(self):
-        return self.participant_set.get(participant_number=2)
+        return self.participation_set.get(participant_number=2)
 
     @staticmethod
     def _queue_round_robin_matches_for_all_active_bots():
@@ -153,7 +153,7 @@ class Match(models.Model):
             cursor.execute(
                 "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ".format(Match._meta.db_table,
                                                                                           Round._meta.db_table,
-                                                                                          Participant._meta.db_table,
+                                                                                          Participation._meta.db_table,
                                                                                           Bot._meta.db_table,
                                                                                           Map._meta.db_table))
             try:
@@ -186,9 +186,9 @@ class Match(models.Model):
     @staticmethod
     def create(round, map, bot1, bot2):
         match = Match.objects.create(map=map, round=round)
-        # create match participants
-        Participant.objects.create(match=match, participant_number=1, bot=bot1)
-        Participant.objects.create(match=match, participant_number=2, bot=bot2)
+        # create match participations
+        Participation.objects.create(match=match, participant_number=1, bot=bot1)
+        Participation.objects.create(match=match, participant_number=2, bot=bot2)
         return match
 
     # todo: let us specify the map
@@ -219,12 +219,12 @@ class Match(models.Model):
             # attempt to kick the bots from the match
             if match.started:
                 try:
-                    bot1 = match.participant_set.select_related().select_for_update().get(participant_number=1).bot
+                    bot1 = match.participation_set.select_related().select_for_update().get(participant_number=1).bot
                     bot1.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
                 try:
-                    bot2 = match.participant_set.select_related().select_for_update().get(participant_number=2).bot
+                    bot2 = match.participation_set.select_related().select_for_update().get(participant_number=2).bot
                     bot2.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
@@ -480,7 +480,7 @@ def match_log_upload_to(instance, filename):
     return '/'.join(['match-logs', str(instance.id)])
 
 
-class Participant(models.Model):
+class Participation(models.Model):
     RESULT_TYPES = (
         ('none', 'None'),
         ('win', 'Win'),
@@ -676,8 +676,8 @@ class Result(models.Model):
             raise Exception('There was no winner or loser for this match.')
 
     def get_participants(self):
-        first = Participant.objects.get(match=self.match, participant_number=1)
-        second = Participant.objects.get(match=self.match, participant_number=2)
+        first = Participation.objects.get(match=self.match, participant_number=1)
+        second = Participation.objects.get(match=self.match, participant_number=2)
         return first, second
 
     def get_participant_bots(self):
@@ -687,8 +687,8 @@ class Result(models.Model):
     def save(self, *args, **kwargs):
         # set winner
         if self.has_winner():
-            self.winner = Participant.objects.get(match=self.match,
-                                                  participant_number=self.winner_participant_number()).bot
+            self.winner = Participation.objects.get(match=self.match,
+                                                    participant_number=self.winner_participant_number()).bot
 
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)

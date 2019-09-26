@@ -24,7 +24,7 @@ class StatsGenerator:
                 cb.name, 
                 avg(cp.resultant_elo) as elo, 
                 date(cm.created) as date 
-                from core_participant cp
+                from core_participation cp
                     left join core_match cm on cp.match_id = cm.id
                     left join core_bot cb on cp.bot_id = cb.id
                 where resultant_elo is not null 
