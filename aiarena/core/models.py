@@ -1,7 +1,7 @@
 import logging
+import time
 import uuid
 from enum import Enum
-import time
 
 from constance import config
 from django.contrib.auth.models import AbstractUser
@@ -310,7 +310,8 @@ class Bot(models.Model):
                 and self.active:
             raise ValidationError(
                 'Too many active bots playing that race already exist for this user.'
-                ' Each user can only have ' + str(config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
+                ' Each user can only have ' + str(
+                    config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
 
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
@@ -409,6 +410,11 @@ class Bot(models.Model):
         elif self.type == 'python':
             return 'run.py'
 
+    def disable_and_sent_alert(self):
+        self.active = False
+        self.save()
+        # todo: sent email
+
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
 _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
@@ -475,6 +481,22 @@ def match_log_upload_to(instance, filename):
 
 
 class Participant(models.Model):
+    RESULT_TYPES = (
+        ('none', 'None'),
+        ('win', 'Win'),
+        ('loss', 'Loss'),
+        ('tie', 'Tie'),
+    )
+    CAUSE_TYPES = (
+        ('game_rules', 'Game Rules'),  # This represents the game handing out a result
+        ('crash', 'Crash'),  # A bot crashed
+        ('timeout', 'Timeout'),  # A bot timed out
+        ('race_mismatch', 'Race Mismatch'),  # A bot joined the match with the wrong race
+        ('match_cancelled', 'Match Cancelled'),  # The match was cancelled
+        ('initialization_failure', 'Initialization Failure'),  # A bot failed to initialize
+        ('error', 'Error'), # There was an unspecified error running the match (this should only be paired with a 'none' result)
+
+    )
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     participant_number = models.PositiveSmallIntegerField()
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='match_participations')
@@ -483,6 +505,8 @@ class Participant(models.Model):
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                  blank=True, null=True)
     avg_step_time = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
+    result = models.CharField(max_length=32, choices=RESULT_TYPES, blank=True, null=True)
+    result_cause = models.CharField(max_length=32, choices=CAUSE_TYPES, blank=True, null=True)
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo
@@ -495,9 +519,44 @@ class Participant(models.Model):
     def step_time_ms(self):
         return (self.avg_step_time if self.avg_step_time is not None else 0) * 1000
 
+    @property
+    def crashed(self):
+        return self.result == 'loss' and self.result_cause in ['crash', 'timeout', 'initialization_failure']
+
+    def calculate_relative_result(self, result_type):
+        if result_type in ['MatchCancelled', 'InitializationError', 'Error']:
+            return 'none'
+        elif result_type in ['Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2RaceMismatch']:
+            return 'win' if self.participant_number == 1 else 'loss'
+        elif result_type in ['Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1RaceMismatch']:
+            return 'win' if self.participant_number == 2 else 'loss'
+        elif result_type == 'Tie':
+            return 'tie'
+        else:
+            raise Exception('Unrecognized result type!')
+
+    def calculate_relative_result_cause(self, result_type):
+        if result_type in ['Player1Win', 'Player2Win', 'Tie']:
+            return 'game_rules'
+        elif result_type in ['Player1Crash', 'Player2Crash']:
+            return 'crash'
+        elif result_type in ['Player1TimeOut', 'Player2TimeOut']:
+            return 'timeout'
+        elif result_type in ['Player1RaceMismatch', 'Player2RaceMismatch']:
+            return 'race_mismatch'
+        elif result_type == 'MatchCancelled':
+            return 'match_cancelled'
+        elif result_type == 'InitializationError':
+            return 'initialization_failure'
+        elif result_type == 'Error':
+            return 'error'
+        else:
+            raise Exception('Unrecognized result type!')
+
 
 def replay_file_upload_to(instance, filename):
-    return '/'.join(['replays', f'{instance.match_id}_{instance.match.participant1.bot.name}vs{instance.match.participant2.bot.name}_{instance.match.map.name}.SC2Replay'])
+    return '/'.join(['replays',
+                     f'{instance.match_id}_{instance.match.participant1.bot.name}vs{instance.match.participant2.bot.name}_{instance.match.map.name}.SC2Replay'])
 
 
 def arenaclient_log_upload_to(instance, filename):
@@ -508,8 +567,7 @@ class Result(models.Model):
     TYPES = (
         ('MatchCancelled', 'MatchCancelled'),
         ('InitializationError', 'InitializationError'),
-        ('Timeout', 'Timeout'),
-        ('ProcessingReplay', 'ProcessingReplay'),
+        ('Error', 'Error'),
         ('Player1Win', 'Player1Win'),
         ('Player1Crash', 'Player1Crash'),
         ('Player1TimeOut', 'Player1TimeOut'),
@@ -519,7 +577,6 @@ class Result(models.Model):
         ('Player2TimeOut', 'Player2TimeOut'),
         ('Player2RaceMismatch', 'Player2RaceMismatch'),
         ('Tie', 'Tie'),
-        ('Error', 'Error'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
@@ -539,7 +596,7 @@ class Result(models.Model):
 
     @property
     def game_time_formatted(self):
-        return time.strftime("%H:%M:%S",time.gmtime(self.game_steps/22.4))
+        return time.strftime("%H:%M:%S", time.gmtime(self.game_steps / 22.4))
 
     @property
     def participant1(self):
@@ -548,7 +605,6 @@ class Result(models.Model):
     @property
     def participant2(self):
         return self.match.participant2
-
 
     # this is not checked while the replay corruption is happening
     def validate_replay_file_requirement(self):
@@ -592,6 +648,23 @@ class Result(models.Model):
 
     def is_tie(self):
         return self.type == 'Tie'
+
+    def is_timeout(self):
+        return self.type == 'Player1TimeOut' or self.type == 'Player2TimeOut'
+
+    def is_crash(self):
+        return self.type == 'Player1Crash' or self.type == 'Player2Crash'
+
+    def is_crash_or_timeout(self):
+        return self.is_crash() or self.is_timeout()
+
+    def get_causing_participant_of_crash_or_timeout_result(self):
+        if self.type == 'Player1TimeOut' or self.type == 'Player1Crash':
+            return self.participant1
+        elif self.type == 'Player2TimeOut' or self.type == 'Player2Crash':
+            return self.participant2
+        else:
+            return None
 
     def get_winner_loser_bots(self):
         bot1, bot2 = self.get_participant_bots()

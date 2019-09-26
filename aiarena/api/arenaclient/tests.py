@@ -361,6 +361,66 @@ class ResultsTestCase(LoggedInTestCase):
         response = self.client.get('/api/arenaclient/results/')
         self.assertEqual(response.status_code, 403)
 
+    def test_bot_disable_on_consecutive_crashes(self):
+        # This is the feature we're testing, so turn it on
+        config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES = 3
+
+        self.client.login(username='staff_user', password='x')
+
+        bot1 = self._create_active_bot(self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
+        self._create_map('test_map')
+
+        # log more crashes than should be allowed
+        for count in range(config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+            match = response.data
+            # always make the same bot crash
+            if match['bot1']['name'] == bot1.name:
+                response = self._post_to_results(match['id'], 'Player1Crash')
+            else:
+                response = self._post_to_results(match['id'], 'Player2Crash')
+            self.assertEqual(response.status_code, 201)
+
+        # The bot should be disabled
+        bot1.refresh_from_db()
+        self.assertFalse(bot1.active)
+
+        # not enough active bots
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 409)
+
+        # Post a successful match, then retry the crashes to make sure the previous ones don't affect the check
+        bot1.active = True
+        bot1.save()
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        match = response.data
+        response = self._post_to_results(match['id'], 'Player2Win')
+        self.assertEqual(response.status_code, 201)
+
+        # once again log more crashes than should be allowed
+        for count in range(config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+            match = response.data
+            # always make the same bot crash
+            if match['bot1']['name'] == bot1.name:
+                response = self._post_to_results(match['id'], 'Player1Crash')
+            else:
+                response = self._post_to_results(match['id'], 'Player2Crash')
+            self.assertEqual(response.status_code, 201)
+
+        # The bot should be disabled
+        bot1.refresh_from_db()
+        self.assertFalse(bot1.active)
+
+        # not enough active bots
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 409)
+
+
 
 class EloTestCase(LoggedInTestCase):
     """

@@ -135,7 +135,7 @@ class SubmitResultBotSerializer(serializers.ModelSerializer):
 class SubmitResultParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
-        fields = 'avg_step_time', 'match_log'
+        fields = 'avg_step_time', 'match_log', 'result', 'result_cause'
 
 
 # Front facing serializer used by the view. Combines the other serializers together.
@@ -191,12 +191,18 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             p1Instance = Participant.objects.get(match_id=serializer.validated_data['match'], participant_number=1)
             participant1 = SubmitResultParticipantSerializer(instance=p1Instance, data={
                 'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
-                'match_log': serializer.validated_data.get('bot1_log')}, partial=True)
+                'match_log': serializer.validated_data.get('bot1_log'),
+                'result': p1Instance.calculate_relative_result(serializer.validated_data['type']),
+                'result_cause': p1Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
+                                                             partial=True)
             participant1.is_valid(raise_exception=True)
             p2Instance = Participant.objects.get(match_id=serializer.validated_data['match'], participant_number=2)
             participant2 = SubmitResultParticipantSerializer(instance=p2Instance, data={
                 'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
-                'match_log': serializer.validated_data.get('bot2_log')}, partial=True)
+                'match_log': serializer.validated_data.get('bot2_log'),
+                'result': p2Instance.calculate_relative_result(serializer.validated_data['type']),
+                'result_cause': p2Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
+                                                             partial=True)
             participant2.is_valid(raise_exception=True)
 
             # validate bots
@@ -254,6 +260,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             if result.match.round is not None:
                 result.match.round.update_if_completed()
 
+            if result.is_crash_or_timeout():
+                run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result())
+
             post_result_to_discord_bot(result)
 
             headers = self.get_success_headers(serializer.data)
@@ -263,3 +272,33 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     # todo: use a model form
     # todo: avoid results being logged against matches not owned by the submitter
+
+
+def run_consecutive_crashes_check(triggering_participant: Participant):
+    """
+    Checks to see whether the last X results for a participant are crashes and, if so, disables the bot
+    and sends an alert to the bot author
+    :param triggering_participant: The participant who triggered this check and whose bot we should run the check for.
+    :return:
+    """
+
+    if config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES < 1:
+        return  # Check is disabled
+
+    # Get recent match participation records for this bot
+    recent_participants = Participant.objects.filter(bot=triggering_participant.bot,
+                                                     match__result__isnull=False).order_by(
+        '-match__result__created')[:config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES]
+
+    # if there's not enough participations yet, then exit without action
+    count = recent_participants.count()
+    if recent_participants.count() < config.DISABLE_BOT_ON_CONSECUTIVE_CRASHES:
+        return
+
+    # if any of the previous results weren't a crash, then exit without action
+    for recent_participant in recent_participants:
+        if not recent_participant.crashed:
+            return
+
+    # If we get to here, all the results were crashes, so take action
+    triggering_participant.bot.disable_and_sent_alert()
