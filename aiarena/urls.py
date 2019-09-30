@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import debug_toolbar
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
@@ -23,6 +24,7 @@ from django.views.generic.base import TemplateView
 from aiarena.core import views as core_views
 
 urlpatterns = [  # todo: replace usage of url with path for all these
+                  path('__debug__/', include(debug_toolbar.urls)),
                   path('admin/', admin.site.urls),
                   url(r'^accounts/', include('registration.backends.default.urls')),
                   url(r'^accounts/', include('django.contrib.auth.urls')),

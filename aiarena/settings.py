@@ -31,6 +31,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
+INTERNAL_IPS = ['127.0.0.1']
+
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
@@ -82,9 +84,11 @@ INSTALLED_APPS = [
     'wiki.plugins.help.apps.HelpConfig',
     'constance',
     'constance.backends.database',  # this should be removed by any env.py file overriding the constance backend
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
