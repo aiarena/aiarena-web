@@ -22,47 +22,55 @@
                 <td>{{ result.match.as_html_link |safe }}</td>
                 <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
 
-                <td style="padding-right: 0">
-                    {% if result.winner == result.participant1.bot %}
-                        <b>[{{ result.participant1.bot.as_html_link |safe }}]</b>
-                    {% else %}
-                        {{ result.participant1.bot.as_html_link |safe }}
-                    {% endif %}
-                </td>
+                {% for p in result.match.participants %}
+                    {% if p.participant_number == 1 %}
+                        <td style="padding-right: 0">
+                            {% if p.winner == result.test.bot %}
+                                <b>[{{ p.bot.as_html_link |safe }}]</b>
+                            {% else %}
+                                {{ p.bot.as_html_link |safe }}
+                            {% endif %}
+                        </td>
 
-                <td style="padding-left: 0">
-                    {{ result.participant1.elo_change |format_elo_change }}
-                    {% if result.participant1.elo_change and result.participant1.elo_change != 0 %}
-                        {% if result.participant1.elo_change > 0 %}
-                            <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
-                        {% elif result.participant1.elo_change < 0 %}
-                            <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
-                        {% endif %}
-                    {% else %}
-                        <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                        <td style="padding-left: 0">
+                            {{ p.elo_change |format_elo_change }}
+                            {% if p.elo_change and p.elo_change != 0 %}
+                                {% if p.elo_change > 0 %}
+                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                                {% elif p.elo_change < 0 %}
+                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                                {% endif %}
+                            {% else %}
+                                <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                            {% endif %}
+                        </td>
                     {% endif %}
-                </td>
+                {% endfor %}
 
-                <td style="padding-right: 0">
-                    {% if result.winner == result.participant2.bot %}
-                        <b>[{{ result.participant2.bot.as_html_link |safe }}]</b>
-                    {% else %}
-                        {{ result.participant2.bot.as_html_link |safe }}
+                {% for p in result.match.participants %}
+                    {% if p.participant_number == 2 %}
+                        <td style="padding-right: 0">
+                            {% if result.winner == p.bot %}
+                                <b>[{{ p.bot.as_html_link |safe }}]</b>
+                            {% else %}
+                                {{ p.bot.as_html_link |safe }}
+                            {% endif %}
+                        </td>
+        
+                        <td style="padding-left: 0">
+                            {{ p.elo_change |format_elo_change }}
+                            {% if p.elo_change and p.elo_change != 0 %}
+                                {% if p.elo_change > 0 %}
+                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                                {% elif p.elo_change < 0 %}
+                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                                {% endif %}
+                            {% else %}
+                                <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                            {% endif %}
+                        </td>
                     {% endif %}
-                </td>
-
-                <td style="padding-left: 0">
-                    {{ result.participant2.elo_change |format_elo_change }}
-                    {% if result.participant2.elo_change and result.participant2.elo_change != 0 %}
-                        {% if result.participant2.elo_change > 0 %}
-                            <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
-                        {% elif result.participant2.elo_change < 0 %}
-                            <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
-                        {% endif %}
-                    {% else %}
-                        <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
-                    {% endif %}
-                </td>
+                {% endfor %}
 
                 <td>{{ result.type }}</td>
 

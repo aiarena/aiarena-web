@@ -3,7 +3,7 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import F
+from django.db.models import F, Prefetch
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import View
@@ -199,7 +199,7 @@ class Ranking(ListView):
 
 
 class Results(ListView):
-    queryset = Result.objects.all().prefetch_related('match__participant_set').order_by('-created')[:100]
+    queryset = Result.objects.all()[:100].prefetch_related(Prefetch('match__participant_set', Participant.objects.all().prefetch_related('bot'), to_attr='participants'))
     template_name = 'results.html'
 
 
