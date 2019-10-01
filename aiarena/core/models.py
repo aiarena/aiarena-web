@@ -52,6 +52,8 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     service_account = models.BooleanField(default=False)
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='None')
+    discord_user = models.CharField(max_length=32, blank=True, null=True)
+    discord_tag = models.CharField(max_length=4, blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('author', kwargs={'pk': self.pk})

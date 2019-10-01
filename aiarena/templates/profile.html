@@ -2,41 +2,50 @@
 {% load i18n %}
 
 {% block content %}
-<div class="divider"><span></span><span><h2>Profile</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>Profile</h2></span><span></span></div>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
-<div id="author_detail">
+    <div id="author_detail">
 
-    {% load avatar_tags %}
-    <div class="author-detail-img">
-
-        <a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a><br>Click to change
+        {% load avatar_tags %}
+        <div class="author-detail-img">
+            <a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a><br>Click to change
         </div>
-    <div class="author-detail-info">
-    <h2>{{ user.username }}</h2>
+        <div class="author-detail-info">
+            <h2>{{ user.username }}</h2>
+            <h3>{{ user.first_name }} {{ user.last_name }}</h3>
 
-        <b>Joined</b><br/>
-        {{ user.date_joined|date:"d. N Y" }}
-        <br/>
+            <b>Joined</b><br/>
+            {{ user.date_joined|date:"d. N Y" }}
+            <br/>
 
-    <b>Last login</b><br/>
-    {{ user.last_login|date:"d. N Y" }}
+            <b>Last login</b><br/>
+            {{ user.last_login|date:"d. N Y" }}<br/>
+            <br/>
+            <a href="{% url 'profile_edit' %}">edit</a>
         </div>
-
-</div>
+    </div>
 
 
     <br>
-<div class="divider"><span></span><span><h2>Bots ({{ bot_list.count }}/{{ max_user_bot_count }})</h2></span><span></span></div>
+    <div class="divider">
+        <span></span><span><h2>Bots ({{ bot_list.count }}/{{ max_user_bot_count }})</h2></span><span></span></div>
     <h4 style="margin-left:65px;">Limited to {{ max_active_per_race_bot_count }} active bot(s) per race.</h4>
     <table id="bot_table">
         <thead>
-            <td><b>Name</b></td>
-            <td><b>Race</b></td>
-            <td><b>Type</b></td>
-            <td><b>Active</b></td>
-            <td><b>Bot Zip</b></td>
-            <td><b>Data</b></td>
-            <td></td>
+        <td><b>Name</b></td>
+        <td><b>Race</b></td>
+        <td><b>Type</b></td>
+        <td><b>Active</b></td>
+        <td><b>Bot Zip</b></td>
+        <td><b>Data</b></td>
+        <td></td>
         </thead>
         {% for bot in bot_list %}
             <tr>

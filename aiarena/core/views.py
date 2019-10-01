@@ -10,21 +10,13 @@ from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
 
-from aiarena import settings
 from aiarena.core.models import Bot, Result, User, Round, Match, Participant
 
 
-class UserProfileForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ['first_name', 'last_name']
-
-
-class UserProfile(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
-    form_class = UserProfileForm
+class UserProfile(LoginRequiredMixin, DetailView):
+    model = User
     redirect_field_name = 'next'
     template_name = 'profile.html'
-    success_message = "Profile saved successfully"
 
     def get_login_url(self):
         return reverse('login')
@@ -42,6 +34,28 @@ class UserProfile(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
         context['max_active_per_race_bot_count'] = config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
         return context
+
+
+class UserProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'discord_user', 'discord_tag']
+
+
+class UserProfileEdit(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    form_class = UserProfileEditForm
+    redirect_field_name = 'next'
+    template_name = 'profile_edit.html'
+    success_message = "Profile saved successfully"
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('profile')
+
+    def get_object(self, *args, **kwargs):
+        return self.request.user
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
@@ -199,7 +213,8 @@ class Ranking(ListView):
 
 
 class Results(ListView):
-    queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(Prefetch('match__participant_set', Participant.objects.all().prefetch_related('bot'), to_attr='participants'))
+    queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(
+        Prefetch('match__participant_set', Participant.objects.all().prefetch_related('bot'), to_attr='participants'))
     template_name = 'results.html'
 
 
@@ -277,4 +292,3 @@ class MatchQueue(View):
 class MatchDetail(DetailView):
     model = Match
     template_name = 'match.html'
-
