@@ -50,7 +50,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   url('avatar/', include('avatar.urls')),
                   path('profile/', core_views.UserProfile.as_view(), name='profile'),
-                  path('profile/edit/', core_views.UserProfileEdit.as_view(), name='profile_edit'),
+                  path('profile/edit/', core_views.UserProfileUpdate.as_view(), name='profile_edit'),
                   path('notifications/', include('django_nyt.urls')),
                   path('wiki/', include('wiki.urls')),
               ] + static(settings.MEDIA_URL,

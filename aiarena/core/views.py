@@ -36,14 +36,14 @@ class UserProfile(LoginRequiredMixin, DetailView):
         return context
 
 
-class UserProfileEditForm(forms.ModelForm):
+class UserProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'discord_user', 'discord_tag']
 
 
-class UserProfileEdit(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
-    form_class = UserProfileEditForm
+class UserProfileUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    form_class = UserProfileUpdateForm
     redirect_field_name = 'next'
     template_name = 'profile_edit.html'
     success_message = "Profile saved successfully"
