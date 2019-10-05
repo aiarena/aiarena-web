@@ -435,7 +435,6 @@ def skip_saving_bot_files(sender, instance, **kwargs):
         instance.bot_data = None
 
 
-# todo: currently this doesn't wipe the bot_data hash if the data file is being cleared. Ideally it should.
 @receiver(post_save, sender=Bot)
 def save_bot_files(sender, instance, created, **kwargs):
     # bot zip
@@ -470,6 +469,11 @@ def save_bot_files(sender, instance, created, **kwargs):
         bot_data_hash = calculate_md5_django_filefield(instance.bot_data)
         if instance.bot_data_md5hash != bot_data_hash:
             instance.bot_data_md5hash = bot_data_hash
+            post_save.disconnect(save_bot_files, sender=sender)
+            instance.save()
+            post_save.connect(save_bot_files, sender=sender)
+    elif instance.bot_data_md5hash is not None:
+            instance.bot_data_md5hash = None
             post_save.disconnect(save_bot_files, sender=sender)
             instance.save()
             post_save.connect(save_bot_files, sender=sender)

@@ -281,7 +281,7 @@ class ResultsTestCase(LoggedInTestCase):
         response = self._post_to_results_no_bot1_data(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
-        # check hashes - nothing should have changed
+        # check hashes - nothing should have changed.
         match3bot1 = Participant.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
         if match3bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
@@ -289,6 +289,10 @@ class ResultsTestCase(LoggedInTestCase):
         else:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+
+        # ensure no files got wiped
+        self.assertTrue(Bot.objects.get(id=bot1.id).bot_data)
+        self.assertTrue(Bot.objects.get(id=bot2.id).bot_data)
 
         # post a standard result with no bot2 data
         match = self._post_to_matches().data
