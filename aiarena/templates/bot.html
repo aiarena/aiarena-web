@@ -27,6 +27,7 @@
                 <td><b>Active</b></td>
                 <td><b>Bot Zip</b></td>
                 <td><b>Bot data</b></td>
+                <td><b>Last Updated</b></td>
                 {# Bot author edit link - blank header#}
                 {% if request.user == bot.user %}
                     <td></td>
@@ -54,6 +55,7 @@
                 {% else %}
                     <td>--</td>
                 {% endif %}
+                <td>{{ bot.bot_zip_updated }}</td>
                 {# Bot author edit link #}
                 {% if request.user == bot.user %}
                     <td>[<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]</td>

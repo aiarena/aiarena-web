@@ -282,7 +282,6 @@ class Bot(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
     current_match = models.ForeignKey(Match, on_delete=models.PROTECT, blank=True, null=True,
@@ -290,6 +289,7 @@ class Bot(models.Model):
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=BOT_ZIP_MAX_SIZE, validators=[validate_bot_zip_file, ])
+    bot_zip_updated = models.DateTimeField(editable=False)
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     bot_zip_publicly_downloadable = models.BooleanField(default=False)
     # todo: set a file size limit which will be checked on result submission
@@ -426,6 +426,7 @@ def skip_saving_bot_files(sender, instance, **kwargs):
     if not instance.pk and not hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         setattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD, instance.bot_zip)
         instance.bot_zip = None
+        instance.bot_zip_updated = timezone.now()
 
     # bot data
     if not instance.pk and not hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD) and instance.bot_data:
@@ -458,6 +459,7 @@ def save_bot_files(sender, instance, created, **kwargs):
         bot_zip_hash = calculate_md5_django_filefield(instance.bot_zip)
         if instance.bot_zip_md5hash != bot_zip_hash:
             instance.bot_zip_md5hash = bot_zip_hash
+            instance.bot_zip_updated = timezone.now()
             post_save.disconnect(save_bot_files, sender=sender)
             instance.save()
             post_save.connect(save_bot_files, sender=sender)
