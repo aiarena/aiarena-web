@@ -1,7 +1,7 @@
 import logging
+import time
 import uuid
 from enum import Enum
-import time
 
 from constance import config
 from django.contrib.auth.models import AbstractUser
@@ -312,7 +312,8 @@ class Bot(models.Model):
                 and self.active:
             raise ValidationError(
                 'Too many active bots playing that race already exist for this user.'
-                ' Each user can only have ' + str(config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
+                ' Each user can only have ' + str(
+                    config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
 
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
@@ -479,8 +480,6 @@ def save_bot_files(sender, instance, created, **kwargs):
             post_save.connect(save_bot_files, sender=sender)
 
 
-
-
 def match_log_upload_to(instance, filename):
     return '/'.join(['match-logs', str(instance.id)])
 
@@ -508,7 +507,11 @@ class Participant(models.Model):
 
 
 def replay_file_upload_to(instance, filename):
-    return '/'.join(['replays', f'{instance.match_id}_{instance.match.participant1.bot.name}vs{instance.match.participant2.bot.name}_{instance.match.map.name}.SC2Replay'])
+    return '/'.join(['replays',
+                     f'{instance.match_id}'
+                     f'_{instance.match.participant_set.get(participant_number=1).bot.name}'
+                     f'vs{instance.match.participant_set.get(participant_number=2).bot.name}'
+                     f'_{instance.match.map.name}.SC2Replay'])
 
 
 def arenaclient_log_upload_to(instance, filename):
@@ -550,7 +553,7 @@ class Result(models.Model):
 
     @property
     def game_time_formatted(self):
-        return time.strftime("%H:%M:%S",time.gmtime(self.game_steps/22.4))
+        return time.strftime("%H:%M:%S", time.gmtime(self.game_steps / 22.4))
 
     @property
     def participant1(self):
@@ -559,7 +562,6 @@ class Result(models.Model):
     @property
     def participant2(self):
         return self.match.participant2
-
 
     # this is not checked while the replay corruption is happening
     def validate_replay_file_requirement(self):
