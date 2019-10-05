@@ -433,7 +433,6 @@ def skip_saving_bot_files(sender, instance, **kwargs):
         instance.bot_data = None
 
 
-# todo: currently this doesn't wipe the bot_data hash if the data file is being cleared. Ideally it should.
 @receiver(post_save, sender=Bot)
 def save_bot_files(sender, instance, created, **kwargs):
     # bot zip
@@ -470,6 +469,14 @@ def save_bot_files(sender, instance, created, **kwargs):
             post_save.disconnect(save_bot_files, sender=sender)
             instance.save()
             post_save.connect(save_bot_files, sender=sender)
+    else:  # Wipe the hash if no bot_data
+        if instance.bot_data_md5hash is not None:
+            instance.bot_data_md5hash = None
+            post_save.disconnect(save_bot_files, sender=sender)
+            instance.save()
+            post_save.connect(save_bot_files, sender=sender)
+
+
 
 
 def match_log_upload_to(instance, filename):
