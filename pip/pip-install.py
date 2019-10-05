@@ -1,6 +1,7 @@
 # pip-install.py
 # This script will run pip install for the ENVIRONMENT_TYPE configured in ./aiarena/settings
 
+import optparse
 import os
 import sys
 from subprocess import run
@@ -14,15 +15,11 @@ _LOCAL_DIRECTORY = os.path.dirname(__file__)
 _STANDARD_REQUIREMENTS_FILE = os.path.join(_LOCAL_DIRECTORY, "requirements.txt")
 _ENVIRONMENT_REQUIREMENTS_FILE = os.path.join(_LOCAL_DIRECTORY, f"requirements.{ENVIRONMENT_TYPE.name}.txt")
 _DEFAULT_PIP_BINARY = "pip3"
+_DEFAULT_PYTHON_BINARY = "python3"
 
 # Require Python 3.7
 _PYTHON_REQUIRED_VERSION_MAJOR = 3
 _PYTHON_REQUIRED_VERSION_MINOR = 7
-
-
-def print_usage():
-    print("Usage: python pip-install.py [pip_binary]" + os.linesep
-          + "\tpip_binary: The path to or name of the PIP binary to use. Default: pip3")
 
 
 def verify_python_version():
@@ -31,18 +28,22 @@ def verify_python_version():
                                                                                 _PYTHON_REQUIRED_VERSION_MINOR))
 
 
-def run_install(pip_binary_name):
+def run_install(pip_binary_name, python_binary_name):
     # requirements - standard across all environments
     run(pip_binary_name + " install -r " + _STANDARD_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
     # environment type specific requirements
     run(pip_binary_name + " install -r " + _ENVIRONMENT_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
+    # Run django-discord-bind setup
+    run(python_binary_name + " ../django-discord-bind/setup.py install", shell=True, check=True)
+
 
 if __name__ == "__main__":
-    if len(sys.argv) == 1:
-        run_install(_DEFAULT_PIP_BINARY)
-    elif sys.argv[1] != '--help':
-        run_install(sys.argv[1])
-    else:
-        print_usage()
+    parser = optparse.OptionParser()
+    parser.set_defaults(pip=_DEFAULT_PIP_BINARY, python=_DEFAULT_PYTHON_BINARY)
+    parser.add_option('--pip', dest='pip')
+    parser.add_option('--python', dest='python')
+    (options, args) = parser.parse_args()
+
+    run_install(options.pip, options.python)
