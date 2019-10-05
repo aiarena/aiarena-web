@@ -85,6 +85,8 @@ INSTALLED_APPS = [
     'constance',
     'constance.backends.database',  # this should be removed by any env.py file overriding the constance backend
     'debug_toolbar',
+    'discord_bind',
+    'sslserver',
 ]
 
 MIDDLEWARE = [
@@ -159,12 +161,15 @@ CONSTANCE_CONFIG = {
                                          'It will also propagate the setting to the arena clients'),
     'GETTING_STARTED_URL': ('https://ai-arena.net/wiki/getting-started/',
                             'The URL to send new users to in order to get started.'),
+    'DISCORD_CLIENT_ID' : ('1234', 'Client ID used for Discord OAuth'),
+    'DISCORD_CLIENT_SECRET': ('1234','Client Secret used for Discord OAuth')
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bot Options': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
     'General Options': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL'),
     'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',),
+    'Discord Options': ('DISCORD_CLIENT_ID','DISCORD_CLIENT_SECRET')
 }
 
 LOGGING = {

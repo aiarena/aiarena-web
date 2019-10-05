@@ -53,5 +53,6 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('profile/edit/', core_views.UserProfileUpdate.as_view(), name='profile_edit'),
                   path('notifications/', include('django_nyt.urls')),
                   path('wiki/', include('wiki.urls')),
+                  url(r'^discord/', include('discord_bind.urls')),
               ] + static(settings.MEDIA_URL,
                          document_root=settings.MEDIA_ROOT)  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
