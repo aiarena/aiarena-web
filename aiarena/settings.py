@@ -14,6 +14,8 @@ import os
 from datetime import timedelta
 from enum import Enum
 
+from constance import config
+
 from aiarena.core.utils import Elo, EnvironmentType
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -307,6 +309,18 @@ AVATAR_PROVIDERS = (
     'avatar.providers.PrimaryAvatarProvider',
     'avatar.providers.DefaultAvatarProvider',
 )
+
+
+def get_discord_client_id():
+    return config.DISCORD_CLIENT_ID
+
+
+def get_discord_client_secret():
+    return config.DISCORD_CLIENT_SECRET
+
+
+DISCORD_CLIENT_ID = get_discord_client_id
+DISCORD_CLIENT_SECRET = get_discord_client_secret
 
 ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
