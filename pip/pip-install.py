@@ -36,7 +36,7 @@ def run_install(pip_binary_name, python_binary_name):
     run(pip_binary_name + " install -r " + _ENVIRONMENT_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
     # Run django-discord-bind setup
-    run(python_binary_name + " ../django-discord-bind/setup.py install", shell=True, check=True)
+    run(python_binary_name + " ../django-discord-bind/setup.py install --force", shell=True, check=True)
 
 
 if __name__ == "__main__":
