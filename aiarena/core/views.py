@@ -39,7 +39,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
 class UserProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'discord_user', 'discord_tag']
+        fields = ['first_name', 'last_name']
 
 
 class UserProfileUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):

@@ -321,6 +321,7 @@ def get_discord_client_secret():
 
 DISCORD_CLIENT_ID = get_discord_client_id
 DISCORD_CLIENT_SECRET = get_discord_client_secret
+DISCORD_RETURN_URI = "/profile/"
 
 ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 

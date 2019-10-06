@@ -778,6 +778,38 @@ border: 0;
 background-color: #86c232;
 }
 
+#discord-linked-button {
+    float: right;
+    text-align: center;
+    width: 150px;
+    height: 30px;
+    font-size: 18px;
+    background-color: #878787;
+    color: white;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    border: 0;
+    margin-right: 80px;
+}
+
+#discord-link-button {
+    float: right;
+    text-align: center;
+    width: 150px;
+    height: 30px;
+    font-size: 18px;
+    background-color: #61892f;
+    color: white;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    border: 0;
+    margin-right: 80px;
+}
+
+#discord-link-button:hover {
+    background-color: #86c232;
+}
+
 .registration-form{
     margin-left: 75px;
     margin-right: 75px;
