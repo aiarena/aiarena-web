@@ -14,6 +14,7 @@ from aiarena.settings import ENVIRONMENT_TYPE
 _LOCAL_DIRECTORY = os.path.dirname(__file__)
 _STANDARD_REQUIREMENTS_FILE = os.path.join(_LOCAL_DIRECTORY, "requirements.txt")
 _ENVIRONMENT_REQUIREMENTS_FILE = os.path.join(_LOCAL_DIRECTORY, f"requirements.{ENVIRONMENT_TYPE.name}.txt")
+_PROJECT_ROOT_DIRECTORY = os.path.join(_LOCAL_DIRECTORY, "..")
 _DEFAULT_PIP_BINARY = "pip3"
 _DEFAULT_PYTHON_BINARY = "python3"
 
@@ -36,7 +37,8 @@ def run_install(pip_binary_name, python_binary_name):
     run(pip_binary_name + " install -r " + _ENVIRONMENT_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
     # Run django-discord-bind setup
-    run(python_binary_name + " ../django-discord-bind/setup.py install --force", shell=True, check=True)
+    run(python_binary_name + " " + os.path.join(_PROJECT_ROOT_DIRECTORY, "django-discord-bind/setup.py")
+        + " install --force", shell=True, check=True)
 
 
 if __name__ == "__main__":
