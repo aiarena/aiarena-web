@@ -14,6 +14,8 @@ import os
 from datetime import timedelta
 from enum import Enum
 
+from constance import config
+
 from aiarena.core.utils import Elo, EnvironmentType
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -84,10 +86,13 @@ INSTALLED_APPS = [
     'wiki.plugins.help.apps.HelpConfig',
     'constance',
     'constance.backends.database',  # this should be removed by any env.py file overriding the constance backend
-    'debug_toolbar',
+    'debug_toolbar',  # This will be removed automatically in non-development environments
+    'discord_bind',
+    'sslserver',  # This will be removed automatically in non-development environments
 ]
 
 MIDDLEWARE = [
+    # This will be removed automatically in non-development environments
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -124,7 +129,6 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
-    # Default to allow access only for admin users
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
@@ -159,12 +163,15 @@ CONSTANCE_CONFIG = {
                                          'It will also propagate the setting to the arena clients'),
     'GETTING_STARTED_URL': ('https://ai-arena.net/wiki/getting-started/',
                             'The URL to send new users to in order to get started.'),
+    'DISCORD_CLIENT_ID': ('', 'Client ID used for Discord OAuth'),
+    'DISCORD_CLIENT_SECRET': ('', 'Client Secret used for Discord OAuth')
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bot Options': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
     'General Options': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL'),
     'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',),
+    'Discord Options': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET')
 }
 
 LOGGING = {
@@ -303,6 +310,19 @@ AVATAR_PROVIDERS = (
     'avatar.providers.DefaultAvatarProvider',
 )
 
+
+def get_discord_client_id():
+    return config.DISCORD_CLIENT_ID
+
+
+def get_discord_client_secret():
+    return config.DISCORD_CLIENT_SECRET
+
+
+DISCORD_CLIENT_ID = get_discord_client_id
+DISCORD_CLIENT_SECRET = get_discord_client_secret
+DISCORD_RETURN_URI = "/profile/"
+
 ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
 # django wiki
@@ -316,3 +336,10 @@ try:
 except ImportError as e:
     if e.name != 'aiarena.env':
         raise
+
+if ENVIRONMENT_TYPE != EnvironmentType.DEVELOPMENT:
+    # not required in staging or production
+    INSTALLED_APPS.remove('debug_toolbar')
+    MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
+
+    INSTALLED_APPS.remove('sslserver')

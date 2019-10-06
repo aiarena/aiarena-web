@@ -30,6 +30,15 @@
             <br/>
             <a href="{% url 'profile_edit' %}">edit</a>
         </div>
+        {% if user.discord_user %}
+            <form action="{% url 'discord_bind_index' %}">
+                <input id="discord-linked-button" type="submit" value="Discord Linked" disabled/>
+            </form>
+        {% else %}
+            <form action="{% url 'discord_bind_index' %}">
+                <input id="discord-link-button" type="submit" value="Link Discord" />
+            </form>
+        {% endif %}
     </div>
 
 
