@@ -17,4 +17,3 @@ wiki==0.4.5
 mysql-connector
 matplotlib
 pandas==0.25.0
-django-debug-toolbar

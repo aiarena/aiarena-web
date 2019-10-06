@@ -1,0 +1,3 @@
+[submodule "django-discord-bind"]
+	path = django-discord-bind
+	url = https://github.com/lladdy/django-discord-bind.git
