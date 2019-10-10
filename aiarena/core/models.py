@@ -525,10 +525,12 @@ class Result(models.Model):
         ('Player1Crash', 'Player1Crash'),
         ('Player1TimeOut', 'Player1TimeOut'),
         ('Player1RaceMismatch', 'Player1RaceMismatch'),
+        ('Player1Surrender','Player1Surrender'),
         ('Player2Win', 'Player2Win'),
         ('Player2Crash', 'Player2Crash'),
         ('Player2TimeOut', 'Player2TimeOut'),
         ('Player2RaceMismatch', 'Player2RaceMismatch'),
+        ('Player2Surrender','Player2Surrender'),
         ('Tie', 'Tie'),
         ('Error', 'Error'),
     )
@@ -582,19 +584,23 @@ class Result(models.Model):
             'Player1Win',
             'Player1Crash',
             'Player1TimeOut',
+            'Player1Surrender',
             'Player2Win',
             'Player2Crash',
-            'Player2TimeOut')
+            'Player2TimeOut',
+            'Player2Surrender')
 
     def winner_participant_number(self):
         if self.type in (
                 'Player1Win',
                 'Player2Crash',
-                'Player2TimeOut'):
+                'Player2TimeOut',
+                'Player2Surrender'):
             return 1
         elif self.type in (
                 'Player1Crash',
                 'Player1TimeOut',
+                'Player1Surrender',
                 'Player2Win'):
             return 2
         else:
@@ -605,9 +611,9 @@ class Result(models.Model):
 
     def get_winner_loser_bots(self):
         bot1, bot2 = self.get_participant_bots()
-        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut'):
+        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut','Player2Surrender'):
             return bot1, bot2
-        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut'):
+        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut','Player1Surrender'):
             return bot2, bot1
         else:
             raise Exception('There was no winner or loser for this match.')

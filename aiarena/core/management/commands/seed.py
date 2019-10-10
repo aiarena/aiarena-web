@@ -136,14 +136,14 @@ def run_seed(rounds, token):
         create_result(create_match(devadmin), 'Player1TimeOut', devadmin)  # 4
         create_result_with_bot_data_and_logs(create_match(devadmin), 'Tie', devadmin)  # 5
         create_result(create_match(devadmin), 'Timeout', devadmin)  # 6
-        create_result(create_match(devadmin), 'Player1Win', devadmin)  # 7
+        create_result(create_match(devadmin), 'Player1Surrender', devadmin)  # 7
         create_result(create_match(devadmin), 'Player2Win', devadmin)  # 8
         create_result_with_bot_data_and_logs(create_match(devadmin), 'Player1Crash', devadmin)  # 9
         create_result(create_match(devadmin), 'Player1TimeOut', devadmin)  # 10
         create_result_with_bot_data_and_logs(create_match(devadmin), 'Tie', devadmin)  # 11
         create_result(create_match(devadmin), 'Timeout', devadmin)  # 12
         create_result(create_match(devadmin), 'Player1Win', devadmin)  # 13
-        create_result(create_match(devadmin), 'Player2Win', devadmin)  # 14
+        create_result(create_match(devadmin), 'Player2Surrender', devadmin)  # 14
         create_result_with_bot_data_and_logs(create_match(devadmin), 'Player1Crash', devadmin)  # 15
 
     # one last to tick over into the final round so we don't have an empty match queue
