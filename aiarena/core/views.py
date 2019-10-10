@@ -215,7 +215,7 @@ class Ranking(ListView):
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(
         Prefetch('winner'),
-        Prefetch('match__participation_set', Participant.objects.all().prefetch_related('bot'), to_attr='participants'))
+        Prefetch('match__participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
     template_name = 'results.html'
 
 
@@ -280,7 +280,7 @@ class MatchQueue(View):
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
             F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
                 Prefetch('map'),
-                Prefetch('participant_set', Participant.objects.all().prefetch_related('bot'), to_attr='participants'))
+                Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
 
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
@@ -288,7 +288,7 @@ class MatchQueue(View):
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
                 F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
                 Prefetch('map'),
-                Prefetch('participant_set', Participant.objects.all().prefetch_related('bot'), to_attr='participants'))
+                Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
 
         context = {'round_list': rounds, 'requested_matches': requested_matches}
         return render(request, 'match_queue.html', context)

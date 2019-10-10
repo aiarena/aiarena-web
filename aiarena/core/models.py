@@ -585,8 +585,8 @@ class Participation(models.Model):
 def replay_file_upload_to(instance, filename):
     return '/'.join(['replays',
                      f'{instance.match_id}'
-                     f'_{instance.match.participant_set.get(participant_number=1).bot.name}'
-                     f'vs{instance.match.participant_set.get(participant_number=2).bot.name}'
+                     f'_{instance.match.participation_set.get(participant_number=1).bot.name}'
+                     f'vs{instance.match.participation_set.get(participant_number=2).bot.name}'
                      f'_{instance.match.map.name}.SC2Replay'])
 
 
