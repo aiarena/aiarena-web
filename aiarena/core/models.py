@@ -651,7 +651,7 @@ class Result(models.Model):
 
 
 def elo_graph_upload_to(instance, filename):
-    return '/'.join(['graphs', '{0}.png'.format(instance.id)])
+    return '/'.join(['graphs', '{0}_{1}.png'.format(instance.bot.id, instance.bot.name)])
 
 
 class StatsBots(models.Model):
