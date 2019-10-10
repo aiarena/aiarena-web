@@ -154,10 +154,10 @@ CONSTANCE_CONFIG = {
     'TIMEOUT_MATCHES_AFTER': (
         timedelta(hours=1),
         'How long to wait before the website should time out a running match.', timedelta),
-    'MAX_ACTIVE_ROUNDS': (1, 'The maximum rounds the ladder can run simultaneously. '
+    'MAX_ACTIVE_ROUNDS': (2, 'The maximum rounds the ladder can run simultaneously. '
                              'The ladder will stop generating new rounds once this number '
                              'is reached until previous active rounds are finished off.'),
-    'MAX_USER_BOT_COUNT': (2, 'Maximum bots a user can have uploaded.'),
+    'MAX_USER_BOT_COUNT': (4, 'Maximum bots a user can have uploaded.'),
     'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE': (1, 'Maximum active bots a user can have per race.'),
     'ARENACLIENT_DEBUG_ENABLED': (False, 'Enable debugging for arena clients. '
                                          'This will log extra data in the arena client API. '
