@@ -417,7 +417,7 @@ class Bot(models.Model):
         self.active = False
         self.save()
         try:
-            send_mail(
+            send_mail(  # todo: template this
                 'AI Arena - ' + self.name + ' deactivated due to crashing',
                 'Dear ' + self.user.username + ',\n'
                 '\n'
