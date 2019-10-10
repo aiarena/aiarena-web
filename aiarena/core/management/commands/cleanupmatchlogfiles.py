@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from aiarena.core.models import Participant
+from aiarena.core.models import Participation
 
 
 class Command(BaseCommand):
@@ -25,8 +25,8 @@ class Command(BaseCommand):
         self.stdout.write('Cleaned up {0} logfiles.'.format(self.cleanup_logfiles(days)))
 
     def cleanup_logfiles(self, days):
-        participants = Participant.objects.filter(match_log__isnull=False,
-                                                  match__result__created__lt=timezone.now() - timedelta(days=days))
+        participants = Participation.objects.filter(match_log__isnull=False,
+                                                    match__result__created__lt=timezone.now() - timedelta(days=days))
         for participant in participants:
             participant.match_log.delete()
         return participants.count()

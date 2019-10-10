@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
 
-from aiarena.core.models import Bot, Result, User, Round, Match, Participant
+from aiarena.core.models import Bot, Result, User, Round, Match, Participation
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
@@ -93,7 +93,7 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = Result.objects.filter(match__participant__bot=self.object).order_by('-created')
+        results = Result.objects.filter(match__participation__bot=self.object).order_by('-created')
 
         # paginate the results
         page = self.request.GET.get('page', 1)
@@ -117,8 +117,8 @@ class BotDetail(DetailView):
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
-            result.opponent = result.match.participant_set.exclude(bot=self.object).get()
-            result.me = result.match.participant_set.get(bot=self.object)
+            result.opponent = result.match.participation_set.exclude(bot=self.object).get()
+            result.me = result.match.participation_set.get(bot=self.object)
 
             # convert the type to be relative to this bot
             typeSuffix = ''
@@ -215,7 +215,7 @@ class Ranking(ListView):
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(
         Prefetch('winner'),
-        Prefetch('match__participant_set', Participant.objects.all().prefetch_related('bot'), to_attr='participants'))
+        Prefetch('match__participation_set', Participant.objects.all().prefetch_related('bot'), to_attr='participants'))
     template_name = 'results.html'
 
 
@@ -255,7 +255,7 @@ class BotDataDownloadView(PrivateStorageDetailView):
 
 
 class MatchLogDownloadView(PrivateStorageDetailView):
-    model = Participant
+    model = Participation
     model_file_field = 'match_log'
 
     content_disposition = 'attachment'

@@ -123,7 +123,7 @@ insert into aiarena_beta.core_round_robin_1(bot_id1,bot_id2,map_id)
       select last_insert_id() 
       into   @match_id; 
        
-      insert into aiarena_beta.core_participant 
+      insert into aiarena_beta.core_participation
                   ( 
                               participant_number, 
                               bot_id, 

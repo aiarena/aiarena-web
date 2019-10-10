@@ -5,7 +5,9 @@ from enum import Enum
 
 from constance import config
 from django.contrib.auth.models import AbstractUser
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.db import models, transaction, connection
 from django.db.models import F
 from django.db.models.signals import post_save, pre_save
@@ -15,6 +17,7 @@ from django.utils import timezone
 from django.utils.html import escape
 from private_storage.fields import PrivateFileField
 
+from aiarena import settings
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
@@ -99,12 +102,12 @@ class Match(models.Model):
             Match.objects.select_for_update().get(id=self.id)  # lock self to avoid race conditions
             if self.started is None:
                 # is a bot currently in a match?
-                participants = Participant.objects.select_for_update().filter(match=self)
-                for p in participants:
+                participations = Participation.objects.select_for_update().filter(match=self)
+                for p in participations:
                     if p.bot.in_match:
                         return Match.StartResult.BOT_ALREADY_IN_MATCH
 
-                for p in participants:
+                for p in participations:
                     p.bot.enter_match(self)
 
                 self.started = timezone.now()
@@ -116,11 +119,11 @@ class Match(models.Model):
 
     @property
     def participant1(self):
-        return self.participant_set.get(participant_number=1)
+        return self.participation_set.get(participant_number=1)
 
     @property
     def participant2(self):
-        return self.participant_set.get(participant_number=2)
+        return self.participation_set.get(participant_number=2)
 
     @staticmethod
     def _queue_round_robin_matches_for_all_active_bots():
@@ -153,7 +156,7 @@ class Match(models.Model):
             cursor.execute(
                 "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ".format(Match._meta.db_table,
                                                                                           Round._meta.db_table,
-                                                                                          Participant._meta.db_table,
+                                                                                          Participation._meta.db_table,
                                                                                           Bot._meta.db_table,
                                                                                           Map._meta.db_table))
             try:
@@ -186,9 +189,9 @@ class Match(models.Model):
     @staticmethod
     def create(round, map, bot1, bot2):
         match = Match.objects.create(map=map, round=round)
-        # create match participants
-        Participant.objects.create(match=match, participant_number=1, bot=bot1)
-        Participant.objects.create(match=match, participant_number=2, bot=bot2)
+        # create match participations
+        Participation.objects.create(match=match, participant_number=1, bot=bot1)
+        Participation.objects.create(match=match, participant_number=2, bot=bot2)
         return match
 
     # todo: let us specify the map
@@ -219,12 +222,12 @@ class Match(models.Model):
             # attempt to kick the bots from the match
             if match.started:
                 try:
-                    bot1 = match.participant_set.select_related().select_for_update().get(participant_number=1).bot
+                    bot1 = match.participation_set.select_related().select_for_update().get(participant_number=1).bot
                     bot1.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
                 try:
-                    bot2 = match.participant_set.select_related().select_for_update().get(participant_number=2).bot
+                    bot2 = match.participation_set.select_related().select_for_update().get(participant_number=2).bot
                     bot2.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
@@ -410,6 +413,30 @@ class Bot(models.Model):
         elif self.type == 'python':
             return 'run.py'
 
+    def disable_and_sent_alert(self):
+        self.active = False
+        self.save()
+        try:
+            send_mail(  # todo: template this
+                'AI Arena - ' + self.name + ' deactivated due to crashing',
+                'Dear ' + self.user.username + ',\n'
+                '\n'
+                'We are emailing you to let you know that your bot '
+                '"' + self.name + '" has reached our consecutive crash limit and hence been deactivated.\n'
+                'Please log into ai-arena.net at your convenience to address the issue.\n'
+                'Bot logs are available for download when logged in on the bot''s page here: '
+                + settings.SITE_PROTOCOL + '://' + Site.objects.get_current().domain
+                + reverse('bot', kwargs={'pk': self.id}) + '\n'
+                '\n'
+                'Kind regards,\n'
+                'AI Arena Staff',
+                settings.DEFAULT_FROM_EMAIL,
+                [self.user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.exception(e)
+
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
 _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
@@ -481,7 +508,23 @@ def match_log_upload_to(instance, filename):
     return '/'.join(['match-logs', str(instance.id)])
 
 
-class Participant(models.Model):
+class Participation(models.Model):
+    RESULT_TYPES = (
+        ('none', 'None'),
+        ('win', 'Win'),
+        ('loss', 'Loss'),
+        ('tie', 'Tie'),
+    )
+    CAUSE_TYPES = (
+        ('game_rules', 'Game Rules'),  # This represents the game handing out a result
+        ('crash', 'Crash'),  # A bot crashed
+        ('timeout', 'Timeout'),  # A bot timed out
+        ('race_mismatch', 'Race Mismatch'),  # A bot joined the match with the wrong race
+        ('match_cancelled', 'Match Cancelled'),  # The match was cancelled
+        ('initialization_failure', 'Initialization Failure'),  # A bot failed to initialize
+        ('error', 'Error'), # There was an unspecified error running the match (this should only be paired with a 'none' result)
+
+    )
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     participant_number = models.PositiveSmallIntegerField()
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='match_participations')
@@ -490,6 +533,8 @@ class Participant(models.Model):
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                  blank=True, null=True)
     avg_step_time = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
+    result = models.CharField(max_length=32, choices=RESULT_TYPES, blank=True, null=True)
+    result_cause = models.CharField(max_length=32, choices=CAUSE_TYPES, blank=True, null=True)
 
     def update_resultant_elo(self):
         self.resultant_elo = self.bot.elo
@@ -501,6 +546,40 @@ class Participant(models.Model):
     @property
     def step_time_ms(self):
         return (self.avg_step_time if self.avg_step_time is not None else 0) * 1000
+
+    @property
+    def crashed(self):
+        return self.result == 'loss' and self.result_cause in ['crash', 'timeout', 'initialization_failure']
+
+    def calculate_relative_result(self, result_type):
+        if result_type in ['MatchCancelled', 'InitializationError', 'Error']:
+            return 'none'
+        elif result_type in ['Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2RaceMismatch']:
+            return 'win' if self.participant_number == 1 else 'loss'
+        elif result_type in ['Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1RaceMismatch']:
+            return 'win' if self.participant_number == 2 else 'loss'
+        elif result_type == 'Tie':
+            return 'tie'
+        else:
+            raise Exception('Unrecognized result type!')
+
+    def calculate_relative_result_cause(self, result_type):
+        if result_type in ['Player1Win', 'Player2Win', 'Tie']:
+            return 'game_rules'
+        elif result_type in ['Player1Crash', 'Player2Crash']:
+            return 'crash'
+        elif result_type in ['Player1TimeOut', 'Player2TimeOut']:
+            return 'timeout'
+        elif result_type in ['Player1RaceMismatch', 'Player2RaceMismatch']:
+            return 'race_mismatch'
+        elif result_type == 'MatchCancelled':
+            return 'match_cancelled'
+        elif result_type == 'InitializationError':
+            return 'initialization_failure'
+        elif result_type == 'Error':
+            return 'error'
+        else:
+            raise Exception('Unrecognized result type!')
 
 
 def replay_file_upload_to(instance, filename):
@@ -519,8 +598,7 @@ class Result(models.Model):
     TYPES = (
         ('MatchCancelled', 'MatchCancelled'),
         ('InitializationError', 'InitializationError'),
-        ('Timeout', 'Timeout'),
-        ('ProcessingReplay', 'ProcessingReplay'),
+        ('Error', 'Error'),
         ('Player1Win', 'Player1Win'),
         ('Player1Crash', 'Player1Crash'),
         ('Player1TimeOut', 'Player1TimeOut'),
@@ -532,7 +610,6 @@ class Result(models.Model):
         ('Player2RaceMismatch', 'Player2RaceMismatch'),
         ('Player2Surrender','Player2Surrender'),
         ('Tie', 'Tie'),
-        ('Error', 'Error'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
@@ -609,6 +686,23 @@ class Result(models.Model):
     def is_tie(self):
         return self.type == 'Tie'
 
+    def is_timeout(self):
+        return self.type == 'Player1TimeOut' or self.type == 'Player2TimeOut'
+
+    def is_crash(self):
+        return self.type == 'Player1Crash' or self.type == 'Player2Crash'
+
+    def is_crash_or_timeout(self):
+        return self.is_crash() or self.is_timeout()
+
+    def get_causing_participant_of_crash_or_timeout_result(self):
+        if self.type == 'Player1TimeOut' or self.type == 'Player1Crash':
+            return self.participant1
+        elif self.type == 'Player2TimeOut' or self.type == 'Player2Crash':
+            return self.participant2
+        else:
+            return None
+
     def get_winner_loser_bots(self):
         bot1, bot2 = self.get_participant_bots()
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut','Player2Surrender'):
@@ -619,8 +713,8 @@ class Result(models.Model):
             raise Exception('There was no winner or loser for this match.')
 
     def get_participants(self):
-        first = Participant.objects.get(match=self.match, participant_number=1)
-        second = Participant.objects.get(match=self.match, participant_number=2)
+        first = Participation.objects.get(match=self.match, participant_number=1)
+        second = Participation.objects.get(match=self.match, participant_number=2)
         return first, second
 
     def get_participant_bots(self):
@@ -630,8 +724,8 @@ class Result(models.Model):
     def save(self, *args, **kwargs):
         # set winner
         if self.has_winner():
-            self.winner = Participant.objects.get(match=self.match,
-                                                  participant_number=self.winner_participant_number()).bot
+            self.winner = Participation.objects.get(match=self.match,
+                                                    participant_number=self.winner_participant_number()).bot
 
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)

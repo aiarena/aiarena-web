@@ -15,7 +15,7 @@ from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import LadderDisabled
-from aiarena.core.models import Bot, Map, Match, Participant, Result
+from aiarena.core.models import Bot, Map, Match, Participation, Result
 from aiarena.core.utils import post_result_to_discord_bot
 from aiarena.core.validators import validate_not_inf, validate_not_nan
 
@@ -36,12 +36,12 @@ class BotSerializer(serializers.ModelSerializer):
     bot_data = serializers.SerializerMethodField()
 
     def get_bot_zip(self, obj):
-        p = Participant.objects.get(bot=obj, match=obj.current_match)
+        p = Participation.objects.get(bot=obj, match=obj.current_match)
         return reverse('match-download-zip', kwargs={'pk': obj.current_match.pk, 'p_num': p.participant_number},
                        request=self.context['request'])
 
     def get_bot_data(self, obj):
-        p = Participant.objects.get(bot=obj, match=obj.current_match)
+        p = Participation.objects.get(bot=obj, match=obj.current_match)
         if p.bot.bot_data:
             return reverse('match-download-data', kwargs={'pk': obj.current_match.pk, 'p_num': p.participant_number},
                            request=self.context['request'])
@@ -76,8 +76,8 @@ class MatchViewSet(viewsets.GenericViewSet):
     def create_new_match(self, requesting_user):
         match = Match.start_next_match(requesting_user)
 
-        match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
-        match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot
+        match.bot1 = Participation.objects.get(match_id=match.id, participant_number=1).bot
+        match.bot2 = Participation.objects.get(match_id=match.id, participant_number=2).bot
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -91,8 +91,8 @@ class MatchViewSet(viewsets.GenericViewSet):
                 if unfinished_matches.count() > 0:
                     match = unfinished_matches[0]  # todo: re-set started time?
 
-                    match.bot1 = Participant.objects.get(match_id=match.id, participant_number=1).bot
-                    match.bot2 = Participant.objects.get(match_id=match.id, participant_number=2).bot
+                    match.bot1 = Participation.objects.get(match_id=match.id, participant_number=1).bot
+                    match.bot2 = Participation.objects.get(match_id=match.id, participant_number=2).bot
 
                     serializer = self.get_serializer(match)
                     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -106,7 +106,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     # todo: check match is in progress/bot is in this match
     @action(detail=True, methods=['GET'], name='Download a participant\'s zip file', url_path='(?P<p_num>\d+)/zip')
     def download_zip(self, request, *args, **kwargs):
-        p = Participant.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
+        p = Participation.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
         response = HttpResponse(FileWrapper(p.bot.bot_zip), content_type='application/zip')
         response['Content-Disposition'] = 'inline; filename="{0}.zip"'.format(p.bot.name)
         return response
@@ -114,7 +114,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     # todo: check match is in progress/bot is in this match
     @action(detail=True, methods=['GET'], name='Download a participant\'s data file', url_path='(?P<p_num>\d+)/data')
     def download_data(self, request, *args, **kwargs):
-        p = Participant.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
+        p = Participation.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
         response = HttpResponse(FileWrapper(p.bot.bot_data), content_type='application/zip')
         response['Content-Disposition'] = 'inline; filename="{0}_data.zip"'.format(p.bot.name)
         return response
@@ -132,10 +132,10 @@ class SubmitResultBotSerializer(serializers.ModelSerializer):
         fields = 'bot_data', 'in_match', 'current_match'
 
 
-class SubmitResultParticipantSerializer(serializers.ModelSerializer):
+class SubmitResultParticipationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Participant
-        fields = 'avg_step_time', 'match_log'
+        model = Participation
+        fields = 'avg_step_time', 'match_log', 'result', 'result_cause'
 
 
 # Front facing serializer used by the view. Combines the other serializers together.
@@ -188,15 +188,21 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             result.is_valid(raise_exception=True)
 
             # validate participants
-            p1Instance = Participant.objects.get(match_id=serializer.validated_data['match'], participant_number=1)
-            participant1 = SubmitResultParticipantSerializer(instance=p1Instance, data={
+            p1Instance = Participation.objects.get(match_id=serializer.validated_data['match'], participant_number=1)
+            participant1 = SubmitResultParticipationSerializer(instance=p1Instance, data={
                 'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
-                'match_log': serializer.validated_data.get('bot1_log')}, partial=True)
+                'match_log': serializer.validated_data.get('bot1_log'),
+                'result': p1Instance.calculate_relative_result(serializer.validated_data['type']),
+                'result_cause': p1Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
+                                                             partial=True)
             participant1.is_valid(raise_exception=True)
-            p2Instance = Participant.objects.get(match_id=serializer.validated_data['match'], participant_number=2)
-            participant2 = SubmitResultParticipantSerializer(instance=p2Instance, data={
+            p2Instance = Participation.objects.get(match_id=serializer.validated_data['match'], participant_number=2)
+            participant2 = SubmitResultParticipationSerializer(instance=p2Instance, data={
                 'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
-                'match_log': serializer.validated_data.get('bot2_log')}, partial=True)
+                'match_log': serializer.validated_data.get('bot2_log'),
+                'result': p2Instance.calculate_relative_result(serializer.validated_data['type']),
+                'result_cause': p2Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
+                                                             partial=True)
             participant2.is_valid(raise_exception=True)
 
             # validate bots
@@ -258,6 +264,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             if result.match.round is not None:
                 result.match.round.update_if_completed()
 
+            if result.is_crash_or_timeout():
+                run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result())
+
             post_result_to_discord_bot(result)
 
             headers = self.get_success_headers(serializer.data)
@@ -267,3 +276,36 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     # todo: use a model form
     # todo: avoid results being logged against matches not owned by the submitter
+
+
+def run_consecutive_crashes_check(triggering_participant: Participation):
+    """
+    Checks to see whether the last X results for a participant are crashes and, if so, disables the bot
+    and sends an alert to the bot author
+    :param triggering_participant: The participant who triggered this check and whose bot we should run the check for.
+    :return:
+    """
+
+    if config.BOT_CONSECUTIVE_CRASH_LIMIT < 1:
+        return  # Check is disabled
+
+    if not triggering_participant.bot.active:
+        return  # No use running the check - bot is already inactive.
+
+    # Get recent match participation records for this bot
+    recent_participations = Participation.objects.filter(bot=triggering_participant.bot,
+                                                       match__result__isnull=False).order_by(
+        '-match__result__created')[:config.BOT_CONSECUTIVE_CRASH_LIMIT]
+
+    # if there's not enough participations yet, then exit without action
+    count = recent_participations.count()
+    if recent_participations.count() < config.BOT_CONSECUTIVE_CRASH_LIMIT:
+        return
+
+    # if any of the previous results weren't a crash, then exit without action
+    for recent_participation in recent_participations:
+        if not recent_participation.crashed:
+            return
+
+    # If we get to here, all the results were crashes, so take action
+    triggering_participant.bot.disable_and_sent_alert()
