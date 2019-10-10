@@ -29,6 +29,10 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 't*4r1u49=a!ah1!z8ydsaajr!lv-f(@r07lm)-9fro_9&67xqd'
 
+# Flag whether we're in testing mode
+# Checks that the second argument is the test command.
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
