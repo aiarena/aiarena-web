@@ -590,7 +590,7 @@ class MatchParticipation(models.Model):
     )
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     participant_number = models.PositiveSmallIntegerField()
-    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='match_participations')
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT)
     resultant_elo = models.SmallIntegerField(null=True)
     elo_change = models.SmallIntegerField(null=True)
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
