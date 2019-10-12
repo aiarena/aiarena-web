@@ -12,7 +12,25 @@ class BotAdmin(admin.ModelAdmin):
 
 
 class MapAdmin(admin.ModelAdmin):
+    actions = ['activate', 'deactivate']
     list_display = [field.name for field in Map._meta.fields]
+
+    def activate(self, request, queryset):
+        """
+        Activates selected maps for play.
+        """
+        for map in queryset:
+            map.activate()
+
+    def deactivate(self, request, queryset):
+        """
+        Deactivates selected maps for play.
+        """
+        for map in queryset:
+            map.deactivate()
+
+    activate.short_description = "Activate selected maps"
+    deactivate.short_description = "Deactivate selected maps"
 
 
 class RoundAdmin(admin.ModelAdmin):
