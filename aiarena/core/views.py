@@ -145,7 +145,7 @@ class BotDetail(DetailView):
 class StandardBotUpdateForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = ['active', 'active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
+        fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
                   'bot_data_publicly_downloadable']
 
 
@@ -154,7 +154,7 @@ class FrozenDataBotUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Bot
-        fields = ['active', 'active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
+        fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
                   'bot_data_publicly_downloadable']
 
 
