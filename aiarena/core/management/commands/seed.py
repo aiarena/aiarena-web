@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Match, Result, Participation
+from aiarena.core.models import User, Map, Bot, Match, Result, MatchParticipation
 from aiarena.core.tests import BaseTestCase
 from aiarena.core.utils import EnvironmentType
 
@@ -21,12 +21,12 @@ def create_result_with_bot_data_and_logs(match, type, as_user):
             open(BaseTestCase.test_bot2_match_log_path, 'rb') as bot2_log:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
                                        submitted_by=as_user)
-        p1 = Participation.objects.get(match_id=result.match_id, participant_number=1)
+        p1 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=1)
         p1.avg_step_time = 0.111111
         p1.match_log = File(bot1_log)
         p1.save()
 
-        p2 = Participation.objects.get(match_id=result.match_id, participant_number=2)
+        p2 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=2)
         p2.avg_step_time = 0.222222
         p2.match_log = File(bot2_log)
         p1.save()
@@ -46,12 +46,12 @@ def create_result(match, type, as_user):
     with open(BaseTestCase.test_replay_path, 'rb') as result_replay:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
                                        submitted_by=as_user)
-        p1 = Participation.objects.get(match_id=result.match_id, participant_number=1)
+        p1 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=1)
         p1.avg_step_time = 0.111111
         p1.match_log = None
         p1.save()
 
-        p2 = Participation.objects.get(match_id=result.match_id, participant_number=2)
+        p2 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=2)
         p2.avg_step_time = 0.222222
         p2.match_log = None
         p1.save()

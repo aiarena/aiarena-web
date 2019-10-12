@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, Participation, Round
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Round
 from aiarena.core.utils import calculate_md5
 
 
@@ -455,7 +455,7 @@ class ManagementCommandTests(MatchReadyTestCase):
         # after we ensure the arena client log count matches, we can safely just use the above results list
         results_logs = Result.objects.filter(arenaclient_log__isnull=False)
         self.assertEqual(results_logs.count(), NUM_MATCHES)
-        participants = Participation.objects.filter(match_log__isnull=False)
+        participants = MatchParticipation.objects.filter(match_log__isnull=False)
         self.assertEqual(participants.count(), NUM_MATCHES * 2)
 
         # set the created time so they'll be purged

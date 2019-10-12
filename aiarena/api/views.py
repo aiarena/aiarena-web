@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, serializers
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, Participation
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
 
 class ParticipationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Participation
+        model = MatchParticipation
         fields = participation_include_fields
 
 
@@ -96,7 +96,7 @@ class ParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
-    queryset = Participation.objects.all()
+    queryset = MatchParticipation.objects.all()
     serializer_class = ParticipationSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -110,10 +110,10 @@ class ResultSerializer(serializers.ModelSerializer):
     bot2_name = serializers.SerializerMethodField()
 
     def get_bot1_name(self, obj):
-        return obj.match.participation_set.get(participant_number=1).bot.name
+        return obj.match.matchparticipation_set.get(participant_number=1).bot.name
 
     def get_bot2_name(self, obj):
-        return obj.match.participation_set.get(participant_number=2).bot.name
+        return obj.match.matchparticipation_set.get(participant_number=2).bot.name
 
     class Meta:
         model = Result

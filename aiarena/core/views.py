@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
 
-from aiarena.core.models import Bot, Result, User, Round, Match, Participation
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
@@ -117,8 +117,8 @@ class BotDetail(DetailView):
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
-            result.opponent = result.match.participation_set.exclude(bot=self.object).get()
-            result.me = result.match.participation_set.get(bot=self.object)
+            result.opponent = result.match.matchparticipation_set.exclude(bot=self.object).get()
+            result.me = result.match.matchparticipation_set.get(bot=self.object)
 
             # convert the type to be relative to this bot
             typeSuffix = ''
@@ -215,7 +215,7 @@ class Ranking(ListView):
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(
         Prefetch('winner'),
-        Prefetch('match__participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
+        Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
     template_name = 'results.html'
 
 
@@ -255,7 +255,7 @@ class BotDataDownloadView(PrivateStorageDetailView):
 
 
 class MatchLogDownloadView(PrivateStorageDetailView):
-    model = Participation
+    model = MatchParticipation
     model_file_field = 'match_log'
 
     content_disposition = 'attachment'
@@ -280,7 +280,7 @@ class MatchQueue(View):
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
             F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
                 Prefetch('map'),
-                Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
+                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
 
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
@@ -288,7 +288,7 @@ class MatchQueue(View):
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
                 F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
                 Prefetch('map'),
-                Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
+                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
 
         context = {'round_list': rounds, 'requested_matches': requested_matches}
         return render(request, 'match_queue.html', context)

@@ -176,7 +176,7 @@ class Match(models.Model):
             Match.objects.select_for_update().get(id=self.id)  # lock self to avoid race conditions
             if self.started is None:
                 # is a bot currently in a match?
-                participations = Participation.objects.select_for_update().filter(match=self)
+                participations = MatchParticipation.objects.select_for_update().filter(match=self)
                 for p in participations:
                     if p.bot.in_match:
                         return Match.StartResult.BOT_ALREADY_IN_MATCH
@@ -193,29 +193,11 @@ class Match(models.Model):
 
     @property
     def participant1(self):
-        return self.participation_set.get(participant_number=1)
+        return self.matchmatchparticipation_set.get(participant_number=1)
 
     @property
     def participant2(self):
-        return self.participation_set.get(participant_number=2)
-
-    @staticmethod
-    def _queue_round_robin_matches_for_all_active_bots():
-        if Map.objects.filter(active=True).count() == 0:
-            raise NoMaps()
-        if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
-            raise NotEnoughActiveBots()
-
-        round = Round.objects.create()
-
-        active_bots = Bot.objects.filter(active=True)
-        already_processed_bots = []
-
-        # loop through and generate matches for all active bots
-        for bot1 in active_bots:
-            already_processed_bots.append(bot1.id)
-            for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
-                Match.create(round, Map.random_active(), bot1, bot2)
+        return self.matchmatchparticipation_set.get(participant_number=2)
 
     @staticmethod
     def start_next_match(requesting_user):
@@ -232,7 +214,7 @@ class Match(models.Model):
             cursor.execute(
                 "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ".format(Match._meta.db_table,
                                                                                           Round._meta.db_table,
-                                                                                          Participation._meta.db_table,
+                                                                                          MatchParticipation._meta.db_table,
                                                                                           Bot._meta.db_table,
                                                                                           Map._meta.db_table))
             try:
@@ -266,8 +248,8 @@ class Match(models.Model):
     def create(round, map, bot1, bot2):
         match = Match.objects.create(map=map, round=round)
         # create match participations
-        Participation.objects.create(match=match, participant_number=1, bot=bot1)
-        Participation.objects.create(match=match, participant_number=2, bot=bot2)
+        MatchParticipation.objects.create(match=match, participant_number=1, bot=bot1)
+        MatchParticipation.objects.create(match=match, participant_number=2, bot=bot2)
         return match
 
     # todo: let us specify the map
@@ -298,12 +280,12 @@ class Match(models.Model):
             # attempt to kick the bots from the match
             if match.started:
                 try:
-                    bot1 = match.participation_set.select_related().select_for_update().get(participant_number=1).bot
+                    bot1 = match.matchparticipation_set.select_related().select_for_update().get(participant_number=1).bot
                     bot1.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
                 try:
-                    bot2 = match.participation_set.select_related().select_for_update().get(participant_number=2).bot
+                    bot2 = match.matchparticipation_set.select_related().select_for_update().get(participant_number=2).bot
                     bot2.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
@@ -589,7 +571,7 @@ def match_log_upload_to(instance, filename):
     return '/'.join(['match-logs', str(instance.id)])
 
 
-class Participation(models.Model):
+class MatchParticipation(models.Model):
     RESULT_TYPES = (
         ('none', 'None'),
         ('win', 'Win'),
@@ -666,8 +648,8 @@ class Participation(models.Model):
 def replay_file_upload_to(instance, filename):
     return '/'.join(['replays',
                      f'{instance.match_id}'
-                     f'_{instance.match.participation_set.get(participant_number=1).bot.name}'
-                     f'vs{instance.match.participation_set.get(participant_number=2).bot.name}'
+                     f'_{instance.match.matchparticipation_set.get(participant_number=1).bot.name}'
+                     f'vs{instance.match.matchparticipation_set.get(participant_number=2).bot.name}'
                      f'_{instance.match.map.name}.SC2Replay'])
 
 
@@ -794,8 +776,8 @@ class Result(models.Model):
             raise Exception('There was no winner or loser for this match.')
 
     def get_participants(self):
-        first = Participation.objects.get(match=self.match, participant_number=1)
-        second = Participation.objects.get(match=self.match, participant_number=2)
+        first = MatchParticipation.objects.get(match=self.match, participant_number=1)
+        second = MatchParticipation.objects.get(match=self.match, participant_number=2)
         return first, second
 
     def get_participant_bots(self):
@@ -805,8 +787,8 @@ class Result(models.Model):
     def save(self, *args, **kwargs):
         # set winner
         if self.has_winner():
-            self.winner = Participation.objects.get(match=self.match,
-                                                    participant_number=self.winner_participant_number()).bot
+            self.winner = MatchParticipation.objects.get(match=self.match,
+                                                         participant_number=self.winner_participant_number()).bot
 
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)

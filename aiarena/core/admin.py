@@ -57,7 +57,7 @@ class MatchAdmin(admin.ModelAdmin):
 
 
 class ParticipationAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in Participation._meta.fields]
+    list_display = [field.name for field in MatchParticipation._meta.fields]
 
 
 class ResultAdmin(admin.ModelAdmin):
@@ -69,5 +69,5 @@ admin.site.register(Bot, BotAdmin)
 admin.site.register(Map, MapAdmin)
 admin.site.register(Round, RoundAdmin)
 admin.site.register(Match, MatchAdmin)
-admin.site.register(Participation, ParticipationAdmin)
+admin.site.register(MatchParticipation, ParticipationAdmin)
 admin.site.register(Result, ResultAdmin)
