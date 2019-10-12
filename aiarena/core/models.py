@@ -28,9 +28,13 @@ from aiarena.settings import ELO_START_VALUE, ELO, BOT_ZIP_MAX_SIZE
 logger = logging.getLogger(__name__)
 
 
+def map_file_upload_to(instance, filename):
+    return '/'.join(['maps', instance.name])
+
+
 class Map(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    file = models.FileField(upload_to='maps')
+    file = models.FileField(upload_to=map_file_upload_to, storage=OverwriteStorage())
     active = models.BooleanField(default=False)
 
     def __str__(self):
