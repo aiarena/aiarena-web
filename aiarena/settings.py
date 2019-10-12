@@ -15,8 +15,6 @@ import sys
 from datetime import timedelta
 from enum import Enum
 
-from constance import config
-
 from aiarena.core.utils import Elo, EnvironmentType
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -322,10 +320,12 @@ AVATAR_PROVIDERS = (
 
 
 def get_discord_client_id():
+    from constance import config  # so that this file can be imported without constance installed
     return config.DISCORD_CLIENT_ID
 
 
 def get_discord_client_secret():
+    from constance import config  # so that this file can be imported without constance installed
     return config.DISCORD_CLIENT_SECRET
 
 
