@@ -599,10 +599,6 @@ class MatchParticipation(models.Model):
     result = models.CharField(max_length=32, choices=RESULT_TYPES, blank=True, null=True)
     result_cause = models.CharField(max_length=32, choices=CAUSE_TYPES, blank=True, null=True)
 
-    def update_resultant_elo(self):
-        self.resultant_elo = self.bot.elo
-        self.save()
-
     def __str__(self):
         return self.bot.name
 
@@ -613,6 +609,10 @@ class MatchParticipation(models.Model):
     @property
     def crashed(self):
         return self.result == 'loss' and self.result_cause in ['crash', 'timeout', 'initialization_failure']
+
+    @property
+    def season_participant(self):
+        return self.match.round.season.seasonparticipation_set.get(bot=self.bot)
 
     def calculate_relative_result(self, result_type):
         if result_type in ['MatchCancelled', 'InitializationError', 'Error']:
@@ -766,8 +766,8 @@ class Result(models.Model):
         else:
             return None
 
-    def get_winner_loser_bots(self):
-        bot1, bot2 = self.get_participant_bots()
+    def get_winner_loser_season_participants(self):
+        bot1, bot2 = self.get_season_participants()
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
             return bot1, bot2
         elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
@@ -775,13 +775,28 @@ class Result(models.Model):
         else:
             raise Exception('There was no winner or loser for this match.')
 
-    def get_participants(self):
+    def get_winner_loser_bots(self):
+        bot1, bot2 = self.get_match_participant_bots()
+        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
+            return bot1, bot2
+        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
+            return bot2, bot1
+        else:
+            raise Exception('There was no winner or loser for this match.')
+
+    def get_season_participants(self):
+        """Returns the SeasonParticipant models for the MatchParticipants"""
+        first = MatchParticipation.objects.get(match=self.match, participant_number=1)
+        second = MatchParticipation.objects.get(match=self.match, participant_number=2)
+        return first.season_participant, second.season_participant
+
+    def get_match_participants(self):
         first = MatchParticipation.objects.get(match=self.match, participant_number=1)
         second = MatchParticipation.objects.get(match=self.match, participant_number=2)
         return first, second
 
-    def get_participant_bots(self):
-        first, second = self.get_participants()
+    def get_match_participant_bots(self):
+        first, second = self.get_match_participants()
         return first.bot, second.bot
 
     def save(self, *args, **kwargs):
@@ -795,22 +810,22 @@ class Result(models.Model):
 
     def adjust_elo(self):
         if self.has_winner():
-            winner, loser = self.get_winner_loser_bots()
-            self._apply_elo_delta(ELO.calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
+            sp_winner, sp_loser = self.get_winner_loser_season_participants()
+            self._apply_elo_delta(ELO.calculate_elo_delta(sp_winner.elo, sp_loser.elo, 1.0), sp_winner, sp_loser)
         elif self.type == 'Tie':
-            first, second = self.get_participant_bots()
-            self._apply_elo_delta(ELO.calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
+            sp_first, sp_second = self.get_season_participants()
+            self._apply_elo_delta(ELO.calculate_elo_delta(sp_first.elo, sp_second.elo, 0.5), sp_first, sp_second)
 
     def get_initial_elos(self):
-        first, second = self.get_participant_bots()
+        first, second = self.get_season_participants()
         return first.elo, second.elo
 
-    def _apply_elo_delta(self, delta, bot1, bot2):
+    def _apply_elo_delta(self, delta, sp1, sp2):
         delta = int(round(delta))
-        bot1.elo += delta
-        bot1.save()
-        bot2.elo -= delta
-        bot2.save()
+        sp1.elo += delta
+        sp1.save()
+        sp2.elo -= delta
+        sp2.save()
 
 
 def elo_graph_upload_to(instance, filename):

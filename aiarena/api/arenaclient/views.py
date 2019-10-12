@@ -232,8 +232,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             result = result.save()
             participant1 = participant1.save()
             participant2 = participant2.save()
-            bot1 = bot1.save()
-            bot2 = bot2.save()
+            bot1.save()
+            bot2.save()
 
             # Update and record ELO figures
             p1_initial_elo, p2_initial_elo = result.get_initial_elos()
@@ -242,10 +242,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             # Calculate the change in ELO
             # the bot elos have changed so refresh them
             # todo: instead of having to refresh, return data from adjust_elo and apply it here
-            bot1.refresh_from_db()
-            bot2.refresh_from_db()
-            participant1.resultant_elo = bot1.elo
-            participant2.resultant_elo = bot2.elo
+            sp1, sp2 = result.get_season_participants()
+            participant1.resultant_elo = sp1.elo
+            participant2.resultant_elo = sp2.elo
             participant1.elo_change = participant1.resultant_elo - p1_initial_elo
             participant2.elo_change = participant2.resultant_elo - p2_initial_elo
             participant1.save()

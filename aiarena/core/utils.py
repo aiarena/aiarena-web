@@ -42,8 +42,8 @@ def calculate_md5_django_filefield(file, block_size=2 ** 20):
 def post_result_to_discord_bot(result):
     if settings.POST_SUBMITTED_RESULTS_TO_ADDRESS:
         try:
-            participants = result.get_participants()
-            bots = result.get_participant_bots()
+            participants = result.get_match_participants()
+            bots = result.get_match_participant_bots()
             wl_bots = result.get_winner_loser_bots()
             json = { # todo: nested json
                 'match_id': result.match_id,
