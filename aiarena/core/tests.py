@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Round
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Round, Season, SeasonParticipation
 from aiarena.core.utils import calculate_md5
 
 
@@ -35,6 +35,11 @@ class BaseTestCase(TransactionTestCase):
 
     def _create_map(self, name):
         return Map.objects.create(name=name, active=True)
+
+    def _create_open_season(self):
+        season = Season.objects.create()
+        season.open()
+        return season
 
     def _create_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
@@ -210,12 +215,14 @@ class MatchReadyTestCase(LoggedInTestCase):
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
         config.MAX_USER_BOT_COUNT = 10
 
+        self._create_open_season()
+        self._create_map('testmap1')
+
         self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
         self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
         self.regularUser1Bot2 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
         self.staffUser1Bot1 = self._create_active_bot(self.staffUser1, 'staffUser1Bot1', 'T')
         self.staffUser1Bot2 = self._create_active_bot(self.staffUser1, 'staffUser1Bot2', 'Z')
-        self._create_map('testmap1')
 
 
 # Use this to pre-build a fuller dataset for testing
@@ -242,6 +249,9 @@ class BotTestCase(LoggedInTestCase):
         # set the configured per user limits for this test
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
         config.MAX_USER_BOT_COUNT = 4
+
+        # required for active bot
+        self._create_open_season()
 
         # create bot along with bot data
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
@@ -511,11 +521,11 @@ class ManagementCommandTests(MatchReadyTestCase):
         self.assertEqual(response.status_code, 201)
 
         out = StringIO()
-        call_command('resetelo', stdout=out)
+        call_command('resetcurrentseasonelo', stdout=out)
         self.assertIn('ELO values have been reset.', out.getvalue())
 
-        for bot in Bot.objects.all():
-            self.assertEqual(bot.elo, settings.ELO_START_VALUE)
+        for participant in SeasonParticipation.objects.all():
+            self.assertEqual(participant.elo, settings.ELO_START_VALUE)
 
     def test_seed(self):
         out = StringIO()

@@ -11,7 +11,7 @@ BEGIN
                    CASE WHEN PARTICIPANT_NUMBER = "2" THEN BOT_ID END
                ) "BOT2"
     FROM core_result CR
-             INNER JOIN core_participation CM ON CR.MATCH_ID = CM.MATCH_ID
+             INNER JOIN core_matchparticipation CM ON CR.MATCH_ID = CM.MATCH_ID
     GROUP BY ID,
              TYPE;
     DROP TEMPORARY TABLE IF EXISTS PIVOT_2;

@@ -14,19 +14,19 @@
             <td><b>Win %</b></td>
             <td><b>ELO</b></td>
         </thead>
-        {% for bot in bot_list %}
+        {% for participant in seasonparticipation_list %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ bot.as_html_link |safe }}</td>
-                <td>{{ bot.get_plays_race_display }}</td>
-                <td>{{ bot.user.as_html_link |safe }}</td>
-                <td>{{ bot.type }}</td>
-                {% if bot.statsbots_set.count > 0 %}
-                    <td>{{ bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
+                <td>{{ participant.bot.as_html_link |safe }}</td>
+                <td>{{ participant.bot.get_plays_race_display }}</td>
+                <td>{{ participant.bot.user.as_html_link |safe }}</td>
+                <td>{{ participant.bot.type }}</td>
+                {% if participant.bot.statsbots_set.count > 0 %}
+                    <td>{{ participant.bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
                 {% else %}
                     <td>No stats</td>
                 {% endif %}
-                <td>{{ bot.elo }}</td>
+                <td>{{ participant.elo }}</td>
             </tr>
         {% endfor %}
         </tbody>

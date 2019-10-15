@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Match, Result, MatchParticipation
+from aiarena.core.models import User, Map, Bot, Match, Result, MatchParticipation, Season
 from aiarena.core.tests import BaseTestCase
 from aiarena.core.utils import EnvironmentType
 
@@ -80,10 +80,9 @@ def finalize_result(result, p1, p2, bot1, bot2):
     # Calculate the change in ELO
     # the bot elos have changed so refresh them
     # todo: instead of having to refresh, return data from adjust_elo and apply it here
-    bot1.refresh_from_db()
-    bot2.refresh_from_db()
-    p1.resultant_elo = bot1.elo
-    p2.resultant_elo = bot2.elo
+    sp1, sp2 = result.get_season_participants()
+    p1.resultant_elo = sp1.elo
+    p2.resultant_elo = sp2.elo
     p1.elo_change = p1.resultant_elo - p1_initial_elo
     p2.elo_change = p2.resultant_elo - p2_initial_elo
     p1.save()
@@ -100,6 +99,10 @@ def run_seed(rounds, token):
 
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient, key=token)
+
+    # todo: restructure project into core/frontend
+    season = Season.objects.create()
+    season.open()
 
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@aiarena.net')
     devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@aiarena.net')

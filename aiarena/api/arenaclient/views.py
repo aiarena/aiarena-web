@@ -15,7 +15,7 @@ from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import LadderDisabled
-from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result
+from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
 from aiarena.core.utils import post_result_to_discord_bot
 from aiarena.core.validators import validate_not_inf, validate_not_nan
 
@@ -188,21 +188,23 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             result.is_valid(raise_exception=True)
 
             # validate participants
-            p1Instance = MatchParticipation.objects.get(match_id=serializer.validated_data['match'], participant_number=1)
+            p1Instance = MatchParticipation.objects.get(match_id=serializer.validated_data['match'],
+                                                        participant_number=1)
             participant1 = SubmitResultParticipationSerializer(instance=p1Instance, data={
                 'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
                 'match_log': serializer.validated_data.get('bot1_log'),
                 'result': p1Instance.calculate_relative_result(serializer.validated_data['type']),
                 'result_cause': p1Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
-                                                             partial=True)
+                                                               partial=True)
             participant1.is_valid(raise_exception=True)
-            p2Instance = MatchParticipation.objects.get(match_id=serializer.validated_data['match'], participant_number=2)
+            p2Instance = MatchParticipation.objects.get(match_id=serializer.validated_data['match'],
+                                                        participant_number=2)
             participant2 = SubmitResultParticipationSerializer(instance=p2Instance, data={
                 'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
                 'match_log': serializer.validated_data.get('bot2_log'),
                 'result': p2Instance.calculate_relative_result(serializer.validated_data['type']),
                 'result_cause': p2Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
-                                                             partial=True)
+                                                               partial=True)
             participant2.is_valid(raise_exception=True)
 
             # validate bots
@@ -210,7 +212,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p1Instance.bot.name))
             bot1_data = serializer.validated_data.get('bot1_data')
-            bot1_dict = {'in_match': False,'current_match': None}
+            bot1_dict = {'in_match': False, 'current_match': None}
             if bot1_data is not None:  # only include bot1_data if it is none - otherwise we'll mistakenly wipe the file
                 bot1_dict['bot_data'] = bot1_data
             bot1 = SubmitResultBotSerializer(instance=p1Instance.bot,
@@ -221,7 +223,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p2Instance.bot.name))
             bot2_data = serializer.validated_data.get('bot2_data')
-            bot2_dict = {'in_match': False,'current_match': None}
+            bot2_dict = {'in_match': False, 'current_match': None}
             if bot2_data is not None:  # only include bot2_data if it is none - otherwise we'll mistakenly wipe the file
                 bot2_dict['bot_data'] = bot2_data
             bot2 = SubmitResultBotSerializer(instance=p2Instance.bot,
@@ -235,38 +237,40 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             bot1.save()
             bot2.save()
 
-            # Update and record ELO figures
-            p1_initial_elo, p2_initial_elo = result.get_initial_elos()
-            result.adjust_elo()
-
-            # Calculate the change in ELO
-            # the bot elos have changed so refresh them
-            # todo: instead of having to refresh, return data from adjust_elo and apply it here
-            sp1, sp2 = result.get_season_participants()
-            participant1.resultant_elo = sp1.elo
-            participant2.resultant_elo = sp2.elo
-            participant1.elo_change = participant1.resultant_elo - p1_initial_elo
-            participant2.elo_change = participant2.resultant_elo - p2_initial_elo
-            participant1.save()
-            participant2.save()
-
-            if settings.ENABLE_ELO_SANITY_CHECK:
-                # test here to check ELO total and ensure no corruption
-                expectedEloSum = settings.ELO_START_VALUE * Bot.objects.all().count()
-                actualEloSum = Bot.objects.aggregate(Sum('elo'))
-
-                if actualEloSum['elo__sum'] != expectedEloSum:
-                    logger.critical(
-                        "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
-                            actualEloSum['elo__sum'], expectedEloSum, result.id))
-
+            # Only do these actions if the match is part of a round
             if result.match.round is not None:
                 result.match.round.update_if_completed()
 
-            if result.is_crash_or_timeout():
-                run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result())
+                # Update and record ELO figures
+                p1_initial_elo, p2_initial_elo = result.get_initial_elos()
+                result.adjust_elo()
 
-            post_result_to_discord_bot(result)
+                # Calculate the change in ELO
+                # the bot elos have changed so refresh them
+                # todo: instead of having to refresh, return data from adjust_elo and apply it here
+                sp1, sp2 = result.get_season_participants()
+                participant1.resultant_elo = sp1.elo
+                participant2.resultant_elo = sp2.elo
+                participant1.elo_change = participant1.resultant_elo - p1_initial_elo
+                participant2.elo_change = participant2.resultant_elo - p2_initial_elo
+                participant1.save()
+                participant2.save()
+
+                if settings.ENABLE_ELO_SANITY_CHECK:
+                    # test here to check ELO total and ensure no corruption
+                    expectedEloSum = settings.ELO_START_VALUE * Bot.objects.all().count()
+                    actualEloSum = SeasonParticipation.objects.filter(season=result.match.round.season).aggregate(
+                        Sum('elo'))
+
+                    if actualEloSum['elo__sum'] != expectedEloSum:
+                        logger.critical(
+                            "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
+                                actualEloSum['elo__sum'], expectedEloSum, result.id))
+
+                if result.is_crash_or_timeout():
+                    run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result())
+
+                post_result_to_discord_bot(result)
 
             headers = self.get_success_headers(serializer.data)
             return Response({'result_id': result.id}, status=status.HTTP_201_CREATED, headers=headers)

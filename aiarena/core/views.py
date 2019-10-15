@@ -10,7 +10,7 @@ from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
 
-from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
@@ -93,7 +93,7 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = Result.objects.filter(match__participation__bot=self.object).order_by('-created')
+        results = Result.objects.filter(match__matchparticipation__bot=self.object).order_by('-created')
 
         # paginate the results
         page = self.request.GET.get('page', 1)
@@ -200,15 +200,16 @@ class AuthorDetail(DetailView):
 # Using a ListView, which has automated behaviour for displaying a list of models
 class Ranking(ListView):
     # If we wanted all the bots, we could just set this and, because we're extending a ListView, it would
-    # understand to get all the Bots, which could be referenced as "bot_list" in the template.
-    # model = Bot
+    # understand to get all the Bots, which could be referenced as "seasonparticipation_list" in the template.
+    # model = SeasonParticipation
 
     # Instead, because we want to filter the bots, we define queryset,
-    # which is also referenced as "bot_list" in the template.
-    queryset = Bot.objects.filter(active=1).order_by('-elo')
+    # which is also referenced as "seasonparticipation_list" in the template.
+    def get_queryset(self):
+        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo').prefetch_related('bot')
 
     # If we didn't set this, the ListView would default to searching for a template at <module>/<modelname>_list.html
-    # In this case, that would be "core/bot_list.html"
+    # In this case, that would be "core/seasonparticipation_list.html"
     template_name = 'ranking.html'
 
 
@@ -270,7 +271,8 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 
 
 class Index(ListView):
-    queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]  # top 10 bots
+    def get_queryset(self):
+        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo')[:10].prefetch_related('bot')  # top 10 bots
     template_name = 'index.html'
 
 

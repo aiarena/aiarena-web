@@ -193,11 +193,11 @@ class Match(models.Model):
 
     @property
     def participant1(self):
-        return self.matchmatchparticipation_set.get(participant_number=1)
+        return self.matchparticipation_set.get(participant_number=1)
 
     @property
     def participant2(self):
-        return self.matchmatchparticipation_set.get(participant_number=2)
+        return self.matchparticipation_set.get(participant_number=2)
 
     @staticmethod
     def start_next_match(requesting_user):
@@ -212,11 +212,12 @@ class Match(models.Model):
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ".format(Match._meta.db_table,
+                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ, {5} READ".format(Match._meta.db_table,
                                                                                           Round._meta.db_table,
                                                                                           MatchParticipation._meta.db_table,
                                                                                           Bot._meta.db_table,
-                                                                                          Map._meta.db_table))
+                                                                                          Map._meta.db_table,
+                                                                                          Season._meta.db_table))
             try:
                 match = Match._locate_and_return_started_match(requesting_user)
                 if match is None:
@@ -494,6 +495,9 @@ class Bot(models.Model):
         except Exception as e:
             logger.exception(e)
 
+    def current_season_participation(self):
+        return self.seasonparticipation_set.get(season=Season.get_current_season())
+
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
 _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
@@ -504,7 +508,7 @@ _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
 # This needs to happen because we want to use the model ID in the file path, but until the model is saved, it doesn't
 # have an ID.
 @receiver(pre_save, sender=Bot)
-def skip_saving_bot_files(sender, instance, **kwargs):
+def pre_save_bot(sender, instance, **kwargs):
     # If the Bot model hasn't been created yet (i.e. it's missing its ID) then set any files aside for the time being
     if not instance.pk and not hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         setattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD, instance.bot_zip)
@@ -518,22 +522,22 @@ def skip_saving_bot_files(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Bot)
-def save_bot_files(sender, instance, created, **kwargs):
+def post_save_bot(sender, instance, created, **kwargs):
     # bot zip
     if created and hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         instance.bot_zip = getattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD)
-        post_save.disconnect(save_bot_files, sender=sender)
+        post_save.disconnect(pre_save_bot, sender=sender)
         instance.save()
-        post_save.connect(save_bot_files, sender=sender)
+        post_save.connect(pre_save_bot, sender=sender)
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_ZIP_FILEFIELD)
 
     # bot data
     if created and hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD):
         instance.bot_data = getattr(instance, _UNSAVED_BOT_DATA_FILEFIELD)
-        post_save.disconnect(save_bot_files, sender=sender)
+        post_save.disconnect(pre_save_bot, sender=sender)
         instance.save()
-        post_save.connect(save_bot_files, sender=sender)
+        post_save.connect(pre_save_bot, sender=sender)
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
 
@@ -543,22 +547,26 @@ def save_bot_files(sender, instance, created, **kwargs):
         if instance.bot_zip_md5hash != bot_zip_hash:
             instance.bot_zip_md5hash = bot_zip_hash
             instance.bot_zip_updated = timezone.now()
-            post_save.disconnect(save_bot_files, sender=sender)
+            post_save.disconnect(pre_save_bot, sender=sender)
             instance.save()
-            post_save.connect(save_bot_files, sender=sender)
+            post_save.connect(pre_save_bot, sender=sender)
 
     if instance.bot_data:
         bot_data_hash = calculate_md5_django_filefield(instance.bot_data)
         if instance.bot_data_md5hash != bot_data_hash:
             instance.bot_data_md5hash = bot_data_hash
-            post_save.disconnect(save_bot_files, sender=sender)
+            post_save.disconnect(pre_save_bot, sender=sender)
             instance.save()
-            post_save.connect(save_bot_files, sender=sender)
+            post_save.connect(pre_save_bot, sender=sender)
     elif instance.bot_data_md5hash is not None:
         instance.bot_data_md5hash = None
-        post_save.disconnect(save_bot_files, sender=sender)
+        post_save.disconnect(pre_save_bot, sender=sender)
         instance.save()
-        post_save.connect(save_bot_files, sender=sender)
+        post_save.connect(pre_save_bot, sender=sender)
+
+    # register a season participation if the bot has been activated
+    if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
+        SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)
 
 
 class SeasonParticipation(models.Model):
