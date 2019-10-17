@@ -181,7 +181,7 @@ class MatchesTestCase(LoggedInTestCase):
 
         # should be the same match reissued
         response_m2 = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response_m2.status_code, 200)
+        self.assertEqual(response_m2.status_code, 201)
 
         self.assertEqual(response_m1.data['id'], response_m2.data['id'])
 

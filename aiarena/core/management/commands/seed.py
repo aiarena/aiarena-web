@@ -1,6 +1,7 @@
 from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
@@ -66,7 +67,7 @@ def create_result(match, type, as_user):
 
         finalize_result(result, p1, p2, bot1, bot2)
 
-
+@transaction.atomic
 def finalize_result(result, p1, p2, bot1, bot2):
     # imitates the arenaclient result view
 
