@@ -84,7 +84,7 @@ class MatchViewSet(viewsets.GenericViewSet):
 
     def create(self, request, *args, **kwargs):
         if config.LADDER_ENABLED:
-            if settings.REISSUE_UNFINISHED_MATCHES:
+            if config.REISSUE_UNFINISHED_MATCHES:
                 # Check for any unfinished matches assigned to this user. If any are present, return that.
                 unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user,
                                                           result__isnull=True).order_by(F('round_id').asc())

@@ -757,12 +757,6 @@ class Result(models.Model):
         # self.validate_replay_file_requirement() # disabled for now
         super().clean(*args, **kwargs)
 
-    # some replays corrupt under linux currently.
-    # if a replay file isn't supplied when it should be, then we assume it was corrupted
-    # and therefore not uploaded with the result.
-    def replay_file_corruption_detected(self):
-        return (self.has_winner() or self.is_tie()) and not self.replay_file
-
     def has_winner(self):
         return self.type in (
             'Player1Win',

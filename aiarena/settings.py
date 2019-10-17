@@ -159,6 +159,8 @@ CONSTANCE_CONFIG = {
     'MAX_ACTIVE_ROUNDS': (2, 'The maximum rounds the ladder can run simultaneously. '
                              'The ladder will stop generating new rounds once this number '
                              'is reached until previous active rounds are finished off.'),
+    'REISSUE_UNFINISHED_MATCHES': (True, 'Whether to reissue previously assigned unfinished matches '
+                                         'when an arena client requests a match.'),
     'BOT_CONSECUTIVE_CRASH_LIMIT': (0, 'The number of consecutive crashes after which a bot is deactivated. '
                                        'Any value below 1 will disable the check for this feature. Default: 0'),
     'MAX_USER_BOT_COUNT': (4, 'Maximum bots a user can have uploaded.'),
@@ -176,7 +178,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'Bot Options': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
     'General Options': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL'),
     'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',
-                       'BOT_CONSECUTIVE_CRASH_LIMIT',),
+                       'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
     'Discord Options': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET')
 }
 
@@ -283,9 +285,6 @@ ELO_START_VALUE = 1600
 
 # Enable a sanity check every time a result is submitted
 ENABLE_ELO_SANITY_CHECK = True
-
-# If an arena client requests a match when it has unfinished matches in the queue, reissue it one of the unfinished ones
-REISSUE_UNFINISHED_MATCHES = True
 
 # ELO implementation
 ELO = Elo(ELO_K)
