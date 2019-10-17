@@ -110,8 +110,6 @@
             {% else %}
                 {% if match.result.replay_file %}
                     <a href="{{ match.result.replay_file.url }}">Replay</a>
-                {% elif match.result.replay_file_corruption_detected %}
-                    Replay corrupt (<a href="{% url 'corrupt_replays' %}">?</a>)
                 {% endif %}
                 {% if match.result.replay_file and match.result.arenaclient_log %}
                 |
