@@ -20,7 +20,7 @@ from private_storage.fields import PrivateFileField
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds, \
     NoCurrentSeason, MultipleCurrentSeasons
-from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
+from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException, IncompleteRounds
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_not_nan, validate_not_inf, validate_bot_name, validate_bot_zip_file
@@ -100,6 +100,9 @@ class Season(models.Model):
         self.save()
 
     def close(self):
+        if Round.objects.filter(season=self, complete=False).count() > 0:
+            raise IncompleteRounds("A season cannot be closed while there are incomplete rounds.")
+
         self.status = 'closed'
         self.date_closed = timezone.now()
         self.save()
