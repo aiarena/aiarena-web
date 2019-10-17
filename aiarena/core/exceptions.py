@@ -4,7 +4,3 @@ class BotNotInMatchException(Exception):
 
 class BotAlreadyInMatchException(Exception):
     pass
-
-
-class IncompleteRounds(Exception):
-    pass

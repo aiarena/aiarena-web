@@ -62,8 +62,10 @@ class BaseTestCase(TransactionTestCase):
     def _post_to_results(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot1_data, open(
-                self.test_bot2_data_path, 'rb') as bot2_data, open(self.test_bot1_match_log_path, 'rb') as bot1_log, open(
-            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path, 'rb') as arenaclient_log:
+                self.test_bot2_data_path, 'rb') as bot2_data, open(self.test_bot1_match_log_path,
+                                                                   'rb') as bot1_log, open(
+            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
+                                                                   'rb') as arenaclient_log:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
@@ -75,9 +77,10 @@ class BaseTestCase(TransactionTestCase):
                                      'bot2_log': SimpleUploadedFile("bot2_log.zip", bot2_log.read()),
                                      'bot1_avg_step_time': 0.2,
                                      'bot2_avg_step_time': 0.1,
-                                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.zip", arenaclient_log.read())})
+                                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.zip",
+                                                                           arenaclient_log.read())})
 
-# todo:
+    # todo:
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile:
@@ -245,7 +248,6 @@ class UserTestCase(BaseTestCase):
 
 class BotTestCase(LoggedInTestCase):
     def test_bot_creation_and_update(self):
-
         # set the configured per user limits for this test
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
         config.MAX_USER_BOT_COUNT = 4
@@ -308,6 +310,58 @@ class BotTestCase(LoggedInTestCase):
 
         bot1.refresh_from_db()
         self.assertEqual(self.test_bot2_data_hash, bot1.bot_data_md5hash)
+
+
+class SeasonsTestCase(FullDataSetTestCase):
+    """
+    Test season rotation
+    """
+
+    def _finish_season_rounds(self):
+        for x in range(Match.objects.filter(result__isnull=True).count()):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+
+            response = self._post_to_results(response.data['id'], 'Player1Win')
+            self.assertEqual(response.status_code, 201)
+
+    def test_season_states(self):
+        self.client.login(username='staff_user', password='x')
+
+        self.assertEqual(Match.objects.filter(result__isnull=True).count(), 12,
+                         msg='This tests expects 12 unplayed matches in order to work.')
+
+        # attempt to close season - should fail
+        season1 = Season.objects.get()
+
+        season1.pause()
+
+        self._finish_season_rounds()
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(u'The current season is paused.', response.data['detail'])
+
+        # reopen the season
+        season1.open()
+
+        # start a new round
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+
+        season1.close()
+
+        # finish the season
+        self._finish_season_rounds()
+
+        # successful close
+        season1.refresh_from_db()
+        self.assertEqual(season1.status, 'closed')
+
+        # todo: check bots should be deactivated
+
+        # todo: start a new season
+        # season2 = Season.cre
 
 
 class PageRenderTestCase(FullDataSetTestCase):
@@ -483,7 +537,8 @@ class ManagementCommandTests(MatchReadyTestCase):
 
         call_command('cleanuparenaclientlogfiles', stdout=out)
         self.assertIn(
-            'Cleaning up arena client logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(NUM_MATCHES),
+            'Cleaning up arena client logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(
+                NUM_MATCHES),
             out.getvalue())
 
         self.assertEqual(results.count(), NUM_MATCHES)

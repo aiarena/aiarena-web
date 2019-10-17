@@ -19,14 +19,21 @@ from private_storage.fields import PrivateFileField
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds, \
-    NoCurrentSeason, MultipleCurrentSeasons
-from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException, IncompleteRounds
+    NoCurrentSeason, MultipleCurrentSeasons, CurrentSeasonPaused, CurrentSeasonClosing
+from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_not_nan, validate_not_inf, validate_bot_name, validate_bot_zip_file
 from aiarena.settings import ELO_START_VALUE, ELO, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
+
+
+class LockableModelMixin:
+    def lock_me(self):
+        # todo: is there a better way to do this?
+        self.__class__.objects.select_for_update().get(id=self.id)
+        self.refresh_from_db()
 
 
 def map_file_upload_to(instance, filename):
@@ -76,18 +83,28 @@ class User(AbstractUser):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
-class Season(models.Model):
+class Season(models.Model, LockableModelMixin):
     """ Represents a season of play in the context of a ladder """
     SEASON_STATUSES = (
         ('created', 'Created'),  # The initial state for a season. Functionally identical to paused.
         ('paused', 'Paused'),  # While a season is paused, existing rounds can be played, but no new ones are generated.
         ('open', 'Open'),  # When a season is open, new rounds can be generated and played.
+        ('closing', 'Closing'),
+        # When a season is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
         ('closed', 'Closed'),  # Functionally identical to paused, except not intended to change after this status.
     )
     date_created = models.DateTimeField(auto_now_add=True)
     date_opened = models.DateTimeField(blank=True, null=True)
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
+
+    @property
+    def is_paused(self):
+        return self.status == 'paused'
+
+    @property
+    def is_closing(self):
+        return self.status == 'closing'
 
     def pause(self):
         self.status = 'paused'
@@ -100,12 +117,16 @@ class Season(models.Model):
         self.save()
 
     def close(self):
-        if Round.objects.filter(season=self, complete=False).count() > 0:
-            raise IncompleteRounds("A season cannot be closed while there are incomplete rounds.")
-
-        self.status = 'closed'
-        self.date_closed = timezone.now()
+        self.status = 'closing'
         self.save()
+
+    def try_to_close(self):
+        self.lock_me()
+
+        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0:
+            self.status = 'closed'
+            self.date_closed = timezone.now()
+            self.save()
 
     @staticmethod
     def get_current_season():
@@ -118,7 +139,7 @@ class Season(models.Model):
             raise MultipleCurrentSeasons()  # todo: separate between core and API exceptions
 
 
-class Round(models.Model):
+class Round(models.Model, LockableModelMixin):
     """ Represents a round of play within a season """
     season = models.ForeignKey(Season, on_delete=models.CASCADE)  # todo: eob remove blank/null
     started = models.DateTimeField(auto_now_add=True)
@@ -127,11 +148,14 @@ class Round(models.Model):
 
     # if all the matches have been run, mark this as complete
     def update_if_completed(self):
+        self.lock_me()
+
         # if there are no matches without results, this round is complete
         if Match.objects.filter(round=self, result__isnull=True).count() == 0:
             self.complete = True
             self.finished = timezone.now()
             self.save()
+            Season.get_current_season().try_to_close()
 
     @staticmethod
     def max_active_rounds_reached():
@@ -144,7 +168,13 @@ class Round(models.Model):
         if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
             raise NotEnoughActiveBots()  # todo: separate between core and API exceptions
 
-        round = Round.objects.create(season=Season.get_current_season())
+        current_season = Season.get_current_season()
+        if current_season.is_paused:
+            raise CurrentSeasonPaused()
+        if current_season.is_closing:  # we should technically never hit this
+            raise CurrentSeasonClosing()
+
+        new_round = Round.objects.create(season=Season.get_current_season())
 
         active_bots = Bot.objects.filter(active=True)
         already_processed_bots = []
@@ -153,7 +183,7 @@ class Round(models.Model):
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
             for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
-                Match.create(round, Map.random_active(), bot1, bot2)
+                Match.create(new_round, Map.random_active(), bot1, bot2)
 
 
 # todo: structure for separate ladder types
@@ -215,23 +245,20 @@ class Match(models.Model):
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ, {5} READ".format(Match._meta.db_table,
-                                                                                          Round._meta.db_table,
-                                                                                          MatchParticipation._meta.db_table,
-                                                                                          Bot._meta.db_table,
-                                                                                          Map._meta.db_table,
-                                                                                          Season._meta.db_table))
+                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ, {5} READ".format(
+                    Match._meta.db_table,
+                    Round._meta.db_table,
+                    MatchParticipation._meta.db_table,
+                    Bot._meta.db_table,
+                    Map._meta.db_table,
+                    Season._meta.db_table))
             try:
                 match = Match._locate_and_return_started_match(requesting_user)
                 if match is None:
                     if Bot.objects.filter(active=True, in_match=False).count() < 2:
                         # All the active bots are already in a match
-                        # ROLLBACK here so the UNLOCK statement doesn't commit changes
-                        cursor.execute("ROLLBACK")
                         raise NotEnoughAvailableBots()
                     elif Round.max_active_rounds_reached():
-                        # ROLLBACK here so the UNLOCK statement doesn't commit changes
-                        cursor.execute("ROLLBACK")
                         raise MaxActiveRounds()
                     else:  # generate new round
                         Round.generate_new()
@@ -243,7 +270,10 @@ class Match(models.Model):
                             return match
                 else:
                     return match
-
+            except:
+                # ROLLBACK here so the UNLOCK statement doesn't commit changes
+                cursor.execute("ROLLBACK")
+                raise  # rethrow
             finally:
                 # pass
                 cursor.execute("UNLOCK TABLES;")
@@ -284,12 +314,14 @@ class Match(models.Model):
             # attempt to kick the bots from the match
             if match.started:
                 try:
-                    bot1 = match.matchparticipation_set.select_related().select_for_update().get(participant_number=1).bot
+                    bot1 = match.matchparticipation_set.select_related().select_for_update().get(
+                        participant_number=1).bot
                     bot1.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
                 try:
-                    bot2 = match.matchparticipation_set.select_related().select_for_update().get(participant_number=2).bot
+                    bot2 = match.matchparticipation_set.select_related().select_for_update().get(
+                        participant_number=2).bot
                     bot2.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
@@ -596,7 +628,8 @@ class MatchParticipation(models.Model):
         ('race_mismatch', 'Race Mismatch'),  # A bot joined the match with the wrong race
         ('match_cancelled', 'Match Cancelled'),  # The match was cancelled
         ('initialization_failure', 'Initialization Failure'),  # A bot failed to initialize
-        ('error', 'Error'),  # There was an unspecified error running the match (this should only be paired with a 'none' result)
+        ('error', 'Error'),
+    # There was an unspecified error running the match (this should only be paired with a 'none' result)
 
     )
     match = models.ForeignKey(Match, on_delete=models.CASCADE)

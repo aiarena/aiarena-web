@@ -37,6 +37,18 @@ class LadderDisabled(APIException):
     default_code = 'ladder_disabled'
 
 
+class CurrentSeasonPaused(APIException):
+    status_code = 503  # Service Unavailable https://httpstatuses.com/503
+    default_detail = 'The current season is paused.'
+    default_code = 'current_season_paused'
+
+
+class CurrentSeasonClosing(APIException):
+    status_code = 503  # Service Unavailable https://httpstatuses.com/503
+    default_detail = 'The current season is closing.'
+    default_code = 'current_season_closing'
+
+
 class NoCurrentSeason(APIException):
     status_code = 503  # Service Unavailable https://httpstatuses.com/503
     default_detail = 'There is no current season.'

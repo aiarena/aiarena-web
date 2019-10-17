@@ -95,7 +95,7 @@ class MatchViewSet(viewsets.GenericViewSet):
                     match.bot2 = MatchParticipation.objects.get(match_id=match.id, participant_number=2).bot
 
                     serializer = self.get_serializer(match)
-                    return Response(serializer.data, status=status.HTTP_200_OK)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
                 else:
                     return self.create_new_match(request.user)
             else:
