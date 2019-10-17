@@ -30,7 +30,7 @@ class MatchesTestCase(LoggedInTestCase):
 
     def test_post_next_match(self):
         # avoid old tests breaking that were pre-this feature
-        settings.REISSUE_UNFINISHED_MATCHES = False
+        config.REISSUE_UNFINISHED_MATCHES = False
 
         self.client.login(username='staff_user', password='x')
 
@@ -106,7 +106,7 @@ class MatchesTestCase(LoggedInTestCase):
 
     def test_previous_match_timeout(self):
         # avoid old tests breaking that were pre-this feature
-        settings.REISSUE_UNFINISHED_MATCHES = False
+        config.REISSUE_UNFINISHED_MATCHES = False
 
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
@@ -180,7 +180,7 @@ class MatchesTestCase(LoggedInTestCase):
 
     def test_max_active_rounds(self):
         # we don't want to have to create lots of arenaclients for multiple matches
-        settings.REISSUE_UNFINISHED_MATCHES = False
+        config.REISSUE_UNFINISHED_MATCHES = False
         config.MAX_ACTIVE_ROUNDS = 2
 
         self.client.login(username='staff_user', password='x')
@@ -556,7 +556,7 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
 
     def test_round_robin_generation(self):
         # avoid old tests breaking that were pre-this feature
-        settings.REISSUE_UNFINISHED_MATCHES = False
+        config.REISSUE_UNFINISHED_MATCHES = False
 
         botCount = Bot.objects.filter(active=True).count()
         expectedMatchCountPerRound = int(botCount / 2 * (botCount - 1))
