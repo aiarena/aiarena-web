@@ -8,6 +8,7 @@
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}
+                    <p><a href="https://demo.django-wiki.org/#wiki-toc-markdown-syntax">Markdown Syntax <i class="material-icons md-18" style="font-size: 18px;">launch</i></a></p>
                     {% if object.bot_data_is_currently_frozen %}
                         <p>NOTE: This bot is currently in a match. Bot data cannot be altered at this time.</p>
                     {% endif %}
