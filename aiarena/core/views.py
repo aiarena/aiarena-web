@@ -145,7 +145,7 @@ class BotDetail(DetailView):
 
 
 class StandardBotUpdateForm(forms.ModelForm):
-    # wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
+    wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
 
     class Meta:
         model = Bot
@@ -155,7 +155,7 @@ class StandardBotUpdateForm(forms.ModelForm):
 
 class FrozenDataBotUpdateForm(forms.ModelForm):
     bot_data = forms.FileField(disabled=True)
-    # wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
+    wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
 
     class Meta:
         model = Bot
@@ -189,15 +189,15 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         """Create a new article revision for the bot wiki page when the form is valid"""
 
         # If the article content is different, add a new revision
-        # if form.instance.wiki_article.current_revision.content != form.cleaned_data['wiki_article_content']:
-        #     revision = ArticleRevision()
-        #     revision.inherit_predecessor(form.instance.wiki_article)
-        #     revision.title = form.instance.name
-        #     revision.content = form.cleaned_data['wiki_article_content']
-        #     # revision.user_message = form.cleaned_data['summary']
-        #     revision.deleted = False
-        #     revision.set_from_request(self.request)
-        #     form.instance.wiki_article.add_revision(revision)
+        if form.instance.wiki_article.current_revision.content != form.cleaned_data['wiki_article_content']:
+            revision = ArticleRevision()
+            revision.inherit_predecessor(form.instance.wiki_article)
+            revision.title = form.instance.name
+            revision.content = form.cleaned_data['wiki_article_content']
+            # revision.user_message = form.cleaned_data['summary']
+            revision.deleted = False
+            revision.set_from_request(self.request)
+            form.instance.wiki_article.add_revision(revision)
         return super(BotUpdate, self).form_valid(form)
 
 
