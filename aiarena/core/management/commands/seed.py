@@ -165,11 +165,16 @@ class Command(BaseCommand):
                             help="Specify the token to use for the arena client."
                                  " Useful to avoid having to reconfigure arena clients in testing")
         parser.add_argument('--flush', action='store_true', help="Whether to flush the existing database data.")
+        parser.add_argument('--migrate', action='store_true', help="Whether to migrate the database first.")
 
     def handle(self, *args, **options):
 
         if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT \
                 or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING:
+            if options['migrate'] is not None:
+                self.stdout.write('Migrating database...')
+                call_command('migrate', '--noinput')
+
             if options['flush'] is not None:
                 self.stdout.write('Flushing data...')
                 call_command('flush', '--noinput')
