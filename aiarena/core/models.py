@@ -286,7 +286,7 @@ class Bot(models.Model):
         ('P', 'Protoss'),
         ('R', 'Random'),
     )
-    TYPES = (
+    TYPES = (  # todo: update display names. capitalize etc
         ('cppwin32', 'cppwin32'),
         ('cpplinux', 'cpplinux'),
         ('dotnetcore', 'dotnetcore'),
