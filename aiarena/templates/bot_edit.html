@@ -4,7 +4,7 @@
 {% block content %}
     <div class="divider"><span></span><span><h2>Edit Bot</h2></span><span></span></div>
     <div class="registration-form">
-        <h2 ><i class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">edit</i>{{ bot.name }}</h2>
+        <h2 ><i class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">edit</i>{{ bot.as_html_link |safe }}</h2>
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}
