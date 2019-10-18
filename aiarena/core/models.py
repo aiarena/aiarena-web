@@ -16,6 +16,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from private_storage.fields import PrivateFileField
+from wiki.models import Article, URLPath, ArticleRevision
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds
@@ -166,11 +167,12 @@ class Match(models.Model):
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ".format(Match._meta.db_table,
+                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ, {5} READ".format(Match._meta.db_table,
                                                                                           Round._meta.db_table,
                                                                                           Participation._meta.db_table,
                                                                                           Bot._meta.db_table,
-                                                                                          Map._meta.db_table))
+                                                                                          Map._meta.db_table,
+                                                                                          Article._meta.db_table))
             try:
                 match = Match._locate_and_return_started_match(requesting_user)
                 if match is None:
@@ -315,6 +317,26 @@ class Bot(models.Model):
     type = models.CharField(max_length=32, choices=TYPES)
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
+    wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT)
+
+    def get_wiki_article(self):
+        try:
+            return self.wiki_article
+        except:
+            return None
+
+    def create_bot_wiki_article(self):
+        article_kwargs = {'owner': self.user,
+                          'group': None,
+                          'group_read': True,
+                          'group_write': False,
+                          'other_read': True,
+                          'other_write': False}
+        article = Article(**article_kwargs)
+        article.add_revision(ArticleRevision(title=self.name), save=True)
+        article.save()
+
+        self.wiki_article = article
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_active_bot_race_per_user(self):
@@ -471,6 +493,10 @@ def skip_saving_bot_files(sender, instance, **kwargs):
         setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
         instance.bot_data = None
 
+    # automatically create a wiki article for this bot if it doesn't exists
+    if instance.get_wiki_article() is None:
+        instance.create_bot_wiki_article()
+
 
 @receiver(post_save, sender=Bot)
 def save_bot_files(sender, instance, created, **kwargs):
@@ -510,10 +536,10 @@ def save_bot_files(sender, instance, created, **kwargs):
             instance.save()
             post_save.connect(save_bot_files, sender=sender)
     elif instance.bot_data_md5hash is not None:
-            instance.bot_data_md5hash = None
-            post_save.disconnect(save_bot_files, sender=sender)
-            instance.save()
-            post_save.connect(save_bot_files, sender=sender)
+        instance.bot_data_md5hash = None
+        post_save.disconnect(save_bot_files, sender=sender)
+        instance.save()
+        post_save.connect(save_bot_files, sender=sender)
 
 
 def match_log_upload_to(instance, filename):
@@ -534,7 +560,8 @@ class Participation(models.Model):
         ('race_mismatch', 'Race Mismatch'),  # A bot joined the match with the wrong race
         ('match_cancelled', 'Match Cancelled'),  # The match was cancelled
         ('initialization_failure', 'Initialization Failure'),  # A bot failed to initialize
-        ('error', 'Error'), # There was an unspecified error running the match (this should only be paired with a 'none' result)
+        ('error', 'Error'),
+    # There was an unspecified error running the match (this should only be paired with a 'none' result)
 
     )
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
@@ -615,12 +642,12 @@ class Result(models.Model):
         ('Player1Crash', 'Player1Crash'),
         ('Player1TimeOut', 'Player1TimeOut'),
         ('Player1RaceMismatch', 'Player1RaceMismatch'),
-        ('Player1Surrender','Player1Surrender'),
+        ('Player1Surrender', 'Player1Surrender'),
         ('Player2Win', 'Player2Win'),
         ('Player2Crash', 'Player2Crash'),
         ('Player2TimeOut', 'Player2TimeOut'),
         ('Player2RaceMismatch', 'Player2RaceMismatch'),
-        ('Player2Surrender','Player2Surrender'),
+        ('Player2Surrender', 'Player2Surrender'),
         ('Tie', 'Tie'),
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
@@ -711,9 +738,9 @@ class Result(models.Model):
 
     def get_winner_loser_bots(self):
         bot1, bot2 = self.get_participant_bots()
-        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut','Player2Surrender'):
+        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
             return bot1, bot2
-        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut','Player1Surrender'):
+        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
             return bot2, bot1
         else:
             raise Exception('There was no winner or loser for this match.')

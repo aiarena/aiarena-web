@@ -9,6 +9,8 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
+from wiki.editors import getEditor
+from wiki.models import ArticleRevision
 
 from aiarena.core.models import Bot, Result, User, Round, Match, Participation
 
@@ -143,6 +145,8 @@ class BotDetail(DetailView):
 
 
 class StandardBotUpdateForm(forms.ModelForm):
+    wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
+
     class Meta:
         model = Bot
         fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
@@ -151,6 +155,7 @@ class StandardBotUpdateForm(forms.ModelForm):
 
 class FrozenDataBotUpdateForm(forms.ModelForm):
     bot_data = forms.FileField(disabled=True)
+    wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
 
     class Meta:
         model = Bot
@@ -179,6 +184,21 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             return FrozenDataBotUpdateForm
         else:
             return StandardBotUpdateForm
+
+    def form_valid(self, form):
+        """Create a new article revision for the bot wiki page when the form is valid"""
+
+        # If the article content is different, add a new revision
+        if form.instance.wiki_article.current_revision.content != form.cleaned_data['wiki_article_content']:
+            revision = ArticleRevision()
+            revision.inherit_predecessor(form.instance.wiki_article)
+            revision.title = form.instance.name
+            revision.content = form.cleaned_data['wiki_article_content']
+            # revision.user_message = form.cleaned_data['summary']
+            revision.deleted = False
+            revision.set_from_request(self.request)
+            form.instance.wiki_article.add_revision(revision)
+        return super(BotUpdate, self).form_valid(form)
 
 
 class AuthorList(ListView):
@@ -215,7 +235,8 @@ class Ranking(ListView):
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(
         Prefetch('winner'),
-        Prefetch('match__participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
+        Prefetch('match__participation_set', Participation.objects.all().prefetch_related('bot'),
+                 to_attr='participants'))
     template_name = 'results.html'
 
 
@@ -279,8 +300,8 @@ class MatchQueue(View):
         # Matches without a round are requested ones
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
             F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
-                Prefetch('map'),
-                Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
+            Prefetch('map'),
+            Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
 
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
@@ -288,7 +309,8 @@ class MatchQueue(View):
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
                 F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
                 Prefetch('map'),
-                Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
+                Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'),
+                         to_attr='participants'))
 
         context = {'round_list': rounds, 'requested_matches': requested_matches}
         return render(request, 'match_queue.html', context)
