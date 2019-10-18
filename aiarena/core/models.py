@@ -317,7 +317,7 @@ class Bot(models.Model):
     type = models.CharField(max_length=32, choices=TYPES)
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
-    wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT)
+    wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
 
     def get_wiki_article(self):
         try:
