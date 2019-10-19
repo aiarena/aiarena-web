@@ -138,7 +138,7 @@ class BotDetail(DetailView):
             else:
                 result.relative_type = result.type
 
-        context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('opponent__name')
+        context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('-win_perc')
         context['result_list'] = results
         context['results_page_range'] = results_page_range
         return context
