@@ -66,7 +66,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     success_message = "Bot was uploaded successfully"
 
     model = Bot
-    fields = ['name', 'bot_zip', 'plays_race', 'type']
+    fields = ['name', 'bot_zip', 'plays_race', 'type', 'active']
 
     def get_login_url(self):
         return reverse('login')
