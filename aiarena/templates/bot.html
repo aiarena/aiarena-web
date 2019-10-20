@@ -180,6 +180,7 @@
             <td><b>Result</b></td>
             <td><b>+/-</b></td>
             <td><b>Avg Step<br/>(ms)</b></td>
+            <td><b>Duration</b></td>
             <td><b>Replay</b></td>
             {% if request.user == bot.user or request.user.is_staff %}
                 <td><b>Log</b></td>
@@ -195,6 +196,7 @@
                         <td>{{ result.relative_type }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
                         <td>{{ result.me.step_time_ms|floatformat:3}}</td>
+                        <td>{{ result.game_time_formatted }}</td>
                         {% if result.replay_file %}
                             <td><a href="{{ result.replay_file.url }}">Download</a></td>
                         {% else %}
