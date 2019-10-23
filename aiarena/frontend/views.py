@@ -137,6 +137,7 @@ class BotDetail(DetailView):
                 result.relative_type = result.type
 
         context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('opponent__name')
+        context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
         context['result_list'] = results
         context['results_page_range'] = results_page_range
         return context

@@ -6,13 +6,11 @@
 <div class="bot_anker">
     <div class="anker_header"><i class="material-icons">swap_vert</i><h3>Go to:</h3></div>
     <div><a href="#bot_top_anker"><b>Top</b></a></div>
+    <div><a href="#bot_rankings_anker"><b>Rankings</b></a></div>
     <div><a href="#bot_stats_anker"><b>Stats</b></a></div>
     <div><a href="#elo_graph_anker"><b>ELO <br/>over time</b></a></div>
     <div><a href="#bot_results_anker"><b>Results</b></a></div>
 </div>
-
-
-
     <div id="bot_top_anker"></div>
     <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
 
@@ -23,7 +21,6 @@
                 <td><b>Author</b></td>
                 <td><b>Race</b></td>
                 <td><b>Type</b></td>
-                <td><b>ELO</b></td>
                 <td><b>Active</b></td>
                 <td><b>Bot Zip</b></td>
                 <td><b>Bot data</b></td>
@@ -39,7 +36,6 @@
                 <td>{{ bot.user.as_html_link |safe }} </td>
                 <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.type }} </td>
-                <td>{{ bot.elo }}</td>
                 <td>{{ bot.active }}</td>
                 {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
                     <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
@@ -62,6 +58,36 @@
                 {% endif %}
             </tr>
             </tbody>
+        </table>
+    </div>
+<div id="bot_rankings_anker"></div>
+<div class="divider"><span></span><span><h2>Rankings</h2></span><span></span></div>
+    <div id="bot_rankings">
+        <table>
+            <thead>
+            <tr>
+            <td><b>Season</b></td>
+            <td><b>Opened</b></td>
+            <td><b>Closed</b></td>
+            <td><b>ELO</b></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% if rankings.count > 0 %}
+                {% for season_participation in rankings %}
+                    <tr>
+                        <td>{{ season_participation.season.as_html_link |safe }}</td>
+                        <td>{{ season_participation.season.date_opened|date:"d. N Y - H:i:s" }}</td>
+                        <td>{{ season_participation.season.date_closed|date:"d. N Y - H:i:s" }}</td>
+                        <td>{{ season_participation.elo }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr><td colspan="4">No rankings</td></tr>
+            {% endif %}
+            </tbody>
+            <tfoot>
+            </tfoot>
         </table>
     </div>
 
