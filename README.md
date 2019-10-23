@@ -5,6 +5,16 @@ A website for running the ai-arena.net ladder.
 
 [Dev Install instructions](./doc/INSTALL.md)
 
+## Module structure:
+### aiarena/core
+Core ladder/project functionality
+
+### aiarena/api
+Web API endpoints and functionality
+
+### aiarena/frontend
+Django template website frontend
+
 
 ## License
 
