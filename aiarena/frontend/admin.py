@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 
 from aiarena.core.models import *
 
@@ -33,6 +34,16 @@ class UserAdmin(admin.ModelAdmin):
 
 class SeasonAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Season._meta.fields]
+
+    # Add the close season button
+    change_form_template = "admin/change_form_season.html"
+
+    def response_change(self, request, obj):
+        if "_close-season" in request.POST:
+            obj.close()
+            self.message_user(request, "This season is now closing.")
+            return HttpResponseRedirect(".")
+        return super().response_change(request, obj)
 
 
 class RoundAdmin(admin.ModelAdmin):
