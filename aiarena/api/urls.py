@@ -12,7 +12,7 @@ router.register(r'match-participations', publicapi_views.MatchParticipationViewS
 router.register(r'season-participations', publicapi_views.SeasonParticipationViewSet, basename='api_seasonparticipation')
 router.register(r'results', publicapi_views.ResultViewSet, basename='api_result')
 router.register(r'rounds', publicapi_views.RoundViewSet, basename='api_round')
-router.register(r'seasons', publicapi_views.RoundViewSet, basename='api_season')
+router.register(r'seasons', publicapi_views.SeasonViewSet, basename='api_season')
 router.register(r'users', publicapi_views.UserViewSet, basename='api_user')
 
 # arena client
