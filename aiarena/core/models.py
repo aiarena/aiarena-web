@@ -593,9 +593,9 @@ class Participation(models.Model):
     def calculate_relative_result(self, result_type):
         if result_type in ['MatchCancelled', 'InitializationError', 'Error']:
             return 'none'
-        elif result_type in ['Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2RaceMismatch']:
+        elif result_type in ['Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2RaceMismatch', 'Player2Surrender']:
             return 'win' if self.participant_number == 1 else 'loss'
-        elif result_type in ['Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1RaceMismatch']:
+        elif result_type in ['Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1RaceMismatch', 'Player1Surrender']:
             return 'win' if self.participant_number == 2 else 'loss'
         elif result_type == 'Tie':
             return 'tie'
@@ -603,7 +603,7 @@ class Participation(models.Model):
             raise Exception('Unrecognized result type!')
 
     def calculate_relative_result_cause(self, result_type):
-        if result_type in ['Player1Win', 'Player2Win', 'Tie']:
+        if result_type in ['Player1Win', 'Player2Win', 'Tie', 'Player1Surrender', 'Player2Surrender']:
             return 'game_rules'
         elif result_type in ['Player1Crash', 'Player2Crash']:
             return 'crash'
