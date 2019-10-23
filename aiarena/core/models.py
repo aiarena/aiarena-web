@@ -291,9 +291,9 @@ class Match(models.Model):
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ, {5} READ".format(Match._meta.db_table,
+                "LOCK TABLES {} WRITE, {} WRITE, {} WRITE, {} WRITE, {} READ, {} READ, {} READ".format(Match._meta.db_table,
                                                                                           Round._meta.db_table,
-                                                                                          Participation._meta.db_table,
+                                                                                          MatchParticipation._meta.db_table,
                                                                                           Bot._meta.db_table,
                                                                                           Map._meta.db_table,
                                                                                           Article._meta.db_table,
