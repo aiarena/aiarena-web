@@ -136,8 +136,8 @@
             <tr>
                 {# matches don't always have a round #}
                 {% if match.round %}
-                    <td>{{ match.round.as_html_link |safe }}</td>
                     <td>{{ match.round.season.as_html_link |safe }}</td>
+                    <td>{{ match.round.as_html_link |safe }}</td>
                 {% else %}
                     <td>--</td>
                     <td>--</td>
