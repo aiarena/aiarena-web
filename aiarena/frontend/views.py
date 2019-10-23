@@ -313,5 +313,6 @@ class SeasonDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(SeasonDetail, self).get_context_data(**kwargs)
         context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
+        context['rankings'] = SeasonParticipation.objects.filter(season_id=self.object.id).order_by('-elo')
         return context
 
