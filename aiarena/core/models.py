@@ -119,7 +119,7 @@ class Season(models.Model, LockableModelMixin):
         self.status = 'open'
         self.save()
 
-    def close(self):
+    def start_closing(self):
         self.status = 'closing'
         self.save()
 

@@ -40,7 +40,7 @@ class SeasonAdmin(admin.ModelAdmin):
 
     def response_change(self, request, obj):
         if "_close-season" in request.POST:
-            obj.close()
+            obj.start_closing()
             self.message_user(request, "This season is now closing.")
             return HttpResponseRedirect(".")
         return super().response_change(request, obj)

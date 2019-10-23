@@ -349,7 +349,7 @@ class SeasonsTestCase(FullDataSetTestCase):
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
 
-        season1.close()
+        season1.start_closing()
 
         # finish the season
         self._finish_season_rounds()
