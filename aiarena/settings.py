@@ -240,9 +240,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [
-    os.path.join(APP_DIR, "static"),
-]
+# Don't configure this, because the files wil be automagically located
+# STATICFILES_DIRS = [
+#     os.path.join(APP_DIR, "frontend/static"),
+# ]
 
 # public media
 MEDIA_URL = "/media/"
