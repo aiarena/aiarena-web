@@ -16,6 +16,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from private_storage.fields import PrivateFileField
+from wiki.models import Article, URLPath, ArticleRevision
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds, \
@@ -290,13 +291,13 @@ class Match(models.Model):
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ, {5} READ".format(
-                    Match._meta.db_table,
-                    Round._meta.db_table,
-                    MatchParticipation._meta.db_table,
-                    Bot._meta.db_table,
-                    Map._meta.db_table,
-                    Season._meta.db_table))
+                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ, {5} READ".format(Match._meta.db_table,
+                                                                                          Round._meta.db_table,
+                                                                                          Participation._meta.db_table,
+                                                                                          Bot._meta.db_table,
+                                                                                          Map._meta.db_table,
+                                                                                          Article._meta.db_table,
+                                                                                          Season._meta.db_table))
             try:
                 match = Match._locate_and_return_started_match(requesting_user)
                 if match is None:
@@ -411,7 +412,7 @@ class Bot(models.Model):
         ('P', 'Protoss'),
         ('R', 'Random'),
     )
-    TYPES = (
+    TYPES = (  # todo: update display names. capitalize etc
         ('cppwin32', 'cppwin32'),
         ('cpplinux', 'cpplinux'),
         ('dotnetcore', 'dotnetcore'),
@@ -441,6 +442,26 @@ class Bot(models.Model):
     type = models.CharField(max_length=32, choices=TYPES)
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
+    wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
+
+    def get_wiki_article(self):
+        try:
+            return self.wiki_article
+        except:
+            return None
+
+    def create_bot_wiki_article(self):
+        article_kwargs = {'owner': self.user,
+                          'group': None,
+                          'group_read': True,
+                          'group_write': False,
+                          'other_read': True,
+                          'other_write': False}
+        article = Article(**article_kwargs)
+        article.add_revision(ArticleRevision(title=self.name), save=True)
+        article.save()
+
+        self.wiki_article = article
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_active_bot_race_per_user(self):
@@ -600,6 +621,10 @@ def pre_save_bot(sender, instance, **kwargs):
         setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
         instance.bot_data = None
 
+    # automatically create a wiki article for this bot if it doesn't exists
+    if instance.get_wiki_article() is None:
+        instance.create_bot_wiki_article()
+
 
 @receiver(post_save, sender=Bot)
 def post_save_bot(sender, instance, created, **kwargs):
@@ -706,9 +731,9 @@ class MatchParticipation(models.Model):
     def calculate_relative_result(self, result_type):
         if result_type in ['MatchCancelled', 'InitializationError', 'Error']:
             return 'none'
-        elif result_type in ['Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2RaceMismatch']:
+        elif result_type in ['Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2RaceMismatch', 'Player2Surrender']:
             return 'win' if self.participant_number == 1 else 'loss'
-        elif result_type in ['Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1RaceMismatch']:
+        elif result_type in ['Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1RaceMismatch', 'Player1Surrender']:
             return 'win' if self.participant_number == 2 else 'loss'
         elif result_type == 'Tie':
             return 'tie'
@@ -716,7 +741,7 @@ class MatchParticipation(models.Model):
             raise Exception('Unrecognized result type!')
 
     def calculate_relative_result_cause(self, result_type):
-        if result_type in ['Player1Win', 'Player2Win', 'Tie']:
+        if result_type in ['Player1Win', 'Player2Win', 'Tie', 'Player1Surrender', 'Player2Surrender']:
             return 'game_rules'
         elif result_type in ['Player1Crash', 'Player2Crash']:
             return 'crash'

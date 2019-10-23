@@ -142,6 +142,21 @@ a:hover {
     width: 12.0%;
 }
 
+#bot_details {
+    float: left;
+    width: 32.0%;
+    margin-left: 73px;
+}
+
+#bot_details table {
+    margin: 0;
+    padding: 0;
+}
+
+#bot_details thead {
+    background-color: rgba(97, 137, 47, 0.7)
+}
+
 #bot_stats {
     float: left;
     width: 32.0%;

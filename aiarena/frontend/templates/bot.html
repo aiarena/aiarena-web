@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters %}
+{% load i18n core_filters wiki_tags %}
 
 
 {% block content %}
@@ -14,51 +14,68 @@
     <div id="bot_top_anker"></div>
     <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
 
-    <div id="sidebar_left">
-        <table id="bot_details">
+    <div id="bot_details">
+        <table>
             <thead>
             <tr>
-                <td><b>Author</b></td>
-                <td><b>Race</b></td>
-                <td><b>Type</b></td>
-                <td><b>Active</b></td>
-                <td><b>Bot Zip</b></td>
-                <td><b>Bot data</b></td>
-                <td><b>Last Updated</b></td>
-                {# Bot author edit link - blank header#}
-                {% if request.user == bot.user %}
-                    <td></td>
-                {% endif %}
+                <td><b>Details</b></td>
+                <td>
+                    {% if request.user == bot.user %}
+                        [<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]
+                    {% endif %}
+                </td>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td>{{ bot.user.as_html_link |safe }} </td>
+                <td><b>Author</b></td>
+                <td>{{ bot.user.as_html_link |safe }}</td>
+            </tr>
+            <tr>
+                <td><b>Race</b></td>
                 <td>{{ bot.get_plays_race_display }}</td>
-                <td>{{ bot.type }} </td>
+            </tr>
+            <tr>
+                <td><b>Type</b></td>
+                <td>{{ bot.type }}</td>
+            </tr>
+            <tr>
+                <td><b>Active</b></td>
                 <td>{{ bot.active }}</td>
-                {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
-                    <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
-                {% else %}
-                    <td>--</td>
-                {% endif %}
-                {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
-                    {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_staff %}
-                        <td><a href="{{ bot.bot_data.url }}">Download</a></td>
+            </tr>
+            <tr>
+                <td><b>Bot Zip</b></td>
+                <td>
+                    {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
+                        <a href="{{ bot.bot_zip.url }}">Download</a>
                     {% else %}
-                        <td>--</td>
+                        --
                     {% endif %}
-                {% else %}
-                    <td>--</td>
-                {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><b>Bot data</b></td>
+                <td>
+                    {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
+                        {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_staff %}
+                            <a href="{{ bot.bot_data.url }}">Download</a>
+                        {% else %}
+                            --
+                        {% endif %}
+                    {% else %}
+                        --
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td><b>Last Updated</b></td>
                 <td>{{ bot.bot_zip_updated }}</td>
-                {# Bot author edit link #}
-                {% if request.user == bot.user %}
-                    <td>[<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]</td>
-                {% endif %}
             </tr>
             </tbody>
         </table>
+    </div>
+    <div>
+    {% wiki_render bot.wiki_article %}
     </div>
 <div id="bot_rankings_anker"></div>
 <div class="divider"><span></span><span><h2>Rankings</h2></span><span></span></div>
@@ -187,6 +204,7 @@
             <td><b>Result</b></td>
             <td><b>+/-</b></td>
             <td><b>Avg Step<br/>(ms)</b></td>
+            <td><b>Duration</b></td>
             <td><b>Replay</b></td>
             {% if request.user == bot.user or request.user.is_staff %}
                 <td><b>Log</b></td>
@@ -202,6 +220,7 @@
                         <td>{{ result.relative_type }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
                         <td>{{ result.me.step_time_ms|floatformat:3}}</td>
+                        <td>{{ result.game_time_formatted }}</td>
                         {% if result.replay_file %}
                             <td><a href="{{ result.replay_file.url }}">Download</a></td>
                         {% else %}

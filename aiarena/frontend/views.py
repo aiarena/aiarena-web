@@ -9,6 +9,8 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
+from wiki.editors import getEditor
+from wiki.models import ArticleRevision
 
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season
 
@@ -64,7 +66,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     success_message = "Bot was uploaded successfully"
 
     model = Bot
-    fields = ['name', 'bot_zip', 'plays_race', 'type']
+    fields = ['name', 'bot_zip', 'plays_race', 'type', 'active']
 
     def get_login_url(self):
         return reverse('login')
@@ -136,7 +138,7 @@ class BotDetail(DetailView):
             else:
                 result.relative_type = result.type
 
-        context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('opponent__name')
+        context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('-win_perc')
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
         context['result_list'] = results
         context['results_page_range'] = results_page_range
@@ -144,6 +146,8 @@ class BotDetail(DetailView):
 
 
 class StandardBotUpdateForm(forms.ModelForm):
+    wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
+
     class Meta:
         model = Bot
         fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
@@ -152,6 +156,7 @@ class StandardBotUpdateForm(forms.ModelForm):
 
 class FrozenDataBotUpdateForm(forms.ModelForm):
     bot_data = forms.FileField(disabled=True)
+    wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
 
     class Meta:
         model = Bot
@@ -180,6 +185,33 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             return FrozenDataBotUpdateForm
         else:
             return StandardBotUpdateForm
+
+    def get_form(self, form_class=None):
+        """Return an instance of the form to be used in this view."""
+
+        if form_class is None:
+            form_class = self.get_form_class()
+
+        # load the wiki article content as the initial value
+        wiki_article_content = self.object.wiki_article.current_revision.content
+        kwargs = self.get_form_kwargs()
+        kwargs['initial']['wiki_article_content'] = wiki_article_content
+        return form_class(**kwargs)
+
+    def form_valid(self, form):
+        """Create a new article revision for the bot wiki page when the form is valid"""
+
+        # If the article content is different, add a new revision
+        if form.instance.wiki_article.current_revision.content != form.cleaned_data['wiki_article_content']:
+            revision = ArticleRevision()
+            revision.inherit_predecessor(form.instance.wiki_article)
+            revision.title = form.instance.name
+            revision.content = form.cleaned_data['wiki_article_content']
+            # revision.user_message = form.cleaned_data['summary']
+            revision.deleted = False
+            revision.set_from_request(self.request)
+            form.instance.wiki_article.add_revision(revision)
+        return super(BotUpdate, self).form_valid(form)
 
 
 class AuthorList(ListView):

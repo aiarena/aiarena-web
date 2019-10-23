@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n core_filters %}
-
+{% load humanize %}
 {% block content %}
 <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <table style="min-width: 900px; margin: 0 auto;">
@@ -20,7 +20,7 @@
         {% for result in result_list %}
             <tr>
                 <td>{{ result.match.as_html_link |safe }}</td>
-                <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
+                <td>{{ result.created|naturaltime}}</td>
 
                 {% for p in result.match.participants %}
                     {% if p.participant_number == 1 %}
