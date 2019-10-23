@@ -45,6 +45,8 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   # path('rounds/', core_views.RoundList.as_view(), name='rounds'), # todo
                   path('rounds/<int:pk>/', core_views.RoundDetail.as_view(), name='round'),
                   path('matches/<int:pk>/', core_views.MatchDetail.as_view(), name='match'),
+                  path('seasons/', core_views.SeasonList.as_view(), name='seasons'),
+                  path('seasons/<int:pk>/', core_views.SeasonDetail.as_view(), name='season'),
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   url('avatar/', include('avatar.urls')),
                   path('profile/', core_views.UserProfile.as_view(), name='profile'),

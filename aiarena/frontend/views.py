@@ -299,3 +299,19 @@ class MatchQueue(View):
 class MatchDetail(DetailView):
     model = Match
     template_name = 'match.html'
+
+
+class SeasonList(ListView):
+    queryset = Season.objects.all().order_by('-id')
+    template_name = 'seasons.html'
+
+
+class SeasonDetail(DetailView):
+    model = Season
+    template_name = 'season.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SeasonDetail, self).get_context_data(**kwargs)
+        context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
+        return context
+

@@ -98,6 +98,9 @@ class Season(models.Model, LockableModelMixin):
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
 
+    def __str__(self):
+        return self.id.__str__()
+
     @property
     def is_paused(self):
         return self.status == 'paused'
@@ -138,6 +141,12 @@ class Season(models.Model, LockableModelMixin):
         except Season.MultipleObjectsReturned:
             raise MultipleCurrentSeasons()  # todo: separate between core and API exceptions
 
+    def get_absolute_url(self):
+        return reverse('season', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
 
 class Round(models.Model, LockableModelMixin):
     """ Represents a round of play within a season """
@@ -145,6 +154,9 @@ class Round(models.Model, LockableModelMixin):
     started = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(blank=True, null=True)
     complete = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.id.__str__()
 
     # if all the matches have been run, mark this as complete
     def update_if_completed(self):
@@ -184,6 +196,12 @@ class Round(models.Model, LockableModelMixin):
             already_processed_bots.append(bot1.id)
             for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
                 Match.create(new_round, Map.random_active(), bot1, bot2)
+
+    def get_absolute_url(self):
+        return reverse('round', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
 # todo: structure for separate ladder types

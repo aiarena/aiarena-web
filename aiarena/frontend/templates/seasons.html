@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+<div class="divider"><span></span><span><h2>Seasons</h2></span><span></span></div>
+    <table id="seasons_table" class="hover_table">
+        <tbody>
+        <thead>
+            <td><b>Season ID</b></td>
+            <td><b>Created</b></td>
+            <td><b>Opened</b></td>
+            <td><b>Closed</b></td>
+            <td><b>Status</b></td>
+        </thead>
+        <tbody>
+        {% for season in season_list %}
+            <tr>
+                <td>{{ season.as_html_link |safe }}</td>
+                <td>{{ season.date_created|date:"d. N Y - H:i:s" }}</td>
+                {% if season.date_opened %}
+                    <td>{{ season.date_opened|date:"d. N Y - H:i:s" }}</td>
+                {% else %}
+                    <td>--</td>
+                {% endif %}
+                {% if season.date_closed %}
+                    <td>{{ season.date_closed|date:"d. N Y - H:i:s" }}</td>
+                {% else %}
+                    <td>--</td>
+                {% endif %}
+                <td>{{ season.get_status_display }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
