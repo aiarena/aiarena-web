@@ -21,7 +21,7 @@ from django.contrib import admin
 from django.urls import path
 from django.views.generic.base import TemplateView
 
-from aiarena.core import views as core_views
+from aiarena.frontend import views as core_views
 
 urlpatterns = [  # todo: replace usage of url with path for all these
                   path('__debug__/', include(debug_toolbar.urls)),

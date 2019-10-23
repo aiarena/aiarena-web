@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'django_filters',
     'avatar',
     'aiarena.core',
+    'aiarena.frontend',
     'aiarena.api',
     'private_storage',
     'django.contrib.sites.apps.SitesConfig',
@@ -111,7 +112,7 @@ ROOT_URLCONF = 'aiarena.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(APP_DIR, 'templates')],
+        'DIRS': [os.path.join(APP_DIR, 'frontend/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -120,7 +121,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'aiarena.core.context_processors.stats',
+                'aiarena.frontend.context_processors.stats',
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',

@@ -101,7 +101,6 @@ def run_seed(rounds, token):
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient, key=token)
 
-    # todo: restructure project into core/frontend
     season = Season.objects.create()
     season.open()
 
