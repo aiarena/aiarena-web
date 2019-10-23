@@ -3,15 +3,16 @@
 
 {% block content %}
 
-<div class="divider"><span></span><span><h2>Seasons</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>Seasons</h2></span><span></span></div>
     <table id="seasons_table" class="hover_table">
-        <tbody>
         <thead>
+        <tr>
             <td><b>Season ID</b></td>
             <td><b>Created</b></td>
             <td><b>Opened</b></td>
             <td><b>Closed</b></td>
             <td><b>Status</b></td>
+        </tr>
         </thead>
         <tbody>
         {% for season in season_list %}

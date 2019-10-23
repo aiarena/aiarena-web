@@ -3,17 +3,18 @@
 
 {% block content %}
 
-<div class="divider"><span></span><span><h2>Season {{ season.id }}</h2></span><span></span></div>
-<div id="sidebar_left">
-<table id="season)details">
-        <tbody>
-        <thead>
-            <td><b>Created</b></td>
-            <td><b>Opened</b></td>
-            <td><b>Closed</b></td>
-            <td><b>Status</b></td>
-        </thead>
-        <tbody>
+    <div class="divider"><span></span><span><h2>Season {{ season.id }}</h2></span><span></span></div>
+    <div id="sidebar_left">
+        <table id="season)details">
+            <thead>
+            <tr>
+                <td><b>Created</b></td>
+                <td><b>Opened</b></td>
+                <td><b>Closed</b></td>
+                <td><b>Status</b></td>
+            </tr>
+            </thead>
+            <tbody>
             <tr>
                 <td>{{ season.date_created|date:"d. N Y - H:i:s" }}</td>
                 {% if season.date_opened %}
@@ -28,33 +29,33 @@
                 {% endif %}
                 <td>{{ season.get_status_display }}</td>
             </tr>
-        </tbody>
-    </table>
-</div>
-<br>
-<div class="divider"><span></span><span><h2>Rounds</h2></span><span></span></div>
-<table id="matches_table" style="min-width: 900px; margin: 0 auto;">
-    <tbody>
-    <thead>
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <div class="divider"><span></span><span><h2>Rounds</h2></span><span></span></div>
+    <table id="matches_table" style="min-width: 900px; margin: 0 auto;">
+        <tbody>
+        <thead>
         <td><b>Round ID</b></td>
         <td><b>Started at</b></td>
         <td><b>Finished at</b></td>
-    </thead>
-    {% for round in round_list %}
-        <tr>
-            <td>{{ round.as_html_link |safe }}</td>
-            {% if season.date_opened %}
-                <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
-            {% else %}
-                <td>--</td>
-            {% endif %}
-            {% if season.date_opened %}
-                <td>{{ round.finished|date:"d. N Y - H:i:s" }}</td>
-            {% else %}
-                <td>--</td>
-            {% endif %}
-        </tr>
-    {% endfor %}
-    <tbody>
-</table>
+        </thead>
+        {% for round in round_list %}
+            <tr>
+                <td>{{ round.as_html_link |safe }}</td>
+                {% if season.date_opened %}
+                    <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
+                {% else %}
+                    <td>--</td>
+                {% endif %}
+                {% if season.date_opened %}
+                    <td>{{ round.finished|date:"d. N Y - H:i:s" }}</td>
+                {% else %}
+                    <td>--</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        <tbody>
+    </table>
 {% endblock %}
