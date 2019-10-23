@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.checks import messages
 from django.http import HttpResponseRedirect
 
 from aiarena.core.models import *
@@ -39,9 +40,26 @@ class SeasonAdmin(admin.ModelAdmin):
     change_form_template = "admin/change_form_season.html"
 
     def response_change(self, request, obj):
-        if "_close-season" in request.POST:
-            obj.start_closing()
-            self.message_user(request, "This season is now closing.")
+        if "_open-season" in request.POST:
+            error = obj.open()
+            if error is None:
+                self.message_user(request, "This season is now open.",)
+            else:
+                self.message_user(request, error, level=messages.ERROR)
+            return HttpResponseRedirect(".")
+        elif "_pause-season" in request.POST:
+            error = obj.pause()
+            if error is None:
+                self.message_user(request, "This season is now paused.")
+            else:
+                self.message_user(request, error, level=messages.ERROR)
+            return HttpResponseRedirect(".")
+        elif "_close-season" in request.POST:
+            error = obj.start_closing()
+            if error is None:
+                self.message_user(request, "This season is now closing.")
+            else:
+                self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
         return super().response_change(request, obj)
 

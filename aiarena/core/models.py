@@ -106,22 +106,41 @@ class Season(models.Model, LockableModelMixin):
         return self.status == 'paused'
 
     @property
+    def is_open(self):
+        return self.status == 'open'
+
+    @property
     def is_closing(self):
         return self.status == 'closing'
 
     def pause(self):
-        self.status = 'paused'
-        self.save()
+        self.lock_me()
+        if self.status == 'open':
+            self.status = 'paused'
+            self.save()
+            return None
+        else:
+            return "Cannot pause a season with a status of {}".format(self.status)
 
     def open(self):
-        if self.status == 'created':
-            self.date_opened = timezone.now()
-        self.status = 'open'
-        self.save()
+        self.lock_me()
+        if self.status in ['created', 'paused']:
+            if self.status == 'created':
+                self.date_opened = timezone.now()
+            self.status = 'open'
+            self.save()
+            return None
+        else:
+            return "Cannot open a season with a status of {}".format(self.status)
 
     def start_closing(self):
-        self.status = 'closing'
-        self.save()
+        self.lock_me()
+        if self.is_open or self.is_paused:
+            self.status = 'closing'
+            self.save()
+            return None
+        else:
+            return "Cannot start closing a season with a status of {}".format(self.status)
 
     def try_to_close(self):
         self.lock_me()
