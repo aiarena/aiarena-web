@@ -15,8 +15,6 @@ import sys
 from datetime import timedelta
 from enum import Enum
 
-from constance import config
-
 from aiarena.core.utils import Elo, EnvironmentType
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -75,6 +73,7 @@ INSTALLED_APPS = [
     'django_filters',
     'avatar',
     'aiarena.core',
+    'aiarena.frontend',
     'aiarena.api',
     'private_storage',
     'django.contrib.sites.apps.SitesConfig',
@@ -113,7 +112,7 @@ ROOT_URLCONF = 'aiarena.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(APP_DIR, 'templates')],
+        'DIRS': [os.path.join(APP_DIR, 'frontend/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,7 +121,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'aiarena.core.context_processors.stats',
+                'aiarena.frontend.context_processors.stats',
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
@@ -241,9 +240,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [
-    os.path.join(APP_DIR, "static"),
-]
+# Don't configure this, because the files wil be automagically located
+# STATICFILES_DIRS = [
+#     os.path.join(APP_DIR, "frontend/static"),
+# ]
 
 # public media
 MEDIA_URL = "/media/"
@@ -321,10 +321,12 @@ AVATAR_PROVIDERS = (
 
 
 def get_discord_client_id():
+    from constance import config  # so that this file can be imported without constance installed
     return config.DISCORD_CLIENT_ID
 
 
 def get_discord_client_secret():
+    from constance import config  # so that this file can be imported without constance installed
     return config.DISCORD_CLIENT_SECRET
 
 

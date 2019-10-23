@@ -19,7 +19,8 @@ from private_storage.fields import PrivateFileField
 from wiki.models import Article, URLPath, ArticleRevision
 
 from aiarena import settings
-from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds
+from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, NotEnoughActiveBots, MaxActiveRounds, \
+    NoCurrentSeason, MultipleCurrentSeasons, CurrentSeasonPaused, CurrentSeasonClosing
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
@@ -27,6 +28,13 @@ from aiarena.core.validators import validate_not_nan, validate_not_inf, validate
 from aiarena.settings import ELO_START_VALUE, ELO, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
+
+
+class LockableModelMixin:
+    def lock_me(self):
+        # todo: is there a better way to do this?
+        self.__class__.objects.select_for_update().get(id=self.id)
+        self.refresh_from_db()
 
 
 def map_file_upload_to(instance, filename):
@@ -76,30 +84,162 @@ class User(AbstractUser):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
-class Round(models.Model):
+class Season(models.Model, LockableModelMixin):
+    """ Represents a season of play in the context of a ladder """
+    SEASON_STATUSES = (
+        ('created', 'Created'),  # The initial state for a season. Functionally identical to paused.
+        ('paused', 'Paused'),  # While a season is paused, existing rounds can be played, but no new ones are generated.
+        ('open', 'Open'),  # When a season is open, new rounds can be generated and played.
+        ('closing', 'Closing'),
+        # When a season is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
+        ('closed', 'Closed'),  # Functionally identical to paused, except not intended to change after this status.
+    )
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_opened = models.DateTimeField(blank=True, null=True)
+    date_closed = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
+
+    def __str__(self):
+        return self.id.__str__()
+
+    @property
+    def is_paused(self):
+        return self.status in ['paused', 'created']
+
+    @property
+    def is_open(self):
+        return self.status == 'open'
+
+    @property
+    def is_closing(self):
+        return self.status == 'closing'
+
+    @transaction.atomic
+    def pause(self):
+        self.lock_me()
+        if self.status == 'open':
+            self.status = 'paused'
+            self.save()
+            return None
+        else:
+            return "Cannot pause a season with a status of {}".format(self.status)
+
+    @transaction.atomic
+    def open(self):
+        self.lock_me()
+        if self.status in ['created', 'paused']:
+            if self.status == 'created':
+                self.date_opened = timezone.now()
+            self.status = 'open'
+            self.save()
+            return None
+        else:
+            return "Cannot open a season with a status of {}".format(self.status)
+
+    @transaction.atomic
+    def start_closing(self):
+        self.lock_me()
+        if self.is_open or self.is_paused:
+            self.status = 'closing'
+            self.save()
+            return None
+        else:
+            return "Cannot start closing a season with a status of {}".format(self.status)
+
+    @transaction.atomic
+    def try_to_close(self):
+        self.lock_me()
+
+        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0:
+            self.status = 'closed'
+            self.date_closed = timezone.now()
+            self.save()
+
+            for participant in self.seasonparticipation_set.all():
+                participant.bot.active = False
+                participant.bot.save()
+
+    @staticmethod
+    def get_current_season():
+        try:
+            #  will fail if there is more than 1 current season or 0 current seasons
+            return Season.objects.get(date_closed__isnull=True)
+        except Season.DoesNotExist:
+            raise NoCurrentSeason()  # todo: separate between core and API exceptions
+        except Season.MultipleObjectsReturned:
+            raise MultipleCurrentSeasons()  # todo: separate between core and API exceptions
+
+    def get_absolute_url(self):
+        return reverse('season', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
+
+class Round(models.Model, LockableModelMixin):
+    """ Represents a round of play within a season """
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)  # todo: eob remove blank/null
     started = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(blank=True, null=True)
     complete = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.id.__str__()
+
     # if all the matches have been run, mark this as complete
     def update_if_completed(self):
+        self.lock_me()
+
         # if there are no matches without results, this round is complete
         if Match.objects.filter(round=self, result__isnull=True).count() == 0:
             self.complete = True
             self.finished = timezone.now()
             self.save()
+            Season.get_current_season().try_to_close()
 
     @staticmethod
     def max_active_rounds_reached():
         return Round.objects.filter(complete=False).count() >= config.MAX_ACTIVE_ROUNDS
 
+    @staticmethod
+    def generate_new():
+        if Map.objects.filter(active=True).count() == 0:
+            raise NoMaps()  # todo: separate between core and API exceptions
+        if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
+            raise NotEnoughActiveBots()  # todo: separate between core and API exceptions
+
+        current_season = Season.get_current_season()
+        if current_season.is_paused:
+            raise CurrentSeasonPaused()
+        if current_season.is_closing:  # we should technically never hit this
+            raise CurrentSeasonClosing()
+
+        new_round = Round.objects.create(season=Season.get_current_season())
+
+        active_bots = Bot.objects.filter(active=True)
+        already_processed_bots = []
+
+        # loop through and generate matches for all active bots
+        for bot1 in active_bots:
+            already_processed_bots.append(bot1.id)
+            for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
+                Match.create(new_round, Map.random_active(), bot1, bot2)
+
+    def get_absolute_url(self):
+        return reverse('round', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
 
 # todo: structure for separate ladder types
 class Match(models.Model):
+    """ Represents a match between 2 bots. Usually this is within the context of a round, but doesn't have to be. """
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     started = models.DateTimeField(blank=True, null=True, editable=False)
-    assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True,
+                                    null=True)  # todo: eob remove blank/null
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
@@ -115,7 +255,7 @@ class Match(models.Model):
             Match.objects.select_for_update().get(id=self.id)  # lock self to avoid race conditions
             if self.started is None:
                 # is a bot currently in a match?
-                participations = Participation.objects.select_for_update().filter(match=self)
+                participations = MatchParticipation.objects.select_for_update().filter(match=self)
                 for p in participations:
                     if p.bot.in_match:
                         return Match.StartResult.BOT_ALREADY_IN_MATCH
@@ -132,32 +272,16 @@ class Match(models.Model):
 
     @property
     def participant1(self):
-        return self.participation_set.get(participant_number=1)
+        return self.matchparticipation_set.get(participant_number=1)
 
     @property
     def participant2(self):
-        return self.participation_set.get(participant_number=2)
-
-    @staticmethod
-    def _queue_round_robin_matches_for_all_active_bots():
-        if Map.objects.filter(active=True).count() == 0:
-            raise NoMaps()
-        if Bot.objects.filter(active=True).count() <= 1:  # need at least 2 active bots for a match
-            raise NotEnoughActiveBots()
-
-        round = Round.objects.create()
-
-        active_bots = Bot.objects.filter(active=True)
-        already_processed_bots = []
-
-        # loop through and generate matches for all active bots
-        for bot1 in active_bots:
-            already_processed_bots.append(bot1.id)
-            for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
-                Match.create(round, Map.random_active(), bot1, bot2)
+        return self.matchparticipation_set.get(participant_number=2)
 
     @staticmethod
     def start_next_match(requesting_user):
+
+        # todo: clean up this whole section
 
         Bot.timeout_overtime_bot_games()
 
@@ -167,26 +291,23 @@ class Match(models.Model):
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {0} WRITE, {1} WRITE, {2} WRITE, {3} WRITE, {4} READ, {5} READ".format(Match._meta.db_table,
+                "LOCK TABLES {} WRITE, {} WRITE, {} WRITE, {} WRITE, {} READ, {} READ, {} READ".format(Match._meta.db_table,
                                                                                           Round._meta.db_table,
-                                                                                          Participation._meta.db_table,
+                                                                                          MatchParticipation._meta.db_table,
                                                                                           Bot._meta.db_table,
                                                                                           Map._meta.db_table,
-                                                                                          Article._meta.db_table))
+                                                                                          Article._meta.db_table,
+                                                                                          Season._meta.db_table))
             try:
                 match = Match._locate_and_return_started_match(requesting_user)
                 if match is None:
                     if Bot.objects.filter(active=True, in_match=False).count() < 2:
                         # All the active bots are already in a match
-                        # ROLLBACK here so the UNLOCK statement doesn't commit changes
-                        cursor.execute("ROLLBACK")
                         raise NotEnoughAvailableBots()
                     elif Round.max_active_rounds_reached():
-                        # ROLLBACK here so the UNLOCK statement doesn't commit changes
-                        cursor.execute("ROLLBACK")
                         raise MaxActiveRounds()
                     else:  # generate new round
-                        Match._queue_round_robin_matches_for_all_active_bots()
+                        Round.generate_new()
                         match = Match._locate_and_return_started_match(requesting_user)
                         if match is None:
                             cursor.execute("ROLLBACK")
@@ -195,7 +316,10 @@ class Match(models.Model):
                             return match
                 else:
                     return match
-
+            except:
+                # ROLLBACK here so the UNLOCK statement doesn't commit changes
+                cursor.execute("ROLLBACK")
+                raise  # rethrow
             finally:
                 # pass
                 cursor.execute("UNLOCK TABLES;")
@@ -204,8 +328,8 @@ class Match(models.Model):
     def create(round, map, bot1, bot2):
         match = Match.objects.create(map=map, round=round)
         # create match participations
-        Participation.objects.create(match=match, participant_number=1, bot=bot1)
-        Participation.objects.create(match=match, participant_number=2, bot=bot2)
+        MatchParticipation.objects.create(match=match, participant_number=1, bot=bot1)
+        MatchParticipation.objects.create(match=match, participant_number=2, bot=bot2)
         return match
 
     # todo: let us specify the map
@@ -236,12 +360,14 @@ class Match(models.Model):
             # attempt to kick the bots from the match
             if match.started:
                 try:
-                    bot1 = match.participation_set.select_related().select_for_update().get(participant_number=1).bot
+                    bot1 = match.matchparticipation_set.select_related().select_for_update().get(
+                        participant_number=1).bot
                     bot1.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
                 try:
-                    bot2 = match.participation_set.select_related().select_for_update().get(participant_number=2).bot
+                    bot2 = match.matchparticipation_set.select_related().select_for_update().get(
+                        participant_number=2).bot
                     bot2.leave_match(match.id)
                 except BotNotInMatchException:
                     pass
@@ -301,7 +427,6 @@ class Bot(models.Model):
     in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
     current_match = models.ForeignKey(Match, on_delete=models.PROTECT, blank=True, null=True,
                                       related_name='bots_currently_in_match')
-    elo = models.SmallIntegerField(default=ELO_START_VALUE)
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=BOT_ZIP_MAX_SIZE, validators=[validate_bot_zip_file, ])
     bot_zip_updated = models.DateTimeField(editable=False)
@@ -454,22 +579,25 @@ class Bot(models.Model):
             send_mail(  # todo: template this
                 'AI Arena - ' + self.name + ' deactivated due to crashing',
                 'Dear ' + self.user.username + ',\n'
-                '\n'
-                'We are emailing you to let you know that your bot '
-                '"' + self.name + '" has reached our consecutive crash limit and hence been deactivated.\n'
-                'Please log into ai-arena.net at your convenience to address the issue.\n'
-                'Bot logs are available for download when logged in on the bot''s page here: '
+                                               '\n'
+                                               'We are emailing you to let you know that your bot '
+                                               '"' + self.name + '" has reached our consecutive crash limit and hence been deactivated.\n'
+                                                                 'Please log into ai-arena.net at your convenience to address the issue.\n'
+                                                                 'Bot logs are available for download when logged in on the bot''s page here: '
                 + settings.SITE_PROTOCOL + '://' + Site.objects.get_current().domain
                 + reverse('bot', kwargs={'pk': self.id}) + '\n'
-                '\n'
-                'Kind regards,\n'
-                'AI Arena Staff',
+                                                           '\n'
+                                                           'Kind regards,\n'
+                                                           'AI Arena Staff',
                 settings.DEFAULT_FROM_EMAIL,
                 [self.user.email],
                 fail_silently=False,
             )
         except Exception as e:
             logger.exception(e)
+
+    def current_season_participation(self):
+        return self.seasonparticipation_set.get(season=Season.get_current_season())
 
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
@@ -481,7 +609,7 @@ _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
 # This needs to happen because we want to use the model ID in the file path, but until the model is saved, it doesn't
 # have an ID.
 @receiver(pre_save, sender=Bot)
-def skip_saving_bot_files(sender, instance, **kwargs):
+def pre_save_bot(sender, instance, **kwargs):
     # If the Bot model hasn't been created yet (i.e. it's missing its ID) then set any files aside for the time being
     if not instance.pk and not hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         setattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD, instance.bot_zip)
@@ -499,22 +627,22 @@ def skip_saving_bot_files(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Bot)
-def save_bot_files(sender, instance, created, **kwargs):
+def post_save_bot(sender, instance, created, **kwargs):
     # bot zip
     if created and hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         instance.bot_zip = getattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD)
-        post_save.disconnect(save_bot_files, sender=sender)
+        post_save.disconnect(pre_save_bot, sender=sender)
         instance.save()
-        post_save.connect(save_bot_files, sender=sender)
+        post_save.connect(pre_save_bot, sender=sender)
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_ZIP_FILEFIELD)
 
     # bot data
     if created and hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD):
         instance.bot_data = getattr(instance, _UNSAVED_BOT_DATA_FILEFIELD)
-        post_save.disconnect(save_bot_files, sender=sender)
+        post_save.disconnect(pre_save_bot, sender=sender)
         instance.save()
-        post_save.connect(save_bot_files, sender=sender)
+        post_save.connect(pre_save_bot, sender=sender)
         # delete the saved instance
         instance.__dict__.pop(_UNSAVED_BOT_DATA_FILEFIELD)
 
@@ -524,29 +652,39 @@ def save_bot_files(sender, instance, created, **kwargs):
         if instance.bot_zip_md5hash != bot_zip_hash:
             instance.bot_zip_md5hash = bot_zip_hash
             instance.bot_zip_updated = timezone.now()
-            post_save.disconnect(save_bot_files, sender=sender)
+            post_save.disconnect(pre_save_bot, sender=sender)
             instance.save()
-            post_save.connect(save_bot_files, sender=sender)
+            post_save.connect(pre_save_bot, sender=sender)
 
     if instance.bot_data:
         bot_data_hash = calculate_md5_django_filefield(instance.bot_data)
         if instance.bot_data_md5hash != bot_data_hash:
             instance.bot_data_md5hash = bot_data_hash
-            post_save.disconnect(save_bot_files, sender=sender)
+            post_save.disconnect(pre_save_bot, sender=sender)
             instance.save()
-            post_save.connect(save_bot_files, sender=sender)
+            post_save.connect(pre_save_bot, sender=sender)
     elif instance.bot_data_md5hash is not None:
         instance.bot_data_md5hash = None
-        post_save.disconnect(save_bot_files, sender=sender)
+        post_save.disconnect(pre_save_bot, sender=sender)
         instance.save()
-        post_save.connect(save_bot_files, sender=sender)
+        post_save.connect(pre_save_bot, sender=sender)
+
+    # register a season participation if the bot has been activated
+    if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
+        SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)
+
+
+class SeasonParticipation(models.Model):
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT)
+    elo = models.SmallIntegerField(default=ELO_START_VALUE)
 
 
 def match_log_upload_to(instance, filename):
     return '/'.join(['match-logs', str(instance.id)])
 
 
-class Participation(models.Model):
+class MatchParticipation(models.Model):
     RESULT_TYPES = (
         ('none', 'None'),
         ('win', 'Win'),
@@ -566,7 +704,7 @@ class Participation(models.Model):
     )
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     participant_number = models.PositiveSmallIntegerField()
-    bot = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='match_participations')
+    bot = models.ForeignKey(Bot, on_delete=models.PROTECT)
     resultant_elo = models.SmallIntegerField(null=True)
     elo_change = models.SmallIntegerField(null=True)
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
@@ -574,10 +712,6 @@ class Participation(models.Model):
     avg_step_time = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
     result = models.CharField(max_length=32, choices=RESULT_TYPES, blank=True, null=True)
     result_cause = models.CharField(max_length=32, choices=CAUSE_TYPES, blank=True, null=True)
-
-    def update_resultant_elo(self):
-        self.resultant_elo = self.bot.elo
-        self.save()
 
     def __str__(self):
         return self.bot.name
@@ -589,6 +723,10 @@ class Participation(models.Model):
     @property
     def crashed(self):
         return self.result == 'loss' and self.result_cause in ['crash', 'timeout', 'initialization_failure']
+
+    @property
+    def season_participant(self):
+        return self.match.round.season.seasonparticipation_set.get(bot=self.bot)
 
     def calculate_relative_result(self, result_type):
         if result_type in ['MatchCancelled', 'InitializationError', 'Error']:
@@ -624,8 +762,8 @@ class Participation(models.Model):
 def replay_file_upload_to(instance, filename):
     return '/'.join(['replays',
                      f'{instance.match_id}'
-                     f'_{instance.match.participation_set.get(participant_number=1).bot.name}'
-                     f'vs{instance.match.participation_set.get(participant_number=2).bot.name}'
+                     f'_{instance.match.matchparticipation_set.get(participant_number=1).bot.name}'
+                     f'vs{instance.match.matchparticipation_set.get(participant_number=2).bot.name}'
                      f'_{instance.match.map.name}.SC2Replay'])
 
 
@@ -736,8 +874,8 @@ class Result(models.Model):
         else:
             return None
 
-    def get_winner_loser_bots(self):
-        bot1, bot2 = self.get_participant_bots()
+    def get_winner_loser_season_participants(self):
+        bot1, bot2 = self.get_season_participants()
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
             return bot1, bot2
         elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
@@ -745,48 +883,64 @@ class Result(models.Model):
         else:
             raise Exception('There was no winner or loser for this match.')
 
-    def get_participants(self):
-        first = Participation.objects.get(match=self.match, participant_number=1)
-        second = Participation.objects.get(match=self.match, participant_number=2)
+    def get_winner_loser_bots(self):
+        bot1, bot2 = self.get_match_participant_bots()
+        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
+            return bot1, bot2
+        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
+            return bot2, bot1
+        else:
+            raise Exception('There was no winner or loser for this match.')
+
+    def get_season_participants(self):
+        """Returns the SeasonParticipant models for the MatchParticipants"""
+        first = MatchParticipation.objects.get(match=self.match, participant_number=1)
+        second = MatchParticipation.objects.get(match=self.match, participant_number=2)
+        return first.season_participant, second.season_participant
+
+    def get_match_participants(self):
+        first = MatchParticipation.objects.get(match=self.match, participant_number=1)
+        second = MatchParticipation.objects.get(match=self.match, participant_number=2)
         return first, second
 
-    def get_participant_bots(self):
-        first, second = self.get_participants()
+    def get_match_participant_bots(self):
+        first, second = self.get_match_participants()
         return first.bot, second.bot
 
     def save(self, *args, **kwargs):
         # set winner
         if self.has_winner():
-            self.winner = Participation.objects.get(match=self.match,
-                                                    participant_number=self.winner_participant_number()).bot
+            self.winner = MatchParticipation.objects.get(match=self.match,
+                                                         participant_number=self.winner_participant_number()).bot
 
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)
 
     def adjust_elo(self):
         if self.has_winner():
-            winner, loser = self.get_winner_loser_bots()
-            self._apply_elo_delta(ELO.calculate_elo_delta(winner.elo, loser.elo, 1.0), winner, loser)
+            sp_winner, sp_loser = self.get_winner_loser_season_participants()
+            self._apply_elo_delta(ELO.calculate_elo_delta(sp_winner.elo, sp_loser.elo, 1.0), sp_winner, sp_loser)
         elif self.type == 'Tie':
-            first, second = self.get_participant_bots()
-            self._apply_elo_delta(ELO.calculate_elo_delta(first.elo, second.elo, 0.5), first, second)
+            sp_first, sp_second = self.get_season_participants()
+            self._apply_elo_delta(ELO.calculate_elo_delta(sp_first.elo, sp_second.elo, 0.5), sp_first, sp_second)
 
     def get_initial_elos(self):
-        first, second = self.get_participant_bots()
+        first, second = self.get_season_participants()
         return first.elo, second.elo
 
-    def _apply_elo_delta(self, delta, bot1, bot2):
+    def _apply_elo_delta(self, delta, sp1, sp2):
         delta = int(round(delta))
-        bot1.elo += delta
-        bot1.save()
-        bot2.elo -= delta
-        bot2.save()
+        sp1.elo += delta
+        sp1.save()
+        sp2.elo -= delta
+        sp2.save()
 
 
 def elo_graph_upload_to(instance, filename):
     return '/'.join(['graphs', '{0}_{1}.png'.format(instance.bot.id, instance.bot.name)])
 
 
+# todo: rename to BotStats
 class StatsBots(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
     win_perc = models.FloatField(validators=[validate_not_nan, validate_not_inf])
@@ -797,6 +951,7 @@ class StatsBots(models.Model):
                                  null=True)
 
 
+# todo: rename to BotMatchupStats
 class StatsBotMatchups(models.Model):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
     opponent = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='opponent_stats')

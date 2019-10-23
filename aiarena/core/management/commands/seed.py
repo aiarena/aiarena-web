@@ -1,10 +1,11 @@
 from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Match, Result, Participation
+from aiarena.core.models import User, Map, Bot, Match, Result, MatchParticipation, Season
 from aiarena.core.tests import BaseTestCase
 from aiarena.core.utils import EnvironmentType
 
@@ -21,12 +22,12 @@ def create_result_with_bot_data_and_logs(match, type, as_user):
             open(BaseTestCase.test_bot2_match_log_path, 'rb') as bot2_log:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
                                        submitted_by=as_user)
-        p1 = Participation.objects.get(match_id=result.match_id, participant_number=1)
+        p1 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=1)
         p1.avg_step_time = 0.111111
         p1.match_log = File(bot1_log)
         p1.save()
 
-        p2 = Participation.objects.get(match_id=result.match_id, participant_number=2)
+        p2 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=2)
         p2.avg_step_time = 0.222222
         p2.match_log = File(bot2_log)
         p1.save()
@@ -46,12 +47,12 @@ def create_result(match, type, as_user):
     with open(BaseTestCase.test_replay_path, 'rb') as result_replay:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
                                        submitted_by=as_user)
-        p1 = Participation.objects.get(match_id=result.match_id, participant_number=1)
+        p1 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=1)
         p1.avg_step_time = 0.111111
         p1.match_log = None
         p1.save()
 
-        p2 = Participation.objects.get(match_id=result.match_id, participant_number=2)
+        p2 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=2)
         p2.avg_step_time = 0.222222
         p2.match_log = None
         p1.save()
@@ -66,7 +67,7 @@ def create_result(match, type, as_user):
 
         finalize_result(result, p1, p2, bot1, bot2)
 
-
+@transaction.atomic
 def finalize_result(result, p1, p2, bot1, bot2):
     # imitates the arenaclient result view
 
@@ -80,10 +81,9 @@ def finalize_result(result, p1, p2, bot1, bot2):
     # Calculate the change in ELO
     # the bot elos have changed so refresh them
     # todo: instead of having to refresh, return data from adjust_elo and apply it here
-    bot1.refresh_from_db()
-    bot2.refresh_from_db()
-    p1.resultant_elo = bot1.elo
-    p2.resultant_elo = bot2.elo
+    sp1, sp2 = result.get_season_participants()
+    p1.resultant_elo = sp1.elo
+    p2.resultant_elo = sp2.elo
     p1.elo_change = p1.resultant_elo - p1_initial_elo
     p2.elo_change = p2.resultant_elo - p2_initial_elo
     p1.save()
@@ -100,6 +100,9 @@ def run_seed(rounds, token):
 
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient, key=token)
+
+    season = Season.objects.create()
+    season.open()
 
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@aiarena.net')
     devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@aiarena.net')

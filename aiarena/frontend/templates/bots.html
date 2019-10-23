@@ -12,7 +12,6 @@
             <td><b>Race</b></td>
             <td><b>Type</b></td>
             <td><b>Active</b></td>
-            <td><b>ELO</b></td>
         </thead>
         {% for bot in bot_list %}
             <tr>
@@ -21,7 +20,6 @@
                 <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.type }}</td>
                 <td>{{ bot.active }}</td>
-                <td>{{ bot.elo }}</td>
             </tr>
         {% endfor %}
         </tbody>

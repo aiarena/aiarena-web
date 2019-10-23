@@ -52,11 +52,11 @@
                     <td><b>Name</b></td>
                     <td><b>ELO</b></td>
                 </thead>
-                {% for bot in bot_list %}
+                {% for participant in seasonparticipation_list %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ bot.as_html_link |safe }}</td>
-                        <td>{{ bot.elo }}</td>
+                        <td>{{ participant.bot.as_html_link |safe }}</td>
+                        <td>{{ participant.elo }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

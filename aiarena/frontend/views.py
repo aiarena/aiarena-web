@@ -12,7 +12,7 @@ from private_storage.views import PrivateStorageDetailView
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
-from aiarena.core.models import Bot, Result, User, Round, Match, Participation
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
@@ -95,7 +95,7 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = Result.objects.filter(match__participation__bot=self.object).order_by('-created')
+        results = Result.objects.filter(match__matchparticipation__bot=self.object).order_by('-created')
 
         # paginate the results
         page = self.request.GET.get('page', 1)
@@ -119,8 +119,8 @@ class BotDetail(DetailView):
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
-            result.opponent = result.match.participation_set.exclude(bot=self.object).get()
-            result.me = result.match.participation_set.get(bot=self.object)
+            result.opponent = result.match.matchparticipation_set.exclude(bot=self.object).get()
+            result.me = result.match.matchparticipation_set.get(bot=self.object)
 
             # convert the type to be relative to this bot
             typeSuffix = ''
@@ -139,6 +139,7 @@ class BotDetail(DetailView):
                 result.relative_type = result.type
 
         context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('-win_perc')
+        context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
         context['result_list'] = results
         context['results_page_range'] = results_page_range
         return context
@@ -232,23 +233,23 @@ class AuthorDetail(DetailView):
 # Using a ListView, which has automated behaviour for displaying a list of models
 class Ranking(ListView):
     # If we wanted all the bots, we could just set this and, because we're extending a ListView, it would
-    # understand to get all the Bots, which could be referenced as "bot_list" in the template.
-    # model = Bot
+    # understand to get all the Bots, which could be referenced as "seasonparticipation_list" in the template.
+    # model = SeasonParticipation
 
     # Instead, because we want to filter the bots, we define queryset,
-    # which is also referenced as "bot_list" in the template.
-    queryset = Bot.objects.filter(active=1).order_by('-elo')
+    # which is also referenced as "seasonparticipation_list" in the template.
+    def get_queryset(self):
+        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo').prefetch_related('bot')
 
     # If we didn't set this, the ListView would default to searching for a template at <module>/<modelname>_list.html
-    # In this case, that would be "core/bot_list.html"
+    # In this case, that would be "core/seasonparticipation_list.html"
     template_name = 'ranking.html'
 
 
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(
         Prefetch('winner'),
-        Prefetch('match__participation_set', Participation.objects.all().prefetch_related('bot'),
-                 to_attr='participants'))
+        Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
     template_name = 'results.html'
 
 
@@ -288,7 +289,7 @@ class BotDataDownloadView(PrivateStorageDetailView):
 
 
 class MatchLogDownloadView(PrivateStorageDetailView):
-    model = Participation
+    model = MatchParticipation
     model_file_field = 'match_log'
 
     content_disposition = 'attachment'
@@ -303,7 +304,8 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 
 
 class Index(ListView):
-    queryset = Bot.objects.filter(active=1).order_by('-elo')[:10]  # top 10 bots
+    def get_queryset(self):
+        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo')[:10].prefetch_related('bot')  # top 10 bots
     template_name = 'index.html'
 
 
@@ -312,8 +314,8 @@ class MatchQueue(View):
         # Matches without a round are requested ones
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
             F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
-            Prefetch('map'),
-            Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'), to_attr='participants'))
+                Prefetch('map'),
+                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
 
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
@@ -321,8 +323,7 @@ class MatchQueue(View):
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
                 F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
                 Prefetch('map'),
-                Prefetch('participation_set', Participation.objects.all().prefetch_related('bot'),
-                         to_attr='participants'))
+                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
 
         context = {'round_list': rounds, 'requested_matches': requested_matches}
         return render(request, 'match_queue.html', context)
@@ -331,3 +332,20 @@ class MatchQueue(View):
 class MatchDetail(DetailView):
     model = Match
     template_name = 'match.html'
+
+
+class SeasonList(ListView):
+    queryset = Season.objects.all().order_by('-id')
+    template_name = 'seasons.html'
+
+
+class SeasonDetail(DetailView):
+    model = Season
+    template_name = 'season.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SeasonDetail, self).get_context_data(**kwargs)
+        context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
+        context['rankings'] = SeasonParticipation.objects.filter(season_id=self.object.id).order_by('-elo')
+        return context
+

@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, serializers
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, Participation
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, SeasonParticipation, Season
 
 logger = logging.getLogger(__name__)
 
@@ -14,10 +14,12 @@ logger = logging.getLogger(__name__)
 # Serializer fields are also manually specified so new private fields don't accidentally get leaked.
 
 bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', \
-                     'current_match', 'elo', 'plays_race', 'type', 'game_display_id', 'bot_zip_updated',
+                     'current_match', 'plays_race', 'type', 'game_display_id', 'bot_zip_updated',
 map_include_fields = 'id', 'name', 'active',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
-participation_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
+matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
+seasonparticipation_include_fields = 'id', 'season', 'bot', 'elo',
+season_include_fields = 'id', 'date_created', 'date_opened', 'date_closed', 'status',
 # todo: add 'arenaclient_log',
 result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', \
                         'game_steps', 'submitted_by', 'arenaclient_log',
@@ -86,23 +88,43 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = match_include_fields
 
 
-class ParticipationSerializer(serializers.ModelSerializer):
+class MatchParticipationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Participation
-        fields = participation_include_fields
+        model = MatchParticipation
+        fields = matchparticipation_include_fields
 
 
-class ParticipationViewSet(viewsets.ReadOnlyModelViewSet):
+class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
-    queryset = Participation.objects.all()
-    serializer_class = ParticipationSerializer
+    queryset = MatchParticipation.objects.all()
+    serializer_class = MatchParticipationSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = participation_include_fields
-    search_fields = participation_include_fields
-    ordering_fields = participation_include_fields
+    filterset_fields = matchparticipation_include_fields
+    search_fields = matchparticipation_include_fields
+    ordering_fields = matchparticipation_include_fields
+
+
+class SeasonParticipationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeasonParticipation
+        fields = seasonparticipation_include_fields
+
+
+class SeasonParticipationViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Result data view
+    """
+    queryset = SeasonParticipation.objects.all()
+    serializer_class = SeasonParticipationSerializer
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = seasonparticipation_include_fields
+    search_fields = seasonparticipation_include_fields
+    ordering_fields = seasonparticipation_include_fields
+
 
 # todo: bot names are included for the stream to use. Ideally the the stream should properly utilize the API
 class ResultSerializer(serializers.ModelSerializer):
@@ -110,10 +132,10 @@ class ResultSerializer(serializers.ModelSerializer):
     bot2_name = serializers.SerializerMethodField()
 
     def get_bot1_name(self, obj):
-        return obj.match.participation_set.get(participant_number=1).bot.name
+        return obj.match.matchparticipation_set.get(participant_number=1).bot.name
 
     def get_bot2_name(self, obj):
-        return obj.match.participation_set.get(participant_number=2).bot.name
+        return obj.match.matchparticipation_set.get(participant_number=2).bot.name
 
     class Meta:
         model = Result
@@ -150,6 +172,25 @@ class RoundViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = round_include_fields
     search_fields = round_include_fields
     ordering_fields = round_include_fields
+
+
+class SeasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Season
+        fields = season_include_fields
+
+
+class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Result data view
+    """
+    queryset = Season.objects.all()
+    serializer_class = SeasonSerializer
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = season_include_fields
+    search_fields = season_include_fields
+    ordering_fields = season_include_fields
 
 
 class UserSerializer(serializers.ModelSerializer):

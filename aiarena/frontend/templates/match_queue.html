@@ -6,26 +6,28 @@
         {% if requested_matches.count > 0 %}
             <div class="divider"><span></span><span><h2>Requested matches</h2></span><span></span></div>
             <table style="min-width: 900px; margin: 0 auto;">
-                <tbody>
                 <thead>
+                <tr>
                     <td><b>Match ID</b></td>
                     <td><b>Bot 1</b></td>
                     <td><b>Bot 2</b></td>
                     <td><b>Map</b></td>
                     <td><b>Started at</b></td>
                     <td><b>Assigned to</b></td>
+                </tr>
                 </thead>
+                <tbody>
                 {% for match in requested_matches %}
                     <tr>
                         <td>{{ match.as_html_link |safe }}</td>
                         {% for p in match.participants %}
                             {% if p.participant_number == 1 %}
-                        <td>{{ p.bot.as_html_link |safe }}</td>
+                                <td>{{ p.bot.as_html_link |safe }}</td>
                             {% endif %}
                         {% endfor %}
                         {% for p in match.participants %}
                             {% if p.participant_number == 2 %}
-                        <td>{{ p.bot.as_html_link |safe }}</td>
+                                <td>{{ p.bot.as_html_link |safe }}</td>
                             {% endif %}
                         {% endfor %}
                         <td>{{ match.map }}</td>
@@ -49,24 +51,24 @@
             <table style="min-width: 900px; margin: 0 auto;">
                 <tbody>
                 <thead>
-                    <td><b>Match ID</b></td>
-                    <td><b>Bot 1</b></td>
-                    <td><b>Bot 2</b></td>
-                    <td><b>Map</b></td>
-                    <td><b>Started at</b></td>
-                    <td><b>Assigned to</b></td>
+                <td><b>Match ID</b></td>
+                <td><b>Bot 1</b></td>
+                <td><b>Bot 2</b></td>
+                <td><b>Map</b></td>
+                <td><b>Started at</b></td>
+                <td><b>Assigned to</b></td>
                 </thead>
                 {% for match in round.matches %}
                     <tr>
                         <td>{{ match.as_html_link |safe }}</td>
                         {% for p in match.participants %}
                             {% if p.participant_number == 1 %}
-                        <td>{{ p.bot.as_html_link |safe }}</td>
+                                <td>{{ p.bot.as_html_link |safe }}</td>
                             {% endif %}
                         {% endfor %}
                         {% for p in match.participants %}
                             {% if p.participant_number == 2 %}
-                        <td>{{ p.bot.as_html_link |safe }}</td>
+                                <td>{{ p.bot.as_html_link |safe }}</td>
                             {% endif %}
                         {% endfor %}
                         <td>{{ match.map }}</td>
@@ -89,12 +91,12 @@
         <table style="min-width: 900px; margin: 0 auto;">
             <tbody>
             <thead>
-                <td><b>Match ID</b></td>
-                <td><b>Bot 1</b></td>
-                <td><b>Bot 2</b></td>
-                <td><b>Map</b></td>
-                <td><b>Started at</b></td>
-                <td><b>Assigned to</b></td>
+            <td><b>Match ID</b></td>
+            <td><b>Bot 1</b></td>
+            <td><b>Bot 2</b></td>
+            <td><b>Map</b></td>
+            <td><b>Started at</b></td>
+            <td><b>Assigned to</b></td>
             </thead>
             <tr>
                 <td colspan="6">Queued matches will show here.</td>

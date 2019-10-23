@@ -11,6 +11,7 @@ class StatsGenerator:
 
     @staticmethod
     def generate_stats():
+        # todo: do for season instead of globally?
         with connection.cursor() as c:
             c.callproc("generate_stats")
 
@@ -24,7 +25,7 @@ class StatsGenerator:
                 cb.name, 
                 avg(cp.resultant_elo) as elo, 
                 date(cm.created) as date 
-                from core_participation cp
+                from core_matchparticipation cp
                     left join core_match cm on cp.match_id = cm.id
                     left join core_bot cb on cp.bot_id = cb.id
                 where resultant_elo is not null 

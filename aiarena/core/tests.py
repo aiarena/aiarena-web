@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, Participation, Round
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, SeasonParticipation
 from aiarena.core.utils import calculate_md5
 
 
@@ -36,6 +36,11 @@ class BaseTestCase(TransactionTestCase):
     def _create_map(self, name):
         return Map.objects.create(name=name, active=True)
 
+    def _create_open_season(self):
+        season = Season.objects.create()
+        season.open()
+        return season
+
     def _create_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
             bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race,
@@ -57,8 +62,10 @@ class BaseTestCase(TransactionTestCase):
     def _post_to_results(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot1_data, open(
-                self.test_bot2_data_path, 'rb') as bot2_data, open(self.test_bot1_match_log_path, 'rb') as bot1_log, open(
-            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path, 'rb') as arenaclient_log:
+                self.test_bot2_data_path, 'rb') as bot2_data, open(self.test_bot1_match_log_path,
+                                                                   'rb') as bot1_log, open(
+            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
+                                                                   'rb') as arenaclient_log:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
@@ -70,9 +77,10 @@ class BaseTestCase(TransactionTestCase):
                                      'bot2_log': SimpleUploadedFile("bot2_log.zip", bot2_log.read()),
                                      'bot1_avg_step_time': 0.2,
                                      'bot2_avg_step_time': 0.1,
-                                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.zip", arenaclient_log.read())})
+                                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.zip",
+                                                                           arenaclient_log.read())})
 
-# todo:
+    # todo:
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile:
@@ -210,12 +218,14 @@ class MatchReadyTestCase(LoggedInTestCase):
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
         config.MAX_USER_BOT_COUNT = 10
 
+        self._create_open_season()
+        self._create_map('testmap1')
+
         self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
         self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
         self.regularUser1Bot2 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
         self.staffUser1Bot1 = self._create_active_bot(self.staffUser1, 'staffUser1Bot1', 'T')
         self.staffUser1Bot2 = self._create_active_bot(self.staffUser1, 'staffUser1Bot2', 'Z')
-        self._create_map('testmap1')
 
 
 # Use this to pre-build a fuller dataset for testing
@@ -238,10 +248,12 @@ class UserTestCase(BaseTestCase):
 
 class BotTestCase(LoggedInTestCase):
     def test_bot_creation_and_update(self):
-
         # set the configured per user limits for this test
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
         config.MAX_USER_BOT_COUNT = 4
+
+        # required for active bot
+        self._create_open_season()
 
         # create bot along with bot data
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot1_data_path, 'rb') as bot_data:
@@ -300,87 +312,79 @@ class BotTestCase(LoggedInTestCase):
         self.assertEqual(self.test_bot2_data_hash, bot1.bot_data_md5hash)
 
 
-class PageRenderTestCase(FullDataSetTestCase):
+class SeasonsTestCase(FullDataSetTestCase):
     """
-    Tests to ensure website pages don't break.
+    Test season rotation
     """
 
-    def test_get_index_page(self):
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
+    def _finish_season_rounds(self):
+        for x in range(Match.objects.filter(result__isnull=True).count()):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
 
-    def test_get_bots_page(self):
-        response = self.client.get('/bots/')
-        self.assertEqual(response.status_code, 200)
+            response = self._post_to_results(response.data['id'], 'Player1Win')
+            self.assertEqual(response.status_code, 201)
 
-    def test_get_bot_page_active(self):
-        active_bot = Bot.objects.filter(active=True)[0]
-        response = self.client.get('/bots/{0}/'.format(active_bot.id))
-        self.assertEqual(response.status_code, 200)
+    def test_season_states(self):
+        self.client.login(username='staff_user', password='x')
 
-    def test_get_bot_page_inactive(self):
-        inactive_bot = Bot.objects.filter(active=False)[0]
-        response = self.client.get('/bots/{0}/'.format(inactive_bot.id))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Match.objects.filter(result__isnull=True).count(), 12,
+                         msg='This tests expects 12 unplayed matches in order to work.')
 
-    def test_get_bot_edit_page(self):
-        self.client.login(username='regular_user1', password='x')
-        # test bot edit pages we can access
-        bots = Bot.objects.filter(user=self.regularUser1)
-        for bot in bots:
-            response = self.client.get('/bots/{0}/edit/'.format(bot.pk))
-            self.assertEqual(response.status_code, 200)
+        # attempt to close season - should fail
+        season1 = Season.objects.get()
 
-        # test bot edit pages we can't access
-        bots = Bot.objects.exclude(user=self.regularUser1)
-        for bot in bots:
-            response = self.client.get('/bots/{0}/edit/'.format(bot.pk))
-            self.assertEqual(response.status_code, 404)
+        season1.pause()
 
-    def test_get_authors_page(self):
-        response = self.client.get('/authors/')
-        self.assertEqual(response.status_code, 200)
+        self._finish_season_rounds()
 
-    def test_get_author_page(self):
-        response = self.client.get('/authors/{0}/'.format(self.regularUser1.id))
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(u'The current season is paused.', response.data['detail'])
 
-    def test_get_match_page(self):
-        response = self.client.get('/matches/{0}/'.format(Match.objects.all()[0].id))
-        self.assertEqual(response.status_code, 200)
+        # reopen the season
+        season1.open()
 
-    def test_get_ranking_page(self):
-        response = self.client.get('/ranking/')
-        self.assertEqual(response.status_code, 200)
+        # start a new round
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
 
-    def test_get_results_page(self):
-        response = self.client.get('/results/')
-        self.assertEqual(response.status_code, 200)
+        season1.start_closing()
 
-    def test_get_login_page(self):
-        response = self.client.get('/accounts/login/')
-        self.assertEqual(response.status_code, 200)
+        # finish the season
+        self._finish_season_rounds()
 
-    def test_get_register_page(self):
-        response = self.client.get('/accounts/register/')
-        self.assertEqual(response.status_code, 200)
+        # successful close
+        season1.refresh_from_db()
+        self.assertEqual(season1.status, 'closed')
 
-    def test_get_reset_password_page(self):
-        response = self.client.get('/accounts/password_reset/')
-        self.assertEqual(response.status_code, 200)
+        # check that bots are all deactivated
+        for bot in Bot.objects.all():
+            self.assertFalse(bot.active)
 
-    def test_get_stream_page(self):
-        response = self.client.get('/stream/')
-        self.assertEqual(response.status_code, 200)
+        # start a new season
+        season2 = Season.objects.create()
 
-    def test_get_match_queue_page(self):
-        response = self.client.get('/match-queue/')
-        self.assertEqual(response.status_code, 200)
+        # not enough active bots
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(u'Not enough available bots for a match. Wait until more bots become available.', response.data['detail'])
 
-    def test_get_round_page(self):
-        response = self.client.get('/rounds/{0}/'.format(Round.objects.all()[0].id))
-        self.assertEqual(response.status_code, 200)
+        # activate the bots
+        for bot in Bot.objects.all():
+            bot.active = True
+            bot.save()
 
+        # current season is paused
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(u'The current season is paused.', response.data['detail'])
+
+        season2.open()
+
+        # start a new round
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
 
 class PrivateStorageTestCase(MatchReadyTestCase):
     pass  # todo
@@ -455,7 +459,7 @@ class ManagementCommandTests(MatchReadyTestCase):
         # after we ensure the arena client log count matches, we can safely just use the above results list
         results_logs = Result.objects.filter(arenaclient_log__isnull=False)
         self.assertEqual(results_logs.count(), NUM_MATCHES)
-        participants = Participation.objects.filter(match_log__isnull=False)
+        participants = MatchParticipation.objects.filter(match_log__isnull=False)
         self.assertEqual(participants.count(), NUM_MATCHES * 2)
 
         # set the created time so they'll be purged
@@ -473,7 +477,8 @@ class ManagementCommandTests(MatchReadyTestCase):
 
         call_command('cleanuparenaclientlogfiles', stdout=out)
         self.assertIn(
-            'Cleaning up arena client logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(NUM_MATCHES),
+            'Cleaning up arena client logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(
+                NUM_MATCHES),
             out.getvalue())
 
         self.assertEqual(results.count(), NUM_MATCHES)
@@ -511,11 +516,11 @@ class ManagementCommandTests(MatchReadyTestCase):
         self.assertEqual(response.status_code, 201)
 
         out = StringIO()
-        call_command('resetelo', stdout=out)
+        call_command('resetcurrentseasonelo', stdout=out)
         self.assertIn('ELO values have been reset.', out.getvalue())
 
-        for bot in Bot.objects.all():
-            self.assertEqual(bot.elo, settings.ELO_START_VALUE)
+        for participant in SeasonParticipation.objects.all():
+            self.assertEqual(participant.elo, settings.ELO_START_VALUE)
 
     def test_seed(self):
         out = StringIO()

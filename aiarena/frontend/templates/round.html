@@ -8,12 +8,14 @@
 <table id="round_details" >
     <thead>
     <tr>
+        <td><b>Season ID</b></td>
         <td><b>Started at</b></td>
         <td><b>Finished at</b></td>
     </tr>
     </thead>
     <tbody>
     <tr>
+        <td>{{ round.season.as_html_link |safe }}</td>
         <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
         <td>{{ round.finished|date:"d. N Y - H:i:s" }}</td>
     </tr>

@@ -6,11 +6,10 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from aiarena import settings
-from aiarena.core.models import Match, Bot, Participation, User, Round, Result
+from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
-
 
 
 # todo: test to esnure that matches are served for earlier rounds first
@@ -52,6 +51,9 @@ class MatchesTestCase(LoggedInTestCase):
         bot2 = self._create_bot(self.regularUser1, 'testbot2')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 409)
+
+        # needs a valid season to be able to activate a bot.
+        self._create_open_season()
 
         # not enough active bots
         bot1.active = True
@@ -110,6 +112,8 @@ class MatchesTestCase(LoggedInTestCase):
 
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
+        self._create_open_season()
+
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
         bot3 = self._create_active_bot(self.regularUser1, 'testbot3', 'P')
@@ -164,8 +168,11 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(Bot.objects.filter(in_match=True).exclude(current_match=None).count(), 4)
 
     def test_match_reissue(self):
+
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
+        self._create_open_season()
+
         self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
 
@@ -174,7 +181,7 @@ class MatchesTestCase(LoggedInTestCase):
 
         # should be the same match reissued
         response_m2 = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response_m2.status_code, 200)
+        self.assertEqual(response_m2.status_code, 201)
 
         self.assertEqual(response_m1.data['id'], response_m2.data['id'])
 
@@ -185,6 +192,8 @@ class MatchesTestCase(LoggedInTestCase):
 
         self.client.login(username='staff_user', password='x')
         self._create_map('test_map')
+        self._create_open_season()
+
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
         bot3 = self._create_active_bot(self.regularUser1, 'testbot3', 'P')
@@ -225,23 +234,26 @@ class ResultsTestCase(LoggedInTestCase):
     def test_create_results(self):
         self.client.login(username='staff_user', password='x')
 
+        self._create_map('test_map')
+        self._create_open_season()
+
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
-        self._create_map('test_map')
 
         # post a standard result
         match = self._post_to_matches().data
         response = self._post_to_results(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
-        p1 = Participation.objects.get(match_id=match['id'], participant_number=1)
-        p2 = Participation.objects.get(match_id=match['id'], participant_number=2)
+        p1 = MatchParticipation.objects.get(match_id=match['id'], participant_number=1)
+        p2 = MatchParticipation.objects.get(match_id=match['id'], participant_number=2)
 
         # check bot datas exist
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
         # check hashes
-        match1bot1 = Participation.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        match1bot1 = MatchParticipation.objects.get(bot=bot1,
+                                                    match_id=match['id'])  # use this to determine which hash to match
         if match1bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
@@ -282,7 +294,8 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
-        match3bot1 = Participation.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        match3bot1 = MatchParticipation.objects.get(bot=bot1,
+                                                    match_id=match['id'])  # use this to determine which hash to match
         if match3bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
@@ -300,7 +313,8 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
-        match4bot1 = Participation.objects.get(bot=bot1, match_id=match['id'])  # use this to determine which hash to match
+        match4bot1 = MatchParticipation.objects.get(bot=bot1,
+                                                    match_id=match['id'])  # use this to determine which hash to match
         if match4bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
@@ -326,9 +340,11 @@ class ResultsTestCase(LoggedInTestCase):
     def test_create_result_bot_not_in_match(self):
         self.client.login(username='staff_user', password='x')
 
+        self._create_map('test_map')
+        self._create_open_season()
+
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
-        self._create_map('test_map')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         match = response.data
@@ -367,13 +383,15 @@ class ResultsTestCase(LoggedInTestCase):
 
     def test_bot_disable_on_consecutive_crashes(self):
         # This is the feature we're testing, so turn it on
-        config.BOT_CONSECUTIVE_CRASH_LIMIT = 3
+        config.BOT_CONSECUTIVE_CRASH_LIMIT = 3  # todo: this update doesn't work.
 
         self.client.login(username='staff_user', password='x')
 
+        self._create_map('test_map')
+        self._create_open_season()
+
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
-        self._create_map('test_map')
 
         # log more crashes than should be allowed
         for count in range(config.BOT_CONSECUTIVE_CRASH_LIMIT):
@@ -425,7 +443,6 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 409)
 
 
-
 class EloTestCase(LoggedInTestCase):
     """
     Tests to ensure ELO calculations run properly.
@@ -438,6 +455,7 @@ class EloTestCase(LoggedInTestCase):
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
         self._create_map('testmap')
+        self._create_open_season()
 
         # activate the required bots
         self.regularUserBot1.active = True
@@ -510,20 +528,20 @@ class EloTestCase(LoggedInTestCase):
             return 'Player1Win' if bot1_id == self.expected_result_sequence[iteration] else 'Player2Win'
 
     def CheckResultantElos(self, match_id, iteration):
-        bot1_participant = Participation.objects.filter(match_id=match_id, bot_id=self.regularUserBot1.id)[0]
-        bot2_participant = Participation.objects.filter(match_id=match_id, bot_id=self.regularUserBot2.id)[0]
+        bot1_participant = MatchParticipation.objects.filter(match_id=match_id, bot_id=self.regularUserBot1.id)[0]
+        bot2_participant = MatchParticipation.objects.filter(match_id=match_id, bot_id=self.regularUserBot2.id)[0]
 
         self.assertEqual(self.expected_resultant_elos[iteration][0], bot1_participant.resultant_elo)
         self.assertEqual(self.expected_resultant_elos[iteration][1], bot2_participant.resultant_elo)
 
     def CheckFinalElos(self):
-        self.regularUserBot1.refresh_from_db()
-        self.regularUserBot2.refresh_from_db()
-        self.assertEqual(self.regularUserBot1.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][0])
-        self.assertEqual(self.regularUserBot2.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][1])
+        sp1 = self.regularUserBot1.current_season_participation()
+        sp2 = self.regularUserBot2.current_season_participation()
+        self.assertEqual(sp1.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][0])
+        self.assertEqual(sp2.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][1])
 
     def CheckEloSum(self):
-        sumElo = Bot.objects.aggregate(Sum('elo'))
+        sumElo = SeasonParticipation.objects.filter(season=Season.get_current_season()).aggregate(Sum('elo'))
         self.assertEqual(sumElo['elo__sum'],
                          ELO_START_VALUE * Bot.objects.all().count())  # starting ELO times number of bots
 
