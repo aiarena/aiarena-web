@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <div class="divider"><span></span><span><h2>Profile</h2></span><span></span></div>
+    <div id="author_detail">
+        {% load avatar_tags %}
+        <div class="author-detail-img">
+            <div class="patreon-{{ user.patreon_level }}">
+                <a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a></div>
+            Click to change
+        </div>
+        <div class="author-detail-info">
+            <h2>{{ user.username }}</h2>
+            <b>Joined</b><br/>
+            {{ user.date_joined|date:"d. N Y" }}
+            <br/>
+            <b>Last login</b><br/>
+            {{ user.last_login|date:"d. N Y" }}
+        </div>
+    </div>
+    <br>
+    <div class="divider">
+        <span></span><span><h2>Bots ({{ bot_list.count }}/{{ max_user_bot_count }})</h2></span><span></span></div>
+    <h4 style="margin-left:65px;">Limited to {{ max_active_per_race_bot_count }} active bot(s) per race.</h4>
+    <table id="bot_table">
+        <thead>
+        <td><b>Name</b></td>
+        <td><b>Race</b></td>
+        <td><b>Type</b></td>
+        <td><b>Active</b></td>
+        <td><b>Bot Zip</b></td>
+        <td><b>Data</b></td>
+        <td></td>
+        </thead>
+        {% for bot in bot_list %}
+            <tr>
+                <td>{{ bot.as_html_link |safe }}</td>
+                <td>{{ bot.get_plays_race_display }}</td>
+                <td>{{ bot.type }}</td>
+                <td>{{ bot.active }}</td>
+                <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
+                {% if bot.bot_data %}
+                    <td><a href="{{ bot.bot_data.url }}">Download</a></td>
+                {% else %}
+                    <td>No bot data</td>
+                {% endif %}
+                <td><a href="{% url 'bot_edit' bot.pk %}">Edit</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

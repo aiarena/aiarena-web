@@ -563,6 +563,30 @@ a:hover, a:visited, a:link, a:active {
     color: #fff;
 }
 
+.patreon-none {
+    border: 2px solid #86c232;
+}
+
+.patreon-bronze {
+    border: 2px solid #cd7f32;
+}
+
+.patreon-silver {
+    border: 2px solid #C0C0C0;
+}
+
+.patreon-gold {
+    border: 2px solid #FFD700;
+}
+
+.patreon-platinum {
+    border: 2px solid #E2E3E5;
+}
+
+.patreon-diamond {
+    border: 2px solid #B9F2FF;
+}
+
 table {
     display: blocking;
     overflow: hiden;
