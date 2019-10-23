@@ -15,7 +15,9 @@
 
         {% load avatar_tags %}
         <div class="author-detail-img">
-            <a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a><br>Click to change
+            <div class="patreon-{{ user.patreon_level }}">
+                <a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a></div>
+            Click to change
         </div>
         <div class="author-detail-info">
             <h2>{{ user.username }}</h2>
