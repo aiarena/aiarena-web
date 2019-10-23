@@ -103,7 +103,7 @@ class Season(models.Model, LockableModelMixin):
 
     @property
     def is_paused(self):
-        return self.status == 'paused'
+        return self.status in ['paused', 'created']
 
     @property
     def is_open(self):
@@ -113,6 +113,7 @@ class Season(models.Model, LockableModelMixin):
     def is_closing(self):
         return self.status == 'closing'
 
+    @transaction.atomic
     def pause(self):
         self.lock_me()
         if self.status == 'open':
@@ -122,6 +123,7 @@ class Season(models.Model, LockableModelMixin):
         else:
             return "Cannot pause a season with a status of {}".format(self.status)
 
+    @transaction.atomic
     def open(self):
         self.lock_me()
         if self.status in ['created', 'paused']:
@@ -133,6 +135,7 @@ class Season(models.Model, LockableModelMixin):
         else:
             return "Cannot open a season with a status of {}".format(self.status)
 
+    @transaction.atomic
     def start_closing(self):
         self.lock_me()
         if self.is_open or self.is_paused:
@@ -142,6 +145,7 @@ class Season(models.Model, LockableModelMixin):
         else:
             return "Cannot start closing a season with a status of {}".format(self.status)
 
+    @transaction.atomic
     def try_to_close(self):
         self.lock_me()
 
@@ -149,6 +153,10 @@ class Season(models.Model, LockableModelMixin):
             self.status = 'closed'
             self.date_closed = timezone.now()
             self.save()
+
+            for participant in self.seasonparticipation_set.all():
+                participant.bot.active = False
+                participant.bot.save()
 
     @staticmethod
     def get_current_season():

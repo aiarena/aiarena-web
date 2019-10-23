@@ -358,11 +358,33 @@ class SeasonsTestCase(FullDataSetTestCase):
         season1.refresh_from_db()
         self.assertEqual(season1.status, 'closed')
 
-        # todo: check bots should be deactivated
+        # check that bots are all deactivated
+        for bot in Bot.objects.all():
+            self.assertFalse(bot.active)
 
-        # todo: start a new season
-        # season2 = Season.cre
+        # start a new season
+        season2 = Season.objects.create()
 
+        # not enough active bots
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(u'Not enough available bots for a match. Wait until more bots become available.', response.data['detail'])
+
+        # activate the bots
+        for bot in Bot.objects.all():
+            bot.active = True
+            bot.save()
+
+        # current season is paused
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(u'The current season is paused.', response.data['detail'])
+
+        season2.open()
+
+        # start a new round
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
 
 class PrivateStorageTestCase(MatchReadyTestCase):
     pass  # todo
