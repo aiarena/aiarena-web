@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'aiarena.core',
     'aiarena.frontend',
     'aiarena.api',
+    'aiarena.patreon',
     'private_storage',
     'django.contrib.sites.apps.SitesConfig',
     'django.contrib.humanize.apps.HumanizeConfig',
@@ -172,15 +173,17 @@ CONSTANCE_CONFIG = {
     'GETTING_STARTED_URL': ('https://ai-arena.net/wiki/getting-started/',
                             'The URL to send new users to in order to get started.'),
     'DISCORD_CLIENT_ID': ('', 'Client ID used for Discord OAuth'),
-    'DISCORD_CLIENT_SECRET': ('', 'Client Secret used for Discord OAuth')
+    'DISCORD_CLIENT_SECRET': ('', 'Client Secret used for Discord OAuth'),
+    'PATREON_CLIENT_ID': ('', 'Client ID used for Patreon OAuth'),
+    'PATREON_CLIENT_SECRET': ('', 'Client Secret used for Patreon OAuth'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
-    'Bot Options': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
-    'General Options': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL'),
-    'Ladder Options': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',
-                       'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
-    'Discord Options': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET')
+    'Bots': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
+    'General': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL'),
+    'Ladders': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',
+                'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
+    'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',)
 }
 
 LOGGING = {
