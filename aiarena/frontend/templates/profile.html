@@ -12,12 +12,10 @@
     {% endif %}
 
     <div id="author_detail">
-
-        {% load avatar_tags %}
         <div class="author-detail-img">
             <div class="patreon-{{ user.patreon_level }}">
-                <a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a></div>
-            Click to change
+                {% avatar user 150 %}
+            </div>
         </div>
         <div class="author-detail-info">
             <h2>{{ user.username }}</h2>
