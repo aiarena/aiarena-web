@@ -94,13 +94,13 @@
                 {% for season_participation in rankings %}
                     <tr>
                         <td>{{ season_participation.season.as_html_link |safe }}</td>
-                        {% if season.date_opened %}
-                            <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
+                        {% if season_participation.season.date_opened %}
+                            <td>{{ season_participation.season.date_opened|date:"d. N Y - H:i:s" }}</td>
                         {% else %}
                             <td>--</td>
                         {% endif %}
-                        {% if season.date_closed %}
-                            <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
+                        {% if season_participation.season.date_closed %}
+                            <td>{{ season_participation.season.date_closed|date:"d. N Y - H:i:s" }}</td>
                         {% else %}
                             <td>--</td>
                         {% endif %}
