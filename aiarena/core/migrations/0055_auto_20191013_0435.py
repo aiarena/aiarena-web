@@ -17,7 +17,7 @@ def transfer_bot_elo(apps, schema_editor):
     Season = apps.get_model('core', 'Season')
     Bot = apps.get_model('core', 'Bot')
     SeasonElo = apps.get_model('core', 'SeasonElo')
-    for bot in Bot.objects.all():
+    for bot in Bot.objects.filter(active=True):
         SeasonElo.objects.create(season_id=1, bot=bot, elo=bot.elo)
 
 
