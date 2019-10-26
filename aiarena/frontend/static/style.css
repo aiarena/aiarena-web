@@ -844,8 +844,13 @@ border: 0;
 background-color: #86c232;
 }
 
-#discord-linked-button {
+#profile_link_buttons {
     float: right;
+    width: 150px;
+    margin-right: 80px;
+}
+
+.profile-linked-button {
     text-align: center;
     width: 150px;
     height: 30px;
@@ -855,11 +860,9 @@ background-color: #86c232;
     font-family: 'Quicksand', sans-serif;
     font-weight: bold;
     border: 0;
-    margin-right: 80px;
 }
 
-#discord-link-button {
-    float: right;
+.profile-link-button {
     text-align: center;
     width: 150px;
     height: 30px;
@@ -869,7 +872,7 @@ background-color: #86c232;
     font-family: 'Quicksand', sans-serif;
     font-weight: bold;
     border: 0;
-    margin-right: 80px;
+    margin: 10px 0 10px 0;
 }
 
 #discord-link-button:hover {
