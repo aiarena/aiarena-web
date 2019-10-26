@@ -178,7 +178,7 @@ class Season(models.Model, LockableModelMixin):
 
 class Round(models.Model, LockableModelMixin):
     """ Represents a round of play within a season """
-    season = models.ForeignKey(Season, on_delete=models.CASCADE)  # todo: eob remove blank/null
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
     started = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(blank=True, null=True)
     complete = models.BooleanField(default=False)
@@ -238,8 +238,7 @@ class Match(models.Model):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     started = models.DateTimeField(blank=True, null=True, editable=False)
-    assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True,
-                                    null=True)  # todo: eob remove blank/null
+    assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
