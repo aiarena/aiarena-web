@@ -11,7 +11,6 @@ def create_first_season(apps, schema_editor):
     Round = apps.get_model('core', 'Round')
     if Round.objects.count() > 0:  # if there are existing rounds, create a season for them
         season = Season.objects.create()
-        season.open()
 
 
 def transfer_bot_elo(apps, schema_editor):
