@@ -142,19 +142,46 @@ a:hover {
     width: 12.0%;
 }
 
+#bot_details_bio {
+    width: 88.0%;
+    margin-left: 73px;
+}
+
 #bot_details {
     float: left;
-    width: 32.0%;
-    margin-left: 73px;
+    width: 35.0%;
 }
 
 #bot_details table {
     margin: 0;
     padding: 0;
+    width: 100.0%;
 }
 
 #bot_details thead {
     background-color: rgba(97, 137, 47, 0.7)
+}
+
+#bot_bio {
+    float: right;
+    width: 60.0%;
+}
+
+#bot_bio table {
+    margin: 0;
+    width: 100.0%;
+}
+
+#bot_bio thead {
+    background-color: rgba(97, 137, 47, 0.7)
+}
+
+#bot_bio tbody {
+    text-align: left;
+}
+
+#bot_wiki_article {
+    padding: 0 10px 0 10px;
 }
 
 #bot_stats {

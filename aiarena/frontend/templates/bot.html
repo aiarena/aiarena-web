@@ -14,79 +14,96 @@
     <div id="bot_top_anker"></div>
     <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
 
-    <div id="bot_details">
-        <table>
-            <thead>
-            <tr>
-                <td><b>Details</b></td>
-                <td>
-                    {% if request.user == bot.user %}
-                        [<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]
-                    {% endif %}
-                </td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td><b>Author</b></td>
-                <td>{{ bot.user.as_html_link |safe }}</td>
-            </tr>
-            <tr>
-                <td><b>Race</b></td>
-                <td>{{ bot.get_plays_race_display }}</td>
-            </tr>
-            <tr>
-                <td><b>Type</b></td>
-                <td>{{ bot.type }}</td>
-            </tr>
-            <tr>
-                <td><b>Active</b></td>
-                <td>{{ bot.active }}</td>
-            </tr>
-            <tr>
-                <td><b>Bot Zip</b></td>
-                <td>
-                    {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
-                        <a href="{{ bot.bot_zip.url }}">Download</a>
-                    {% else %}
-                        --
-                    {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <td><b>Bot data</b></td>
-                <td>
-                    {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
-                        {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_staff %}
-                            <a href="{{ bot.bot_data.url }}">Download</a>
+    <div id="bot_details_bio">
+        <div id="bot_details">
+            <table>
+                <thead>
+                <tr>
+                    <td><b>Details</b></td>
+                    <td>
+                        {% if request.user == bot.user %}
+                            [<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]
+                        {% endif %}
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><b>Author</b></td>
+                    <td>{{ bot.user.as_html_link |safe }}</td>
+                </tr>
+                <tr>
+                    <td><b>Race</b></td>
+                    <td>{{ bot.get_plays_race_display }}</td>
+                </tr>
+                <tr>
+                    <td><b>Type</b></td>
+                    <td>{{ bot.type }}</td>
+                </tr>
+                <tr>
+                    <td><b>Active</b></td>
+                    <td>{{ bot.active }}</td>
+                </tr>
+                <tr>
+                    <td><b>Bot Zip</b></td>
+                    <td>
+                        {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
+                            <a href="{{ bot.bot_zip.url }}">Download</a>
                         {% else %}
                             --
                         {% endif %}
-                    {% else %}
-                        --
-                    {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <td><b>Last Updated</b></td>
-                <td>{{ bot.bot_zip_updated }}</td>
-            </tr>
-            </tbody>
-        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>Bot data</b></td>
+                    <td>
+                        {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
+                            {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_staff %}
+                                <a href="{{ bot.bot_data.url }}">Download</a>
+                            {% else %}
+                                --
+                            {% endif %}
+                        {% else %}
+                            --
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>Last Updated</b></td>
+                    <td>{{ bot.bot_zip_updated }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="bot_bio">
+            <table>
+                <thead>
+                <tr>
+                    <td><b>Biography</b></td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <div id="bot_wiki_article">
+                            {% wiki_render bot.wiki_article %}
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div>
-    {% wiki_render bot.wiki_article %}
-    </div>
-<div id="bot_rankings_anker"></div>
-<div class="divider"><span></span><span><h2>Rankings</h2></span><span></span></div>
+    <div id="bot_rankings_anker"></div>
+    <div class="divider"><span></span><span><h2>Rankings</h2></span><span></span></div>
     <div id="bot_rankings">
         <table>
             <thead>
             <tr>
-            <td><b>Season</b></td>
-            <td><b>Opened</b></td>
-            <td><b>Closed</b></td>
-            <td><b>ELO</b></td>
+                <td><b>Season</b></td>
+                <td><b>Opened</b></td>
+                <td><b>Closed</b></td>
+                <td><b>ELO</b></td>
             </tr>
             </thead>
             <tbody>
@@ -108,7 +125,9 @@
                     </tr>
                 {% endfor %}
             {% else %}
-                <tr><td colspan="4">No rankings</td></tr>
+                <tr>
+                    <td colspan="4">No rankings</td>
+                </tr>
             {% endif %}
             </tbody>
             <tfoot>
@@ -139,7 +158,7 @@
             <tr>
                 <td>Crash %</td>
                 {% if bot.statsbots_set.count > 0 %}
-                <td>{{ bot.statsbots_set.get.crash_perc|floatformat:2 }}</td>
+                    <td>{{ bot.statsbots_set.get.crash_perc|floatformat:2 }}</td>
                 {% else %}
                     <td>No stats</td>
                 {% endif %}
@@ -147,7 +166,7 @@
             <tr>
                 <td>Games</td>
                 {% if bot.statsbots_set.count > 0 %}
-                <td>{{ bot.statsbots_set.get.game_count }}</td>
+                    <td>{{ bot.statsbots_set.get.game_count }}</td>
                 {% else %}
                     <td>No stats</td>
                 {% endif %}
@@ -155,7 +174,7 @@
             <tr>
                 <td>Last generated</td>
                 {% if bot.statsbots_set.count > 0 %}
-                <td>{{ bot.statsbots_set.get.generated_at|date:"d. N Y - H:i:s" }}</td>
+                    <td>{{ bot.statsbots_set.get.generated_at|date:"d. N Y - H:i:s" }}</td>
                 {% else %}
                     <td>No stats</td>
                 {% endif %}
@@ -194,15 +213,15 @@
         </table>
         <br/>
     </div>
-<div id="elo_graph_anker"></div>
-<div class="divider"><span></span><span><h2>ELO over time</h2></span><span></span></div>
+    <div id="elo_graph_anker"></div>
+    <div class="divider"><span></span><span><h2>ELO over time</h2></span><span></span></div>
     {% if bot.statsbots_set.count > 0 and bot.statsbots_set.get.elo_graph %}
-    <div id="elo_graph">
-        <img src="{{ bot.statsbots_set.get.elo_graph.url }}" alt="ELOGraph"/>
-    </div>
+        <div id="elo_graph">
+            <img src="{{ bot.statsbots_set.get.elo_graph.url }}" alt="ELOGraph"/>
+        </div>
     {% endif %}
-<div id="bot_results_anker"></div>
-<div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+    <div id="bot_results_anker"></div>
+    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
         <table>
             <thead>
@@ -227,7 +246,7 @@
                         <td>{{ result.opponent.bot.as_html_link |safe }}</td>
                         <td>{{ result.relative_type }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
-                        <td>{{ result.me.step_time_ms|floatformat:3}}</td>
+                        <td>{{ result.me.step_time_ms|floatformat:3 }}</td>
                         <td>{{ result.game_time_formatted }}</td>
                         {% if result.replay_file %}
                             <td><a href="{{ result.replay_file.url }}">Download</a></td>
@@ -244,7 +263,9 @@
                     </tr>
                 {% endfor %}
             {% else %}
-                <tr><td colspan="8">No results</td></tr>
+                <tr>
+                    <td colspan="8">No results</td>
+                </tr>
             {% endif %}
             </tbody>
             <tfoot>
