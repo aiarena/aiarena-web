@@ -1,15 +1,23 @@
+from discord_bind.models import DiscordUser, DiscordInvite
 from django.core.management.base import BaseCommand
 
 from aiarena import settings
 from aiarena.core.models import User
 from aiarena.core.utils import EnvironmentType
+from aiarena.patreon.models import PatreonAccountBind
 
 
 def purge_user_data():
     for user in User.objects.all():
-        user.set_password('x')
         user.email = user.username + '@staging.ai-arena.net'
         user.save()
+
+    # discord integration
+    DiscordUser.objects.all().delete()
+    DiscordInvite.objects.all().delete()
+
+    # patreon integration
+    PatreonAccountBind.objects.all().delete()
 
 
 class Command(BaseCommand):
