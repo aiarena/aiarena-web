@@ -24,7 +24,8 @@ from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, N
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
-from aiarena.core.validators import validate_not_nan, validate_not_inf, validate_bot_name, validate_bot_zip_file
+from aiarena.core.validators import validate_not_nan, validate_not_inf, validate_bot_name, validate_bot_zip_file, \
+    validate_user_owner
 from aiarena.settings import ELO_START_VALUE, ELO, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
@@ -81,7 +82,9 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     service_account = models.BooleanField(default=False)
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
-    user_type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
+    user_type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER',
+                                 validators=[validate_user_owner, ])
+    owner = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('author', kwargs={'pk': self.pk})
@@ -296,13 +299,14 @@ class Match(models.Model):
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {} WRITE, {} WRITE, {} WRITE, {} WRITE, {} READ, {} READ, {} READ".format(Match._meta.db_table,
-                                                                                          Round._meta.db_table,
-                                                                                          MatchParticipation._meta.db_table,
-                                                                                          Bot._meta.db_table,
-                                                                                          Map._meta.db_table,
-                                                                                          Article._meta.db_table,
-                                                                                          Season._meta.db_table))
+                "LOCK TABLES {} WRITE, {} WRITE, {} WRITE, {} WRITE, {} READ, {} READ, {} READ".format(
+                    Match._meta.db_table,
+                    Round._meta.db_table,
+                    MatchParticipation._meta.db_table,
+                    Bot._meta.db_table,
+                    Map._meta.db_table,
+                    Article._meta.db_table,
+                    Season._meta.db_table))
             try:
                 match = Match._locate_and_return_started_match(requesting_user)
                 if match is None:
@@ -704,7 +708,7 @@ class MatchParticipation(models.Model):
         ('match_cancelled', 'Match Cancelled'),  # The match was cancelled
         ('initialization_failure', 'Initialization Failure'),  # A bot failed to initialize
         ('error', 'Error'),
-    # There was an unspecified error running the match (this should only be paired with a 'none' result)
+        # There was an unspecified error running the match (this should only be paired with a 'none' result)
 
     )
     match = models.ForeignKey(Match, on_delete=models.CASCADE)

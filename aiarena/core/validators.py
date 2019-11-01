@@ -17,6 +17,15 @@ def validate_not_inf(value):
     return value
 
 
+def validate_user_owner(value):
+    if value == 'ARENA_CLIENT' and value.instance.owner is None:
+        raise ValidationError("ARENA_CLIENT type requires the owner field to be set.")
+    elif value.instance.owner is not None:
+        raise ValidationError("User type of {} is not allowed to have an owner.".format(value))
+
+    return value
+
+
 validate_bot_name = RegexValidator(r'^[0-9a-zA-Z\._\-]*$',
                                    'Only alphanumeric (A-Z, a-z, 0-9), period (.), underscore (_) '
                                    'and hyphen (-) characters are allowed.')
