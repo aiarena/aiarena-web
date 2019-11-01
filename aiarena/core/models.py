@@ -73,9 +73,15 @@ class User(AbstractUser):
         ('platinum', 'Platinum'),
         ('diamond', 'Diamond'),
     )
+    USER_TYPES = (
+        ('WEBSITE_USER', 'Website User'),
+        ('ARENA_CLIENT', 'Arena Client'),
+        ('SERVICE', 'Service'),
+    )
     email = models.EmailField(unique=True)
     service_account = models.BooleanField(default=False)
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
+    user_type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
 
     def get_absolute_url(self):
         return reverse('author', kwargs={'pk': self.pk})
