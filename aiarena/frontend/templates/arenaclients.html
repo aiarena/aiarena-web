@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load i18n core_filters %}
+{% load humanize %}
+{% block content %}
+<div class="divider"><span></span><span><h2>Arena Clients</h2></span><span></span></div>
+    <table style="min-width: 900px; margin: 0 auto;">
+        <tbody>
+        <thead>
+            <td><b>Name</b></td>
+        </thead>
+        {% for arenaclient in user_list %}
+            <tr>
+                <td>{{ arenaclient.username }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

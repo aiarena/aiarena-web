@@ -32,6 +32,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('api/', include('aiarena.api.urls')),
                   path('ranking/', core_views.Ranking.as_view(), name='ranking'),
                   path('results/', core_views.Results.as_view(), name='results'),
+                  path('arenaclients/', core_views.ArenaClients.as_view(), name='arenaclients'),
                   path('match-queue/', core_views.MatchQueue.as_view(), name='match_queue'),
                   path('stream/', TemplateView.as_view(template_name='stream.html'), name='stream'),
                   path('bots/', core_views.BotList.as_view(), name='bots'),

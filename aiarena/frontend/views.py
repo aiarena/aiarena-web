@@ -253,6 +253,16 @@ class Results(ListView):
     template_name = 'results.html'
 
 
+class ArenaClients(ListView):
+    queryset = User.objects.filter(type='ARENA_CLIENT').order_by('username')
+    template_name = 'arenaclients.html'
+
+
+# class ArenaClient(DetailView):
+#     model = User
+#     template_name = 'arenaclient.html'
+
+
 class RoundDetail(DetailView):
     model = Round
     template_name = 'round.html'
