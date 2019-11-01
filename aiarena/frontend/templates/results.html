@@ -2,25 +2,25 @@
 {% load i18n core_filters %}
 {% load humanize %}
 {% block content %}
-<div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <table style="min-width: 900px; margin: 0 auto;">
-        <tbody>
         <thead>
-            <td><b>ID</b></td>
-            <td><b>Date</b></td>
-            {# Remove padding so the bot name and ELO change sit closer together #}
-            <td style="padding-right: 0"><b>Bot 1</b></td>
-            <td style="padding-left: 0"></td>
-            <td style="padding-right: 0"><b>Bot 2</b></td>
-            <td style="padding-left: 0"></td>
-            <td><b>Result</b></td>
-            <td><b>Duration</b></td>
-            <td><b>Replay</b></td>            
+        <td><b>ID</b></td>
+        <td><b>Date</b></td>
+        {# Remove padding so the bot name and ELO change sit closer together #}
+        <td style="padding-right: 0"><b>Bot 1</b></td>
+        <td style="padding-left: 0"></td>
+        <td style="padding-right: 0"><b>Bot 2</b></td>
+        <td style="padding-left: 0"></td>
+        <td><b>Result</b></td>
+        <td><b>Duration</b></td>
+        <td><b>Replay</b></td>
         </thead>
+        <tbody>
         {% for result in result_list %}
             <tr>
                 <td>{{ result.match.as_html_link |safe }}</td>
-                <td>{{ result.created|naturaltime}}</td>
+                <td>{{ result.created|naturaltime }}</td>
 
                 {% for p in result.match.participants %}
                     {% if p.participant_number == 1 %}
@@ -56,7 +56,7 @@
                                 {{ p.bot.as_html_link |safe }}
                             {% endif %}
                         </td>
-        
+
                         <td style="padding-left: 0">
                             {{ p.elo_change |format_elo_change }}
                             {% if p.elo_change and p.elo_change != 0 %}
@@ -74,13 +74,13 @@
 
                 <td>{{ result.type }}</td>
 
-                <td>{{ result.game_time_formatted}}</td>
-                
+                <td>{{ result.game_time_formatted }}</td>
+
                 {% if result.replay_file %}
                     <td><a href="{{ result.replay_file.url }}">Download</a></td>
                 {% else %}
                     <td>Unavailable</td>
-                {% endif %}                
+                {% endif %}
             </tr>
         {% endfor %}
         </tbody>
