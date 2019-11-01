@@ -1,4 +1,4 @@
-from aiarena.core.models import Match, Round, Bot
+from aiarena.core.models import Match, Round, Bot, User
 from aiarena.core.tests import FullDataSetTestCase
 
 
@@ -78,3 +78,12 @@ class PageRenderTestCase(FullDataSetTestCase):
         # round
         response = self.client.get('/rounds/{0}/'.format(Round.objects.all()[0].id))
         self.assertEqual(response.status_code, 200)
+
+        # arenaclients
+        response = self.client.get('/arenaclients/')
+        self.assertEqual(response.status_code, 200)
+
+        # arenaclients
+        for arenaclient in User.objects.filter(type='ARENA_CLIENT'):
+            response = self.client.get('/arenaclients/{0}/'.format(arenaclient.id))
+            self.assertEqual(response.status_code, 200)

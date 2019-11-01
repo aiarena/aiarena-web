@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n core_filters %}
+{% load humanize %}
+{% block content %}
+    <div class="divider"><span></span><span><h2>Arena Client</h2></span><span></span></div>
+    <table style="min-width: 900px; margin: 0 auto;">
+        <thead>
+        <td><b>Name</b></td>
+        <td><b>Owner</b></td>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{ arenaclient.username }}</td>
+            <td>{{ arenaclient.owner.as_html_link |safe }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+    <div id="bot_results">
+        <table>
+            <thead>
+            <td><b>ID</b></td>
+            <td><b>Date</b></td>
+            {# Remove padding so the bot name and ELO change sit closer together #}
+            <td style="padding-right: 0"><b>Bot 1</b></td>
+            <td style="padding-left: 0"></td>
+            <td style="padding-right: 0"><b>Bot 2</b></td>
+            <td style="padding-left: 0"></td>
+            <td><b>Result</b></td>
+            <td><b>Duration</b></td>
+            <td><b>Replay</b></td>
+            </thead>
+            <tbody>
+            {% for result in result_list %}
+                <tr>
+                    <td>{{ result.match.as_html_link |safe }}</td>
+                    <td>{{ result.created|naturaltime }}</td>
+
+                    {% for p in result.match.participants %}
+                        {% if p.participant_number == 1 %}
+                            <td style="padding-right: 0">
+                                {% if result.winner == p.bot %}
+                                    <b>[{{ p.bot.as_html_link |safe }}]</b>
+                                {% else %}
+                                    {{ p.bot.as_html_link |safe }}
+                                {% endif %}
+                            </td>
+
+                            <td style="padding-left: 0">
+                                {{ p.elo_change |format_elo_change }}
+                                {% if p.elo_change and p.elo_change != 0 %}
+                                    {% if p.elo_change > 0 %}
+                                        <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                                    {% elif p.elo_change < 0 %}
+                                        <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                                    {% endif %}
+                                {% else %}
+                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for p in result.match.participants %}
+                        {% if p.participant_number == 2 %}
+                            <td style="padding-right: 0">
+                                {% if result.winner == p.bot %}
+                                    <b>[{{ p.bot.as_html_link |safe }}]</b>
+                                {% else %}
+                                    {{ p.bot.as_html_link |safe }}
+                                {% endif %}
+                            </td>
+
+                            <td style="padding-left: 0">
+                                {{ p.elo_change |format_elo_change }}
+                                {% if p.elo_change and p.elo_change != 0 %}
+                                    {% if p.elo_change > 0 %}
+                                        <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                                    {% elif p.elo_change < 0 %}
+                                        <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                                    {% endif %}
+                                {% else %}
+                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                                {% endif %}
+                            </td>
+                        {% endif %}
+                    {% endfor %}
+
+                    <td>{{ result.type }}</td>
+
+                    <td>{{ result.game_time_formatted }}</td>
+
+                    {% if result.replay_file %}
+                        <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                    {% else %}
+                        <td>Unavailable</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {# I had to move the pagination outside the above tfoot for now #}
+        {# because it was appearing at the top of the table. Not sure why? #}
+        <div class="pagination">
+            {% if result_list.has_other_pages %}
+                <ul class="pagination">
+                    {% if result_list.has_previous %}
+                        <li>
+                            <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                    {% for page_num in results_page_range %}
+                        {% if result_list.number == page_num %}
+                            <li class="active"><span>{{ page_num }}</span></li>
+                        {% else %}
+                            <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if result_list.has_next %}
+                        <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

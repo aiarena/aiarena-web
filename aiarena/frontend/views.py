@@ -260,9 +260,39 @@ class ArenaClients(ListView):
     template_name = 'arenaclients.html'
 
 
-# class ArenaClient(DetailView):
-#     model = User
-#     template_name = 'arenaclient.html'
+class ArenaClient(DetailView):
+    queryset = User.objects.filter(type='ARENA_CLIENT')
+    template_name = 'arenaclient.html'
+    context_object_name = 'arenaclient'  # change the context name to avoid overriding the current user oontext object
+
+    def get_context_data(self, **kwargs):
+        context = super(ArenaClient, self).get_context_data(**kwargs)
+
+        results = Result.objects.filter(match__assigned_to=self.object).order_by('-created')
+
+        # paginate the results
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(results, 30)
+        try:
+            results = paginator.page(page)
+        except PageNotAnInteger:
+            results = paginator.page(1)
+        except EmptyPage:
+            results = paginator.page(paginator.num_pages)
+
+        page_number = results.number
+
+        # limit displayed page numbers
+        if paginator.num_pages <= 11 or page_number <= 6:  # case 1 and 2
+            results_page_range = [x for x in range(1, min(paginator.num_pages + 1, 12))]
+        elif page_number > paginator.num_pages - 6:  # case 4
+            results_page_range = [x for x in range(paginator.num_pages - 10, paginator.num_pages + 1)]
+        else:  # case 3
+            results_page_range = [x for x in range(page_number - 5, page_number + 6)]
+
+        context['result_list'] = results
+        context['results_page_range'] = results_page_range
+        return context
 
 
 class RoundDetail(DetailView):
