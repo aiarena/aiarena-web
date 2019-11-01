@@ -137,25 +137,25 @@ def run_seed(rounds, token):
                            bot_zip=File(bot_zip))  # inactive bot
 
     for x in range(rounds - 1):  # 6 active bots - 15 games per round
-        create_result(create_match(devadmin), 'Player1Win', devadmin)  # 1
-        create_result(create_match(devadmin), 'Player2Win', devadmin)  # 2
-        create_result_with_bot_data_and_logs(create_match(devadmin), 'Player1Crash', devadmin)  # 3
-        create_result(create_match(devadmin), 'Player1TimeOut', devadmin)  # 4
-        create_result_with_bot_data_and_logs(create_match(devadmin), 'Tie', devadmin)  # 5
-        create_result(create_match(devadmin), 'InitializationError', devadmin)  # 6
-        create_result(create_match(devadmin), 'Player1Surrender', devadmin)  # 7
-        create_result(create_match(devadmin), 'Player2Win', devadmin)  # 8
-        create_result_with_bot_data_and_logs(create_match(devadmin), 'Player1Crash', devadmin)  # 9
-        create_result(create_match(devadmin), 'Player1TimeOut', devadmin)  # 10
-        create_result_with_bot_data_and_logs(create_match(devadmin), 'Tie', devadmin)  # 11
-        create_result(create_match(devadmin), 'InitializationError', devadmin)  # 12
-        create_result(create_match(devadmin), 'Player1Win', devadmin)  # 13
-        create_result(create_match(devadmin), 'Player2Surrender', devadmin)  # 14
-        create_result_with_bot_data_and_logs(create_match(devadmin), 'Player1Crash', devadmin)  # 15
+        create_result(create_match(arenaclient), 'Player1Win', arenaclient)  # 1
+        create_result(create_match(arenaclient), 'Player2Win', arenaclient)  # 2
+        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Player1Crash', arenaclient)  # 3
+        create_result(create_match(arenaclient), 'Player1TimeOut', arenaclient)  # 4
+        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Tie', arenaclient)  # 5
+        create_result(create_match(arenaclient), 'InitializationError', arenaclient)  # 6
+        create_result(create_match(arenaclient), 'Player1Surrender', arenaclient)  # 7
+        create_result(create_match(arenaclient), 'Player2Win', arenaclient)  # 8
+        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Player1Crash', arenaclient)  # 9
+        create_result(create_match(arenaclient), 'Player1TimeOut', arenaclient)  # 10
+        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Tie', arenaclient)  # 11
+        create_result(create_match(arenaclient), 'InitializationError', arenaclient)  # 12
+        create_result(create_match(arenaclient), 'Player1Win', arenaclient)  # 13
+        create_result(create_match(arenaclient), 'Player2Surrender', arenaclient)  # 14
+        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Player1Crash', arenaclient)  # 15
 
     # one last to tick over into the final round so we don't have an empty match queue
     if rounds != 0:
-        create_match(devadmin)
+        create_match(arenaclient)
 
     return new_token
 
