@@ -15,6 +15,7 @@ from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import LadderDisabled
+from aiarena.core.permissions import IsArenaClient
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
 from aiarena.core.utils import post_result_to_discord_bot
 from aiarena.core.validators import validate_not_inf, validate_not_nan
@@ -71,7 +72,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     No reading of models is implemented.
     """
     serializer_class = MatchSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser, IsArenaClient]
 
     def create_new_match(self, requesting_user):
         match = Match.start_next_match(requesting_user)
@@ -163,7 +164,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     No reading of models is implemented.
     """
     serializer_class = SubmitResultCombinedSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser, IsArenaClient]
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):

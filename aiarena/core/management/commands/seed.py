@@ -93,10 +93,15 @@ def finalize_result(result, p1, p2, bot1, bot2):
 
 
 def run_seed(rounds, token):
-    devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@aiarena.net')
+    devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     arenaclient = User.objects.create_user(username='aiarenaclient-000', password='x',
-                                           email='aiarenaclient-000@aiarena.net', is_staff=True, service_account=True)
+                                           email='aiarenaclient-000@dev.aiarena.net', is_staff=True, service_account=True,
+                                           user_type='ARENA_CLIENT')
+
+    service_user = User.objects.create_user(username='service_user', password='x',
+                                           email='service_user@dev.aiarena.net', is_staff=True, service_account=True,
+                                           user_type='SERVICE')
 
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient, key=token)
@@ -104,8 +109,8 @@ def run_seed(rounds, token):
     season = Season.objects.create()
     season.open()
 
-    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@aiarena.net')
-    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@aiarena.net')
+    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net')
+    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net')
 
     with open(BaseTestCase.test_map_path, 'rb') as map:
         Map.objects.create(name='test_map', file=File(map), active=True)
