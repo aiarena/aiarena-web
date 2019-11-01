@@ -31,7 +31,7 @@ class MatchesTestCase(LoggedInTestCase):
         # avoid old tests breaking that were pre-this feature
         config.REISSUE_UNFINISHED_MATCHES = False
 
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
 
         # no maps
         response = self._post_to_matches()
@@ -110,7 +110,7 @@ class MatchesTestCase(LoggedInTestCase):
         # avoid old tests breaking that were pre-this feature
         config.REISSUE_UNFINISHED_MATCHES = False
 
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
         self._create_map('test_map')
         self._create_open_season()
 
@@ -169,7 +169,7 @@ class MatchesTestCase(LoggedInTestCase):
 
     def test_match_reissue(self):
 
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
         self._create_map('test_map')
         self._create_open_season()
 
@@ -190,7 +190,7 @@ class MatchesTestCase(LoggedInTestCase):
         config.REISSUE_UNFINISHED_MATCHES = False
         config.MAX_ACTIVE_ROUNDS = 2
 
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
         self._create_map('test_map')
         self._create_open_season()
 
@@ -232,7 +232,7 @@ class ResultsTestCase(LoggedInTestCase):
     uploaded_arenaclient_log_path = os.path.join(MEDIA_ROOT, 'arenaclient-logs', '{0}_arenaclientlog.zip')
 
     def test_create_results(self):
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
 
         self._create_map('test_map')
         self._create_open_season()
@@ -338,7 +338,7 @@ class ResultsTestCase(LoggedInTestCase):
         #     self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
 
     def test_create_result_bot_not_in_match(self):
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
 
         self._create_map('test_map')
         self._create_open_season()
@@ -385,7 +385,7 @@ class ResultsTestCase(LoggedInTestCase):
         # This is the feature we're testing, so turn it on
         config.BOT_CONSECUTIVE_CRASH_LIMIT = 3  # todo: this update doesn't work.
 
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
 
         self._create_map('test_map')
         self._create_open_season()
@@ -450,7 +450,7 @@ class EloTestCase(LoggedInTestCase):
 
     def setUp(self):
         super(EloTestCase, self).setUp()
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
 
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
@@ -570,7 +570,7 @@ class EloTestCase(LoggedInTestCase):
 class RoundRobinGenerationTestCase(MatchReadyTestCase):
     def setUp(self):
         super(RoundRobinGenerationTestCase, self).setUp()
-        self.client.login(username='staff_user', password='x')
+        self.client.force_login(User.objects.get(username='arenaclient1'))
 
     def test_round_robin_generation(self):
         # avoid old tests breaking that were pre-this feature

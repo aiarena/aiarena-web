@@ -193,21 +193,24 @@ class BaseTestCase(TransactionTestCase):
 
     def _generate_extra_users(self):
         self.regularUser2 = User.objects.create_user(username='regular_user2', password='x',
-                                                     email='regular_user2@aiarena.net')
+                                                     email='regular_user2@dev.aiarena.net')
         self.regularUser3 = User.objects.create_user(username='regular_user3', password='x',
-                                                     email='regular_user3@aiarena.net')
+                                                     email='regular_user3@dev.aiarena.net')
         self.regularUser4 = User.objects.create_user(username='regular_user4', password='x',
-                                                     email='regular_user4@aiarena.net')
+                                                     email='regular_user4@dev.aiarena.net')
 
 
 class LoggedInTestCase(BaseTestCase):
     def setUp(self):
         super(LoggedInTestCase, self).setUp()
 
-        self.staffUser1 = User.objects.create_user(username='staff_user', password='x', email='staff_user@aiarena.net',
+        self.staffUser1 = User.objects.create_user(username='staff_user', password='x', email='staff_user@dev.aiarena.net',
                                                    is_staff=True)
+
+        self.arenaclientUser1 = User.objects.create_user(username='arenaclient1', email='arenaclient@dev.aiarena.net',
+                                                         type='ARENA_CLIENT')
         self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
-                                                     email='regular_user1@aiarena.net')
+                                                     email='regular_user1@dev.aiarena.net')
 
 
 class MatchReadyTestCase(LoggedInTestCase):
