@@ -75,6 +75,7 @@ class User(AbstractUser):
         ('diamond', 'Diamond'),
     )
     USER_TYPES = (
+        # When adding types here, ensure they are considered in post_save and validate_user_owner
         ('WEBSITE_USER', 'Website User'),
         ('ARENA_CLIENT', 'Arena Client'),
         ('SERVICE', 'Service'),
@@ -91,6 +92,12 @@ class User(AbstractUser):
 
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
+
+@receiver(pre_save, sender=User)
+def pre_save_user(sender, instance, **kwargs):
+    if instance.user_type != 'WEBSITE_USER':
+        instance.set_unusable_password()
 
 
 class Season(models.Model, LockableModelMixin):
