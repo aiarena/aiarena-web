@@ -268,7 +268,10 @@ class ArenaClient(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ArenaClient, self).get_context_data(**kwargs)
 
-        results = Result.objects.filter(match__assigned_to=self.object).order_by('-created')
+        results = Result.objects.filter(match__assigned_to=self.object).order_by('-created').prefetch_related(
+            Prefetch('winner'),
+            Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
 
         # paginate the results
         page = self.request.GET.get('page', 1)
