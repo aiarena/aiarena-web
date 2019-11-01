@@ -81,10 +81,9 @@ class User(AbstractUser):
         ('SERVICE', 'Service'),
     )
     email = models.EmailField(unique=True)
-    service_account = models.BooleanField(default=False)
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
-    user_type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER',
-                                 validators=[validate_user_owner, ])
+    type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER',
+                            validators=[validate_user_owner, ])
     owner = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
 
     def get_absolute_url(self):

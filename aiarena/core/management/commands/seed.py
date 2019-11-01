@@ -67,6 +67,7 @@ def create_result(match, type, as_user):
 
         finalize_result(result, p1, p2, bot1, bot2)
 
+
 @transaction.atomic
 def finalize_result(result, p1, p2, bot1, bot2):
     # imitates the arenaclient result view
@@ -96,11 +97,10 @@ def run_seed(rounds, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     arenaclient = User.objects.create_user(username='aiarenaclient-000', email='aiarenaclient-000@dev.aiarena.net',
-                                           service_account=True, user_type='ARENA_CLIENT')
+                                           user_type='ARENA_CLIENT')
 
-    service_user = User.objects.create_user(username='service_user', password='x',
-                                           email='service_user@dev.aiarena.net', service_account=True,
-                                           user_type='SERVICE')
+    service_user = User.objects.create_user(username='service_user', password='x', email='service_user@dev.aiarena.net',
+                                            user_type='SERVICE')
 
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient, key=token)
@@ -167,7 +167,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--rounds', type=int, default=self._DEFAULT_ROUNDS_TO_GENERATE,
-                            help="Number of rounds to generate. Default is {0}.".format(self._DEFAULT_ROUNDS_TO_GENERATE))
+                            help="Number of rounds to generate. Default is {0}.".format(
+                                self._DEFAULT_ROUNDS_TO_GENERATE))
         parser.add_argument('--token', type=str, default=None,
                             help="Specify the token to use for the arena client."
                                  " Useful to avoid having to reconfigure arena clients in testing")

@@ -26,7 +26,7 @@ result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file
 result_filter_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by',
 round_include_fields = 'id', 'started', 'finished', 'complete',
 user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', \
-                      'service_account', 'patreon_level'
+                      'type', 'patreon_level'
 
 
 class BotSerializer(serializers.ModelSerializer):
