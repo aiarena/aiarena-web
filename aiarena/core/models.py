@@ -95,7 +95,7 @@ class User(AbstractUser):
 
 @receiver(pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):
-    if instance.user_type != 'WEBSITE_USER':
+    if instance.type != 'WEBSITE_USER':
         instance.set_unusable_password()
 
 

@@ -215,7 +215,7 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
 
 class AuthorList(ListView):
-    queryset = User.objects.all().order_by('username').filter(is_active=1, service_account=False)
+    queryset = User.objects.all().order_by('username').filter(is_active=1, type='WEBSITE_USER')
     template_name = 'authors.html'
 
 

@@ -97,10 +97,10 @@ def run_seed(rounds, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     arenaclient = User.objects.create_user(username='aiarenaclient-000', email='aiarenaclient-000@dev.aiarena.net',
-                                           user_type='ARENA_CLIENT')
+                                           type='ARENA_CLIENT')
 
     service_user = User.objects.create_user(username='service_user', password='x', email='service_user@dev.aiarena.net',
-                                            user_type='SERVICE')
+                                            type='SERVICE')
 
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient, key=token)
