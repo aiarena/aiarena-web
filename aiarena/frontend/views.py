@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from constance import config
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -6,6 +8,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import F, Prefetch
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
@@ -272,6 +275,10 @@ class ArenaClient(DetailView):
             Prefetch('winner'),
             Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
                      to_attr='participants'))
+
+        context['match_count_1h'] = Result.objects.filter(match__assigned_to=self.object, created__gte=timezone.now() - timedelta(hours=1)).count()
+        context['match_count_24h'] = Result.objects.filter(match__assigned_to=self.object, created__gte=timezone.now() - timedelta(hours=24)).count()
+        context['match_count'] = results.count()
 
         # paginate the results
         page = self.request.GET.get('page', 1)

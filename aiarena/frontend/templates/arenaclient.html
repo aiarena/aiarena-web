@@ -7,11 +7,17 @@
         <thead>
         <td><b>Name</b></td>
         <td><b>Owner</b></td>
+        <td><b>Matches (1h)</b></td>
+        <td><b>Matches (24h)</b></td>
+        <td><b>Matches Total</b></td>
         </thead>
         <tbody>
         <tr>
             <td>{{ arenaclient.username }}</td>
             <td>{{ arenaclient.owner.as_html_link |safe }}</td>
+            <td>{{ match_count_1h }}</td>
+            <td>{{ match_count_24h }}</td>
+            <td>{{ match_count }}</td>
         </tr>
         </tbody>
     </table>
