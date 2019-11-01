@@ -4,13 +4,15 @@
 {% block content %}
 <div class="divider"><span></span><span><h2>Arena Clients</h2></span><span></span></div>
     <table style="min-width: 900px; margin: 0 auto;">
-        <tbody>
         <thead>
             <td><b>Name</b></td>
+            <td><b>Owner</b></td>
         </thead>
+        <tbody>
         {% for arenaclient in user_list %}
             <tr>
-                <td>{{ arenaclient.username }}</td>
+                <td>{{ arenaclient.as_html_link |safe }}</td>
+                <td>{{ arenaclient.owner.as_html_link |safe }}</td>
             </tr>
         {% endfor %}
         </tbody>

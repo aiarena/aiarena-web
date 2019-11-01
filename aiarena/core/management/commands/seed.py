@@ -97,7 +97,7 @@ def run_seed(rounds, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     arenaclient = User.objects.create_user(username='aiarenaclient-000', email='aiarenaclient-000@dev.aiarena.net',
-                                           type='ARENA_CLIENT')
+                                           type='ARENA_CLIENT', owner=devadmin)
 
     service_user = User.objects.create_user(username='service_user', password='x', email='service_user@dev.aiarena.net',
                                             type='SERVICE')

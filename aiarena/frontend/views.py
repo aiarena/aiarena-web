@@ -215,12 +215,12 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
 
 class AuthorList(ListView):
-    queryset = User.objects.all().order_by('username').filter(is_active=1, type='WEBSITE_USER')
+    queryset = User.objects.filter(is_active=1, type='WEBSITE_USER').order_by('username')
     template_name = 'authors.html'
 
 
 class AuthorDetail(DetailView):
-    model = User
+    queryset = User.objects.filter(is_active=1, type='WEBSITE_USER')
     template_name = 'author.html'
     context_object_name = 'author'  # change the context name to avoid overriding the current user oontext object
 
@@ -239,7 +239,8 @@ class Ranking(ListView):
     # Instead, because we want to filter the bots, we define queryset,
     # which is also referenced as "seasonparticipation_list" in the template.
     def get_queryset(self):
-        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo').prefetch_related('bot')
+        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by(
+            '-elo').prefetch_related('bot')
 
     # If we didn't set this, the ListView would default to searching for a template at <module>/<modelname>_list.html
     # In this case, that would be "core/seasonparticipation_list.html"
@@ -249,7 +250,8 @@ class Ranking(ListView):
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(
         Prefetch('winner'),
-        Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
+        Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                 to_attr='participants'))
     template_name = 'results.html'
 
 
@@ -315,7 +317,9 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 
 class Index(ListView):
     def get_queryset(self):
-        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo')[:10].prefetch_related('bot')  # top 10 bots
+        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo')[
+               :10].prefetch_related('bot')  # top 10 bots
+
     template_name = 'index.html'
 
 
@@ -324,8 +328,9 @@ class MatchQueue(View):
         # Matches without a round are requested ones
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
             F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
-                Prefetch('map'),
-                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
+            Prefetch('map'),
+            Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
 
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
@@ -333,7 +338,8 @@ class MatchQueue(View):
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
                 F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
                 Prefetch('map'),
-                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
+                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                         to_attr='participants'))
 
         context = {'round_list': rounds, 'requested_matches': requested_matches}
         return render(request, 'match_queue.html', context)
@@ -358,4 +364,3 @@ class SeasonDetail(DetailView):
         context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
         context['rankings'] = SeasonParticipation.objects.filter(season_id=self.object.id).order_by('-elo')
         return context
-

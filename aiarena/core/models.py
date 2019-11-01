@@ -87,7 +87,12 @@ class User(AbstractUser):
     owner = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
 
     def get_absolute_url(self):
-        return reverse('author', kwargs={'pk': self.pk})
+        if self.type == 'WEBSITE_USER':
+            return reverse('author', kwargs={'pk': self.pk})
+        elif self.type == 'ARENA_CLIENT':
+            return reverse('arenaclient', kwargs={'pk': self.pk})
+        else:
+            raise Exception("This user type does not have a url.")
 
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
