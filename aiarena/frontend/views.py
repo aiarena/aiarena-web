@@ -280,6 +280,11 @@ class Ranking(ListView):
     # In this case, that would be "core/seasonparticipation_list.html"
     template_name = 'ranking.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(Ranking, self).get_context_data(**kwargs)
+        context['current_season_name'] = Season.get_current_season().name
+        return context
+
 
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(

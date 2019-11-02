@@ -123,6 +123,10 @@ class Season(models.Model, LockableModelMixin):
         return self.id.__str__()
 
     @property
+    def name(self):
+        return 'Season ' + str(self.id)
+
+    @property
     def is_paused(self):
         return self.status in ['paused', 'created']
 
