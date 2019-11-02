@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
-from django.db.models import F, Prefetch
+from django.db.models import F, Prefetch, Count, Q
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -290,7 +290,10 @@ class Results(ListView):
 
 
 class ArenaClients(ListView):
-    queryset = User.objects.filter(type='ARENA_CLIENT').order_by('username')
+    queryset = User.objects.filter(type='ARENA_CLIENT').annotate(
+        matches_1hr=Count('match__result', filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=1))),
+        matches_24hr=Count('match__result', filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
+    ).order_by('username')
     template_name = 'arenaclients.html'
 
 
