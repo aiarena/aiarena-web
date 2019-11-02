@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n avatar_tags %}
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Profile</h2></span><span></span></div>
@@ -47,8 +47,6 @@
             </form>
         </div>
     </div>
-
-
     <br>
     <div class="divider">
         <span></span><span><h2>Bots ({{ bot_list.count }}/{{ max_user_bot_count }})</h2></span><span></span></div>
@@ -78,6 +76,5 @@
                 <td><a href="{% url 'bot_edit' bot.pk %}">Edit</a></td>
             </tr>
         {% endfor %}
-
     </table>
 {% endblock %}
