@@ -18,6 +18,7 @@ from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season
+from aiarena.frontend.utils import restrict_page_range
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
@@ -125,17 +126,10 @@ class BotList(ListView):
     def get_context_data(self, **kwargs):
         context = super(BotList, self).get_context_data(**kwargs)
 
+        # add the page ranges
         page_obj = context['page_obj']
+        context['page_range'] = restrict_page_range(page_obj.paginator.num_pages, page_obj.number)
 
-        # limit displayed page numbers
-        if page_obj.paginator.num_pages <= 11 or page_obj.number <= 6:  # case 1 and 2
-            page_range = [x for x in range(1, min(page_obj.paginator.num_pages + 1, 12))]
-        elif page_obj.number > page_obj.paginator.num_pages - 6:  # case 4
-            page_range = [x for x in range(page_obj.paginator.num_pages - 10, page_obj.paginator.num_pages + 1)]
-        else:  # case 3
-            page_range = [x for x in range(page_obj.number - 5, page_obj.number + 6)]
-
-        context['page_range'] = page_range
         return context
 
 
@@ -157,16 +151,6 @@ class BotDetail(DetailView):
             results = paginator.page(1)
         except EmptyPage:
             results = paginator.page(paginator.num_pages)
-
-        page_number = results.number
-
-        # limit displayed page numbers
-        if paginator.num_pages <= 11 or page_number <= 6:  # case 1 and 2
-            results_page_range = [x for x in range(1, min(paginator.num_pages + 1, 12))]
-        elif page_number > paginator.num_pages - 6:  # case 4
-            results_page_range = [x for x in range(paginator.num_pages - 10, paginator.num_pages + 1)]
-        else:  # case 3
-            results_page_range = [x for x in range(page_number - 5, page_number + 6)]
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
@@ -192,7 +176,7 @@ class BotDetail(DetailView):
         context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('-win_perc')
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
         context['result_list'] = results
-        context['results_page_range'] = results_page_range
+        context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
         return context
 
 
@@ -348,18 +332,8 @@ class ArenaClient(DetailView):
         except EmptyPage:
             results = paginator.page(paginator.num_pages)
 
-        page_number = results.number
-
-        # limit displayed page numbers
-        if paginator.num_pages <= 11 or page_number <= 6:  # case 1 and 2
-            results_page_range = [x for x in range(1, min(paginator.num_pages + 1, 12))]
-        elif page_number > paginator.num_pages - 6:  # case 4
-            results_page_range = [x for x in range(paginator.num_pages - 10, paginator.num_pages + 1)]
-        else:  # case 3
-            results_page_range = [x for x in range(page_number - 5, page_number + 6)]
-
         context['result_list'] = results
-        context['results_page_range'] = results_page_range
+        context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
         return context
 
 
