@@ -121,7 +121,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 class BotList(ListView):
     queryset = Bot.objects.all().order_by('name')
     template_name = 'bots.html'
-    paginate_by = 2
+    paginate_by = 50
 
     def get_context_data(self, **kwargs):
         context = super(BotList, self).get_context_data(**kwargs)
