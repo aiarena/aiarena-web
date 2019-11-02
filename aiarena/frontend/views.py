@@ -120,6 +120,23 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 class BotList(ListView):
     queryset = Bot.objects.all().order_by('name')
     template_name = 'bots.html'
+    paginate_by = 2
+
+    def get_context_data(self, **kwargs):
+        context = super(BotList, self).get_context_data(**kwargs)
+
+        page_obj = context['page_obj']
+
+        # limit displayed page numbers
+        if page_obj.paginator.num_pages <= 11 or page_obj.number <= 6:  # case 1 and 2
+            page_range = [x for x in range(1, min(page_obj.paginator.num_pages + 1, 12))]
+        elif page_obj.number > page_obj.paginator.num_pages - 6:  # case 4
+            page_range = [x for x in range(page_obj.paginator.num_pages - 10, page_obj.paginator.num_pages + 1)]
+        else:  # case 3
+            page_range = [x for x in range(page_obj.number - 5, page_obj.number + 6)]
+
+        context['page_range'] = page_range
+        return context
 
 
 class BotDetail(DetailView):
