@@ -1,10 +1,13 @@
 @import url('https://fonts.googleapis.com/css?family=Quicksand&display=swap');
 
+div.pagination {
+    margin-left: 60px;
+    margin-right: 50px;
+}
 ul.pagination {
     display: table;
     padding: 0;
-    width: 88%;
-    float: right;
+    width: 100%;
     text-align: justify;
     background-color: rgba(0, 0, 0, 0.5);
     margin-right: 50px;
@@ -618,7 +621,7 @@ table {
     display: blocking;
     overflow: hiden;
     background-color: rgba(0, 0, 0, 0.1);
-    width: 88%;
+    width: 90%;
     text-align: center;
     border-collapse: collapse;
     margin-left: 60px;
