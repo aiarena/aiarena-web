@@ -24,6 +24,10 @@ class PageRenderTestCase(FullDataSetTestCase):
         response = self.client.get('/bots/')
         self.assertEqual(response.status_code, 200)
 
+        # profile before login - should redirect
+        response = self.client.get('/profile/')
+        self.assertEqual(response.status_code, 302)
+
         # bot
         active_bot = Bot.objects.filter(active=True)[0]
         response = self.client.get('/bots/{0}/'.format(active_bot.id))
@@ -87,3 +91,15 @@ class PageRenderTestCase(FullDataSetTestCase):
         for arenaclient in User.objects.filter(type='ARENA_CLIENT'):
             response = self.client.get('/arenaclients/{0}/'.format(arenaclient.id))
             self.assertEqual(response.status_code, 200)
+
+        # profile
+        response = self.client.get('/profile/')
+        self.assertEqual(response.status_code, 200)
+
+        # token
+        response = self.client.get('/profile/token/')
+        self.assertEqual(response.status_code, 200)
+
+        # recreate - will redirect
+        response = self.client.post('/profile/token/')
+        self.assertEqual(response.status_code, 302)

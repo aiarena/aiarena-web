@@ -5,13 +5,15 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.db import transaction, IntegrityError
 from django.db.models import F, Prefetch
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView
 from private_storage.views import PrivateStorageDetailView
+from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
@@ -39,6 +41,35 @@ class UserProfile(LoginRequiredMixin, DetailView):
         context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
         context['max_active_per_race_bot_count'] = config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE
         return context
+
+
+class UserTokenDetailView(LoginRequiredMixin, DetailView):
+    model = Token
+    redirect_field_name = 'next'
+    template_name = 'profile_token.html'
+    fields = ['user', ]
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_object(self, *args, **kwargs):
+        # try auto create the token. If that fails then it must exist, so retrieve it
+        try:
+            with transaction.atomic():
+                token = Token.objects.create(user=self.request.user)
+        except IntegrityError:  # already exists
+            token = Token.objects.get(user=self.request.user)
+        return token
+
+    # Regenerate the API token
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        # delete the token
+        token = Token.objects.get(user=self.request.user)
+        token.delete()
+
+        # navigating back to the page will auto-create the token
+        return redirect('profile_token')
 
 
 class UserProfileUpdateForm(forms.ModelForm):
@@ -276,8 +307,10 @@ class ArenaClient(DetailView):
             Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
                      to_attr='participants'))
 
-        context['match_count_1h'] = Result.objects.filter(match__assigned_to=self.object, created__gte=timezone.now() - timedelta(hours=1)).count()
-        context['match_count_24h'] = Result.objects.filter(match__assigned_to=self.object, created__gte=timezone.now() - timedelta(hours=24)).count()
+        context['match_count_1h'] = Result.objects.filter(match__assigned_to=self.object,
+                                                          created__gte=timezone.now() - timedelta(hours=1)).count()
+        context['match_count_24h'] = Result.objects.filter(match__assigned_to=self.object,
+                                                           created__gte=timezone.now() - timedelta(hours=24)).count()
         context['match_count'] = results.count()
 
         # paginate the results

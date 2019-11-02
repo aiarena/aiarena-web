@@ -875,6 +875,19 @@ background-color: #86c232;
     margin: 10px 0 10px 0;
 }
 
+.profile-token-button {
+    text-align: center;
+    width: 150px;
+    height: 30px;
+    font-size: 18px;
+    background-color: #61892f;
+    color: white;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    border: 0;
+    margin: 10px 0 10px 0;
+}
+
 #discord-link-button:hover {
     background-color: #86c232;
 }

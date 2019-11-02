@@ -45,6 +45,10 @@
                     <input class="profile-link-button" type="submit" value="Link Patreon"/>
                 {% endif %}
             </form>
+            <br/>
+            <form action="{% url 'profile_token' %}">
+                <input class="profile-token-button" type="submit" value="View API Token"/>
+            </form>
         </div>
     </div>
     <br>

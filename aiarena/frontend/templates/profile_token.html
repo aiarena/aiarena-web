@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n avatar_tags %}
+
+{% block content %}
+    <div class="divider"><span></span><span><h2>Data API Token</h2></span><span></span></div>
+
+    <div id="author_token">
+        <table>
+            <thead>
+            <tr>
+                <td colspan="2">
+                    Key
+                </td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="mono">
+                    {{ token.key }}
+                </td>
+                <td>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input class="profile-token-regen" type="submit" value="Regenerate"/>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div style="text-align: center"><a href="{% url 'api-root' %}"><h3>View the API here</h3></a></div>
+
+{% endblock %}
