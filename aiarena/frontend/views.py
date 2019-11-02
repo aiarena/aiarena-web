@@ -288,11 +288,21 @@ class Ranking(ListView):
 
 
 class Results(ListView):
-    queryset = Result.objects.all().order_by('-created')[:100].prefetch_related(
+    queryset = Result.objects.all().order_by('-created').prefetch_related(
         Prefetch('winner'),
         Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
                  to_attr='participants'))
     template_name = 'results.html'
+    paginate_by = 50
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # add the page ranges
+        page_obj = context['page_obj']
+        context['page_range'] = restrict_page_range(page_obj.paginator.num_pages, page_obj.number)
+
+        return context
 
 
 class ArenaClients(ListView):
