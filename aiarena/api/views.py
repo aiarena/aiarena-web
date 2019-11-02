@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', \
                      'current_match', 'plays_race', 'type', 'game_display_id', 'bot_zip_updated',
-map_include_fields = 'id', 'name', 'active',
+map_include_fields = 'id', 'name', 'file', 'active',
+map_filter_fields = 'id', 'name', 'active',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
 matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
 seasonparticipation_include_fields = 'id', 'season', 'bot', 'elo',
@@ -51,8 +52,6 @@ class BotViewSet(viewsets.ReadOnlyModelViewSet):
 class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
-        # todo: The file isn't used by the arena clients currently, so exclude it to avoid confusion.
-        # todo: Eventually the arena clients will download maps from the website
         fields = map_include_fields
 
 
@@ -64,9 +63,9 @@ class MapViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MapSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = map_include_fields
-    search_fields = map_include_fields
-    ordering_fields = map_include_fields
+    filterset_fields = map_filter_fields
+    search_fields = map_filter_fields
+    ordering_fields = map_filter_fields
 
 
 class MatchSerializer(serializers.ModelSerializer):
