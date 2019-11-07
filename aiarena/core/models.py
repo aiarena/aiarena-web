@@ -660,10 +660,11 @@ class Bot(models.Model):
         return self.seasonparticipation_set.get(season=Season.get_current_season())
 
     def validate_current_season(self):
-        try:
-            Season.get_current_season()
-        except NoCurrentSeason:
-            raise ValidationError('You cannot activate a bot when there is no current season.')
+        if self.active:
+            try:
+                Season.get_current_season()
+            except NoCurrentSeason:
+                raise ValidationError('You cannot activate a bot when there is no current season.')
 
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
