@@ -304,8 +304,11 @@ class Ranking(ListView):
     # Instead, because we want to filter the bots, we define queryset,
     # which is also referenced as "seasonparticipation_list" in the template.
     def get_queryset(self):
-        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by(
-            '-elo').prefetch_related('bot')
+        try:
+            return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by(
+                '-elo').prefetch_related('bot')
+        except NoCurrentSeason:
+            return SeasonParticipation.objects.none()
 
     # If we didn't set this, the ListView would default to searching for a template at <module>/<modelname>_list.html
     # In this case, that would be "core/seasonparticipation_list.html"
@@ -313,7 +316,11 @@ class Ranking(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(Ranking, self).get_context_data(**kwargs)
-        context['current_season_name'] = Season.get_current_season().name
+        try:
+            season = Season.get_current_season()
+            context['current_season_name'] = season.name
+        except NoCurrentSeason:
+            pass
         return context
 
 
