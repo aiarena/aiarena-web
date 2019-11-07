@@ -28,16 +28,11 @@ class PatreonBindView(View):
 class PatreonCallbackView(View):
     def get(self, request):
         try:
-            logger.error("1")
             oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
-            logger.error("2")
             site = Site.objects.get_current()
-            logger.error("3")
             tokens = oauth_client.get_tokens(request.GET['code'], 'https://' + site.domain + '/patreon/oauth/redirect')
-            logger.error("4")
 
             if 'access_token' in tokens and 'refresh_token' in tokens:
-                logger.error("5")
                 account_bind, created = PatreonAccountBind.objects.get_or_create(user=request.user)
                 account_bind.access_token = tokens['access_token']
                 account_bind.refresh_token = tokens['refresh_token']

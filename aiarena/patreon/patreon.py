@@ -13,7 +13,6 @@ class PatreonOAuth:
         self.client_secret = client_secret
 
     def get_tokens(self, code, redirect_uri):
-        logger.error("get_tokens")
         return self.__update_token({
             "code": code,
             "grant_type": "authorization_code",
@@ -23,7 +22,6 @@ class PatreonOAuth:
         })
 
     def refresh_token(self, refresh_token):
-        logger.error("refresh_token")
         return self.__update_token({
             "grant_type": "refresh_token",
             "refresh_token": refresh_token,
@@ -41,7 +39,6 @@ class PatreonOAuth:
                 'User-Agent': user_agent_string(),
             }
         )
-        logger.error("response.status_code: " + str(response.status_code))
         return response.json()
 
 
