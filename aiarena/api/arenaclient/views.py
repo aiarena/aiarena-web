@@ -259,7 +259,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 if settings.ENABLE_ELO_SANITY_CHECK:
                     # test here to check ELO total and ensure no corruption
-                    expectedEloSum = settings.ELO_START_VALUE * Bot.objects.all().count()
+                    expectedEloSum = settings.ELO_START_VALUE * SeasonParticipation.objects.all().count()
                     actualEloSum = SeasonParticipation.objects.filter(season=result.match.round.season).aggregate(
                         Sum('elo'))
 

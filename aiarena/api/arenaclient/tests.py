@@ -559,12 +559,19 @@ class EloTestCase(LoggedInTestCase):
     # an exception won't be raised from this - but a log entry will
     # this is only to ensure no other exception takes place
     def test_elo_sanity_check(self):
+        # todo: test log file content
+        # log_file = "./logs/aiarena.log"
+        # os.remove(log_file)  # clean it
+
         # intentionally cause a sanity check failure
         self.regularUserBot1.elo = ELO_START_VALUE - 1
         self.regularUserBot1.save()
 
         match = self._post_to_matches().data
         self._post_to_results(match['id'], 'Player1Win')
+
+        # with open(log_file, "r") as f:
+        #     self.assertFalse("did not match expected value of" in f.read())
 
 
 class RoundRobinGenerationTestCase(MatchReadyTestCase):
