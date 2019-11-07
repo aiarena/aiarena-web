@@ -1,3 +1,5 @@
+import logging
+
 from constance import config
 from django.contrib.sites.models import Site
 from django.shortcuts import redirect
@@ -7,14 +9,18 @@ import urllib.parse
 from aiarena.patreon.models import PatreonAccountBind
 from aiarena.patreon.patreon import PatreonOAuth, PatreonApi
 
+logger = logging.getLogger(__name__)
 
 class PatreonBindView(View):
     def get(self, request):
         site = Site.objects.get_current()
+        domain = urllib.parse.quote_plus(site.domain)
+        logger.critical(site.domain)
+        logger.critical(domain)
         return redirect("https://www.patreon.com/oauth2/authorize"
                         "?response_type=code"
                         "&client_id=" + config.PATREON_CLIENT_ID +
-                        "&redirect_uri=https%3A%2F%2F" + urllib.parse.quote_plus(site.domain) + "%2Fpatreon%2Foauth%2Fredirect")
+                        "&redirect_uri=https%3A%2F%2F" + domain + "%2Fpatreon%2Foauth%2Fredirect")
 
 
 class PatreonCallbackView(View):
