@@ -114,7 +114,7 @@ class StatsBotMatchupsAdmin(admin.ModelAdmin):
 
 
 class PatreonAccountBindAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in StatsBotMatchups._meta.fields]
+    list_display = [field.name for field in PatreonAccountBind._meta.fields]
 
 
 admin.site.register(Map, MapAdmin)
