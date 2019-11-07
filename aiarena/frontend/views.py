@@ -191,13 +191,12 @@ class StandardBotUpdateForm(forms.ModelForm):
 
 
 class NoCurrentSeasonBotUpdateForm(forms.ModelForm):
-    active = forms.BooleanField(disabled=True)
+    active = forms.BooleanField(disabled=True, required=False)
     wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
 
     class Meta:
         model = Bot
-        fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
-                  'bot_data_publicly_downloadable']
+        fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data', 'bot_data_publicly_downloadable']
 
 
 class FrozenDataBotUpdateForm(forms.ModelForm):
@@ -236,7 +235,8 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse('bot_edit', kwargs={'pk': self.object.pk})
 
-    # change the available fields based upon whether the bot_data is available for editing or not.
+    # change the available fields based upon whether the bot_data is available for editing or not
+    # and whether there's a current season
     def get_form_class(self):
         if self.object.bot_data_is_currently_frozen():
             try:
