@@ -1,3 +1,4 @@
+import json
 import logging
 
 from constance import config
@@ -30,6 +31,8 @@ class PatreonCallbackView(View):
         logger.warning(site.domain)
         logger.error(site.domain)
         tokens = oauth_client.get_tokens(request.GET['code'], 'https://' + site.domain + '/patreon/oauth/redirect')
+
+        json.dumps(tokens)
 
         account_bind, created = PatreonAccountBind.objects.get_or_create(user=request.user)
         account_bind.access_token = tokens['access_token']
