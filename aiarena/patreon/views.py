@@ -72,7 +72,7 @@ class PatreonCallbackView(View):
                     request.user.patreon_level = patreon_level
                     request.user.save()
                 except Exception as e:
-                    logger.error("Failed to update patreon tier with error:\n" + traceback.print_exc())
+                    logger.error("Failed to update patreon tier with error:\n" + traceback.format_exc())
                     messages.add_message(request, messages.WARNING, 'There was an issue updating your account\'s Patreon tier.')
 
             else:
@@ -80,7 +80,7 @@ class PatreonCallbackView(View):
                 messages.add_message(request, messages.ERROR,
                                      'Sorry, there was an issue linking your patreon. Please try again later. If this issue persists, please contact an admin via discord.')
         except Exception as e:
-            logger.error("Patreon linkage failed with error:\n" + traceback.print_exc())
+            logger.error("Patreon linkage failed with error:\n" + traceback.format_exc())
             messages.add_message(request, messages.ERROR,
                                  'Sorry, there was an issue linking your patreon. Please try again later. If this issue persists, please contact an admin via discord.')
 
