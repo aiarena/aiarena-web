@@ -162,6 +162,7 @@ class Season(models.Model, LockableModelMixin):
         for bot in Bot.objects.all():
             if bot.active:
                 bot.active = False
+                logger.warning(f"Bot {bot.id} was somehow active before the season was open!")
             bot.regen_game_display_id()
             bot.save()
 
