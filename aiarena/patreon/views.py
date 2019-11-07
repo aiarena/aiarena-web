@@ -1,3 +1,4 @@
+import json
 import logging
 import urllib.parse
 
@@ -62,6 +63,7 @@ class PatreonCallbackView(View):
             request.user.patreon_level = patreon_level
             request.user.save()
         else:
+            logger.error("Patreon linkage failed. Tokens dump:\n" + json.dumps(tokens))
             messages.add_message(request, messages.ERROR,
                                  'Sorry, there was an issue linking your patreon. Please try again later. If this issue persists, please contact an admin via discord.')
 
