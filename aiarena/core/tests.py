@@ -246,7 +246,13 @@ class UtilsTestCase(BaseTestCase):
 
 class UserTestCase(BaseTestCase):
     def test_user_creation(self):
-        User.objects.create(username='test user', email='test@test.com')
+        user = User.objects.create(username='test user', email='test@test.com')
+        arenaclient = User.objects.create(username='test arenaclient', email='arenaclient@test.com')
+        arenaclient.type = 'ARENA_CLIENT'
+        with self.assertRaises(ValidationError):
+            arenaclient.clean()
+        arenaclient.owner = user
+        arenaclient.clean()
 
 
 class BotTestCase(LoggedInTestCase):
