@@ -43,26 +43,27 @@ class PatreonCallbackView(View):
                     api_client = PatreonApi(account_bind.access_token)
                     user = api_client.current_user()
                     patreon_level = 'none'
-                    for entry in user['included']:
-                        if entry['type'] == 'pledge':
-                            if entry['attributes']['amount_cents'] >= 10000:  # diamond
-                                patreon_level = 'diamond'
-                                break
-                            elif entry['attributes']['amount_cents'] >= 5000:  # platinum
-                                patreon_level = 'platinum'
-                                break
-                            elif entry['attributes']['amount_cents'] >= 2500:  # gold
-                                patreon_level = 'gold'
-                                break
-                            elif entry['attributes']['amount_cents'] >= 1000:  # silver
-                                patreon_level = 'silver'
-                                break
-                            elif entry['attributes']['amount_cents'] >= 500:  # bronze
-                                patreon_level = 'bronze'
-                                break
-                            else:
-                                patreon_level = 'none'
-                                break
+                    if 'included' in user:
+                        for entry in user['included']:
+                            if entry['type'] == 'pledge':
+                                if entry['attributes']['amount_cents'] >= 10000:  # diamond
+                                    patreon_level = 'diamond'
+                                    break
+                                elif entry['attributes']['amount_cents'] >= 5000:  # platinum
+                                    patreon_level = 'platinum'
+                                    break
+                                elif entry['attributes']['amount_cents'] >= 2500:  # gold
+                                    patreon_level = 'gold'
+                                    break
+                                elif entry['attributes']['amount_cents'] >= 1000:  # silver
+                                    patreon_level = 'silver'
+                                    break
+                                elif entry['attributes']['amount_cents'] >= 500:  # bronze
+                                    patreon_level = 'bronze'
+                                    break
+                                else:
+                                    patreon_level = 'none'
+                                    break
 
                     request.user.patreon_level = patreon_level
                     request.user.save()
