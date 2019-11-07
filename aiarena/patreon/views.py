@@ -9,6 +9,9 @@ import urllib.parse
 from aiarena.patreon.models import PatreonAccountBind
 from aiarena.patreon.patreon import PatreonOAuth, PatreonApi
 
+
+logger = logging.getLogger(__name__)
+
 class PatreonBindView(View):
     def get(self, request):
         site = Site.objects.get_current()
@@ -23,6 +26,9 @@ class PatreonCallbackView(View):
     def get(self, request):
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
         site = Site.objects.get_current()
+        logger.critical(site.domain)
+        logger.warning(site.domain)
+        logger.error(site.domain)
         tokens = oauth_client.get_tokens(request.GET['code'], 'https://' + site.domain + '/patreon/oauth/redirect')
 
         account_bind, created = PatreonAccountBind.objects.get_or_create(user=request.user)
