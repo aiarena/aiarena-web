@@ -161,10 +161,6 @@ a:hover {
     width: 100.0%;
 }
 
-#bot_details thead {
-    background-color: rgba(97, 137, 47, 0.7)
-}
-
 #bot_bio {
     float: right;
     width: 60.0%;
@@ -173,10 +169,6 @@ a:hover {
 #bot_bio table {
     margin: 0;
     width: 100.0%;
-}
-
-#bot_bio thead {
-    background-color: rgba(97, 137, 47, 0.7)
 }
 
 #bot_bio tbody {
@@ -630,7 +622,7 @@ table {
 }
 
 thead {
-    background-color: #86c232;
+    background-color: rgba(97, 137, 47, 0.7); /*#61892f;*/
     color: #fffff;
     font-size: 16px;
     min-height: 40px;
@@ -647,7 +639,7 @@ tr:nth-child(even) {
     background-color: rgba(0, 0, 0, 0.3);
 }
 
-tr:hover {
+table.row-hover-highlight tbody tr:hover {
     background-color: rgba(97, 137, 47, 0.7); /*#61892f;*/
     color: #fffff;
 }
@@ -662,10 +654,6 @@ tr:hover a {
 
 tr:hover a:focus {
     color: #fffff;
-}
-
-thead tr:hover {
-    background-color: #86c232;
 }
 
 #top10 table {
@@ -690,10 +678,6 @@ thead tr:hover {
     margin-left: 73px;
 
 
-}
-
-#sidebar_left thead {
-    background-color: rgba(97, 137, 47, 0.7)
 }
 
 #sidebar_left tr:hover {
