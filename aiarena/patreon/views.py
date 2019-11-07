@@ -66,7 +66,8 @@ class PatreonCallbackView(View):
                                 patreon_level = 'bronze'
                                 break
                             else:
-                                raise Exception("Unexpected Patreon tier encountered!")
+                                patreon_level = 'none'
+                                break
 
                     request.user.patreon_level = patreon_level
                     request.user.save()
