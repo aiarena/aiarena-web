@@ -723,7 +723,7 @@ def post_save_bot(sender, instance, created, **kwargs):
 
 class SeasonParticipation(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    bot = models.ForeignKey(Bot, on_delete=models.PROTECT)
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
 
 
