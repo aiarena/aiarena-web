@@ -126,11 +126,11 @@ class Season(models.Model, LockableModelMixin):
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
 
     def __str__(self):
-        return self.id.__str__()
+        return self.name
 
     @property
     def name(self):
-        return 'Season ' + str(self.id)
+        return 'Season ' + str(self.number)
 
     @property
     def is_paused(self):
@@ -220,8 +220,12 @@ class Round(models.Model, LockableModelMixin):
     finished = models.DateTimeField(blank=True, null=True)
     complete = models.BooleanField(default=False)
 
+    @property
+    def name(self):
+        return 'Round ' + str(self.number)
+
     def __str__(self):
-        return self.id.__str__()
+        return self.name
 
     # if all the matches have been run, mark this as complete
     def update_if_completed(self):
