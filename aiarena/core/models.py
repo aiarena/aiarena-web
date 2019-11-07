@@ -472,7 +472,7 @@ class Bot(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
-    current_match = models.ForeignKey(Match, on_delete=models.PROTECT, blank=True, null=True,
+    current_match = models.ForeignKey(Match, on_delete=models.SET_NULL, blank=True, null=True,
                                       related_name='bots_currently_in_match')
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=BOT_ZIP_MAX_SIZE, validators=[validate_bot_zip_file, ])
