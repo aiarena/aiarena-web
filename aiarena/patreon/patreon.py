@@ -1,5 +1,8 @@
+import logging
+
 import requests
 
+logger = logging.getLogger(__name__)
 
 # Reimplementation of: https://github.com/Patreon/patreon-python/
 
@@ -32,9 +35,11 @@ class PatreonOAuth:
             "https://www.patreon.com/api/oauth2/token",
             params=params,
             headers={
+                'Content-type': 'application/x-www-form-urlencoded',
                 'User-Agent': user_agent_string(),
             }
         )
+        logger.error("response.status_code: " + str(response.status_code))
         return response.json()
 
 
