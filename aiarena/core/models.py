@@ -24,8 +24,7 @@ from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, NoMaps, N
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage, OverwriteStorage
 from aiarena.core.utils import calculate_md5_django_filefield
-from aiarena.core.validators import validate_not_nan, validate_not_inf, validate_bot_name, validate_bot_zip_file, \
-    validate_user_owner
+from aiarena.core.validators import validate_not_nan, validate_not_inf, validate_bot_name, validate_bot_zip_file
 from aiarena.settings import ELO_START_VALUE, ELO, BOT_ZIP_MAX_SIZE
 
 logger = logging.getLogger(__name__)
@@ -82,8 +81,7 @@ class User(AbstractUser):
     )
     email = models.EmailField(unique=True)
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
-    type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER',
-                            validators=[validate_user_owner, ])
+    type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
     owner = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
 
     def get_absolute_url(self):
@@ -96,6 +94,13 @@ class User(AbstractUser):
 
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
+    def clean(self):
+        if self.type == 'ARENA_CLIENT' and self.owner is None:
+            raise ValidationError("ARENA_CLIENT type requires the owner field to be set.")
+        elif self.owner is not None:
+            raise ValidationError("User type of {} is not allowed to have an owner.".format(self.type))
+
 
 
 @receiver(pre_save, sender=User)
