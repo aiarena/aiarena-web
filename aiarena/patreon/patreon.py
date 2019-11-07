@@ -14,8 +14,8 @@ class PatreonOAuth:
 
     def get_tokens(self, code, redirect_uri):
         return self.__update_token({
-            "grant_type": "authorization_code",
             "code": code,
+            "grant_type": "authorization_code",
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "redirect_uri": redirect_uri
