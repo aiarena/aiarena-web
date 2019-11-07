@@ -1,6 +1,8 @@
 from constance import config
+from django.contrib.sites.models import Site
 from django.shortcuts import redirect
 from django.views import View
+import urllib.parse
 
 from aiarena.patreon.models import PatreonAccountBind
 from aiarena.patreon.patreon import PatreonOAuth, PatreonApi
@@ -8,16 +10,18 @@ from aiarena.patreon.patreon import PatreonOAuth, PatreonApi
 
 class PatreonBindView(View):
     def get(self, request):
+        site = Site.objects.get_current()
         return redirect("https://www.patreon.com/oauth2/authorize"
                         "?response_type=code"
                         "&client_id=" + config.PATREON_CLIENT_ID +
-                        "&redirect_uri=https%3A%2F%2F127.0.0.1%3A8000%2Fpatreon%2Foauth%2Fredirect")
+                        "&redirect_uri=https%3A%2F%2F" + urllib.parse.quote_plus(site.domain) + "%2Fpatreon%2Foauth%2Fredirect")
 
 
 class PatreonCallbackView(View):
     def get(self, request):
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
-        tokens = oauth_client.get_tokens(request.GET['code'], 'https://127.0.0.1:8000/patreon/oauth/redirect')
+        site = Site.objects.get_current()
+        tokens = oauth_client.get_tokens(request.GET['code'], 'https://' + urllib.parse.quote_plus(site.domain) + '/patreon/oauth/redirect')
 
         account_bind, created = PatreonAccountBind.objects.get_or_create(user=request.user)
         account_bind.access_token = tokens['access_token']
