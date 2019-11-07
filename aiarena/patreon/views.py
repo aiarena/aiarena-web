@@ -21,7 +21,7 @@ class PatreonCallbackView(View):
     def get(self, request):
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
         site = Site.objects.get_current()
-        tokens = oauth_client.get_tokens(request.GET['code'], 'https://' + urllib.parse.quote_plus(site.domain) + '/patreon/oauth/redirect')
+        tokens = oauth_client.get_tokens(request.GET['code'], 'https://' + site.domain + '/patreon/oauth/redirect')
 
         account_bind, created = PatreonAccountBind.objects.get_or_create(user=request.user)
         account_bind.access_token = tokens['access_token']
