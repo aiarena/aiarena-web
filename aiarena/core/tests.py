@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, SeasonParticipation
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, SeasonParticipation, Round
 from aiarena.core.utils import calculate_md5
 
 
@@ -342,6 +342,7 @@ class SeasonsTestCase(FullDataSetTestCase):
 
         # attempt to close season - should fail
         season1 = Season.objects.get()
+        self.assertEqual(season1.number, 1)
 
         season1.pause()
 
@@ -373,6 +374,7 @@ class SeasonsTestCase(FullDataSetTestCase):
 
         # start a new season
         season2 = Season.objects.create()
+        self.assertEqual(season2.number, 2)
 
         # not enough active bots
         response = self._post_to_matches()
@@ -394,6 +396,10 @@ class SeasonsTestCase(FullDataSetTestCase):
         # start a new round
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
+
+        # New round should be number 1 for the new season
+        round = Round.objects.get(season=season2)
+        self.assertEqual(round.number, 1)
 
 class PrivateStorageTestCase(MatchReadyTestCase):
     pass  # todo

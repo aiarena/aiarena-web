@@ -119,6 +119,7 @@ class Season(models.Model, LockableModelMixin):
         # When a season is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
         ('closed', 'Closed'),  # Functionally identical to paused, except not intended to change after this status.
     )
+    number = models.IntegerField(blank=True, editable=False)
     date_created = models.DateTimeField(auto_now_add=True)
     date_opened = models.DateTimeField(blank=True, null=True)
     date_closed = models.DateTimeField(blank=True, null=True)
@@ -205,8 +206,15 @@ class Season(models.Model, LockableModelMixin):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
 
+@receiver(pre_save, sender=Season)
+def pre_save_season(sender, instance, **kwargs):
+    if instance.number is None:
+        instance.number = Season.objects.all().count() + 1  # todo: redo this for multiladders
+
+
 class Round(models.Model, LockableModelMixin):
     """ Represents a round of play within a season """
+    number = models.IntegerField(blank=True, editable=False)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     started = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(blank=True, null=True)
@@ -259,6 +267,12 @@ class Round(models.Model, LockableModelMixin):
 
     def as_html_link(self):
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+
+
+@receiver(pre_save, sender=Round)
+def pre_save_round(sender, instance, **kwargs):
+    if instance.number is None:
+        instance.number = Round.objects.filter(season=instance.season).count() + 1
 
 
 # todo: structure for separate ladder types
