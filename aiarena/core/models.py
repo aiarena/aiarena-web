@@ -98,7 +98,7 @@ class User(AbstractUser):
     def clean(self):
         if self.type == 'ARENA_CLIENT' and self.owner is None:
             raise ValidationError("ARENA_CLIENT type requires the owner field to be set.")
-        elif self.owner is not None:
+        elif self.type != 'ARENA_CLIENT' and self.owner is not None:
             raise ValidationError("User type of {} is not allowed to have an owner.".format(self.type))
 
 
