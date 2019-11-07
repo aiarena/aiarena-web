@@ -17,6 +17,7 @@ from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
+from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season
 from aiarena.frontend.utils import restrict_page_range
 
@@ -399,8 +400,11 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 
 class Index(ListView):
     def get_queryset(self):
-        return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo')[
-               :10].prefetch_related('bot')  # top 10 bots
+        try:
+            return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo')[
+                   :10].prefetch_related('bot')  # top 10 bots
+        except NoCurrentSeason:
+            return SeasonParticipation.objects.none()
 
     template_name = 'index.html'
 
