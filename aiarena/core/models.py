@@ -158,10 +158,12 @@ class Season(models.Model, LockableModelMixin):
         self.lock_me()
 
         # double check bots aren't active and if so deactivate them
+        # also regenerate their display ids
         for bot in Bot.objects.all():
             if bot.active:
                 bot.active = False
-                bot.save()
+            bot.regen_game_display_id()
+            bot.save()
 
         if self.status in ['created', 'paused']:
             if self.status == 'created':
@@ -496,6 +498,9 @@ class Bot(models.Model):
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
+
+    def regen_game_display_id(self):
+        self.game_display_id = uuid.uuid4()
 
     def get_wiki_article(self):
         try:
