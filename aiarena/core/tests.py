@@ -372,6 +372,13 @@ class SeasonsTestCase(FullDataSetTestCase):
         for bot in Bot.objects.all():
             self.assertFalse(bot.active)
 
+        # Activating a bot should fail
+        with self.assertRaises(ValidationError):
+            bot = Bot.objects.all()[0]
+            bot.active = True
+            bot.full_clean()
+
+
         # start a new season
         season2 = Season.objects.create()
         self.assertEqual(season2.number, 2)

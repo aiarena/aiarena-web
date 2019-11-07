@@ -190,7 +190,28 @@ class StandardBotUpdateForm(forms.ModelForm):
                   'bot_data_publicly_downloadable']
 
 
+class NoCurrentSeasonBotUpdateForm(forms.ModelForm):
+    active = forms.BooleanField(disabled=True)
+    wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
+
+    class Meta:
+        model = Bot
+        fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
+                  'bot_data_publicly_downloadable']
+
+
 class FrozenDataBotUpdateForm(forms.ModelForm):
+    bot_data = forms.FileField(disabled=True)
+    wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
+
+    class Meta:
+        model = Bot
+        fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
+                  'bot_data_publicly_downloadable']
+
+
+class NoCurrentSeasonFrozenDataBotUpdateForm(forms.ModelForm):
+    active = forms.BooleanField(disabled=True)
     bot_data = forms.FileField(disabled=True)
     wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
 
@@ -218,9 +239,17 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     # change the available fields based upon whether the bot_data is available for editing or not.
     def get_form_class(self):
         if self.object.bot_data_is_currently_frozen():
-            return FrozenDataBotUpdateForm
+            try:
+                Season.get_current_season()
+                return FrozenDataBotUpdateForm
+            except NoCurrentSeason:
+                return NoCurrentSeasonFrozenDataBotUpdateForm
         else:
-            return StandardBotUpdateForm
+            try:
+                Season.get_current_season()
+                return StandardBotUpdateForm
+            except NoCurrentSeason:
+                return NoCurrentSeasonBotUpdateForm
 
     def get_form(self, form_class=None):
         """Return an instance of the form to be used in this view."""

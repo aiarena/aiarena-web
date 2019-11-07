@@ -102,7 +102,6 @@ class User(AbstractUser):
             raise ValidationError("User type of {} is not allowed to have an owner.".format(self.type))
 
 
-
 @receiver(pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):
     if instance.type != 'WEBSITE_USER':
@@ -157,6 +156,13 @@ class Season(models.Model, LockableModelMixin):
     @transaction.atomic
     def open(self):
         self.lock_me()
+
+        # double check bots aren't active and if so deactivate them
+        for bot in Bot.objects.all():
+            if bot.active:
+                bot.active = False
+                bot.save()
+
         if self.status in ['created', 'paused']:
             if self.status == 'created':
                 self.date_opened = timezone.now()
@@ -531,6 +537,7 @@ class Bot(models.Model):
     def clean(self):
         self.validate_max_bot_count()
         self.validate_active_bot_race_per_user()
+        self.validate_current_season()
 
     def __str__(self):
         return self.name
@@ -645,6 +652,12 @@ class Bot(models.Model):
 
     def current_season_participation(self):
         return self.seasonparticipation_set.get(season=Season.get_current_season())
+
+    def validate_current_season(self):
+        try:
+            Season.get_current_season()
+        except NoCurrentSeason:
+            raise ValidationError('You cannot activate a bot when there is no current season.')
 
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
