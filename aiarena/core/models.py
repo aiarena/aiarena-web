@@ -101,18 +101,17 @@ class User(AbstractUser):
         elif self.type != 'ARENA_CLIENT' and self.owner is not None:
             raise ValidationError("User type of {} is not allowed to have an owner.".format(self.type))
 
-    # patreon level: allowed bot count, whether it's the max attained bot count
-    BOTS_PER_RACE_MAP = {
-        "none": [config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, True],
-        "bronze": [config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, True],
-        "silver": [2, True],
-        "gold": [3, True],
-        "platinum": [5, True],
-        "Diamond": [5, True],
+    BOTS_PER_RACE_LIMIT_MAP = {
+        "none": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
+        "bronze": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
+        "silver": 2,
+        "gold": 3,
+        "platinum": 5,
+        "diamond": None
     }
 
-    def get_allowed_bots_per_race(self):
-        return self.BOTS_PER_RACE_MAP[self.patreon_level][0], self.BOTS_PER_RACE_MAP[self.patreon_level][1]
+    def get_bots_per_race_limit(self):
+        return self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
 
 
 
@@ -538,15 +537,17 @@ class Bot(models.Model):
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_active_bot_race_per_user(self):
-        bot_limit, is_max = self.user.get_allowed_bots_per_race()
-        # if the active bots playing the same race exceeds the allowed count, then back out
-        if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
-                id=self.id).count() >= bot_limit\
-                and self.active:
-            raise ValidationError(
-                'Too many active bots playing that race already exist for this user.'
-                ' You are allowed ' + str(bot_limit) + ' active bot(s) per race.'
-                + ('' if is_max else ' A donation via Patreon can increase this limit.'))
+        bot_limit = self.user.get_bots_per_race_limit()
+
+        # None means no limit
+        if bot_limit is not None:
+            # if the active bots playing the same race exceeds the allowed count, then back out
+            if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
+                    id=self.id).count() >= bot_limit\
+                    and self.active:
+                raise ValidationError(
+                    'Too many active bots playing that race already exist for this user.'
+                    ' You are allowed ' + str(bot_limit) + ' active bot(s) per race.')
 
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
