@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="divider"><span></span><span><h2>Request Match</h2></span><span></span></div>
+<div class="request-match-form">
+    <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}" enctype="multipart/form-data" >
+        {% csrf_token %}
+        <div class="request-match-bot">{{ form.bot1 }}</div>
+        VS
+        <div class="request-match-bot">{{ form.bot2 }}</div>
+        ON
+        <div class="request-match-bot">{{ form.map }}</div>
+        <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"/>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

@@ -894,3 +894,12 @@ background-color: #86c232;
 font-family: 'Cutive Mono', monospace;
 font-size: 14px;
 }
+
+.request-match-form {
+    text-align: center;
+    margin: 20px;
+}
+
+.request-match-bot {
+    margin: 20px;
+}

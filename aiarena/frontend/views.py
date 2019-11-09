@@ -11,14 +11,14 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views import View
-from django.views.generic import CreateView, ListView, UpdateView, DetailView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView
 from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
-from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
 from aiarena.frontend.utils import restrict_page_range
 
 
@@ -437,7 +437,8 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     def get_queryset(self):
         try:
-            return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by('-elo')[
+            return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by(
+                '-elo')[
                    :10].prefetch_related('bot')  # top 10 bots
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
@@ -486,3 +487,25 @@ class SeasonDetail(DetailView):
         context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
         context['rankings'] = SeasonParticipation.objects.filter(season_id=self.object.id).order_by('-elo')
         return context
+
+
+class RequestMatchForm(forms.Form):
+    bot1 = forms.ModelChoiceField(queryset=Bot.objects.all(), empty_label=None, label='test')
+    bot2 = forms.ModelChoiceField(queryset=Bot.objects.all(), empty_label='Random', required=False)
+    map = forms.ModelChoiceField(queryset=Map.objects.all(), empty_label='Random', required=False)
+
+    def request_match(self):
+        Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'])
+
+
+class RequestMatch(SuccessMessageMixin, FormView):
+    form_class = RequestMatchForm
+    template_name = 'request_match.html'
+    success_message = "Match requested"
+
+    def get_success_url(self):
+        return reverse('requestmatch')
+
+    def form_valid(self, form):
+        form.request_match()
+        return super().form_valid(form)

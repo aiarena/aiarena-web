@@ -50,6 +50,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('seasons/', core_views.SeasonList.as_view(), name='seasons'),
                   path('seasons/<int:pk>/', core_views.SeasonDetail.as_view(), name='season'),
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
+                  path('requestmatch/', core_views.RequestMatch.as_view(), name='requestmatch'),
                   url('avatar/', include('avatar.urls')),
                   path('profile/', core_views.UserProfile.as_view(), name='profile'),
                   path('profile/edit/', core_views.UserProfileUpdate.as_view(), name='profile_edit'),

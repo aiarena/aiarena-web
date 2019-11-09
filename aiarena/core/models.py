@@ -407,8 +407,9 @@ class Match(models.Model):
 
     # todo: let us specify the map
     @staticmethod
-    def request_bot_match(bot, opponent=None):
-        return Match.create(None, Map.random_active(), bot,
+    def request_bot_match(bot, opponent=None, map=None):
+        # if opponent is none a random one gets chosen
+        return Match.create(None, map if map is not None else Map.random_active(), bot,
                             opponent if opponent is not None else bot.get_random_available_excluding_self())
 
     class CancelResult(Enum):
@@ -630,6 +631,7 @@ class Bot(models.Model):
         return reverse('bot', kwargs={'pk': self.pk})
 
     def as_html_link(self):
+        # todo: mark_safe
         return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
 
     def expected_executable_filename(self):
