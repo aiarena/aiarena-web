@@ -363,11 +363,11 @@ class ArenaClient(DetailView):
             Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
                      to_attr='participants'))
 
-        context['match_count_1h'] = Result.objects.filter(match__assigned_to=self.object,
+        context['ac_match_count_1h'] = Result.objects.filter(match__assigned_to=self.object,
                                                           created__gte=timezone.now() - timedelta(hours=1)).count()
-        context['match_count_24h'] = Result.objects.filter(match__assigned_to=self.object,
+        context['ac_match_count_24h'] = Result.objects.filter(match__assigned_to=self.object,
                                                            created__gte=timezone.now() - timedelta(hours=24)).count()
-        context['match_count'] = results.count()
+        context['ac_match_count'] = results.count()
 
         # paginate the results
         page = self.request.GET.get('page', 1)
