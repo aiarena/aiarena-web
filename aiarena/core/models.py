@@ -113,6 +113,10 @@ class User(AbstractUser):
     def get_bots_per_race_limit(self):
         return self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
 
+    def get_bots_per_race_limit_display(self):
+        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+        return limit if limit is not None else 'unlimited'
+
 
 
 @receiver(pre_save, sender=User)
