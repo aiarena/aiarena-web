@@ -6,11 +6,7 @@
 <div class="request-match-form">
     <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}" enctype="multipart/form-data" >
         {% csrf_token %}
-        <div class="request-match-bot">{{ form.bot1 }}</div>
-        VS
-        <div class="request-match-bot">{{ form.bot2 }}</div>
-        ON
-        <div class="request-match-bot">{{ form.map }}</div>
+        {{ form.as_p }}
         <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"/>
         {% if messages %}
             <ul class="messages">

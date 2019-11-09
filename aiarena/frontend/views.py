@@ -490,7 +490,7 @@ class SeasonDetail(DetailView):
 
 
 class RequestMatchForm(forms.Form):
-    bot1 = forms.ModelChoiceField(queryset=Bot.objects.all(), empty_label=None, label='test')
+    bot1 = forms.ModelChoiceField(queryset=Bot.objects.all(), empty_label=None, required=True)
     bot2 = forms.ModelChoiceField(queryset=Bot.objects.all(), empty_label='Random', required=False)
     map = forms.ModelChoiceField(queryset=Map.objects.all(), empty_label='Random', required=False)
 
@@ -502,6 +502,13 @@ class RequestMatch(SuccessMessageMixin, FormView):
     form_class = RequestMatchForm
     template_name = 'request_match.html'
     success_message = "Match requested"
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # If not staff, only allow requesting games against this user's bots
+        if not self.request.user.is_staff:
+            form.fields['bot1'].queryset=Bot.objects.filter(user=self.request.user)
+        return form
 
     def get_success_url(self):
         return reverse('requestmatch')
