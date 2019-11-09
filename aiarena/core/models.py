@@ -101,6 +101,20 @@ class User(AbstractUser):
         elif self.type != 'ARENA_CLIENT' and self.owner is not None:
             raise ValidationError("User type of {} is not allowed to have an owner.".format(self.type))
 
+    # patreon level: allowed bot count, whether it's the max attained bot count
+    BOTS_PER_RACE_MAP = {
+        "none": [config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, True],
+        "bronze": [config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE, True],
+        "silver": [2, True],
+        "gold": [3, True],
+        "platinum": [5, True],
+        "Diamond": [5, True],
+    }
+
+    def get_allowed_bots_per_race(self):
+        return self.BOTS_PER_RACE_MAP[self.patreon_level][0], self.BOTS_PER_RACE_MAP[self.patreon_level][1]
+
+
 
 @receiver(pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):
@@ -524,15 +538,15 @@ class Bot(models.Model):
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_active_bot_race_per_user(self):
-        # if there is already an active bot for this user playing the same race, and this bot is also marked as active
-        # then back out
+        bot_limit, is_max = self.user.get_allowed_bots_per_race()
+        # if the active bots playing the same race exceeds the allowed count, then back out
         if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
-                id=self.id).count() >= config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE \
+                id=self.id).count() >= bot_limit\
                 and self.active:
             raise ValidationError(
                 'Too many active bots playing that race already exist for this user.'
-                ' Each user can only have ' + str(
-                    config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE) + ' active bot(s) per race.')
+                ' You are allowed ' + str(bot_limit) + ' active bot(s) per race.'
+                + ('' if is_max else ' A donation via Patreon can increase this limit.'))
 
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
@@ -1026,3 +1040,12 @@ class StatsBotMatchups(models.Model):
     win_count = models.IntegerField()
     game_count = models.IntegerField()
     generated_at = models.DateTimeField()
+
+
+class WebsiteNotice(models.Model):
+    """ Represents a notice to be displayed on the website """
+    title = models.CharField(max_length=20)
+    description = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    display = models.BooleanField(default=True)
+    posted_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
