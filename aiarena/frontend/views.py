@@ -498,10 +498,13 @@ class RequestMatchForm(forms.Form):
         Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'])
 
 
-class RequestMatch(SuccessMessageMixin, FormView):
+class RequestMatch(LoginRequiredMixin, SuccessMessageMixin, FormView):
     form_class = RequestMatchForm
     template_name = 'request_match.html'
     success_message = "Match requested"
+
+    def get_login_url(self):
+        return reverse('login')
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
