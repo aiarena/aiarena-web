@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # Serializer fields are also manually specified so new private fields don't accidentally get leaked.
 
 bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', \
-                     'current_match', 'plays_race', 'type', 'game_display_id', 'bot_zip_updated','bot_zip_publicly_downloadable','bot_zip'
+                     'current_match', 'plays_race', 'type', 'game_display_id', 'bot_zip_updated','bot_zip_publicly_downloadable','bot_zip_md5hash','bot_zip'
 bot_filter_fields = bot_include_fields[:-1] #Crude way to exclude bot_zip from filters since it's a PrivateFileField
 map_include_fields = 'id', 'name', 'file', 'active',
 map_filter_fields = 'id', 'name', 'active',
