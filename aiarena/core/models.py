@@ -313,6 +313,7 @@ class Match(models.Model):
     started = models.DateTimeField(blank=True, null=True, editable=False)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
+    requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='requested_matches')
 
     def __str__(self):
         return self.id.__str__()
@@ -398,8 +399,8 @@ class Match(models.Model):
                 cursor.execute("UNLOCK TABLES;")
 
     @staticmethod
-    def create(round, map, bot1, bot2):
-        match = Match.objects.create(map=map, round=round)
+    def create(round, map, bot1, bot2, requested_by=None):
+        match = Match.objects.create(map=map, round=round, requested_by=requested_by)
         # create match participations
         MatchParticipation.objects.create(match=match, participant_number=1, bot=bot1)
         MatchParticipation.objects.create(match=match, participant_number=2, bot=bot2)
@@ -407,10 +408,11 @@ class Match(models.Model):
 
     # todo: let us specify the map
     @staticmethod
-    def request_bot_match(bot, opponent=None, map=None):
+    def request_bot_match(bot, opponent=None, map=None, user=None):
         # if opponent is none a random one gets chosen
         return Match.create(None, map if map is not None else Map.random_active(), bot,
-                            opponent if opponent is not None else bot.get_random_available_excluding_self())
+                            opponent if opponent is not None else bot.get_random_available_excluding_self(),
+                            user)
 
     class CancelResult(Enum):
         SUCCESS = 1

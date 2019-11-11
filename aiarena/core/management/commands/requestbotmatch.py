@@ -19,6 +19,6 @@ class Command(BaseCommand):
             opponent = Bot.objects.select_for_update().get(pk=options['opponent']) # todo: catch bot missing
 
         # if opponent is none a random one gets chosen
-        match = Match.request_bot_match(bot, opponent, None)
+        match = Match.request_bot_match(bot, opponent)
         self.stdout.write(self.style.SUCCESS('Successfully requested match. Match ID: {0}'.format(match.id)))
 

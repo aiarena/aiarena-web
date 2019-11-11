@@ -494,8 +494,8 @@ class RequestMatchForm(forms.Form):
     bot2 = forms.ModelChoiceField(queryset=Bot.objects.all(), empty_label='Random', required=False)
     map = forms.ModelChoiceField(queryset=Map.objects.filter(active=True), empty_label='Random', required=False)
 
-    def request_match(self):
-        Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'])
+    def request_match(self, user):
+        Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'], user)
 
 
 class RequestMatch(LoginRequiredMixin, SuccessMessageMixin, FormView):
@@ -517,5 +517,5 @@ class RequestMatch(LoginRequiredMixin, SuccessMessageMixin, FormView):
         return reverse('requestmatch')
 
     def form_valid(self, form):
-        form.request_match()
+        form.request_match(self.request.user)
         return super().form_valid(form)
