@@ -146,7 +146,7 @@ class Season(models.Model, LockableModelMixin):
 
     @property
     def name(self):
-        return 'Season ' + str(self.number)
+        return 'Test Season ' + str(self.number)
 
     @property
     def is_paused(self):
