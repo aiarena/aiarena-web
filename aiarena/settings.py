@@ -16,6 +16,7 @@ from datetime import timedelta
 from enum import Enum
 
 from aiarena.core.utils import Elo, EnvironmentType
+from aiarena.events.event_manager import EventManager
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -345,6 +346,8 @@ WIKI_ACCOUNT_SIGNUP_ALLOWED = False
 SITE_ID = 1
 
 SITE_PROTOCOL = 'https'
+
+EVENT_MANAGER = EventManager()
 
 # override any of these settings with an env.py file
 try:
