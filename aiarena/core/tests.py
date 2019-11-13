@@ -304,7 +304,7 @@ class BotTestCase(LoggedInTestCase):
         inactive_bot = Bot.objects.filter(user=self.regularUser1, active=False)[0]
         with self.assertRaisesMessage(ValidationError,
                                       'Too many active bots playing that race already exist for this user.'
-                                      ' Each user can only have 1 active bot(s) per race.'):
+                                      'You are allowed 1 active bot(s) per race.'):
             inactive_bot.active = True
             inactive_bot.full_clean()  # run validation
 
@@ -532,22 +532,6 @@ class ManagementCommandTests(MatchReadyTestCase):
         out = StringIO()
         call_command('requestbotmatch', '1', stdout=out)
         self.assertIn('Successfully requested match. Match ID:', out.getvalue())
-
-    def test_reset_elo(self):
-        self._generate_full_data_set()
-        # test match successfully cancelled
-        self.client.login(username='staff_user', password='x')
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data['id'], 'Player1Win')
-        self.assertEqual(response.status_code, 201)
-
-        out = StringIO()
-        call_command('resetcurrentseasonelo', stdout=out)
-        self.assertIn('ELO values have been reset.', out.getvalue())
-
-        for participant in SeasonParticipation.objects.all():
-            self.assertEqual(participant.elo, settings.ELO_START_VALUE)
 
     def test_seed(self):
         out = StringIO()
