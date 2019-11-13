@@ -1,10 +1,13 @@
-from aiarena.core.utils import post_result_to_discord_bot
 from aiarena.core.events.events import BotActivationStatusChangedEvent, MatchResultReceivedEvent, Event, EventType
+from aiarena.core.utils import post_result_to_discord_bot
 
 
 class EventManager:
     def __init__(self):
-        pass
+        self._EVENT_HANDLER_MAP = {
+            EventType.MATCH_RESULT_RECEIVED: self._handle_match_result_received,
+            EventType.BOT_ACTIVATION_STATUS_CHANGED: self._handle_bot_activation_status_changed
+        }
 
     def broadcast_event(self, event: Event):
         self._EVENT_HANDLER_MAP[event.TYPE](event)
@@ -16,7 +19,5 @@ class EventManager:
     def _handle_bot_activation_status_changed(self, event: BotActivationStatusChangedEvent):
         pass
 
-    _EVENT_HANDLER_MAP = {
-        EventType.MATCH_RESULT_RECEIVED: _handle_match_result_received,
-        EventType.BOT_ACTIVATION_STATUS_CHANGED: _handle_bot_activation_status_changed
-    }
+
+EVENT_MANAGER = EventManager()
