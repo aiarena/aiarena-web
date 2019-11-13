@@ -1,6 +1,7 @@
 from rest_framework.routers import DefaultRouter
 
 from aiarena.api import views as publicapi_views
+from aiarena.api.stream import views as stream_views
 from .arenaclient import views as arenaclient_views
 
 router = DefaultRouter()
@@ -18,6 +19,9 @@ router.register(r'users', publicapi_views.UserViewSet, basename='api_user')
 # arena client
 router.register(r'arenaclient/matches', arenaclient_views.MatchViewSet, basename='match')  # todo: prefix basename with arenaclient
 router.register(r'arenaclient/results', arenaclient_views.ResultViewSet, basename='result')  # todo: prefix basename with arenaclient
+
+# stream
+router.register(r'stream/next-replay', stream_views.StreamNextReplayViewSet, basename='api_stream_nextreplay')
 
 
 urlpatterns = router.urls
