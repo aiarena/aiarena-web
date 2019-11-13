@@ -1,7 +1,5 @@
-from enum import Enum
-
 from aiarena.core.utils import post_result_to_discord_bot
-from aiarena.events.events import BotActivationStatusChangedEvent, MatchResultReceivedEvent, Event, EventType
+from aiarena.core.events.events import BotActivationStatusChangedEvent, MatchResultReceivedEvent, Event, EventType
 
 
 class EventManager:

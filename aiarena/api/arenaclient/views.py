@@ -17,7 +17,7 @@ from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.permissions import IsArenaClientOrAdminUser
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
 from aiarena.core.validators import validate_not_inf, validate_not_nan
-from aiarena.events.events import MatchResultReceivedEvent
+from aiarena.core.events.events import MatchResultReceivedEvent
 
 logger = logging.getLogger(__name__)
 
@@ -270,7 +270,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 if result.is_crash_or_timeout():
                     run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result())
 
-                settings.EVENT_MANAGER.broadcast_event(MatchResultReceivedEvent(result))
+                from django.apps import apps
+                apps.get_app_config('aiarena.core').EVENT_MANAGER.broadcast_event(MatchResultReceivedEvent(result))
 
             headers = self.get_success_headers(serializer.data)
             return Response({'result_id': result.id}, status=status.HTTP_201_CREATED, headers=headers)
