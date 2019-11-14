@@ -15,6 +15,7 @@
         <td><b>Race</b></td>
         <td><b>Author</b></td>
         <td><b>Type</b></td>
+        <td><b>Active</b></td>
         <td><b>Win %</b></td>
         <td><b>ELO</b></td>
         </thead>
@@ -25,6 +26,7 @@
                 <td>{{ participant.bot.get_plays_race_display }}</td>
                 <td>{{ participant.bot.user.as_html_link |safe }}</td>
                 <td>{{ participant.bot.type }}</td>
+                <td>{{ participant.bot.active }}</td>
                 {% if participant.bot.statsbots_set.count > 0 %}
                     <td>{{ participant.bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
                 {% else %}

@@ -305,7 +305,7 @@ class Ranking(ListView):
     # which is also referenced as "seasonparticipation_list" in the template.
     def get_queryset(self):
         try:
-            return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by(
+            return SeasonParticipation.objects.filter(season=Season.get_current_season()).order_by(
                 '-elo').prefetch_related('bot')
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
