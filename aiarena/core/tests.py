@@ -340,12 +340,14 @@ class SeasonsTestCase(FullDataSetTestCase):
             self.assertEqual(response.status_code, 201)
 
     def test_season_states(self):
-        self.client.login(username='arenaclient1', password='x')
+        self.client.force_login(self.arenaclientUser1)
 
         self.assertEqual(Match.objects.filter(result__isnull=True).count(), 12,
                          msg='This tests expects 12 unplayed matches in order to work.')
 
-        # attempt to close season - should fail
+        # cache the bots - list forces the queryset to be evaluated
+        bots = list(Bot.objects.all())
+
         season1 = Season.objects.get()
         self.assertEqual(season1.number, 1)
 
@@ -373,10 +375,6 @@ class SeasonsTestCase(FullDataSetTestCase):
         season1.refresh_from_db()
         self.assertEqual(season1.status, 'closed')
 
-        # check that bots are all deactivated
-        for bot in Bot.objects.all():
-            self.assertFalse(bot.active)
-
         # Activating a bot should fail
         with self.assertRaises(ValidationError):
             bot = Bot.objects.all()[0]
@@ -388,6 +386,25 @@ class SeasonsTestCase(FullDataSetTestCase):
         season2 = Season.objects.create()
         self.assertEqual(season2.number, 2)
 
+        # current season is paused
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(u'The current season is paused.', response.data['detail'])
+
+
+        # check no bot display IDs have changed
+        for bot in bots:
+            updated_bot = Bot.objects.get(id=bot.id)
+            self.assertEqual(updated_bot.game_display_id, bot.game_display_id)
+
+        season2.open()
+
+        # check bot display IDs have been updated and they're deactivated
+        for bot in bots:
+            updated_bot = Bot.objects.get(id=bot.id)
+            self.assertFalse(updated_bot.active)
+            self.assertNotEqual(updated_bot.game_display_id, bot.game_display_id)
+
         # not enough active bots
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 409)
@@ -398,13 +415,6 @@ class SeasonsTestCase(FullDataSetTestCase):
             bot.active = True
             bot.save()
 
-        # current season is paused
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 503)
-        self.assertEqual(u'The current season is paused.', response.data['detail'])
-
-        season2.open()
-
         # start a new round
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
@@ -412,6 +422,7 @@ class SeasonsTestCase(FullDataSetTestCase):
         # New round should be number 1 for the new season
         round = Round.objects.get(season=season2)
         self.assertEqual(round.number, 1)
+
 
 class PrivateStorageTestCase(MatchReadyTestCase):
     pass  # todo

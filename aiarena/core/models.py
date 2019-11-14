@@ -118,7 +118,6 @@ class User(AbstractUser):
         return limit if limit is not None else 'unlimited'
 
 
-
 @receiver(pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):
     if instance.type != 'WEBSITE_USER':
@@ -174,18 +173,18 @@ class Season(models.Model, LockableModelMixin):
     def open(self):
         self.lock_me()
 
-        # double check bots aren't active and if so deactivate them
-        # also regenerate their display ids
-        for bot in Bot.objects.all():
-            if bot.active:
-                bot.active = False
-                logger.warning(f"Bot {bot.id} was somehow active before the season was open!")
-            bot.regen_game_display_id()
-            bot.save()
-
         if self.status in ['created', 'paused']:
             if self.status == 'created':
                 self.date_opened = timezone.now()
+
+                # double check bots aren't active and if so deactivate them
+                # also regenerate their display ids
+                for bot in Bot.objects.all():
+                    if bot.active:
+                        bot.active = False
+                    bot.regen_game_display_id()
+                    bot.save()
+
             self.status = 'open'
             self.save()
             return None
@@ -210,10 +209,6 @@ class Season(models.Model, LockableModelMixin):
             self.status = 'closed'
             self.date_closed = timezone.now()
             self.save()
-
-            for participant in self.seasonparticipation_set.all():
-                participant.bot.active = False
-                participant.bot.save()
 
     @staticmethod
     def get_current_season():
@@ -313,7 +308,8 @@ class Match(models.Model):
     started = models.DateTimeField(blank=True, null=True, editable=False)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
-    requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='requested_matches')
+    requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True,
+                                     related_name='requested_matches')
 
     def __str__(self):
         return self.id.__str__()
@@ -550,7 +546,7 @@ class Bot(models.Model):
         if bot_limit is not None:
             # if the active bots playing the same race exceeds the allowed count, then back out
             if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
-                    id=self.id).count() >= bot_limit\
+                    id=self.id).count() >= bot_limit \
                     and self.active:
                 raise ValidationError(
                     'Too many active bots playing that race already exist for this user.'
