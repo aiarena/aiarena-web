@@ -340,7 +340,7 @@ class SeasonsTestCase(FullDataSetTestCase):
             self.assertEqual(response.status_code, 201)
 
     def test_season_states(self):
-        self.client.login(username='staff_user', password='x')
+        self.client.login(username='arenaclient1', password='x')
 
         self.assertEqual(Match.objects.filter(result__isnull=True).count(), 12,
                          msg='This tests expects 12 unplayed matches in order to work.')
