@@ -304,7 +304,7 @@ class BotTestCase(LoggedInTestCase):
         inactive_bot = Bot.objects.filter(user=self.regularUser1, active=False)[0]
         with self.assertRaisesMessage(ValidationError,
                                       'Too many active bots playing that race already exist for this user.'
-                                      'You are allowed 1 active bot(s) per race.'):
+                                      ' You are allowed 1 active bot(s) per race.'):
             inactive_bot.active = True
             inactive_bot.full_clean()  # run validation
 
