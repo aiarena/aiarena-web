@@ -849,7 +849,7 @@ def replay_file_upload_to(instance, filename):
     return '/'.join(['replays',
                      f'{instance.match_id}'
                      f'_{instance.match.matchparticipation_set.get(participant_number=1).bot.name}'
-                     f'vs{instance.match.matchparticipation_set.get(participant_number=2).bot.name}'
+                     f'_{instance.match.matchparticipation_set.get(participant_number=2).bot.name}'
                      f'_{instance.match.map.name}.SC2Replay'])
 
 
