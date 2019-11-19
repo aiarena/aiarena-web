@@ -8,15 +8,18 @@ from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParti
 
 logger = logging.getLogger(__name__)
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 # !IMPORTANT!
 # Serializer and Filter/etc fields are manually specified for security reasons
 # Allowing filtering/etc on sensitive fields could leak information.
 # Serializer fields are also manually specified so new private fields don't accidentally get leaked.
 
-bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'current_match', 'plays_race', 'type',\
-                     'game_display_id', 'bot_zip_updated','bot_zip_publicly_downloadable','bot_zip_md5hash','bot_zip'
-bot_filter_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'current_match', 'plays_race', 'type',\
-                    'game_display_id', 'bot_zip_updated','bot_zip_publicly_downloadable'
+bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'current_match', 'plays_race', 'type', \
+                     'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_zip', \
+                     'bot_zip_md5hash', 'bot_data_publicly_downloadable', 'bot_data', 'bot_data_md5hash'
+bot_filter_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'current_match', 'plays_race', 'type', \
+                    'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_data_publicly_downloadable'
 map_include_fields = 'id', 'name', 'file', 'active',
 map_filter_fields = 'id', 'name', 'active',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
@@ -32,11 +35,34 @@ user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', '
                       'type', 'patreon_level'
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
+
 class BotSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, value):
+        """
+        Blank out private fields
+        :param value:
+        :return:
+        """
+        rep = super().to_representation(value)
+        if not value.can_download_bot_zip(self.context['request'].user):
+            rep['bot_zip'] = None
+            rep['bot_zip_md5hash'] = None
+
+        if not value.can_download_bot_data(self.context['request'].user):
+            rep['bot_data'] = None
+            rep['bot_data_md5hash'] = None
+
+        return rep
+
     class Meta:
         model = Bot
         fields = bot_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class BotViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -51,11 +77,15 @@ class BotViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = bot_filter_fields
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
         fields = map_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class MapViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -70,11 +100,15 @@ class MapViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = map_filter_fields
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 class MatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Match
         fields = match_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -89,11 +123,15 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = match_include_fields
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 class MatchParticipationSerializer(serializers.ModelSerializer):
     class Meta:
         model = MatchParticipation
         fields = matchparticipation_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -108,11 +146,15 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = matchparticipation_include_fields
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 class SeasonParticipationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SeasonParticipation
         fields = seasonparticipation_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class SeasonParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -126,6 +168,8 @@ class SeasonParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = seasonparticipation_include_fields
     ordering_fields = seasonparticipation_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 # todo: bot names are included for the stream to use. Ideally the the stream should properly utilize the API
 class ResultSerializer(serializers.ModelSerializer):
@@ -143,6 +187,8 @@ class ResultSerializer(serializers.ModelSerializer):
         fields = result_include_fields + ('bot1_name', 'bot2_name')
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
@@ -156,11 +202,15 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = result_filter_fields
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 class RoundSerializer(serializers.ModelSerializer):
     class Meta:
         model = Round
         fields = round_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class RoundViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -175,11 +225,15 @@ class RoundViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = round_include_fields
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 class SeasonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Season
         fields = season_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -194,11 +248,15 @@ class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
     ordering_fields = season_include_fields
 
 
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = user_include_fields
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
@@ -211,3 +269,5 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = user_include_fields
     search_fields = user_include_fields
     ordering_fields = user_include_fields
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS

@@ -685,6 +685,12 @@ class Bot(models.Model):
             except NoCurrentSeason:
                 raise ValidationError('You cannot activate a bot when there is no current season.')
 
+    def can_download_bot_zip(self, user):
+        return self.user == user or self.bot_zip_publicly_downloadable or user.is_staff
+
+    def can_download_bot_data(self, user):
+        return self.user == user or self.bot_data_publicly_downloadable or user.is_staff
+
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
 _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
