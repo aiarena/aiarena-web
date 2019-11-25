@@ -5,7 +5,6 @@
 <div class="divider"><span></span><span><h2>Request Match</h2></span><span></span></div>
 <div class="request-match-form">
     <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}" enctype="multipart/form-data" >
-        While these matches will be hidden in future, note that currently they will show up to other website users.
         {% csrf_token %}
         {{ form.as_p }}
         <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"/>
