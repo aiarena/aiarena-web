@@ -107,7 +107,7 @@ class User(AbstractUser):
         "silver": 2,
         "gold": 3,
         "platinum": 5,
-        "diamond": None
+        "diamond": None  # No limit
     }
 
     def get_bots_per_race_limit(self):
