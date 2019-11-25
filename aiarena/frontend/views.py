@@ -41,7 +41,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
         # Add in the user's bots
         context['bot_list'] = self.request.user.bots.all()
         context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
-        context['max_active_per_race_bot_count'] = self.request.user.get_bots_per_race_limit_display()
+        context['max_active_per_race_bot_count'] = self.request.user.get_active_bots_per_race_limit_display()
         return context
 
 

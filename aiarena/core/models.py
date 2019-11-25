@@ -83,6 +83,7 @@ class User(AbstractUser):
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
     type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
     owner = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
+    extra_active_bots_per_race = models.IntegerField(default=0)
 
     def get_absolute_url(self):
         if self.type == 'WEBSITE_USER':
@@ -110,12 +111,12 @@ class User(AbstractUser):
         "diamond": None  # No limit
     }
 
-    def get_bots_per_race_limit(self):
-        return self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+    def get_active_bots_per_race_limit(self):
+        return self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level] + self.extra_active_bots_per_race
 
-    def get_bots_per_race_limit_display(self):
+    def get_active_bots_per_race_limit_display(self):
         limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
-        return limit if limit is not None else 'unlimited'
+        return limit + self.extra_active_bots_per_race if limit is not None else 'unlimited'
 
     def has_donated(self):
         return self.patreon_level != 'none'
@@ -549,7 +550,7 @@ class Bot(models.Model):
 
     # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
     def validate_active_bot_race_per_user(self):
-        bot_limit = self.user.get_bots_per_race_limit()
+        bot_limit = self.user.get_active_bots_per_race_limit()
 
         # None means no limit
         if bot_limit is not None:
