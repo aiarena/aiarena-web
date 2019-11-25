@@ -116,6 +116,15 @@
                         <li><a href="https://www.youtube.com/channel/UC8kMGEtBoAA2PNLA8mkH9hg"> YouTube <i class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</i></a></li>
                     </ul>
                 </li>
+                {% if random_donator %}
+                <li>
+                    <div id="sidebar-header">
+                    <i class="material-icons">favorite</i>
+                    <h3>Supporters</h3>
+                    </div>
+                    Thank you to {{ random_donator.as_html_link | safe }} for your support!
+                </li>
+                {% endif %}
             </ul>
         {% endblock %}
     </div>

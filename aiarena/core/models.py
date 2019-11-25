@@ -117,6 +117,15 @@ class User(AbstractUser):
         limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
         return limit if limit is not None else 'unlimited'
 
+    def has_donated(self):
+        return self.patreon_level != 'none'
+
+    @staticmethod
+    def random_donator():
+        # todo: apparently order_by('?') is really slow
+        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+        return User.objects.exclude(patreon_level='none').order_by('?').first()
+
 
 @receiver(pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):

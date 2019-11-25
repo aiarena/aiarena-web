@@ -14,4 +14,5 @@ def stats(request):
         'active_bots': Bot.objects.filter(active=True).count(),
         'arenaclients': User.objects.filter(type='ARENA_CLIENT').count(),
         'aiarena_settings': settings,
+        'random_donator': User.random_donator(),
     }
