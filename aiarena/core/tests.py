@@ -37,7 +37,7 @@ class BaseTestCase(TransactionTestCase):
         return Map.objects.create(name=name, active=True)
 
     def _create_open_season(self):
-        season = Season.objects.create()
+        season = Season.objects.create(previous_season_files_cleaned=True)
         season.open()
         return season
 
@@ -383,7 +383,7 @@ class SeasonsTestCase(FullDataSetTestCase):
 
 
         # start a new season
-        season2 = Season.objects.create()
+        season2 = Season.objects.create(previous_season_files_cleaned=True)
         self.assertEqual(season2.number, 2)
 
         # current season is paused

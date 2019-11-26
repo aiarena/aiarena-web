@@ -149,6 +149,7 @@ class Season(models.Model, LockableModelMixin):
     date_opened = models.DateTimeField(blank=True, null=True)
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
+    previous_season_files_cleaned = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -182,6 +183,9 @@ class Season(models.Model, LockableModelMixin):
     @transaction.atomic
     def open(self):
         self.lock_me()
+
+        if not self.previous_season_files_cleaned:
+            return "Cannot open a season where previous_season_replays_cleaned has not been marked as True."
 
         if self.status in ['created', 'paused']:
             if self.status == 'created':

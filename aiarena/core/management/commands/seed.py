@@ -105,7 +105,7 @@ def run_seed(rounds, token):
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient, key=token)
 
-    season = Season.objects.create()
+    season = Season.objects.create(previous_season_files_cleaned=True)
     season.open()
 
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net')
