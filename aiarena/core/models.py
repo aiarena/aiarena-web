@@ -1,3 +1,4 @@
+import io
 import logging
 import time
 import uuid
@@ -7,6 +8,7 @@ from constance import config
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.core.mail import send_mail
 from django.db import models, transaction, connection
 from django.db.models import F
@@ -134,6 +136,10 @@ def pre_save_user(sender, instance, **kwargs):
         instance.set_unusable_password()
 
 
+def replay_archive_upload_to(instance, filename):
+    return '/'.join(['replays', 'season_' + str(instance.number) + '_zip'])
+
+
 class Season(models.Model, LockableModelMixin):
     """ Represents a season of play in the context of a ladder """
     SEASON_STATUSES = (
@@ -150,6 +156,7 @@ class Season(models.Model, LockableModelMixin):
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
     previous_season_files_cleaned = models.BooleanField(default=False)
+    replay_archive_zip = models.FileField(upload_to=replay_archive_upload_to, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -245,6 +252,16 @@ class Season(models.Model, LockableModelMixin):
 def pre_save_season(sender, instance, **kwargs):
     if instance.number is None:
         instance.number = Season.objects.all().count() + 1  # todo: redo this for multiladders
+
+
+@receiver(post_save, sender=Season)
+def post_save_season(sender, instance, created, **kwargs):
+    if created:
+        # create an empty zip file
+        instance.replay_archive_zip.save('filename',  # filename is ignore
+                                         File(
+                                             io.BytesIO(
+                                                 b"PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")))
 
 
 class Round(models.Model, LockableModelMixin):
