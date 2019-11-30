@@ -1,6 +1,7 @@
 import json
 from urllib import request
 from enum import Enum
+from zipfile import ZipFile
 
 from aiarena import settings
 
@@ -40,32 +41,46 @@ def calculate_md5_django_filefield(file, block_size=2 ** 20):
 
 
 def post_result_to_discord_bot(result):
-    if settings.POST_SUBMITTED_RESULTS_TO_ADDRESS:
-        try:
-            participants = result.get_match_participants()
-            bots = result.get_match_participant_bots()
-            wl_bots = result.get_winner_loser_bots()
-            json = { # todo: nested json
-                'match_id': result.match_id,
-                'round_id': result.match.round_id,
-                'bot1': bots[0].name,
-                'bot1_id': bots[0].id,
-                'bot1_resultant_elo': participants[0].resultant_elo,
-                'bot1_elo_change': participants[0].elo_change,
-                'bot1_avg_step_time': participants[0].avg_step_time,
-                'bot2': bots[1].name,
-                'bot2_id': bots[1].id,
-                'bot2_resultant_elo': participants[1].resultant_elo,
-                'bot2_elo_change': participants[1].elo_change,
-                'bot2_avg_step_time': participants[1].avg_step_time,
-                'winner': wl_bots[0].name,
-                'loser': wl_bots[1].name,
-                'result_type': result.type,
-                'game_steps': result.game_steps,
-                'replay_file_download_url': result.replay_file.url}
-            post_json_content_to_address(json, settings.POST_SUBMITTED_RESULTS_TO_ADDRESS)
-        except Exception as e:
-            pass  # todo: log warning if this fails
+    try:
+        participants = result.get_match_participants()
+        bots = result.get_match_participant_bots()
+        wl_bots = result.get_winner_loser_bots()
+        json = { # todo: nested json
+            'match_id': result.match_id,
+            'round_id': result.match.round_id,
+            'bot1': bots[0].name,
+            'bot1_id': bots[0].id,
+            'bot1_resultant_elo': participants[0].resultant_elo,
+            'bot1_elo_change': participants[0].elo_change,
+            'bot1_avg_step_time': participants[0].avg_step_time,
+            'bot2': bots[1].name,
+            'bot2_id': bots[1].id,
+            'bot2_resultant_elo': participants[1].resultant_elo,
+            'bot2_elo_change': participants[1].elo_change,
+            'bot2_avg_step_time': participants[1].avg_step_time,
+            'winner': wl_bots[0].name,
+            'loser': wl_bots[1].name,
+            'result_type': result.type,
+            'game_steps': result.game_steps,
+            'replay_file_download_url': result.replay_file.url}
+        post_json_content_to_address(json, settings.POST_SUBMITTED_RESULTS_TO_ADDRESS)
+    except Exception as e:
+        pass  # todo: log warning if this fails
+
+def add_result_replay_file_to_season_archive(result):
+    """
+    If there's a replay file, add it to the season's replay archive
+    :param result:
+    :return:
+    """
+    try:
+        if result.replay_file:
+            with result.match.round.season.replay_archive_zip.open("wb") as file:
+                with ZipFile(file, "a") as zip_file:
+                    file_path = result.replay_file.file.name
+                    zip_file.write(file_path)
+    except Exception as e:
+        pass  # todo: log warning if this fails
 
 def post_json_content_to_address(json_content, address):
     req = request.Request(address)
