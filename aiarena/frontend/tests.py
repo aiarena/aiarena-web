@@ -103,3 +103,7 @@ class PageRenderTestCase(FullDataSetTestCase):
         # recreate - will redirect
         response = self.client.post('/profile/token/')
         self.assertEqual(response.status_code, 302)
+
+        # requestmatch
+        response = self.client.get('/requestmatch/')
+        self.assertEqual(response.status_code, 200)
