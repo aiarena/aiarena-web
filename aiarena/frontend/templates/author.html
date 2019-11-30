@@ -5,8 +5,11 @@
     <div class="divider"><span></span><span><h2>Author</h2></span><span></span></div>
     <div id="author_detail">
         {% load avatar_tags %}
-        <div class="author-detail-img patreon-{{ author.patreon_level }}">
-            {% avatar author 150 %}
+        <div class="author-detail-img">
+            <div class="author-image-container">
+                <div class="author-image">{% avatar author 150 %}</div>
+            </div>
+            <div class="patreon-{{ author.patreon_level }}"></div>
         </div>
         <div class="author-detail-info">
             <h2>{{ author.username }}</h2>

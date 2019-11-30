@@ -729,9 +729,10 @@ tr:hover a:focus {
 }
 
 .author-detail-img{
-float: left;
-margin-left: 80px;
-margin-bottom: 0;
+    position: relative;
+    float: left;
+    margin-left: 80px;
+    margin-bottom: 0;
 
 }
 .author-detail-img img{
