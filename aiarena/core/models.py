@@ -163,8 +163,8 @@ class Season(models.Model, LockableModelMixin):
         return self.name
 
     @property
-    def name(self):  # todo: eob remove Test prefix
-        return 'Test Season ' + str(self.number)
+    def name(self):
+        return 'Season ' + str(self.number)
 
     @property
     def is_paused(self):
@@ -231,6 +231,9 @@ class Season(models.Model, LockableModelMixin):
             self.status = 'closed'
             self.date_closed = timezone.now()
             self.save()
+            # todo: sanity check replay archive contents against results.
+            # todo: then dump results data as JSON?
+            # todo: then wipe all replay/log files?
 
     @staticmethod
     def get_current_season():
@@ -259,7 +262,7 @@ def pre_save_season(sender, instance, **kwargs):
 def post_save_season(sender, instance, created, **kwargs):
     if created:
         # create an empty zip file
-        instance.replay_archive_zip.save('filename',  # filename is ignore
+        instance.replay_archive_zip.save('filename',  # filename is ignored
                                          File(
                                              io.BytesIO(
                                                  b"PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")))

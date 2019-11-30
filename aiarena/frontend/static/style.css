@@ -555,13 +555,13 @@ a:hover, a:visited, a:link, a:active {
 }
 
 .author {
+    position: relative;
     float: left;
     width: 150px;
     height: 150px;
     background-color: #fff;
     margin: 10px;
     overflow: visible;
-    border: 1px solid #86c232;
 }
 
 .author-image {
@@ -585,28 +585,44 @@ a:hover, a:visited, a:link, a:active {
     color: #fff;
 }
 
+.patreon-base, .patreon-none, .patreon-bronze, .patreon-silver, .patreon-gold, .patreon-platinum, .patreon-diamond {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
 .patreon-none {
-    border: 2px solid #86c232;
+    outline: 1px solid #86c232;
+    outline-offset: -1px;
 }
 
 .patreon-bronze {
-    border: 2px solid #cd7f32;
+    outline: 5px outset #cd7f32;
+    outline-offset: -5px;
 }
 
 .patreon-silver {
-    border: 2px solid #C0C0C0;
+    outline: 5px outset #C0C0C0;
+    outline-offset: -5px;
 }
 
 .patreon-gold {
-    border: 2px solid #FFD700;
+    outline: 5px outset #FFD700;
+    outline-offset: -5px;
 }
 
 .patreon-platinum {
-    border: 2px solid #E2E3E5;
+    outline: 5px ridge #E2E3E5;
+    outline-offset: -5px;
 }
 
 .patreon-diamond {
-    border: 2px solid #B9F2FF;
+    outline: 5px ridge #B9F2FF;
+    outline-offset: -5px;
 }
 
 table {
@@ -713,13 +729,11 @@ tr:hover a:focus {
 }
 
 .author-detail-img{
-float: left;
-margin-left: 80px;
-margin-bottom: 0;
+    position: relative;
+    float: left;
+    margin-left: 80px;
+    margin-bottom: 0;
 
-}
-.author-detail-img img{
-border: 1px solid #86c232;
 }
 
 .author-detail-info{
