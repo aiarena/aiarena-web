@@ -344,8 +344,8 @@ class Results(ListView):
 
 class ArenaClients(ListView):
     queryset = User.objects.annotate(
-        matches_1hr=Count('match__result', filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=1))),
-        matches_24hr=Count('match__result', filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
+        matches_1hr=Count('result', distinct=True, filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=1))),
+        matches_24hr=Count('result', distinct=True, filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
     ).filter(type='ARENA_CLIENT').order_by('username')
     template_name = 'arenaclients.html'
 
