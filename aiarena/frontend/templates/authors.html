@@ -1,19 +1,18 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n avatar_tags %}
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Authors</h2></span><span></span></div>
     <div id="authors_table">
-        {% load avatar_tags %}
         {% for author in user_list %}
-            <div class="author patreon-{{ author.patreon_level }}">
-                <div class="author-image-container>">
+            <div class="author">
+                <div class="author-image-container">
                     <a href="{{ author.id }}">
                         <div class="author-image">{% avatar author 150 %}</div>
                     </a>
                 </div>
                 <div class="author-name">{{ author.as_html_link |safe }}</div>
-                <br/>
+                <div class="patreon-{{ author.patreon_level }}"></div>
             </div>
         {% endfor %}
     </div>
