@@ -1,11 +1,14 @@
 import json
+import logging
 import os
+import traceback
 from urllib import request
 from enum import Enum
 from zipfile import ZipFile
 
 from aiarena import settings
 
+logger = logging.getLogger(__name__)
 
 def calculate_md5(file, block_size=2 ** 20):
     """Returns MD% checksum for given file.
@@ -66,7 +69,8 @@ def post_result_to_discord_bot(result):
             'replay_file_download_url': result.replay_file.url}
         post_json_content_to_address(json, settings.POST_SUBMITTED_RESULTS_TO_ADDRESS)
     except Exception as e:
-        pass  # todo: log warning if this fails
+        logger.warning(f"Attempt to post result for match_id {result.match_id} to discord failed with error:"
+                       + os.linesep + traceback.format_exc())
 
 def add_result_replay_file_to_season_archive(result):
     """
@@ -80,7 +84,8 @@ def add_result_replay_file_to_season_archive(result):
                 file_path = result.replay_file.file.name
                 zip_file.write(file_path, arcname=os.path.basename(file_path))
     except Exception as e:
-        pass  # todo: log warning if this fails
+        logger.error(f"Attempt to add replay file for result of match_id {result.match_id} to season archive failed with error:"
+                       + os.linesep + traceback.format_exc())
 
 def post_json_content_to_address(json_content, address):
     req = request.Request(address)
