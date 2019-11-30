@@ -163,7 +163,7 @@ class Season(models.Model, LockableModelMixin):
         return self.name
 
     @property
-    def name(self):  # todo: eob remove Test prefix
+    def name(self):
         return 'Season ' + str(self.number)
 
     @property
