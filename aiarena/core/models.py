@@ -231,6 +231,9 @@ class Season(models.Model, LockableModelMixin):
             self.status = 'closed'
             self.date_closed = timezone.now()
             self.save()
+            # todo: sanity check replay archive contents against results.
+            # todo: then dump results data as JSON?
+            # todo: then wipe all replay/log files?
 
     @staticmethod
     def get_current_season():
