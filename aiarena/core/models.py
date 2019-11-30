@@ -164,7 +164,7 @@ class Season(models.Model, LockableModelMixin):
 
     @property
     def name(self):  # todo: eob remove Test prefix
-        return 'Test Season ' + str(self.number)
+        return 'Season ' + str(self.number)
 
     @property
     def is_paused(self):
