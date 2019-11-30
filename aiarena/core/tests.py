@@ -10,13 +10,15 @@ from django.core.management import call_command, CommandError
 from django.test import TransactionTestCase
 from django.utils import timezone
 
-from aiarena import settings
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, SeasonParticipation, Round
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round
 from aiarena.core.utils import calculate_md5
 
 
 class BaseTestCase(TransactionTestCase):
+    """
+    Base test case for testing. Contains references to all the test files such as test bot zips etc.
+    """
     # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
     test_bot_zip_path = 'aiarena/core/test-media/test_bot.zip'
@@ -204,7 +206,8 @@ class LoggedInTestCase(BaseTestCase):
     def setUp(self):
         super(LoggedInTestCase, self).setUp()
 
-        self.staffUser1 = User.objects.create_user(username='staff_user', password='x', email='staff_user@dev.aiarena.net',
+        self.staffUser1 = User.objects.create_user(username='staff_user', password='x',
+                                                   email='staff_user@dev.aiarena.net',
                                                    is_staff=True)
 
         self.arenaclientUser1 = User.objects.create_user(username='arenaclient1', email='arenaclient@dev.aiarena.net',
@@ -214,6 +217,10 @@ class LoggedInTestCase(BaseTestCase):
 
 
 class MatchReadyTestCase(LoggedInTestCase):
+    """
+    A test case which is setup and ready to run matches
+    """
+
     def setUp(self):
         super(MatchReadyTestCase, self).setUp()
 
@@ -233,6 +240,10 @@ class MatchReadyTestCase(LoggedInTestCase):
 
 # Use this to pre-build a fuller dataset for testing
 class FullDataSetTestCase(MatchReadyTestCase):
+    """
+    A test case with a full dataset including run matches.
+    """
+
     def setUp(self):
         super(FullDataSetTestCase, self).setUp()
         self._generate_full_data_set()
@@ -384,7 +395,6 @@ class SeasonsTestCase(FullDataSetTestCase):
             bot.active = True
             bot.full_clean()
 
-
         # start a new season
         season2 = Season.objects.create(previous_season_files_cleaned=True)
         self.assertEqual(season2.number, 2)
@@ -393,7 +403,6 @@ class SeasonsTestCase(FullDataSetTestCase):
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 503)
         self.assertEqual(u'The current season is paused.', response.data['detail'])
-
 
         # check no bot display IDs have changed
         for bot in bots:
@@ -411,7 +420,8 @@ class SeasonsTestCase(FullDataSetTestCase):
         # not enough active bots
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 409)
-        self.assertEqual(u'Not enough available bots for a match. Wait until more bots become available.', response.data['detail'])
+        self.assertEqual(u'Not enough available bots for a match. Wait until more bots become available.',
+                         response.data['detail'])
 
         # activate the bots
         for bot in Bot.objects.all():
