@@ -76,10 +76,9 @@ def add_result_replay_file_to_season_archive(result):
     """
     try:
         if result.replay_file:
-            with result.match.round.season.replay_archive_zip.open("wb") as file:
-                with ZipFile(file, "a") as zip_file:
-                    file_path = result.replay_file.file.name
-                    zip_file.write(file_path, arcname=os.path.basename(file_path))
+            with ZipFile(result.match.round.season.replay_archive_zip.file.name, "a") as zip_file:
+                file_path = result.replay_file.file.name
+                zip_file.write(file_path, arcname=os.path.basename(file_path))
     except Exception as e:
         pass  # todo: log warning if this fails
 
