@@ -259,7 +259,7 @@ def pre_save_season(sender, instance, **kwargs):
 def post_save_season(sender, instance, created, **kwargs):
     if created:
         # create an empty zip file
-        instance.replay_archive_zip.save('filename',  # filename is ignore
+        instance.replay_archive_zip.save('filename',  # filename is ignored
                                          File(
                                              io.BytesIO(
                                                  b"PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")))
