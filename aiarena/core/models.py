@@ -86,6 +86,7 @@ class User(AbstractUser):
     type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
     owner = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     extra_active_bots_per_race = models.IntegerField(default=0)
+    receive_email_comms = models.BooleanField(default=True)
 
     def get_absolute_url(self):
         if self.type == 'WEBSITE_USER':

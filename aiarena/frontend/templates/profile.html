@@ -26,7 +26,12 @@
             <br/>
 
             <b>Last login</b><br/>
-            {{ user.last_login|date:"d. N Y" }}<br/>
+            {{ user.last_login|date:"d. N Y" }}
+            <br/>
+
+            <b>Receive emails</b><br/>
+            {{ user.receive_email_comms }}
+            <br/>
             <br/>
             <a href="{% url 'profile_edit' %}">edit</a>
         </div>
