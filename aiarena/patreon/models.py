@@ -1,3 +1,4 @@
+import json
 import logging
 
 from constance import config
@@ -23,7 +24,7 @@ class PatreonAccountBind(models.Model):
             self.refresh_token = tokens['refresh_token']
             self.save()
         else:
-            raise Exception("Failed to refresh patreon token.")
+            raise Exception("Failed to refresh patreon token. Tokens dump:\n" + json.dumps(tokens))
 
     def update_user_patreon_tier(self):
         api_client = PatreonApi(self.access_token)
