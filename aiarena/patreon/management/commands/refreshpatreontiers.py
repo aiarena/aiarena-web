@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         for patreon_bind in PatreonAccountBind.objects.all():
             try:
-                patreon_bind.refresh_token()
+                patreon_bind.update_refresh_token()
                 patreon_bind.update_user_patreon_tier()
             except Exception as e:
                 raise CommandError(traceback.format_exc())

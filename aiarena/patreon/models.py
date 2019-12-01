@@ -16,7 +16,7 @@ class PatreonAccountBind(models.Model):
     access_token = models.CharField(max_length=64)
     refresh_token = models.CharField(max_length=64)
 
-    def refresh_token(self):
+    def update_refresh_token(self):
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
         tokens = oauth_client.refresh_token(self.refresh_token)
         if 'access_token' in tokens and 'refresh_token' in tokens:
