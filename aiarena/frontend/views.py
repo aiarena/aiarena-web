@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from constance import config
 from django import forms
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -344,9 +345,11 @@ class Results(ListView):
 
 class ArenaClients(ListView):
     queryset = User.objects.annotate(
-        matches_1hr=Count('result', distinct=True, filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=1))),
-    ).annotate(matches_24hr=Count('result', distinct=True, filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
-    ).filter(type='ARENA_CLIENT').order_by('username')
+        matches_1hr=Count('result', distinct=True,
+                          filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=1))),
+    ).annotate(matches_24hr=Count('result', distinct=True,
+                                  filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
+               ).filter(type='ARENA_CLIENT').order_by('username')
     template_name = 'arenaclients.html'
 
 
@@ -364,9 +367,9 @@ class ArenaClient(DetailView):
                      to_attr='participants'))
 
         context['ac_match_count_1h'] = Result.objects.filter(match__assigned_to=self.object,
-                                                          created__gte=timezone.now() - timedelta(hours=1)).count()
+                                                             created__gte=timezone.now() - timedelta(hours=1)).count()
         context['ac_match_count_24h'] = Result.objects.filter(match__assigned_to=self.object,
-                                                           created__gte=timezone.now() - timedelta(hours=24)).count()
+                                                              created__gte=timezone.now() - timedelta(hours=24)).count()
         context['ac_match_count'] = results.count()
 
         # paginate the results
@@ -510,12 +513,16 @@ class RequestMatch(LoginRequiredMixin, SuccessMessageMixin, FormView):
         form = super().get_form(form_class)
         # If not staff, only allow requesting games against this user's bots
         if not self.request.user.is_staff:
-            form.fields['bot1'].queryset=Bot.objects.filter(user=self.request.user)
+            form.fields['bot1'].queryset = Bot.objects.filter(user=self.request.user)
         return form
 
     def get_success_url(self):
         return reverse('requestmatch')
 
     def form_valid(self, form):
-        form.request_match(self.request.user)
-        return super().form_valid(form)
+        if config.ALLOW_REQUESTED_MATCHES:
+            form.request_match(self.request.user)
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "Sorry. Requested matches are currently disabled.")
+            return self.render_to_response(self.get_context_data(form=form))

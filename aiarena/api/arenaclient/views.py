@@ -214,7 +214,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                    .format(p1Instance.bot.name))
             bot1_data = serializer.validated_data.get('bot1_data')
             bot1_dict = {'in_match': False, 'current_match': None}
-            if bot1_data is not None:  # only include bot1_data if it is none - otherwise we'll mistakenly wipe the file
+            if bot1_data is not None:  # only include bot1_data if it isn't none - otherwise we'll mistakenly wipe the file
                 bot1_dict['bot_data'] = bot1_data
             bot1 = SubmitResultBotSerializer(instance=p1Instance.bot,
                                              data=bot1_dict, partial=True)
@@ -225,7 +225,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                    .format(p2Instance.bot.name))
             bot2_data = serializer.validated_data.get('bot2_data')
             bot2_dict = {'in_match': False, 'current_match': None}
-            if bot2_data is not None:  # only include bot2_data if it is none - otherwise we'll mistakenly wipe the file
+            if bot2_data is not None:  # only include bot2_data if it isn't none - otherwise we'll mistakenly wipe the file
                 bot2_dict['bot_data'] = bot2_data
             bot2 = SubmitResultBotSerializer(instance=p2Instance.bot,
                                              data=bot2_dict, partial=True)

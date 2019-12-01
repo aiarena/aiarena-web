@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from constance import config
 from django.utils import timezone
 
 from aiarena import settings
@@ -15,4 +16,5 @@ def stats(request):
         'arenaclients': User.objects.filter(type='ARENA_CLIENT').count(),
         'aiarena_settings': settings,
         'random_donator': User.random_donator(),
+        'config': config
     }

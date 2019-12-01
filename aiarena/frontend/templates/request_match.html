@@ -2,12 +2,18 @@
 {% load i18n %}
 
 {% block content %}
-<div class="divider"><span></span><span><h2>Request Match</h2></span><span></span></div>
-<div class="request-match-form">
-    <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}" enctype="multipart/form-data" >
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"/>
+    <div class="divider"><span></span><span><h2>Request Match</h2></span><span></span></div>
+    <div class="request-match-form">
+        {% if config.ALLOW_REQUESTED_MATCHES %}
+            <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
+                  enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"/>
+            </form>
+        {% else %}
+            <h3>Sorry. Requested matches are currently disabled.</h3>
+        {% endif %}
         {% if messages %}
             <ul class="messages">
                 {% for message in messages %}
@@ -15,6 +21,5 @@
                 {% endfor %}
             </ul>
         {% endif %}
-    </form>
-</div>
+    </div>
 {% endblock %}
