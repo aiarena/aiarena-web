@@ -209,9 +209,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             participant2.is_valid(raise_exception=True)
 
             # validate bots
-            match = Match.objects.first(id=result.data['match'])
+            match = result.validated_data['match']
 
-            if p1Instance.bot.current_match_id != result.validated_data['match'].id:
+            if p1Instance.bot.current_match_id != match.id:
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p1Instance.bot.name))
             bot1_data = serializer.validated_data.get('bot1_data')
@@ -225,7 +225,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                              data=bot1_dict, partial=True)
             bot1.is_valid(raise_exception=True)
 
-            if p2Instance.bot.current_match_id != result.validated_data['match'].id:
+            if p2Instance.bot.current_match_id != match.id:
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p2Instance.bot.name))
             bot2_data = serializer.validated_data.get('bot2_data')

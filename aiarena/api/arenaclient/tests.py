@@ -5,8 +5,7 @@ from constance import config
 from django.db.models import Sum
 from django.utils import timezone
 
-from aiarena import settings
-from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season
+from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map
 from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
@@ -316,6 +315,20 @@ class ResultsTestCase(LoggedInTestCase):
         match4bot1 = MatchParticipation.objects.get(bot=bot1,
                                                     match_id=match['id'])  # use this to determine which hash to match
         if match4bot1.participant_number == 1:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        else:
+            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+
+        # test that requested matches don't update bot_data
+        match5 = Match.request_bot_match(bot1, bot2, Map.random_active(), self.staffUser1)
+        self._post_to_results_updated_datas(match5.id, 'Player1Win')
+
+        # check hashes - nothing should have changed
+        match5bot1 = MatchParticipation.objects.get(bot=bot1,
+                                                    match_id=match5.id)  # use this to determine which hash to match
+        if match5bot1.participant_number == 1:
             self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
         else:

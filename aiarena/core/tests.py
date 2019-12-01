@@ -82,7 +82,33 @@ class BaseTestCase(TransactionTestCase):
                                      'arenaclient_log': SimpleUploadedFile("arenaclient_log.zip",
                                                                            arenaclient_log.read())})
 
-    # todo:
+    def _post_to_results_updated_datas(self, match_id, result_type):
+        """
+        Posts a result with switched bot datas to immitate a bot updating its data
+        :param match_id:
+        :param result_type:
+        :return:
+        """
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
+        with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot2_data, open(
+                self.test_bot2_data_path, 'rb') as bot1_data, open(self.test_bot1_match_log_path,
+                                                                   'rb') as bot1_log, open(
+            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
+                                                                   'rb') as arenaclient_log:
+            return self.client.post('/api/arenaclient/results/',
+                                    {'match': match_id,
+                                     'type': result_type,
+                                     'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
+                                     'game_steps': 500,
+                                     'bot1_data': SimpleUploadedFile("bot1_data.zip", bot1_data.read()),
+                                     'bot2_data': SimpleUploadedFile("bot2_data.zip", bot2_data.read()),
+                                     'bot1_log': SimpleUploadedFile("bot1_log.zip", bot1_log.read()),
+                                     'bot2_log': SimpleUploadedFile("bot2_log.zip", bot2_log.read()),
+                                     'bot1_avg_step_time': 0.2,
+                                     'bot2_avg_step_time': 0.1,
+                                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.zip",
+                                                                           arenaclient_log.read())})
+
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile:
