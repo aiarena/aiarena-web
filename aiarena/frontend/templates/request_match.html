@@ -5,12 +5,17 @@
     <div class="divider"><span></span><span><h2>Request Match</h2></span><span></span></div>
     <div class="request-match-form">
         {% if config.ALLOW_REQUESTED_MATCHES %}
-            <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
-                  enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"/>
-            </form>
+            {% if user.match_request_count_left > 0 %}
+                Match requests left: {{ user.match_request_count_left_display }}
+                <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"/>
+                </form>
+            {% else %}
+                <h3>You have already reached your match request limit.</h3>
+            {% endif %}
         {% else %}
             <h3>Sorry. Requested matches are currently disabled.</h3>
         {% endif %}

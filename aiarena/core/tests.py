@@ -239,7 +239,7 @@ class LoggedInTestCase(BaseTestCase):
         self.arenaclientUser1 = User.objects.create_user(username='arenaclient1', email='arenaclient@dev.aiarena.net',
                                                          type='ARENA_CLIENT')
         self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
-                                                     email='regular_user1@dev.aiarena.net')
+                                                     email='regular_user1@dev.aiarena.net', patreon_level='gold')
 
 
 class MatchReadyTestCase(LoggedInTestCase):

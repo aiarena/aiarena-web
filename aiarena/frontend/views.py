@@ -11,6 +11,7 @@ from django.db.models import F, Prefetch, Count, Q
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView
 from private_storage.views import PrivateStorageDetailView
@@ -498,13 +499,12 @@ class RequestMatchForm(forms.Form):
     map = forms.ModelChoiceField(queryset=Map.objects.filter(active=True), empty_label='Random', required=False)
 
     def request_match(self, user):
-        Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'], user)
+        return Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'], user)
 
 
-class RequestMatch(LoginRequiredMixin, SuccessMessageMixin, FormView):
+class RequestMatch(LoginRequiredMixin, FormView):
     form_class = RequestMatchForm
     template_name = 'request_match.html'
-    success_message = "Match requested"
 
     def get_login_url(self):
         return reverse('login')
@@ -521,8 +521,13 @@ class RequestMatch(LoginRequiredMixin, SuccessMessageMixin, FormView):
 
     def form_valid(self, form):
         if config.ALLOW_REQUESTED_MATCHES:
-            form.request_match(self.request.user)
-            return super().form_valid(form)
+            if self.request.user.match_request_count_left > 0:
+                match = form.request_match(self.request.user)
+                messages.success(self.request, mark_safe(f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created."))
+                return super().form_valid(form)
+            else:
+                messages.error(self.request, "You have already reached your match request limit.")
+                return self.render_to_response(self.get_context_data(form=form))
         else:
             messages.error(self.request, "Sorry. Requested matches are currently disabled.")
             return self.render_to_response(self.get_context_data(form=form))

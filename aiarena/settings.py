@@ -178,11 +178,13 @@ CONSTANCE_CONFIG = {
     'PATREON_CLIENT_SECRET': ('', 'Client Secret used for Patreon OAuth'),
     'HOUSE_BOTS_USER_ID': (0, 'The user ID of the user account which hosts all the house bots.'),
     'ALLOW_REQUESTED_MATCHES': (True, 'Whether to allow users to request matches.'),
+    'MAX_REQUESTED_MATCHES_PER_WEEK': (10, 'The global limit on requested matches within a rolling week time frame.'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bots': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
-    'General': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES',),
+    'General': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES',
+                'MAX_REQUESTED_MATCHES_PER_WEEK',),
     'Ladders': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',
                 'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
     'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',)
