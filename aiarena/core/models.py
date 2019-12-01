@@ -382,6 +382,10 @@ class Match(models.Model):
     def participant2(self):
         return self.matchparticipation_set.get(participant_number=2)
 
+    @property
+    def is_requested(self):
+        return self.requested_by is not None
+
     @staticmethod
     def start_next_match(requesting_user):
 
