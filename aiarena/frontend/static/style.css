@@ -95,27 +95,26 @@ a:hover {
 
 }
 
-#construction {
+#rules-short-instructions {
     margin-left: 75px;
     margin-right: 75px;
-    height: 75px;
+    height: 175px;
     border: 2px solid #86c232;
     background-color: rgba(0, 0, 0, 0.2);
 
 }
 
-#construction span {
+#rules-short-instructions span {
     top: 40px;
     float: left;
 }
 
-#construction h3 {
-    color: #61892f;
+#rules-short-instructions h3 {
     padding: 0px;
     margin: 0px;
 }
 
-.construction-content {
+.rules-short-instructions-content {
     padding-left: 20px;
     padding-top: 15px;
 }
@@ -123,6 +122,10 @@ a:hover {
 #rules-short {
     margin-left: 75px;
     margin-right: 75px;
+}
+
+#rules-short h2 {
+    text-align: center;
 }
 
 #top10 {

@@ -3,31 +3,22 @@
 
 {% block content %}
 
-    <div class="divider"><span></span><span><h2>Under Construction</h2></span><span></span></div>
-
-    <div id="construction">
-        <div class="construction-content">
-            <span><i class="material-icons">build</i></span>
-            <span> <h3>This website is currently under construction. </h3>
-                    Please feel free to have a look around, but be aware that things are likely to break currently.</span>
-        </div>
-    </div>
-
-    <div class="divider"><span></span><span><h2>Welcome to the Ai-Arena Open Beta!</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>Welcome to the AI-Arena!</h2></span><span></span></div>
     <div id="rules-short">
-        <b>Open Beta?</b><br>
-        The Open Beta is all about breaking things, finding Bugs and enhancing the Workflow.
-        Everyone is invited to upload a Bot to the Ladder :)<br>
-        <br>
-        <br>
-        <b>Instructions:</b><br>
-        <ol>
-            <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
-            <li>Read the <a href="{{ config.GETTING_STARTED_URL }}">Getting Started</a> guide</li>
-            <li>Upload your Bot to the Website and activate it</li>
-            <br>
-        </ol>
-        <div>Your Bot will be added to the Pool and starts fighting other Bots on the Ladder.</div>
+        <div><h2>Season 1 has started! Want to join the battle?</h2></div>
+        <br/>
+        <div id="rules-short-instructions">
+            <div class="rules-short-instructions-content">
+
+                <span><h3><i class="material-icons">assignment</i>Instructions</h3></span><br/><br/>
+                <ol>
+                    <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
+                    <li>Read the <a href="{{ config.GETTING_STARTED_URL }}">Getting Started</a> guide</li>
+                    <li>Upload your Bot to the Website and activate it</li>
+                </ol>
+                <div>Your Bot will be added to the pool and starts fighting other Bots on the Ladder.</div>
+            </div>
+        </div>
     </div>
 
     <div class="float-half-left">
@@ -48,9 +39,9 @@
             <table id="resultsTable" cellpadding="2px" style="min-width: 400px">
                 <tbody>
                 <thead>
-                    <td><b>Rank</b></td>
-                    <td><b>Name</b></td>
-                    <td><b>ELO</b></td>
+                <td><b>Rank</b></td>
+                <td><b>Name</b></td>
+                <td><b>ELO</b></td>
                 </thead>
                 {% for participant in seasonparticipation_list %}
                     <tr>
