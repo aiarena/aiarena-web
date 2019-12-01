@@ -806,7 +806,19 @@ def pre_save_bot(sender, instance, **kwargs):
     # automatically create a wiki article for this bot if it doesn't exists
     if instance.get_wiki_article() is None:
         instance.create_bot_wiki_article()
-
+    
+    if instance.id:
+        previous = Bot.objects.get(id=instance.id)
+        if previous.active != instance.active and instance.active:
+            bot1 = Bot.objects.get(id=instance.id)
+            latest_round = Round.objects.filter(complete=False).order_by('-id')[:1].get()
+            matches = Match.objects.filter(round=latest_round).all()
+            if not any({bot1 == x.participant1.bot or bot1 == x.participant2.bot for x in matches}):
+                active_bots = Bot.objects.filter(active=True)
+            
+                # loop through and generate matches for all active bots
+                for bot2 in active_bots:
+                    Match.create(latest_round, Map.random_active(), bot1, bot2)
 
 @receiver(post_save, sender=Bot)
 def post_save_bot(sender, instance, created, **kwargs):
