@@ -115,7 +115,10 @@ class User(AbstractUser):
     }
 
     def get_active_bots_per_race_limit(self):
-        return self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level] + self.extra_active_bots_per_race
+        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+        # if limit is None, return None - this represents no limit
+        return limit + self.extra_active_bots_per_race if limit is not None else None
+
 
     def get_active_bots_per_race_limit_display(self):
         limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
