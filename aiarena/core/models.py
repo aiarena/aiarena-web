@@ -784,6 +784,7 @@ class Bot(models.Model):
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
 _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
+_ADD_MATCHES = 'add_matches_booleanfield'
 
 
 # The following methods will temporarily store the bot_zip and bot_data files while we wait for the Bot model to be
@@ -819,6 +820,9 @@ def pre_save_bot(sender, instance, **kwargs):
                 # loop through and generate matches for all active bots
                 for bot2 in active_bots:
                     Match.create(latest_round, Map.random_active(), bot1, bot2)
+    
+    if not instance.id and instance.active and not hasattr(instance, _ADD_MATCHES):
+        setattr(instance, _ADD_MATCHES, True)
 
 @receiver(post_save, sender=Bot)
 def post_save_bot(sender, instance, created, **kwargs):
@@ -857,6 +861,7 @@ def post_save_bot(sender, instance, created, **kwargs):
             post_save.disconnect(pre_save_bot, sender=sender)
             instance.save()
             post_save.connect(pre_save_bot, sender=sender)
+            
     elif instance.bot_data_md5hash is not None:
         instance.bot_data_md5hash = None
         post_save.disconnect(pre_save_bot, sender=sender)
@@ -867,6 +872,17 @@ def post_save_bot(sender, instance, created, **kwargs):
     if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
         SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)
 
+    if instance.active and hasattr(instance, _ADD_MATCHES):
+        bot1 = Bot.objects.get(id=instance.id)
+        latest_round = Round.objects.filter(complete=False).order_by('-id')[:1].get()
+        matches = Match.objects.filter(round=latest_round).all()
+        if not any({bot1 == x.participant1.bot or bot1 == x.participant2.bot for x in matches}):
+            active_bots = Bot.objects.filter(active=True)
+        
+            # loop through and generate matches for all active bots
+            for bot2 in active_bots:
+                Match.create(latest_round, Map.random_active(), bot1, bot2)
+        instance.__dict__.pop(_ADD_MATCHES)
 
 class SeasonParticipation(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
