@@ -17,4 +17,4 @@ class Command(BaseCommand):
                 patreon_bind.refresh_token()
                 patreon_bind.update_user_patreon_tier()
             except Exception as e:
-                raise CommandError(traceback)
+                raise CommandError(traceback.format_exc())
