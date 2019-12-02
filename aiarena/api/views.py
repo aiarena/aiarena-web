@@ -1,8 +1,12 @@
 import logging
+from wsgiref.util import FileWrapper
 
+from django.http import HttpResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, serializers
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.reverse import reverse
 
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, SeasonParticipation, Season
 
@@ -40,23 +44,40 @@ user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', '
 
 
 class BotSerializer(serializers.ModelSerializer):
+    bot_zip = serializers.SerializerMethodField()
+    bot_zip_md5hash = serializers.SerializerMethodField()
+    bot_data = serializers.SerializerMethodField()
+    bot_data_md5hash = serializers.SerializerMethodField()
 
-    def to_representation(self, value):
-        """
-        Blank out private fields
-        :param value:
-        :return:
-        """
-        rep = super().to_representation(value)
-        if not value.can_download_bot_zip(self.context['request'].user):
-            rep['bot_zip'] = None
-            rep['bot_zip_md5hash'] = None
+    def get_bot_zip(self, obj):
+        # only display if the user can download the file
+        if obj.can_download_bot_zip(self.context['request'].user):
+            # provide an API based download url instead of website.
+            return reverse('api_bot-download-zip', kwargs={'pk': obj.id}, request=self.context['request'])
+        else:
+            return None
 
-        if not value.can_download_bot_data(self.context['request'].user):
-            rep['bot_data'] = None
-            rep['bot_data_md5hash'] = None
+    def get_bot_zip_md5hash(self, obj):
+        # only display if the user can download the file
+        if obj.can_download_bot_zip(self.context['request'].user):
+            return obj.bot_zip_md5hash
+        else:
+            return None
 
-        return rep
+    def get_bot_data(self, obj):
+        # only display if the user can download the file
+        if obj.can_download_bot_data(self.context['request'].user):
+            # provide an API based download url instead of website.
+            return reverse('api_bot-download-data', kwargs={'pk': obj.id}, request=self.context['request'])
+        else:
+            return None
+
+    def get_bot_data_md5hash(self, obj):
+        # only display if the user can download the file
+        if obj.can_download_bot_data(self.context['request'].user):
+            return obj.bot_data_md5hash
+        else:
+            return None
 
     class Meta:
         model = Bot
@@ -76,6 +97,26 @@ class BotViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = bot_filter_fields
     search_fields = bot_filter_fields
     ordering_fields = bot_filter_fields
+
+    @action(detail=True, methods=['GET'], name='Download a bot\'s zip file', url_path='zip')
+    def download_zip(self, request, *args, **kwargs):
+        bot = Bot.objects.get(id=kwargs['pk'])
+        if bot.can_download_bot_zip(request.user):
+            response = HttpResponse(FileWrapper(bot.bot_zip), content_type='application/zip')
+            response['Content-Disposition'] = 'inline; filename="{0}.zip"'.format(bot.name)
+            return response
+        else:
+            raise Http404()
+
+    @action(detail=True, methods=['GET'], name='Download a bot\'s data file', url_path='data')
+    def download_data(self, request, *args, **kwargs):
+        bot = Bot.objects.get(id=kwargs['pk'])
+        if bot.can_download_bot_data(request.user):
+            response = HttpResponse(FileWrapper(bot.bot_data), content_type='application/zip')
+            response['Content-Disposition'] = 'inline; filename="{0}_data.zip"'.format(bot.name)
+            return response
+        else:
+            raise Http404()
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
