@@ -51,7 +51,7 @@ class BotSerializer(serializers.ModelSerializer):
 
     def get_bot_zip(self, obj):
         # only display if the user can download the file
-        if obj.can_download_bot_zip(self.context['request'].user):
+        if obj.bot_zip and obj.can_download_bot_zip(self.context['request'].user):
             # provide an API based download url instead of website.
             return reverse('api_bot-download-zip', kwargs={'pk': obj.id}, request=self.context['request'])
         else:
@@ -66,7 +66,7 @@ class BotSerializer(serializers.ModelSerializer):
 
     def get_bot_data(self, obj):
         # only display if the user can download the file
-        if obj.can_download_bot_data(self.context['request'].user):
+        if obj.bot_data and obj.can_download_bot_data(self.context['request'].user):
             # provide an API based download url instead of website.
             return reverse('api_bot-download-data', kwargs={'pk': obj.id}, request=self.context['request'])
         else:
@@ -168,17 +168,16 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class MatchParticipationSerializer(serializers.ModelSerializer):
-    def to_representation(self, value):
-        """
-        Blank out private fields
-        :param value:
-        :return:
-        """
-        rep = super().to_representation(value)
-        if not value.can_download_match_log(self.context['request'].user):
-            rep['match_log'] = None
+    match_log = serializers.SerializerMethodField()
 
-        return rep
+    def get_match_log(self, obj):
+        # only display if the user can download the file
+        if obj.match_log and obj.can_download_match_log(self.context['request'].user):
+            # provide an API based download url instead of website.
+            return reverse('api_matchparticipation-download-match-log', kwargs={'pk': obj.id},
+                           request=self.context['request'])
+        else:
+            return None
 
     class Meta:
         model = MatchParticipation
@@ -198,6 +197,16 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = matchparticipation_filter_fields
     search_fields = matchparticipation_filter_fields
     ordering_fields = matchparticipation_filter_fields
+
+    @action(detail=True, methods=['GET'], name='Download a bot\'s zip file', url_path='match-log')
+    def download_match_log(self, request, *args, **kwargs):
+        mp = MatchParticipation.objects.get(id=kwargs['pk'])
+        if mp.can_download_match_log(request.user):
+            response = HttpResponse(FileWrapper(mp.match_log), content_type='application/zip')
+            response['Content-Disposition'] = f'inline; filename="{mp.match_id}_{mp.bot.name}.zip"'
+            return response
+        else:
+            raise Http404()
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
