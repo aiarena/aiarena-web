@@ -940,6 +940,9 @@ class MatchParticipation(models.Model):
         else:
             raise Exception('Unrecognized result type!')
 
+    def can_download_match_log(self, user):
+        return self.bot.user == user or user.is_staff
+
 
 def replay_file_upload_to(instance, filename):
     return '/'.join(['replays',

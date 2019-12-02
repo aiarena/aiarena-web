@@ -23,7 +23,8 @@ bot_filter_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'curr
 map_include_fields = 'id', 'name', 'file', 'active',
 map_filter_fields = 'id', 'name', 'active',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
-matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
+matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time', 'match_log',
+matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
 seasonparticipation_include_fields = 'id', 'season', 'bot', 'elo',
 season_include_fields = 'id', 'date_created', 'date_opened', 'date_closed', 'status',
 # todo: add 'arenaclient_log',
@@ -126,6 +127,18 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class MatchParticipationSerializer(serializers.ModelSerializer):
+    def to_representation(self, value):
+        """
+        Blank out private fields
+        :param value:
+        :return:
+        """
+        rep = super().to_representation(value)
+        if not value.can_download_match_log(self.context['request'].user):
+            rep['match_log'] = None
+
+        return rep
+
     class Meta:
         model = MatchParticipation
         fields = matchparticipation_include_fields
@@ -141,9 +154,9 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = MatchParticipationSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = matchparticipation_include_fields
-    search_fields = matchparticipation_include_fields
-    ordering_fields = matchparticipation_include_fields
+    filterset_fields = matchparticipation_filter_fields
+    search_fields = matchparticipation_filter_fields
+    ordering_fields = matchparticipation_filter_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
