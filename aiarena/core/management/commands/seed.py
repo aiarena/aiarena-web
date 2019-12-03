@@ -96,14 +96,17 @@ def finalize_result(result, p1, p2, bot1, bot2):
 def run_seed(rounds, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
-    arenaclient = User.objects.create_user(username='aiarenaclient-000', email='aiarenaclient-000@dev.aiarena.net',
+    arenaclient1 = User.objects.create_user(username='aiarenaclient-001', email='aiarenaclient-001@dev.aiarena.net',
+                                           type='ARENA_CLIENT', owner=devadmin)
+
+    arenaclient2 = User.objects.create_user(username='aiarenaclient-002', email='aiarenaclient-002@dev.aiarena.net',
                                            type='ARENA_CLIENT', owner=devadmin)
 
     service_user = User.objects.create_user(username='service_user', password='x', email='service_user@dev.aiarena.net',
                                             type='SERVICE')
 
     # if token is None it will generate a new one, otherwise it will use the one specified
-    new_token = Token.objects.create(user=arenaclient, key=token)
+    new_token = Token.objects.create(user=arenaclient1, key=token)
 
     season = Season.objects.create(previous_season_files_cleaned=True)
     season.open()
@@ -136,26 +139,26 @@ def run_seed(rounds, token):
         Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-    for x in range(rounds - 1):  # 6 active bots - 15 games per round
-        create_result(create_match(arenaclient), 'Player1Win', arenaclient)  # 1
-        create_result(create_match(arenaclient), 'Player2Win', arenaclient)  # 2
-        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Player1Crash', arenaclient)  # 3
-        create_result(create_match(arenaclient), 'Player1TimeOut', arenaclient)  # 4
-        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Tie', arenaclient)  # 5
-        create_result(create_match(arenaclient), 'InitializationError', arenaclient)  # 6
-        create_result(create_match(arenaclient), 'Player1Surrender', arenaclient)  # 7
-        create_result(create_match(arenaclient), 'Player2Win', arenaclient)  # 8
-        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Player1Crash', arenaclient)  # 9
-        create_result(create_match(arenaclient), 'Player1TimeOut', arenaclient)  # 10
-        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Tie', arenaclient)  # 11
-        create_result(create_match(arenaclient), 'InitializationError', arenaclient)  # 12
-        create_result(create_match(arenaclient), 'Player1Win', arenaclient)  # 13
-        create_result(create_match(arenaclient), 'Player2Surrender', arenaclient)  # 14
-        create_result_with_bot_data_and_logs(create_match(arenaclient), 'Player1Crash', arenaclient)  # 15
+    for x in range(rounds - 1):  # 6 active bots - 15 games per round - todo: not sure this is correct anymore
+        create_result(create_match(arenaclient1), 'Player1Win', arenaclient1)  # 1
+        create_result(create_match(arenaclient2), 'Player2Win', arenaclient2)  # 2
+        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)  # 3
+        create_result(create_match(arenaclient1), 'Player1TimeOut', arenaclient1)  # 4
+        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Tie', arenaclient2)  # 5
+        create_result(create_match(arenaclient1), 'InitializationError', arenaclient1)  # 6
+        create_result(create_match(arenaclient1), 'Player1Surrender', arenaclient1)  # 7
+        create_result(create_match(arenaclient2), 'Player2Win', arenaclient2)  # 8
+        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)  # 9
+        create_result(create_match(arenaclient1), 'Player1TimeOut', arenaclient1)  # 10
+        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Tie', arenaclient1)  # 11
+        create_result(create_match(arenaclient1), 'InitializationError', arenaclient1)  # 12
+        create_result(create_match(arenaclient2), 'Player1Win', arenaclient2)  # 13
+        create_result(create_match(arenaclient1), 'Player2Surrender', arenaclient1)  # 14
+        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)  # 15
 
     # one last to tick over into the final round so we don't have an empty match queue
     if rounds != 0:
-        create_match(arenaclient)
+        create_match(arenaclient1)
 
     return new_token
 

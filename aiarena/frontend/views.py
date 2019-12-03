@@ -345,13 +345,23 @@ class Results(ListView):
 
 
 class ArenaClients(ListView):
-    queryset = User.objects.annotate(
-        matches_1hr=Count('result', distinct=True,
-                          filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=1))),
-    ).annotate(matches_24hr=Count('result', distinct=True,
-                                  filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
-               ).filter(type='ARENA_CLIENT').order_by('username')
+    queryset = User.objects.filter(type='ARENA_CLIENT')
+    # todo: why doesn't this work?
+    # queryset = User.objects.filter(type='ARENA_CLIENT').annotate(
+    #     matches_1hr=Count('submitted_results', filter=Q(submitted_results__created__gte=timezone.now() - timedelta(hours=1))),
+    #     matches_24hr=Count('submitted_results',filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
+    #            ).order_by('username')
     template_name = 'arenaclients.html'
+
+    def get_context_data(self, **kwargs):
+        for arenaclient in self.object_list:
+            arenaclient.matches_1hr = Result.objects.filter(match__assigned_to=arenaclient,
+                                                                 created__gte=timezone.now() - timedelta(
+                                                                     hours=1)).count()
+            arenaclient.matches_24hr = Result.objects.filter(match__assigned_to=arenaclient,
+                                                                  created__gte=timezone.now() - timedelta(
+                                                                      hours=24)).count()
+        return super().get_context_data(**kwargs)
 
 
 class ArenaClient(DetailView):

@@ -392,7 +392,8 @@ class Match(models.Model):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
     started = models.DateTimeField(blank=True, null=True, editable=False)
-    assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True,
+                                     related_name='assigned_matches')
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
     requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True,
                                      related_name='requested_matches')
@@ -979,7 +980,7 @@ class Result(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     replay_file = models.FileField(upload_to=replay_file_upload_to, blank=True, null=True)
     game_steps = models.IntegerField()
-    submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True, related_name='submitted_results')
     arenaclient_log = models.FileField(upload_to=arenaclient_log_upload_to, blank=True, null=True)
 
     def __str__(self):
