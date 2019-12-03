@@ -372,6 +372,10 @@ class ArenaClient(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ArenaClient, self).get_context_data(**kwargs)
 
+        context['assigned_matches_list'] = Match.objects.filter(assigned_to=self.object, result__isnull=True).prefetch_related(
+            Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
+
         results = Result.objects.filter(match__assigned_to=self.object).order_by('-created').prefetch_related(
             Prefetch('winner'),
             Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),

@@ -21,6 +21,43 @@
         </tr>
         </tbody>
     </table>
+    {% if assigned_matches_list.count > 0 %}
+    <div class="divider"><span></span><span><h2>Assigned Matches</h2></span><span></span></div>
+    <div id="bot_results">
+        <table class="row-hover-highlight">
+            <thead>
+                <td><b>Match ID</b></td>
+                <td><b>Bot 1</b></td>
+                <td><b>Bot 2</b></td>
+                <td><b>Map</b></td>
+                <td><b>Started at</b></td>
+            </thead>
+            <tbody>
+            {% for match in assigned_matches_list %}
+                <tr>
+                    <td>{{ match.as_html_link |safe }}</td>
+                    {% for p in match.participants %}
+                        {% if p.participant_number == 1 %}
+                            <td>{{ p.bot.as_html_link |safe }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    {% for p in match.participants %}
+                        {% if p.participant_number == 2 %}
+                            <td>{{ p.bot.as_html_link |safe }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    <td>{{ match.map }}</td>
+                    {% if match.started %}
+                        <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
+                    {% else %}
+                        <td>queued...</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
         <table class="row-hover-highlight">
