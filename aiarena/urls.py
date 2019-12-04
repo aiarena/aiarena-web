@@ -18,10 +18,16 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.contrib.sitemaps.views import sitemap
+from django.urls import path, re_path
 from django.views.generic.base import TemplateView
 
 from aiarena.frontend import views as core_views
+from aiarena.sitemaps import StaticViewSitemap
+
+sitemaps = {
+    'static': StaticViewSitemap,
+}
 
 urlpatterns = [  # todo: replace usage of url with path for all these
                   path('__debug__/', include(debug_toolbar.urls)),
@@ -59,5 +65,6 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('wiki/', include('wiki.urls')),
                   url(r'^discord/', include('discord_bind.urls')),
                   url(r'^patreon/', include('aiarena.patreon.urls')),
+                  re_path('^sitemap\.xml/$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap')
               ] + static(settings.MEDIA_URL,
                          document_root=settings.MEDIA_ROOT)  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
