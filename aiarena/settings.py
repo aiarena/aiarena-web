@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     'debug_toolbar',  # This will be removed automatically in non-development environments
     'discord_bind',
     'sslserver',  # This will be removed automatically in non-development environments
+    'robots',
 ]
 
 MIDDLEWARE = [
