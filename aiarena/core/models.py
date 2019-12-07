@@ -88,7 +88,7 @@ class User(AbstractUser):
     type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
     owner = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     extra_active_bots_per_race = models.IntegerField(default=0)
-    extra_requested_matches_per_week = models.IntegerField(default=0)
+    extra_periodic_match_requests = models.IntegerField(default=0)
     receive_email_comms = models.BooleanField(default=True)
 
     def get_absolute_url(self):
@@ -131,45 +131,24 @@ class User(AbstractUser):
         else:
             return limit + self.extra_active_bots_per_race
 
-    REQUESTED_MATCHES_PER_WEEK_LIMIT_MAP = {
-        "none": config.MAX_REQUESTED_MATCHES_PER_WEEK,
-        "bronze": config.MAX_REQUESTED_MATCHES_PER_WEEK,
-        "silver": config.MAX_REQUESTED_MATCHES_PER_WEEK,
-        "gold": 100,
-        "platinum": 100,
-        "diamond": None  # No limit
+    REQUESTED_MATCHES_LIMIT_MAP = {
+        "none": config.MATCH_REQUEST_LIMIT_FREE_TIER,
+        "bronze": config.MATCH_REQUEST_LIMIT_BRONZE_TIER,
+        "silver": config.MATCH_REQUEST_LIMIT_SILVER_TIER,
+        "gold": config.MATCH_REQUEST_LIMIT_GOLD_TIER,
+        "platinum": config.MATCH_REQUEST_LIMIT_PLATINUM_TIER,
+        "diamond": config.MATCH_REQUEST_LIMIT_DIAMOND_TIER,
     }
 
-    def get_requested_matches_per_week_limit(self):
-        limit = self.REQUESTED_MATCHES_PER_WEEK_LIMIT_MAP[self.patreon_level]
-        if limit is None:
-            return None  # no limit
-        else:
-            return limit + self.extra_requested_matches_per_week
-
-    def get_requested_matches_per_week_limit_display(self):
-        limit = self.get_requested_matches_per_week_limit()
-        if limit is None:
-            return 'unlimited'  # no limit
-        else:
-            return limit
+    @property
+    def requested_matches_limit(self):
+        return self.REQUESTED_MATCHES_LIMIT_MAP[self.patreon_level] + self.extra_periodic_match_requests
 
     @property
     def match_request_count_left(self):
-        limit = self.get_requested_matches_per_week_limit()
-        if limit is None:
-            return math.inf  # no limit
-        else:
-            return self.get_requested_matches_per_week_limit() \
-                   - Match.objects.filter(requested_by=self, created__gte=timezone.now() - timedelta(weeks=1)).count()
-
-    @property
-    def match_request_count_left_display(self):
-        limit = self.match_request_count_left
-        if limit == math.inf:
-            return 'Unlimited'  # no limit
-        else:
-            return limit
+        return self.requested_matches_limit \
+                   - Match.objects.filter(requested_by=self,
+                                          created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD).count()
 
     @property
     def has_donated(self):
