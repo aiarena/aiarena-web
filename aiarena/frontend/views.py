@@ -455,9 +455,8 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     def get_queryset(self):
         try:
-            return SeasonParticipation.objects.filter(season=Season.get_current_season(), bot__active=1).order_by(
-                '-elo')[
-                   :10].prefetch_related('bot')  # top 10 bots
+            return SeasonParticipation.objects.filter(season=Season.get_current_season()).order_by(
+                '-elo')[:10].prefetch_related('bot')  # top 10 bots
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
 
