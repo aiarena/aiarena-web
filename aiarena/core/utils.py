@@ -48,7 +48,12 @@ def post_result_to_discord_bot(result):
     try:
         participants = result.get_match_participants()
         bots = result.get_match_participant_bots()
-        wl_bots = result.get_winner_loser_bots()
+
+        if result.has_winner():
+            wl_bots = result.get_winner_loser_bots()
+        else:
+            wl_bots = None
+
         json = { # todo: nested json
             'match_id': result.match_id,
             'round_id': result.match.round_id,
@@ -62,8 +67,8 @@ def post_result_to_discord_bot(result):
             'bot2_resultant_elo': participants[1].resultant_elo,
             'bot2_elo_change': participants[1].elo_change,
             'bot2_avg_step_time': participants[1].avg_step_time,
-            'winner': wl_bots[0].name,
-            'loser': wl_bots[1].name,
+            'winner': wl_bots[0].name if wl_bots is not None else None,
+            'loser': wl_bots[1].name if wl_bots is not None else None,
             'result_type': result.type,
             'game_steps': result.game_steps,
             'replay_file_download_url': result.replay_file.url}
