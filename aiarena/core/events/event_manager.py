@@ -16,7 +16,8 @@ class EventManager:
     def _handle_match_result_received(self, event: MatchResultReceivedEvent):
         if settings.POST_SUBMITTED_RESULTS_TO_ADDRESS and event.result.match.round is not None:
             post_result_to_discord_bot(event.result)
-        add_result_replay_file_to_season_archive(event.result)
+        if not event.result.match.is_requested:
+            add_result_replay_file_to_season_archive(event.result)
 
 
     # todo: change this to a generic bot updated event
