@@ -1,4 +1,4 @@
-from aiarena.core.tests import LoggedInTestCase
+from aiarena.core.tests.tests import LoggedInTestCase
 
 
 class StreamTestCase(LoggedInTestCase):

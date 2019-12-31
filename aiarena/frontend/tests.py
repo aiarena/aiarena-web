@@ -1,5 +1,5 @@
 from aiarena.core.models import Match, Round, Bot, User
-from aiarena.core.tests import FullDataSetTestCase
+from aiarena.core.tests.tests import FullDataSetTestCase
 
 
 class PageRenderTestCase(FullDataSetTestCase):

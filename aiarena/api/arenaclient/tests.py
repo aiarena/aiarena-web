@@ -6,7 +6,7 @@ from django.db.models import Sum
 from django.utils import timezone
 
 from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map
-from aiarena.core.tests import LoggedInTestCase, MatchReadyTestCase
+from aiarena.core.tests.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
 

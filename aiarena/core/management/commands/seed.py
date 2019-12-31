@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.core.models import User, Map, Bot, Match, Result, MatchParticipation, Season
-from aiarena.core.tests import BaseTestCase
+from aiarena.core.tests.tests import BaseTestCase
 from aiarena.core.utils import EnvironmentType
 
 
