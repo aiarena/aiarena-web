@@ -14,11 +14,13 @@ from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import LadderDisabled
-from aiarena.core.events.event_manager import EVENT_MANAGER
+from aiarena.core.events import EVENT_MANAGER
 from aiarena.core.permissions import IsArenaClientOrAdminUser
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
 from aiarena.core.validators import validate_not_inf, validate_not_nan
-from aiarena.core.events.events import MatchResultReceivedEvent
+from aiarena.core.events import MatchResultReceivedEvent
+from aiarena.core.api import Bots
+from core.api import Matches
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +77,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     permission_classes = [IsArenaClientOrAdminUser]
 
     def create_new_match(self, requesting_user):
-        match = Match.start_next_match(requesting_user)
+        match = Matches.start_next_match(requesting_user)
 
         match.bot1 = MatchParticipation.objects.get(match_id=match.id, participant_number=1).bot
         match.bot2 = MatchParticipation.objects.get(match_id=match.id, participant_number=2).bot
@@ -320,4 +322,4 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
             return
 
     # If we get to here, all the results were crashes, so take action
-    triggering_participant.bot.disable_and_sent_alert()
+    Bots.disable_and_send_crash_alert(triggering_participant.bot)

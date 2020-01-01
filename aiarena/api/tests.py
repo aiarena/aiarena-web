@@ -1,4 +1,4 @@
-from aiarena.core.tests import FullDataSetTestCase
+from aiarena.core.tests.tests import FullDataSetTestCase
 
 
 class ApiReadTestCase(FullDataSetTestCase):

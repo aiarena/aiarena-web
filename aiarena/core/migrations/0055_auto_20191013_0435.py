@@ -5,6 +5,8 @@ import aiarena.core.storage
 from django.db import migrations, models
 import django.db.models.deletion
 
+from aiarena.core import models as core_models
+
 
 def create_first_season(apps, schema_editor):
     Season = apps.get_model('core', 'Season')
@@ -64,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='map',
             name='file',
-            field=models.FileField(storage=aiarena.core.storage.OverwriteStorage(), upload_to=aiarena.core.models.map_file_upload_to),
+            field=models.FileField(storage=aiarena.core.storage.OverwriteStorage(), upload_to=core_models.map.map_file_upload_to),
         ),
         migrations.AddField(
             model_name='round',

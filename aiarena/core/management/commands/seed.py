@@ -5,13 +5,14 @@ from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Match, Result, MatchParticipation, Season
-from aiarena.core.tests import BaseTestCase
+from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season
+from aiarena.core.tests.tests import BaseTestCase
 from aiarena.core.utils import EnvironmentType
+from core.api import Matches
 
 
 def create_match(as_user):
-    return Match.start_next_match(as_user)
+    return Matches.start_next_match(as_user)
 
 
 def create_result_with_bot_data_and_logs(match, type, as_user):
@@ -97,10 +98,10 @@ def run_seed(rounds, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     arenaclient1 = User.objects.create_user(username='aiarenaclient-001', email='aiarenaclient-001@dev.aiarena.net',
-                                           type='ARENA_CLIENT', owner=devadmin)
+                                            type='ARENA_CLIENT', owner=devadmin)
 
     arenaclient2 = User.objects.create_user(username='aiarenaclient-002', email='aiarenaclient-002@dev.aiarena.net',
-                                           type='ARENA_CLIENT', owner=devadmin)
+                                            type='ARENA_CLIENT', owner=devadmin)
 
     service_user = User.objects.create_user(username='service_user', password='x', email='service_user@dev.aiarena.net',
                                             type='SERVICE')

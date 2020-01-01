@@ -21,19 +21,19 @@ class BaseTestCase(TransactionTestCase):
     """
     # For some reason using an absolute file path here will cause it to mangle the save directory and fail
     # later whilst handling the bot_zip file save
-    test_bot_zip_path = 'aiarena/core/test-media/test_bot.zip'
+    test_bot_zip_path = 'aiarena/core/tests/test-media/test_bot.zip'
     test_bot_zip_hash = 'c96bcfc79318a8b50b0b2c8696400d06'
-    test_bot_zip_updated_path = 'aiarena/core/test-media/test_bot_updated.zip'
+    test_bot_zip_updated_path = 'aiarena/core/tests/test-media/test_bot_updated.zip'
     test_bot_zip_updated_hash = '685dba7a89511157a6594c20c50397d3'
-    test_bot1_data_path = 'aiarena/core/test-media/test_bot1_data.zip'
+    test_bot1_data_path = 'aiarena/core/tests/test-media/test_bot1_data.zip'
     test_bot1_data_hash = '855994f4cb90e1220b3b2819a0ed1cc7'
-    test_bot2_data_path = 'aiarena/core/test-media/test_bot2_data.zip'
+    test_bot2_data_path = 'aiarena/core/tests/test-media/test_bot2_data.zip'
     test_bot2_data_hash = '0579988bdab3a23cdf54998ae1d531db'
-    test_bot1_match_log_path = 'aiarena/core/test-media/test_bot1_match_log.zip'
-    test_bot2_match_log_path = 'aiarena/core/test-media/test_bot2_match_log.zip'
-    test_arenaclient_log_path = 'aiarena/core/test-media/test_arenaclient_log.zip'
-    test_replay_path = 'aiarena/core/test-media/testReplay.SC2Replay'
-    test_map_path = 'aiarena/core/test-media/AutomatonLE.SC2Map'
+    test_bot1_match_log_path = 'aiarena/core/tests/test-media/test_bot1_match_log.zip'
+    test_bot2_match_log_path = 'aiarena/core/tests/test-media/test_bot2_match_log.zip'
+    test_arenaclient_log_path = 'aiarena/core/tests/test-media/test_arenaclient_log.zip'
+    test_replay_path = 'aiarena/core/tests/test-media/testReplay.SC2Replay'
+    test_map_path = 'aiarena/core/tests/test-media/AutomatonLE.SC2Map'
 
     def _create_map(self, name):
         return Map.objects.create(name=name, active=True)
@@ -62,7 +62,8 @@ class BaseTestCase(TransactionTestCase):
         return self.client.post('/api/arenaclient/matches/')
 
     def _post_to_results(self, match_id, result_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot1_data, open(
                 self.test_bot2_data_path, 'rb') as bot2_data, open(self.test_bot1_match_log_path,
                                                                    'rb') as bot1_log, open(
@@ -89,7 +90,8 @@ class BaseTestCase(TransactionTestCase):
         :param result_type:
         :return:
         """
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot2_data, open(
                 self.test_bot2_data_path, 'rb') as bot1_data, open(self.test_bot1_match_log_path,
                                                                    'rb') as bot1_log, open(
@@ -110,7 +112,8 @@ class BaseTestCase(TransactionTestCase):
                                                                            arenaclient_log.read())})
 
     def _post_to_results_no_bot_datas(self, match_id, result_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
@@ -119,7 +122,8 @@ class BaseTestCase(TransactionTestCase):
                                      'game_steps': 500})
 
     def _post_to_results_no_bot1_data(self, match_id, result_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile, open(self.test_bot2_data_path, 'rb') as bot2_data:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
@@ -129,7 +133,8 @@ class BaseTestCase(TransactionTestCase):
                                      'bot2_data': SimpleUploadedFile("bot2_data.zip", bot2_data.read())})
 
     def _post_to_results_no_bot2_data(self, match_id, result_type):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/testReplay.SC2Replay')
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile, open(self.test_bot1_data_path, 'rb') as bot1_data:
             return self.client.post('/api/arenaclient/results/',
                                     {'match': match_id,
@@ -277,7 +282,7 @@ class FullDataSetTestCase(MatchReadyTestCase):
 
 class UtilsTestCase(BaseTestCase):
     def test_calc_md5(self):
-        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/test_bot.zip')
+        filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/../test-media/test_bot.zip')
         self.assertEqual('c96bcfc79318a8b50b0b2c8696400d06', calculate_md5(filename))
 
 
