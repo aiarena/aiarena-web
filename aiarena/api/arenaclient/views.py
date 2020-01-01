@@ -19,7 +19,7 @@ from aiarena.core.permissions import IsArenaClientOrAdminUser
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
 from aiarena.core.validators import validate_not_inf, validate_not_nan
 from aiarena.core.events import MatchResultReceivedEvent
-from core.api import Bots
+from aiarena.core.api import Bots
 
 logger = logging.getLogger(__name__)
 

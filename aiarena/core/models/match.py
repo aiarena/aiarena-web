@@ -129,7 +129,6 @@ class Match(models.Model):
         MatchParticipation.objects.create(match=match, participant_number=2, bot=bot2)
         return match
 
-    # todo: let us specify the map
     @staticmethod
     def request_bot_match(bot, opponent=None, map=None, user=None):
         # if opponent is none a random one gets chosen
