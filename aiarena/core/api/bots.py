@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.urls import reverse
 
 from aiarena import settings
-from core.models import Bot
+from aiarena.core.models import Bot
 
 logger = logging.getLogger(__name__)
 
