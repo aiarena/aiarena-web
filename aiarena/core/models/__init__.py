@@ -8,5 +8,6 @@ from .season import Season
 from .season_participation import SeasonParticipation
 from .stats_bot_matchups import StatsBotMatchups
 from .stats_bots import StatsBots
+from .trophies import Trophy
 from .user import User
 from .website_notice import WebsiteNotice
