@@ -145,24 +145,6 @@ class Bot(models.Model):
         # dont alter bot_data while a bot is in a match, unless there was no bot_data initially
         return self.in_match and self.bot_data
 
-    # todo: have arena client check in with web service inorder to delay this
-    @staticmethod
-    def timeout_overtime_bot_games():
-        from .result import Result
-        with transaction.atomic():
-            bots_in_matches = Bot.objects.select_for_update().filter(in_match=True,
-                                                                     current_match__started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER)
-            for bot in bots_in_matches:
-                logger.warning('bot {0} forcefully removed from match {1}'.format(bot.id, bot.current_match_id))
-                bot.leave_match()
-
-            matches_without_result = Match.objects.select_related('round').select_for_update().filter(
-                started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
-            for match in matches_without_result:
-                Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
-                if match.round is not None:  # if the match is part of a round, check for round completion
-                    match.round.update_if_completed()
-
     @staticmethod
     def get_random_available():
         # todo: apparently this is really slow

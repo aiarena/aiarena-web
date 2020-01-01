@@ -20,6 +20,7 @@ from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, Sea
 from aiarena.core.validators import validate_not_inf, validate_not_nan
 from aiarena.core.events import MatchResultReceivedEvent
 from aiarena.core.api import Bots
+from core.api import Matches
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     permission_classes = [IsArenaClientOrAdminUser]
 
     def create_new_match(self, requesting_user):
-        match = Match.start_next_match(requesting_user)
+        match = Matches.start_next_match(requesting_user)
 
         match.bot1 = MatchParticipation.objects.get(match_id=match.id, participant_number=1).bot
         match.bot2 = MatchParticipation.objects.get(match_id=match.id, participant_number=2).bot

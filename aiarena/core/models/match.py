@@ -1,14 +1,12 @@
 import logging
 from enum import Enum
 
-from django.db import models, transaction, connection
+from django.db import models, transaction
 from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
-from wiki.models import Article
 
-from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds
 from aiarena.core.exceptions import BotNotInMatchException
 from .map import Map
 from .round import Round
@@ -69,56 +67,6 @@ class Match(models.Model):
     @property
     def is_requested(self):
         return self.requested_by is not None
-
-    @staticmethod
-    def start_next_match(requesting_user):
-
-        from . import Bot, Season
-
-        # todo: clean up this whole section
-
-        Bot.timeout_overtime_bot_games()
-
-        with connection.cursor() as cursor:
-            # Lock the matches table
-            # this needs to happen so that if we end up having to generate a new set of matches
-            # then we don't hit a race condition
-            # MySql also requires we lock any other tables we access as well.
-            from .match_participation import MatchParticipation  # avoid circular reference
-            cursor.execute(
-                "LOCK TABLES {} WRITE, {} WRITE, {} WRITE, {} WRITE, {} READ, {} READ, {} READ".format(
-                    Match._meta.db_table,
-                    Round._meta.db_table,
-                    MatchParticipation._meta.db_table,
-                    Bot._meta.db_table,
-                    Map._meta.db_table,
-                    Article._meta.db_table,
-                    Season._meta.db_table))
-            try:
-                match = Match._locate_and_return_started_match(requesting_user)
-                if match is None:
-                    if Bot.objects.filter(active=True, in_match=False).count() < 2:
-                        # All the active bots are already in a match
-                        raise NotEnoughAvailableBots()
-                    elif Round.max_active_rounds_reached():
-                        raise MaxActiveRounds()
-                    else:  # generate new round
-                        Round.generate_new()
-                        match = Match._locate_and_return_started_match(requesting_user)
-                        if match is None:
-                            cursor.execute("ROLLBACK")
-                            raise Exception("Failed to start match for unknown reason.")
-                        else:
-                            return match
-                else:
-                    return match
-            except:
-                # ROLLBACK here so the UNLOCK statement doesn't commit changes
-                cursor.execute("ROLLBACK")
-                raise  # rethrow
-            finally:
-                # pass
-                cursor.execute("UNLOCK TABLES;")
 
     @staticmethod
     def create(round, map, bot1, bot2, requested_by=None):
