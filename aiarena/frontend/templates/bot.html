@@ -184,6 +184,29 @@
             </tr>
             </tbody>
         </table>
+        <br/>
+        <table class="row-hover-highlight">
+            <thead>
+            <tr>
+                <td><b>Trophies</b></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% if bot_trophies.count > 0 %}
+                {% for trophy in bot_trophies %}
+                    <tr>
+                        <td>{{ trophy.name }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4">No trophies</td>
+                </tr>
+            {% endif %}
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
     </div>
     <div id="bot_stats_matchups">
         <table class="row-hover-highlight">

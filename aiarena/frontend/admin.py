@@ -5,7 +5,6 @@ from django.http import HttpResponseRedirect
 from aiarena.core.models import *
 
 
-# These are ordered the same as in the aiarena/core/models.py file
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -117,6 +116,10 @@ class PatreonAccountBindAdmin(admin.ModelAdmin):
     list_display = [field.name for field in PatreonAccountBind._meta.fields]
 
 
+class TrophyAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Trophy._meta.fields]
+
+
 admin.site.register(Map, MapAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(Season, SeasonAdmin)
@@ -127,5 +130,6 @@ admin.site.register(SeasonParticipation, SeasonParticipationAdmin)
 admin.site.register(MatchParticipation, MatchParticipationAdmin)
 admin.site.register(Result, ResultAdmin)
 admin.site.register(StatsBots, StatsBotsAdmin)
+admin.site.register(Trophy, TrophyAdmin)
 admin.site.register(StatsBotMatchups, StatsBotMatchupsAdmin)
 admin.site.register(PatreonAccountBind, PatreonAccountBindAdmin)

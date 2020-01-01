@@ -22,6 +22,7 @@ from wiki.models import ArticleRevision
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
 from aiarena.frontend.utils import restrict_page_range
+from aiarena.core.models import Trophy
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
@@ -176,6 +177,7 @@ class BotDetail(DetailView):
             else:
                 result.relative_type = result.type
 
+        context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
         context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('-win_perc')
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
         context['result_list'] = results
