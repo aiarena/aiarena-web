@@ -279,7 +279,7 @@
                 <ul class="pagination">
                     {% if result_list.has_previous %}
                         <li>
-                            <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
+                            <a href="?page={{ result_list.previous_page_number }}#bot_results">&laquo;</a>
                         </li>
                     {% else %}
                         <li class="disabled"><span>&laquo;</span></li>
@@ -288,11 +288,11 @@
                         {% if result_list.number == page_num %}
                             <li class="active"><span>{{ page_num }}</span></li>
                         {% else %}
-                            <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                            <li><a href="?page={{ page_num }}#bot_results">{{ page_num }}</a></li>
                         {% endif %}
                     {% endfor %}
                     {% if result_list.has_next %}
-                        <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
+                        <li><a href="?page={{ result_list.next_page_number }}#bot_results">&raquo;</a>
                         </li>
                     {% else %}
                         <li class="disabled"><span>&raquo;</span></li>
