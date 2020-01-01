@@ -7,6 +7,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 import private_storage.fields
 
+from aiarena.core import models as core_models
+
 
 class Migration(migrations.Migration):
 
@@ -18,7 +20,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='bot',
             name='bot_data',
-            field=private_storage.fields.PrivateFileField(null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot_data_upload_to),
+            field=private_storage.fields.PrivateFileField(null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=core_models.bot.bot_data_upload_to),
         ),
         migrations.AddField(
             model_name='bot',
@@ -28,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='bot',
             name='bot_zip',
-            field=private_storage.fields.PrivateFileField(storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot_zip_upload_to),
+            field=private_storage.fields.PrivateFileField(storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=core_models.bot.bot_zip_upload_to),
         ),
         migrations.AlterField(
             model_name='bot',

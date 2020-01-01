@@ -6,6 +6,8 @@ import aiarena.core.validators
 from django.db import migrations
 import private_storage.fields
 
+from aiarena.core import models
+
 
 class Migration(migrations.Migration):
 
@@ -17,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='bot',
             name='bot_zip',
-            field=private_storage.fields.PrivateFileField(storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot_zip_upload_to, validators=[aiarena.core.validators.validate_bot_zip_file]),
+            field=private_storage.fields.PrivateFileField(storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=models.bot.bot_zip_upload_to, validators=[aiarena.core.validators.validate_bot_zip_file]),
         ),
     ]

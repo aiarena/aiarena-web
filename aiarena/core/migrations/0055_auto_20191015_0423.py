@@ -3,10 +3,10 @@
 import aiarena.core.models
 import aiarena.core.storage
 from django.db import migrations, models
+from aiarena.core import models as core_models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0054_auto_20191012_1606'),
     ]
@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='map',
             name='file',
-            field=models.FileField(storage=aiarena.core.storage.OverwriteStorage(), upload_to=aiarena.core.models.map_file_upload_to),
+            field=models.FileField(storage=aiarena.core.storage.OverwriteStorage(),
+                                   upload_to=core_models.map.map_file_upload_to),
         ),
     ]
