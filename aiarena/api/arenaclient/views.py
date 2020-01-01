@@ -19,6 +19,7 @@ from aiarena.core.permissions import IsArenaClientOrAdminUser
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
 from aiarena.core.validators import validate_not_inf, validate_not_nan
 from aiarena.core.events import MatchResultReceivedEvent
+from core.api import Bots
 
 logger = logging.getLogger(__name__)
 
@@ -320,4 +321,4 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
             return
 
     # If we get to here, all the results were crashes, so take action
-    triggering_participant.bot.disable_and_sent_alert()
+    Bots.disable_and_send_crash_alert(triggering_participant.bot)

@@ -2,9 +2,7 @@ import logging
 import uuid
 
 from constance import config
-from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
 from django.db import models, transaction
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -14,7 +12,6 @@ from django.utils.html import escape
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
-from aiarena import settings
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
@@ -210,30 +207,6 @@ class Bot(models.Model):
             return f'{self.name}.js'
         elif self.type == 'python':
             return 'run.py'
-
-    def disable_and_sent_alert(self):
-        self.active = False
-        self.save()
-        try:
-            send_mail(  # todo: template this
-                'AI Arena - ' + self.name + ' deactivated due to crashing',
-                'Dear ' + self.user.username + ',\n'
-                                               '\n'
-                                               'We are emailing you to let you know that your bot '
-                                               '"' + self.name + '" has reached our consecutive crash limit and hence been deactivated.\n'
-                                                                 'Please log into ai-arena.net at your convenience to address the issue.\n'
-                                                                 'Bot logs are available for download when logged in on the bot''s page here: '
-                + settings.SITE_PROTOCOL + '://' + Site.objects.get_current().domain
-                + reverse('bot', kwargs={'pk': self.id}) + '\n'
-                                                           '\n'
-                                                           'Kind regards,\n'
-                                                           'AI Arena Staff',
-                settings.DEFAULT_FROM_EMAIL,
-                [self.user.email],
-                fail_silently=False,
-            )
-        except Exception as e:
-            logger.exception(e)
 
     def current_season_participation(self):
         return self.seasonparticipation_set.get(season=Season.get_current_season())
