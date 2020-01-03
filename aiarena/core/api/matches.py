@@ -5,7 +5,7 @@ from django.db import transaction, connection
 from django.utils import timezone
 from wiki.models import Article
 from aiarena.core.models import Bot, Result, Round, Map, Season, MatchParticipation, Match
-from api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds
+from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds
 
 logger = logging.getLogger(__name__)
 
