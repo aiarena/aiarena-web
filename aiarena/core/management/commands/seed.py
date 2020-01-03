@@ -8,7 +8,7 @@ from aiarena import settings
 from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season
 from aiarena.core.tests.tests import BaseTestCase
 from aiarena.core.utils import EnvironmentType
-from core.api import Matches
+from aiarena.core.api import Matches
 
 
 def create_match(as_user):
