@@ -51,6 +51,8 @@ class Result(models.Model):
     submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True,
                                      related_name='submitted_results')
     arenaclient_log = models.FileField(upload_to=arenaclient_log_upload_to, blank=True, null=True)
+    interest_rating = models.FloatField(blank=True, null=True)
+    date_interest_rating_calculated = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.created.__str__()

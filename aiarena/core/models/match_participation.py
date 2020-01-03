@@ -3,8 +3,9 @@ from private_storage.fields import PrivateFileField
 
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.validators import validate_not_nan, validate_not_inf
-from .match import Match
 from .bot import Bot
+from .match import Match
+
 
 def match_log_upload_to(instance, filename):
     return '/'.join(['match-logs', str(instance.id)])
@@ -31,8 +32,14 @@ class MatchParticipation(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     participant_number = models.PositiveSmallIntegerField()
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT)
+    starting_elo = models.SmallIntegerField(null=True)
+    """The bot's ELO at the time the match started
+    Note that this isn't necessarily the same as resultant_elo - elo_change."""
     resultant_elo = models.SmallIntegerField(null=True)
+    """The bot's ELO as a result of this match.
+    Note that this isn't necessarily the same as starting_elo + elo_change."""
     elo_change = models.SmallIntegerField(null=True)
+    """The amount the bot's ELO changed as a result of this match."""
     match_log = PrivateFileField(upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                  blank=True, null=True)
     avg_step_time = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])

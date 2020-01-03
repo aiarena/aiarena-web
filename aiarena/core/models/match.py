@@ -49,6 +49,12 @@ class Match(models.Model):
                 for p in participations:
                     p.bot.enter_match(self)
 
+                from . import Season
+                if self.round:  # if this is a ladder match, record the starting elo
+                    for p in participations:
+                        p.starting_elo = p.bot.seasonparticipation_set.get(season=Season.get_current_season()).elo
+                        p.save()
+
                 self.started = timezone.now()
                 self.assigned_to = assign_to
                 self.save()
