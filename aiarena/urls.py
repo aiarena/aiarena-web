@@ -49,8 +49,8 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
                   path('bots/<int:pk>/bot_data', core_views.BotDataDownloadView.as_view()),
 
-                  path('stats/<int:pk>/', core_views.BotSeasonDetail.as_view()),
-                  path('stats/<int:pk>/<slug:slug>', core_views.BotSeasonDetail.as_view(), name='bot_season_stats'),
+                  path('stats/<int:pk>/', core_views.BotSeasonStatsDetail.as_view()),
+                  path('stats/<int:pk>/<slug:slug>', core_views.BotSeasonStatsDetail.as_view(), name='bot_season_stats'),
 
                   path('match-logs/<int:pk>/', core_views.MatchLogDownloadView.as_view()),
                   path('authors/', core_views.AuthorList.as_view(), name='authors'),

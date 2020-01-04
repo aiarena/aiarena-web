@@ -194,9 +194,7 @@ a:hover {
 }
 
 #bot_season_stats_matchups {
-    float: right;
-    width: 55.0%;
-    margin: 0 0 0 27px;
+    margin: 0 0 0 73px;
 }
 
 #bot_season_stats_matchups table {
@@ -205,11 +203,7 @@ a:hover {
 }
 
 #elo_graph img{
-    margin: 0, 0, 0, 0;
-    margin-left: 80px;
-    padding: 15px;
-    width: 870px;
-    height: auto;
+    width: 55%;
     background-color: rgba(0, 0, 0, 0.4);
 }
 

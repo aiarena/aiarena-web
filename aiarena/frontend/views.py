@@ -178,19 +178,21 @@ class BotDetail(DetailView):
                 result.relative_type = result.type
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
-        context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('-win_perc')
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
         context['result_list'] = results
         context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
         return context
 
 
-class BotSeasonDetail(DetailView):
+class BotSeasonStatsDetail(DetailView):
     model = SeasonParticipation
-    template_name = 'bot_season.html'
+    template_name = 'bot_season_stats.html'
 
-    # def get_context_data(self, **kwargs):
-    #     context = super(BotDetail, self).get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['season_bot_matchups'] = self.object.season_matchup_stats.all().order_by('-win_perc')
+        return context
+
     #
     #     results = Result.objects.filter(match__matchparticipation__bot=self.object).order_by('-created')
     #
