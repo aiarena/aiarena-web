@@ -21,5 +21,5 @@ class SeasonParticipation(models.Model):
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     win_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
     crash_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
-    game_count = models.IntegerField(default=0)
+    match_count = models.IntegerField(default=0)
     elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True)
