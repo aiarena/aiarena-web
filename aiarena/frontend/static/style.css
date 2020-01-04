@@ -182,25 +182,24 @@ a:hover {
     padding: 0 10px 0 10px;
 }
 
-#bot_stats {
+#bot_season_stats {
     float: left;
     width: 32.0%;
     margin-left: 73px;
 }
 
-#bot_stats table {
+#bot_season_stats table {
     margin: 0;
     padding: 0;
 }
 
-#bot_stats_matchups {
+#bot_season_stats_matchups {
     float: right;
     width: 55.0%;
     margin: 0 0 0 27px;
 }
 
-
-#bot_stats_matchups table {
+#bot_season_stats_matchups table {
     margin: 0;
     padding: 0;
 }

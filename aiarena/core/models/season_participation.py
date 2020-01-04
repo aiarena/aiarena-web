@@ -1,6 +1,7 @@
 import logging
 
 from django.db import models
+from django.utils.text import slugify
 
 from aiarena.settings import ELO_START_VALUE
 from .bot import Bot
@@ -23,3 +24,9 @@ class SeasonParticipation(models.Model):
     crash_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
     match_count = models.IntegerField(default=0)
     elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True)
+    slug = models.SlugField()
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(f'{self.bot.name} Season {self.season.number}')
+        super().save(*args, **kwargs)
+

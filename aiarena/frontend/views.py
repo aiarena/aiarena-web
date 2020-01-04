@@ -185,6 +185,54 @@ class BotDetail(DetailView):
         return context
 
 
+class BotSeasonDetail(DetailView):
+    model = SeasonParticipation
+    template_name = 'bot_season.html'
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(BotDetail, self).get_context_data(**kwargs)
+    #
+    #     results = Result.objects.filter(match__matchparticipation__bot=self.object).order_by('-created')
+    #
+    #     # paginate the results
+    #     page = self.request.GET.get('page', 1)
+    #     paginator = Paginator(results, 30)
+    #     try:
+    #         results = paginator.page(page)
+    #     except PageNotAnInteger:
+    #         results = paginator.page(1)
+    #     except EmptyPage:
+    #         results = paginator.page(paginator.num_pages)
+    #
+    #     # retrieve the opponent and transform the result type to be personal to this bot
+    #     for result in results:
+    #         result.opponent = result.match.matchparticipation_set.exclude(bot=self.object).get()
+    #         result.me = result.match.matchparticipation_set.get(bot=self.object)
+    #
+    #         # convert the type to be relative to this bot
+    #         typeSuffix = ''
+    #         if result.type in ['Player1Crash', 'Player2Crash']:
+    #             typeSuffix = ' - Crash'
+    #         elif result.type in ['Player1TimeOut', 'Player2TimeOut']:
+    #             typeSuffix = ' - TimeOut'
+    #
+    #         if result.winner is not None:
+    #
+    #             if result.winner == self.object:
+    #                 result.relative_type = 'Win' + typeSuffix
+    #             else:
+    #                 result.relative_type = 'Loss' + typeSuffix
+    #         else:
+    #             result.relative_type = result.type
+    #
+    #     context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
+    #     context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('-win_perc')
+    #     context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
+    #     context['result_list'] = results
+    #     context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
+    #     return context
+
+
 class StandardBotUpdateForm(forms.ModelForm):
     wiki_article_content = forms.CharField(label='Bot page content', required=False, widget=getEditor().get_widget())
 

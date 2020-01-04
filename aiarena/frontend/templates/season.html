@@ -57,8 +57,8 @@
                     <td>{{ participant.bot.get_plays_race_display }}</td>
                     <td>{{ participant.bot.user.as_html_link |safe }}</td>
                     <td>{{ participant.bot.type }}</td>
-                    {% if participant.bot.statsbots_set.count > 0 %}
-                        <td>{{ participant.bot.statsbots_set.get.win_perc|floatformat:2 }}</td>
+                    {% if participant.win_perc %}
+                        <td>{{ participant.win_perc|floatformat:2 }}</td>
                     {% else %}
                         <td>No stats</td>
                     {% endif %}

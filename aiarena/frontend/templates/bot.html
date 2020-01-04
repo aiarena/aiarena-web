@@ -108,6 +108,7 @@
                 <td><b>Opened</b></td>
                 <td><b>Closed</b></td>
                 <td><b>ELO</b></td>
+                <td></td>
             </tr>
             </thead>
             <tbody>
@@ -126,6 +127,7 @@
                             <td>--</td>
                         {% endif %}
                         <td>{{ season_participation.elo }}</td>
+                        <td><a href="{% url 'bot_season_stats' season_participation.id season_participation.slug %}">Stats</a></td>
                     </tr>
                 {% endfor %}
             {% else %}
