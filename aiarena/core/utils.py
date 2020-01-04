@@ -71,7 +71,7 @@ def post_result_to_discord_bot(result):
             'loser': wl_bots[1].name if wl_bots is not None else None,
             'result_type': result.type,
             'game_steps': result.game_steps,
-            'replay_file_download_url': result.replay_file.url}
+            'replay_file_download_url': result.replay_file.url if result.replay_file else None}
         post_json_content_to_address(json, settings.POST_SUBMITTED_RESULTS_TO_ADDRESS)
     except Exception as e:
         logger.warning(f"Attempt to post result for match_id {result.match_id} to discord failed with error:"
