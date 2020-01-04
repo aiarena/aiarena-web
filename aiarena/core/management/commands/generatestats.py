@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from aiarena.core.models import Bot
+from aiarena.core.models import Bot, SeasonParticipation, Season
 from aiarena.core.stats.stats_generator import StatsGenerator
 
 
@@ -9,10 +9,19 @@ class Command(BaseCommand):
 
 
     def add_arguments(self, parser):
-        parser.add_argument('bot_id', type=int, help="The bot id to generate the stats for.")
+        parser.add_argument('--botid', type=int, help="The bot id to generate the stats for. "
+                                                       "If this isn't supplied, all bots will have "
+                                                       "their stats generated.")
 
     def handle(self, *args, **options):
-        bot_id = options['bot_id']
-        self.stdout.write(f'Generating stats for bot {bot_id}...')
-        StatsGenerator.update_stats(Bot.objects.get(id=bot_id))
+        bot_id = options['botid']
+        if bot_id is not None:
+            self.stdout.write(f'Generating current season stats for bot {bot_id}...')
+            sp = SeasonParticipation.objects.get(season=Season.get_current_season(), bot_id=bot_id)
+            StatsGenerator.update_stats(sp)
+        else:
+            for bot in SeasonParticipation.objects.filter(season=Season.get_current_season()):
+                self.stdout.write(f'Generating current season stats for bot {bot.id}...')
+                StatsGenerator.update_stats(bot)
+
         self.stdout.write('Done')

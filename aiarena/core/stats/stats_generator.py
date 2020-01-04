@@ -11,34 +11,32 @@ from aiarena.core.models.season_bot_matchup_stats import SeasonBotMatchupStats
 class StatsGenerator:
 
     @staticmethod
-    def update_stats(bot: Bot):
+    def update_stats(sp: SeasonParticipation):
         with transaction.atomic():
-            current_season: Season = Season.get_current_season()
-            sp: SeasonParticipation = bot.current_season_participation()
             sp.lock_me()
-            sp.match_count = MatchParticipation.objects.filter(bot=bot,
+            sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
                                                                match__result__isnull=False,
-                                                               match__round__season=current_season).count()
+                                                               match__round__season=sp.season).count()
             if sp.match_count != 0:
-                sp.win_count = MatchParticipation.objects.filter(bot=bot, result='win',
-                                                        match__round__season=current_season
+                sp.win_count = MatchParticipation.objects.filter(bot=sp.bot, result='win',
+                                                        match__round__season=sp.season
                                                         ).count()
                 sp.win_perc = sp.win_count / sp.match_count
-                sp.loss_count = MatchParticipation.objects.filter(bot=bot, result='loss',
-                                                                  match__round__season=current_season
+                sp.loss_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss',
+                                                                  match__round__season=sp.season
                                                                   ).count()
                 sp.loss_perc = sp.loss_count / sp.match_count
-                sp.tie_count = MatchParticipation.objects.filter(bot=bot, result='tie',
-                                                                  match__round__season=current_season
+                sp.tie_count = MatchParticipation.objects.filter(bot=sp.bot, result='tie',
+                                                                  match__round__season=sp.season
                                                                   ).count()
                 sp.tie_perc = sp.tie_count / sp.match_count
-                sp.crash_count = MatchParticipation.objects.filter(bot=bot, result='loss', result_cause__in=['crash',
+                sp.crash_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss', result_cause__in=['crash',
                                                                                                   'timeout',
                                                                                                   'initialization_failure'],
-                                                                   match__round__season=current_season
+                                                                   match__round__season=sp.season
                                                                    ).count()
                 sp.crash_perc = sp.crash_count / sp.match_count
-                graph = StatsGenerator._generate_elo_graph(bot.id)
+                graph = StatsGenerator._generate_elo_graph(sp.bot.id)
                 if graph is not None:
                     sp.elo_graph.save('elo.png', graph)
             else:
