@@ -581,7 +581,7 @@ class ManagementCommandTests(MatchReadyTestCase):
         self._generate_full_data_set()
         out = StringIO()
         call_command('generatestats', stdout=out)
-        self.assertIn('Generating stats...\nDone', out.getvalue())
+        self.assertIn('Done', out.getvalue())
 
     def test_request_bot_match_random_opponent(self):
         out = StringIO()
@@ -592,3 +592,4 @@ class ManagementCommandTests(MatchReadyTestCase):
         out = StringIO()
         call_command('seed', stdout=out)
         self.assertIn('Done. User logins have a password of "x".', out.getvalue())
+
