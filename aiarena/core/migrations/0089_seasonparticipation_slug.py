@@ -18,14 +18,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='seasonparticipation',
             name='slug',
-            field=models.SlugField(null=True),
+            field=models.SlugField(null=True, max_length=255),
             preserve_default=False,
         ),
         migrations.RunPython(set_sp_slugs),
         migrations.AlterField(
             model_name='seasonparticipation',
             name='slug',
-            field=models.SlugField(),
+            field=models.SlugField(max_length=255),
             preserve_default=False,
         ),
     ]

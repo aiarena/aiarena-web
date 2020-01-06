@@ -31,7 +31,7 @@ class SeasonParticipation(models.Model, LockableModelMixin):
     crash_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
     crash_count = models.IntegerField(default=0)
     elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True)
-    slug = models.SlugField()
+    slug = models.SlugField(max_length=255)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(f'{self.bot.name} Season {self.season.number}')
