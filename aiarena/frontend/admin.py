@@ -104,12 +104,8 @@ class ResultAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Result._meta.fields]
 
 
-class StatsBotsAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in StatsBots._meta.fields]
-
-
-class StatsBotMatchupsAdmin(admin.ModelAdmin):
-    list_display = [field.name for field in StatsBotMatchups._meta.fields]
+class SeasonBotMatchupStatsAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in SeasonBotMatchupStats._meta.fields]
 
 
 class PatreonAccountBindAdmin(admin.ModelAdmin):
@@ -129,7 +125,6 @@ admin.site.register(Bot, BotAdmin)
 admin.site.register(SeasonParticipation, SeasonParticipationAdmin)
 admin.site.register(MatchParticipation, MatchParticipationAdmin)
 admin.site.register(Result, ResultAdmin)
-admin.site.register(StatsBots, StatsBotsAdmin)
 admin.site.register(Trophy, TrophyAdmin)
-admin.site.register(StatsBotMatchups, StatsBotMatchupsAdmin)
+admin.site.register(SeasonBotMatchupStats, SeasonBotMatchupStatsAdmin)
 admin.site.register(PatreonAccountBind, PatreonAccountBindAdmin)

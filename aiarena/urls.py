@@ -42,11 +42,16 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('arenaclients/<int:pk>/', core_views.ArenaClient.as_view(), name='arenaclient'),
                   path('match-queue/', core_views.MatchQueue.as_view(), name='match_queue'),
                   path('stream/', TemplateView.as_view(template_name='stream.html'), name='stream'),
+
                   path('bots/', core_views.BotList.as_view(), name='bots'),
                   path('bots/<int:pk>/', core_views.BotDetail.as_view(), name='bot'),
                   path('bots/<int:pk>/edit/', core_views.BotUpdate.as_view(), name='bot_edit'),
                   path('bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
                   path('bots/<int:pk>/bot_data', core_views.BotDataDownloadView.as_view()),
+
+                  path('stats/<int:pk>/', core_views.BotSeasonStatsDetail.as_view()),
+                  path('stats/<int:pk>/<slug:slug>', core_views.BotSeasonStatsDetail.as_view(), name='bot_season_stats'),
+
                   path('match-logs/<int:pk>/', core_views.MatchLogDownloadView.as_view()),
                   path('authors/', core_views.AuthorList.as_view(), name='authors'),
                   path('authors/<int:pk>/', core_views.AuthorDetail.as_view(), name='author'),
@@ -57,7 +62,9 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('seasons/<int:pk>/', core_views.SeasonDetail.as_view(), name='season'),
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   path('requestmatch/', core_views.RequestMatch.as_view(), name='requestmatch'),
+
                   url('avatar/', include('avatar.urls')),
+
                   path('profile/', core_views.UserProfile.as_view(), name='profile'),
                   path('profile/edit/', core_views.UserProfileUpdate.as_view(), name='profile_edit'),
                   path('profile/token/', core_views.UserTokenDetailView.as_view(), name='profile_token'),
