@@ -21,21 +21,21 @@ class StatsGenerator:
                 sp.win_count = MatchParticipation.objects.filter(bot=sp.bot, result='win',
                                                         match__round__season=sp.season
                                                         ).count()
-                sp.win_perc = sp.win_count / sp.match_count
+                sp.win_perc = sp.win_count / sp.match_count * 100
                 sp.loss_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss',
                                                                   match__round__season=sp.season
                                                                   ).count()
-                sp.loss_perc = sp.loss_count / sp.match_count
+                sp.loss_perc = sp.loss_count / sp.match_count * 100
                 sp.tie_count = MatchParticipation.objects.filter(bot=sp.bot, result='tie',
                                                                   match__round__season=sp.season
                                                                   ).count()
-                sp.tie_perc = sp.tie_count / sp.match_count
+                sp.tie_perc = sp.tie_count / sp.match_count * 100
                 sp.crash_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss', result_cause__in=['crash',
                                                                                                   'timeout',
                                                                                                   'initialization_failure'],
                                                                    match__round__season=sp.season
                                                                    ).count()
-                sp.crash_perc = sp.crash_count / sp.match_count
+                sp.crash_perc = sp.crash_count / sp.match_count * 100
                 graph = StatsGenerator._generate_elo_graph(sp.bot.id)
                 if graph is not None:
                     sp.elo_graph.save('elo.png', graph)
@@ -86,7 +86,7 @@ class StatsGenerator:
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
                     row = cursor.fetchone()
                     matchup_stats.win_count = row[0]
-                    matchup_stats.win_perc = matchup_stats.win_count/matchup_stats.match_count
+                    matchup_stats.win_perc = matchup_stats.win_count/matchup_stats.match_count * 100
 
                     cursor.execute("""
                     select count(cm.id) as count
@@ -102,7 +102,7 @@ class StatsGenerator:
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
                     row = cursor.fetchone()
                     matchup_stats.loss_count = row[0]
-                    matchup_stats.loss_perc = matchup_stats.loss_count/matchup_stats.match_count
+                    matchup_stats.loss_perc = matchup_stats.loss_count/matchup_stats.match_count * 100
 
                     cursor.execute("""
                     select count(cm.id) as count
@@ -118,7 +118,7 @@ class StatsGenerator:
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
                     row = cursor.fetchone()
                     matchup_stats.tie_count = row[0]
-                    matchup_stats.tie_perc = matchup_stats.tie_count/matchup_stats.match_count
+                    matchup_stats.tie_perc = matchup_stats.tie_count/matchup_stats.match_count * 100
 
                     cursor.execute("""
                     select count(cm.id) as count
@@ -134,7 +134,7 @@ class StatsGenerator:
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
                     row = cursor.fetchone()
                     matchup_stats.crash_count = row[0]
-                    matchup_stats.crash_perc = matchup_stats.crash_count/matchup_stats.match_count
+                    matchup_stats.crash_perc = matchup_stats.crash_count/matchup_stats.match_count * 100
                 else:
                     matchup_stats.win_count = 0
                     matchup_stats.loss_count = 0
