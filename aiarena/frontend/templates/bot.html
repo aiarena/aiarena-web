@@ -28,7 +28,7 @@
                 <tbody>
                 <tr>
                     <td><b>Author</b></td>
-                    <td>{{ bot.user.as_html_link |safe }}</td>
+                    <td>{{ bot.user.as_html_link }}</td>
                 </tr>
                 <tr>
                     <td><b>Race</b></td>
@@ -136,7 +136,7 @@
             {% if rankings.count > 0 %}
                 {% for season_participation in rankings %}
                     <tr>
-                        <td>{{ season_participation.season.as_html_link |safe }}</td>
+                        <td>{{ season_participation.season.as_html_link }}</td>
                         {% if season_participation.season.date_opened %}
                             <td>{{ season_participation.season.date_opened|date:"d. N Y - H:i:s" }}</td>
                         {% else %}
@@ -182,9 +182,9 @@
             {% if result_list.paginator.count > 0 %}
                 {% for result in result_list %}
                     <tr>
-                        <td>{{ result.match.as_html_link |safe }}</td>
+                        <td>{{ result.match.as_html_link }}</td>
                         <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
-                        <td>{{ result.opponent.bot.as_html_link |safe }}</td>
+                        <td>{{ result.opponent.bot.as_html_link }}</td>
                         <td>{{ result.relative_type }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
                         <td>{{ result.me.step_time_ms|floatformat:3 }}</td>

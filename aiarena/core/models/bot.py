@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
@@ -168,8 +169,10 @@ class Bot(models.Model):
         return reverse('bot', kwargs={'pk': self.pk})
 
     def as_html_link(self):
-        # todo: mark_safe
-        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
+
+    def as_html_link_with_race(self):
+        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())} ({self.plays_race})</a>')
 
     def expected_executable_filename(self):
         """

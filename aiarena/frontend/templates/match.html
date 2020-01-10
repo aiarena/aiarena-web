@@ -28,14 +28,14 @@
             {% endif %}
 
             {# Bot name #}
-            {{ match.participant1.bot.as_html_link |safe }}
+            {{ match.participant1.bot.as_html_link }}
 
             - VS -
 
             {# Participant 2 #}
 
             {# Bot name #}
-            {{ match.participant2.bot.as_html_link |safe }}
+            {{ match.participant2.bot.as_html_link }}
 
             {% if match.result %}
                 {# ELO change #}
@@ -136,8 +136,8 @@
             <tr>
                 {# matches don't always have a round #}
                 {% if match.round %}
-                    <td>{{ match.round.season.as_html_link |safe }}</td>
-                    <td>{{ match.round.as_html_link |safe }}</td>
+                    <td>{{ match.round.season.as_html_link }}</td>
+                    <td>{{ match.round.as_html_link }}</td>
                 {% else %}
                     <td>--</td>
                     <td>--</td>

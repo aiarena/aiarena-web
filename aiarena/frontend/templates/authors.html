@@ -11,7 +11,7 @@
                         <div class="author-image">{% avatar author 150 %}</div>
                     </a>
                 </div>
-                <div class="author-name">{{ author.as_html_link |safe }}</div>
+                <div class="author-name">{{ author.as_html_link }}</div>
                 <div class="patreon-{{ author.patreon_level }}"></div>
             </div>
         {% endfor %}

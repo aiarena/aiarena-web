@@ -13,8 +13,8 @@
         <tbody>
         {% for arenaclient in user_list %}
             <tr>
-                <td>{{ arenaclient.as_html_link |safe }}</td>
-                <td>{{ arenaclient.owner.as_html_link |safe }}</td>
+                <td>{{ arenaclient.as_html_link }}</td>
+                <td>{{ arenaclient.owner.as_html_link }}</td>
                 <td>{{ arenaclient.matches_1hr }}</td>
                 <td>{{ arenaclient.matches_24hr }}</td>
             </tr>

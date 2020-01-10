@@ -18,7 +18,7 @@
         <tbody>
         {% for season in season_list %}
             <tr>
-                <td>{{ season.as_html_link |safe }}</td>
+                <td>{{ season.as_html_link }}</td>
                 <td>{{ season.date_created|date:"d. N Y - H:i:s" }}</td>
                 {% if season.date_opened %}
                     <td>{{ season.date_opened|date:"d. N Y - H:i:s" }}</td>

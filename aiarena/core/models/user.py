@@ -9,7 +9,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
-
+from django.utils.safestring import mark_safe
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class User(AbstractUser):
             raise Exception("This user type does not have a url.")
 
     def as_html_link(self):
-        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+        return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__())))
 
     def clean(self):
         if self.type == 'ARENA_CLIENT' and self.owner is None:

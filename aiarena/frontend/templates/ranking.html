@@ -22,9 +22,9 @@
         {% for participant in seasonparticipation_list %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ participant.bot.as_html_link |safe }}</td>
+                <td>{{ participant.bot.as_html_link }}</td>
                 <td>{{ participant.bot.get_plays_race_display }}</td>
-                <td>{{ participant.bot.user.as_html_link |safe }}</td>
+                <td>{{ participant.bot.user.as_html_link }}</td>
                 <td>{{ participant.bot.type }}</td>
                 <td>{{ participant.bot.active }}</td>
                 {% if participant.bot.statsbots_set.count > 0 %}

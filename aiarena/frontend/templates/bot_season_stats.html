@@ -102,7 +102,7 @@
             {% if season_bot_matchups.count > 0 %}
                 {% for bot_matchup in season_bot_matchups %}
                     <tr style="text-align: right">
-                        <td style="text-align: right">{{ bot_matchup.opponent.bot.as_html_link |safe }}</td>
+                        <td style="text-align: right">{{ bot_matchup.opponent.bot.as_html_link }}</td>
                         <td class="mono">{{ bot_matchup.opponent.bot.get_plays_race_display }}</td>
                         <td class="mono">{{ bot_matchup.match_count }}</td>
                         <td class="mono">{{ bot_matchup.win_count }}</td>

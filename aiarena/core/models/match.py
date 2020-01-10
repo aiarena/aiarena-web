@@ -6,6 +6,7 @@ from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 from aiarena.core.exceptions import BotNotInMatchException
 from .map import Map
@@ -147,4 +148,4 @@ class Match(models.Model):
         return reverse('match', kwargs={'pk': self.pk})
 
     def as_html_link(self):
-        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')

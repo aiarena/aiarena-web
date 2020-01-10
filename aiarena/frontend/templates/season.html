@@ -53,9 +53,9 @@
             {% for participant in rankings %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ participant.bot.as_html_link |safe }}</td>
+                    <td>{{ participant.bot.as_html_link }}</td>
                     <td>{{ participant.bot.get_plays_race_display }}</td>
-                    <td>{{ participant.bot.user.as_html_link |safe }}</td>
+                    <td>{{ participant.bot.user.as_html_link }}</td>
                     <td>{{ participant.bot.type }}</td>
                     {% if participant.win_perc %}
                         <td>{{ participant.win_perc|floatformat:2 }}</td>
@@ -82,7 +82,7 @@
         </thead>
         {% for round in round_list %}
             <tr>
-                <td>{{ round.as_html_link |safe }}</td>
+                <td>{{ round.as_html_link }}</td>
                 {% if season.date_opened %}
                     <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
                 {% else %}

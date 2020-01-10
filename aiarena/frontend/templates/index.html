@@ -46,7 +46,7 @@
                 {% for participant in seasonparticipation_list %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ participant.bot.as_html_link |safe }}</td>
+                        <td>{{ participant.bot.as_html_link }}</td>
                         <td>{{ participant.elo }}</td>
                     </tr>
                 {% endfor %}

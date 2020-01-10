@@ -14,7 +14,7 @@
         <tbody>
         <tr>
             <td>{{ arenaclient.username }}</td>
-            <td>{{ arenaclient.owner.as_html_link |safe }}</td>
+            <td>{{ arenaclient.owner.as_html_link }}</td>
             <td>{{ ac_match_count_1h }}</td>
             <td>{{ ac_match_count_24h }}</td>
             <td>{{ ac_match_count }}</td>
@@ -35,15 +35,15 @@
             <tbody>
             {% for match in assigned_matches_list %}
                 <tr>
-                    <td>{{ match.as_html_link |safe }}</td>
+                    <td>{{ match.as_html_link }}</td>
                     {% for p in match.participants %}
                         {% if p.participant_number == 1 %}
-                            <td>{{ p.bot.as_html_link |safe }}</td>
+                            <td>{{ p.bot.as_html_link }}</td>
                         {% endif %}
                     {% endfor %}
                     {% for p in match.participants %}
                         {% if p.participant_number == 2 %}
-                            <td>{{ p.bot.as_html_link |safe }}</td>
+                            <td>{{ p.bot.as_html_link }}</td>
                         {% endif %}
                     {% endfor %}
                     <td>{{ match.map }}</td>
@@ -76,16 +76,16 @@
             <tbody>
             {% for result in result_list %}
                 <tr>
-                    <td>{{ result.match.as_html_link |safe }}</td>
+                    <td>{{ result.match.as_html_link }}</td>
                     <td>{{ result.created|naturaltime }}</td>
 
                     {% for p in result.match.participants %}
                         {% if p.participant_number == 1 %}
                             <td style="padding-right: 0">
                                 {% if result.winner == p.bot %}
-                                    <b>[{{ p.bot.as_html_link |safe }}]</b>
+                                    <b>[{{ p.bot.as_html_link }}]</b>
                                 {% else %}
-                                    {{ p.bot.as_html_link |safe }}
+                                    {{ p.bot.as_html_link }}
                                 {% endif %}
                             </td>
 
@@ -108,9 +108,9 @@
                         {% if p.participant_number == 2 %}
                             <td style="padding-right: 0">
                                 {% if result.winner == p.bot %}
-                                    <b>[{{ p.bot.as_html_link |safe }}]</b>
+                                    <b>[{{ p.bot.as_html_link }}]</b>
                                 {% else %}
-                                    {{ p.bot.as_html_link |safe }}
+                                    {{ p.bot.as_html_link }}
                                 {% endif %}
                             </td>
 

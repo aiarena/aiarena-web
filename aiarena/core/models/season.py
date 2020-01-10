@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason, MultipleCurrentSeasons
 from .mixins import LockableModelMixin
@@ -129,7 +130,7 @@ class Season(models.Model, LockableModelMixin):
         return reverse('season', kwargs={'pk': self.pk})
 
     def as_html_link(self):
-        return '<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__()))
+        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
 
 
 @receiver(pre_save, sender=Season)

@@ -19,15 +19,15 @@
                 <tbody>
                 {% for match in requested_matches %}
                     <tr>
-                        <td>{{ match.as_html_link |safe }}</td>
+                        <td>{{ match.as_html_link }}</td>
                         {% for p in match.participants %}
                             {% if p.participant_number == 1 %}
-                                <td>{{ p.bot.as_html_link |safe }}</td>
+                                <td>{{ p.bot.as_html_link }}</td>
                             {% endif %}
                         {% endfor %}
                         {% for p in match.participants %}
                             {% if p.participant_number == 2 %}
-                                <td>{{ p.bot.as_html_link |safe }}</td>
+                                <td>{{ p.bot.as_html_link }}</td>
                             {% endif %}
                         {% endfor %}
                         <td>{{ match.map }}</td>
@@ -60,15 +60,15 @@
                 </thead>
                 {% for match in round.matches %}
                     <tr>
-                        <td>{{ match.as_html_link |safe }}</td>
+                        <td>{{ match.as_html_link }}</td>
                         {% for p in match.participants %}
                             {% if p.participant_number == 1 %}
-                                <td>{{ p.bot.as_html_link |safe }}</td>
+                                <td>{{ p.bot.as_html_link }}</td>
                             {% endif %}
                         {% endfor %}
                         {% for p in match.participants %}
                             {% if p.participant_number == 2 %}
-                                <td>{{ p.bot.as_html_link |safe }}</td>
+                                <td>{{ p.bot.as_html_link }}</td>
                             {% endif %}
                         {% endfor %}
                         <td>{{ match.map }}</td>

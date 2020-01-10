@@ -15,7 +15,7 @@
     </thead>
     <tbody>
     <tr>
-        <td>{{ round.season.as_html_link |safe }}</td>
+        <td>{{ round.season.as_html_link }}</td>
         <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
         <td>{{ round.finished|date:"d. N Y - H:i:s" }}</td>
     </tr>
@@ -37,9 +37,9 @@
     </thead>
     {% for match in round.match_set.all %}
         <tr>
-            <td>{{ match.as_html_link |safe }}</td>
-            <td>{{ match.participant1.bot.as_html_link |safe }}</td>
-            <td>{{ match.participant2.bot.as_html_link |safe }}</td>
+            <td>{{ match.as_html_link }}</td>
+            <td>{{ match.participant1.bot.as_html_link }}</td>
+            <td>{{ match.participant2.bot.as_html_link }}</td>
             <td>{{ match.map }}</td>
             {% if match.started %}
                 <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
