@@ -88,42 +88,46 @@
                 <td><b>Opponent</b></td>
                 <td><b>Race</b></td>
                 <td><b>Matches</b></td>
-                <td colspan="2"><b>Win</b></td>
-                <td colspan="2"><b>Loss</b></td>
-                <td colspan="2"><b>Tie</b></td>
-                <td colspan="2"><b>Crash</b></td>
+                <td><b>Win</b></td>
+                <td><b>%</b></td>
+                <td><b>Loss</b></td>
+                <td><b>%</b></td>
+                <td><b>Tie</b></td>
+                <td><b>%</b></td>
+                <td><b>Crash</b></td>
+                <td><b>%</b></td>
             </tr>
             </thead>
             <tbody>
             {% if season_bot_matchups.count > 0 %}
                 {% for bot_matchup in season_bot_matchups %}
-                    <tr>
+                    <tr style="text-align: right">
                         <td style="text-align: right">{{ bot_matchup.opponent.bot.as_html_link |safe }}</td>
                         <td class="mono">{{ bot_matchup.opponent.bot.get_plays_race_display }}</td>
                         <td class="mono">{{ bot_matchup.match_count }}</td>
-                        <td class="mono" style="text-align: right">{{ bot_matchup.win_count }}</td>
+                        <td class="mono">{{ bot_matchup.win_count }}</td>
                         {% if bot_matchup.match_count > 0 %}
-                        <td class="mono" style="text-align: left">{{ bot_matchup.win_perc|floatformat:2 }}</td>
+                        <td class="mono">{{ bot_matchup.win_perc|floatformat:2 }}</td>
                         {% else %}
-                        <td class="mono" style="text-align: left">N/A</td>
+                        <td class="mono">N/A</td>
                         {% endif %}
-                        <td class="mono" style="text-align: right">{{ bot_matchup.loss_count }}</td>
+                        <td class="mono">{{ bot_matchup.loss_count }}</td>
                         {% if bot_matchup.match_count > 0 %}
-                        <td class="mono" style="text-align: left">{{ bot_matchup.loss_perc|floatformat:2 }}</td>
+                        <td class="mono">{{ bot_matchup.loss_perc|floatformat:2 }}</td>
                         {% else %}
-                        <td class="mono" style="text-align: left">N/A</td>
+                        <td class="mono">N/A</td>
                         {% endif %}
-                        <td class="mono" style="text-align: right">{{ bot_matchup.tie_count }}</td>
+                        <td class="mono">{{ bot_matchup.tie_count }}</td>
                         {% if bot_matchup.match_count > 0 %}
-                        <td class="mono" style="text-align: left">{{ bot_matchup.tie_perc|floatformat:2 }}</td>
+                        <td class="mono">{{ bot_matchup.tie_perc|floatformat:2 }}</td>
                         {% else %}
-                        <td class="mono" style="text-align: left">N/A</td>
+                        <td class="mono">N/A</td>
                         {% endif %}
-                        <td class="mono" style="text-align: right">{{ bot_matchup.crash_count }}</td>
+                        <td class="mono">{{ bot_matchup.crash_count }}</td>
                         {% if bot_matchup.match_count > 0 %}
-                        <td class="mono" style="text-align: left">{{ bot_matchup.crash_perc|floatformat:2 }}</td>
+                        <td class="mono">{{ bot_matchup.crash_perc|floatformat:2 }}</td>
                         {% else %}
-                        <td class="mono" style="text-align: left">N/A</td>
+                        <td class="mono">N/A</td>
                         {% endif %}
                     </tr>
                 {% endfor %}
