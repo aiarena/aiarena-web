@@ -3,8 +3,9 @@ import io
 import matplotlib.pyplot as plt
 import pandas as pd
 from django.db import connection, transaction
+from django.db.models import Max
 
-from aiarena.core.models import Bot, Season, MatchParticipation, SeasonParticipation, Match
+from aiarena.core.models import MatchParticipation, SeasonParticipation
 from aiarena.core.models.season_bot_matchup_stats import SeasonBotMatchupStats
 
 
@@ -19,23 +20,28 @@ class StatsGenerator:
                                                                match__round__season=sp.season).count()
             if sp.match_count != 0:
                 sp.win_count = MatchParticipation.objects.filter(bot=sp.bot, result='win',
-                                                        match__round__season=sp.season
-                                                        ).count()
+                                                                 match__round__season=sp.season
+                                                                 ).count()
                 sp.win_perc = sp.win_count / sp.match_count * 100
                 sp.loss_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss',
                                                                   match__round__season=sp.season
                                                                   ).count()
                 sp.loss_perc = sp.loss_count / sp.match_count * 100
                 sp.tie_count = MatchParticipation.objects.filter(bot=sp.bot, result='tie',
-                                                                  match__round__season=sp.season
-                                                                  ).count()
+                                                                 match__round__season=sp.season
+                                                                 ).count()
                 sp.tie_perc = sp.tie_count / sp.match_count * 100
                 sp.crash_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss', result_cause__in=['crash',
-                                                                                                  'timeout',
-                                                                                                  'initialization_failure'],
+                                                                                                                'timeout',
+                                                                                                                'initialization_failure'],
                                                                    match__round__season=sp.season
                                                                    ).count()
                 sp.crash_perc = sp.crash_count / sp.match_count * 100
+
+                sp.highest_elo = MatchParticipation.objects.filter(bot=sp.bot,
+                                                                   match__round__season=sp.season)\
+                    .aggregate(Max('resultant_elo')).resultant_elo__max
+
                 graph = StatsGenerator._generate_elo_graph(sp.bot.id)
                 if graph is not None:
                     sp.elo_graph.save('elo.png', graph)
@@ -52,23 +58,23 @@ class StatsGenerator:
     def _update_matchup_stats(sp: SeasonParticipation):
         for season_participation in SeasonParticipation.objects.exclude(bot=sp.bot):
             with connection.cursor() as cursor:
-                matchup_stats = SeasonBotMatchupStats.objects.select_for_update()\
+                matchup_stats = SeasonBotMatchupStats.objects.select_for_update() \
                     .get_or_create(bot=sp, opponent=season_participation)[0]
 
                 matchup_stats.match_count = StatsGenerator._calculate_matchup_count(cursor, season_participation, sp)
 
                 if matchup_stats.match_count != 0:
                     matchup_stats.win_count = StatsGenerator._calculate_win_count(cursor, season_participation, sp)
-                    matchup_stats.win_perc = matchup_stats.win_count/matchup_stats.match_count * 100
+                    matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
 
                     matchup_stats.loss_count = StatsGenerator._calculate_loss_count(cursor, season_participation, sp)
-                    matchup_stats.loss_perc = matchup_stats.loss_count/matchup_stats.match_count * 100
+                    matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
 
                     matchup_stats.tie_count = StatsGenerator._calculate_tie_count(cursor, season_participation, sp)
-                    matchup_stats.tie_perc = matchup_stats.tie_count/matchup_stats.match_count * 100
+                    matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
 
                     matchup_stats.crash_count = StatsGenerator._calculate_crash_count(cursor, season_participation, sp)
-                    matchup_stats.crash_perc = matchup_stats.crash_count/matchup_stats.match_count * 100
+                    matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
                 else:
                     matchup_stats.win_count = 0
                     matchup_stats.loss_count = 0
@@ -85,7 +91,7 @@ class StatsGenerator:
 
     @staticmethod
     def _calculate_matchup_count(cursor, season_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor,"""
+        return StatsGenerator._run_single_column_query(cursor, """
                 select count(cm.id) as count
                 from core_match cm
                 inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -100,7 +106,7 @@ class StatsGenerator:
 
     @staticmethod
     def _calculate_win_count(cursor, season_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor,"""
+        return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -115,7 +121,7 @@ class StatsGenerator:
 
     @staticmethod
     def _calculate_loss_count(cursor, season_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor,"""
+        return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -130,7 +136,7 @@ class StatsGenerator:
 
     @staticmethod
     def _calculate_tie_count(cursor, season_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor,"""
+        return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -145,7 +151,7 @@ class StatsGenerator:
 
     @staticmethod
     def _calculate_crash_count(cursor, season_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor,"""
+        return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id

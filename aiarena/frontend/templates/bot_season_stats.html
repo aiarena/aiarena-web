@@ -68,6 +68,14 @@
                     <td>No stats</td>
                 {% endif %}
             </tr>
+            <tr>
+                <td>Highest ELO</td>
+                {% if seasonparticipation.highest_elo != None %}
+                    <td>{{ seasonparticipation.highest_elo }}</td>
+                {% else %}
+                    <td>No stats</td>
+                {% endif %}
+            </tr>
             </tbody>
         </table>
         <br/>
