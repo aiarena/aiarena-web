@@ -161,7 +161,8 @@ class StatsGenerator:
                     where cs.id = %s -- make sure it's part of the current season
                     and bot_p.bot_id = %s
                     and opponent_p.bot_id = %s
-                    and bot_p.result = 'crash'
+                    and bot_p.result = 'loss'
+                    and bot_p.result_cause = 'crash'
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
 
     @staticmethod
