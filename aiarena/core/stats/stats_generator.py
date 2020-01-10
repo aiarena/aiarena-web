@@ -40,7 +40,7 @@ class StatsGenerator:
 
                 sp.highest_elo = MatchParticipation.objects.filter(bot=sp.bot,
                                                                    match__round__season=sp.season)\
-                    .aggregate(Max('resultant_elo')).resultant_elo__max
+                    .aggregate(Max('resultant_elo'))['resultant_elo__max']
 
                 graph = StatsGenerator._generate_elo_graph(sp.bot.id)
                 if graph is not None:
