@@ -17,6 +17,14 @@
                 <td>{{ seasonparticipation.elo }}</td>
             </tr>
             <tr>
+                <td>Highest ELO</td>
+                {% if seasonparticipation.highest_elo != None %}
+                    <td>{{ seasonparticipation.highest_elo }}</td>
+                {% else %}
+                    <td>No stats</td>
+                {% endif %}
+            </tr>
+            <tr>
                 <td>Matches</td>
                 <td>{{ seasonparticipation.match_count }}</td>
             </tr>
@@ -64,14 +72,6 @@
                 <td>Crash %</td>
                 {% if seasonparticipation.crash_perc != None %}
                     <td>{{ seasonparticipation.crash_perc|floatformat:2 }}</td>
-                {% else %}
-                    <td>No stats</td>
-                {% endif %}
-            </tr>
-            <tr>
-                <td>Highest ELO</td>
-                {% if seasonparticipation.highest_elo != None %}
-                    <td>{{ seasonparticipation.highest_elo }}</td>
                 {% else %}
                     <td>No stats</td>
                 {% endif %}
