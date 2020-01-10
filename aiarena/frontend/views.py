@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
-from django.db.models import F, Prefetch, Count, Q
+from django.db.models import F, Prefetch
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -21,8 +21,8 @@ from wiki.models import ArticleRevision
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
-from aiarena.frontend.utils import restrict_page_range
 from aiarena.core.models import Trophy
+from aiarena.frontend.utils import restrict_page_range
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
@@ -192,47 +192,6 @@ class BotSeasonStatsDetail(DetailView):
         context = super().get_context_data(**kwargs)
         context['season_bot_matchups'] = self.object.season_matchup_stats.all().order_by('-win_perc')
         return context
-
-    #
-    #     results = Result.objects.filter(match__matchparticipation__bot=self.object).order_by('-created')
-    #
-    #     # paginate the results
-    #     page = self.request.GET.get('page', 1)
-    #     paginator = Paginator(results, 30)
-    #     try:
-    #         results = paginator.page(page)
-    #     except PageNotAnInteger:
-    #         results = paginator.page(1)
-    #     except EmptyPage:
-    #         results = paginator.page(paginator.num_pages)
-    #
-    #     # retrieve the opponent and transform the result type to be personal to this bot
-    #     for result in results:
-    #         result.opponent = result.match.matchparticipation_set.exclude(bot=self.object).get()
-    #         result.me = result.match.matchparticipation_set.get(bot=self.object)
-    #
-    #         # convert the type to be relative to this bot
-    #         typeSuffix = ''
-    #         if result.type in ['Player1Crash', 'Player2Crash']:
-    #             typeSuffix = ' - Crash'
-    #         elif result.type in ['Player1TimeOut', 'Player2TimeOut']:
-    #             typeSuffix = ' - TimeOut'
-    #
-    #         if result.winner is not None:
-    #
-    #             if result.winner == self.object:
-    #                 result.relative_type = 'Win' + typeSuffix
-    #             else:
-    #                 result.relative_type = 'Loss' + typeSuffix
-    #         else:
-    #             result.relative_type = result.type
-    #
-    #     context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
-    #     context['stats_bot_matchups'] = self.object.statsbotmatchups_set.all().order_by('-win_perc')
-    #     context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
-    #     context['result_list'] = results
-    #     context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
-    #     return context
 
 
 class StandardBotUpdateForm(forms.ModelForm):
@@ -408,11 +367,11 @@ class ArenaClients(ListView):
     def get_context_data(self, **kwargs):
         for arenaclient in self.object_list:
             arenaclient.matches_1hr = Result.objects.filter(match__assigned_to=arenaclient,
-                                                                 created__gte=timezone.now() - timedelta(
-                                                                     hours=1)).count()
+                                                            created__gte=timezone.now() - timedelta(
+                                                                hours=1)).count()
             arenaclient.matches_24hr = Result.objects.filter(match__assigned_to=arenaclient,
-                                                                  created__gte=timezone.now() - timedelta(
-                                                                      hours=24)).count()
+                                                             created__gte=timezone.now() - timedelta(
+                                                                 hours=24)).count()
         return super().get_context_data(**kwargs)
 
 
@@ -424,7 +383,8 @@ class ArenaClient(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ArenaClient, self).get_context_data(**kwargs)
 
-        context['assigned_matches_list'] = Match.objects.filter(assigned_to=self.object, result__isnull=True).prefetch_related(
+        context['assigned_matches_list'] = Match.objects.filter(assigned_to=self.object,
+                                                                result__isnull=True).prefetch_related(
             Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
                      to_attr='participants'))
 
@@ -564,7 +524,8 @@ class RequestMatchForm(forms.Form):
     map = forms.ModelChoiceField(queryset=Map.objects.filter(active=True), empty_label='Random', required=False)
 
     def request_match(self, user):
-        return Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'], user)
+        return Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'],
+                                       user)
 
 
 class RequestMatch(LoginRequiredMixin, FormView):
@@ -588,7 +549,8 @@ class RequestMatch(LoginRequiredMixin, FormView):
         if config.ALLOW_REQUESTED_MATCHES:
             if self.request.user.match_request_count_left > 0:
                 match = form.request_match(self.request.user)
-                messages.success(self.request, mark_safe(f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created."))
+                messages.success(self.request, mark_safe(
+                    f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created."))
                 return super().form_valid(form)
             else:
                 messages.error(self.request, "You have already reached your match request limit.")
