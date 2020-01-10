@@ -55,7 +55,37 @@ class StatsGenerator:
                 matchup_stats = SeasonBotMatchupStats.objects.select_for_update()\
                     .get_or_create(bot=sp, opponent=season_participation)[0]
 
-                cursor.execute("""
+                matchup_stats.match_count = StatsGenerator._calculate_matchup_count(cursor, season_participation, sp)
+
+                if matchup_stats.match_count != 0:
+                    matchup_stats.win_count = StatsGenerator._calculate_win_count(cursor, season_participation, sp)
+                    matchup_stats.win_perc = matchup_stats.win_count/matchup_stats.match_count * 100
+
+                    matchup_stats.loss_count = StatsGenerator._calculate_loss_count(cursor, season_participation, sp)
+                    matchup_stats.loss_perc = matchup_stats.loss_count/matchup_stats.match_count * 100
+
+                    matchup_stats.tie_count = StatsGenerator._calculate_tie_count(cursor, season_participation, sp)
+                    matchup_stats.tie_perc = matchup_stats.tie_count/matchup_stats.match_count * 100
+
+                    matchup_stats.crash_count = StatsGenerator._calculate_crash_count(cursor, season_participation, sp)
+                    matchup_stats.crash_perc = matchup_stats.crash_count/matchup_stats.match_count * 100
+                else:
+                    matchup_stats.win_count = 0
+                    matchup_stats.loss_count = 0
+                    matchup_stats.tie_count = 0
+                    matchup_stats.crash_count = 0
+
+                matchup_stats.save()
+
+    @staticmethod
+    def _run_single_column_query(cursor, query, params):
+        cursor.execute(query, params)
+        row = cursor.fetchone()
+        return row[0]
+
+    @staticmethod
+    def _calculate_matchup_count(cursor, season_participation, sp):
+        return StatsGenerator._run_single_column_query(cursor,"""
                 select count(cm.id) as count
                 from core_match cm
                 inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -67,12 +97,10 @@ class StatsGenerator:
                 and opponent_p.bot_id = %s
                 and bot_p.result is not null -- make sure it's a finished match wih a result
                 """, [sp.season_id, sp.bot_id, season_participation.bot_id])
-                row = cursor.fetchone()
-                matchup_stats.match_count = row[0]
 
-                if matchup_stats.match_count != 0:
-
-                    cursor.execute("""
+    @staticmethod
+    def _calculate_win_count(cursor, season_participation, sp):
+        return StatsGenerator._run_single_column_query(cursor,"""
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -84,11 +112,10 @@ class StatsGenerator:
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'win'
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
-                    row = cursor.fetchone()
-                    matchup_stats.win_count = row[0]
-                    matchup_stats.win_perc = matchup_stats.win_count/matchup_stats.match_count * 100
 
-                    cursor.execute("""
+    @staticmethod
+    def _calculate_loss_count(cursor, season_participation, sp):
+        return StatsGenerator._run_single_column_query(cursor,"""
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -100,11 +127,10 @@ class StatsGenerator:
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'loss'
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
-                    row = cursor.fetchone()
-                    matchup_stats.loss_count = row[0]
-                    matchup_stats.loss_perc = matchup_stats.loss_count/matchup_stats.match_count * 100
 
-                    cursor.execute("""
+    @staticmethod
+    def _calculate_tie_count(cursor, season_participation, sp):
+        return StatsGenerator._run_single_column_query(cursor,"""
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -116,11 +142,10 @@ class StatsGenerator:
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'tie'
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
-                    row = cursor.fetchone()
-                    matchup_stats.tie_count = row[0]
-                    matchup_stats.tie_perc = matchup_stats.tie_count/matchup_stats.match_count * 100
 
-                    cursor.execute("""
+    @staticmethod
+    def _calculate_crash_count(cursor, season_participation, sp):
+        return StatsGenerator._run_single_column_query(cursor,"""
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
@@ -132,16 +157,6 @@ class StatsGenerator:
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'crash'
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
-                    row = cursor.fetchone()
-                    matchup_stats.crash_count = row[0]
-                    matchup_stats.crash_perc = matchup_stats.crash_count/matchup_stats.match_count * 100
-                else:
-                    matchup_stats.win_count = 0
-                    matchup_stats.loss_count = 0
-                    matchup_stats.tie_count = 0
-                    matchup_stats.crash_count = 0
-
-                matchup_stats.save()
 
     @staticmethod
     def _get_data(bot_id):
