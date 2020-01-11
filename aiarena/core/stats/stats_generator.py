@@ -17,7 +17,9 @@ class StatsGenerator:
             sp.lock_me()
             sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
                                                                match__result__isnull=False,
-                                                               match__round__season=sp.season).count()
+                                                               match__round__season=sp.season) \
+                .exclude(match__result__type__in=['MatchCancelled', 'InitializationError', 'Error']) \
+                .count()
             if sp.match_count != 0:
                 sp.win_count = MatchParticipation.objects.filter(bot=sp.bot, result='win',
                                                                  match__round__season=sp.season
@@ -39,7 +41,8 @@ class StatsGenerator:
                 sp.crash_perc = sp.crash_count / sp.match_count * 100
 
                 sp.highest_elo = MatchParticipation.objects.filter(bot=sp.bot,
-                                                                   match__round__season=sp.season)\
+                                                                   match__result__isnull=False,
+                                                                   match__round__season=sp.season) \
                     .aggregate(Max('resultant_elo'))['resultant_elo__max']
 
                 graph = StatsGenerator._generate_elo_graph(sp.bot.id)
@@ -101,7 +104,7 @@ class StatsGenerator:
                 where cs.id = %s -- make sure it's part of the current season
                 and bot_p.bot_id = %s
                 and opponent_p.bot_id = %s
-                and bot_p.result is not null -- make sure it's a finished match wih a result
+                and bot_p.result is not null and bot_p.result != 'none' -- make sure it's a finished match wih a result
                 """, [sp.season_id, sp.bot_id, season_participation.bot_id])
 
     @staticmethod
