@@ -4,7 +4,7 @@ from constance import config
 from django.utils import timezone
 
 from aiarena import settings
-from aiarena.core.models import Bot, Result, User
+from aiarena.core.models import Bot, Result, User, Season
 
 
 # these are available globally in the django templates
@@ -16,5 +16,6 @@ def stats(request):
         'arenaclients': User.objects.filter(type='ARENA_CLIENT').count(),
         'aiarena_settings': settings,
         'random_donator': User.random_donator(),
-        'config': config
+        'config': config,
+        'current_season': Season.get_current_season_or_none(),
     }

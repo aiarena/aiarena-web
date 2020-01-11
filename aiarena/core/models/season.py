@@ -132,6 +132,21 @@ class Season(models.Model, LockableModelMixin):
     def as_html_link(self):
         return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
 
+    @staticmethod
+    def get_current_season_or_none():
+        try:
+            return Season.get_current_season()
+        except NoCurrentSeason:
+            return None
+        except MultipleCurrentSeasons:
+            return None
+
+    def get_absolute_url(self):
+        return reverse('season', kwargs={'pk': self.pk})
+
+    def as_html_link(self):
+        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
+
 
 @receiver(pre_save, sender=Season)
 def pre_save_season(sender, instance, **kwargs):

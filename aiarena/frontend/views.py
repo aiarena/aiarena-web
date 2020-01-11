@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import View
-from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView, TemplateView
 from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
@@ -308,33 +308,17 @@ class AuthorDetail(DetailView):
         return context
 
 
-# Using a ListView, which has automated behaviour for displaying a list of models
-class Ranking(ListView):
-    # If we wanted all the bots, we could just set this and, because we're extending a ListView, it would
-    # understand to get all the Bots, which could be referenced as "seasonparticipation_list" in the template.
-    # model = SeasonParticipation
-
-    # Instead, because we want to filter the bots, we define queryset,
-    # which is also referenced as "seasonparticipation_list" in the template.
-    def get_queryset(self):
-        try:
-            return SeasonParticipation.objects.filter(season=Season.get_current_season()).order_by(
-                '-elo').prefetch_related('bot')
-        except NoCurrentSeason:
-            return SeasonParticipation.objects.none()
-
-    # If we didn't set this, the ListView would default to searching for a template at <module>/<modelname>_list.html
-    # In this case, that would be "core/seasonparticipation_list.html"
-    template_name = 'ranking.html'
-
-    def get_context_data(self, **kwargs):
-        context = super(Ranking, self).get_context_data(**kwargs)
-        try:
-            season = Season.get_current_season()
-            context['current_season_name'] = season.name
-        except NoCurrentSeason:
-            pass
-        return context
+class Ranking(TemplateView):
+    """
+    If there's a current season, we redirect to that season's page. Otherwise we render a static
+    template explaining that there are no rankings to be viewed currently.
+    """
+    def get(self, request, *args, **kwargs):
+        season = Season.get_current_season_or_none()
+        if season is None:
+            return render(request, 'ranking_no_season.html')
+        else:
+            return redirect('season', pk=season.pk)
 
 
 class Results(ListView):
