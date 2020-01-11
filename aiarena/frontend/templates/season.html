@@ -4,8 +4,8 @@
 {% block content %}
 
     <div class="divider"><span></span><span><h2>{{ season.name }}</h2></span><span></span></div>
-    <div id="sidebar_left">
-        <table id="season)details">
+    <div id="inner_content">
+        <table id="season_details">
             <thead>
             <tr>
                 <td><b>Created</b></td>
@@ -33,71 +33,71 @@
             </tr>
             </tbody>
         </table>
-    </div>
-    <br>
-    <div class="divider"><span></span><span><h2>Ranking</h2></span><span></span></div>
-    <table id="season_ranking_table" style="min-width: 900px; margin: 0 auto;">
-        <thead>
-        <tr>
-            <td><b>Rank</b></td>
-            <td><b>Name</b></td>
-            <td><b>Race</b></td>
-            <td><b>Author</b></td>
-            <td><b>Type</b></td>
-            <td><b>Win %</b></td>
-            <td><b>ELO</b></td>
-            <td></td>
-        </tr>
-        </thead>
-        <tbody>
-        {% if rankings.count > 0 %}
-            {% for participant in rankings %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ participant.bot.as_html_link }}</td>
-                    <td>{{ participant.bot.get_plays_race_display }}</td>
-                    <td>{{ participant.bot.user.as_html_link }}</td>
-                    <td>{{ participant.bot.type }}</td>
-                    {% if participant.win_perc %}
-                        <td>{{ participant.win_perc|floatformat:2 }}</td>
-                    {% else %}
-                        <td>No stats</td>
-                    {% endif %}
-                    <td>{{ participant.elo }}</td>
-                    <td><a href="{% url 'bot_season_stats' participant.id participant.slug %}">Stats</a></td>
+        <br>
+        <div class="divider"><span></span><span><h2>Ranking</h2></span><span></span></div>
+        <table id="season_ranking_table">
+            <thead>
+            <tr>
+                <td><b>Rank</b></td>
+                <td><b>Name</b></td>
+                <td><b>Race</b></td>
+                <td><b>Author</b></td>
+                <td><b>Type</b></td>
+                <td><b>Win %</b></td>
+                <td><b>ELO</b></td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% if rankings.count > 0 %}
+                {% for participant in rankings %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ participant.bot.as_html_link }}</td>
+                        <td>{{ participant.bot.get_plays_race_display }}</td>
+                        <td>{{ participant.bot.user.as_html_link }}</td>
+                        <td>{{ participant.bot.type }}</td>
+                        {% if participant.win_perc %}
+                            <td>{{ participant.win_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td>No stats</td>
+                        {% endif %}
+                        <td>{{ participant.elo }}</td>
+                        <td><a href="{% url 'bot_season_stats' participant.id participant.slug %}">Stats</a></td>
 
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <td colspan="8">No participants</td>
+            {% endif %}
+
+            </tbody>
+        </table>
+        <br>
+        <div class="divider"><span></span><span><h2>Rounds</h2></span><span></span></div>
+        <table id="matches_table" style="min-width: 900px; margin: 0 auto;">
+            <tbody>
+            <thead>
+            <td><b>Round #</b></td>
+            <td><b>Started at</b></td>
+            <td><b>Finished at</b></td>
+            </thead>
+            {% for round in round_list %}
+                <tr>
+                    <td>{{ round.as_html_link }}</td>
+                    {% if season.date_opened %}
+                        <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
+                    {% else %}
+                        <td>--</td>
+                    {% endif %}
+                    {% if season.date_opened %}
+                        <td>{{ round.finished|date:"d. N Y - H:i:s" }}</td>
+                    {% else %}
+                        <td>--</td>
+                    {% endif %}
                 </tr>
             {% endfor %}
-        {% else %}
-            <td colspan="8">No participants</td>
-        {% endif %}
-
-        </tbody>
-    </table>
-    <br>
-    <div class="divider"><span></span><span><h2>Rounds</h2></span><span></span></div>
-    <table id="matches_table" style="min-width: 900px; margin: 0 auto;">
-        <tbody>
-        <thead>
-        <td><b>Round #</b></td>
-        <td><b>Started at</b></td>
-        <td><b>Finished at</b></td>
-        </thead>
-        {% for round in round_list %}
-            <tr>
-                <td>{{ round.as_html_link }}</td>
-                {% if season.date_opened %}
-                    <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
-                {% else %}
-                    <td>--</td>
-                {% endif %}
-                {% if season.date_opened %}
-                    <td>{{ round.finished|date:"d. N Y - H:i:s" }}</td>
-                {% else %}
-                    <td>--</td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-        <tbody>
-    </table>
+            <tbody>
+        </table>
+    </div>
 {% endblock %}

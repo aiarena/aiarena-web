@@ -676,7 +676,7 @@ tr:hover a:focus {
 }
 
 
-#sidebar_left {
+#inner_content {
     width: 100%;
     float: right;
     margin: 0px;
@@ -685,14 +685,11 @@ tr:hover a:focus {
 
 }
 
-#sidebar_left table {
+#inner_content table {
     text-align: justify;
-    margin-left: 73px;
-
-
 }
 
-#sidebar_left tr:hover {
+#inner_content tr:hover {
     background-color: rgba(0, 0, 0, 0)
 
 }
