@@ -49,9 +49,6 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
                   path('bots/<int:pk>/bot_data', core_views.BotDataDownloadView.as_view()),
 
-                  path('stats/<int:pk>/', core_views.BotSeasonStatsDetail.as_view()),
-                  path('stats/<int:pk>/<slug:slug>', core_views.BotSeasonStatsDetail.as_view(), name='bot_season_stats'),
-
                   path('match-logs/<int:pk>/', core_views.MatchLogDownloadView.as_view()),
                   path('authors/', core_views.AuthorList.as_view(), name='authors'),
                   path('authors/<int:pk>/', core_views.AuthorDetail.as_view(), name='author'),
@@ -60,6 +57,10 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('matches/<int:pk>/', core_views.MatchDetail.as_view(), name='match'),
                   path('seasons/', core_views.SeasonList.as_view(), name='seasons'),
                   path('seasons/<int:pk>/', core_views.SeasonDetail.as_view(), name='season'),
+
+                  path('seasons/stats/<int:pk>/', core_views.BotSeasonStatsDetail.as_view()),
+                  path('seasons/stats/<int:pk>/<slug:slug>', core_views.BotSeasonStatsDetail.as_view(), name='bot_season_stats'),
+
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   path('requestmatch/', core_views.RequestMatch.as_view(), name='requestmatch'),
 
