@@ -21,7 +21,7 @@ class Command(BaseCommand):
             StatsGenerator.update_stats(sp)
         else:
             for bot in SeasonParticipation.objects.filter(season=Season.get_current_season()):
-                self.stdout.write(f'Generating current season stats for bot {bot.id}...')
+                self.stdout.write(f'Generating current season stats for bot {bot.bot_id}...')
                 StatsGenerator.update_stats(bot)
 
         self.stdout.write('Done')
