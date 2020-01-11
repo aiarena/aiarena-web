@@ -61,7 +61,7 @@ class PageRenderTestCase(FullDataSetTestCase):
 
         # ranking
         response = self.client.get('/ranking/')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
         # results
         response = self.client.get('/results/')
