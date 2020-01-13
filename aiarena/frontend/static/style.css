@@ -184,7 +184,7 @@ a:hover {
 
 #bot_season_stats {
     float: left;
-    width: 32.0%;
+    width: 27.0%;
     margin-left: 73px;
 }
 
@@ -203,7 +203,7 @@ a:hover {
 }
 
 #elo_graph img{
-    width: 55%;
+    width: 60%;
     background-color: rgba(0, 0, 0, 0.4);
 }
 
