@@ -37,13 +37,16 @@
             <a href="{% url 'profile_edit' %}">edit</a>
         </div>
         <div id="profile_link_buttons">
-            <form action="{% url 'discord_bind_index' %}">
-                {% if user.discord_user %}
-                    <input class="profile-linked-button" type="submit" value="Discord Linked" disabled/>
-                {% else %}
+            {% if user.discord_user %}
+                <form action="{% url 'unlink_discord' %}">
+
+                    <input class="profile-linked-button" type="submit" value="Unlink Discord"/>
+                </form>
+            {% else %}
+                <form action="{% url 'discord_bind_index' %}">
                     <input class="profile-link-button" type="submit" value="Link Discord"/>
-                {% endif %}
-            </form>
+                </form>
+            {% endif %}
             <form action="{% url 'patreon_bind_index' %}">
                 {% if user.patreonaccountbind %}
                     <input class="profile-linked-button" type="submit" value="Link Patreon" disabled/>

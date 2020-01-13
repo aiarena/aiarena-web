@@ -69,6 +69,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('profile/', core_views.UserProfile.as_view(), name='profile'),
                   path('profile/edit/', core_views.UserProfileUpdate.as_view(), name='profile_edit'),
                   path('profile/token/', core_views.UserTokenDetailView.as_view(), name='profile_token'),
+                  path('profile/unlink/discord/', core_views.UnlinkDiscordView.as_view(), name='unlink_discord'),
                   path('notifications/', include('django_nyt.urls')),
                   path('wiki/', include('wiki.urls')),
                   url(r'^discord/', include('discord_bind.urls')),

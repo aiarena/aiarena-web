@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from constance import config
+from discord_bind.models import DiscordUser
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import View
-from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView, TemplateView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView, TemplateView, DeleteView
 from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
@@ -75,6 +76,19 @@ class UserTokenDetailView(LoginRequiredMixin, DetailView):
 
         # navigating back to the page will auto-create the token
         return redirect('profile_token')
+
+
+class UnlinkDiscordView(LoginRequiredMixin, DeleteView):
+    model = DiscordUser
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('profile')
+
+    def get_object(self, *args, **kwargs):
+        return self.request.user.discord_user
 
 
 class UserProfileUpdateForm(forms.ModelForm):
