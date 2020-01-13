@@ -24,6 +24,7 @@ from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
 from aiarena.core.models import Trophy
 from aiarena.frontend.utils import restrict_page_range
+from aiarena.patreon.models import PatreonAccountBind
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
@@ -89,6 +90,19 @@ class UnlinkDiscordView(LoginRequiredMixin, DeleteView):
 
     def get_object(self, *args, **kwargs):
         return self.request.user.discord_user
+
+
+class UnlinkPatreonView(LoginRequiredMixin, DeleteView):
+    model = PatreonAccountBind
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('profile')
+
+    def get_object(self, *args, **kwargs):
+        return self.request.user.patreonaccountbind
 
 
 class UserProfileUpdateForm(forms.ModelForm):

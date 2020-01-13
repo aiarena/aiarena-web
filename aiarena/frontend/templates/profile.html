@@ -47,13 +47,15 @@
                     <input class="profile-link-button" type="submit" value="Link Discord"/>
                 </form>
             {% endif %}
-            <form action="{% url 'patreon_bind_index' %}">
-                {% if user.patreonaccountbind %}
-                    <input class="profile-linked-button" type="submit" value="Link Patreon" disabled/>
-                {% else %}
+            {% if user.patreonaccountbind %}
+                <form action="{% url 'unlink_patreon' %}">
+                    <input class="profile-linked-button" type="submit" value="Unlink Patreon"/>
+                </form>
+            {% else %}
+                <form action="{% url 'patreon_bind_index' %}">
                     <input class="profile-link-button" type="submit" value="Link Patreon"/>
-                {% endif %}
-            </form>
+                </form>
+            {% endif %}
             <br/>
             <form action="{% url 'profile_token' %}">
                 <input class="profile-token-button" type="submit" value="View API Token"/>
