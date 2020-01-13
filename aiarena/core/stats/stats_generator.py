@@ -183,7 +183,6 @@ class StatsGenerator:
                     left join core_bot cb on cp.bot_id = cb.id
                 where resultant_elo is not null 
                     and bot_id = {bot_id} 
-                group by date(cr.created) 
                 order by cr.created
                 """)
             cursor.execute(query)
