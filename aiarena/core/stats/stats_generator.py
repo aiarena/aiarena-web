@@ -1,6 +1,8 @@
 import io
 
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+
 import pandas as pd
 from django.db import connection, transaction
 from django.db.models import Max
@@ -174,8 +176,8 @@ class StatsGenerator:
             query = (f"""
                 select distinct
                 cb.name, 
-                avg(cp.resultant_elo) as elo, 
-                date(cr.created) as date 
+                cp.resultant_elo as elo, 
+                cr.created as date 
                 from core_matchparticipation cp
                     inner join core_result cr on cp.match_id = cr.match_id
                     left join core_bot cb on cp.bot_id = cb.id
@@ -192,6 +194,7 @@ class StatsGenerator:
     def _generate_plot_image(df):
         plot = io.BytesIO()
         ax = plt.gca()
+        plt.rc('xtick', labelsize=22)  
         graph = df.plot(kind='line', x='Date', y='ELO', ax=ax, figsize=(12, 9), color=('#86c232'))
         graph.spines["top"].set_visible(False)
         graph.spines["right"].set_visible(False)
@@ -202,10 +205,11 @@ class StatsGenerator:
         graph.get_yaxis().tick_left()
 
         plt.title('ELO over time', fontsize=20, color=('#86c232'))
-        plt.xticks(rotation=60)
-        ax.xaxis.label.set_color('#86c232')
-        ax.tick_params(axis='x', colors='#86c232')
-        ax.tick_params(axis='y', colors='#86c232')
+        plt.xticks()
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b-%d'))
+        ax.tick_params(axis='x', colors='#86c232', labelsize=16)
+        ax.tick_params(axis='y', colors='#86c232',  labelsize=16)
+        ax.get_legend().remove()
         plt.tight_layout()  # Avoids savefig cutting off x-label
         plt.savefig(plot, format="png", transparent=True)
         plt.cla()  # Clears axis in preparation for new graph
