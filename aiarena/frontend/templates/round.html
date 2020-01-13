@@ -30,7 +30,6 @@
         <td><b>Match ID</b></td>
         <td><b>Bot 1</b></td>
         <td><b>Bot 2</b></td>
-        <td><b>Map</b></td>
         <td><b>Started at</b></td>
         <td><b>Finished at</b></td>
         <td><b>Assigned to</b></td>
@@ -40,7 +39,6 @@
             <td>{{ match.as_html_link }}</td>
             <td>{{ match.participant1.bot.as_html_link }}</td>
             <td>{{ match.participant2.bot.as_html_link }}</td>
-            <td>{{ match.map }}</td>
             {% if match.started %}
                 <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
             {% else %}
