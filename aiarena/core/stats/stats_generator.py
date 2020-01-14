@@ -16,7 +16,7 @@ class StatsGenerator:
     @staticmethod
     def update_stats(sp: SeasonParticipation):
         with transaction.atomic():
-            sp.lock_me()
+            # sp.lock_me()  # don't lock until we start doing this after each result
             sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
                                                                match__result__isnull=False,
                                                                match__round__season=sp.season) \
