@@ -167,7 +167,7 @@ class StatsGenerator:
                     and bot_p.bot_id = %s
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'loss'
-                    and bot_p.result_cause = 'crash'
+                    and bot_p.result_cause in ('crash', 'timeout', 'initialization_failure')
                     """, [sp.season_id, sp.bot_id, season_participation.bot_id])
 
     @staticmethod
