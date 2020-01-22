@@ -26,16 +26,18 @@ bot_filter_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'curr
                     'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_data_publicly_downloadable'
 map_include_fields = 'id', 'name', 'file', 'active',
 map_filter_fields = 'id', 'name', 'active',
-match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round',
-matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time', 'match_log',
-matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', 'resultant_elo', 'elo_change', 'avg_step_time',
+match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round', 'requested_by',
+matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
+                                    'elo_change', 'avg_step_time', 'match_log', 'result', 'result_cause',
+matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
+                                   'elo_change', 'avg_step_time', 'result', 'result_cause',
+result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps',\
+                        'submitted_by', 'arenaclient_log', 'interest_rating', 'date_interest_rating_calculated',
+result_filter_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
+                       'submitted_by', 'interest_rating', 'date_interest_rating_calculated',
+round_include_fields = 'id', 'number', 'season', 'started', 'finished', 'complete',
+season_include_fields = 'id', 'number', 'date_created', 'date_opened', 'date_closed', 'status',
 seasonparticipation_include_fields = 'id', 'season', 'bot', 'elo',
-season_include_fields = 'id', 'date_created', 'date_opened', 'date_closed', 'status',
-# todo: add 'arenaclient_log',
-result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', \
-                        'game_steps', 'submitted_by', 'arenaclient_log',
-result_filter_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', 'submitted_by',
-round_include_fields = 'id', 'started', 'finished', 'complete',
 user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', \
                       'type', 'patreon_level'
 
