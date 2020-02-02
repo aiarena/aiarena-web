@@ -43,12 +43,12 @@
         <div class="divider"><span></span><span><h2>Top 10 bots</h2></span><span></span></div>
         <div id="top10">
             <table id="resultsTable" cellpadding="2px" style="min-width: 400px">
-                <tbody>
                 <thead>
                 <td><b>Rank</b></td>
                 <td><b>Name</b></td>
                 <td><b>ELO</b></td>
                 </thead>
+                <tbody>
                 {% for participant in seasonparticipation_list %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
@@ -64,11 +64,11 @@
         <div class="divider"><span></span><span><h2>Recently updated</h2></span><span></span></div>
         <div id="top10">
             <table id="recentlyUpdatedTable" cellpadding="2px" style="min-width: 400px">
-                <tbody>
                 <thead>
                 <td><b>Date</b></td>
                 <td><b>Bot</b></td>
                 </thead>
+                <tbody>
                 {% for bot in recently_updated_bots %}
                     <tr>
                         <td>{{ bot.bot_zip_updated }}</td>
