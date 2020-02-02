@@ -61,6 +61,25 @@
             <br> <!-- extra space -->
 
         </div>
+        <div class="divider"><span></span><span><h2>Recently updated</h2></span><span></span></div>
+        <div id="top10">
+            <table id="recentlyUpdatedTable" cellpadding="2px" style="min-width: 400px">
+                <tbody>
+                <thead>
+                <td><b>Date</b></td>
+                <td><b>Bot</b></td>
+                </thead>
+                {% for bot in recently_updated_bots %}
+                    <tr>
+                        <td>{{ bot.bot_zip_updated }}</td>
+                        <td>{{ bot.as_html_link }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <br> <!-- extra space -->
+
+        </div>
         <div class="divider-full div-transparent-full "></div>
     </div>
 {% endblock %}
