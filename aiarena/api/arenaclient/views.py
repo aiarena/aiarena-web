@@ -311,7 +311,6 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
         '-match__result__created')[:config.BOT_CONSECUTIVE_CRASH_LIMIT]
 
     # if there's not enough participations yet, then exit without action
-    count = recent_participations.count()
     if recent_participations.count() < config.BOT_CONSECUTIVE_CRASH_LIMIT:
         return
 
