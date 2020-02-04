@@ -81,6 +81,7 @@ class UserTokenDetailView(LoginRequiredMixin, DetailView):
 
 class UnlinkDiscordView(LoginRequiredMixin, DeleteView):
     model = DiscordUser
+    template_name = 'discord/confirm_unlink.html'
 
     def get_login_url(self):
         return reverse('login')
@@ -94,6 +95,7 @@ class UnlinkDiscordView(LoginRequiredMixin, DeleteView):
 
 class UnlinkPatreonView(LoginRequiredMixin, DeleteView):
     model = PatreonAccountBind
+    template_name = 'patreon/confirm_unlink.html'
 
     def get_login_url(self):
         return reverse('login')

@@ -895,6 +895,17 @@ background-color: #86c232;
     padding-bottom: 30px;
 }
 
+.unlink-account-form{
+    margin-left: 75px;
+    margin-right: 75px;
+    border: 2px solid #86c232;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding-top: 10px;
+    padding-left: 30px;
+    padding-bottom: 30px;
+    text-align: center;
+}
+
 .mono{
 font-family: 'Cutive Mono', monospace;
 font-size: 14px;
