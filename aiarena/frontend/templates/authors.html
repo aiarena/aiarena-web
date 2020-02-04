@@ -1,17 +1,17 @@
 {% extends "base.html" %}
-{% load i18n avatar_tags %}
+{% load i18n avatar_tags static %}
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Authors</h2></span><span></span></div>
     <div id="authors_table">
         {% for author in user_list %}
-            <div class="author">
+            <div class="author-avatar">
                 <div class="author-image-container">
                     <a href="{{ author.id }}">
                         <div class="author-image">{% avatar author 150 %}</div>
                     </a>
+                    <div class="author-name">{{ author.as_html_link }}</div>
                 </div>
-                <div class="author-name">{{ author.as_html_link }}</div>
                 <div class="patreon-{{ author.patreon_level }}"></div>
             </div>
         {% endfor %}

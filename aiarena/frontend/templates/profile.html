@@ -12,11 +12,13 @@
     {% endif %}
 
     <div id="author_detail">
-        <div class="author-detail-img">
-            <div class="author-image-container">
-                <div class="author-image">{% avatar user 150 %}</div>
+        <div class="author-details-avatar-container">
+            <div class="author-avatar">
+                <div class="author-image-container">
+                    <div class="author-image">{% avatar user 150 %}</div>
+                </div>
+                <div class="patreon-{{ user.patreon_level }}"></div>
             </div>
-            <div class="patreon-{{ user.patreon_level }}"></div>
         </div>
         <div class="author-detail-info">
             <h2>{{ user.username }}</h2>

@@ -555,19 +555,23 @@ a:hover, a:visited, a:link, a:active {
 
 }
 
-.author {
-    position: relative;
+.author-avatar {
     float: left;
+    position: relative;
+}
+
+.author-image-container {
     width: 150px;
     height: 150px;
-    background-color: #fff;
-    margin: 10px;
     overflow: visible;
+    margin: 10px;
+    background-color: #fff;
 }
 
 .author-image {
     width: 150px;
     height: 150px;
+    outline: 1px solid #86c232;
 }
 
 .author-name {
@@ -589,41 +593,34 @@ a:hover, a:visited, a:link, a:active {
 .patreon-base, .patreon-none, .patreon-bronze, .patreon-silver, .patreon-gold, .patreon-platinum, .patreon-diamond {
     position: absolute;
     top: 0;
-    left: 0;
-    display: block;
+    left: 8px;
     width: 100%;
     height: 100%;
     pointer-events: none;
+    background-repeat: no-repeat;
 }
 
 .patreon-none {
-    outline: 1px solid #86c232;
-    outline-offset: -1px;
 }
 
 .patreon-bronze {
-    outline: 5px outset #cd7f32;
-    outline-offset: -5px;
+    background-image: url("/static/avatar/frames/bronze.png");
 }
 
 .patreon-silver {
-    outline: 5px outset #C0C0C0;
-    outline-offset: -5px;
+    background-image: url("/static/avatar/frames/silver.png");
 }
 
 .patreon-gold {
-    outline: 5px outset #FFD700;
-    outline-offset: -5px;
+    background-image: url("/static/avatar/frames/gold.png");
 }
 
 .patreon-platinum {
-    outline: 5px ridge #E2E3E5;
-    outline-offset: -5px;
+    background-image: url("/static/avatar/frames/platinum.png");
 }
 
 .patreon-diamond {
-    outline: 5px ridge #B9F2FF;
-    outline-offset: -5px;
+    background-image: url("/static/avatar/frames/diamond.png");
 }
 
 table {
@@ -726,12 +723,8 @@ tr:hover a:focus {
     text-align: center;
 }
 
-.author-detail-img{
-    position: relative;
-    float: left;
+.author-details-avatar-container{
     margin-left: 80px;
-    margin-bottom: 0;
-
 }
 
 .author-detail-info{
