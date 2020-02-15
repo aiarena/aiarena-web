@@ -146,29 +146,6 @@ class MapViewSet(viewsets.ReadOnlyModelViewSet):
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
-class MatchSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Match
-        fields = match_include_fields
-
-
-# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
-
-class MatchViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Match data view
-    """
-    queryset = Match.objects.all()
-    serializer_class = MatchSerializer
-
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = match_include_fields
-    search_fields = match_include_fields
-    ordering_fields = match_include_fields
-
-
-# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
-
 class MatchParticipationSerializer(serializers.ModelSerializer):
     match_log = serializers.SerializerMethodField()
 
@@ -265,6 +242,30 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = result_filter_fields
     search_fields = result_filter_fields
     ordering_fields = result_filter_fields
+
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
+class MatchSerializer(serializers.ModelSerializer):
+    result = ResultSerializer()
+    class Meta:
+        model = Match
+        fields = match_include_fields + ('result',)
+
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
+class MatchViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Match data view
+    """
+    queryset = Match.objects.all()
+    serializer_class = MatchSerializer
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = match_include_fields
+    search_fields = match_include_fields
+    ordering_fields = match_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
