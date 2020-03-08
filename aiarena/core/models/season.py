@@ -11,6 +11,7 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason, MultipleCurrentSeasons
+from .competition import Competition
 from .mixins import LockableModelMixin
 
 
@@ -37,6 +38,7 @@ class Season(models.Model, LockableModelMixin):
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
     previous_season_files_cleaned = models.BooleanField(default=False)
     replay_archive_zip = models.FileField(upload_to=replay_archive_upload_to, blank=True, null=True)
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
