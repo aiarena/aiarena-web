@@ -19,10 +19,10 @@ logger = logging.getLogger(__name__)
 # Allowing filtering/etc on sensitive fields could leak information.
 # Serializer fields are also manually specified so new private fields don't accidentally get leaked.
 
-bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'current_match', 'plays_race', 'type', \
+bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
                      'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_zip', \
                      'bot_zip_md5hash', 'bot_data_publicly_downloadable', 'bot_data', 'bot_data_md5hash'
-bot_filter_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'current_match', 'plays_race', 'type', \
+bot_filter_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
                     'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_data_publicly_downloadable'
 map_include_fields = 'id', 'name', 'file', 'active',
 map_filter_fields = 'id', 'name', 'active',
@@ -31,7 +31,7 @@ matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 
                                     'elo_change', 'avg_step_time', 'match_log', 'result', 'result_cause',
 matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
                                    'elo_change', 'avg_step_time', 'result', 'result_cause',
-result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps',\
+result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps', \
                         'submitted_by', 'arenaclient_log', 'interest_rating', 'date_interest_rating_calculated',
 result_filter_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
                        'submitted_by', 'interest_rating', 'date_interest_rating_calculated',

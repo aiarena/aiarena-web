@@ -1,8 +1,7 @@
 import io
 
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-
+import matplotlib.pyplot as plt
 import pandas as pd
 from django.db import connection, transaction
 from django.db.models import Max
@@ -193,7 +192,7 @@ class StatsGenerator:
     def _generate_plot_image(df):
         plot = io.BytesIO()
         ax = plt.gca()
-        plt.rc('xtick', labelsize=22)  
+        plt.rc('xtick', labelsize=22)
         graph = df.plot(kind='line', x='Date', y='ELO', ax=ax, figsize=(12, 9), color=('#86c232'))
         graph.spines["top"].set_visible(False)
         graph.spines["right"].set_visible(False)
@@ -207,7 +206,7 @@ class StatsGenerator:
         plt.xticks()
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%b-%d'))
         ax.tick_params(axis='x', colors='#86c232', labelsize=16)
-        ax.tick_params(axis='y', colors='#86c232',  labelsize=16)
+        ax.tick_params(axis='y', colors='#86c232', labelsize=16)
         ax.get_legend().remove()
         plt.tight_layout()  # Avoids savefig cutting off x-label
         plt.savefig(plot, format="png", transparent=True)

@@ -160,7 +160,7 @@ class BaseTestCase(TransactionTestCase):
         self._generate_match_activity()
 
         # generate a bot match request to ensure it doesn't bug things out
-        bot = Bot.get_random_available()
+        bot = Bot.get_random_active()
         call_command('requestbotmatch', bot.id)
 
         self.client.logout()  # child tests can login if they require
@@ -468,10 +468,6 @@ class SeasonsTestCase(FullDataSetTestCase):
         self.assertEqual(round.number, 1)
 
 
-class PrivateStorageTestCase(MatchReadyTestCase):
-    pass  # todo
-
-
 class ManagementCommandTests(MatchReadyTestCase):
     """
     Tests for management commands
@@ -592,4 +588,3 @@ class ManagementCommandTests(MatchReadyTestCase):
         out = StringIO()
         call_command('seed', stdout=out)
         self.assertIn('Done. User logins have a password of "x".', out.getvalue())
-

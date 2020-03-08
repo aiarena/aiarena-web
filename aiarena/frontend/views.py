@@ -21,6 +21,7 @@ from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
+from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
 from aiarena.core.models import Trophy
 from aiarena.frontend.utils import restrict_page_range
@@ -544,7 +545,7 @@ class RequestMatchForm(forms.Form):
     match_count = forms.IntegerField(min_value=1, initial=1)
 
     def request_match(self, user):
-        return [Match.request_bot_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'],
+        return [Matches.request_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'],
                                        user) for _ in range(0, self.cleaned_data['match_count'])]
 
 

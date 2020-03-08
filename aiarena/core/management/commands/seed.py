@@ -73,9 +73,6 @@ def create_result(match, type, as_user):
 def finalize_result(result, p1, p2, bot1, bot2):
     # imitates the arenaclient result view
 
-    bot1.leave_match(result.match_id)
-    bot2.leave_match(result.match_id)
-
     # Update and record ELO figures
     p1_initial_elo, p2_initial_elo = result.get_initial_elos()
     result.adjust_elo()
