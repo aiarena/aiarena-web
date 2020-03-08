@@ -558,7 +558,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         # If not staff, only allow requesting games against this user's bots
-        if not self.request.user.is_staff:
+        if not self.request.user.is_staff and not self.request.user.can_request_games_for_another_authors_bot:
             form.fields['bot1'].queryset = Bot.objects.filter(user=self.request.user)
         return form
 
