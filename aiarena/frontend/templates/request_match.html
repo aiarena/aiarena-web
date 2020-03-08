@@ -6,16 +6,16 @@
     <div class="request-match-form">
         {% if config.ALLOW_REQUESTED_MATCHES %}
             <p>Match request limit: {{ user.requested_matches_limit }} per {{ config.REQUESTED_MATCHES_LIMIT_PERIOD|smooth_timedelta }}</p>
-            {% if user.match_request_count_left > 0 %}
-                Match requests left: {{ user.match_request_count_left }}
-                <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
-                      enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"/>
-                </form>
-            {% else %}
-                <h3>You have already reached your match request limit.</h3>
+            Match requests left: {{ user.match_request_count_left }}
+            <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
+                  enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
+                  {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
+            </form>
+            {% if user.match_request_count_left <= 0 %}
+                <h3>You have reached your match request limit.</h3>
             {% endif %}
         {% else %}
             <h3>Sorry. Requested matches are currently disabled.</h3>

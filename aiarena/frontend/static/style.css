@@ -832,8 +832,13 @@ font-family: 'Quicksand', sans-serif;
 font-weight: bold;
 border: 0;
 }
+
 #submit-button:hover {
 background-color: #86c232;
+}
+
+#submit-button:disabled {
+background-color: #3d4536;
 }
 
 #profile_link_buttons {
