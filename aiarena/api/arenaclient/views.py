@@ -38,14 +38,14 @@ class BotSerializer(serializers.ModelSerializer):
     bot_data = serializers.SerializerMethodField()
 
     def get_bot_zip(self, obj):
-        p = MatchParticipation.objects.get(bot=obj, match=obj.current_match)
-        return reverse('match-download-zip', kwargs={'pk': obj.current_match.pk, 'p_num': p.participant_number},
+        p = MatchParticipation.objects.get(bot=obj, match_id=self.root.instance.id)
+        return reverse('match-download-zip', kwargs={'pk': self.root.instance.id, 'p_num': p.participant_number},
                        request=self.context['request'])
 
     def get_bot_data(self, obj):
-        p = MatchParticipation.objects.get(bot=obj, match=obj.current_match)
-        if p.bot.bot_data:
-            return reverse('match-download-data', kwargs={'pk': obj.current_match.pk, 'p_num': p.participant_number},
+        p = MatchParticipation.objects.get(bot=obj, match_id=self.root.instance.id)
+        if p.use_bot_data and p.bot.bot_data:
+            return reverse('match-download-data', kwargs={'pk': self.root.instance.id, 'p_num': p.participant_number},
                            request=self.context['request'])
         else:
             return None
@@ -131,7 +131,7 @@ class SubmitResultResultSerializer(serializers.ModelSerializer):
 class SubmitResultBotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bot
-        fields = 'bot_data', 'in_match', 'current_match'
+        fields = 'bot_data',
 
 
 class SubmitResultParticipationSerializer(serializers.ModelSerializer):
@@ -212,40 +212,43 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             # validate bots
             match = result.validated_data['match']
 
-            if p1Instance.bot.current_match_id != match.id:
+            if not p1Instance.bot.is_in_match(match.id):
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p1Instance.bot.name))
-            bot1_data = serializer.validated_data.get('bot1_data')
-            bot1_dict = {'in_match': False, 'current_match': None}
-            # if we set the bot data key to anything, it will overwrite the existing bot data
-            # so only include bot1_data if it isn't none
-            # Also don't update bot data if it's a requested match.
-            if bot1_data is not None and not match.is_requested:
-                bot1_dict['bot_data'] = bot1_data
-            bot1 = SubmitResultBotSerializer(instance=p1Instance.bot,
-                                             data=bot1_dict, partial=True)
-            bot1.is_valid(raise_exception=True)
 
-            if p2Instance.bot.current_match_id != match.id:
+            # should we update the bot data?
+            if p1Instance.use_bot_data and p1Instance.update_bot_data:
+                bot1_data = serializer.validated_data.get('bot1_data')
+                # if we set the bot data key to anything, it will overwrite the existing bot data
+                # so only include bot1_data if it isn't none
+                # Also don't update bot data if it's a requested match.
+                if bot1_data is not None and not match.is_requested:
+                    bot1_dict = {'bot_data': bot1_data}
+                    bot1 = SubmitResultBotSerializer(instance=p1Instance.bot,
+                                                     data=bot1_dict, partial=True)
+                    bot1.is_valid(raise_exception=True)
+                    bot1.save()
+
+            if not p2Instance.bot.is_in_match(match.id):
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p2Instance.bot.name))
-            bot2_data = serializer.validated_data.get('bot2_data')
-            bot2_dict = {'in_match': False, 'current_match': None}
-            # if we set the bot data key to anything, it will overwrite the existing bot data
-            # so only include bot2_data if it isn't none
-            # Also don't update bot data if it's a requested match.
-            if bot2_data is not None and not match.is_requested:
-                bot2_dict['bot_data'] = bot2_data
-            bot2 = SubmitResultBotSerializer(instance=p2Instance.bot,
-                                             data=bot2_dict, partial=True)
-            bot2.is_valid(raise_exception=True)
+
+            if p2Instance.use_bot_data and p2Instance.update_bot_data:
+                bot2_data = serializer.validated_data.get('bot2_data')
+                # if we set the bot data key to anything, it will overwrite the existing bot data
+                # so only include bot2_data if it isn't none
+                # Also don't update bot data if it's a requested match.
+                if bot2_data is not None and not match.is_requested:
+                    bot2_dict = {'bot_data': bot2_data}
+                    bot2 = SubmitResultBotSerializer(instance=p2Instance.bot,
+                                                     data=bot2_dict, partial=True)
+                    bot2.is_valid(raise_exception=True)
+                    bot2.save()
 
             # save models
             result = result.save()
             participant1 = participant1.save()
             participant2 = participant2.save()
-            bot1.save()
-            bot2.save()
 
             # Only do these actions if the match is part of a round
             if result.match.round is not None:
