@@ -542,10 +542,11 @@ class RequestMatchForm(forms.Form):
     bot1 = forms.ModelChoiceField(queryset=Bot.objects.all().order_by('name'), empty_label=None, required=True)
     bot2 = forms.ModelChoiceField(queryset=Bot.objects.all().order_by('name'), empty_label='Random', required=False)
     map = forms.ModelChoiceField(queryset=Map.objects.filter(active=True), empty_label='Random', required=False)
+    match_count = forms.IntegerField(min_value=1, initial=1)
 
     def request_match(self, user):
-        return Matches.request_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'],
-                                     self.cleaned_data['map'], user)
+        return [Matches.request_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'],
+                                       user) for _ in range(0, self.cleaned_data['match_count'])]
 
 
 class RequestMatch(LoginRequiredMixin, FormView):
@@ -558,7 +559,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         # If not staff, only allow requesting games against this user's bots
-        if not self.request.user.is_staff:
+        if not self.request.user.is_staff and not self.request.user.can_request_games_for_another_authors_bot:
             form.fields['bot1'].queryset = Bot.objects.filter(user=self.request.user)
         return form
 
@@ -567,13 +568,15 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         if config.ALLOW_REQUESTED_MATCHES:
-            if self.request.user.match_request_count_left > 0:
-                match = form.request_match(self.request.user)
-                messages.success(self.request, mark_safe(
-                    f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created."))
+            if self.request.user.match_request_count_left >= form.cleaned_data['match_count']:
+                match_list = form.request_match(self.request.user)
+                message = ""
+                for match in match_list:
+                    message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
+                messages.success(self.request, mark_safe(message))
                 return super().form_valid(form)
             else:
-                messages.error(self.request, "You have already reached your match request limit.")
+                messages.error(self.request, "That number of matches exceeds your match request limit.")
                 return self.render_to_response(self.get_context_data(form=form))
         else:
             messages.error(self.request, "Sorry. Requested matches are currently disabled.")

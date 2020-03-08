@@ -37,6 +37,9 @@ class User(AbstractUser):
     extra_periodic_match_requests = models.IntegerField(default=0)
     receive_email_comms = models.BooleanField(default=True)
 
+    # permissions
+    can_request_games_for_another_authors_bot = models.BooleanField(default=False)
+
     def get_absolute_url(self):
         if self.type == 'WEBSITE_USER':
             return reverse('author', kwargs={'pk': self.pk})
