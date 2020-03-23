@@ -36,6 +36,25 @@
         <div id="contribute">
             Refer to the <a href="https://ai-arena.net/wiki/contribute/">wiki</a> on ways to contribute.
         </div>
+        <div class="divider"><span></span><span><h2>New bots</h2></span><span></span></div>
+        <div id="top10">
+            <table id="NewBotsTable" cellpadding="2px" style="min-width: 400px">
+                <thead>
+                <td><b>Date</b></td>
+                <td><b>Bot</b></td>
+                </thead>
+                <tbody>
+                {% for bot in new_bots %}
+                    <tr>
+                        <td>{{ bot.created }}</td>
+                        <td>{{ bot.as_html_link }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <br> <!-- extra space -->
+
+        </div>
         <br> <!-- extra space -->
         <div class="divider-full div-transparent-full "></div>
     </div>

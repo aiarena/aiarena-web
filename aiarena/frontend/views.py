@@ -491,6 +491,7 @@ class Index(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['recently_updated_bots'] = Bot.objects.all().order_by('-bot_zip_updated')[:5]
+        context['new_bots'] = Bot.objects.all().order_by('-created')[:5]
         return context
 
     template_name = 'index.html'
