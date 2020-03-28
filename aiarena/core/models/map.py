@@ -18,7 +18,7 @@ class Map(models.Model):
         return self.name
 
     @staticmethod
-    def random(ladder):
+    def random(competition: Competition):
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return Map.objects.filter(ladder=ladder).order_by('?').first()
+        return Map.objects.filter(competition=competition).order_by('?').first()

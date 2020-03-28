@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season
+from aiarena.core.models.competition import Competition
 from aiarena.core.tests.tests import BaseTestCase
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
@@ -106,14 +107,17 @@ def run_seed(rounds, token):
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient1, key=token)
 
-    season = Season.objects.create(previous_season_files_cleaned=True)
+    competition = Competition.objects.create(name='Melee Ladder', type='ladder')
+
+    season = Season.objects.create(previous_season_files_cleaned=True, competition=competition)
     season.open()
 
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net')
     devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net')
 
     with open(BaseTestCase.test_map_path, 'rb') as map:
-        Map.objects.create(name='test_map', file=File(map), active=True)
+        map = Map.objects.create(name='test_map', file=File(map), active=True)
+        competition.map_set.add(map)
 
     with open(BaseTestCase.test_bot_zip_path, 'rb') as bot_zip:
         Bot.objects.create(user=devadmin, name='devadmin_bot1', active=True, plays_race='T', type='python',

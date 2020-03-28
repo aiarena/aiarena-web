@@ -62,7 +62,7 @@ class Round(models.Model, LockableModelMixin):
         if current_season.is_closing:  # we should technically never hit this
             raise CurrentSeasonClosing()
 
-        new_round = Round.objects.create(season=Season.get_current_season())
+        new_round = Round.objects.create(season=current_season)
 
         active_bots = Bot.objects.filter(active=True)
         already_processed_bots = []
@@ -71,7 +71,7 @@ class Round(models.Model, LockableModelMixin):
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
             for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
-                Match.create(new_round, Map.random_active(), bot1, bot2)
+                Match.create(new_round, Map.random(current_season.competition), bot1, bot2)
 
     def get_absolute_url(self):
         return reverse('round', kwargs={'pk': self.pk})

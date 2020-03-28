@@ -9,6 +9,7 @@ from wiki.models import Article
 from aiarena.core.models import Bot, Result, Round, Map, Season, MatchParticipation, Match
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds
 from aiarena.core.api import Bots
+from aiarena.core.models.competition import Competition
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +17,9 @@ logger = logging.getLogger(__name__)
 class Matches:
     @staticmethod
     def request_match(bot, opponent=None, map=None, user=None):
+        assert map is not None
         # if opponent or map is none, a random one gets chosen
-        return Match.create(None, map if map is not None else Map.random_active(), bot,
+        return Match.create(None, map, bot,
                             opponent if opponent is not None else bot.get_random_active_excluding_self(),
                             user, bot1_update_data=False, bot2_update_data=False)
 
@@ -61,14 +63,16 @@ class Matches:
             # then we don't hit a race condition
             # MySql also requires we lock any other tables we access as well.
             cursor.execute(
-                "LOCK TABLES {} WRITE, {} WRITE, {} WRITE, {} WRITE, {} READ, {} READ, {} READ".format(
-                    Match._meta.db_table,
-                    Round._meta.db_table,
-                    MatchParticipation._meta.db_table,
-                    Bot._meta.db_table,
-                    Map._meta.db_table,
-                    Article._meta.db_table,
-                    Season._meta.db_table))
+                f"LOCK TABLES {Match._meta.db_table} WRITE,"
+                f" {Round._meta.db_table} WRITE,"
+                f" {MatchParticipation._meta.db_table} WRITE,"
+                f" {Bot._meta.db_table} WRITE,"
+                f" {Map._meta.db_table} READ,"
+                f" {Article._meta.db_table} READ,"
+                f" {Season._meta.db_table} READ,"
+                f" {Competition._meta.db_table}  READ,"
+                f" core_map_competition READ"
+            )
             try:
                 match = Matches._locate_and_return_started_match(requesting_user)
                 if match is None:

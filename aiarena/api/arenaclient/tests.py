@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map
+from aiarena.core.models.competition import Competition
 from aiarena.core.tests.tests import LoggedInTestCase, MatchReadyTestCase
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
@@ -37,7 +38,7 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 409)
 
         # not enough active bots
-        self._create_map('test_map')
+        map = self._create_map('test_map')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 409)
 
@@ -52,7 +53,8 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 409)
 
         # needs a valid season to be able to activate a bot.
-        self._create_open_season()
+        season = self._create_open_season()
+        season.competition.map_set.add(map)
 
         # not enough active bots
         bot1.active = True
@@ -110,8 +112,8 @@ class MatchesTestCase(LoggedInTestCase):
         config.REISSUE_UNFINISHED_MATCHES = False
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map('test_map')
-        self._create_open_season()
+        season = self._create_open_season()
+        season.competition.map_set.add(self._create_map('test_map'))
 
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -148,8 +150,8 @@ class MatchesTestCase(LoggedInTestCase):
     def test_match_reissue(self):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map('test_map')
-        self._create_open_season()
+        season = self._create_open_season()
+        self._create_map('test_map', season.competition)
 
         self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -169,8 +171,8 @@ class MatchesTestCase(LoggedInTestCase):
         config.MAX_ACTIVE_ROUNDS = 2
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map('test_map')
-        self._create_open_season()
+        season = self._create_open_season()
+        self._create_map('test_map', season.competition)
 
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -208,8 +210,8 @@ class MatchesTestCase(LoggedInTestCase):
                                                          type='ARENA_CLIENT')
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map('test_map')
-        self._create_open_season()
+        season = self._create_open_season()
+        map = self._create_map('test_map', season.competition)
 
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -224,7 +226,7 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(u"Failed to start match. There might not be any available participants.", response.data['detail'])
 
-        Matches.request_match(bot1)
+        Matches.request_match(bot1, map=map)
 
         # now we should be able to get a match - the requested one
         response = self.client.post('/api/arenaclient/matches/')
@@ -241,8 +243,9 @@ class ResultsTestCase(LoggedInTestCase):
     def test_create_results(self):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map('test_map')
-        self._create_open_season()
+        map = self._create_map('test_map')
+        season = self._create_open_season()
+        season.competition.map_set.add(map)
 
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
@@ -330,7 +333,7 @@ class ResultsTestCase(LoggedInTestCase):
             self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
 
         # test that requested matches don't update bot_data
-        match5 = Matches.request_match(bot1, bot2, Map.random_active(), self.staffUser1)
+        match5 = Matches.request_match(bot1, bot2, map, self.staffUser1)
         self._post_to_results_updated_datas(match5.id, 'Player1Win')
 
         # check hashes - nothing should have changed
@@ -361,8 +364,8 @@ class ResultsTestCase(LoggedInTestCase):
     def test_create_result_bot_not_in_match(self):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map('test_map')
-        self._create_open_season()
+        season = self._create_open_season()
+        season.competition.map_set.add(self._create_map('test_map'))
 
         # Create 3 bots, so after a round is generated, we'll have some unstarted matches
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
@@ -395,8 +398,8 @@ class ResultsTestCase(LoggedInTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map('test_map')
-        self._create_open_season()
+        season = self._create_open_season()
+        season.competition.map_set.add(self._create_map('test_map'))
 
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
@@ -462,8 +465,8 @@ class EloTestCase(LoggedInTestCase):
 
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
-        self._create_map('testmap')
-        self._create_open_season()
+        season = self._create_open_season()
+        self._create_map('testmap', season.competition)
 
         # activate the required bots
         self.regularUserBot1.active = True

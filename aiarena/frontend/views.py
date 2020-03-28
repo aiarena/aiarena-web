@@ -541,7 +541,7 @@ class SeasonDetail(DetailView):
 class RequestMatchForm(forms.Form):
     bot1 = forms.ModelChoiceField(queryset=Bot.objects.all().order_by('name'), empty_label=None, required=True)
     bot2 = forms.ModelChoiceField(queryset=Bot.objects.all().order_by('name'), empty_label='Random', required=False)
-    map = forms.ModelChoiceField(queryset=Map.objects.filter(active=True), empty_label='Random', required=False)
+    map = forms.ModelChoiceField(queryset=Map.objects.filter(active=True), required=True)
     match_count = forms.IntegerField(min_value=1, initial=1)
 
     def request_match(self, user):

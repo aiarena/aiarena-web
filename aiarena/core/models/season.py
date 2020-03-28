@@ -17,7 +17,7 @@ from .mixins import LockableModelMixin
 
 logger = logging.getLogger(__name__)
 
-
+# todo: include competition name
 def replay_archive_upload_to(instance, filename):
     return '/'.join(['replays', 'season_' + str(instance.number) + '_zip'])
 
@@ -153,7 +153,7 @@ class Season(models.Model, LockableModelMixin):
 @receiver(pre_save, sender=Season)
 def pre_save_season(sender, instance, **kwargs):
     if instance.number is None:
-        instance.number = Season.objects.all().count() + 1  # todo: redo this for multiladders
+        instance.number = Season.objects.filter(competition=instance.competition).count() + 1
 
 
 @receiver(post_save, sender=Season)

@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round
+from aiarena.core.models.competition import Competition
 from aiarena.core.utils import calculate_md5
 
 
@@ -35,11 +36,19 @@ class BaseTestCase(TransactionTestCase):
     test_replay_path = 'aiarena/core/tests/test-media/testReplay.SC2Replay'
     test_map_path = 'aiarena/core/tests/test-media/AutomatonLE.SC2Map'
 
-    def _create_map(self, name):
-        return Map.objects.create(name=name, active=True)
+    def _create_map(self, name: str, competition: Competition=None):
+        map = Map.objects.create(name=name, active=True)
+        if competition is not None:
+            competition.map_set.add(map)
+        return map
+
+    def _create_competition(self):
+        return Competition.objects.create(name='Melee Ladder', type='ladder')
 
     def _create_open_season(self):
-        season = Season.objects.create(previous_season_files_cleaned=True)
+        competition = self._create_competition()
+
+        season = Season.objects.create(competition=competition, previous_season_files_cleaned=True)
         season.open()
         return season
 
@@ -153,7 +162,7 @@ class BaseTestCase(TransactionTestCase):
     def _generate_full_data_set(self):
         self.client.login(username='staff_user', password='x')
 
-        self._create_map('testmap2')
+        map = self._create_map('testmap2')
         self._generate_extra_users()
         self._generate_extra_bots()
 
@@ -161,7 +170,7 @@ class BaseTestCase(TransactionTestCase):
 
         # generate a bot match request to ensure it doesn't bug things out
         bot = Bot.get_random_active()
-        call_command('requestbotmatch', bot.id)
+        call_command('requestbotmatch', bot.id, map.id)
 
         self.client.logout()  # child tests can login if they require
 
@@ -259,8 +268,8 @@ class MatchReadyTestCase(LoggedInTestCase):
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
         config.MAX_USER_BOT_COUNT = 10
 
-        self._create_open_season()
-        self._create_map('testmap1')
+        season = self._create_open_season()
+        self.testmap1 = self._create_map('testmap1', season.competition)
 
         self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
         self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
@@ -427,7 +436,7 @@ class SeasonsTestCase(FullDataSetTestCase):
             bot.full_clean()
 
         # start a new season
-        season2 = Season.objects.create(previous_season_files_cleaned=True)
+        season2 = Season.objects.create(previous_season_files_cleaned=True, competition=season1.competition)
         self.assertEqual(season2.number, 2)
 
         # current season is paused
@@ -581,7 +590,7 @@ class ManagementCommandTests(MatchReadyTestCase):
 
     def test_request_bot_match_random_opponent(self):
         out = StringIO()
-        call_command('requestbotmatch', '1', stdout=out)
+        call_command('requestbotmatch', '1', str(self.testmap1.id), stdout=out)
         self.assertIn('Successfully requested match. Match ID:', out.getvalue())
 
     def test_seed(self):
