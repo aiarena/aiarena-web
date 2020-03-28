@@ -21,6 +21,7 @@ from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
+from aiarena.core.api.ladders import Ladders
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
 from aiarena.core.models import Trophy
 from aiarena.frontend.utils import restrict_page_range
@@ -481,8 +482,8 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     def get_queryset(self):
         try:
-            return SeasonParticipation.objects.filter(season=Season.get_current_season()).order_by(
-                '-elo')[:10].prefetch_related('bot')  # top 10 bots
+            return Ladders.get_season_ranked_participants(
+                Season.get_current_season())[:10].prefetch_related('bot')  # top 10 bots
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
 
@@ -533,7 +534,7 @@ class SeasonDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(SeasonDetail, self).get_context_data(**kwargs)
         context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
-        context['rankings'] = SeasonParticipation.objects.filter(season_id=self.object.id).order_by('-elo')
+        context['rankings'] = Ladders.get_season_ranked_participants(self.object)
         return context
 
 

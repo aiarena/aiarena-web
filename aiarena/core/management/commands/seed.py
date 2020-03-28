@@ -1,3 +1,5 @@
+import random
+
 from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -5,7 +7,7 @@ from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season
+from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match
 from aiarena.core.tests.tests import BaseTestCase
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
@@ -94,7 +96,7 @@ def finalize_result(result, p1, p2, bot1, bot2):
     result.match.round.update_if_completed()
 
 
-def run_seed(rounds, token):
+def run_seed(matches, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     arenaclient1 = User.objects.create_user(username='aiarenaclient-001', email='aiarenaclient-001@dev.aiarena.net',
@@ -140,25 +142,19 @@ def run_seed(rounds, token):
         Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-    for x in range(rounds - 1):  # 6 active bots - 15 games per round - todo: not sure this is correct anymore
-        create_result(create_match(arenaclient1), 'Player1Win', arenaclient1)  # 1
-        create_result(create_match(arenaclient2), 'Player2Win', arenaclient2)  # 2
-        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)  # 3
-        create_result(create_match(arenaclient1), 'Player1TimeOut', arenaclient1)  # 4
-        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Tie', arenaclient2)  # 5
-        create_result(create_match(arenaclient1), 'InitializationError', arenaclient1)  # 6
-        create_result(create_match(arenaclient1), 'Player1Surrender', arenaclient1)  # 7
-        create_result(create_match(arenaclient2), 'Player2Win', arenaclient2)  # 8
-        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)  # 9
-        create_result(create_match(arenaclient1), 'Player1TimeOut', arenaclient1)  # 10
-        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Tie', arenaclient1)  # 11
-        create_result(create_match(arenaclient1), 'InitializationError', arenaclient1)  # 12
-        create_result(create_match(arenaclient2), 'Player1Win', arenaclient2)  # 13
-        create_result(create_match(arenaclient1), 'Player2Surrender', arenaclient1)  # 14
-        create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)  # 15
+    for x in range(matches - 1):
+        if(bool(random.getrandbits(1))):  # select randomly
+            create_result(create_match(arenaclient1), random.choice(Result.TYPES)[0], arenaclient1)
+        else:
+            create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)
 
-    # one last to tick over into the final round so we don't have an empty match queue
-    if rounds != 0:
+        if x == 0:  # make it so a bot that once was active, is now inactive
+            bot1 = Match.objects.get(result__isnull=False).participant1.bot
+            bot1.active = False
+            bot1.save()
+
+    # so we have a match in progress
+    if matches != 0:
         create_match(arenaclient1)
 
     return new_token
@@ -167,12 +163,12 @@ def run_seed(rounds, token):
 class Command(BaseCommand):
     help = "Seed database for testing and development."
 
-    _DEFAULT_ROUNDS_TO_GENERATE = 20
+    _DEFAULT_MATCHES_TO_GENERATE = 20
 
     def add_arguments(self, parser):
-        parser.add_argument('--rounds', type=int, default=self._DEFAULT_ROUNDS_TO_GENERATE,
-                            help="Number of rounds to generate. Default is {0}.".format(
-                                self._DEFAULT_ROUNDS_TO_GENERATE))
+        parser.add_argument('--matches', type=int, default=self._DEFAULT_MATCHES_TO_GENERATE,
+                            help="Number of matches to generate. Default is {0}.".format(
+                                self._DEFAULT_MATCHES_TO_GENERATE))
         parser.add_argument('--token', type=str, default=None,
                             help="Specify the token to use for the arena client."
                                  " Useful to avoid having to reconfigure arena clients in testing")
@@ -193,8 +189,8 @@ class Command(BaseCommand):
 
             self.stdout.write('Seeding data...')
 
-            self.stdout.write('Generating {0} round(s)...'.format(options['rounds']))
-            api_token = run_seed(options['rounds'], options['token'])
+            self.stdout.write('Generating {0} match(es)...'.format(options['matches']))
+            api_token = run_seed(options['matches'], options['token'])
 
             self.stdout.write('Done. User logins have a password of "x".')
             self.stdout.write('API Token is {0}.'.format(api_token))
