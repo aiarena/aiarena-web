@@ -14,7 +14,6 @@ from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
-from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
@@ -52,7 +51,6 @@ class Bot(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
-    active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=BOT_ZIP_MAX_SIZE, validators=[validate_bot_zip_file, ])
     bot_zip_updated = models.DateTimeField(editable=False)
@@ -273,6 +271,6 @@ def post_save_bot(sender, instance, created, **kwargs):
         post_save.connect(pre_save_bot, sender=sender)
 
     # register a season participation if the bot has been activated
-    if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
-        from .season_participation import SeasonParticipation
-        SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)
+    # if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
+    #     from .season_participation import SeasonParticipation
+    #     SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)

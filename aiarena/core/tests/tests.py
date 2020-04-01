@@ -43,11 +43,10 @@ class BaseTestCase(TransactionTestCase):
         return map
 
     def _create_competition(self):
-        return Competition.objects.create(name='Melee Ladder', type='ladder')
+        return Competition.objects.create(name='Ladder' + Competition.objects.count()+1, type='ladder')
 
-    def _create_open_season(self):
-        competition = self._create_competition()
 
+    def _create_open_season(self, competition: Competition):
         season = Season.objects.create(competition=competition, previous_season_files_cleaned=True)
         season.open()
         return season
@@ -268,8 +267,13 @@ class MatchReadyTestCase(LoggedInTestCase):
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
         config.MAX_USER_BOT_COUNT = 10
 
-        season = self._create_open_season()
-        self.testmap1 = self._create_map('testmap1', season.competition)
+        ladder1 = self._create_competition()
+        season = self._create_open_season(ladder1)
+        self.testmap1 = self._create_map('testmap_ladder1', season.competition)
+
+        ladder2 = self._create_competition()
+        season = self._create_open_season(ladder2)
+        self.testmap1 = self._create_map('testmap_ladder2', season.competition)
 
         self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
         self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
