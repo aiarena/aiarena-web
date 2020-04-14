@@ -52,9 +52,6 @@ DATABASES = {
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
-        # todo: having this enabled will open a transaction for every request and therefore slow down the site
-        # todo: ideally we will eventually remove this and specify each individual view that needs its own transaction.
-        'ATOMIC_REQUESTS': True,
     }
 }
 
