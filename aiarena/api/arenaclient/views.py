@@ -84,6 +84,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @transaction.atomic()
     def create(self, request, *args, **kwargs):
         if config.LADDER_ENABLED:
             if config.REISSUE_UNFINISHED_MATCHES:
