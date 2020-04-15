@@ -7,8 +7,8 @@ from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match
-from aiarena.core.tests.tests import BaseTestCase
+from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season
+from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
 
@@ -18,11 +18,11 @@ def create_match(as_user):
 
 
 def create_result_with_bot_data_and_logs(match, type, as_user):
-    with open(BaseTestCase.test_replay_path, 'rb') as result_replay, \
-            open(BaseTestCase.test_bot1_data_path, 'rb') as bot1_data, \
-            open(BaseTestCase.test_bot2_data_path, 'rb') as bot2_data, \
-            open(BaseTestCase.test_bot1_match_log_path, 'rb') as bot1_log, \
-            open(BaseTestCase.test_bot2_match_log_path, 'rb') as bot2_log:
+    with open(BaseTestMixin.test_replay_path, 'rb') as result_replay, \
+            open(BaseTestMixin.test_bot1_data_path, 'rb') as bot1_data, \
+            open(BaseTestMixin.test_bot2_data_path, 'rb') as bot2_data, \
+            open(BaseTestMixin.test_bot1_match_log_path, 'rb') as bot1_log, \
+            open(BaseTestMixin.test_bot2_match_log_path, 'rb') as bot2_log:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
                                        submitted_by=as_user)
         p1 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=1)
@@ -47,7 +47,7 @@ def create_result_with_bot_data_and_logs(match, type, as_user):
 
 
 def create_result(match, type, as_user):
-    with open(BaseTestCase.test_replay_path, 'rb') as result_replay:
+    with open(BaseTestMixin.test_replay_path, 'rb') as result_replay:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
                                        submitted_by=as_user)
         p1 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=1)
@@ -117,10 +117,10 @@ def run_seed(matches, token):
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net')
     devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net')
 
-    with open(BaseTestCase.test_map_path, 'rb') as map:
+    with open(BaseTestMixin.test_map_path, 'rb') as map:
         Map.objects.create(name='test_map', file=File(map), active=True)
 
-    with open(BaseTestCase.test_bot_zip_path, 'rb') as bot_zip:
+    with open(BaseTestMixin.test_bot_zip_path, 'rb') as bot_zip:
         Bot.objects.create(user=devadmin, name='devadmin_bot1', active=True, plays_race='T', type='python',
                            bot_zip=File(bot_zip))
         Bot.objects.create(user=devadmin, name='devadmin_bot2', active=True, plays_race='Z', type='python',

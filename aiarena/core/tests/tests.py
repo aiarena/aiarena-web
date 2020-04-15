@@ -1,13 +1,13 @@
 import os
 from datetime import timedelta
 from io import StringIO
+from django.test import TestCase, TransactionTestCase
 
 from constance import config
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command, CommandError
-from django.test import TransactionTestCase
 from django.utils import timezone
 
 from aiarena.core.management.commands import cleanupreplays
@@ -15,7 +15,7 @@ from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipatio
 from aiarena.core.utils import calculate_md5
 
 
-class BaseTestCase(TransactionTestCase):
+class BaseTestMixin(object):
     """
     Base test case for testing. Contains references to all the test files such as test bot zips etc.
     """
@@ -233,9 +233,12 @@ class BaseTestCase(TransactionTestCase):
                                                      email='regular_user4@dev.aiarena.net')
 
 
-class LoggedInTestCase(BaseTestCase):
+class LoggedInMixin(BaseTestMixin):
+    """
+    A test case for when logged in as a user.
+    """
     def setUp(self):
-        super(LoggedInTestCase, self).setUp()
+        super(LoggedInMixin, self).setUp()
 
         self.staffUser1 = User.objects.create_user(username='staff_user', password='x',
                                                    email='staff_user@dev.aiarena.net',
@@ -247,13 +250,13 @@ class LoggedInTestCase(BaseTestCase):
                                                      email='regular_user1@dev.aiarena.net')
 
 
-class MatchReadyTestCase(LoggedInTestCase):
+class MatchReadyMixin(LoggedInMixin):
     """
     A test case which is setup and ready to run matches
     """
 
     def setUp(self):
-        super(MatchReadyTestCase, self).setUp()
+        super(MatchReadyMixin, self).setUp()
 
         # raise the configured per user limits
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
@@ -270,23 +273,23 @@ class MatchReadyTestCase(LoggedInTestCase):
 
 
 # Use this to pre-build a fuller dataset for testing
-class FullDataSetTestCase(MatchReadyTestCase):
+class FullDataSetMixin(MatchReadyMixin):
     """
     A test case with a full dataset including run matches.
     """
 
     def setUp(self):
-        super(FullDataSetTestCase, self).setUp()
+        super(FullDataSetMixin, self).setUp()
         self._generate_full_data_set()
 
 
-class UtilsTestCase(BaseTestCase):
+class UtilsTestCase(BaseTestMixin, TestCase):
     def test_calc_md5(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/../test-media/test_bot.zip')
         self.assertEqual('c96bcfc79318a8b50b0b2c8696400d06', calculate_md5(filename))
 
 
-class UserTestCase(BaseTestCase):
+class UserTestCase(BaseTestMixin, TestCase):
     def test_user_creation(self):
         user = User.objects.create(username='test user', email='test@test.com')
         arenaclient = User.objects.create(username='test arenaclient', email='arenaclient@test.com')
@@ -297,7 +300,7 @@ class UserTestCase(BaseTestCase):
         arenaclient.clean()
 
 
-class BotTestCase(LoggedInTestCase):
+class BotTestCase(LoggedInMixin, TestCase):
     def test_bot_creation_and_update(self):
         # set the configured per user limits for this test
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
@@ -368,7 +371,7 @@ class BotTestCase(LoggedInTestCase):
         self.assertEqual(self.test_bot2_data_hash, bot1.bot_data_md5hash)
 
 
-class SeasonsTestCase(FullDataSetTestCase):
+class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
     """
     Test season rotation
     """
@@ -468,11 +471,11 @@ class SeasonsTestCase(FullDataSetTestCase):
         self.assertEqual(round.number, 1)
 
 
-class PrivateStorageTestCase(MatchReadyTestCase):
+class PrivateStorageTestCase(MatchReadyMixin, TestCase):
     pass  # todo
 
 
-class ManagementCommandTests(MatchReadyTestCase):
+class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
     """
     Tests for management commands
     """

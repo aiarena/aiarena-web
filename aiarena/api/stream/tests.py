@@ -1,9 +1,9 @@
-from aiarena.core.tests.tests import LoggedInTestCase
+from django.test import TestCase
+
+from aiarena.core.tests.tests import LoggedInMixin
 
 
-class StreamTestCase(LoggedInTestCase):
-    def setUp(self):
-        super().setUp()
+class StreamTestCase(LoggedInMixin, TestCase):
 
     def test_stream_nextreplay(self):
         self.client.login(username='regular_user', password='x')

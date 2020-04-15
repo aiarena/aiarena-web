@@ -1,8 +1,9 @@
 from aiarena.core.models import Match, Round, Bot, User
-from aiarena.core.tests.tests import FullDataSetTestCase
+from aiarena.core.tests.tests import FullDataSetMixin
+from django.test import TransactionTestCase
 
 
-class PageRenderTestCase(FullDataSetTestCase):
+class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
     """
     Tests to ensure website pages don't break.
     """

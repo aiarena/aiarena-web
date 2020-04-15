@@ -3,16 +3,16 @@ from datetime import timedelta
 
 from constance import config
 from django.db.models import Sum
+from django.test import TransactionTestCase, TestCase
 from django.utils import timezone
 
 from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map
-from aiarena.core.tests.tests import LoggedInTestCase, MatchReadyTestCase
+from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
 
 
-# todo: test to esnure that matches are served for earlier rounds first
-class MatchesTestCase(LoggedInTestCase):
+class MatchesTestCase(LoggedInMixin, TransactionTestCase):
     def setUp(self):
         super(MatchesTestCase, self).setUp()
         self.regularUser2 = User.objects.create_user(username='regular_user2', password='x',
@@ -224,7 +224,7 @@ class MatchesTestCase(LoggedInTestCase):
                          response.data['detail'])
 
 
-class ResultsTestCase(LoggedInTestCase):
+class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data')
     uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data_backup')
     uploaded_match_log_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'match-logs', '{0}')
@@ -456,7 +456,7 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 409)
 
 
-class EloTestCase(LoggedInTestCase):
+class EloTestCase(LoggedInMixin, TransactionTestCase):
     """
     Tests to ensure ELO calculations run properly.
     """
@@ -587,7 +587,7 @@ class EloTestCase(LoggedInTestCase):
         #     self.assertFalse("did not match expected value of" in f.read())
 
 
-class RoundRobinGenerationTestCase(MatchReadyTestCase):
+class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
     def setUp(self):
         super(RoundRobinGenerationTestCase, self).setUp()
         self.client.force_login(User.objects.get(username='arenaclient1'))
