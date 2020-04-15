@@ -7,7 +7,7 @@ from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season
+from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
