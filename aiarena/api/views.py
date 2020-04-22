@@ -24,15 +24,15 @@ bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 't
                      'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_zip', \
                      'bot_zip_md5hash', 'bot_data_publicly_downloadable', 'bot_data', 'bot_data_md5hash'
 bot_filter_fields = {
-    'id': ['exact', 'lt', 'gt'],
+    'id': ['exact', 'lt', 'gt', 'lte', 'gte'],
     'user': ['exact'],
     'name': ['exact'],
-    'created': ['exact', 'lt', 'gt'],
+    'created': ['exact', 'lt', 'gt', 'lte', 'gte'],
     'active': ['exact'],
     'plays_race': ['exact'],
     'type': ['exact'],
     'game_display_id': ['exact'],
-    'bot_zip_updated': ['exact', 'lt', 'gt'],
+    'bot_zip_updated': ['exact', 'lt', 'gt', 'lte', 'gte'],
     'bot_zip_publicly_downloadable': ['exact'],
     'bot_data_publicly_downloadable': ['exact']
 }
@@ -48,15 +48,15 @@ matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', '
 result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps', \
                         'submitted_by', 'arenaclient_log', 'interest_rating', 'date_interest_rating_calculated',
 result_filter_fields = {
-    'id': ['exact', 'lt', 'gt'],
-    'match': ['exact', 'lt', 'gt'],
+    'id': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'match': ['exact', 'lt', 'gt', 'lte', 'gte'],
     'winner': ['exact'],
     'type': ['exact'],
-    'created': ['exact', 'lt', 'gt'],
-    'game_steps': ['exact', 'lt', 'gt'],
+    'created': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'game_steps': ['exact', 'lt', 'gt', 'lte', 'gte'],
     'submitted_by': ['exact'],
-    'interest_rating': ['exact', 'lt', 'gt'],
-    'date_interest_rating_calculated': ['exact', 'lt', 'gt']
+    'interest_rating': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'date_interest_rating_calculated': ['exact', 'lt', 'gt', 'lte', 'gte']
 }
 result_search_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
                        'submitted_by', 'interest_rating', 'date_interest_rating_calculated',
