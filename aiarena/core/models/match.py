@@ -76,7 +76,6 @@ class Match(models.Model):
         return self.requested_by is not None
 
     @staticmethod
-    @transaction.atomic()
     def create(round, map, bot1, bot2, requested_by=None):
         match = Match.objects.create(map=map, round=round, requested_by=requested_by)
         # create match participations
