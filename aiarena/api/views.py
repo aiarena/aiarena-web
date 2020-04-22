@@ -7,6 +7,7 @@ from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.reverse import reverse
+from django.db.models import Prefetch
 
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, SeasonParticipation, Season
 
@@ -19,10 +20,23 @@ logger = logging.getLogger(__name__)
 # Allowing filtering/etc on sensitive fields could leak information.
 # Serializer fields are also manually specified so new private fields don't accidentally get leaked.
 
-bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'current_match', 'plays_race', 'type', \
+bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
                      'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_zip', \
                      'bot_zip_md5hash', 'bot_data_publicly_downloadable', 'bot_data', 'bot_data_md5hash'
-bot_filter_fields = 'id', 'user', 'name', 'created', 'active', 'in_match', 'current_match', 'plays_race', 'type', \
+bot_filter_fields = {
+    'id': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'user': ['exact'],
+    'name': ['exact'],
+    'created': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'active': ['exact'],
+    'plays_race': ['exact'],
+    'type': ['exact'],
+    'game_display_id': ['exact'],
+    'bot_zip_updated': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'bot_zip_publicly_downloadable': ['exact'],
+    'bot_data_publicly_downloadable': ['exact']
+}
+bot_search_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
                     'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_data_publicly_downloadable'
 map_include_fields = 'id', 'name', 'file', 'active',
 map_filter_fields = 'id', 'name', 'active',
@@ -31,9 +45,20 @@ matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 
                                     'elo_change', 'avg_step_time', 'match_log', 'result', 'result_cause',
 matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
                                    'elo_change', 'avg_step_time', 'result', 'result_cause',
-result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps',\
+result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps', \
                         'submitted_by', 'arenaclient_log', 'interest_rating', 'date_interest_rating_calculated',
-result_filter_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
+result_filter_fields = {
+    'id': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'match': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'winner': ['exact'],
+    'type': ['exact'],
+    'created': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'game_steps': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'submitted_by': ['exact'],
+    'interest_rating': ['exact', 'lt', 'gt', 'lte', 'gte'],
+    'date_interest_rating_calculated': ['exact', 'lt', 'gt', 'lte', 'gte']
+}
+result_search_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
                        'submitted_by', 'interest_rating', 'date_interest_rating_calculated',
 round_include_fields = 'id', 'number', 'season', 'started', 'finished', 'complete',
 season_include_fields = 'id', 'number', 'date_created', 'date_opened', 'date_closed', 'status',
@@ -97,8 +122,8 @@ class BotViewSet(viewsets.ReadOnlyModelViewSet):
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = bot_filter_fields
-    search_fields = bot_filter_fields
-    ordering_fields = bot_filter_fields
+    search_fields = bot_search_fields
+    ordering_fields = bot_search_fields
 
     @action(detail=True, methods=['GET'], name='Download a bot\'s zip file', url_path='zip')
     def download_zip(self, request, *args, **kwargs):
@@ -219,10 +244,10 @@ class ResultSerializer(serializers.ModelSerializer):
     bot2_name = serializers.SerializerMethodField()
 
     def get_bot1_name(self, obj):
-        return obj.match.matchparticipation_set.get(participant_number=1).bot.name
+        return obj.match.participants[0].bot.name
 
     def get_bot2_name(self, obj):
-        return obj.match.matchparticipation_set.get(participant_number=2).bot.name
+        return obj.match.participants[1].bot.name
 
     class Meta:
         model = Result
@@ -235,13 +260,16 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
-    queryset = Result.objects.all()
+    queryset = Result.objects.all().prefetch_related(
+        Prefetch('winner'),
+        Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                 to_attr='participants'))
     serializer_class = ResultSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = result_filter_fields
-    search_fields = result_filter_fields
-    ordering_fields = result_filter_fields
+    search_fields = result_search_fields
+    ordering_fields = result_search_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
