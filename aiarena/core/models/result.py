@@ -53,6 +53,7 @@ class Result(models.Model):
     arenaclient_log = models.FileField(upload_to=arenaclient_log_upload_to, blank=True, null=True)
     interest_rating = models.FloatField(blank=True, null=True)
     date_interest_rating_calculated = models.DateTimeField(blank=True, null=True)
+    replay_file_has_been_cleaned = models.BooleanField(default=False)
 
     def __str__(self):
         return self.created.__str__()
@@ -74,7 +75,7 @@ class Result(models.Model):
         return self.match.participant2
 
     def validate_replay_file_requirement(self):
-        if (self.has_winner() or self.is_tie()) and not self.replay_file:
+        if (self.has_winner() or self.is_tie()) and not self.replay_file and not self.replay_file_has_been_cleaned:
             raise ValidationError('A win/loss or tie result must be accompanied by a replay file.')
 
     def clean(self, *args, **kwargs):

@@ -202,12 +202,12 @@ class BaseTestMixin(object):
 
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
-        response = self._post_to_results_no_bot1_data(response.data['id'], 'Player1Win')
+        response = self._post_to_results_no_bot1_data(response.data['id'], 'Player1Win', 0)
         self.assertEqual(response.status_code, 201)
 
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
-        response = self._post_to_results_no_bot2_data(response.data['id'], 'Player1Crash')
+        response = self._post_to_results_no_bot2_data(response.data['id'], 'Player1Crash', 0)
         self.assertEqual(response.status_code, 201)
 
         response = self._post_to_matches()
@@ -388,12 +388,12 @@ class BotTestCase(LoggedInMixin, TestCase):
 
         # test updating bot_data
         # using bot2's data instead here so it's different
-        with open(self.test_bot2_data1_path, 'rb') as bot_data_updated:
+        with open(self.test_bot_datas['bot2'][0]['path'], 'rb') as bot_data_updated:
             bot1.bot_data = File(bot_data_updated)
             bot1.save()
 
         bot1.refresh_from_db()
-        self.assertEqual(self.test_bot2_data1_hash, bot1.bot_data_md5hash)
+        self.assertEqual(self.test_bot_datas['bot2'][0]['hash'], bot1.bot_data_md5hash)
 
 
 class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
