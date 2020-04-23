@@ -123,6 +123,12 @@ class MatchViewSet(viewsets.GenericViewSet):
 
 
 class SubmitResultResultSerializer(serializers.ModelSerializer):
+
+    def validate(self, attrs):
+        instance = SubmitResultResultSerializer.Meta.model(**attrs)
+        instance.clean()  # enforce model validation
+        return attrs
+
     class Meta:
         model = Result
         fields = 'match', 'type', 'replay_file', 'game_steps', 'submitted_by', 'arenaclient_log'

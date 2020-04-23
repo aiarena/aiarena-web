@@ -73,15 +73,12 @@ class Result(models.Model):
     def participant2(self):
         return self.match.participant2
 
-    # this is not checked while the replay corruption is happening
     def validate_replay_file_requirement(self):
         if (self.has_winner() or self.is_tie()) and not self.replay_file:
-            raise ValidationError('A win/loss or tie result must contain a replay file.')
+            raise ValidationError('A win/loss or tie result must be accompanied by a replay file.')
 
     def clean(self, *args, **kwargs):
-        # todo: if we ever re-enable this, then it needs to be
-        # todo: called upon serializer validation in the arenaclient API
-        # self.validate_replay_file_requirement() # disabled for now
+        self.validate_replay_file_requirement()
         super().clean(*args, **kwargs)
 
     def has_winner(self):

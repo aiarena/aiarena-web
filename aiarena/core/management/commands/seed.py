@@ -19,8 +19,8 @@ def create_match(as_user):
 
 def create_result_with_bot_data_and_logs(match, type, as_user):
     with open(BaseTestMixin.test_replay_path, 'rb') as result_replay, \
-            open(BaseTestMixin.test_bot1_data_path, 'rb') as bot1_data, \
-            open(BaseTestMixin.test_bot2_data_path, 'rb') as bot2_data, \
+            open(BaseTestMixin.test_bot1_data1_path, 'rb') as bot1_data, \
+            open(BaseTestMixin.test_bot2_data1_path, 'rb') as bot2_data, \
             open(BaseTestMixin.test_bot1_match_log_path, 'rb') as bot1_log, \
             open(BaseTestMixin.test_bot2_match_log_path, 'rb') as bot2_log:
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
