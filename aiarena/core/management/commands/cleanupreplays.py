@@ -29,6 +29,7 @@ class Command(BaseCommand):
     def cleanup_replays(self, days):
         results = Result.objects.filter(replay_file__isnull=False, created__lt=timezone.now() - timedelta(days=days)).select_for_update()
         for result in results:
-            result.replay_file.delete()
             result.replay_file_has_been_cleaned = True
+            result.replay_file.delete()
+            result.save()
         return results.count()
