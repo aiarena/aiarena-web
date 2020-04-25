@@ -308,7 +308,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._check_hashes(bot1, bot2, match['id'], 1)
 
         # test that requested matches don't update bot_data
-        match5 = Match.request_match(bot1, bot2, Map.random_active(), self.staffUser1)
+        match5 = Matches.request_match(bot1, bot2, Map.random_active(), self.staffUser1)
         self._post_to_results_bot_datas_set_1(match5.id, 'Player1Win')
 
         # check hashes - nothing should have changed
