@@ -6,6 +6,7 @@ from django.db.models import Sum
 from django.test import TransactionTestCase, TestCase
 from django.utils import timezone
 
+from aiarena.core.api import Matches
 from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map
 from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
@@ -133,12 +134,6 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 201)
         match2 = Match.objects.get(id=response.data['id'])
 
-        # confirm these bots are currently in the match
-        self.assertEqual(match1.bots_currently_in_match.count(), 2)
-        for bot in match1.bots_currently_in_match.all():
-            self.assertTrue(bot.in_match)
-            self.assertFalse(bot.current_match is None)
-
         # set the created time back into the past long enough for it to cause a time out
         match1.started = timezone.now() - (config.TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
         match1.save()
@@ -147,24 +142,9 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 201)
 
-        # confirm these bots were successfully force removed from their match
-        self.assertEqual(match1.bots_currently_in_match.count(), 0)
-        for bot in match1.bots_currently_in_match.all():
-            self.assertFalse(bot.in_match)
-            self.assertTrue(bot.current_match is None)
-
-        # confirm these bots weren't affected
-        self.assertEqual(match2.bots_currently_in_match.count(), 2)
-        for bot in match2.bots_currently_in_match.all():
-            self.assertTrue(bot.in_match)
-            self.assertTrue(bot.current_match is not None)
-
         # confirm a result was registered
         self.assertTrue(match1.result is not None)
 
-        # final count double checks
-        self.assertEqual(Bot.objects.filter(in_match=False, current_match=None).count(), 4)
-        self.assertEqual(Bot.objects.filter(in_match=True).exclude(current_match=None).count(), 4)
 
     def test_match_reissue(self):
 
@@ -222,6 +202,35 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
                          'serving a new match would require generating a new one. Please wait until matches from current ' \
                          'rounds become available.',
                          response.data['detail'])
+
+    def test_match_blocking(self):
+        # create an extra arena client for this test
+        self.arenaclientUser2 = User.objects.create_user(username='arenaclient2', email='arenaclient2@dev.aiarena.net',
+                                                         type='ARENA_CLIENT')
+
+        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self._create_map('test_map')
+        self._create_open_season()
+
+        bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
+        bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
+
+        # this should tie up both bots
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 201)
+
+        # we shouldn't be able to get a new match
+        self.client.force_login(User.objects.get(username='arenaclient2'))
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(u"Failed to start match. There might not be any available participants.", response.data['detail'])
+
+        Matches.request_match(bot1)
+
+        # now we should be able to get a match - the requested one
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 201)
+
 
 
 class ResultsTestCase(LoggedInMixin, TransactionTestCase):
@@ -299,7 +308,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._check_hashes(bot1, bot2, match['id'], 1)
 
         # test that requested matches don't update bot_data
-        match5 = Match.request_bot_match(bot1, bot2, Map.random_active(), self.staffUser1)
+        match5 = Match.request_match(bot1, bot2, Map.random_active(), self.staffUser1)
         self._post_to_results_bot_datas_set_1(match5.id, 'Player1Win')
 
         # check hashes - nothing should have changed
@@ -333,34 +342,21 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._create_map('test_map')
         self._create_open_season()
 
+        # Create 3 bots, so after a round is generated, we'll have some unstarted matches
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
+        bot3 = self._create_active_bot(self.regularUser1, 'bot3', 'P')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         match = response.data
 
-        # force the exception
-        bot1.in_match = False
-        bot1.current_match = None
-        bot1.save()
+        not_started_match = Match.objects.filter(started__isnull=True, result__isnull=True).first()
 
-        response = self._post_to_results(match['id'], 'Player1Win')
+        # should fail
+        response = self._post_to_results(not_started_match.id, 'Player1Win')
         self.assertEqual(response.status_code, 500)
         self.assertTrue('detail' in response.data)
         self.assertEqual(u'Unable to log result: Bot bot1 is not currently in this match!',
-                         response.data['detail'])
-
-        bot2.in_match = False  # check bot 2 as well
-        bot2.current_match = None
-        bot2.save()
-        bot1.in_match = True
-        bot1.current_match = Match.objects.get(pk=match['id'])
-        bot1.save()
-
-        response = self._post_to_results(match['id'], 'Player1Win')
-        self.assertEqual(response.status_code, 500)
-        self.assertTrue('detail' in response.data)
-        self.assertEqual(u'Unable to log result: Bot bot2 is not currently in this match!',
                          response.data['detail'])
 
     def test_get_results_not_authorized(self):

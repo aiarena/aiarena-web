@@ -2,6 +2,7 @@ import logging
 
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
+from django.db.models import QuerySet
 from django.urls import reverse
 
 from aiarena import settings
@@ -35,3 +36,12 @@ class Bots:
             )
         except Exception as e:
             logger.exception(e)
+
+    @staticmethod
+    def get_active() -> QuerySet:
+        return Bot.objects.filter(active=True)
+
+    @staticmethod
+    def get_active_and_available() -> list:
+        return [bot for bot in Bots.get_active() if not bot.bot_data_is_currently_frozen()]
+

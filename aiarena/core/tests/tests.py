@@ -184,7 +184,7 @@ class BaseTestMixin(object):
         self._generate_match_activity()
 
         # generate a bot match request to ensure it doesn't bug things out
-        bot = Bot.get_random_available()
+        bot = Bot.get_random_active()
         call_command('requestbotmatch', bot.id)
 
         self.client.logout()  # child tests can login if they require
@@ -494,10 +494,6 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         # New round should be number 1 for the new season
         round = Round.objects.get(season=season2)
         self.assertEqual(round.number, 1)
-
-
-class PrivateStorageTestCase(MatchReadyMixin, TestCase):
-    pass  # todo
 
 
 class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):

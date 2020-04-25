@@ -1,7 +1,7 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
+from django.core.management.base import BaseCommand
 
-from aiarena.core.models import Bot, Match
+from aiarena.core.api import Matches
+from aiarena.core.models import Bot
 
 
 class Command(BaseCommand):
@@ -16,9 +16,8 @@ class Command(BaseCommand):
         bot = Bot.objects.get(pk=options['botid'])  # todo: catch bot missing
         opponent = None
         if options['opponentid'] is not None:
-            opponent = Bot.objects.select_for_update().get(pk=options['opponent']) # todo: catch bot missing
+            opponent = Bot.objects.select_for_update().get(pk=options['opponent'])  # todo: catch bot missing
 
         # if opponent is none a random one gets chosen
-        match = Match.request_bot_match(bot, opponent)
+        match = Matches.request_match(bot, opponent)
         self.stdout.write(self.style.SUCCESS('Successfully requested match. Match ID: {0}'.format(match.id)))
-
