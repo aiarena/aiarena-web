@@ -1,15 +1,15 @@
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 
 from aiarena.core.tests.tests import FullDataSetMixin
 
 
-class ApiReadTestCase(FullDataSetMixin, TestCase):
+class ApiReadTestCase(FullDataSetMixin, TransactionTestCase):
     """
     Tests to ensure API endpoint page renders don't break.
     """
 
     def setUp(self):
-        super(FullDataSetMixin, self).setUp()
+        super().setUp()
         self.client.login(username='staff_user', password='x')
 
     def test_get_api_index_page(self):

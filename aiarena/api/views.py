@@ -244,10 +244,10 @@ class ResultSerializer(serializers.ModelSerializer):
     bot2_name = serializers.SerializerMethodField()
 
     def get_bot1_name(self, obj):
-        return obj.match.participants[0].bot.name
+        return obj.match.participant1.bot.name
 
     def get_bot2_name(self, obj):
-        return obj.match.participants[1].bot.name
+        return obj.match.participant2.bot.name
 
     class Meta:
         model = Result
