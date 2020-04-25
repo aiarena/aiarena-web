@@ -53,9 +53,6 @@ class Bot(models.Model):
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
-    in_match = models.BooleanField(default=False)  # todo: move to ladder participant when multiple ladders comes in
-    current_match = models.ForeignKey(Match, on_delete=models.SET_NULL, blank=True, null=True,
-                                      related_name='bots_currently_in_match')
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                max_file_size=BOT_ZIP_MAX_SIZE, validators=[validate_bot_zip_file, ])
     bot_zip_updated = models.DateTimeField(editable=False)
@@ -63,6 +60,8 @@ class Bot(models.Model):
     bot_zip_publicly_downloadable = models.BooleanField(default=False)
     # todo: set a file size limit which will be checked on result submission
     # and the bot deactivated if the file size exceeds it
+    bot_data_enabled = models.BooleanField(default=True)
+    """Whether the use of bot data is enabled."""
     bot_data = PrivateFileField(upload_to=bot_data_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                 blank=True, null=True)
     bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
@@ -72,6 +71,17 @@ class Bot(models.Model):
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
+
+    @property
+    def current_matches(self):
+        return Match.objects.filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
+
+    def is_in_match(self, match_id):
+        is_in_match: bool = False
+        for match in self.current_matches:
+            if match.id == match_id:
+                is_in_match = True
+        return is_in_match
 
     def regen_game_display_id(self):
         self.game_display_id = uuid.uuid4()
@@ -123,47 +133,30 @@ class Bot(models.Model):
     def __str__(self):
         return self.name
 
-    def enter_match(self, match):
-        if not self.in_match:
-            self.current_match = match
-            self.in_match = True
-            self.save()
-        else:
-            raise BotAlreadyInMatchException('Cannot enter a match - bot is already in one.')
-
-    def leave_match(self, match_id=None):
-        if self.in_match and (match_id is None or self.current_match_id == match_id):
-            self.current_match = None
-            self.in_match = False
-            self.save()
-        else:
-            if match_id is None:
-                raise BotNotInMatchException('Cannot leave match - bot is not in one.')
-            else:
-                raise BotNotInMatchException('Cannot leave match - bot is not in match "{0}".'.format(match_id))
-
     def bot_data_is_currently_frozen(self):
-        # dont alter bot_data while a bot is in a match, unless there was no bot_data initially
-        return self.in_match and self.bot_data
+        # dont alter bot_data while the data is locked in a match, unless there was no bot_data initially
+        matches = Match.objects.filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
+        data_frozen = False
+        for match in matches:
+            for p in match.matchparticipation_set.filter(bot=self):
+                if p.use_bot_data and p.update_bot_data:
+                    data_frozen = True
+        return self.bot_data and data_frozen
 
     @staticmethod
-    def get_random_available():
+    def get_random_active():
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return Bot.objects.filter(active=True, in_match=False).order_by('?').first()
+        return Bot.objects.filter(active=True).order_by('?').first()
 
     @staticmethod
     def active_count():
         return Bot.objects.filter(active=True).count()
 
-    @staticmethod
-    def get_active():
-        return Bot.objects.filter(active=True)
-
-    def get_random_available_excluding_self(self):
+    def get_random_active_excluding_self(self):
         if Bot.active_count() <= 1:
             raise RuntimeError("I am the only bot.")
-        return Bot.objects.filter(active=True, in_match=False).exclude(id=self.id).order_by('?').first()
+        return Bot.objects.filter(active=True).exclude(id=self.id).order_by('?').first()
 
     def get_absolute_url(self):
         return reverse('bot', kwargs={'pk': self.pk})
