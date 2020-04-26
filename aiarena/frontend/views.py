@@ -546,8 +546,9 @@ class RequestMatchForm(forms.Form):
     map = forms.ModelChoiceField(queryset=Map.objects.filter(active=True), empty_label='Random', required=False)
     match_count = forms.IntegerField(min_value=1, initial=1)
 
+    @transaction.atomic()
     def request_match(self, user):
-        return [Match.request_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'],
+        return [Matches.request_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'],
                                        user) for _ in range(0, self.cleaned_data['match_count'])]
 
 
