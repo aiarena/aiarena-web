@@ -223,6 +223,13 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p1Instance.bot.name))
 
+            if not p2Instance.bot.is_in_match(match.id):
+                raise APIException('Unable to log result: Bot {0} is not currently in this match!'
+                                   .format(p2Instance.bot.name))
+
+            bot1 = None
+            bot2 = None
+
             # should we update the bot data?
             if p1Instance.use_bot_data and p1Instance.update_bot_data:
                 bot1_data = serializer.validated_data.get('bot1_data')
@@ -234,11 +241,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     bot1 = SubmitResultBotSerializer(instance=p1Instance.bot,
                                                      data=bot1_dict, partial=True)
                     bot1.is_valid(raise_exception=True)
-                    bot1.save()
-
-            if not p2Instance.bot.is_in_match(match.id):
-                raise APIException('Unable to log result: Bot {0} is not currently in this match!'
-                                   .format(p2Instance.bot.name))
 
             if p2Instance.use_bot_data and p2Instance.update_bot_data:
                 bot2_data = serializer.validated_data.get('bot2_data')
@@ -250,12 +252,18 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     bot2 = SubmitResultBotSerializer(instance=p2Instance.bot,
                                                      data=bot2_dict, partial=True)
                     bot2.is_valid(raise_exception=True)
-                    bot2.save()
 
             # save models
             result = result.save()
             participant1 = participant1.save()
             participant2 = participant2.save()
+            # save these after the others so if there's a validation error,
+            # then the bot data files don't need reverting to match their hashes.
+            # This could probably be done more fool-proof by actually rolling back the files on a transaction fail.
+            if bot1 is not None:
+                bot1.save()
+            if bot2 is not None:
+                bot2.save()
 
             # Only do these actions if the match is part of a round
             if result.match.round is not None:
