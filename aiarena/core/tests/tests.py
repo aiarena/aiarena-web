@@ -616,3 +616,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command('seed', stdout=out)
         self.assertIn('Done. User logins have a password of "x".', out.getvalue())
+
+    def test_check_bot_hashes(self):
+        call_command('checkbothashes')
