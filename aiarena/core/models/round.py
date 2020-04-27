@@ -21,8 +21,8 @@ class Round(models.Model, LockableModelMixin):
     """ Represents a round of play within a season """
     number = models.IntegerField(blank=True, editable=False)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    started = models.DateTimeField(auto_now_add=True)
-    finished = models.DateTimeField(blank=True, null=True)
+    started = models.DateTimeField(auto_now_add=True, db_index=True)
+    finished = models.DateTimeField(blank=True, null=True, db_index=True)
     complete = models.BooleanField(default=False)
 
     @property

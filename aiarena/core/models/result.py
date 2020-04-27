@@ -44,14 +44,14 @@ class Result(models.Model):
     )
     match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
-    type = models.CharField(max_length=32, choices=TYPES)
-    created = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=32, choices=TYPES, db_index=True)
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
     replay_file = models.FileField(upload_to=replay_file_upload_to, blank=True, null=True)
-    game_steps = models.IntegerField()
+    game_steps = models.IntegerField(db_index=True)
     submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True,
                                      related_name='submitted_results')
     arenaclient_log = models.FileField(upload_to=arenaclient_log_upload_to, blank=True, null=True)
-    interest_rating = models.FloatField(blank=True, null=True)
+    interest_rating = models.FloatField(blank=True, null=True, db_index=True)
     date_interest_rating_calculated = models.DateTimeField(blank=True, null=True)
     replay_file_has_been_cleaned = models.BooleanField(default=False)
 

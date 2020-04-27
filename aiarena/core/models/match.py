@@ -20,8 +20,8 @@ logger = logging.getLogger(__name__)
 class Match(models.Model, LockableModelMixin):
     """ Represents a match between 2 bots. Usually this is within the context of a round, but doesn't have to be. """
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
-    created = models.DateTimeField(auto_now_add=True)
-    started = models.DateTimeField(blank=True, null=True, editable=False)
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    started = models.DateTimeField(blank=True, null=True, editable=False, db_index=True)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True,
                                      related_name='assigned_matches')
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
