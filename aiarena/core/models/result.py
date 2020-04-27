@@ -12,6 +12,10 @@ from .bot import Bot
 
 logger = logging.getLogger(__name__)
 
+# todo: move sanity checking to DB constraints:
+# https://docs.djangoproject.com/en/3.0/ref/models/options/#constraints
+# Requires upgrade to django 2.2
+
 
 def replay_file_upload_to(instance, filename):
     return '/'.join(['replays',
