@@ -22,11 +22,17 @@ class Command(BaseCommand):
             self.stdout.write('No argument supplied - no actions taken.')
         else:
             for bot in Bot.objects.all():
-                if options['zip'] is not None and bot.bot_zip_md5hash != calculate_md5_django_filefield(bot.bot_zip):
+                bot_zip_hash = calculate_md5_django_filefield(bot.bot_zip)
+                if options['zip'] is not None and bot.bot_zip_md5hash != bot_zip_hash:
+                    bot.bot_zip_md5hash = bot_zip_hash
+                    bot.save()
                     self.stdout.write(f'{bot.name} - bot_zip - MISMATCH - REPAIRED')
 
                 if options['data'] is not None and bot.bot_data:
-                    if bot.bot_data_md5hash != calculate_md5_django_filefield(bot.bot_data):
+                    bot_data_hash = calculate_md5_django_filefield(bot.bot_data)
+                    if bot.bot_data_md5hash != bot_data_hash:
+                        bot.bot_data_md5hash = bot_data_hash
+                        bot.save()
                         self.stdout.write(f'{bot.name} - bot_data - MISMATCH - REPAIRED')
 
         self.stdout.write('Done.')
