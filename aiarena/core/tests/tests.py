@@ -619,3 +619,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
     def test_check_bot_hashes(self):
         call_command('checkbothashes')
+
+    def test_repair_bot_hashes(self):
+        call_command('repairbothashes')
