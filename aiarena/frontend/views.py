@@ -571,15 +571,19 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         if config.ALLOW_REQUESTED_MATCHES:
-            if self.request.user.match_request_count_left >= form.cleaned_data['match_count']:
-                match_list = form.request_match(self.request.user)
-                message = ""
-                for match in match_list:
-                    message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
-                messages.success(self.request, mark_safe(message))
-                return super().form_valid(form)
+            if form.cleaned_data['bot1'] != form.cleaned_data['bot1']:
+                if self.request.user.match_request_count_left >= form.cleaned_data['match_count']:
+                    match_list = form.request_match(self.request.user)
+                    message = ""
+                    for match in match_list:
+                        message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
+                    messages.success(self.request, mark_safe(message))
+                    return super().form_valid(form)
+                else:
+                    messages.error(self.request, "That number of matches exceeds your match request limit.")
+                    return self.render_to_response(self.get_context_data(form=form))
             else:
-                messages.error(self.request, "That number of matches exceeds your match request limit.")
+                messages.error(self.request, "Sorry - you cannot request matches between the same bot.")
                 return self.render_to_response(self.get_context_data(form=form))
         else:
             messages.error(self.request, "Sorry. Requested matches are currently disabled.")
