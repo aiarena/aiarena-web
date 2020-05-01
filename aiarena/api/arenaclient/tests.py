@@ -106,45 +106,6 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)
 
-    def test_previous_match_timeout(self):
-        # avoid old tests breaking that were pre-this feature
-        config.REISSUE_UNFINISHED_MATCHES = False
-
-        self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map('test_map')
-        self._create_open_season()
-
-        bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
-        bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
-        bot3 = self._create_active_bot(self.regularUser1, 'testbot3', 'P')
-        bot4 = self._create_active_bot(self.regularUser1, 'testbot4', 'R')
-        bot5 = self._create_active_bot(self.regularUser2, 'testbot5', 'T')
-        bot6 = self._create_active_bot(self.regularUser2, 'testbot6', 'Z')
-        bot7 = self._create_active_bot(self.regularUser2, 'testbot7', 'P')
-        bot8 = self._create_active_bot(self.regularUser2, 'testbot8', 'R')
-
-        response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 201)
-
-        # save the match for modification
-        match1 = Match.objects.get(id=response.data['id'])
-
-        # generate a new match so we can check it isn't interfered with
-        response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 201)
-        match2 = Match.objects.get(id=response.data['id'])
-
-        # set the created time back into the past long enough for it to cause a time out
-        match1.started = timezone.now() - (config.TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
-        match1.save()
-
-        # this should trigger the bots to be forced out of the match
-        response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 201)
-
-        # confirm a result was registered
-        self.assertTrue(match1.result is not None)
-
 
     def test_match_reissue(self):
 

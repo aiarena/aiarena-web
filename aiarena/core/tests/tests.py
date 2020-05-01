@@ -622,3 +622,22 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
     def test_repair_bot_hashes(self):
         call_command('repairbothashes')
+
+    def test_timeout_overtime_matches(self):
+        self.client.force_login(User.objects.get(username='arenaclient1'))
+
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 201)
+
+        # save the match for modification
+        match1 = Match.objects.get(id=response.data['id'])
+
+        # set the created time back into the past long enough for it to cause a time out
+        match1.started = timezone.now() - (config.TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
+        match1.save()
+
+        # this should trigger the bots to be forced out of the match
+        call_command('timeoutovertimematches')
+
+        # confirm a result was registered
+        self.assertTrue(match1.result is not None)
