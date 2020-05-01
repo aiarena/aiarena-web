@@ -80,7 +80,7 @@ class Result(models.Model):
 
     def validate_replay_file_requirement(self):
         if (self.has_winner() or self.is_tie()) and not self.replay_file and not self.replay_file_has_been_cleaned:
-            logger.critical(f"Replay {self.id} failed validation due to a missing replay file.")
+            logger.warning(f"Result for match {self.match_id} failed validation due to a missing replay file.")
             raise ValidationError('A win/loss or tie result must be accompanied by a replay file.')
 
     def clean(self, *args, **kwargs):
