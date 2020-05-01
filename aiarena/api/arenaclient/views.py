@@ -282,6 +282,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     p1_initial_elo, p2_initial_elo = result.get_initial_elos()
                     result.adjust_elo()
 
+                    initial_elo_sum = p1_initial_elo + p2_initial_elo
+
                     # Calculate the change in ELO
                     # the bot elos have changed so refresh them
                     # todo: instead of having to refresh, return data from adjust_elo and apply it here
@@ -292,6 +294,15 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     participant2.elo_change = participant2.resultant_elo - p2_initial_elo
                     participant1.save()
                     participant2.save()
+
+                    resultant_elo_sum = participant1.resultant_elo + participant2.resultant_elo
+                    if initial_elo_sum != resultant_elo_sum:
+                        logger.critical(f"Initial and resultant ELO sum mismatch: "
+                                        f"Result {result.id}. "
+                                        f"initial_elo_sum: {initial_elo_sum}. "
+                                        f"resultant_elo_sum: {resultant_elo_sum}. "
+                                        f"participant1.elo_change: {participant1.elo_change}. "
+                                        f"participant2.elo_change: {participant2.elo_change}")
 
                     if config.ENABLE_ELO_SANITY_CHECK:
                         # test here to check ELO total and ensure no corruption
