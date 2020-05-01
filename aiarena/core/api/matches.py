@@ -41,19 +41,16 @@ class Matches:
     # todo: have arena client check in with web service inorder to delay this
     @staticmethod
     def timeout_overtime_bot_games():
-        with transaction.atomic():
-            matches_without_result = Match.objects.select_related('round').select_for_update().filter(
-                started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
-            for match in matches_without_result:
-                Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
-                if match.round is not None:  # if the match is part of a round, check for round completion
-                    match.round.update_if_completed()
+        matches_without_result = Match.objects.select_related('round').select_for_update().filter(
+            started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
+        for match in matches_without_result:
+            Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
+            if match.round is not None:  # if the match is part of a round, check for round completion
+                match.round.update_if_completed()
 
     @staticmethod
     def start_next_match(requesting_user):
         # todo: clean up this whole section
-
-        Matches.timeout_overtime_bot_games()
 
         with connection.cursor() as cursor:
             # Lock the matches table
