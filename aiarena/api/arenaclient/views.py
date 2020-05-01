@@ -181,9 +181,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             serializer.is_valid(raise_exception=True)
 
             if config.ARENACLIENT_DEBUG_ENABLED:  # todo: make this an INFO or DEBUG level log?
-                logger.critical(
+                logger.debug(
                     "Bot1 avg_step_size: {0}".format(serializer.validated_data.get('bot1_avg_step_time')))
-                logger.critical(
+                logger.debug(
                     "Bot2 avg_step_size: {0}".format(serializer.validated_data.get('bot2_avg_step_time')))
 
             # validate result
@@ -220,10 +220,14 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
             match = result.validated_data['match']
 
             if not p1Instance.bot.is_in_match(match.id):
+                logger.warning(f"A result was submitted for match {match.id}, "
+                               f"which Bot {p1Instance.bot.name} isn't currently in!")
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p1Instance.bot.name))
 
             if not p2Instance.bot.is_in_match(match.id):
+                logger.warning(f"A result was submitted for match {match.id}, "
+                               f"which Bot {p2Instance.bot.name} isn't currently in!")
                 raise APIException('Unable to log result: Bot {0} is not currently in this match!'
                                    .format(p2Instance.bot.name))
 
@@ -284,7 +288,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 participant1.save()
                 participant2.save()
 
-                if settings.ENABLE_ELO_SANITY_CHECK:
+                if config.ENABLE_ELO_SANITY_CHECK:
                     # test here to check ELO total and ensure no corruption
                     expectedEloSum = settings.ELO_START_VALUE * SeasonParticipation.objects.filter(season=result.match.round.season).count()
                     actualEloSum = SeasonParticipation.objects.filter(season=result.match.round.season).aggregate(

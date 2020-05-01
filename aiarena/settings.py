@@ -185,13 +185,17 @@ CONSTANCE_CONFIG = {
     'MATCH_REQUEST_LIMIT_DIAMOND_TIER': (8000, 'The periodic limit of match requests for a diamond patreon tier user.'),
     'REQUESTED_MATCHES_LIMIT_PERIOD': (
         timedelta(days=30), 'The period length for which a user''s match request limit applies.', timedelta),
-    'ELO_DIFF_RATING_MODIFIER': (0.999, 'Affects how the ELO difference between bots in an upset match (lower ranked bot beats higher ranked) affects the interest score: ELO_DIFF_RATING_MODIFIER^ELO_DIFF-1'),
-    'COMBINED_ELO_RATING_DIVISOR': (200, 'Controls how the combined bot ELO affects the interest score: 1/(1+e^(-AVG_BOT_ELO/COMBINED_ELO_RATING_DIVISOR))-0.5'),
+    'ELO_DIFF_RATING_MODIFIER': (0.999, 'Affects how the ELO difference between bots in an upset match '
+                                        '(lower ranked bot beats higher ranked) affects the interest score: ELO_DIFF_RATING_MODIFIER^ELO_DIFF-1'),
+    'COMBINED_ELO_RATING_DIVISOR': (200, 'Controls how the combined bot ELO affects the interest score: '
+                                         '1/(1+e^(-AVG_BOT_ELO/COMBINED_ELO_RATING_DIVISOR))-0.5'),
+    'ENABLE_ELO_SANITY_CHECK': (True, 'Whether to sanity check the total sum of bot ELO '
+                                      'on result submission in order to detect ELO corruption.'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bots': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
-    'General': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES'),
+    'General': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES', 'ENABLE_ELO_SANITY_CHECK'),
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',
                        'MATCH_REQUEST_LIMIT_SILVER_TIER', 'MATCH_REQUEST_LIMIT_GOLD_TIER',
                        'MATCH_REQUEST_LIMIT_PLATINUM_TIER', 'MATCH_REQUEST_LIMIT_DIAMOND_TIER',
@@ -303,9 +307,6 @@ ELO_K = 16
 
 # starting ELO for bots
 ELO_START_VALUE = 1600
-
-# Enable a sanity check every time a result is submitted
-ENABLE_ELO_SANITY_CHECK = True
 
 # ELO implementation
 ELO = Elo(ELO_K)
