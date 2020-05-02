@@ -2,7 +2,7 @@ import logging
 from wsgiref.util import FileWrapper
 
 from constance import config
-from django.db import transaction
+from django.db import transaction, connection
 from django.db.models import Sum, F
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
@@ -185,14 +185,20 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
 
-                match = Match.objects\
-                    .prefetch_related('matchparticipation_set',
-                                    'matchparticipation_set__bot',
-                                    'round',
-                                    'round__season',
-                                    'round__season__seasonparticipation_set')\
-                    .select_for_update()\
-                    .get(id=serializer.validated_data['match'])
+                match_id = serializer.validated_data['match']
+
+                # Lock everything manually to ensure transactional integrity
+                with connection.cursor() as cursor:
+                    cursor.execute(f"select 1 "
+                                   f"from core_match as m "
+                                   f"join core_matchparticipation as cm on m.id = cm.match_id "
+                                   f"join core_bot cb on cm.bot_id = cb.id "
+                                   f"join core_round cr on m.round_id = cr.id "
+                                   f"join core_season cs on cr.season_id = cs.id "
+                                   f"where m.id = {match_id} "
+                                   f"for update")
+
+                match = Match.objects.get(id=match_id)
 
                 if config.ARENACLIENT_DEBUG_ENABLED:  # todo: make this an INFO or DEBUG level log?
                     logger.debug(
@@ -211,7 +217,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 result.is_valid(raise_exception=True)
 
                 # validate participants
-                p1Instance = match.matchparticipation_set.get(participant_number=1)
+                p1Instance = match.participant1
                 participant1 = SubmitResultParticipationSerializer(instance=p1Instance, data={
                     'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
                     'match_log': serializer.validated_data.get('bot1_log'),
@@ -219,7 +225,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     'result_cause': p1Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
                                                                    partial=True)
                 participant1.is_valid(raise_exception=True)
-                p2Instance = match.matchparticipation_set.get(participant_number=2)
+
+                p2Instance = match.participant2
                 participant2 = SubmitResultParticipationSerializer(instance=p2Instance, data={
                     'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
                     'match_log': serializer.validated_data.get('bot2_log'),
