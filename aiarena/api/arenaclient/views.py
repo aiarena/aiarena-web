@@ -185,6 +185,15 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 serializer = self.get_serializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
 
+                match = Match.objects\
+                    .prefetch_related('matchparticipation_set',
+                                    'matchparticipation_set__bot',
+                                    'round',
+                                    'round__season',
+                                    'round__season__seasonparticipation_set')\
+                    .select_for_update()\
+                    .get(id=serializer.validated_data['match'])
+
                 if config.ARENACLIENT_DEBUG_ENABLED:  # todo: make this an INFO or DEBUG level log?
                     logger.debug(
                         "Bot1 avg_step_size: {0}".format(serializer.validated_data.get('bot1_avg_step_time')))
@@ -202,8 +211,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 result.is_valid(raise_exception=True)
 
                 # validate participants
-                p1Instance = MatchParticipation.objects.get(match_id=serializer.validated_data['match'],
-                                                            participant_number=1)
+                p1Instance = match.matchparticipation_set.objects.get(participant_number=1)
                 participant1 = SubmitResultParticipationSerializer(instance=p1Instance, data={
                     'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
                     'match_log': serializer.validated_data.get('bot1_log'),
@@ -211,8 +219,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     'result_cause': p1Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
                                                                    partial=True)
                 participant1.is_valid(raise_exception=True)
-                p2Instance = MatchParticipation.objects.get(match_id=serializer.validated_data['match'],
-                                                            participant_number=2)
+                p2Instance = match.matchparticipation_set.objects.get(participant_number=2)
                 participant2 = SubmitResultParticipationSerializer(instance=p2Instance, data={
                     'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
                     'match_log': serializer.validated_data.get('bot2_log'),
@@ -222,7 +229,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 participant2.is_valid(raise_exception=True)
 
                 # validate bots
-                match = result.validated_data['match']
 
                 if not p1Instance.bot.is_in_match(match.id):
                     logger.warning(f"A result was submitted for match {match.id}, "

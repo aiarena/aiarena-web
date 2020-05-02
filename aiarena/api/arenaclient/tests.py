@@ -210,7 +210,9 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
 
         # post a standard result
-        match = self._post_to_matches().data
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        match = response.data
         response = self._post_to_results(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
@@ -230,7 +232,9 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(p2.id)))
 
         # Post a result with different bot datas
-        match = self._post_to_matches().data
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        match = response.data
         self._post_to_results_bot_datas_set_1(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
