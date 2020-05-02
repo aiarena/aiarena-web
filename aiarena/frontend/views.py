@@ -571,7 +571,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         if config.ALLOW_REQUESTED_MATCHES:
-            if form.cleaned_data['bot1'] != form.cleaned_data['bot1']:
+            if form.cleaned_data['bot1'] != form.cleaned_data['bot2']:
                 if self.request.user.match_request_count_left >= form.cleaned_data['match_count']:
                     match_list = form.request_match(self.request.user)
                     message = ""
