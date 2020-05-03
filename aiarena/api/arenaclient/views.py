@@ -187,7 +187,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 match_id = serializer.validated_data['match']
 
-                logger.debug(f"Result submission. "
+                logger.info(f"Result submission. "
                              f"match: {serializer.validated_data.get('match')} "
                              f"type: {serializer.validated_data.get('type')} "
                              f"replay_file: {serializer.validated_data.get('replay_file')} "
