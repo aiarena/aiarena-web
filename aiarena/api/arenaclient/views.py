@@ -187,6 +187,21 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 match_id = serializer.validated_data['match']
 
+                logger.debug(f"Result submission. "
+                             f"match: {serializer.validated_data.get('match')} "
+                             f"type: {serializer.validated_data.get('type')} "
+                             f"replay_file: {serializer.validated_data.get('replay_file')} "
+                             f"game_steps: {serializer.validated_data.get('game_steps')} "
+                             f"submitted_by: {serializer.validated_data.get('submitted_by')} "
+                             f"arenaclient_log: {serializer.validated_data.get('arenaclient_log')} "
+                             f"bot1_avg_step_time: {serializer.validated_data.get('bot1_avg_step_time')} "
+                             f"bot1_log: {serializer.validated_data.get('bot1_log')} "
+                             f"bot1_data: {serializer.validated_data.get('bot1_data')} "
+                             f"bot2_avg_step_time: {serializer.validated_data.get('bot2_avg_step_time')} "
+                             f"bot2_log: {serializer.validated_data.get('bot2_log')} "
+                             f"bot2_data: {serializer.validated_data.get('bot2_data')} "
+                             )
+
                 # Lock everything manually to ensure transactional integrity
                 with connection.cursor() as cursor:
                     cursor.execute(f"select 1 "
@@ -200,11 +215,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 match = Match.objects.get(id=match_id)
 
-                if config.ARENACLIENT_DEBUG_ENABLED:  # todo: make this an INFO or DEBUG level log?
-                    logger.debug(
-                        "Bot1 avg_step_size: {0}".format(serializer.validated_data.get('bot1_avg_step_time')))
-                    logger.debug(
-                        "Bot2 avg_step_size: {0}".format(serializer.validated_data.get('bot2_avg_step_time')))
 
                 # validate result
                 result = SubmitResultResultSerializer(data={'match': serializer.validated_data['match'],
