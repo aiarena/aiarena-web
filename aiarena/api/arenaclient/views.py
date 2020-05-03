@@ -210,6 +210,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                    f"join core_bot cb on cm.bot_id = cb.id "
                                    f"join core_round cr on m.round_id = cr.id "
                                    f"join core_season cs on cr.season_id = cs.id "
+                                   f"join core_seasonparticipation csp on cb.id = csp.bot_id and cs.id = csp.season_id "
                                    f"where m.id = {match_id} "
                                    f"for update")
 
