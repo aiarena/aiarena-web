@@ -20,6 +20,7 @@ from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
 from aiarena.settings import BOT_ZIP_MAX_SIZE
 from .match import Match
+from .mixins import LockableModelMixin
 from .season import Season
 from .user import User
 
@@ -34,7 +35,7 @@ def bot_data_upload_to(instance, filename):
     return '/'.join(['bots', str(instance.id), 'bot_data'])
 
 
-class Bot(models.Model):
+class Bot(models.Model, LockableModelMixin):
     RACES = (
         ('T', 'Terran'),
         ('Z', 'Zerg'),
