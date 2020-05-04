@@ -623,6 +623,34 @@ a:hover, a:visited, a:link, a:active {
     background-image: url("/static/avatar/frames/diamond.png");
 }
 
+.bot-star-base, .bot-star-none, .bot-star-bronze, .bot-star-silver, .bot-star-gold, .bot-star-platinum, .bot-star-diamond {
+    padding: 2px
+}
+
+.bot-star-none  {
+    display: none
+}
+
+.bot-star-bronze  {
+    color: #a56e19;
+}
+
+.bot-star-silver  {
+    color: #8b9597;
+}
+
+.bot-star-gold  {
+    color: #f1bd2f;
+}
+
+.bot-star-platinum  {
+    color: #7e7679
+}
+
+.bot-star-diamond  {
+    color: #d0e4e6
+}
+
 table {
     display: blocking;
     overflow: hiden;

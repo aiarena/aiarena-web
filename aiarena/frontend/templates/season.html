@@ -53,7 +53,18 @@
                 {% for participant in rankings %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ participant.bot.as_html_link }}</td>
+                        <td>
+                            {% if participant.bot.user.patreon_level != 'none' %}
+                                <i class="material-icons bot-star-{{ participant.bot.user.patreon_level }}" style="display: inline-block">stars</i>
+                                <div style="display: inline-block; vertical-align: middle; height: 30px">
+                                    {{ participant.bot.as_html_link }}
+                                </div>
+                                <i class="material-icons bot-star-{{ participant.bot.user.patreon_level }}" style="display: inline-block">stars</i>
+                            {% else %}
+                                {{ participant.bot.as_html_link }}
+                            {% endif %}
+
+                        </td>
                         <td>{{ participant.bot.get_plays_race_display }}</td>
                         <td>{{ participant.bot.user.as_html_link }}</td>
                         <td>{{ participant.bot.type }}</td>
