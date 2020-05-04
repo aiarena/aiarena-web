@@ -229,11 +229,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 # validate participants
                 p1Instance = match.participant1
-                logger.info(f"p1Instance.bot.elo: {p1Instance.bot.elo} "
-                            f"p1Instance.starting_elo: {p1Instance.starting_elo} "
-                            f"p1Instance.elo_change: {p1Instance.elo_change} "
-                            f"p1Instance.resultant_elo: {p1Instance.resultant_elo} "
-                            )
                 participant1 = SubmitResultParticipationSerializer(instance=p1Instance, data={
                     'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
                     'match_log': serializer.validated_data.get('bot1_log'),
@@ -243,11 +238,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 participant1.is_valid(raise_exception=True)
 
                 p2Instance = match.participant2
-                logger.info(f"p2Instance.bot.elo: {p2Instance.bot.elo} "
-                            f"p2Instance.starting_elo: {p2Instance.starting_elo} "
-                            f"p2Instance.elo_change: {p2Instance.elo_change} "
-                            f"p2Instance.resultant_elo: {p2Instance.resultant_elo} "
-                            )
                 participant2 = SubmitResultParticipationSerializer(instance=p2Instance, data={
                     'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
                     'match_log': serializer.validated_data.get('bot2_log'),
@@ -331,24 +321,12 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                     resultant_elo_sum = participant1.resultant_elo + participant2.resultant_elo
                     if initial_elo_sum != resultant_elo_sum:
-                        logger.critical(f"Initial and resultant ELO sum mismatch: ")
-                    #                     f"Result {result.id}. "
-                    #                     f"initial_elo_sum: {initial_elo_sum}. "
-                    #                     f"resultant_elo_sum: {resultant_elo_sum}. "
-                    #                     f"participant1.elo_change: {participant1.elo_change}. "
-                    #                     f"participant2.elo_change: {participant2.elo_change}")
-
-                    logger.info(f"sp1.bot.elo: {sp1.bot.elo} "
-                                f"sp1.starting_elo: {sp1.starting_elo} "
-                                f"sp1.elo_change: {sp1.elo_change} "
-                                f"sp1.resultant_elo: {sp1.resultant_elo} "
-                                f"sp2.bot.elo: {sp2.bot.elo} "
-                                f"sp2.starting_elo: {sp2.starting_elo} "
-                                f"sp2.elo_change: {sp2.elo_change} "
-                                f"sp2.resultant_elo: {sp2.resultant_elo} "
-                                f"initial_elo_sum: {initial_elo_sum}. "
-                                f"resultant_elo_sum: {resultant_elo_sum}. "
-                                )
+                        logger.critical(f"Initial and resultant ELO sum mismatch: "
+                                        f"Result {result.id}. "
+                                        f"initial_elo_sum: {initial_elo_sum}. "
+                                        f"resultant_elo_sum: {resultant_elo_sum}. "
+                                        f"participant1.elo_change: {participant1.elo_change}. "
+                                        f"participant2.elo_change: {participant2.elo_change}")
 
                     if config.ENABLE_ELO_SANITY_CHECK:
                         # test here to check ELO total and ensure no corruption
