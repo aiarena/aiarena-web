@@ -7,6 +7,7 @@ from django.db import models
 
 from aiarena.settings import ELO
 from .match import Match
+from .mixins import LockableModelMixin
 from .user import User
 from .bot import Bot
 
@@ -29,7 +30,7 @@ def arenaclient_log_upload_to(instance, filename):
     return '/'.join(['arenaclient-logs', '{0}_arenaclientlog.zip'.format(instance.match_id)])
 
 
-class Result(models.Model):
+class Result(models.Model, LockableModelMixin):
     TYPES = (
         ('MatchCancelled', 'MatchCancelled'),
         ('InitializationError', 'InitializationError'),
