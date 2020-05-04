@@ -329,6 +329,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                         f"participant2.elo_change: {participant2.elo_change}")
 
                     if config.ENABLE_ELO_SANITY_CHECK:
+                        logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
+
                         # test here to check ELO total and ensure no corruption
                         expectedEloSum = settings.ELO_START_VALUE * SeasonParticipation.objects.filter(season=result.match.round.season).count()
                         actualEloSum = SeasonParticipation.objects.filter(season=result.match.round.season).aggregate(
@@ -338,6 +340,12 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                             logger.critical(
                                 "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
                                     actualEloSum['elo__sum'], expectedEloSum, result.id))
+                        else:
+                            logger.info("ENABLE_ELO_SANITY_CHECK passed!")
+
+                    else:
+                        logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
+
 
                     if result.is_crash_or_timeout():
                         run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result())
