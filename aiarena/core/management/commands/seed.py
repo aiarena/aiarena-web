@@ -113,6 +113,9 @@ def run_seed(matches, token):
 
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net')
     devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net')
+    devuser3 = User.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net')
+    devuser4 = User.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net')
+    devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net')
 
     with open(BaseTestMixin.test_map_path, 'rb') as map:
         Map.objects.create(name='test_map', file=File(map), active=True)
@@ -138,6 +141,15 @@ def run_seed(matches, token):
                            bot_zip=File(bot_zip))
         Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
+
+        Bot.objects.create(user=devuser3, name='devuser3_bot1', active=True, plays_race='T', type='python',
+                           bot_zip=File(bot_zip))
+
+        Bot.objects.create(user=devuser4, name='devuser4_bot1', active=True, plays_race='Z', type='python',
+                           bot_zip=File(bot_zip))
+
+        Bot.objects.create(user=devuser5, name='devuser5_bot1', active=True, plays_race='P', type='python',
+                           bot_zip=File(bot_zip))
 
     for x in range(matches - 1):
         if(bool(random.getrandbits(1))):  # select randomly
