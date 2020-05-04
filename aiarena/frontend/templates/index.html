@@ -38,15 +38,23 @@
         </div>
         <div class="divider"><span></span><span><h2>New bots</h2></span><span></span></div>
         <div id="top10">
-            <table id="NewBotsTable" cellpadding="2px" style="min-width: 400px">
+            <table id="NewBotsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
                 <thead>
-                <td><b>Date</b></td>
-                <td><b>Bot</b></td>
+                    <tr>
+                        <td><b>Date</b></td>
+                        <td></td>
+                        <td><b>Bot</b></td>
+                    </tr>
                 </thead>
                 <tbody>
                 {% for bot in new_bots %}
                     <tr>
                         <td>{{ bot.created }}</td>
+                        <td style="padding-right: 0">
+                            {% if bot.user.patreon_level != 'none' %}
+                                <i class="bot-star-{{ bot.user.patreon_level }} material-icons" style="padding-right: 0; float: right">stars</i>
+                            {% endif %}
+                        </td>
                         <td>{{ bot.as_html_link }}</td>
                     </tr>
                 {% endfor %}
@@ -61,16 +69,22 @@
     <div class="float-half-right">
         <div class="divider"><span></span><span><h2>Top 10 bots</h2></span><span></span></div>
         <div id="top10">
-            <table id="resultsTable" cellpadding="2px" style="min-width: 400px">
+            <table id="resultsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
                 <thead>
-                <td><b>Rank</b></td>
+                <td style="text-align: center"><b>Rank</b></td>
+                <td></td>
                 <td><b>Name</b></td>
                 <td><b>ELO</b></td>
                 </thead>
                 <tbody>
                 {% for participant in seasonparticipation_list %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td style="text-align: center">{{ forloop.counter }}</td>
+                        <td style="padding-right: 0">
+                            {% if participant.bot.user.patreon_level != 'none' %}
+                                <i class="bot-star-{{ participant.bot.user.patreon_level }} material-icons" style="padding-right: 0; float: right">stars</i>
+                            {% endif %}
+                        </td>
                         <td>{{ participant.bot.as_html_link }}</td>
                         <td>{{ participant.elo }}</td>
                     </tr>
@@ -82,15 +96,21 @@
         </div>
         <div class="divider"><span></span><span><h2>Recently updated</h2></span><span></span></div>
         <div id="top10">
-            <table id="recentlyUpdatedTable" cellpadding="2px" style="min-width: 400px">
+            <table id="recentlyUpdatedTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
                 <thead>
                 <td><b>Date</b></td>
+                <td></td>
                 <td><b>Bot</b></td>
                 </thead>
                 <tbody>
                 {% for bot in recently_updated_bots %}
                     <tr>
                         <td>{{ bot.bot_zip_updated }}</td>
+                        <td style="padding-right: 0">
+                            {% if bot.user.patreon_level != 'none' %}
+                                <i class="bot-star-{{ bot.user.patreon_level }} material-icons" style="padding-right: 0; float: right">stars</i>
+                            {% endif %}
+                        </td>
                         <td>{{ bot.as_html_link }}</td>
                     </tr>
                 {% endfor %}

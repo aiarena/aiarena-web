@@ -38,7 +38,7 @@
         <table id="season_ranking_table">
             <thead>
             <tr>
-                <td><b>Rank</b></td>
+                <td style="text-align: center"><b>Rank</b></td>
                 <td></td>
                 <td><b>Name</b></td>
                 <td><b>Race</b></td>
@@ -53,7 +53,7 @@
             {% if rankings.count > 0 %}
                 {% for participant in rankings %}
                     <tr>
-                        <td style="padding-right: 0">{{ forloop.counter }}</td>
+                        <td style="padding-right: 0; text-align: center">{{ forloop.counter }}</td>
                         <td style="padding-right: 0">
                             {% if participant.bot.user.patreon_level != 'none' %}
                                 <i class="bot-star-{{ participant.bot.user.patreon_level }} material-icons" style="padding-right: 0; float: right">stars</i>
