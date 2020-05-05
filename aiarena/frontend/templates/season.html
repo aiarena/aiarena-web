@@ -56,7 +56,7 @@
                         <td style="padding-right: 0; text-align: center">{{ forloop.counter }}</td>
                         <td style="padding-right: 0">
                             {% if participant.bot.user.patreon_level != 'none' %}
-                                <i class="bot-star-{{ participant.bot.user.patreon_level }} material-icons" style="padding-right: 0; float: right">stars</i>
+                                <span class="bot-star-{{ participant.bot.user.patreon_level }} material-icons" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter">stars</span>
                             {% endif %}
                         </td>
                         <td>
