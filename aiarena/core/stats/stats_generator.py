@@ -14,49 +14,47 @@ class StatsGenerator:
 
     @staticmethod
     def update_stats(sp: SeasonParticipation):
-        with transaction.atomic():
-            # sp.lock_me()  # don't lock until we start doing this after each result
-            sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
+        sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
+                                                           match__result__isnull=False,
+                                                           match__round__season=sp.season) \
+            .exclude(match__result__type__in=['MatchCancelled', 'InitializationError', 'Error']) \
+            .count()
+        if sp.match_count != 0:
+            sp.win_count = MatchParticipation.objects.filter(bot=sp.bot, result='win',
+                                                             match__round__season=sp.season
+                                                             ).count()
+            sp.win_perc = sp.win_count / sp.match_count * 100
+            sp.loss_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss',
+                                                              match__round__season=sp.season
+                                                              ).count()
+            sp.loss_perc = sp.loss_count / sp.match_count * 100
+            sp.tie_count = MatchParticipation.objects.filter(bot=sp.bot, result='tie',
+                                                             match__round__season=sp.season
+                                                             ).count()
+            sp.tie_perc = sp.tie_count / sp.match_count * 100
+            sp.crash_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss', result_cause__in=['crash',
+                                                                                                            'timeout',
+                                                                                                            'initialization_failure'],
+                                                               match__round__season=sp.season
+                                                               ).count()
+            sp.crash_perc = sp.crash_count / sp.match_count * 100
+
+            sp.highest_elo = MatchParticipation.objects.filter(bot=sp.bot,
                                                                match__result__isnull=False,
                                                                match__round__season=sp.season) \
-                .exclude(match__result__type__in=['MatchCancelled', 'InitializationError', 'Error']) \
-                .count()
-            if sp.match_count != 0:
-                sp.win_count = MatchParticipation.objects.filter(bot=sp.bot, result='win',
-                                                                 match__round__season=sp.season
-                                                                 ).count()
-                sp.win_perc = sp.win_count / sp.match_count * 100
-                sp.loss_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss',
-                                                                  match__round__season=sp.season
-                                                                  ).count()
-                sp.loss_perc = sp.loss_count / sp.match_count * 100
-                sp.tie_count = MatchParticipation.objects.filter(bot=sp.bot, result='tie',
-                                                                 match__round__season=sp.season
-                                                                 ).count()
-                sp.tie_perc = sp.tie_count / sp.match_count * 100
-                sp.crash_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss', result_cause__in=['crash',
-                                                                                                                'timeout',
-                                                                                                                'initialization_failure'],
-                                                                   match__round__season=sp.season
-                                                                   ).count()
-                sp.crash_perc = sp.crash_count / sp.match_count * 100
+                .aggregate(Max('resultant_elo'))['resultant_elo__max']
 
-                sp.highest_elo = MatchParticipation.objects.filter(bot=sp.bot,
-                                                                   match__result__isnull=False,
-                                                                   match__round__season=sp.season) \
-                    .aggregate(Max('resultant_elo'))['resultant_elo__max']
+            graph = StatsGenerator._generate_elo_graph(sp.bot.id)
+            if graph is not None:
+                sp.elo_graph.save('elo.png', graph)
+        else:
+            sp.win_count = 0
+            sp.loss_count = 0
+            sp.tie_count = 0
+            sp.crash_count = 0
+        sp.save()
 
-                graph = StatsGenerator._generate_elo_graph(sp.bot.id)
-                if graph is not None:
-                    sp.elo_graph.save('elo.png', graph)
-            else:
-                sp.win_count = 0
-                sp.loss_count = 0
-                sp.tie_count = 0
-                sp.crash_count = 0
-            sp.save()
-
-            StatsGenerator._update_matchup_stats(sp)
+        StatsGenerator._update_matchup_stats(sp)
 
     @staticmethod
     def _update_matchup_stats(sp: SeasonParticipation):
