@@ -204,15 +204,15 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 # Lock everything manually to ensure transactional integrity
                 with connection.cursor() as cursor:
-                    cursor.execute(f"select 1 "
-                                   f"from core_match as m "
-                                   f"join core_matchparticipation as cm on m.id = cm.match_id "
-                                   f"join core_bot cb on cm.bot_id = cb.id "
-                                   f"join core_round cr on m.round_id = cr.id "
-                                   f"join core_season cs on cr.season_id = cs.id "
-                                   f"join core_seasonparticipation csp on cb.id = csp.bot_id and cs.id = csp.season_id "
-                                   f"where m.id = {match_id} "
-                                   f"for update")
+                    cursor.execute("select 1 "
+                                   "from core_match as m "
+                                   "join core_matchparticipation as cm on m.id = cm.match_id "
+                                   "join core_bot cb on cm.bot_id = cb.id "
+                                   "join core_round cr on m.round_id = cr.id "
+                                   "join core_season cs on cr.season_id = cs.id "
+                                   "join core_seasonparticipation csp on cb.id = csp.bot_id and cs.id = csp.season_id "
+                                   "where m.id = %s "
+                                   "for update", (match_id, ))
 
                 match = Match.objects.get(id=match_id)
 
