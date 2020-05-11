@@ -623,32 +623,34 @@ a:hover, a:visited, a:link, a:active {
     background-image: url("/static/avatar/frames/diamond.png");
 }
 
-.bot-star-base, .bot-star-none, .bot-star-bronze, .bot-star-silver, .bot-star-gold, .bot-star-platinum, .bot-star-diamond {
-    padding: 2px
+.bot-icon-base, .bot-icon-none, .bot-icon-bronze, .bot-icon-silver, .bot-icon-gold, .bot-icon-platinum, .bot-icon-diamond {
+    /*padding: 2px;*/
+    width: 27px;
+    height: 27px;
 }
 
-.bot-star-none  {
+.bot-icon-none  {
     display: none
 }
 
-.bot-star-bronze  {
-    color: #a56e19;
+.bot-icon-bronze  {
+    background-image: url("/static/bot-icons/bronze.png");
 }
 
-.bot-star-silver  {
-    color: #8b9597;
+.bot-icon-silver  {
+    background-image: url("/static/bot-icons/silver.png");
 }
 
-.bot-star-gold  {
-    color: #f1bd2f;
+.bot-icon-gold  {
+    background-image: url("/static/bot-icons/gold.png");
 }
 
-.bot-star-platinum  {
-    color: #e5e4e2
+.bot-icon-platinum  {
+    background-image: url("/static/bot-icons/platinum.png");
 }
 
-.bot-star-diamond  {
-    color: #d0e4e6
+.bot-icon-diamond  {
+    background-image: url("/static/bot-icons/diamond.png");
 }
 
 table {
