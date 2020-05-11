@@ -1,3 +1,4 @@
+from .arena_client import ArenaClient
 from .bot import Bot
 from .map import Map
 from .match import Match

@@ -2,7 +2,7 @@ import logging
 
 from django.db import models
 
-from aiarena.core.models import User
+from .user import User
 
 logger = logging.getLogger(__name__)
 
