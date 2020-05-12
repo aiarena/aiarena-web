@@ -36,7 +36,6 @@ class Season(models.Model, LockableModelMixin):
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
     previous_season_files_cleaned = models.BooleanField(default=False)
-    replay_archive_zip = models.FileField(upload_to=replay_archive_upload_to, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -153,12 +152,3 @@ def pre_save_season(sender, instance, **kwargs):
     if instance.number is None:
         instance.number = Season.objects.all().count() + 1  # todo: redo this for multiladders
 
-
-@receiver(post_save, sender=Season)
-def post_save_season(sender, instance, created, **kwargs):
-    if created:
-        # create an empty zip file
-        instance.replay_archive_zip.save('filename',  # filename is ignored
-                                         File(
-                                             io.BytesIO(
-                                                 b"PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")))

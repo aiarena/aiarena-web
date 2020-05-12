@@ -421,9 +421,6 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         season1 = Season.objects.get()
         self.assertEqual(season1.number, 1)
 
-        # check the replay archive exists
-        self.assertTrue(season1.replay_archive_zip)
-
         season1.pause()
 
         self._finish_season_rounds()
