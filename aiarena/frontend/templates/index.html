@@ -49,7 +49,7 @@
                 <tbody>
                 {% for bot in new_bots %}
                     <tr>
-                        <td>{{ bot.created }}</td>
+                        <td>{{ bot.created|date:"d. N Y - H:i:s" }}</td>
                         <td style="padding-right: 0">
                             {% if bot.user.patreon_level != 'none' %}
                                 <div class="bot-icon-{{ bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
@@ -105,7 +105,7 @@
                 <tbody>
                 {% for bot in recently_updated_bots %}
                     <tr>
-                        <td>{{ bot.bot_zip_updated }}</td>
+                        <td>{{ bot.bot_zip_updated|date:"d. N Y - H:i:s" }}</td>
                         <td style="padding-right: 0">
                             {% if bot.user.patreon_level != 'none' %}
                                 <div class="bot-icon-{{ bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>

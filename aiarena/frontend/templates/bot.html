@@ -68,11 +68,11 @@
                 </tr>
                 <tr>
                     <td><b>Created</b></td>
-                    <td>{{ bot.created }}</td>
+                    <td>{{ bot.created|date:"d. N Y - H:i:s" }}</td>
                 </tr>
                 <tr>
                     <td><b>Last Updated</b></td>
-                    <td>{{ bot.bot_zip_updated }}</td>
+                    <td>{{ bot.bot_zip_updated|date:"d. N Y - H:i:s" }}</td>
                 </tr>
                 </tbody>
             </table>
