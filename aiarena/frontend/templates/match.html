@@ -87,7 +87,7 @@
                 {% endif %}
 
                 {% if match.assigned_to %}
-                    <td>{{ match.assigned_to }}</td>
+                    <td>{{ match.assigned_to.as_html_link }}</td>
                 {% else %}
                     <td>queued...</td>
                 {% endif %}
