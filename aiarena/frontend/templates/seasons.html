@@ -12,7 +12,6 @@
             <td><b>Opened</b></td>
             <td><b>Closed</b></td>
             <td><b>Status</b></td>
-            <td><b>Replay Archive</b></td>
         </tr>
         </thead>
         <tbody>
@@ -31,7 +30,6 @@
                     <td>--</td>
                 {% endif %}
                 <td>{{ season.get_status_display }}</td>
-                <td><a href="{{ season.replay_archive_zip.url }}">Download</a></td>
             </tr>
         {% endfor %}
         </tbody>
