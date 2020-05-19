@@ -190,13 +190,13 @@
                         <td>{{ result.me.step_time_ms|floatformat:3 }}</td>
                         <td>{{ result.game_time_formatted }}</td>
                         {% if result.replay_file %}
-                            <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                            <td><a class="file-link" href="{{ result.replay_file.url }}">Download</a></td>
                         {% else %}
                             <td>Unavailable</td>
                         {% endif %}
                         {% if request.user == bot.user or request.user.is_staff %}
                             {% if result.me.match_log %}
-                                <td><a href="{{ result.me.match_log.url }}">Download</a></td>
+                                <td><a class="file-link" href="{{ result.me.match_log.url }}">Download</a></td>
                             {% else %}
                                 <td>None</td>
                             {% endif %}

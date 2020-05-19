@@ -59,6 +59,10 @@ a {
 
 }
 
+a.file-link:visited {
+    color: #61892f;
+}
+
 .material-icons {
     font-size: 32px;
     padding-right: 12px;
