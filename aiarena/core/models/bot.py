@@ -141,7 +141,7 @@ class Bot(models.Model, LockableModelMixin):
         for match in matches:
             for p in match.matchparticipation_set.filter(bot=self):
                 if p.use_bot_data and p.update_bot_data:
-                    data_frozen = True
+                    data_frozen = True  # todo: maybe we can cache this flag
         return self.bot_data and data_frozen
 
     @staticmethod

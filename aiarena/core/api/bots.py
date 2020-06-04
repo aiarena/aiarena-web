@@ -42,6 +42,6 @@ class Bots:
         return Bot.objects.filter(active=True)
 
     @staticmethod
-    def get_active_and_available() -> list:
-        return [bot for bot in Bots.get_active() if not bot.bot_data_is_currently_frozen()]
+    def get_available(bots) -> list:
+        return [bot for bot in bots if not bot.bot_data_is_currently_frozen()]
 

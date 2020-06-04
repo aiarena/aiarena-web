@@ -10,6 +10,7 @@ from django.core.management import call_command, CommandError
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
+from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round
 from aiarena.core.utils import calculate_md5
@@ -185,7 +186,7 @@ class BaseTestMixin(object):
 
         # generate a bot match request to ensure it doesn't bug things out
         bot = Bot.get_random_active()
-        call_command('requestbotmatch', bot.id)
+        Matches.request_match(self.regularUser2, bot)
 
         self.client.logout()  # child tests can login if they require
 
@@ -263,8 +264,6 @@ class LoggedInMixin(BaseTestMixin):
     """
 
     def setUp(self):
-        super(LoggedInMixin, self).setUp()
-
         self.staffUser1 = User.objects.create_user(username='staff_user', password='x',
                                                    email='staff_user@dev.aiarena.net',
                                                    is_staff=True)
@@ -413,7 +412,7 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         self.client.force_login(self.arenaclientUser1)
 
         self.assertEqual(Match.objects.filter(result__isnull=True).count(), 12,
-                         msg='This tests expects 12 unplayed matches in order to work.')
+                         msg='This test expects 12 unplayed matches in order to work.')
 
         # cache the bots - list forces the queryset to be evaluated
         bots = list(Bot.objects.all())
@@ -421,10 +420,16 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         season1 = Season.objects.get()
         self.assertEqual(season1.number, 1)
 
+        # start a new round
+        # response = self._post_to_matches()
+        # self.assertEqual(response.status_code, 201)
+
+        # Pause the season and finish the round
         season1.pause()
 
         self._finish_season_rounds()
 
+        # this should fail due to a new round trying to generate while the season is paused
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 503)
         self.assertEqual(u'The current season is paused.', response.data['detail'])
@@ -603,11 +608,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command('generatestats', stdout=out)
         self.assertIn('Done', out.getvalue())
-
-    def test_request_bot_match_random_opponent(self):
-        out = StringIO()
-        call_command('requestbotmatch', '1', stdout=out)
-        self.assertIn('Successfully requested match. Match ID:', out.getvalue())
 
     def test_seed(self):
         out = StringIO()

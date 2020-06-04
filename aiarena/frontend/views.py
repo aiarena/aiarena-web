@@ -548,8 +548,8 @@ class RequestMatchForm(forms.Form):
 
     @transaction.atomic()
     def request_match(self, user):
-        return [Matches.request_match(self.cleaned_data['bot1'], self.cleaned_data['bot2'], self.cleaned_data['map'],
-                                       user) for _ in range(0, self.cleaned_data['match_count'])]
+        return [Matches.request_match(user, self.cleaned_data['bot1'], self.cleaned_data['bot2'],
+                                      self.cleaned_data['map']) for _ in range(0, self.cleaned_data['match_count'])]
 
 
 class RequestMatch(LoginRequiredMixin, FormView):
