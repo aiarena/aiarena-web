@@ -33,6 +33,13 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
+        # no current season
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 503)
+
+        # needs a valid season to be able to activate a bot.
+        self._create_open_season()
+
         # no maps
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 409)
@@ -51,9 +58,6 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         bot2 = self._create_bot(self.regularUser1, 'testbot2')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 409)
-
-        # needs a valid season to be able to activate a bot.
-        self._create_open_season()
 
         # not enough active bots
         bot1.active = True
@@ -186,7 +190,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(u"Failed to start match. There might not be any available participants.", response.data['detail'])
 
-        Matches.request_match(bot1)
+        Matches.request_match(self.regularUser2, bot1)
 
         # now we should be able to get a match - the requested one
         response = self.client.post('/api/arenaclient/matches/')
@@ -273,7 +277,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._check_hashes(bot1, bot2, match['id'], 1)
 
         # test that requested matches don't update bot_data
-        match5 = Matches.request_match(bot1, bot2, Map.random_active(), self.staffUser1)
+        match5 = Matches.request_match(self.staffUser1, bot1, bot2, Map.random_active())
         self._post_to_results_bot_datas_set_1(match5.id, 'Player1Win')
 
         # check hashes - nothing should have changed

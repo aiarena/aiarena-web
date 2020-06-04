@@ -116,10 +116,11 @@ class Season(models.Model, LockableModelMixin):
             # todo: then wipe all replay/log files?
 
     @staticmethod
-    def get_current_season():
+    def get_current_season(select_for_update: bool = False) -> 'Season':
         try:
             #  will fail if there is more than 1 current season or 0 current seasons
-            return Season.objects.get(date_closed__isnull=True)
+            return Season.objects.select_for_update().get(date_closed__isnull=True) \
+                if select_for_update else Season.objects.get(date_closed__isnull=True)
         except Season.DoesNotExist:
             raise NoCurrentSeason()  # todo: separate between core and API exceptions
         except Season.MultipleObjectsReturned:
