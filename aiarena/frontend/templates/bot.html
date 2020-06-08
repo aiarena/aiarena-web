@@ -164,8 +164,9 @@
     <div id="bot_results_anker"></div>
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
-        <table class="row-hover-highlight">
-            <thead>
+        <table class="row-hover-highlight" id="bot_results_table">
+            <thead >
+            <tr style="height: 60px; ">
             <td><b>ID</b></td>
             <td><b>Date</b></td>
             <td><b>Opponent</b></td>
@@ -177,6 +178,7 @@
             {% if request.user == bot.user or request.user.is_staff %}
                 <td><b>Log</b></td>
             {% endif %}
+            </tr>
             </thead>
             <tbody>
             {% if result_list.paginator.count > 0 %}
@@ -212,6 +214,77 @@
             <tfoot>
             </tfoot>
         </table>
+
+        <script>
+			var filtersConfig = {
+				base_path: '/static/tablefilter/',
+
+				auto_filter: {
+					delay: 1100
+				},
+
+				paging: {
+				  results_per_page: ['Records: ', [25, 50, 100, 250]]
+				},
+
+				state: {
+					types: ['local_storage'],
+					filters: true,
+					page_number: true,
+					page_length: true,
+					sort: true
+				},
+
+				sticky_headers: true,
+				filters_row_index: 1,
+				loader: true,
+				state: true,
+
+				grid_layout: {
+					filters: true,
+					cont_css_class: 'grd-main-cont',
+					tbl_head_css_class: 'grd-head-cont',
+					tbl_cont_css_class: 'grd-cont'
+				},
+
+				alternate_rows: true,
+				rows_counter: false,
+				btn_reset: true,
+				status_bar: true,
+				toolbar: true,
+				mark_active_columns: true,
+				highlight_keywords: true,
+				msg_filter: 'Filtering...',
+				loader: {
+					html: '<div id="lblMsg"></div>',
+					css_class: 'myLoader'
+				},
+				status_bar: {
+					target_id: 'lblMsg',
+					css_class: 'myStatus'
+				},
+				col_2: 'select',
+				col_3: 'select',
+				col_9: 'select',
+				col_widths: [
+					"50px", "150px", "150px",
+					"100px", "70px", "100px",
+					"100px", "100px"
+				],
+				col_types: [
+					'number', 'string', 'string',
+					'string', 'string', 'string',
+					'string', 'string'
+				],
+				extensions:[{
+					name: 'sort'
+				}]
+			};
+
+			var tf = new TableFilter('bot_results_table', filtersConfig);
+			tf.init();
+		</script>
+
         <div class="pagination">
             {% if result_list.has_other_pages %}
                 <ul class="pagination">
