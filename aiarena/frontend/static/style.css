@@ -958,3 +958,92 @@ font-size: 14px;
 .request-match-bot {
     margin: 20px;
 }
+
+.myLoader {
+    position:absolute; padding: 5px;
+    margin:100px 0 0 5%; width:auto;
+    z-index:1000; font-size:12px; font-weight:bold;
+    border:1px solid #666; background:#ffffcc;
+    vertical-align:middle;
+}
+
+.myStatus {
+    width:auto; display:block;
+}
+
+.grd-main-cont{
+    overflow: hidden;
+    /*background-color: #f4f4f4;*/
+
+    text-align:ellipsis;
+    margin: 10px auto;
+
+}
+
+/* headers container */
+.grd-head-cont{
+    overflow: hidden;
+    text-align: center;
+   /* background-color: #4A4A4A; */
+}
+
+/* header cell */
+.grd-head-cont th{
+  /*  background-color: #4A4A4A; */
+    /*padding: 0.5em 0.1em;*/
+    color: #fff;
+    /*border-right: 1px dotted #fff;*/
+    min-height: 70px;
+    overflow: hidden;
+  /*text-overflow: ellipsis;*/
+
+}
+
+/* table container */
+.grd-cont{
+    /** background-color: #f4f4f4; */
+    overflow-x: hidden;
+    overflow-y: hidden;
+
+}
+
+/* cell */
+.grd-cont td{
+    padding: 0.5em 0.1em;
+   /* background-color: rgba(0, 0, 0, 0.25); */
+    /*border-bottom: 1px solid #ccc;
+    border-right: 1px dotted #666;*/
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 16px;
+    height: 35px;
+
+}
+
+/* head and body tables */
+.grd-head-cont table, .grd-cont table{
+    /*font-size: 1.1em;*/
+    border-collapse: collapse;
+
+}
+
+.grd-head-cont tr:nth-child(even)
+{background-color: rgba(0, 0, 0, 0.3);}
+
+/* bottom toolbar override */
+.grd-main-cont > .grd_inf {
+width:89.5%;
+margin-left: 57px;
+    background-color: rgba(97, 137, 47, 0.5);
+
+}
+
+.grd-cont  tr:hover {
+    background-color: rgba(97, 137, 47, 0.7); /*#61892f;*/
+    color: #fffff;
+}
+
+td img{
+height: 0px;
+width: 0px;
+}
