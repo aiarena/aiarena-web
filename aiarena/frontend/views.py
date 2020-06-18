@@ -179,14 +179,14 @@ class BotDetail(DetailView):
         results = Result.objects.filter(match__matchparticipation__bot=self.object).order_by('-created')
 
         # paginate the results
-        page = self.request.GET.get('page', 1)
-        paginator = Paginator(results, 30)
-        try:
-            results = paginator.page(page)
-        except PageNotAnInteger:
-            results = paginator.page(1)
-        except EmptyPage:
-            results = paginator.page(paginator.num_pages)
+        # page = self.request.GET.get('page', 1)
+        # paginator = Paginator(results, 30)
+        # try:
+        #     results = paginator.page(page)
+        # except PageNotAnInteger:
+        #     results = paginator.page(1)
+        # except EmptyPage:
+        #     results = paginator.page(paginator.num_pages)
 
         # retrieve the opponent and transform the result type to be personal to this bot
         for result in results:
@@ -212,7 +212,7 @@ class BotDetail(DetailView):
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
         context['result_list'] = results
-        context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
+        # context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
         return context
 
 

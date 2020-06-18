@@ -181,7 +181,7 @@
             </tr>
             </thead>
             <tbody>
-            {% if result_list.paginator.count > 0 %}
+            {% if result_list.count > 0 %}
                 {% for result in result_list %}
                     <tr>
                         <td>{{ result.match.as_html_link }}</td>
@@ -285,32 +285,32 @@
 			tf.init();
 		</script>
 
-        <div class="pagination">
-            {% if result_list.has_other_pages %}
-                <ul class="pagination">
-                    {% if result_list.has_previous %}
-                        <li>
-                            <a href="?page={{ result_list.previous_page_number }}#bot_results">&laquo;</a>
-                        </li>
-                    {% else %}
-                        <li class="disabled"><span>&laquo;</span></li>
-                    {% endif %}
-                    {% for page_num in results_page_range %}
-                        {% if result_list.number == page_num %}
-                            <li class="active"><span>{{ page_num }}</span></li>
-                        {% else %}
-                            <li><a href="?page={{ page_num }}#bot_results">{{ page_num }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if result_list.has_next %}
-                        <li><a href="?page={{ result_list.next_page_number }}#bot_results">&raquo;</a>
-                        </li>
-                    {% else %}
-                        <li class="disabled"><span>&raquo;</span></li>
-                    {% endif %}
-                </ul>
-            {% endif %}
-        </div>
+{#        <div class="pagination">#}
+{#            {% if result_list.has_other_pages %}#}
+{#                <ul class="pagination">#}
+{#                    {% if result_list.has_previous %}#}
+{#                        <li>#}
+{#                            <a href="?page={{ result_list.previous_page_number }}#bot_results">&laquo;</a>#}
+{#                        </li>#}
+{#                    {% else %}#}
+{#                        <li class="disabled"><span>&laquo;</span></li>#}
+{#                    {% endif %}#}
+{#                    {% for page_num in results_page_range %}#}
+{#                        {% if result_list.number == page_num %}#}
+{#                            <li class="active"><span>{{ page_num }}</span></li>#}
+{#                        {% else %}#}
+{#                            <li><a href="?page={{ page_num }}#bot_results">{{ page_num }}</a></li>#}
+{#                        {% endif %}#}
+{#                    {% endfor %}#}
+{#                    {% if result_list.has_next %}#}
+{#                        <li><a href="?page={{ result_list.next_page_number }}#bot_results">&raquo;</a>#}
+{#                        </li>#}
+{#                    {% else %}#}
+{#                        <li class="disabled"><span>&raquo;</span></li>#}
+{#                    {% endif %}#}
+{#                </ul>#}
+{#            {% endif %}#}
+{#        </div>#}
     </div>
 {% endblock %}
 
