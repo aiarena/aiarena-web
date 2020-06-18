@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db import transaction, IntegrityError
+from django.db import transaction, IntegrityError, connection
 from django.db.models import F, Prefetch
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -25,6 +25,7 @@ from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
 from aiarena.core.models import Trophy
+from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
@@ -176,7 +177,45 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = Result.objects.filter(match__matchparticipation__bot=self.object).order_by('-created')
+        # This is done using a raw query to keep it performant
+        # results = RelativeResult.objects.raw("select cr.id as id,"
+        #                    " me.id as me_id,"
+        #                    " cr.created as created,"
+        #                    " opponent.id as opponent_id,"
+        #                    " me.result as result,"
+        #                    " me.result_cause as result_cause,"
+        #                    " me.elo_change as elo_change,"
+        #                    " me.avg_step_time as avg_step_time,"
+        #                    " SEC_TO_TIME(cr.game_steps) as game_time_formatted,"
+        #                    " cr.game_steps as game_steps"
+        #                    " from core_result cr"
+        #                    " join core_match cm on cr.match_id = cm.id"
+        #                    " join core_matchparticipation me on cm.id = me.match_id"
+        #                    " join core_matchparticipation opponent on cm.id = opponent.match_id"
+        #                    " where me.bot_id = %s"
+        #                    " order by cr.created desc", (self.object.id, ))
+        results = RelativeResult.objects.select_related().filter(me__bot=self.object).order_by('created')
+            # for result in results:
+                # result.opponent = result.match.matchparticipation_set.exclude(bot=self.object).get()
+                # result.me = result.match.matchparticipation_set.get(bot=self.object)
+                #
+                # # convert the type to be relative to this bot
+                # typeSuffix = ''
+                # if result.type in ['Player1Crash', 'Player2Crash']:
+                #     typeSuffix = ' - Crash'
+                # elif result.type in ['Player1TimeOut', 'Player2TimeOut']:
+                #     typeSuffix = ' - TimeOut'
+                #
+                # if result.winner is not None:
+                #
+                #     if result.winner == self.object:
+                #         result.relative_type = 'Win' + typeSuffix
+                #     else:
+                #         result.relative_type = 'Loss' + typeSuffix
+                # else:
+                #     result.relative_type = result.type
+
+        # results = Result.objects.filter(match__matchparticipation__bot=self.object).order_by('-created')
 
         # paginate the results
         # page = self.request.GET.get('page', 1)
@@ -189,25 +228,25 @@ class BotDetail(DetailView):
         #     results = paginator.page(paginator.num_pages)
 
         # retrieve the opponent and transform the result type to be personal to this bot
-        for result in results:
-            result.opponent = result.match.matchparticipation_set.exclude(bot=self.object).get()
-            result.me = result.match.matchparticipation_set.get(bot=self.object)
-
-            # convert the type to be relative to this bot
-            typeSuffix = ''
-            if result.type in ['Player1Crash', 'Player2Crash']:
-                typeSuffix = ' - Crash'
-            elif result.type in ['Player1TimeOut', 'Player2TimeOut']:
-                typeSuffix = ' - TimeOut'
-
-            if result.winner is not None:
-
-                if result.winner == self.object:
-                    result.relative_type = 'Win' + typeSuffix
-                else:
-                    result.relative_type = 'Loss' + typeSuffix
-            else:
-                result.relative_type = result.type
+        # for result in results:
+        #     result.opponent = result.match.matchparticipation_set.exclude(bot=self.object).get()
+        #     result.me = result.match.matchparticipation_set.get(bot=self.object)
+        #
+        #     # convert the type to be relative to this bot
+        #     typeSuffix = ''
+        #     if result.type in ['Player1Crash', 'Player2Crash']:
+        #         typeSuffix = ' - Crash'
+        #     elif result.type in ['Player1TimeOut', 'Player2TimeOut']:
+        #         typeSuffix = ' - TimeOut'
+        #
+        #     if result.winner is not None:
+        #
+        #         if result.winner == self.object:
+        #             result.relative_type = 'Win' + typeSuffix
+        #         else:
+        #             result.relative_type = 'Loss' + typeSuffix
+        #     else:
+        #         result.relative_type = result.type
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
