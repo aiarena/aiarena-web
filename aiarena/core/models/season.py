@@ -111,6 +111,12 @@ class Season(models.Model, LockableModelMixin):
             self.status = 'closed'
             self.date_closed = timezone.now()
             self.save()
+
+            # deactivate all bots
+            from .bot import Bot
+            for bot in Bot.objects.all():
+                bot.active = False
+                bot.save()
             # todo: sanity check replay archive contents against results.
             # todo: then dump results data as JSON?
             # todo: then wipe all replay/log files?
