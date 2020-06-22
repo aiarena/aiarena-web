@@ -170,6 +170,7 @@
             <td><b>Date</b></td>
             <td><b>Opponent</b></td>
             <td><b>Result</b></td>
+            <td><b>Cause</b></td>
             <td><b>+/-</b></td>
             <td><b>Avg Step<br/>(ms)</b></td>
             <td><b>Duration</b></td>
@@ -185,7 +186,8 @@
                         <td>{{ result.match.as_html_link }}</td>
                         <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
                         <td>{{ result.opponent.bot.as_html_link }}</td>
-                        <td>{{ result.relative_type }}</td>
+                        <td>{{ result.result }}</td>
+                        <td>{{ result.result_cause }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
                         <td>{{ result.me.step_time_ms|floatformat:3 }}</td>
                         <td>{{ result.game_time_formatted }}</td>
