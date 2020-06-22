@@ -79,11 +79,9 @@ class Season(models.Model, LockableModelMixin):
                 self.date_opened = timezone.now()
 
                 # double check bots aren't active and if so deactivate them
-                # also regenerate their display ids
                 for bot in Bot.objects.all():
                     if bot.active:
                         bot.active = False
-                    bot.regen_game_display_id()
                     bot.save()
 
             self.status = 'open'
