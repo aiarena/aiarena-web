@@ -450,6 +450,10 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         season1.refresh_from_db()
         self.assertEqual(season1.status, 'closed')
 
+        # all bots should be deactivated
+        for bot in Bot.objects.all():
+            self.assertFalse(bot.active)
+
         # Activating a bot should fail
         with self.assertRaises(ValidationError):
             bot = Bot.objects.all()[0]
@@ -460,34 +464,33 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         season2 = Season.objects.create(previous_season_files_cleaned=True)
         self.assertEqual(season2.number, 2)
 
-        # current season is paused
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 503)
-        self.assertEqual(u'The current season is paused.', response.data['detail'])
-
-        # check no bot display IDs have changed
-        for bot in bots:
-            updated_bot = Bot.objects.get(id=bot.id)
-            self.assertEqual(updated_bot.game_display_id, bot.game_display_id)
-
-        season2.open()
-
-        # check bot display IDs have been updated and they're deactivated
-        for bot in bots:
-            updated_bot = Bot.objects.get(id=bot.id)
-            self.assertFalse(updated_bot.active)
-            self.assertNotEqual(updated_bot.game_display_id, bot.game_display_id)
-
         # not enough active bots
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 409)
         self.assertEqual(u'Not enough available bots for a match. Wait until more bots become available.',
                          response.data['detail'])
 
-        # activate the bots
+        # activate the bots - this should be possible, but just in case
         for bot in Bot.objects.all():
             bot.active = True
             bot.save()
+
+        # current season is paused
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(u'The current season is paused.', response.data['detail'])
+
+        season2.open()
+        # opening a season deactivates bots, so reactivate
+        for bot in Bot.objects.all():
+            bot.active = True
+            bot.save()
+
+        # check no bot display IDs have changed
+        # they used to change in previous website versions - make sure they no longer do
+        for bot in bots:
+            updated_bot = Bot.objects.get(id=bot.id)
+            self.assertEqual(updated_bot.game_display_id, bot.game_display_id)
 
         # start a new round
         response = self._post_to_matches()
