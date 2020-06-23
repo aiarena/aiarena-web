@@ -15,6 +15,7 @@ class Command(BaseCommand):
         parser.add_argument('--days', type=int,
                             help="Number of days into the past to start cleaning from. Default is {0}.".format(
                                 self._DEFAULT_DAYS_LOOKBACK))
+        parser.add_argument('--verbose', action='store_true', help="Output information with each action.")
 
     def handle(self, *args, **options):
         if options['days'] is not None:
@@ -22,11 +23,13 @@ class Command(BaseCommand):
         else:
             days = self._DEFAULT_DAYS_LOOKBACK
         self.stdout.write('Cleaning up match logfiles starting from {0} days into the past...'.format(days))
-        self.stdout.write('Cleaned up {0} logfiles.'.format(self.cleanup_logfiles(days)))
+        self.stdout.write('Cleaned up {0} logfiles.'.format(self.cleanup_logfiles(days, options['verbose'])))
 
-    def cleanup_logfiles(self, days):
+    def cleanup_logfiles(self, days, verbose):
         participants = MatchParticipation.objects.filter(match_log__isnull=False,
                                                          match__result__created__lt=timezone.now() - timedelta(days=days))
         for participant in participants:
             participant.match_log.delete()
+            if verbose:
+                self.stdout.write(f'Participant {participant.id} match log deleted.')
         return participants.count()
