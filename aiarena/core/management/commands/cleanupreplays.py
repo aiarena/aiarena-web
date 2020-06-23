@@ -25,7 +25,6 @@ class Command(BaseCommand):
         self.stdout.write('Cleaning up replays starting from {0} days into the past...'.format(days))
         self.stdout.write('Cleaned up {0} replays.'.format(self.cleanup_replays(days)))
 
-    @transaction.atomic()
     def cleanup_replays(self, days):
         results = Result.objects.filter(replay_file__isnull=False, created__lt=timezone.now() - timedelta(days=days)).select_for_update()
         for result in results:
