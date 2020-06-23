@@ -1,8 +1,17 @@
 # Install
 
-1. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
+1. Clone this project by doing a recursive clone:
+    ```bash
+    git clone --recursive <GIT_URL>
+    ```
+   If you have already done a non-recursive clone, you can initialize missing any submodules like so:
+   ```
+   git submodule update --init --recursive
+   ```
 
-2. Install MySQL and create a Database and a User who can access it  
+2. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
+
+3. Install MySQL and create a Database and a User who can access it  
     Using SQL:
     ```
     CREATE DATABASE aiarena;
@@ -10,7 +19,7 @@
     GRANT ALL PRIVILEGES ON aiarena.* TO aiarena WITH GRANT OPTION;
     ```
 
-3. Install python modules
+4. Install python modules
     ```
     python ./pip/pip-install.py
     ```
@@ -23,28 +32,28 @@
    If these commands fail, then you likely have an issue with your environment (is `pip3` in your PATH?).
    
 
-4. Modify the Website config to use your Database.  
+5. Modify the Website config to use your Database.  
     If you are using a standard mysql setup at localhost:3306 and step 2's SQL script, then you can skip this step -
     the credentials will already be configured.  
     If you need to configure different credentials, make a copy of the `/aiarena/example-dev-env.py` file as 
     `/aiarena/env.py` and update the relevant details
 
-5. Initialize Website DB:
+6. Initialize Website DB:
     ```
     python manage.py migrate
     ```
 
-6. Create static files
+7. Create static files
    ```
    python manage.py collectstatic
    ```
 
-7. Seed the database with data users and match data
+8. Seed the database with data users and match data
     ```
     python manage.py seed
     ```
 
-8. Launch the Website then navigate your browser to `http://127.0.0.1:8000/`
+9. Launch the Website then navigate your browser to `http://127.0.0.1:8000/`
     ```
     python manage.py runserver
     ```
