@@ -612,6 +612,18 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         call_command('generatestats', stdout=out)
         self.assertIn('Done', out.getvalue())
 
+    def test_generatestats_season(self):
+        self._generate_full_data_set()
+        out = StringIO()
+        call_command('generatestats', '--seasonid', '1', stdout=out)
+        self.assertIn('Done', out.getvalue())
+
+    def test_generatestats_bot(self):
+        self._generate_full_data_set()
+        out = StringIO()
+        call_command('generatestats', '--botid', '1', stdout=out)
+        self.assertIn('Done', out.getvalue())
+
     def test_seed(self):
         out = StringIO()
         call_command('seed', stdout=out)
