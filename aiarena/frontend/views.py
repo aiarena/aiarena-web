@@ -177,7 +177,7 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = RelativeResult.objects.select_related().filter(me__bot=self.object).order_by('created')
+        results = RelativeResult.objects.select_related().filter(me__bot=self.object).order_by('-created')
 
         # paginate the results
         page = self.request.GET.get('page', 1)
