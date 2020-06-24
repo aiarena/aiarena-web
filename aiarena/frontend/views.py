@@ -491,6 +491,7 @@ class SeasonDetail(DetailView):
         context = super(SeasonDetail, self).get_context_data(**kwargs)
         context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
         context['rankings'] = Ladders.get_season_ranked_participants(self.object)
+        context['rankings'].count = len(context['rankings'])
         return context
 
 
