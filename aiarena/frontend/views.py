@@ -438,7 +438,7 @@ class Index(ListView):
     def get_queryset(self):
         try:
             return Ladders.get_season_ranked_participants(
-                Season.get_current_season())[:10].prefetch_related('bot')  # top 10 bots
+                Season.get_current_season())[:10]  # top 10 bots
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
 
