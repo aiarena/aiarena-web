@@ -22,4 +22,4 @@ class Ladders:
 
     @staticmethod
     def get_most_recent_round(season: Season):
-        return Round.objects.get(number=Round.objects.filter(season=season).aggregate(Max('number'))['number__max'])
+        return Round.objects.get(season=season, number=Round.objects.filter(season=season).aggregate(Max('number'))['number__max'])
