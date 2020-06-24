@@ -10,6 +10,16 @@ logger = logging.getLogger(__name__)
 class Ladders:
     @staticmethod
     def get_season_ranked_participants(season: Season):
-        last_round_numer = Round.objects.filter(season=season).aggregate(Max('number'))
-        return SeasonParticipation.objects.filter(season=season, season__round__number=last_round_numer['number__max']).order_by('-elo')
+        # only return SeasonParticipations that are included in the most recent round
+        last_round = Ladders.get_most_recent_round(season)
+        return SeasonParticipation.objects.raw("select distinct csp.*"
+                                        " from core_seasonparticipation csp"
+                                        " left join core_bot cb on csp.bot_id = cb.id"
+                                        " left join core_matchparticipation cmp on cb.id = cmp.bot_id"
+                                        " left join core_match cm on cmp.match_id = cm.id"
+                                        " where cm.round_id = %s"
+                                        " order by elo desc", (last_round.id,))
 
+    @staticmethod
+    def get_most_recent_round(season: Season):
+        return Round.objects.get(number=Round.objects.filter(season=season).aggregate(Max('number'))['number__max'])
