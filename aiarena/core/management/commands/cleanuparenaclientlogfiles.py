@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from django.utils import timezone
 
 from aiarena.core.models import Result
@@ -30,7 +31,11 @@ class Command(BaseCommand):
         results = Result.objects.exclude(arenaclient_log='').filter(created__lt=timezone.now() - timedelta(days=days))
         self.stdout.write(f'{results.count()} records gathered.')
         for result in results:
-            result.arenaclient_log.delete()
-            if verbose:
-                self.stdout.write(f'Match {result.match_id} arena client log deleted.')
+            with transaction.atomic():
+                result.lock_me()
+                result.arenaclient_log_has_been_cleaned = True
+                result.arenaclient_log.delete()
+                result.save()
+                if verbose:
+                    self.stdout.write(f'Match {result.match_id} arena client log deleted.')
         return results.count()

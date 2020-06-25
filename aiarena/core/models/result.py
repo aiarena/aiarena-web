@@ -59,6 +59,9 @@ class Result(models.Model, LockableModelMixin):
     interest_rating = models.FloatField(blank=True, null=True, db_index=True)
     date_interest_rating_calculated = models.DateTimeField(blank=True, null=True)
     replay_file_has_been_cleaned = models.BooleanField(default=False)
+    """This is set to true when the replay file is deleted by the cleanup job."""
+    arenaclient_log_has_been_cleaned = models.BooleanField(default=False)
+    """This is set to true when the arena log file is deleted by the cleanup job."""
 
     def __str__(self):
         return self.created.__str__()

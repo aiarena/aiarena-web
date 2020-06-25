@@ -5,13 +5,14 @@ from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.validators import validate_not_nan, validate_not_inf
 from .bot import Bot
 from .match import Match
+from .mixins import LockableModelMixin
 
 
 def match_log_upload_to(instance, filename):
     return '/'.join(['match-logs', str(instance.id)])
 
 
-class MatchParticipation(models.Model):
+class MatchParticipation(models.Model, LockableModelMixin):
     RESULT_TYPES = (
         ('none', 'None'),
         ('win', 'Win'),
@@ -50,6 +51,8 @@ class MatchParticipation(models.Model):
     If this is False, update_bot_data is also assumed False"""
     update_bot_data = models.BooleanField(default=True)
     """Whether to update this bot's data after the match."""
+    match_log_has_been_cleaned = models.BooleanField(default=True)
+    """This is set to true when the match log file is deleted by the cleanup job."""
 
     def __str__(self):
         return self.bot.name

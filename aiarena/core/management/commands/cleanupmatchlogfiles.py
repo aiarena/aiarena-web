@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from django.utils import timezone
 
 from aiarena.core.models import MatchParticipation
@@ -31,7 +32,11 @@ class Command(BaseCommand):
             .filter(match__result__created__lt=timezone.now() - timedelta(days=days))
         self.stdout.write(f'{participants.count()} records gathered.')
         for participant in participants:
-            participant.match_log.delete()
-            if verbose:
-                self.stdout.write(f'Participant {participant.id} match log deleted.')
+            with transaction.atomic():
+                participant.lock_me()
+                participant.match_log_has_been_cleaned = True
+                participant.match_log.delete()
+                participant.save()
+                if verbose:
+                    self.stdout.write(f'Participant {participant.id} match log deleted.')
         return participants.count()
