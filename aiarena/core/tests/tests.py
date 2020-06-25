@@ -582,6 +582,13 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
             'Cleaning up replays starting from 30 days into the past...\nGathering records to clean...\n{0} records gathered.\nCleaned up {0} replays.'.format(NUM_MATCHES),
             out.getvalue())
 
+        # ensure the job doesn't re-clean the same records when run again
+        out = StringIO()
+        call_command('cleanupreplays', stdout=out)
+        self.assertIn(
+            'Cleaning up replays starting from 30 days into the past...\nGathering records to clean...\n0 records gathered.\nCleaned up 0 replays.',
+            out.getvalue())
+
         self.assertEqual(results.count(), NUM_MATCHES)
         for result in results:
             self.assertFalse(result.replay_file)
@@ -593,6 +600,13 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
                 NUM_MATCHES),
             out.getvalue())
 
+        # ensure the job doesn't re-clean the same records when run again
+        out = StringIO()
+        call_command('cleanuparenaclientlogfiles', stdout=out)
+        self.assertIn(
+            'Cleaning up arena client logfiles starting from 30 days into the past...\nGathering records to clean...\n0 records gathered.\nCleaned up 0 logfiles.',
+            out.getvalue())
+
         self.assertEqual(results.count(), NUM_MATCHES)
         for result in results:
             self.assertFalse(result.replay_file)
@@ -602,6 +616,13 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIn(
             'Cleaning up match logfiles starting from 30 days into the past...\nGathering records to clean...\n{0} records gathered.\nCleaned up {0} logfiles.'.format(
                 NUM_MATCHES * 2),
+            out.getvalue())
+
+        # ensure the job doesn't re-clean the same records when run again
+        out = StringIO()
+        call_command('cleanupmatchlogfiles', stdout=out)
+        self.assertIn(
+            'Cleaning up match logfiles starting from 30 days into the past...\nGathering records to clean...\n0 records gathered.\nCleaned up 0 logfiles.',
             out.getvalue())
 
         self.assertEqual(participants.count(), NUM_MATCHES * 2)

@@ -28,8 +28,7 @@ class Command(BaseCommand):
 
     def cleanup_replays(self, days, verbose):
         self.stdout.write(f'Gathering records to clean...')
-        results = Result.objects.exclude(replay_file__isnull=True, replay_file='')\
-            .filter(created__lt=timezone.now() - timedelta(days=days))
+        results = Result.objects.exclude(replay_file='').filter(created__lt=timezone.now() - timedelta(days=days))
         self.stdout.write(f'{results.count()} records gathered.')
         for result in results:
             with transaction.atomic():

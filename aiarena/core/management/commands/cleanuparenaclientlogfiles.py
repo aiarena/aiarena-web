@@ -27,8 +27,7 @@ class Command(BaseCommand):
 
     def cleanup_logfiles(self, days, verbose):
         self.stdout.write(f'Gathering records to clean...')
-        results = Result.objects.exclude(arenaclient_log__isnull=True, arenaclient_log='')\
-            .filter(created__lt=timezone.now() - timedelta(days=days))
+        results = Result.objects.exclude(arenaclient_log='').filter(created__lt=timezone.now() - timedelta(days=days))
         self.stdout.write(f'{results.count()} records gathered.')
         for result in results:
             result.arenaclient_log.delete()
