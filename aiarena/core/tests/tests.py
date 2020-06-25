@@ -579,16 +579,17 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command('cleanupreplays', stdout=out)
         self.assertIn(
-            'Cleaning up replays starting from 30 days into the past...\nCleaned up {0} replays.'.format(NUM_MATCHES),
+            'Cleaning up replays starting from 30 days into the past...\nGathering records to clean...\n{0} records gathered.\nCleaned up {0} replays.'.format(NUM_MATCHES),
             out.getvalue())
 
         self.assertEqual(results.count(), NUM_MATCHES)
         for result in results:
             self.assertFalse(result.replay_file)
 
+        out = StringIO()
         call_command('cleanuparenaclientlogfiles', stdout=out)
         self.assertIn(
-            'Cleaning up arena client logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(
+            'Cleaning up arena client logfiles starting from 30 days into the past...\nGathering records to clean...\n{0} records gathered.\nCleaned up {0} logfiles.'.format(
                 NUM_MATCHES),
             out.getvalue())
 
@@ -596,9 +597,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         for result in results:
             self.assertFalse(result.replay_file)
 
+        out = StringIO()
         call_command('cleanupmatchlogfiles', stdout=out)
         self.assertIn(
-            'Cleaning up match logfiles starting from 30 days into the past...\nCleaned up {0} logfiles.'.format(
+            'Cleaning up match logfiles starting from 30 days into the past...\nGathering records to clean...\n{0} records gathered.\nCleaned up {0} logfiles.'.format(
                 NUM_MATCHES * 2),
             out.getvalue())
 
