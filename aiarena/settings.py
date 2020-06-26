@@ -303,13 +303,10 @@ AUTH_USER_MODEL = "core.User"
 FILE_UPLOAD_PERMISSIONS = 0o644
 
 # elo_k for calculating ladder ELO updates
-ELO_K = 16
+ELO_K = 8
 
 # starting ELO for bots
 ELO_START_VALUE = 1600
-
-# ELO implementation
-ELO = Elo(ELO_K)
 
 # For convenience
 BOT_ZIP_MAX_SIZE_MB = 50
@@ -376,3 +373,6 @@ if ENVIRONMENT_TYPE != EnvironmentType.DEVELOPMENT:
     MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
 
     INSTALLED_APPS.remove('sslserver')
+
+# load this after the env file so if the ELO_K value was overridden, it will be applied properly
+ELO = Elo(ELO_K)
