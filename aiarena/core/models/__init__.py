@@ -11,3 +11,4 @@ from .season_participation import SeasonParticipation
 from .trophy import Trophy
 from .user import User
 from .website_notice import WebsiteNotice
+from .relative_result import RelativeResult

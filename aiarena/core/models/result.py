@@ -64,7 +64,7 @@ class Result(models.Model, LockableModelMixin):
     """This is set to true when the arena log file is deleted by the cleanup job."""
 
     def __str__(self):
-        return self.created.__str__()
+        return self.created.__str__() + " " + str(self.type) + " " + str(self.duration_seconds)
 
     @property
     def duration_seconds(self):

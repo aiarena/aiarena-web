@@ -20,7 +20,11 @@ from aiarena.core.utils import Elo, EnvironmentType
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
-
+GRAPPELLI_ADMIN_TITLE = "AiArena Admin"
+GRAPPELLI_SWITCH_USER_ORIGINAL = True
+GRAPPELLI_INDEX_DASHBOARD = (
+    "aiarena.frontend.dashboard.CustomIndexDashboard"
+)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -59,6 +63,9 @@ DATABASES = {
 
 INSTALLED_APPS = [
     'registration',
+    'grappelli.dashboard',
+    'grappelli',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -93,6 +100,8 @@ INSTALLED_APPS = [
     'discord_bind',
     'sslserver',  # This will be removed automatically in non-development environments
     'robots',
+    'django_summernote',
+    'django.contrib.admindocs',
 ]
 
 MIDDLEWARE = [
