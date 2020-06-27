@@ -100,7 +100,6 @@ INSTALLED_APPS = [
     'discord_bind',
     'sslserver',  # This will be removed automatically in non-development environments
     'robots',
-    'django_summernote',
     'django.contrib.admindocs',
 ]
 
