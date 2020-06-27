@@ -31,6 +31,8 @@ sitemaps = {
 
 urlpatterns = [  # todo: replace usage of url with path for all these
                   path('__debug__/', include(debug_toolbar.urls)),
+                  path('grappelli/', include('grappelli.urls')), # Grappelli URLS
+                  path('admin/doc/', include('django.contrib.admindocs.urls')),
                   path('admin/', admin.site.urls),
                   url(r'^accounts/', include('registration.backends.default.urls')),
                   url(r'^accounts/', include('django.contrib.auth.urls')),
