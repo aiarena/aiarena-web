@@ -17,6 +17,13 @@
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-153791853-1"></script>
+
+    {#Jquery cdn#}
+    <script src="https://code.jquery.com/jquery-3.5.1.js"
+  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+  crossorigin="anonymous">
+    </script>
+
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -152,5 +159,22 @@
     </div>
 </div>
 </body>
+<script>
+setInterval(function() {
+    let links = document.getElementsByClassName('file-link');
+    for (i = 0; i < links.length; i++) {
+        let link = links[i];
+        let mykey = "visited-" + link;
+        if (localStorage.getItem(mykey)) {
+            links[i].style.color = 'red';
+        }
+    }
+}, 3000);
 
+$(`a.file-link`).click(function() {
+    $(this).css('color', 'red');
+
+    localStorage.setItem('visited-' + this.href, true);
+});
+</script>
 </html>
