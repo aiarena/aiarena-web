@@ -225,7 +225,7 @@ LOGGING = {
     },
     'handlers': {
         'terminal': {
-            'level': 'WARNING',
+            'level': 'ERROR',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
