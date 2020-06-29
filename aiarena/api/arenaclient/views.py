@@ -187,20 +187,21 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 match_id = serializer.validated_data['match']
 
-                logger.info(f"Result submission. "
-                             f"match: {serializer.validated_data.get('match')} "
-                             f"type: {serializer.validated_data.get('type')} "
-                             f"replay_file: {serializer.validated_data.get('replay_file')} "
-                             f"game_steps: {serializer.validated_data.get('game_steps')} "
-                             f"submitted_by: {serializer.validated_data.get('submitted_by')} "
-                             f"arenaclient_log: {serializer.validated_data.get('arenaclient_log')} "
-                             f"bot1_avg_step_time: {serializer.validated_data.get('bot1_avg_step_time')} "
-                             f"bot1_log: {serializer.validated_data.get('bot1_log')} "
-                             f"bot1_data: {serializer.validated_data.get('bot1_data')} "
-                             f"bot2_avg_step_time: {serializer.validated_data.get('bot2_avg_step_time')} "
-                             f"bot2_log: {serializer.validated_data.get('bot2_log')} "
-                             f"bot2_data: {serializer.validated_data.get('bot2_data')} "
-                             )
+                if config.DEBUG_LOGGING_ENABLED:
+                    logger.info(f"Result submission. "
+                                 f"match: {serializer.validated_data.get('match')} "
+                                 f"type: {serializer.validated_data.get('type')} "
+                                 f"replay_file: {serializer.validated_data.get('replay_file')} "
+                                 f"game_steps: {serializer.validated_data.get('game_steps')} "
+                                 f"submitted_by: {serializer.validated_data.get('submitted_by')} "
+                                 f"arenaclient_log: {serializer.validated_data.get('arenaclient_log')} "
+                                 f"bot1_avg_step_time: {serializer.validated_data.get('bot1_avg_step_time')} "
+                                 f"bot1_log: {serializer.validated_data.get('bot1_log')} "
+                                 f"bot1_data: {serializer.validated_data.get('bot1_data')} "
+                                 f"bot2_avg_step_time: {serializer.validated_data.get('bot2_avg_step_time')} "
+                                 f"bot2_log: {serializer.validated_data.get('bot2_log')} "
+                                 f"bot2_data: {serializer.validated_data.get('bot2_data')} "
+                                 )
 
                 # Lock everything manually to ensure transactional integrity
                 with connection.cursor() as cursor:
@@ -329,7 +330,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                         f"participant2.elo_change: {participant2.elo_change}")
 
                     if config.ENABLE_ELO_SANITY_CHECK:
-                        logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
+                        if config.DEBUG_LOGGING_ENABLED:
+                            logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
 
                         # test here to check ELO total and ensure no corruption
                         expectedEloSum = settings.ELO_START_VALUE * SeasonParticipation.objects.filter(season=result.match.round.season).count()
@@ -340,10 +342,10 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                             logger.critical(
                                 "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
                                     actualEloSum['elo__sum'], expectedEloSum, result.id))
-                        else:
+                        elif config.DEBUG_LOGGING_ENABLED:
                             logger.info("ENABLE_ELO_SANITY_CHECK passed!")
 
-                    else:
+                    elif config.DEBUG_LOGGING_ENABLED:
                         logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
 

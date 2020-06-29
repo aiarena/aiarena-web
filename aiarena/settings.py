@@ -174,9 +174,9 @@ CONSTANCE_CONFIG = {
                                        'Any value below 1 will disable the check for this feature. Default: 0'),
     'MAX_USER_BOT_COUNT': (4, 'Maximum bots a user can have uploaded.'),
     'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE': (1, 'Maximum active bots a user can have per race.'),
-    'ARENACLIENT_DEBUG_ENABLED': (False, 'Enable debugging for arena clients. '
-                                         'This will log extra data in the arena client API. '
-                                         'It will also propagate the setting to the arena clients'),
+    'DEBUG_LOGGING_ENABLED': (False, 'Enable debug logging. '
+                                     'This will log extra data for debugging throughout the website. '
+                                     'It will also propagate the setting to the arena clients'),
     'GETTING_STARTED_URL': ('https://ai-arena.net/wiki/getting-started/',
                             'The URL to send new users to in order to get started.'),
     'DISCORD_CLIENT_ID': ('', 'Client ID used for Discord OAuth'),
@@ -203,7 +203,7 @@ CONSTANCE_CONFIG = {
 
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bots': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
-    'General': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES', 'ENABLE_ELO_SANITY_CHECK'),
+    'General': ('DEBUG_LOGGING_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES', 'ENABLE_ELO_SANITY_CHECK'),
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',
                        'MATCH_REQUEST_LIMIT_SILVER_TIER', 'MATCH_REQUEST_LIMIT_GOLD_TIER',
                        'MATCH_REQUEST_LIMIT_PLATINUM_TIER', 'MATCH_REQUEST_LIMIT_DIAMOND_TIER',
