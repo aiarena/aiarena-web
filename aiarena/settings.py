@@ -244,12 +244,12 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['django-file','terminal'],
+            'handlers': ['django-file',],
             'level': 'WARNING',
             'propagate': True,
         },
         'aiarena': {
-            'handlers': ['aiarena-file','terminal'],
+            'handlers': ['aiarena-file',],
             'level': 'WARNING',
             'propagate': True,
         },
