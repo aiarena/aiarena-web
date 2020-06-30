@@ -224,11 +224,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        'terminal': {
-            'level': 'ERROR',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
         'django-file': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
