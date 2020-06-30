@@ -224,6 +224,11 @@ LOGGING = {
         },
     },
     'handlers': {
+        'terminal': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
         'django-file': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
@@ -239,12 +244,12 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['django-file'],
+            'handlers': ['django-file','terminal'],
             'level': 'WARNING',
             'propagate': True,
         },
         'aiarena': {
-            'handlers': ['aiarena-file'],
+            'handlers': ['aiarena-file','terminal'],
             'level': 'WARNING',
             'propagate': True,
         },
