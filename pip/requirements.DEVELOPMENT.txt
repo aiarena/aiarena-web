@@ -1,3 +1,4 @@
+colorama==0.4.3
 Werkzeug==1.0.1
 django-constance[database]==2.4.0
 django-sslserver
