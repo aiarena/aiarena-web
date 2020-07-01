@@ -7,18 +7,17 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command, CommandError
-from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round
 from aiarena.core.utils import calculate_md5
+from aiarena.settings import TestCase, TransactionTestCase
 import warnings
 # skip the warnings (such as matplotlib)
 warnings.simplefilter("ignore")
-# dont print exceptions when they are tested for
-__unittest = True
+
 
 class BaseTestMixin(object):
     """
