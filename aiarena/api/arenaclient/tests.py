@@ -11,7 +11,7 @@ from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Res
 from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
-from aiarena.settings import TestCase, TransactionTestCase
+from aiarena.core.utils import TestCase , TransactionTestCase
 
 class MatchesTestCase(LoggedInMixin, TransactionTestCase):
     def setUp(self):

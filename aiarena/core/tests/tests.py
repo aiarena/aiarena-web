@@ -13,7 +13,7 @@ from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import TestCase, TransactionTestCase
+from aiarena.core.utils import TestCase, TransactionTestCase
 import warnings
 # skip the warnings (such as matplotlib)
 warnings.simplefilter("ignore")
