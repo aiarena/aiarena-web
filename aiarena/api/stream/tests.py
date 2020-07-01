@@ -1,4 +1,4 @@
-from aiarena.settings import TestCase
+from aiarena.core.utils import TestCase
 from aiarena.core.tests.tests import LoggedInMixin
 
 

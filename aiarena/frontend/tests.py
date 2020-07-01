@@ -6,7 +6,7 @@ from django.test import RequestFactory
 from aiarena.core.models import Match, Round, Bot, User, Map, Result, Season
 from aiarena.core.tests.tests import FullDataSetMixin
 from .admin import MapAdmin, MatchAdmin, SeasonAdmin
-from aiarena.settings import TestCase, TransactionTestCase
+from aiarena.core.utils import TestCase, TransactionTestCase
 
 
 class AdminMethodsTestCase(FullDataSetMixin, TestCase):

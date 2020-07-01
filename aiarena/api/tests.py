@@ -1,4 +1,4 @@
-from aiarena.settings import TestCase, TransactionTestCase
+from aiarena.core.utils import TestCase, TransactionTestCase
 
 from aiarena.core.tests.tests import FullDataSetMixin
 
