@@ -15,7 +15,7 @@ deploy_staging:
     name: staging
     url: ai-arena.net
   script:
-    - ssh aiarena@staging.ai-arena.net -p 2281 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && echo STARTING TESTS && python3 manage.py test --noinput -v=2 && /home/aiarena/cleardb.sh && python3 manage.py migrate && python3 manage.py purgesensitivedata && sudo apachectl graceful && exit"
+    - ssh aiarena@staging.ai-arena.net -p 2281 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && echo STARTING TESTS && python3 manage.py test --noinput -v=0 && /home/aiarena/cleardb.sh && python3 manage.py migrate && python3 manage.py purgesensitivedata && sudo apachectl graceful && exit"
   only:
     - master
 
