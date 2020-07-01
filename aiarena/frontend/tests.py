@@ -1,11 +1,13 @@
 from django.urls import reverse
+from django.contrib.messages.middleware import MessageMiddleware
+from django.contrib.sessions.middleware import SessionMiddleware
+from django.test import RequestFactory
 
 from aiarena.core.models import Match, Round, Bot, User, Map, Result, Season
 from aiarena.core.tests.tests import FullDataSetMixin
-from django.test import TransactionTestCase, TestCase, RequestFactory, Client
 from .admin import MapAdmin, MatchAdmin, SeasonAdmin
-from django.contrib.messages.middleware import MessageMiddleware
-from django.contrib.sessions.middleware import SessionMiddleware
+from aiarena.settings import TestCase, TransactionTestCase
+
 
 class AdminMethodsTestCase(FullDataSetMixin, TestCase):
 

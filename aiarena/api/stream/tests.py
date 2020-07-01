@@ -1,5 +1,4 @@
-from django.test import TestCase
-
+from aiarena.settings import TestCase
 from aiarena.core.tests.tests import LoggedInMixin
 
 
