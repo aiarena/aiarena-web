@@ -1,4 +1,4 @@
-from aiarena.settings import TestCase, TransactionTestCase
+from django.test import TestCase, TransactionTestCase
 
 from aiarena.core.tests.tests import FullDataSetMixin
 
