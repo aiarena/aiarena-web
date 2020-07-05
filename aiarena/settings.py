@@ -69,8 +69,6 @@ class SimpleTestCase(TestCase, STC):
 class TransactionTestCase(TestCase,TTC):
     pass
 
-# overrides in testconf
-from .testconf import colorama, color_init, TestCase,SimpleTestCase,TransactionTestCase
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
