@@ -35,6 +35,18 @@ def bot_data_upload_to(instance, filename):
     return '/'.join(['bots', str(instance.id), 'bot_data'])
 
 
+def probots_bot_zip_upload_to(instance, filename):
+    return '/'.join(['bots', str(instance.id), 'probots_bot_zip'])
+
+
+def probots_bot_source_upload_to(instance, filename):
+    return '/'.join(['bots', str(instance.id), 'probots_bot_source'])
+
+
+def probots_bot_data_upload_to(instance, filename):
+    return '/'.join(['bots', str(instance.id), 'probots_bot_data'])
+
+
 class Bot(models.Model, LockableModelMixin):
     RACES = (
         ('T', 'Terran'),
@@ -72,6 +84,16 @@ class Bot(models.Model, LockableModelMixin):
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
+
+    # probots
+    is_probots_participant = models.BooleanField(default=False)
+    probots_bot_zip = PrivateFileField(upload_to=probots_bot_zip_upload_to,
+                                       storage=OverwritePrivateStorage(base_url='/'),
+                                       validators=[validate_bot_zip_file, ], blank=True, null=True)
+    probots_bot_source = PrivateFileField(upload_to=probots_bot_source_upload_to,
+                                       storage=OverwritePrivateStorage(base_url='/'), blank=True, null=True)
+    probots_bot_data = PrivateFileField(upload_to=probots_bot_data_upload_to,
+                                        storage=OverwritePrivateStorage(base_url='/'), blank=True, null=True)
 
     @property
     def current_matches(self):

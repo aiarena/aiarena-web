@@ -206,6 +206,7 @@ class BotSeasonStatsDetail(DetailView):
         return context
 
 
+
 class BotUpdateForm(forms.ModelForm):
     """
     Standard form for updating a bot
@@ -228,10 +229,18 @@ class BotUpdateForm(forms.ModelForm):
             self.fields['active'].disabled = True
             self.fields['active'].required = False
 
+
+        if not self.instance.is_probots_participant:
+            # don't show these fields to non-probots participants
+            del self.fields['probots_bot_zip']
+            del self.fields['probots_bot_source']
+            del self.fields['probots_bot_data']
+
+
     class Meta:
         model = Bot
         fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
-                  'bot_data_publicly_downloadable']
+                  'bot_data_publicly_downloadable','probots_bot_zip','probots_bot_source','probots_bot_data']
 
 
 class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):

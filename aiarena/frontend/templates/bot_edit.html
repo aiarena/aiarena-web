@@ -4,25 +4,49 @@
 {% block content %}
     <div class="divider"><span></span><span><h2>Edit Bot</h2></span><span></span></div>
     <div class="registration-form">
-        <h2 ><i class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">edit</i>{{ bot.as_html_link }}</h2>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <p><a href="https://demo.django-wiki.org/#wiki-toc-markdown-syntax">Markdown Syntax <i class="material-icons md-18" style="font-size: 18px;">launch</i></a></p>
-                    {% if object.bot_data_is_currently_frozen %}
-                        <p>NOTE: This bot is currently in a match. Bot data cannot be altered at this time.</p>
-                    {% endif %}
+        <h2><i class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">edit</i>{{ bot.as_html_link }}
+        </h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h3>Melee Ladder</h3>
+            <p>Active: {{ form.active }}</p>
+            <p>Bot zip:<br/>
+                {{ form.bot_zip }}<br/>
+                Publicly downloadable: {{ form.bot_zip_publicly_downloadable }}</p>
+            <p>Bot data:<br/>
+                {{ form.bot_data }}<br/>
+                Publicly downloadable: {{ form.bot_data_publicly_downloadable }}</p>
+            {% if object.is_probots_participant %}
+                <h3>ProBots</h3>
+                <h4>Next ProBots resubmission deadline: {{ config.PROBOTS_SUBMISSION_DEADLINE|date:"d. N Y - H:i:s" }}
+                    UTC</h4>
+                <p>Probots bot zip:<br/>
+                    {{ form.probots_bot_zip }}</p>
+                <p>Probots bot source/change log:<br/>
+                    {{ form.probots_bot_source }}</p>
+                <p>Probots bot data:<br/>
+                    {{ form.probots_bot_data }}</p>
+            {% endif %}
+            <h3>Bot page content</h3>
+            <p>
+            {{ form.wiki_article_content }}
+                <a href="https://demo.django-wiki.org/#wiki-toc-markdown-syntax">Markdown Syntax <i
+                        class="material-icons md-18" style="font-size: 18px;">launch</i></a>
+            </p>
+            {% if object.bot_data_is_currently_frozen %}
+                <p>NOTE: This bot is currently in a match. Bot data cannot be altered at this time.</p>
+            {% endif %}
+            <br/>
+            <input id="submit-button" type=submit value="Save"/>
 
-                    <input id="submit-button" type=submit value="Save"/>
-
-                    {% if messages %}
-                        <ul class="messages">
-                            {% for message in messages %}
-                                <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </form>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </form>
 
     </div>
 
