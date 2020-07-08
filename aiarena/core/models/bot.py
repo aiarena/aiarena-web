@@ -15,7 +15,7 @@ from wiki.models import Article, ArticleRevision
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
-from aiarena.core.storage import OverwritePrivateStorage
+from aiarena.core.storage import OverwritePrivateStorage, HardcodedURLFilenamePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
 from aiarena.settings import BOT_ZIP_MAX_SIZE
@@ -36,15 +36,15 @@ def bot_data_upload_to(instance, filename):
 
 
 def probots_bot_zip_upload_to(instance, filename):
-    return '/'.join(['bots', str(instance.id), 'probots_bot_zip'])
+    return '/'.join(['bots', str(instance.id), 'probots', 'bot_zip_' + timezone.now().strftime("%Y%m%d_%H%M%S")])
 
 
 def probots_bot_source_upload_to(instance, filename):
-    return '/'.join(['bots', str(instance.id), 'probots_bot_source'])
+    return '/'.join(['bots', str(instance.id), 'probots', 'bot_source_' + timezone.now().strftime("%Y%m%d_%H%M%S")])
 
 
 def probots_bot_data_upload_to(instance, filename):
-    return '/'.join(['bots', str(instance.id), 'probots_bot_data'])
+    return '/'.join(['bots', str(instance.id), 'probots', 'bot_data_' + timezone.now().strftime("%Y%m%d_%H%M%S")])
 
 
 class Bot(models.Model, LockableModelMixin):
@@ -88,12 +88,15 @@ class Bot(models.Model, LockableModelMixin):
     # probots
     is_probots_participant = models.BooleanField(default=False)
     probots_bot_zip = PrivateFileField(upload_to=probots_bot_zip_upload_to,
-                                       storage=OverwritePrivateStorage(base_url='/'),
+                                       storage=HardcodedURLFilenamePrivateStorage(url_filename='bot_zip', base_url='/'),
                                        validators=[validate_bot_zip_file, ], blank=True, null=True)
     probots_bot_source = PrivateFileField(upload_to=probots_bot_source_upload_to,
-                                       storage=OverwritePrivateStorage(base_url='/'), blank=True, null=True)
+                                          storage=HardcodedURLFilenamePrivateStorage(url_filename='bot_source',
+                                                                                     base_url='/'), blank=True,
+                                          null=True)
     probots_bot_data = PrivateFileField(upload_to=probots_bot_data_upload_to,
-                                        storage=OverwritePrivateStorage(base_url='/'), blank=True, null=True)
+                                        storage=HardcodedURLFilenamePrivateStorage(url_filename='bot_data',
+                                                                                   base_url='/'), blank=True, null=True)
 
     @property
     def current_matches(self):

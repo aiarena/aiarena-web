@@ -240,7 +240,7 @@ class BotUpdateForm(forms.ModelForm):
     class Meta:
         model = Bot
         fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
-                  'bot_data_publicly_downloadable','probots_bot_zip','probots_bot_source','probots_bot_data']
+                  'bot_data_publicly_downloadable', 'probots_bot_zip', 'probots_bot_source', 'probots_bot_data']
 
 
 class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
@@ -308,6 +308,7 @@ class Ranking(TemplateView):
     If there's a current season, we redirect to that season's page. Otherwise we render a static
     template explaining that there are no rankings to be viewed currently.
     """
+
     def get(self, request, *args, **kwargs):
         season = Season.get_current_season_or_none()
         if season is None:
@@ -428,6 +429,31 @@ class BotDataDownloadView(PrivateStorageDetailView):
         return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_data_publicly_downloadable
 
 
+class ProbotsFileDownloadView(PrivateStorageDetailView):
+    model = Bot
+
+    content_disposition = 'attachment'
+
+    def get_content_disposition_filename(self, private_file):
+        return 'probots_{0}.zip'.format(private_file.relative_name.split('/')[-1])
+
+    def can_access_file(self, private_file):
+        user = private_file.request.user
+        # Allow if staff, the owner of the file, or the file is marked as publicly downloadable
+        return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_data_publicly_downloadable
+
+class ProbotsZipDownloadView(ProbotsFileDownloadView):
+    model_file_field = 'probots_bot_zip'
+
+
+class ProbotsSourceDownloadView(ProbotsFileDownloadView):
+    model_file_field = 'probots_bot_source'
+
+
+class ProbotsDataDownloadView(ProbotsFileDownloadView):
+    model_file_field = 'probots_bot_data'
+
+
 class MatchLogDownloadView(PrivateStorageDetailView):
     model = MatchParticipation
     model_file_field = 'match_log'
@@ -507,7 +533,8 @@ class SeasonDetail(DetailView):
 class RequestMatchForm(forms.Form):
     bot1 = forms.ModelChoiceField(queryset=Bot.objects.all().order_by('name'), empty_label=None, required=True)
     bot2 = forms.ModelChoiceField(queryset=Bot.objects.all().order_by('name'), empty_label='Random', required=False)
-    map = forms.ModelChoiceField(queryset=Map.objects.all().order_by('name'), empty_label='Random Ladder Map', required=False)
+    map = forms.ModelChoiceField(queryset=Map.objects.all().order_by('name'), empty_label='Random Ladder Map',
+                                 required=False)
     match_count = forms.IntegerField(min_value=1, initial=1)
 
     @transaction.atomic()
