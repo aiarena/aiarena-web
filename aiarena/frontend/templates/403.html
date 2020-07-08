@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="divider"><span></span><span><h2>Whoops...</h2></span><span></span></div>
+    <div id="inner_content"><center>
+    {% if user.is_authenticated %}
+        You dont have permissions to do that!
+    {% else %}
+        You need to be <a href="{% url 'login' %}">{% trans "logged in" %}</a> to do that!
+    {% endif %}
+    </center></div>
+{% endblock %}
