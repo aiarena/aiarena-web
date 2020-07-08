@@ -2,12 +2,7 @@ image: debian:latest
 
 before_script:
   - apt-get update -qq
-  - apt-get install -qq git
-  - 'which ssh-agent || ( apt-get install -qq openssh-client )'
-  - eval $(ssh-agent -s)
-  - bash -c "ssh-add <(echo '$SSH_PRIVATE_KEY')"
-  - mkdir -p ~/.ssh
-  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
 
 deploy_staging:
   type: deploy
@@ -15,7 +10,13 @@ deploy_staging:
     name: staging
     url: ai-arena.net
   script:
-    - ssh aiarena@staging.ai-arena.net -p 2281 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && echo STARTING TESTS && python3 manage.py test --noinput -v=2 && /home/aiarena/cleardb.sh && python3 manage.py migrate && python3 manage.py purgesensitivedata && sudo apachectl graceful && exit"
+    - apt-get install -qq git
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - bash -c "ssh-add <(echo '$SSH_PRIVATE_KEY')"
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh aiarena@staging.ai-arena.net -p 2281 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && echo STARTING TESTS && python3 manage.py test --noinput -v=0 && /home/aiarena/cleardb.sh && python3 manage.py migrate && python3 manage.py purgesensitivedata && sudo apachectl graceful && exit"
   only:
     - master
 
@@ -26,6 +27,47 @@ deploy_production:
     url: ai-arena.net
   when: manual
   script:
+    - apt-get install -qq git
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - bash -c "ssh-add <(echo '$SSH_PRIVATE_KEY')"
+    - mkdir -p ~/.ssh
     - ssh aiarena@ai-arena.net -p 2280 "cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && python3 manage.py migrate && sudo apachectl graceful && exit"
   only:
     - master
+
+test:
+  variables:
+    MYSQL_ROOT_PASSWORD: mysql
+#    MYSQL_DATABASE: default
+  cache:
+    paths:
+      - .cache/pip
+      - aiarena_env/
+
+  services:
+    - mariadb:10.1.38
+
+  script:
+    - apt-get install -y -qq python3.7-mysqldb default-libmysqlclient-dev
+    - apt-get install -y -qq git build-essential
+    - apt-get install -y -qq default-mysql-client
+    - apt-get install -qq python3.7-dev && apt-get install -qq python3.7-distutils && apt-get install -qq python3.7-apt
+    - apt-get install -qq curl
+    - git submodule update --init --recursive
+    - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    - python3.7 get-pip.py
+    - pip3.7 install virtualenv
+    - virtualenv aiarena_env
+    - source aiarena_env/bin/activate
+    - python3.7 ./pip/pip-install.py --pip pip3.7 --python python3.7
+#    - sleep 20
+    - cp test/test_env.py aiarena/env.py
+    - mysql --host=mariadb -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE aiarena"
+    - mysql --host=mariadb -u root -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER aiarena IDENTIFIED BY 'aiarena';"
+    - mysql --host=mariadb -u root -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON aiarena.* TO aiarena WITH GRANT OPTION;"
+    - mysql --host=mariadb -u root -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON test_aiarena.* to aiarena WITH GRANT OPTION;"
+    - python3.7 manage.py migrate
+    - python3.7 manage.py collectstatic --noinput
+    - python3.7 manage.py seed
+    - python3.7 manage.py test
