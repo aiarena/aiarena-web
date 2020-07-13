@@ -14,19 +14,8 @@ cache:
   paths:
     - .sonar/cache
 
-sonarqube-check:
-  stage: test
-  script:
-    - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
-    - unzip sonar-scanner-cli-4.2.0.1873-linux.zip
-    - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=. -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN
-  allow_failure: true
-  only:
-    - merge_requests
-    - master
-
 deploy_staging:
-  type: deploy
+  stage: deploy_staging
   environment:
     name: staging
     url: https://staging.ai-arena.net
@@ -41,7 +30,7 @@ deploy_staging:
     - master
 
 deploy_production:
-  type: deploy
+  stage: deploy_production
   environment:
     name: production
     url: https://ai-arena.net
@@ -55,7 +44,19 @@ deploy_production:
   only:
     - master
 
+sonarqube-check:
+  stage: code_test
+  script:
+    - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
+    - unzip sonar-scanner-cli-4.2.0.1873-linux.zip
+    - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=. -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN
+  allow_failure: true
+  only:
+    - merge_requests
+    - master
+
 test:
+  stage: test
   variables:
     MYSQL_ROOT_PASSWORD: mysql
 #    MYSQL_DATABASE: default
