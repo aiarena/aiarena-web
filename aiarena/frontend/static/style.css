@@ -671,7 +671,7 @@ table {
 
 thead {
     background-color: rgba(97, 137, 47, 0.7); /*#61892f;*/
-    color: #fffff;
+    color: #ffffff;
     font-size: 16px;
     min-height: 40px;
 }
@@ -689,19 +689,19 @@ tr:nth-child(even) {
 
 table.row-hover-highlight tbody tr:hover {
     background-color: rgba(97, 137, 47, 0.7); /*#61892f;*/
-    color: #fffff;
+    color: #ffffff;
 }
 
 tr:hover a:hover {
-    color: #fffff;
+    color: #ffffff;
 }
 
 tr:hover a {
-    color: #fffff;
+    color: #ffffff;
 }
 
 tr:hover a:focus {
-    color: #fffff;
+    color: #ffffff;
 }
 
 #top10 table {

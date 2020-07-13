@@ -15,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('Repairing hashes...')
 
-        if options['zip'] is None and options['zip'] is None:
+        if options['zip'] is None:
             self.stdout.write('No argument supplied - no actions taken.')
         else:
             for bot in Bot.objects.all():
