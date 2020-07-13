@@ -7,6 +7,7 @@ before_script:
   - mkdir -p /tmp/sonarqube
   - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip -O /tmp/sonarqube.zip
   - unzip /tmp/sonarqube.zip
+  - rm ~/.bash_logout
 
 variables:
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
