@@ -19,8 +19,7 @@ sonarqube-check:
   script:
     - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
     - unzip sonar-scanner-cli-4.2.0.1873-linux.zip
-    - git clone https://gitlab.com/aiarena/aiarena-web.git aiarena_src
-    - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=./aiarena_src -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN
+    - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=. -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN
   allow_failure: true
   only:
     - merge_requests
