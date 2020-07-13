@@ -438,6 +438,12 @@ iframe {
     float: left;
 }
 
+#sidebar ul em {
+    padding-bottom: 10px;
+    padding-top: 0px;
+    float: left;
+}
+
 #sidebar li {
     list-style-type: none;
 }
