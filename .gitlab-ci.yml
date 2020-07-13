@@ -1,9 +1,12 @@
 default:
-  image: sonarsource/sonar-scanner-cli:latest
+  image: debian:latest
 
 before_script:
   - apt-get update -qq
-  - apt-get install -qq git
+  - apt-get install -qq git unzip wget nodejs
+  - mkdir -p /tmp/sonarqube
+  - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip -O /tmp/sonarqube/sonarqube.zip
+  - unzip /tmp/sonarqube/sonarqube.zip
 
 variables:
   SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
@@ -17,7 +20,7 @@ cache:
 sonarqube-check:
   stage: test
   script:
-    - sonar-scanner -Dsonar.qualitygate.wait=true
+    - /tmp/sonarqube/sonar-scanner -Dsonar.qualitygate.wait=true
   allow_failure: true
   only:
     - merge_requests
