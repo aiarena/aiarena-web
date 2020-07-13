@@ -1,7 +1,7 @@
 default:
   image: debian:latest
   services:
-    - sonar-scanner-cli
+    - sonarsource/sonar-scanner-cli:latest
 
 before_script:
   - apt-get update -qq
