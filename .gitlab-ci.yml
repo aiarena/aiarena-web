@@ -15,7 +15,7 @@ cache:
     - .sonar/cache
 
 deploy_staging:
-  stage: deploy_staging
+  stage: deploy
   environment:
     name: staging
     url: https://staging.ai-arena.net
@@ -30,7 +30,7 @@ deploy_staging:
     - master
 
 deploy_production:
-  stage: deploy_production
+  stage: deploy
   environment:
     name: production
     url: https://ai-arena.net
@@ -45,7 +45,7 @@ deploy_production:
     - master
 
 sonarqube-check:
-  stage: code_test
+  stage: test
   script:
     - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
     - unzip sonar-scanner-cli-4.2.0.1873-linux.zip
