@@ -5,7 +5,7 @@
     <div class="divider"><span></span><span><h2>Match {{ match.id }}</h2></span><span></span></div>
     <div class="registration-form" style="text-align: center; margin-bottom: 40px;">
         <h2>
-            <i class="material-icons" style="font-size: 48px; padding-bottom:15px;">emoji_events</i><br/>
+            <em class="material-icons" style="font-size: 48px; padding-bottom:15px;">emoji_events</em><br/>
 
             {# Participant 1 #}
 
@@ -13,14 +13,14 @@
                 {# ELO movement indicator #}
                 {% if match.participant1.elo_change and match.participant1.elo_change != 0 %}
                     {% if match.participant1.elo_change > 0 %}
-                        <i class="material-icons"
-                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                        <em class="material-icons"
+                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
                     {% elif match.participant1.elo_change < 0 %}
-                        <i class="material-icons"
-                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                        <em class="material-icons"
+                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                     {% endif %}
                 {% else %}
-                    <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_forward</i>
+                    <em class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_forward</em>
                 {% endif %}
 
                 {# ELO change #}
@@ -44,14 +44,14 @@
                 {# ELO movement indicator #}
                 {% if match.participant2.elo_change and match.participant2.elo_change != 0 %}
                     {% if match.participant2.elo_change > 0 %}
-                        <i class="material-icons"
-                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                        <em class="material-icons"
+                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
                     {% elif match.participant2.elo_change < 0 %}
-                        <i class="material-icons"
-                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                        <em class="material-icons"
+                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                     {% endif %}
                 {% else %}
-                    <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                    <em class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</em>
                 {% endif %}
             {% else %}
             {% endif %}

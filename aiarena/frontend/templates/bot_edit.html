@@ -4,7 +4,7 @@
 {% block content %}
     <div class="divider"><span></span><span><h2>Edit Bot</h2></span><span></span></div>
     <div class="registration-form">
-        <h2><i class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">edit</i>{{ bot.as_html_link }}
+        <h2><em class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">edit</em>{{ bot.as_html_link }}
         </h2>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
@@ -35,8 +35,8 @@
             <h3>Bot page content</h3>
             <p>
                 {{ form.wiki_article_content }}
-                <a href="https://demo.django-wiki.org/#wiki-toc-markdown-syntax">Markdown Syntax <i
-                        class="material-icons md-18" style="font-size: 18px;">launch</i></a>
+                <a href="https://demo.django-wiki.org/#wiki-toc-markdown-syntax">Markdown Syntax <em
+                        class="material-icons md-18" style="font-size: 18px;">launch</em></a>
             </p>
             {% if object.bot_data_is_currently_frozen %}
                 <p>NOTE: This bot is currently in a match. Bot data cannot be altered at this time.</p>

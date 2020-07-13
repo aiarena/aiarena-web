@@ -4,7 +4,7 @@
 {% block content %}
 <div class="divider"><span></span><span><h2>Bot Upload</h2></span><span></span></div>
 <div class="registration-form">
-   <h2><i class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">cloud_upload</i> Submit your bot here: </h2>
+   <h2><em class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">cloud_upload</em> Submit your bot here: </h2>
 
     <form method="post" style="font-size: 16px;" action="{% url "botupload" %}" enctype="multipart/form-data" >
         {% csrf_token %}

@@ -36,12 +36,12 @@
                             {{ p.elo_change |format_elo_change }}
                             {% if p.elo_change and p.elo_change != 0 %}
                                 {% if p.elo_change > 0 %}
-                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
                                 {% elif p.elo_change < 0 %}
-                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                                 {% endif %}
                             {% else %}
-                                <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                                <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</em>
                             {% endif %}
                         </td>
                     {% endif %}
@@ -61,12 +61,12 @@
                             {{ p.elo_change |format_elo_change }}
                             {% if p.elo_change and p.elo_change != 0 %}
                                 {% if p.elo_change > 0 %}
-                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
                                 {% elif p.elo_change < 0 %}
-                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                                 {% endif %}
                             {% else %}
-                                <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                                <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</em>
                             {% endif %}
                         </td>
                     {% endif %}
