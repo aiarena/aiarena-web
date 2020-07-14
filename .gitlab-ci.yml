@@ -68,6 +68,7 @@ test:
     - git submodule update --init --recursive
     - curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
     - python3.7 get-pip.py
+    - rm get-pip.py
     - pip3.7 install virtualenv
     - virtualenv aiarena_env
     - source aiarena_env/bin/activate
