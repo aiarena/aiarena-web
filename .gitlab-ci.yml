@@ -80,7 +80,7 @@ test:
 #    - python3.7 manage.py collectstatic --noinput
     - python3.7 manage.py seed --migrate
     - python3.7 manage.py test --noinput
-    - coverage xml
+    - coverage xml -o coverage-reports/coverage.xml
     - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
     - unzip sonar-scanner-cli-4.2.0.1873-linux.zip
     - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=. -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN
