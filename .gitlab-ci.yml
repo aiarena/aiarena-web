@@ -84,7 +84,7 @@ test:
     - coverage xml -o coverage-reports/coverage-aiarena.xml
     - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
     - unzip sonar-scanner-cli-4.2.0.1873-linux.zip
-    - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=. -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.exclusions=coverage-reports/,settings.py,*/migrations/*
+    - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=. -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.exclusions=coverage-reports/,aiarena/core/settings.py,*/migrations/*
   only:
     - merge_requests
     - master
