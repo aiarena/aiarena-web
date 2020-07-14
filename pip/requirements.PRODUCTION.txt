@@ -1,2 +1,2 @@
-django-constance[redis]==2.7.0
-redis==3.5.3
+django-constance[redis]==2.4.0
+redis==3.3.8
