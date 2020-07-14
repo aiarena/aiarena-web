@@ -5,3 +5,4 @@ source = .
 
 [report]
 show_missing = true
+omit = aiarena/*/tests/*, aiarena/*/migrations/*, aiarena/urls.py, aiarena/settings.py, */wsgi.py, manage.py
