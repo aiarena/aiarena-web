@@ -1,6 +1,5 @@
 import logging
 import random
-from enum import Enum
 
 from constance import config
 from django.db import transaction
@@ -62,29 +61,32 @@ class Matches:
     def _attempt_to_start_a_requested_match(requesting_user: User):
         # Try get a requested match
         matches = Match.objects.filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
-        return Matches._start_and_return_a_match(requesting_user, matches)
+        if matches.count() > 0:
+            return Matches._start_and_return_a_match(requesting_user, matches)
+        else:
+            return None
 
     @staticmethod
     def _start_and_return_a_match(requesting_user: User, matches):
-        if matches.count() > 0:
-            for match in matches:
-                if Matches.start_match(match, requesting_user):
-                    return match
-        return None  # No match was able to start
+        for match in matches:
+            if Matches.start_match(match, requesting_user):
+                return match
+
+        return None
 
     @staticmethod
     def _attempt_to_start_a_ladder_match(requesting_user: User, for_round):
         if for_round is not None:
-            ladder_matches_to_play = Match.objects.filter(started__isnull=True, requested_by__isnull=True, round=for_round)\
-                .select_for_update().order_by('round_id')
+            ladder_matches_to_play = list(Match.objects.filter(started__isnull=True, requested_by__isnull=True,
+                                                               round=for_round).select_for_update())
         else:
-            ladder_matches_to_play = Match.objects.filter(started__isnull=True, requested_by__isnull=True)\
-                .select_for_update().order_by('round_id')
-        if ladder_matches_to_play.count() > 0:
-            participants_of_ladder_matches_to_play = []
-            [participants_of_ladder_matches_to_play.extend(m.matchparticipation_set.all()) for m in
-             ladder_matches_to_play]
-            random.shuffle(list(ladder_matches_to_play))  # pick a random one
+            ladder_matches_to_play = list(Match.objects.filter(started__isnull=True, requested_by__isnull=True)
+                                          .select_for_update().order_by('round_id'))
+        if len(ladder_matches_to_play) > 0:
+            participants_of_ladder_matches_to_play = [
+                bot for match in ladder_matches_to_play for bot in match.matchparticipation_set.all()
+            ]
+            random.shuffle(ladder_matches_to_play)  # pick a random one
             bots_with_a_ladder_match_to_play = Bot.objects.filter(
                 matchparticipation__in=participants_of_ladder_matches_to_play).select_for_update()
 
