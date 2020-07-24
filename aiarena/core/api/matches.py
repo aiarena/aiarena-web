@@ -126,7 +126,7 @@ class Matches:
                 return match  # a match was found - we're done
 
             # LADDER MATCHES
-            current_season = Season.get_current_season(select_for_update=True)
+            current_season = Season.get_current_season()
             # Get rounds with un-started matches
             rounds = Round.objects.filter(season=current_season,
                                           finished__isnull=True,
