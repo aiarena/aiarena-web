@@ -38,12 +38,14 @@ class BotSerializer(serializers.ModelSerializer):
     bot_data = serializers.SerializerMethodField()
 
     def get_bot_zip(self, obj):
-        p = MatchParticipation.objects.get(bot=obj, match_id=self.root.instance.id)
+        p = MatchParticipation.objects.only('participant_number').get(bot=obj, match_id=self.root.instance.id)
         return reverse('match-download-zip', kwargs={'pk': self.root.instance.id, 'p_num': p.participant_number},
                        request=self.context['request'])
 
     def get_bot_data(self, obj):
-        p = MatchParticipation.objects.get(bot=obj, match_id=self.root.instance.id)
+        p = MatchParticipation.objects.select_related('bot')\
+            .only('use_bot_data', 'bot__bot_data', 'participant_number')\
+            .get(bot=obj, match_id=self.root.instance.id)
         if p.use_bot_data and p.bot.bot_data:
             return reverse('match-download-data', kwargs={'pk': self.root.instance.id, 'p_num': p.participant_number},
                            request=self.context['request'])
@@ -78,8 +80,10 @@ class MatchViewSet(viewsets.GenericViewSet):
     def create_new_match(self, requesting_user):
         match = Matches.start_next_match(requesting_user)
 
-        match.bot1 = MatchParticipation.objects.get(match_id=match.id, participant_number=1).bot
-        match.bot2 = MatchParticipation.objects.get(match_id=match.id, participant_number=2).bot
+        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot')\
+            .get(match_id=match.id, participant_number=1).bot
+        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot')\
+            .get(match_id=match.id, participant_number=2).bot
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -90,13 +94,16 @@ class MatchViewSet(viewsets.GenericViewSet):
             try:
                 if config.REISSUE_UNFINISHED_MATCHES:
                     # Check for any unfinished matches assigned to this user. If any are present, return that.
-                    unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user,
-                                                              result__isnull=True).order_by(F('round_id').asc())
+                    unfinished_matches = Match.objects.only('id', 'map')\
+                        .filter(started__isnull=False, assigned_to=request.user,
+                                result__isnull=True).order_by(F('round_id').asc())
                     if unfinished_matches.count() > 0:
                         match = unfinished_matches[0]  # todo: re-set started time?
 
-                        match.bot1 = MatchParticipation.objects.get(match_id=match.id, participant_number=1).bot
-                        match.bot2 = MatchParticipation.objects.get(match_id=match.id, participant_number=2).bot
+                        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot')\
+                            .get(match_id=match.id, participant_number=1).bot
+                        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot')\
+                            .get(match_id=match.id, participant_number=2).bot
 
                         serializer = self.get_serializer(match)
                         return Response(serializer.data, status=status.HTTP_201_CREATED)

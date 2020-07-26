@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from django.utils.functional import cached_property
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,7 @@ class User(AbstractUser):
     # permissions
     can_request_games_for_another_authors_bot = models.BooleanField(default=False)
 
+    @cached_property
     def get_absolute_url(self):
         if self.type == 'WEBSITE_USER':
             return reverse('author', kwargs={'pk': self.pk})
@@ -48,8 +50,9 @@ class User(AbstractUser):
         else:
             raise Exception("This user type does not have a url.")
 
+    @cached_property
     def as_html_link(self):
-        return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__())))
+        return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url, escape(self.__str__())))
 
     def clean(self):
         if self.type == 'ARENA_CLIENT' and self.owner is None:
@@ -97,7 +100,7 @@ class User(AbstractUser):
     def match_request_count_left(self):
         from .match import Match
         return self.requested_matches_limit \
-               - Match.objects.filter(requested_by=self,
+               - Match.objects.only('id').filter(requested_by=self,
                                       created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD).count()
 
     @property
@@ -108,7 +111,7 @@ class User(AbstractUser):
     def random_donator():
         # todo: apparently order_by('?') is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return User.objects.exclude(patreon_level='none').order_by('?').first()
+        return User.objects.only('id', 'username').exclude(patreon_level='none').order_by('?').first()
 
 
 @receiver(pre_save, sender=User)
