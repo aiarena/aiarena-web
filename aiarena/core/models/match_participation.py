@@ -67,12 +67,13 @@ class MatchParticipation(models.Model, LockableModelMixin):
 
     @property
     def season_participant(self):
-        return self.match.round.season.seasonparticipation_set.get(bot=self.bot)
+        return self.match.round.season.seasonparticipation_set.get(bot_id=self.bot_id)
 
     @property
     def allow_parallel_run(self):
         """Whether this bot can participate in this match when already in other non-parallel matches."""
-        return not self.use_bot_data or not self.update_bot_data
+        data_dict = self.__class__.objects.values('use_bot_data', 'update_bot_data').get(id=self.id)
+        return not data_dict['use_bot_data'] or not data_dict['update_bot_data']
 
     @property
     def available_to_start_match(self):
@@ -80,7 +81,8 @@ class MatchParticipation(models.Model, LockableModelMixin):
         if not self.allow_parallel_run:
             # Get all the matches that contain this bot that have started and not finished
             # Then check to see if they should block entry into a new match
-            matches = Match.objects.filter(matchparticipation__bot=self.bot, started__isnull=False, result__isnull=True)
+            matches = Match.objects.only('id').filter(matchparticipation__bot=self.bot, started__isnull=False,
+                                                      result__isnull=True)
             for match in matches:
                 for p in match.matchparticipation_set.filter(bot=self.bot):
                     if not p.allow_parallel_run:

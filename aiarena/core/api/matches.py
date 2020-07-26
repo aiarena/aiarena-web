@@ -23,10 +23,10 @@ class Matches:
                             opponent if opponent is not None else bot.get_random_active_excluding_self(),
                             user, bot1_update_data=False, bot2_update_data=False)
 
-    # todo: have arena client check in with web service inorder to delay this
+    # todo: have arena client check in with web service in order to delay this
     @staticmethod
     def timeout_overtime_bot_games():
-        matches_without_result = Match.objects.select_related('round').select_for_update().filter(
+        matches_without_result = Match.objects.only('round').select_related('round').select_for_update().filter(
             started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
         for match in matches_without_result:
             Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
@@ -38,7 +38,8 @@ class Matches:
         match.lock_me()  # lock self to avoid race conditions
         if match.started is None:
             # Avoid starting a match when a participant is not available
-            participations = MatchParticipation.objects.select_for_update().filter(match=match)
+            participations = MatchParticipation.objects.only('id')\
+                .select_for_update().filter(match=match)
             for p in participations:
                 if not p.available_to_start_match:
                     logger.warning(f"Match {match.id} failed to start unexpectedly"
@@ -47,7 +48,8 @@ class Matches:
 
             if match.round:  # if this is a ladder match, record the starting elo
                 for p in participations:
-                    p.starting_elo = p.bot.seasonparticipation_set.get(season=Season.get_current_season()).elo
+                    p.starting_elo = p.bot.seasonparticipation_set.only('elo', 'bot_id')\
+                        .get(season=Season.get_current_season()).elo
                     p.save()
 
             match.started = timezone.now()
@@ -61,7 +63,8 @@ class Matches:
     @staticmethod
     def _attempt_to_start_a_requested_match(requesting_user: User):
         # Try get a requested match
-        matches = Match.objects.filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
+        matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round')\
+            .filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
         return Matches._start_and_return_a_match(requesting_user, matches)
 
     @staticmethod
@@ -75,21 +78,25 @@ class Matches:
     @staticmethod
     def _attempt_to_start_a_ladder_match(requesting_user: User, for_round):
         if for_round is not None:
-            ladder_matches_to_play = Match.objects.filter(started__isnull=True, requested_by__isnull=True, round=for_round)\
+            ladder_matches_to_play = Match.objects.select_related('round').prefetch_related('matchparticipation_set')\
+                .only('started', 'assigned_to', 'round')\
+                .filter(started__isnull=True, requested_by__isnull=True, round=for_round)\
                 .select_for_update().order_by('round_id')
         else:
-            ladder_matches_to_play = Match.objects.filter(started__isnull=True, requested_by__isnull=True)\
+            ladder_matches_to_play = Match.objects.select_related('round').prefetch_related('matchparticipation_set')\
+                .only('started', 'assigned_to', 'round')\
+                .filter(started__isnull=True, requested_by__isnull=True)\
                 .select_for_update().order_by('round_id')
         if ladder_matches_to_play.count() > 0:
             participants_of_ladder_matches_to_play = []
             [participants_of_ladder_matches_to_play.extend(m.matchparticipation_set.all()) for m in
              ladder_matches_to_play]
             random.shuffle(list(ladder_matches_to_play))  # pick a random one
-            bots_with_a_ladder_match_to_play = Bot.objects.filter(
+            bots_with_a_ladder_match_to_play = Bot.objects.only('id').filter(
                 matchparticipation__in=participants_of_ladder_matches_to_play).select_for_update()
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
-            if len(Bots.get_available(bots_with_a_ladder_match_to_play)) >= 2:
+            if Bots.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
                 return Matches._start_and_return_a_match(requesting_user, ladder_matches_to_play)
         return None
 
@@ -106,13 +113,13 @@ class Matches:
 
         new_round = Round.objects.create(season=for_season)
 
-        active_bots = Bot.objects.filter(active=True)
+        active_bots = Bot.objects.only("id").filter(active=True)
         already_processed_bots = []
 
         # loop through and generate matches for all active bots
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
-            for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
+            for bot2 in Bot.objects.only("id").filter(active=True).exclude(id__in=already_processed_bots):
                 Match.create(new_round, random.choice(active_maps), bot1, bot2)
 
         return new_round
@@ -126,9 +133,9 @@ class Matches:
                 return match  # a match was found - we're done
 
             # LADDER MATCHES
-            current_season = Season.get_current_season(select_for_update=True)
+            current_season = Season.get_current_season()
             # Get rounds with un-started matches
-            rounds = Round.objects.filter(season=current_season,
+            rounds = Round.objects.only('id').filter(season=current_season,
                                           finished__isnull=True,
                                           match__started__isnull=True).select_for_update().order_by('number')
             for round in rounds:
@@ -138,8 +145,8 @@ class Matches:
 
             # If none of the previous matches were able to start, and we don't have 2 active bots available,
             # then we give up.
-            active_bots = Bot.objects.filter(active=True).select_for_update()
-            if len(Bots.get_available(active_bots)) < 2:
+            active_bots = Bot.objects.only("id").filter(active=True).select_for_update()
+            if not Bots.available_is_more_than(active_bots, 2):
                 raise NotEnoughAvailableBots()
 
             # If we get to here, then we have
