@@ -63,16 +63,18 @@ class Matches:
     @staticmethod
     def _attempt_to_start_a_requested_match(requesting_user: User):
         # Try get a requested match
-        matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round')\
+        matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round') \
             .filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
-        return Matches._start_and_return_a_match(requesting_user, matches)
+        if matches.count() > 0:
+            return Matches._start_and_return_a_match(requesting_user, matches)
+        else:
+            return None
 
     @staticmethod
-    def _start_and_return_a_match(requesting_user: User, matches):
-        if matches.count() > 0:
-            for match in matches:
-                if Matches.start_match(match, requesting_user):
-                    return match
+    def _start_and_return_a_match(requesting_user: User, matches: list):
+        for match in matches:
+            if Matches.start_match(match, requesting_user):
+                return match
         return None  # No match was able to start
 
     @staticmethod
@@ -91,13 +93,14 @@ class Matches:
             participants_of_ladder_matches_to_play = []
             [participants_of_ladder_matches_to_play.extend(m.matchparticipation_set.all()) for m in
              ladder_matches_to_play]
-            random.shuffle(list(ladder_matches_to_play))  # pick a random one
+            list_of_ladder_matches_to_play = list(ladder_matches_to_play)
+            random.shuffle(list_of_ladder_matches_to_play) # pick a random one
             bots_with_a_ladder_match_to_play = Bot.objects.only('id').filter(
                 matchparticipation__in=participants_of_ladder_matches_to_play).select_for_update()
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
             if Bots.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
-                return Matches._start_and_return_a_match(requesting_user, ladder_matches_to_play)
+                return Matches._start_and_return_a_match(requesting_user, list_of_ladder_matches_to_play)
         return None
 
     @staticmethod
