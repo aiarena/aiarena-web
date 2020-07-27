@@ -90,9 +90,9 @@ class Matches:
                 .filter(started__isnull=True, requested_by__isnull=True)\
                 .select_for_update().order_by('round_id')
         if ladder_matches_to_play.count() > 0:
-            participants_of_ladder_matches_to_play = []
-            [participants_of_ladder_matches_to_play.extend(m.matchparticipation_set.all()) for m in
-             ladder_matches_to_play]
+            participants_of_ladder_matches_to_play = [
+                bot for match in ladder_matches_to_play for bot in match.matchparticipation_set.all()
+            ]
             list_of_ladder_matches_to_play = list(ladder_matches_to_play)
             random.shuffle(list_of_ladder_matches_to_play) # pick a random one
             bots_with_a_ladder_match_to_play = Bot.objects.only('id').filter(
