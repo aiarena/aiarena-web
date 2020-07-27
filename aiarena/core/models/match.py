@@ -67,7 +67,6 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
             MatchParticipation.objects.create(match=match, participant_number=2, bot=bot2,
                                               use_bot_data=bot2_use_data, update_bot_data=bot2_update_data)
 
-            matches_all = list(Match.objects.all())
             return match
 
     class CancelResult(Enum):

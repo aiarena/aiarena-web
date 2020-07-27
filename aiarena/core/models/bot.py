@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
@@ -100,14 +101,15 @@ class Bot(models.Model, LockableModelMixin):
 
     @property
     def current_matches(self):
-        return Match.objects.filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
+        return Match.objects.only('id').filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
 
     def is_in_match(self, match_id):
-        is_in_match: bool = False
-        for match in self.current_matches:
-            if match.id == match_id:
-                is_in_match = True
-        return is_in_match
+        matches = Match.objects.only('id').filter(matchparticipation__bot=self,
+                                                  started__isnull=False,
+                                                  result__isnull=True,
+                                                  id=match_id
+                                                  )
+        return matches.count() > 0
 
     def regen_game_display_id(self):
         self.game_display_id = uuid.uuid4()
@@ -161,12 +163,14 @@ class Bot(models.Model, LockableModelMixin):
 
     def bot_data_is_currently_frozen(self):
         # dont alter bot_data while the data is locked in a match, unless there was no bot_data initially
-        matches = Match.objects.filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
+        matches = Match.objects.only('id').filter(matchparticipation__bot=self, started__isnull=False,
+                                                  result__isnull=True)
         data_frozen = False
         for match in matches:
             for p in match.matchparticipation_set.filter(bot=self):
                 if p.use_bot_data and p.update_bot_data:
                     data_frozen = True  # todo: maybe we can cache this flag
+                    break
         return self.bot_data and data_frozen
 
     @staticmethod
@@ -184,15 +188,19 @@ class Bot(models.Model, LockableModelMixin):
             raise RuntimeError("I am the only bot.")
         return Bot.objects.filter(active=True).exclude(id=self.id).order_by('?').first()
 
+    @cached_property
     def get_absolute_url(self):
         return reverse('bot', kwargs={'pk': self.pk})
 
+    @cached_property
     def as_html_link(self):
-        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
+        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())}</a>')
 
+    @cached_property
     def as_html_link_with_race(self):
-        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())} ({self.plays_race})</a>')
+        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())} ({self.plays_race})</a>')
 
+    @cached_property
     def expected_executable_filename(self):
         """
         The expected file name that should be run to start the bot.

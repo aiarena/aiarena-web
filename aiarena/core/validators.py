@@ -29,7 +29,7 @@ validate_bot_name = RegexValidator(r'^[0-9a-zA-Z\._\-]*$',
 def validate_bot_zip_file(value):
     try:
         with ZipFile(value.open()) as zip_file:
-            expected_name = value.instance.expected_executable_filename()
+            expected_name = value.instance.expected_executable_filename
             if expected_name not in zip_file.namelist():
                 raise ValidationError(f"Incorrect bot zip file structure. A bot of type {value.instance.type} "
                                       f"would need to have a file in the zip file root named {expected_name}")
