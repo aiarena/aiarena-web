@@ -46,11 +46,11 @@ def calculate_md5_django_filefield(file, block_size=2 ** 20):
 
 def post_result_to_discord_bot(result):
     try:
-        participants = result.get_match_participants()
-        bots = result.get_match_participant_bots()
+        participants = result.get_match_participants
+        bots = result.get_match_participant_bots
 
-        if result.has_winner():
-            wl_bots = result.get_winner_loser_bots()
+        if result.has_winner:
+            wl_bots = result.get_winner_loser_bots
         else:
             wl_bots = None
 
