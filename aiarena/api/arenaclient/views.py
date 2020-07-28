@@ -3,7 +3,7 @@ from wsgiref.util import FileWrapper
 
 from constance import config
 from django.db import transaction, connection
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Prefetch
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
@@ -38,12 +38,14 @@ class BotSerializer(serializers.ModelSerializer):
     bot_data = serializers.SerializerMethodField()
 
     def get_bot_zip(self, obj):
-        p = MatchParticipation.objects.get(bot=obj, match_id=self.root.instance.id)
+        p = MatchParticipation.objects.only('participant_number').get(bot=obj, match_id=self.root.instance.id)
         return reverse('match-download-zip', kwargs={'pk': self.root.instance.id, 'p_num': p.participant_number},
                        request=self.context['request'])
 
     def get_bot_data(self, obj):
-        p = MatchParticipation.objects.get(bot=obj, match_id=self.root.instance.id)
+        p = MatchParticipation.objects.select_related('bot')\
+            .only('use_bot_data', 'bot__bot_data', 'participant_number')\
+            .get(bot=obj, match_id=self.root.instance.id)
         if p.use_bot_data and p.bot.bot_data:
             return reverse('match-download-data', kwargs={'pk': self.root.instance.id, 'p_num': p.participant_number},
                            request=self.context['request'])
@@ -78,8 +80,10 @@ class MatchViewSet(viewsets.GenericViewSet):
     def create_new_match(self, requesting_user):
         match = Matches.start_next_match(requesting_user)
 
-        match.bot1 = MatchParticipation.objects.get(match_id=match.id, participant_number=1).bot
-        match.bot2 = MatchParticipation.objects.get(match_id=match.id, participant_number=2).bot
+        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot')\
+            .get(match_id=match.id, participant_number=1).bot
+        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot')\
+            .get(match_id=match.id, participant_number=2).bot
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -90,13 +94,16 @@ class MatchViewSet(viewsets.GenericViewSet):
             try:
                 if config.REISSUE_UNFINISHED_MATCHES:
                     # Check for any unfinished matches assigned to this user. If any are present, return that.
-                    unfinished_matches = Match.objects.filter(started__isnull=False, assigned_to=request.user,
-                                                              result__isnull=True).order_by(F('round_id').asc())
+                    unfinished_matches = Match.objects.only('id', 'map')\
+                        .filter(started__isnull=False, assigned_to=request.user,
+                                result__isnull=True).order_by(F('round_id').asc())
                     if unfinished_matches.count() > 0:
                         match = unfinished_matches[0]  # todo: re-set started time?
 
-                        match.bot1 = MatchParticipation.objects.get(match_id=match.id, participant_number=1).bot
-                        match.bot2 = MatchParticipation.objects.get(match_id=match.id, participant_number=2).bot
+                        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot')\
+                            .get(match_id=match.id, participant_number=1).bot
+                        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot')\
+                            .get(match_id=match.id, participant_number=2).bot
 
                         serializer = self.get_serializer(match)
                         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -203,6 +210,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                  f"bot2_data: {serializer.validated_data.get('bot2_data')} "
                                  )
 
+
                 # Lock everything manually to ensure transactional integrity
                 with connection.cursor() as cursor:
                     cursor.execute("select 1 "
@@ -215,7 +223,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                    "where m.id = %s "
                                    "for update", (match_id, ))
 
-                match = Match.objects.get(id=match_id)
+                match = Match.objects.prefetch_related(
+                    Prefetch('matchparticipation_set', MatchParticipation.objects.all().select_related('bot'))
+                ).get(id=match_id)
 
 
                 # validate result
@@ -229,7 +239,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 result.is_valid(raise_exception=True)
 
                 # validate participants
-                p1Instance = match.participant1
+                p1Instance = match.matchparticipation_set.get(participant_number=1)
                 participant1 = SubmitResultParticipationSerializer(instance=p1Instance, data={
                     'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
                     'match_log': serializer.validated_data.get('bot1_log'),
@@ -238,7 +248,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                                                    partial=True)
                 participant1.is_valid(raise_exception=True)
 
-                p2Instance = match.participant2
+                p2Instance = match.matchparticipation_set.get(participant_number=2)
                 participant2 = SubmitResultParticipationSerializer(instance=p2Instance, data={
                     'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
                     'match_log': serializer.validated_data.get('bot2_log'),
@@ -304,7 +314,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     result.match.round.update_if_completed()
 
                     # Update and record ELO figures
-                    p1_initial_elo, p2_initial_elo = result.get_initial_elos()
+                    p1_initial_elo, p2_initial_elo = result.get_initial_elos
                     result.adjust_elo()
 
                     initial_elo_sum = p1_initial_elo + p2_initial_elo
@@ -312,7 +322,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     # Calculate the change in ELO
                     # the bot elos have changed so refresh them
                     # todo: instead of having to refresh, return data from adjust_elo and apply it here
-                    sp1, sp2 = result.get_season_participants()
+                    sp1, sp2 = result.get_season_participants
                     participant1.resultant_elo = sp1.elo
                     participant2.resultant_elo = sp2.elo
                     participant1.elo_change = participant1.resultant_elo - p1_initial_elo
@@ -348,9 +358,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     elif config.DEBUG_LOGGING_ENABLED:
                         logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
-
-                    if result.is_crash_or_timeout():
-                        run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result())
+                    if result.is_crash_or_timeout:
+                        run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
 
                 EVENT_MANAGER.broadcast_event(MatchResultReceivedEvent(result))
 
