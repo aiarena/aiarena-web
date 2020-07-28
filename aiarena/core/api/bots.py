@@ -45,3 +45,13 @@ class Bots:
     def get_available(bots) -> list:
         return [bot for bot in bots if not bot.bot_data_is_currently_frozen()]
 
+    @staticmethod
+    def available_is_more_than(bots, amount: int) -> bool:
+        available = 0
+        for bot in bots:
+            if not bot.bot_data_is_currently_frozen():
+                available += 1
+            if available >= amount:
+                return True
+        return False
+

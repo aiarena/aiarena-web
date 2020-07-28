@@ -1,8 +1,8 @@
 [run]
 branch = true
-omit = aiarena/*/tests/*, aiarena/*/migrations/*, aiarena/urls.py, aiarena/settings.py, */wsgi.py, manage.py
+omit = aiarena/*/tests/*, aiarena/*/migrations/*, aiarena/urls.py, aiarena/settings.py, */wsgi.py, manage.py, __init__.py
 source = .
 
 [report]
 show_missing = true
-omit = aiarena/*/tests/*, aiarena/*/migrations/*, aiarena/urls.py, aiarena/settings.py, */wsgi.py, manage.py
+omit = aiarena/*/tests/*, aiarena/*/migrations/*, aiarena/urls.py, aiarena/settings.py, */wsgi.py, manage.py, __init__.py

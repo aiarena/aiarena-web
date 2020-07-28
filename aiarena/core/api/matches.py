@@ -143,8 +143,8 @@ class Matches:
             """, (tuple(match_ids), tuple(bot_ids), tuple(bot_ids)))) if bot_ids else []
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
-            if len(bot_ids) >= 2 and len(available_ladder_matches_to_play) > 0:
-                return Matches._start_and_return_a_match(requesting_user, available_ladder_matches_to_play)
+            if len(Bots.get_available(bots_with_a_ladder_match_to_play)) >= 2:
+                return Matches._start_and_return_a_match(requesting_user, ladder_matches_to_play)
         return None
 
     @staticmethod
