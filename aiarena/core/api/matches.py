@@ -47,10 +47,11 @@ class Matches:
                         left join core_result cr on m.id = cr.match_id
                         where m.started is not null
                         and cr.type is null
-                        and (core_matchparticipation.use_bot_data = 1 or core_matchparticipation.update_bot_data =1)        
+                        and (core_matchparticipation.use_bot_data = 1 or core_matchparticipation.update_bot_data =1)       
+                        and m.id != %s 
                     )) and match_id = %s
 
-            """, (match.id,))
+            """, (match.id, match.id))
 
             if len(participations) < 2:
                 logger.warning(f"Match {match.id} failed to start unexpectedly"
