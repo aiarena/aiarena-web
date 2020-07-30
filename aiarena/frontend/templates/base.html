@@ -67,9 +67,7 @@
                         <li><a href="{% url 'match_queue' %}">{% trans "Match Queue" %}</a></li>
                         <li><a href="{% url 'results' %}">{% trans "Results" %}</a></li>
                         <li><a href="{% url 'stream' %}">{% trans "Live Stream" %}</a></li>
-                        {% if user.is_authenticated %}
-                            <li><a href="{% url 'api-root' %}">{% trans "API" %}</a></li>
-                        {% endif %}
+                        <li><a href="/swagger/">{% trans "API" %}</a></li>
                     </ul>
                 </li>
 
@@ -102,7 +100,6 @@
                             <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
                             <li><a href="https://node01.m1nd.io:8006/">{% trans "Cluster" %}</a></li>
                             <li><a href="https://ai-arena.net/cgi-bin/awstats.pl">{% trans "Web Stats" %}</a></li>
-                            <li><a href="/swagger/">{% trans "API Documentation" %}</a></li>
                     </ul>
                 </li>
                 {% endif %}
