@@ -107,6 +107,7 @@ INSTALLED_APPS = [
     'sslserver',  # This will be removed automatically in non-development environments
     'robots',
     'django.contrib.admindocs',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
