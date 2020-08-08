@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
 
 from aiarena.core.storage import OverwritePrivateStorage
@@ -65,24 +66,27 @@ class MatchParticipation(models.Model, LockableModelMixin):
     def crashed(self):
         return self.result == 'loss' and self.result_cause in ['crash', 'timeout', 'initialization_failure']
 
-    @property
+    @cached_property
     def season_participant(self):
-        return self.match.round.season.seasonparticipation_set.get(bot=self.bot)
+        obj = self.__class__.objects.select_related('match', 'match__round', 'match__round__season').get(id=self.id)
+        return obj.match.round.season.seasonparticipation_set.get(bot_id=self.bot_id)
 
-    @property
+    @cached_property
     def allow_parallel_run(self):
         """Whether this bot can participate in this match when already in other non-parallel matches."""
-        return not self.use_bot_data or not self.update_bot_data
+        data_dict = self.__class__.objects.values('use_bot_data', 'update_bot_data').get(id=self.id)
+        return not data_dict['use_bot_data'] or not data_dict['update_bot_data']
 
-    @property
+    @cached_property
     def available_to_start_match(self):
         """Whether this bot can start the match at this time."""
         if not self.allow_parallel_run:
             # Get all the matches that contain this bot that have started and not finished
             # Then check to see if they should block entry into a new match
-            matches = Match.objects.filter(matchparticipation__bot=self.bot, started__isnull=False, result__isnull=True)
+            matches = Match.objects.only('id').filter(matchparticipation__bot_id=self.bot_id, started__isnull=False,
+                                                      result__isnull=True)
             for match in matches:
-                for p in match.matchparticipation_set.filter(bot=self.bot):
+                for p in match.matchparticipation_set.filter(bot_id=self.bot_id):
                     if not p.allow_parallel_run:
                         return False
         return True

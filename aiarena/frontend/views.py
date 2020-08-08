@@ -156,7 +156,8 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 
 class BotList(ListView):
-    queryset = Bot.objects.all().order_by('name')
+    queryset = Bot.objects.all().only('name', 'plays_race', 'active', 'type', 'user__username', 'user__type')\
+        .select_related('user').order_by('name')
     template_name = 'bots.html'
     paginate_by = 50
 
@@ -177,7 +178,8 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = RelativeResult.objects.select_related().filter(me__bot=self.object).order_by('-created')
+        results = RelativeResult.objects.select_related('match', 'me__bot', 'opponent__bot').defer("me__bot__bot_data")\
+            .filter(me__bot=self.object).order_by('-created')
 
         # paginate the results
         page = self.request.GET.get('page', 1)
@@ -299,7 +301,7 @@ class AuthorDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(AuthorDetail, self).get_context_data(**kwargs)
-        context['bot_list'] = Bot.objects.filter(user_id=self.object.id).order_by('-created')
+        context['bot_list'] = Bot.objects.select_related('user').filter(user_id=self.object.id).order_by('-created')
         return context
 
 
@@ -473,14 +475,16 @@ class Index(ListView):
     def get_queryset(self):
         try:
             return Ladders.get_season_ranked_participants(
-                Season.get_current_season())[:10]  # top 10 bots
+                Season.get_current_season(), amount=10).prefetch_related(
+                Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
+                Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['recently_updated_bots'] = Bot.objects.all().order_by('-bot_zip_updated')[:5]
-        context['new_bots'] = Bot.objects.all().order_by('-created')[:5]
+        context['recently_updated_bots'] = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
+        context['new_bots'] = Bot.objects.select_related('user').only('user__patreon_level', 'name', 'created').order_by('-created')[:5]
         return context
 
     template_name = 'index.html'
@@ -498,9 +502,8 @@ class MatchQueue(View):
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
         for round in rounds:
-            round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).order_by(
+            round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).select_related('map').order_by(
                 F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
-                Prefetch('map'),
                 Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
                          to_attr='participants'))
 
@@ -525,15 +528,17 @@ class SeasonDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(SeasonDetail, self).get_context_data(**kwargs)
         context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
-        context['rankings'] = Ladders.get_season_ranked_participants(self.object)
+        context['rankings'] = Ladders.get_season_ranked_participants(self.object).prefetch_related(
+            Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
+            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type')))
         context['rankings'].count = len(context['rankings'])
         return context
 
 
 class RequestMatchForm(forms.Form):
-    bot1 = forms.ModelChoiceField(queryset=Bot.objects.all().order_by('name'), empty_label=None, required=True)
-    bot2 = forms.ModelChoiceField(queryset=Bot.objects.all().order_by('name'), empty_label='Random', required=False)
-    map = forms.ModelChoiceField(queryset=Map.objects.all().order_by('name'), empty_label='Random Ladder Map',
+    bot1 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), empty_label=None, required=True)
+    bot2 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), empty_label='Random', required=False)
+    map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'), empty_label='Random Ladder Map',
                                  required=False)
     match_count = forms.IntegerField(min_value=1, initial=1)
 
@@ -554,7 +559,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
         form = super().get_form(form_class)
         # If not staff, only allow requesting games against this user's bots
         if not self.request.user.is_staff and not self.request.user.can_request_games_for_another_authors_bot:
-            form.fields['bot1'].queryset = Bot.objects.filter(user=self.request.user)
+            form.fields['bot1'].queryset = Bot.objects.only('name').filter(user=self.request.user)
         return form
 
     def get_success_url(self):

@@ -76,13 +76,13 @@ def finalize_result(result, p1, p2, bot1, bot2):
     # imitates the arenaclient result view
 
     # Update and record ELO figures
-    p1_initial_elo, p2_initial_elo = result.get_initial_elos()
+    p1_initial_elo, p2_initial_elo = result.get_initial_elos
     result.adjust_elo()
 
     # Calculate the change in ELO
     # the bot elos have changed so refresh them
     # todo: instead of having to refresh, return data from adjust_elo and apply it here
-    sp1, sp2 = result.get_season_participants()
+    sp1, sp2 = result.get_season_participants
     p1.resultant_elo = sp1.elo
     p2.resultant_elo = sp2.elo
     p1.elo_change = p1.resultant_elo - p1_initial_elo

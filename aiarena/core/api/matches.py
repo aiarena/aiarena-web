@@ -23,10 +23,10 @@ class Matches:
                             opponent if opponent is not None else bot.get_random_active_excluding_self(),
                             user, bot1_update_data=False, bot2_update_data=False)
 
-    # todo: have arena client check in with web service inorder to delay this
+    # todo: have arena client check in with web service in order to delay this
     @staticmethod
     def timeout_overtime_bot_games():
-        matches_without_result = Match.objects.select_related('round').select_for_update().filter(
+        matches_without_result = Match.objects.only('round').select_related('round').select_for_update().filter(
             started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
         for match in matches_without_result:
             Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
@@ -38,16 +38,30 @@ class Matches:
         match.lock_me()  # lock self to avoid race conditions
         if match.started is None:
             # Avoid starting a match when a participant is not available
-            participations = MatchParticipation.objects.select_for_update().filter(match=match)
-            for p in participations:
-                if not p.available_to_start_match:
-                    logger.warning(f"Match {match.id} failed to start unexpectedly"
-                                   f" because participant {p.bot.name} was not available.")
-                    return False
+            participations = MatchParticipation.objects.raw("""
+                SELECT cm.id FROM core_matchparticipation cm
+                where ((cm.use_bot_data =0 or cm.update_bot_data =0) or cm.bot_id not in (
+                        select bot_id
+                        from core_matchparticipation
+                        inner join core_match m on core_matchparticipation.match_id = m.id
+                        left join core_result cr on m.id = cr.match_id
+                        where m.started is not null
+                        and cr.type is null
+                        and (core_matchparticipation.use_bot_data = 1 or core_matchparticipation.update_bot_data =1)       
+                        and m.id != %s 
+                    )) and match_id = %s
+
+            """, (match.id, match.id))
+
+            if len(participations) < 2:
+                logger.warning(f"Match {match.id} failed to start unexpectedly"
+                               f" because one of the participants was not available.")
+                return False
 
             if match.round:  # if this is a ladder match, record the starting elo
                 for p in participations:
-                    p.starting_elo = p.bot.seasonparticipation_set.get(season=Season.get_current_season()).elo
+                    p.starting_elo = p.bot.seasonparticipation_set.only('elo', 'bot_id') \
+                        .get(season=Season.get_current_season()).elo
                     p.save()
 
             match.started = timezone.now()
@@ -61,32 +75,73 @@ class Matches:
     @staticmethod
     def _attempt_to_start_a_requested_match(requesting_user: User):
         # Try get a requested match
-        matches = Match.objects.filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
-        return Matches._start_and_return_a_match(requesting_user, matches)
+        matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round') \
+            .filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
+        if matches.count() > 0:
+            return Matches._start_and_return_a_match(requesting_user, matches)
+        else:
+            return None
 
     @staticmethod
     def _start_and_return_a_match(requesting_user: User, matches):
-        if matches.count() > 0:
-            for match in matches:
-                if Matches.start_match(match, requesting_user):
-                    return match
+        for match in matches:
+            if Matches.start_match(match, requesting_user):
+                return match
         return None  # No match was able to start
 
     @staticmethod
     def _attempt_to_start_a_ladder_match(requesting_user: User, for_round):
         if for_round is not None:
-            ladder_matches_to_play = Match.objects.filter(started__isnull=True, requested_by__isnull=True, round=for_round)\
-                .select_for_update().order_by('round_id')
+            ladder_matches_to_play = list(Match.objects.raw("""
+            SELECT core_match.id, core_match.started, assigned_to_id, round_id from core_match
+            inner join core_round cr on core_match.round_id = cr.id
+            where core_match.started is null and requested_by_id is null and round_id = %s
+            order by round_id
+            for update 
+            """, (for_round.id,)))
+
         else:
-            ladder_matches_to_play = Match.objects.filter(started__isnull=True, requested_by__isnull=True)\
-                .select_for_update().order_by('round_id')
-        if ladder_matches_to_play.count() > 0:
-            participants_of_ladder_matches_to_play = []
-            [participants_of_ladder_matches_to_play.extend(m.matchparticipation_set.all()) for m in
-             ladder_matches_to_play]
-            random.shuffle(list(ladder_matches_to_play))  # pick a random one
-            bots_with_a_ladder_match_to_play = Bot.objects.filter(
-                matchparticipation__in=participants_of_ladder_matches_to_play).select_for_update()
+            ladder_matches_to_play = list(Match.objects.raw("""
+                SELECT core_match.id, core_match.started, assigned_to_id, round_id from core_match
+                inner join core_round cr on core_match.round_id = cr.id
+                where core_match.started is null and requested_by_id is null 
+                order by round_id
+                for update 
+                """))
+
+        if len(ladder_matches_to_play) > 0:
+            bots_with_a_ladder_match_to_play = Bot.objects.raw("""
+            select distinct cb.id
+              from core_match cm
+             inner join core_matchparticipation c
+                on cm.id = c.match_id
+            inner join core_bot cb on c.bot_id = cb.id
+             where cm.started is null
+               and requested_by_id is null
+               and c.bot_id not in 
+                    (select cb.id
+                      from core_matchparticipation
+                     inner join core_match m
+                        on core_matchparticipation.match_id = m.id
+                      left join core_result cr
+                        on m.id = cr.match_id
+                    inner join core_bot cb on core_matchparticipation.bot_id = cb.id
+                     where m.started is not null
+                       and cr.id is null
+                       and core_matchparticipation.use_bot_data = 1
+                       and core_matchparticipation.update_bot_data =1    )               
+                for update         
+            """)
+            match_ids = [match.id for match in ladder_matches_to_play]
+            bot_ids = [bot.id for bot in bots_with_a_ladder_match_to_play]
+
+            available_ladder_matches_to_play = list(Match.objects.raw("""
+                    SELECT cm.* from core_match cm
+                    inner join core_matchparticipation c1 on cm.id = c1.match_id and c1.participant_number = 1
+                    inner join core_matchparticipation c2 on cm.id = c2.match_id and c2.participant_number = 2
+                    where cm.id in %s
+                    and c1.bot_id in %s and c2.bot_id in %s
+            """, (tuple(match_ids), tuple(bot_ids), tuple(bot_ids)))) if bot_ids else []
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
             if len(Bots.get_available(bots_with_a_ladder_match_to_play)) >= 2:
@@ -106,13 +161,13 @@ class Matches:
 
         new_round = Round.objects.create(season=for_season)
 
-        active_bots = Bot.objects.filter(active=True)
+        active_bots = Bot.objects.only("id").filter(active=True)
         already_processed_bots = []
 
         # loop through and generate matches for all active bots
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
-            for bot2 in Bot.objects.filter(active=True).exclude(id__in=already_processed_bots):
+            for bot2 in Bot.objects.only("id").filter(active=True).exclude(id__in=already_processed_bots):
                 Match.create(new_round, random.choice(active_maps), bot1, bot2)
 
         return new_round
@@ -128,9 +183,15 @@ class Matches:
             # LADDER MATCHES
             current_season = Season.get_current_season()
             # Get rounds with un-started matches
-            rounds = Round.objects.filter(season=current_season,
-                                          finished__isnull=True,
-                                          match__started__isnull=True).select_for_update().order_by('number')
+            rounds = Round.objects.raw("""
+                SELECT distinct cr.id from core_round cr 
+                inner join core_match cm on cr.id = cm.round_id
+                where season_id=%s
+                and finished is null
+                and cm.started is null
+                order by number
+                for update""", (current_season.id,))
+
             for round in rounds:
                 match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
                 if match is not None:
@@ -138,8 +199,8 @@ class Matches:
 
             # If none of the previous matches were able to start, and we don't have 2 active bots available,
             # then we give up.
-            active_bots = Bot.objects.filter(active=True).select_for_update()
-            if len(Bots.get_available(active_bots)) < 2:
+            active_bots = Bot.objects.only("id").filter(active=True).select_for_update()
+            if not Bots.available_is_more_than(active_bots, 2):
                 raise NotEnoughAvailableBots()
 
             # If we get to here, then we have
