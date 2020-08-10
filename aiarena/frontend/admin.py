@@ -1,8 +1,8 @@
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 
-from aiarena.core.models import User, ArenaClient, Map, Season, Round, Match, Bot, MatchParticipation, Result, SeasonParticipation, SeasonBotMatchupStats, Trophy, WebsiteNotice, RelativeResult
-
+from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Season, \
+    SeasonBotMatchupStats, SeasonParticipation, Trophy, User
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -191,6 +191,7 @@ class MatchAdmin(admin.ModelAdmin):
         'require_trusted_arenaclient',
     )
     list_filter = ('created', 'started', 'require_trusted_arenaclient')
+    search_fields = ['id']
     actions = ['cancel_matches']
 
     def cancel_matches(self, request, queryset):
