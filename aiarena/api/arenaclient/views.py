@@ -80,6 +80,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     """
     serializer_class = MatchSerializer
     permission_classes = [IsArenaClientOrAdminUser]
+    throttle_scope = 'arenaclient'
 
     def create_new_match(self, requesting_user):
         match = Matches.start_next_match(requesting_user)
@@ -188,6 +189,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     serializer_class = SubmitResultCombinedSerializer
     permission_classes = [IsArenaClientOrAdminUser]
+    throttle_scope = 'arenaclient'
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
