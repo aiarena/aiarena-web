@@ -189,7 +189,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     serializer_class = SubmitResultCombinedSerializer
     permission_classes = [IsArenaClientOrAdminUser]
-    throttle_scope = 'arenaclient'
+    # Don't throttle result submissions - we can never have "too many" result submissions.
+    # throttle_scope = 'arenaclient'
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):
