@@ -16,3 +16,10 @@ DATABASES = {
         },
     }
 }
+
+# Remove throttling for tests.
+try:
+    REST_FRAMEWORK.pop('DEFAULT_THROTTLE_CLASSES', None)
+    REST_FRAMEWORK.pop('DEFAULT_THROTTLE_RATES', None)
+except NameError:
+    pass
