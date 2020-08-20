@@ -98,6 +98,7 @@ class Bot(models.Model, LockableModelMixin):
     probots_bot_data = PrivateFileField(upload_to=probots_bot_data_upload_to,
                                         storage=HardcodedURLFilenamePrivateStorage(url_filename='bot_data',
                                                                                    base_url='/'), blank=True, null=True)
+    secrets_config = models.TextField(blank=True, null=True)
 
     @property
     def current_matches(self):
