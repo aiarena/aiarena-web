@@ -204,7 +204,7 @@ class BotSeasonStatsDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['season_bot_matchups'] = self.object.season_matchup_stats.all().order_by('-win_perc')
+        context['season_bot_matchups'] = self.object.season_matchup_stats.all().order_by('-win_perc').distinct()
         return context
 
 
@@ -242,7 +242,8 @@ class BotUpdateForm(forms.ModelForm):
     class Meta:
         model = Bot
         fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
-                  'bot_data_publicly_downloadable', 'probots_bot_zip', 'probots_bot_source', 'probots_bot_data']
+                  'bot_data_publicly_downloadable', 'probots_bot_zip', 'probots_bot_source', 'probots_bot_data',
+                  'secrets_config']
 
 
 class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):

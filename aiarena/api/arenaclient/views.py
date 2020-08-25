@@ -57,7 +57,7 @@ class BotSerializer(serializers.ModelSerializer):
         model = Bot
         fields = (
             'id', 'name', 'game_display_id', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race',
-            'type')
+            'type', 'secrets_config')
 
         ref_name = "arenaclient"
 
@@ -80,6 +80,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     """
     serializer_class = MatchSerializer
     permission_classes = [IsArenaClientOrAdminUser]
+    throttle_scope = 'arenaclient'
 
     def create_new_match(self, requesting_user):
         match = Matches.start_next_match(requesting_user)
@@ -188,6 +189,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     serializer_class = SubmitResultCombinedSerializer
     permission_classes = [IsArenaClientOrAdminUser]
+    # Don't throttle result submissions - we can never have "too many" result submissions.
+    # throttle_scope = 'arenaclient'
 
     @transaction.atomic()
     def create(self, request, *args, **kwargs):

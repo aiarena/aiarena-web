@@ -156,7 +156,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100
+    'PAGE_SIZE': 100,
 }
 
 # Constance https://github.com/jazzband/django-constance
@@ -196,7 +196,8 @@ CONSTANCE_CONFIG = {
     'MATCH_REQUEST_LIMIT_BRONZE_TIER': (80, 'The periodic limit of match requests for a bronze patreon tier user.'),
     'MATCH_REQUEST_LIMIT_SILVER_TIER': (200, 'The periodic limit of match requests for a silver patreon tier user.'),
     'MATCH_REQUEST_LIMIT_GOLD_TIER': (600, 'The periodic limit of match requests for a gold patreon tier user.'),
-    'MATCH_REQUEST_LIMIT_PLATINUM_TIER': (2000, 'The periodic limit of match requests for a platinum patreon tier user.'),
+    'MATCH_REQUEST_LIMIT_PLATINUM_TIER': (
+    2000, 'The periodic limit of match requests for a platinum patreon tier user.'),
     'MATCH_REQUEST_LIMIT_DIAMOND_TIER': (8000, 'The periodic limit of match requests for a diamond patreon tier user.'),
     'REQUESTED_MATCHES_LIMIT_PERIOD': (
         timedelta(days=30), 'The period length for which a user''s match request limit applies.', timedelta),
@@ -211,7 +212,8 @@ CONSTANCE_CONFIG = {
 
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bots': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
-    'General': ('DEBUG_LOGGING_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES', 'ENABLE_ELO_SANITY_CHECK'),
+    'General': ('DEBUG_LOGGING_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES',
+                'ENABLE_ELO_SANITY_CHECK'),
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',
                        'MATCH_REQUEST_LIMIT_SILVER_TIER', 'MATCH_REQUEST_LIMIT_GOLD_TIER',
                        'MATCH_REQUEST_LIMIT_PLATINUM_TIER', 'MATCH_REQUEST_LIMIT_DIAMOND_TIER',
@@ -248,12 +250,12 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['django-file',],
+            'handlers': ['django-file', ],
             'level': 'WARNING',
             'propagate': True,
         },
         'aiarena': {
-            'handlers': ['aiarena-file',],
+            'handlers': ['aiarena-file', ],
             'level': 'WARNING',
             'propagate': True,
         },

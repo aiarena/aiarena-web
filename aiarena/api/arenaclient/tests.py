@@ -35,35 +35,35 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # no current season
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.status_code, 200)
 
         # needs a valid season to be able to activate a bot.
         self._create_open_season()
 
         # no maps
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # not enough active bots
         self._create_map('test_map')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # not enough active bots
         bot1 = self._create_bot(self.regularUser1, 'testbot1')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # not enough active bots
         bot2 = self._create_bot(self.regularUser1, 'testbot2')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # not enough active bots
         bot1.active = True
         bot1.save()
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # success
         bot2.active = True
@@ -105,7 +105,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # not enough available bots
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)
@@ -161,7 +161,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # Round 3 - should fail due to active round limit
         response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
         self.assertTrue('detail' in response.data)
         self.assertEqual(u'There are available bots, but the ladder has reached the maximum active rounds allowed and ' \
                          'serving a new match would require generating a new one. Please wait until matches from current ' \
@@ -366,7 +366,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         # not enough active bots
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # Post a successful match, then retry the crashes to make sure the previous ones don't affect the check
         bot1.active = True
@@ -395,7 +395,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         # not enough active bots
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
 
 class EloTestCase(LoggedInMixin, TransactionTestCase):

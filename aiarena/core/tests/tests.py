@@ -431,7 +431,7 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
 
         # this should fail due to a new round trying to generate while the season is paused
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(u'The current season is paused.', response.data['detail'])
 
         # reopen the season
@@ -466,7 +466,7 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
 
         # not enough active bots
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(u'Not enough available bots for a match. Wait until more bots become available.',
                          response.data['detail'])
 
@@ -477,7 +477,7 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
 
         # current season is paused
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(u'The current season is paused.', response.data['detail'])
 
         season2.open()
