@@ -38,13 +38,6 @@
                 <a href="https://demo.django-wiki.org/#wiki-toc-markdown-syntax">Markdown Syntax <em
                         class="material-icons md-18" style="font-size: 18px;">launch</em></a>
             </p>
-            <h3>Secrets config</h3>
-            <p>
-                This config will remain hidden to other website users. You can enter secrets here instead of containing them in your bot files or data folder.
-            </p>
-            <p>
-                {{ form.secrets_config }}
-            </p>
             {% if object.bot_data_is_currently_frozen %}
                 <p>NOTE: This bot is currently in a match. Bot data cannot be altered at this time.</p>
             {% endif %}
