@@ -184,6 +184,9 @@ class StatsGenerator:
                 """)
             cursor.execute(query)
             elo_over_time = pd.DataFrame(cursor.fetchall())
+            elo_over_time.to_csv('tmp.csv')
+            elo_over_time = pd.read_csv('tmp.csv')
+            elo_over_time = elo_over_time.drop('Unnamed: 0', axis=1)
         return elo_over_time
 
     @staticmethod
@@ -215,7 +218,7 @@ class StatsGenerator:
     def _generate_elo_graph(bot_id: int):
         df = StatsGenerator._get_data(bot_id)
         if not df.empty:
-            df[1] = pd.to_numeric(df[1])
+            df['1'] = pd.to_numeric(df['1'])
             df.columns = ['Name', 'ELO', 'Date']
 
             return StatsGenerator._generate_plot_image(df)
