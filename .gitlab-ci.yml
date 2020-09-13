@@ -37,28 +37,12 @@ deploy_production:
   only:
     - master
 
-#sonarqube-check:
-#  stage: test
-#  script:
-#    - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
-#    - unzip sonar-scanner-cli-4.2.0.1873-linux.zip
-#    - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=. -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN
-#  allow_failure: true
-#
 
-# test:
-#   stage: test
-#   variables:
-#     MYSQL_ROOT_PASSWORD: mysql
-#     SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
-#     GIT_DEPTH: 0
 
-#    MYSQL_DATABASE: default
   cache:
     paths:
       - .cache/pip
       - aiarena_env/
-      # - .sonar/cache
 
   services:
     - mariadb:10.1.38
@@ -83,9 +67,7 @@ deploy_production:
     - python3.7 manage.py seed --migrate
     - python3.7 manage.py test --noinput
     - coverage xml -o coverage-reports/coverage-aiarena.xml
-    # - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip
-    # - unzip sonar-scanner-cli-4.2.0.1873-linux.zip
-    # - sonar-scanner-4.2.0.1873-linux/bin/sonar-scanner -Dsonar.qualitygate.wait=true -Dsonar.projectKey=aiarena-web -Dsonar.sources=. -Dsonar.host.url=https://sonar.m1nd.io -Dsonar.login=$SONAR_TOKEN -Dsonar.coverage.exclusions=coverage-reports/*,aiarena/settings.py,aiarena/*/migrations/*
+
   only:
     - merge_requests
     - master
