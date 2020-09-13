@@ -36,7 +36,11 @@ deploy_production:
   only:
     - master
 
-
+test:
+  stage: test
+  variables:
+    MYSQL_ROOT_PASSWORD: mysql
+    GIT_DEPTH: 0
 
   cache:
     paths:
