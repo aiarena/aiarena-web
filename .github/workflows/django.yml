@@ -18,7 +18,7 @@ jobs:
         env:
           MYSQL_USER: aiarena
           MYSQL_PASSWORD: aiarena
-          MYSQL_DATABASE: aiarena
+          MYSQL_DATABASE: test_aiarena
           MYSQL_ROOT_PASSWORD: aiarena
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     strategy:
