@@ -46,7 +46,9 @@ jobs:
             sleep 1
           done
     - name: Grant aiarena user full access
-      run: mysql -u root -p"$MY_SQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON test_aiarena.* to aiarena WITH GRANT OPTION;"
+      env:
+          PORT: ${{ job.services.mariadb.ports[3306] }}
+      run: mysql --host="127.0.0.1" --port "$PORT" -u root -p"$MY_SQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON test_aiarena.* to aiarena WITH GRANT OPTION;"
     - name: Migrate
       run: python manage.py migrate
     - name: Run Tests
