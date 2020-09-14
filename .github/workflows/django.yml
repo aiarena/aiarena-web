@@ -16,10 +16,10 @@ jobs:
         ports:
           - 3306
         env:
-          MYSQL_USER: user
-          MYSQL_PASSWORD: password
-          MYSQL_DATABASE: test
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_USER: aiarena
+          MYSQL_PASSWORD: aiarena
+          MYSQL_DATABASE: aiarena
+          MYSQL_ROOT_PASSWORD: aiarena
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     strategy:
       max-parallel: 4
