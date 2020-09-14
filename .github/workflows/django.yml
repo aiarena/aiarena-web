@@ -12,13 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mysql:
-        image: mysql:5.7
-        env:
-            MYSQL_ALLOW_EMPTY_PASSWORD: yes
-            MYSQL_DATABASE: aiarena
+        image: mariadb:latest
         ports:
-            - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          - 3306
+        env:
+          MYSQL_USER: aiarena
+          MYSQL_PASSWORD: aiarena
+          MYSQL_DATABASE: aiarena
+          MYSQL_ROOT_PASSWORD: password
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     strategy:
       max-parallel: 4
       matrix:
@@ -32,14 +34,17 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Verify MySQL connection from host
-      run: |
-        sudo apt-get install -y mysql-client
-        mysql --host 127.0.0.1 --port 3306 -uroot -ppassword -e "SHOW DATABASES"
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         python ./pip/pip-install.py --python=python --pip=pip
+    - name: Verify MariaDB connection
+      env:
+          PORT: ${{ job.services.mariadb.ports[3306] }}
+      run: |
+          while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
+            sleep 1
+          done
     - name: Run Tests
       run: |
         python manage.py test
