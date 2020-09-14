@@ -48,9 +48,8 @@ jobs:
     - name: Grant aiarena user full access
       env:
           PORT: ${{ job.services.mariadb.ports[3306] }}
-      run: mysql --host="127.0.0.1" --port "$PORT" -uroot -paiarena -e "GRANT ALL PRIVILEGES ON test_aiarena.* to aiarena WITH GRANT OPTION;"
-    - name: Migrate
-      run: python manage.py migrate
+      run: | 
+        mysql --host="127.0.0.1" --port "$PORT" -uroot -paiarena -e "GRANT ALL PRIVILEGES ON test_aiarena.* to aiarena WITH GRANT OPTION;";
     - name: Run Tests
       run: |
         python manage.py test
