@@ -2,7 +2,7 @@ name: Staging Deploy CI
 
 on:
   push:
-    branches: [ staging_ci ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
