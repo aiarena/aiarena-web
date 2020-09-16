@@ -16,7 +16,7 @@ jobs:
       uses: garygrossgarten/github-action-ssh@release
       with:
         command: cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && /home/aiarena/cleardb.sh && python3 manage.py migrate && python3 manage.py purgesensitivedata && sudo apachectl graceful && exit
-        host: ${{ secrets.HOST }}
+        host: ${{ secrets.STAGING_HOST }}
         port: ${{ secrets.STAGING_PORT }}
         username: aiarena
         password: ${{ secrets.STAGING_SSH_PASSWORD }}
