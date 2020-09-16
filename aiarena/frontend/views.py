@@ -132,13 +132,17 @@ class UserProfileUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         return self.request.user
 
 
+class BotUploadForm(forms.ModelForm):
+    class Meta:
+        model = Bot
+        fields = ['name', 'bot_zip', 'plays_race', 'type', 'active']
+
+
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
+    form_class = BotUploadForm
     redirect_field_name = 'next'
     template_name = 'botupload.html'
     success_message = "Bot was uploaded successfully"
-
-    model = Bot
-    fields = ['name', 'bot_zip', 'plays_race', 'type', 'active']
 
     def get_login_url(self):
         return reverse('login')
@@ -153,6 +157,13 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
             kwargs['instance'] = Bot()
         kwargs['instance'].user = self.request.user
         return kwargs
+
+    def form_valid(self, form):
+        if config.BOT_UPLOADS_ENABLED:
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "Sorry. Requested matches are currently disabled.")
+            return self.render_to_response(self.get_context_data(form=form))
 
 
 class BotList(ListView):

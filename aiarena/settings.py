@@ -208,10 +208,11 @@ CONSTANCE_CONFIG = {
     'ENABLE_ELO_SANITY_CHECK': (True, 'Whether to sanity check the total sum of bot ELO '
                                       'on result submission in order to detect ELO corruption.'),
     'PROBOTS_SUBMISSION_DEADLINE': (datetime.datetime.now(), 'The next ProBots submission deadline datetime.'),
+    'BOT_UPLOADS_ENABLED': (True, 'Whether authors can upload new bots to the website.'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
-    'Bots': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
+    'Bots': ('BOT_UPLOADS_ENABLED', 'MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
     'General': ('DEBUG_LOGGING_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES',
                 'ENABLE_ELO_SANITY_CHECK'),
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',
