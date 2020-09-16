@@ -6,7 +6,7 @@
 <div class="registration-form">
    <h2><em class="material-icons" style="font-size: 48px; vertical-align: -0.35em;">cloud_upload</em> Submit your bot here: </h2>
 
-    {% if config.ALLOW_REQUESTED_MATCHES %}
+    {% if config.BOT_UPLOADS_ENABLED %}
     <form method="post" style="font-size: 16px;" action="{% url "botupload" %}" enctype="multipart/form-data" >
         {% csrf_token %}
         {{ form.as_p }}
