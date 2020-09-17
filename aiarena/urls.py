@@ -35,11 +35,11 @@ sitemaps = {
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="AI-Arena API",
+      title="AI Arena API",
       default_version='v1',
       description="AI-Arena API Swagger Documentation",
-      terms_of_service="https://ai-arena.net/",
-      contact=openapi.Contact(email="m1nd@ai-arena.net"),
+      terms_of_service="https://aiarena.net/",
+      contact=openapi.Contact(email="staff@aiarena.net"),
       license=openapi.License(name="GPLv3"),
    ),
    public=True,

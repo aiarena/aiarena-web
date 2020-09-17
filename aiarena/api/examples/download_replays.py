@@ -10,12 +10,12 @@ file_path = './replays/'  # insert file path
 auth = {'Authorization': f'Token {token}'}
 
 # requests.get(url).text returns a dictionary formatted as a string and we need dictionaries
-response = requests.get(f'https://ai-arena.net/api/match-participations/?bot={bot_id}', headers=auth)
+response = requests.get(f'https://aiarena.net/api/match-participations/?bot={bot_id}', headers=auth)
 assert response.status_code == 200, 'Unexpected status_code returned from match-participations'
 participation = json.loads(response.text)
 for i in range(len(participation['results'])):
     print(f'Downloading match {participation["results"][i]["match"]}')
-    response = requests.get(f'https://ai-arena.net/api/results/?match={participation["results"][i]["match"]}', headers=auth)
+    response = requests.get(f'https://aiarena.net/api/results/?match={participation["results"][i]["match"]}', headers=auth)
     assert response.status_code == 200, 'Unexpected status_code returned from results'
     match_details = json.loads(response.text)
     replay_file = match_details['results'][0]['replay_file']

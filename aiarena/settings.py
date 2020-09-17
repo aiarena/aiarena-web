@@ -184,7 +184,7 @@ CONSTANCE_CONFIG = {
     'DEBUG_LOGGING_ENABLED': (False, 'Enable debug logging. '
                                      'This will log extra data for debugging throughout the website. '
                                      'It will also propagate the setting to the arena clients'),
-    'GETTING_STARTED_URL': ('https://ai-arena.net/wiki/getting-started/',
+    'GETTING_STARTED_URL': ('https://aiarena.net/wiki/getting-started/',
                             'The URL to send new users to in order to get started.'),
     'DISCORD_CLIENT_ID': ('', 'Client ID used for Discord OAuth'),
     'DISCORD_CLIENT_SECRET': ('', 'Client Secret used for Discord OAuth'),

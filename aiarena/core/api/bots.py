@@ -23,7 +23,7 @@ class Bots:
                                                '\n'
                                                'We are emailing you to let you know that your bot '
                                                '"' + bot.name + '" has reached our consecutive crash limit and hence been deactivated.\n'
-                                                                 'Please log into ai-arena.net at your convenience to address the issue.\n'
+                                                                 'Please log into aiarena.net at your convenience to address the issue.\n'
                                                                  'Bot logs are available for download when logged in on the bot''s page here: '
                 + settings.SITE_PROTOCOL + '://' + Site.objects.get_current().domain
                 + reverse('bot', kwargs={'pk': bot.id}) + '\n'
