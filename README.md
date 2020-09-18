@@ -1,7 +1,7 @@
 # aiarena-web
-A website for running the ai-arena.net ladder.
+A website for running the aiarena.net ladder.
 
-[See the live website here](https://ai-arena.net/)
+[See the live website here](https://aiarena.net/)
 
 [Dev Install instructions](./doc/INSTALL.md)
 

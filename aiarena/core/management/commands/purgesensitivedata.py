@@ -9,7 +9,7 @@ from aiarena.patreon.models import PatreonAccountBind
 
 def purge_user_data():
     for user in User.objects.all():
-        user.email = user.username + '@staging.ai-arena.net'
+        user.email = user.username + '@staging.aiarena.net'
         user.save()
 
     # discord integration
