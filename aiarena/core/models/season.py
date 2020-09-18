@@ -100,24 +100,23 @@ class Season(models.Model, LockableModelMixin):
         else:
             return "Cannot start closing a season with a status of {}".format(self.status)
 
-    @transaction.atomic
     def try_to_close(self):
-        self.lock_me()
-
         from .round import Round
+        from .bot import Bot
         if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0:
-            self.status = 'closed'
-            self.date_closed = timezone.now()
-            self.save()
+            with transaction.atomic():
+                self.__class__.objects.select_for_update().get(id=self.id)
+                self.status = 'closed'
+                self.date_closed = timezone.now()
+                self.save()
 
-            # deactivate all bots
-            from .bot import Bot
-            for bot in Bot.objects.all():
-                bot.active = False
-                bot.save()
-            # todo: sanity check replay archive contents against results.
-            # todo: then dump results data as JSON?
-            # todo: then wipe all replay/log files?
+                # deactivate all bots
+                for bot in Bot.objects.all():
+                    bot.active = False
+                    bot.save()
+                # todo: sanity check replay archive contents against results.
+                # todo: then dump results data as JSON?
+                # todo: then wipe all replay/log files?
 
     @staticmethod
     def get_current_season(select_for_update: bool = False) -> 'Season':
