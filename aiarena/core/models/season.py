@@ -1,9 +1,7 @@
-import io
 import logging
 
-from django.core.files import File
 from django.db import models, transaction
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
@@ -12,7 +10,6 @@ from django.utils.safestring import mark_safe
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason, MultipleCurrentSeasons
 from .mixins import LockableModelMixin
-
 
 logger = logging.getLogger(__name__)
 
@@ -103,17 +100,16 @@ class Season(models.Model, LockableModelMixin):
     def try_to_close(self):
         from .round import Round
         from .bot import Bot
-        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0:
-            with transaction.atomic():
-                if Season.objects.filter(id=self.id, status='closing')\
-                        .update(status='closed', date_closed=timezone.now()) > 0:
-                    # deactivate all bots
-                    for bot in Bot.objects.all():
-                        bot.active = False
-                        bot.save()
-                    # todo: sanity check replay archive contents against results.
-                    # todo: then dump results data as JSON?
-                    # todo: then wipe all replay/log files?
+        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0 and \
+                Season.objects.filter(id=self.id, status='closing') \
+                .update(status='closed', date_closed=timezone.now()) > 0:
+            # deactivate all bots
+            for bot in Bot.objects.all():
+                bot.active = False
+                bot.save()
+            # todo: sanity check replay archive contents against results.
+            # todo: then dump results data as JSON?
+            # todo: then wipe all replay/log files?
 
     @staticmethod
     def get_current_season(select_for_update: bool = False) -> 'Season':
