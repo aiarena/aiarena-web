@@ -313,17 +313,6 @@ class UtilsTestCase(BaseTestMixin, TestCase):
         self.assertEqual('c96bcfc79318a8b50b0b2c8696400d06', calculate_md5(filename))
 
 
-class UserTestCase(BaseTestMixin, TestCase):
-    def test_user_creation(self):
-        user = User.objects.create(username='test user', email='test@test.com')
-        arenaclient = User.objects.create(username='test arenaclient', email='arenaclient@test.com')
-        arenaclient.type = 'ARENA_CLIENT'
-        with self.assertRaises(ValidationError):
-            arenaclient.clean()
-        arenaclient.owner = user
-        arenaclient.clean()
-
-
 class BotTestCase(LoggedInMixin, TestCase):
     def test_bot_creation_and_update(self):
         # set the configured per user limits for this test
