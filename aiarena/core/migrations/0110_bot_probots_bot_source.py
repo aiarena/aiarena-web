@@ -13,9 +13,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='bot',
-            name='probots_bot_source',
-            field=private_storage.fields.PrivateFileField(blank=True, null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.probots_bot_source_upload_to),
-        ),
+        # Broken migration - field removed
+        # migrations.AddField(
+        #     model_name='bot',
+        #     name='probots_bot_source',
+        #     field=private_storage.fields.PrivateFileField(blank=True, null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.probots_bot_source_upload_to),
+        # ),
     ]

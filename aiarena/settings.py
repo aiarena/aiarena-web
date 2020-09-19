@@ -207,7 +207,6 @@ CONSTANCE_CONFIG = {
                                          '1/(1+e^(-AVG_BOT_ELO/COMBINED_ELO_RATING_DIVISOR))-0.5'),
     'ENABLE_ELO_SANITY_CHECK': (True, 'Whether to sanity check the total sum of bot ELO '
                                       'on result submission in order to detect ELO corruption.'),
-    'PROBOTS_SUBMISSION_DEADLINE': (datetime.datetime.now(), 'The next ProBots submission deadline datetime.'),
     'BOT_UPLOADS_ENABLED': (True, 'Whether authors can upload new bots to the website.'),
 }
 
@@ -223,7 +222,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
                 'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
     'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',),
     'Match interest analysis': ('ELO_DIFF_RATING_MODIFIER', 'COMBINED_ELO_RATING_DIVISOR',),
-    'ProBots': ('PROBOTS_SUBMISSION_DEADLINE',),
 }
 
 LOGGING = {

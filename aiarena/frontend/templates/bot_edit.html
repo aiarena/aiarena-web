@@ -16,22 +16,6 @@
             <p>Bot data:<br/>
                 {{ form.bot_data }}<br/>
                 Publicly downloadable: {{ form.bot_data_publicly_downloadable }}</p>
-            {% if object.is_probots_participant %}
-                {% if config.PROBOTS_SUBMISSION_DEADLINE < now %}
-                    <h4>ProBots submissions are currently closed.</h4>
-                {% else %}
-                    <h3>ProBots</h3>
-                    <h4>Next ProBots submission
-                        deadline: {{ config.PROBOTS_SUBMISSION_DEADLINE|date:"d. N Y - H:i:s" }}
-                        UTC</h4>
-                    <p>Probots bot zip:<br/>
-                        {{ form.probots_bot_zip }}</p>
-                    <p>Probots bot source/change log zip:<br/>
-                        {{ form.probots_bot_source }}</p>
-                    <p>Probots bot data zip:<br/>
-                        {{ form.probots_bot_data }}</p>
-                {% endif %}
-            {% endif %}
             <h3>Bot page content</h3>
             <p>
                 {{ form.wiki_article_content }}
