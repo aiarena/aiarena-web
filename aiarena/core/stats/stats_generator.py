@@ -184,8 +184,9 @@ class StatsGenerator:
                 """)
             cursor.execute(query)
             elo_over_time = pd.DataFrame(cursor.fetchall())
-            elo_over_time.to_csv('tmp.csv')
-            elo_over_time = pd.read_csv('tmp.csv')
+            # HACK - saving to a csv and loading it back normalizes the time format
+            elo_over_time.to_csv('./tmp/tmp.csv')
+            elo_over_time = pd.read_csv('./tmp/tmp.csv')
             elo_over_time = elo_over_time.drop('Unnamed: 0', axis=1)
         return elo_over_time
 
