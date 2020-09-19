@@ -275,7 +275,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         # if we set the bot data key to anything, it will overwrite the existing bot data
                         # so only include bot1_data if it isn't none
                         # Also don't update bot data if it's a requested match.
-                        if bot1_data is not None:
+                        if bot1_data is not None and not match_is_requested:
                             bot1_dict = {'bot_data': bot1_data}
                             bot1 = SubmitResultBotSerializer(instance=p1_instance.bot,
                                                              data=bot1_dict, partial=True)
@@ -286,7 +286,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         # if we set the bot data key to anything, it will overwrite the existing bot data
                         # so only include bot2_data if it isn't none
                         # Also don't update bot data if it's a requested match.
-                        if bot2_data is not None:
+                        if bot2_data is not None and not match_is_requested:
                             bot2_dict = {'bot_data': bot2_data}
                             bot2 = SubmitResultBotSerializer(instance=p2_instance.bot,
                                                              data=bot2_dict, partial=True)
