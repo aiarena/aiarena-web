@@ -104,7 +104,7 @@ class MatchParticipation(models.Model, LockableModelMixin):
             raise Exception('Unrecognized result type!')
 
     @staticmethod
-    def calculate_relative_result_cause(result_type):
+    def calculate_result_cause(result_type):
         if result_type in ['Player1Win', 'Player2Win', 'Tie', 'Player1Surrender', 'Player2Surrender']:
             return 'game_rules'
         elif result_type in ['Player1Crash', 'Player2Crash']:

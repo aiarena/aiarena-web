@@ -233,7 +233,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                     # validate participants
                     p1_instance = match.matchparticipation_set.get(participant_number=1)
-                    result_cause = p1_instance.calculate_relative_result_cause(serializer.validated_data['type'])
+                    result_cause = p1_instance.calculate_result_cause(serializer.validated_data['type'])
                     participant1 = SubmitResultParticipationSerializer(instance=p1_instance, data={
                         'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
                         'match_log': serializer.validated_data.get('bot1_log'),
