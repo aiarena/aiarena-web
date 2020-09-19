@@ -105,18 +105,15 @@ class Season(models.Model, LockableModelMixin):
         from .bot import Bot
         if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0:
             with transaction.atomic():
-                self.__class__.objects.select_for_update().get(id=self.id)
-                self.status = 'closed'
-                self.date_closed = timezone.now()
-                self.save()
-
-                # deactivate all bots
-                for bot in Bot.objects.all():
-                    bot.active = False
-                    bot.save()
-                # todo: sanity check replay archive contents against results.
-                # todo: then dump results data as JSON?
-                # todo: then wipe all replay/log files?
+                if Season.objects.filter(id=self.id, status='closing')\
+                        .update(status='closed', date_closed=timezone.now()) > 0:
+                    # deactivate all bots
+                    for bot in Bot.objects.all():
+                        bot.active = False
+                        bot.save()
+                    # todo: sanity check replay archive contents against results.
+                    # todo: then dump results data as JSON?
+                    # todo: then wipe all replay/log files?
 
     @staticmethod
     def get_current_season(select_for_update: bool = False) -> 'Season':
