@@ -37,12 +37,10 @@ class Round(models.Model, LockableModelMixin):
         from .match import Match
         with transaction.atomic():
             # if there are no matches without results, this round is complete
-            if Match.objects.filter(round=self, result__isnull=True).count() == 0:
-                self.__class__.objects.select_for_update().get(id=self.id)
-                self.complete = True
-                self.finished = timezone.now()
-                self.save()
-                Season.get_current_season().try_to_close()
+            # if this round close attempt results in a row update, try to close the season
+            if Match.objects.filter(round=self, result__isnull=True).count() == 0 and \
+                    Round.objects.filter(id=self.id, complete=False).update(complete=True, finished=timezone.now()) > 0:
+                self.season.try_to_close()
 
     @staticmethod
     def max_active_rounds_reached():
