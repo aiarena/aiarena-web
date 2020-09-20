@@ -375,6 +375,7 @@ ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
 # django wiki
 WIKI_ACCOUNT_HANDLING = True
+WIKI_ATTACHMENTS_EXTENSIONS = ["pdf", "doc", "odt", "docx", "txt", "zip"]
 WIKI_ACCOUNT_SIGNUP_ALLOWED = False
 SITE_ID = 1
 
