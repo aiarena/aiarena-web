@@ -1,9 +1,7 @@
-import io
 import logging
 
-from django.core.files import File
 from django.db import models, transaction
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
@@ -12,7 +10,6 @@ from django.utils.safestring import mark_safe
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason, MultipleCurrentSeasons
 from .mixins import LockableModelMixin
-
 
 logger = logging.getLogger(__name__)
 
@@ -100,18 +97,13 @@ class Season(models.Model, LockableModelMixin):
         else:
             return "Cannot start closing a season with a status of {}".format(self.status)
 
-    @transaction.atomic
     def try_to_close(self):
-        self.lock_me()
-
         from .round import Round
-        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0:
-            self.status = 'closed'
-            self.date_closed = timezone.now()
-            self.save()
-
+        from .bot import Bot
+        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0 and \
+                Season.objects.filter(id=self.id, status='closing') \
+                .update(status='closed', date_closed=timezone.now()) > 0:
             # deactivate all bots
-            from .bot import Bot
             for bot in Bot.objects.all():
                 bot.active = False
                 bot.save()

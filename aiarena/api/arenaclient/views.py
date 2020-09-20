@@ -192,7 +192,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     # Don't throttle result submissions - we can never have "too many" result submissions.
     # throttle_scope = 'arenaclient'
 
-    @transaction.atomic()
     def create(self, request, *args, **kwargs):
         if config.LADDER_ENABLED:
             try:
@@ -217,156 +216,146 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                  f"bot2_data: {serializer.validated_data.get('bot2_data')} "
                                  )
 
+                with transaction.atomic():
+                    match = Match.objects.prefetch_related(
+                        Prefetch('matchparticipation_set', MatchParticipation.objects.all().select_related('bot'))
+                    ).get(id=match_id)
 
-                # Lock everything manually to ensure transactional integrity
-                with connection.cursor() as cursor:
-                    cursor.execute("select 1 "
-                                   "from core_match as m "
-                                   "join core_matchparticipation as cm on m.id = cm.match_id "
-                                   "join core_bot cb on cm.bot_id = cb.id "
-                                   "join core_round cr on m.round_id = cr.id "
-                                   "join core_season cs on cr.season_id = cs.id "
-                                   "join core_seasonparticipation csp on cb.id = csp.bot_id and cs.id = csp.season_id "
-                                   "where m.id = %s "
-                                   "for update", (match_id, ))
-
-                match = Match.objects.prefetch_related(
-                    Prefetch('matchparticipation_set', MatchParticipation.objects.all().select_related('bot'))
-                ).get(id=match_id)
-
-
-                # validate result
-                result = SubmitResultResultSerializer(data={'match': serializer.validated_data['match'],
-                                                            'type': serializer.validated_data['type'],
-                                                            'replay_file': serializer.validated_data.get('replay_file'),
-                                                            'game_steps': serializer.validated_data['game_steps'],
-                                                            'submitted_by': serializer.validated_data['submitted_by'].pk,
-                                                            'arenaclient_log': serializer.validated_data.get(
+                    # validate result
+                    result = SubmitResultResultSerializer(data={'match': match_id,
+                                                                'type': serializer.validated_data['type'],
+                                                                'replay_file': serializer.validated_data.get('replay_file'),
+                                                                'game_steps': serializer.validated_data['game_steps'],
+                                                                'submitted_by': serializer.validated_data['submitted_by'].pk,
+                                                                'arenaclient_log': serializer.validated_data.get(
                                                                 'arenaclient_log')})
-                result.is_valid(raise_exception=True)
+                    result.is_valid(raise_exception=True)
 
-                # validate participants
-                p1Instance = match.matchparticipation_set.get(participant_number=1)
-                participant1 = SubmitResultParticipationSerializer(instance=p1Instance, data={
-                    'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
-                    'match_log': serializer.validated_data.get('bot1_log'),
-                    'result': p1Instance.calculate_relative_result(serializer.validated_data['type']),
-                    'result_cause': p1Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
-                                                                   partial=True)
-                participant1.is_valid(raise_exception=True)
+                    # validate participants
+                    p1_instance = match.matchparticipation_set.get(participant_number=1)
+                    result_cause = p1_instance.calculate_result_cause(serializer.validated_data['type'])
+                    participant1 = SubmitResultParticipationSerializer(instance=p1_instance, data={
+                        'avg_step_time': serializer.validated_data.get('bot1_avg_step_time'),
+                        'match_log': serializer.validated_data.get('bot1_log'),
+                        'result': p1_instance.calculate_relative_result(serializer.validated_data['type']),
+                        'result_cause': result_cause},
+                                                                       partial=True)
+                    participant1.is_valid(raise_exception=True)
 
-                p2Instance = match.matchparticipation_set.get(participant_number=2)
-                participant2 = SubmitResultParticipationSerializer(instance=p2Instance, data={
-                    'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
-                    'match_log': serializer.validated_data.get('bot2_log'),
-                    'result': p2Instance.calculate_relative_result(serializer.validated_data['type']),
-                    'result_cause': p2Instance.calculate_relative_result_cause(serializer.validated_data['type'])},
-                                                                   partial=True)
-                participant2.is_valid(raise_exception=True)
+                    p2_instance = match.matchparticipation_set.get(participant_number=2)
+                    participant2 = SubmitResultParticipationSerializer(instance=p2_instance, data={
+                        'avg_step_time': serializer.validated_data.get('bot2_avg_step_time'),
+                        'match_log': serializer.validated_data.get('bot2_log'),
+                        'result': p2_instance.calculate_relative_result(serializer.validated_data['type']),
+                        'result_cause': result_cause},
+                                                                       partial=True)
+                    participant2.is_valid(raise_exception=True)
 
-                # validate bots
+                    # validate bots
 
-                if not p1Instance.bot.is_in_match(match.id):
-                    logger.warning(f"A result was submitted for match {match.id}, "
-                                   f"which Bot {p1Instance.bot.name} isn't currently in!")
-                    raise APIException('Unable to log result: Bot {0} is not currently in this match!'
-                                       .format(p1Instance.bot.name))
+                    if not p1_instance.bot.is_in_match(match_id):
+                        logger.warning(f"A result was submitted for match {match_id}, "
+                                       f"which Bot {p1_instance.bot.name} isn't currently in!")
+                        raise APIException('Unable to log result: Bot {0} is not currently in this match!'
+                                           .format(p1_instance.bot.name))
 
-                if not p2Instance.bot.is_in_match(match.id):
-                    logger.warning(f"A result was submitted for match {match.id}, "
-                                   f"which Bot {p2Instance.bot.name} isn't currently in!")
-                    raise APIException('Unable to log result: Bot {0} is not currently in this match!'
-                                       .format(p2Instance.bot.name))
+                    if not p2_instance.bot.is_in_match(match_id):
+                        logger.warning(f"A result was submitted for match {match_id}, "
+                                       f"which Bot {p2_instance.bot.name} isn't currently in!")
+                        raise APIException('Unable to log result: Bot {0} is not currently in this match!'
+                                           .format(p2_instance.bot.name))
 
-                bot1 = None
-                bot2 = None
+                    bot1 = None
+                    bot2 = None
 
-                # should we update the bot data?
-                if p1Instance.use_bot_data and p1Instance.update_bot_data:
-                    bot1_data = serializer.validated_data.get('bot1_data')
-                    # if we set the bot data key to anything, it will overwrite the existing bot data
-                    # so only include bot1_data if it isn't none
-                    # Also don't update bot data if it's a requested match.
-                    if bot1_data is not None and not match.is_requested:
-                        bot1_dict = {'bot_data': bot1_data}
-                        bot1 = SubmitResultBotSerializer(instance=p1Instance.bot,
-                                                         data=bot1_dict, partial=True)
-                        bot1.is_valid(raise_exception=True)
+                    match_is_requested = match.is_requested
+                    # should we update the bot data?
+                    if p1_instance.use_bot_data and p1_instance.update_bot_data and not match_is_requested:
+                        bot1_data = serializer.validated_data.get('bot1_data')
+                        # if we set the bot data key to anything, it will overwrite the existing bot data
+                        # so only include bot1_data if it isn't none
+                        # Also don't update bot data if it's a requested match.
+                        if bot1_data is not None and not match_is_requested:
+                            bot1_dict = {'bot_data': bot1_data}
+                            bot1 = SubmitResultBotSerializer(instance=p1_instance.bot,
+                                                             data=bot1_dict, partial=True)
+                            bot1.is_valid(raise_exception=True)
 
-                if p2Instance.use_bot_data and p2Instance.update_bot_data:
-                    bot2_data = serializer.validated_data.get('bot2_data')
-                    # if we set the bot data key to anything, it will overwrite the existing bot data
-                    # so only include bot2_data if it isn't none
-                    # Also don't update bot data if it's a requested match.
-                    if bot2_data is not None and not match.is_requested:
-                        bot2_dict = {'bot_data': bot2_data}
-                        bot2 = SubmitResultBotSerializer(instance=p2Instance.bot,
-                                                         data=bot2_dict, partial=True)
-                        bot2.is_valid(raise_exception=True)
+                    if p2_instance.use_bot_data and p2_instance.update_bot_data and not match_is_requested:
+                        bot2_data = serializer.validated_data.get('bot2_data')
+                        # if we set the bot data key to anything, it will overwrite the existing bot data
+                        # so only include bot2_data if it isn't none
+                        # Also don't update bot data if it's a requested match.
+                        if bot2_data is not None and not match_is_requested:
+                            bot2_dict = {'bot_data': bot2_data}
+                            bot2 = SubmitResultBotSerializer(instance=p2_instance.bot,
+                                                             data=bot2_dict, partial=True)
+                            bot2.is_valid(raise_exception=True)
 
-                # save models
-                result = result.save()
-                participant1 = participant1.save()
-                participant2 = participant2.save()
-                # save these after the others so if there's a validation error,
-                # then the bot data files don't need reverting to match their hashes.
-                # This could probably be done more fool-proof by actually rolling back the files on a transaction fail.
-                if bot1 is not None:
-                    bot1.save()
-                if bot2 is not None:
-                    bot2.save()
+                    # save models
+                    result = result.save()
+                    participant1 = participant1.save()
+                    participant2 = participant2.save()
+                    # save these after the others so if there's a validation error,
+                    # then the bot data files don't need reverting to match their hashes.
+                    # This could probably be done more fool-proof by actually rolling back the files on a transaction fail.
+                    if bot1 is not None:
+                        bot1.save()
+                    if bot2 is not None:
+                        bot2.save()
 
-                # Only do these actions if the match is part of a round
-                if result.match.round is not None:
-                    result.match.round.update_if_completed()
+                    # Only do these actions if the match is part of a round
+                    if result.match.round is not None:
+                        result.match.round.update_if_completed()
 
-                    # Update and record ELO figures
-                    p1_initial_elo, p2_initial_elo = result.get_initial_elos
-                    result.adjust_elo()
+                        # Update and record ELO figures
+                        p1_initial_elo, p2_initial_elo = result.get_initial_elos
+                        result.adjust_elo()
 
-                    initial_elo_sum = p1_initial_elo + p2_initial_elo
+                        initial_elo_sum = p1_initial_elo + p2_initial_elo
 
-                    # Calculate the change in ELO
-                    # the bot elos have changed so refresh them
-                    # todo: instead of having to refresh, return data from adjust_elo and apply it here
-                    sp1, sp2 = result.get_season_participants
-                    participant1.resultant_elo = sp1.elo
-                    participant2.resultant_elo = sp2.elo
-                    participant1.elo_change = participant1.resultant_elo - p1_initial_elo
-                    participant2.elo_change = participant2.resultant_elo - p2_initial_elo
-                    participant1.save()
-                    participant2.save()
+                        # Calculate the change in ELO
+                        # the bot elos have changed so refresh them
+                        # todo: instead of having to refresh, return data from adjust_elo and apply it here
+                        sp1, sp2 = result.get_season_participants
+                        participant1.resultant_elo = sp1.elo
+                        participant2.resultant_elo = sp2.elo
+                        participant1.elo_change = participant1.resultant_elo - p1_initial_elo
+                        participant2.elo_change = participant2.resultant_elo - p2_initial_elo
+                        participant1.save()
+                        participant2.save()
 
-                    resultant_elo_sum = participant1.resultant_elo + participant2.resultant_elo
-                    if initial_elo_sum != resultant_elo_sum:
-                        logger.critical(f"Initial and resultant ELO sum mismatch: "
-                                        f"Result {result.id}. "
-                                        f"initial_elo_sum: {initial_elo_sum}. "
-                                        f"resultant_elo_sum: {resultant_elo_sum}. "
-                                        f"participant1.elo_change: {participant1.elo_change}. "
-                                        f"participant2.elo_change: {participant2.elo_change}")
+                        resultant_elo_sum = participant1.resultant_elo + participant2.resultant_elo
+                        if initial_elo_sum != resultant_elo_sum:
+                            logger.critical(f"Initial and resultant ELO sum mismatch: "
+                                            f"Result {result.id}. "
+                                            f"initial_elo_sum: {initial_elo_sum}. "
+                                            f"resultant_elo_sum: {resultant_elo_sum}. "
+                                            f"participant1.elo_change: {participant1.elo_change}. "
+                                            f"participant2.elo_change: {participant2.elo_change}")
 
-                    if config.ENABLE_ELO_SANITY_CHECK:
-                        if config.DEBUG_LOGGING_ENABLED:
-                            logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
+                        if config.ENABLE_ELO_SANITY_CHECK:
+                            if config.DEBUG_LOGGING_ENABLED:
+                                logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
 
-                        # test here to check ELO total and ensure no corruption
-                        expectedEloSum = settings.ELO_START_VALUE * SeasonParticipation.objects.filter(season=result.match.round.season).count()
-                        actualEloSum = SeasonParticipation.objects.filter(season=result.match.round.season).aggregate(
-                            Sum('elo'))
+                            # test here to check ELO total and ensure no corruption
+                            match_season = result.match.round.season
+                            expected_elo_sum = settings.ELO_START_VALUE * SeasonParticipation.objects.filter(season=match_season).count()
+                            actual_elo_sum = SeasonParticipation.objects.filter(season=match_season).aggregate(
+                                Sum('elo'))
 
-                        if actualEloSum['elo__sum'] != expectedEloSum:
-                            logger.critical(
-                                "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
-                                    actualEloSum['elo__sum'], expectedEloSum, result.id))
+                            if actual_elo_sum['elo__sum'] != expected_elo_sum:
+                                logger.critical(
+                                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
+                                        actual_elo_sum['elo__sum'], expected_elo_sum, result.id))
+                            elif config.DEBUG_LOGGING_ENABLED:
+                                logger.info("ENABLE_ELO_SANITY_CHECK passed!")
+
                         elif config.DEBUG_LOGGING_ENABLED:
-                            logger.info("ENABLE_ELO_SANITY_CHECK passed!")
+                            logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
-                    elif config.DEBUG_LOGGING_ENABLED:
-                        logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
-
-                    if result.is_crash_or_timeout:
-                        run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
+                        if result.is_crash_or_timeout:
+                            run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
 
                 EVENT_MANAGER.broadcast_event(MatchResultReceivedEvent(result))
 

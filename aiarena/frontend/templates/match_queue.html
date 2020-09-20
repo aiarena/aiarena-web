@@ -2,8 +2,9 @@
 {% load i18n core_filters %}
 
 {% block content %}
-    {% if requested_matches.count > 0 or round_list.count > 0 %}
-        {% if requested_matches.count > 0 %}
+    {% with requested_count=requested_matches.count %}
+        {% if requested_count > 0 or round_list.count > 0 %}
+        {% if requested_count > 0 %}
             <div class="divider"><span></span><span><h2>Requested matches</h2></span><span></span></div>
             <table summary="Table containing information about requested matches" class="row-hover-highlight">
                 <thead>
@@ -104,4 +105,5 @@
             <tbody>
         </table>
     {% endif %}
+    {% endwith %}
 {% endblock %}
