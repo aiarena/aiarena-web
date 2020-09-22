@@ -384,7 +384,7 @@ class SetArenaClientStatusViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
     No reading of models is implemented.
     """
     serializer_class = SetArenaClientStatusSerializer
-    permission_classes = [IsArenaClientOrAdminUser]
+    permission_classes = [IsArenaClient]
 
     def perform_create(self, serializer):
         serializer.save(arenaclient=self.request.user.arenaclient)
