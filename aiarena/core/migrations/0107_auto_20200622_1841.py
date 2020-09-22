@@ -14,19 +14,20 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='bot',
-            name='is_probots_participant',
-            field=models.BooleanField(default=False),
-        ),
-        migrations.AddField(
-            model_name='bot',
-            name='probots_bot_data',
-            field=private_storage.fields.PrivateFileField(blank=True, null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.probots_bot_data_upload_to),
-        ),
-        migrations.AddField(
-            model_name='bot',
-            name='probots_bot_zip',
-            field=private_storage.fields.PrivateFileField(blank=True, null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.probots_bot_zip_upload_to, validators=[aiarena.core.validators.validate_bot_zip_file]),
-        ),
+        # Broken migrations - field removed
+        # migrations.AddField(
+        #     model_name='bot',
+        #     name='is_probots_participant',
+        #     field=models.BooleanField(default=False),
+        # ),
+        # migrations.AddField(
+        #     model_name='bot',
+        #     name='probots_bot_data',
+        #     field=private_storage.fields.PrivateFileField(blank=True, null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.probots_bot_data_upload_to),
+        # ),
+        # migrations.AddField(
+        #     model_name='bot',
+        #     name='probots_bot_zip',
+        #     field=private_storage.fields.PrivateFileField(blank=True, null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.probots_bot_zip_upload_to, validators=[aiarena.core.validators.validate_bot_zip_file]),
+        # ),
     ]
