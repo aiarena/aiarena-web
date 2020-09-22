@@ -653,3 +653,13 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
 
         # check result count - should have 2 rounds worth of results
         self.assertEqual(Result.objects.count(), expectedMatchCountPerRound * 2)
+
+
+class SetStatusTestCase(LoggedInMixin, TransactionTestCase):
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(User.objects.get(username='arenaclient1'))
+
+    def test_set_status(self):
+        return self.client.post('/api/arenaclient/set-status/',
+                                {'status': 'idle'})
