@@ -23,7 +23,8 @@ from wiki.models import ArticleRevision
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
-from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map, \
+    ArenaClient
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
@@ -243,17 +244,10 @@ class BotUpdateForm(forms.ModelForm):
             self.fields['active'].required = False
 
 
-        if not self.instance.is_probots_participant:
-            # don't show these fields to non-probots participants
-            del self.fields['probots_bot_zip']
-            del self.fields['probots_bot_source']
-            del self.fields['probots_bot_data']
-
-
     class Meta:
         model = Bot
         fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
-                  'bot_data_publicly_downloadable', 'probots_bot_zip', 'probots_bot_source', 'probots_bot_data']
+                  'bot_data_publicly_downloadable']
 
 
 class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
@@ -349,7 +343,7 @@ class Results(ListView):
 
 
 class ArenaClients(ListView):
-    queryset = User.objects.filter(type='ARENA_CLIENT')
+    queryset = ArenaClient.objects.filter(is_active=True)
     # todo: why doesn't this work?
     # queryset = User.objects.filter(type='ARENA_CLIENT').annotate(
     #     matches_1hr=Count('submitted_results', filter=Q(submitted_results__created__gte=timezone.now() - timedelta(hours=1))),
@@ -368,13 +362,13 @@ class ArenaClients(ListView):
         return super().get_context_data(**kwargs)
 
 
-class ArenaClient(DetailView):
+class ArenaClientView(DetailView):
     queryset = User.objects.filter(type='ARENA_CLIENT')
     template_name = 'arenaclient.html'
     context_object_name = 'arenaclient'  # change the context name to avoid overriding the current user oontext object
 
     def get_context_data(self, **kwargs):
-        context = super(ArenaClient, self).get_context_data(**kwargs)
+        context = super(ArenaClientView, self).get_context_data(**kwargs)
 
         context['assigned_matches_list'] = Match.objects.filter(assigned_to=self.object,
                                                                 result__isnull=True).prefetch_related(
@@ -440,31 +434,6 @@ class BotDataDownloadView(PrivateStorageDetailView):
         user = private_file.request.user
         # Allow if staff, the owner of the file, or the file is marked as publicly downloadable
         return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_data_publicly_downloadable
-
-
-class ProbotsFileDownloadView(PrivateStorageDetailView):
-    model = Bot
-
-    content_disposition = 'attachment'
-
-    def get_content_disposition_filename(self, private_file):
-        return 'probots_{0}.zip'.format(private_file.relative_name.split('/')[-1])
-
-    def can_access_file(self, private_file):
-        user = private_file.request.user
-        # Allow if staff, the owner of the file, or the file is marked as publicly downloadable
-        return user.is_authenticated and user.is_staff or private_file.parent_object.user == user or private_file.parent_object.bot_data_publicly_downloadable
-
-class ProbotsZipDownloadView(ProbotsFileDownloadView):
-    model_file_field = 'probots_bot_zip'
-
-
-class ProbotsSourceDownloadView(ProbotsFileDownloadView):
-    model_file_field = 'probots_bot_source'
-
-
-class ProbotsDataDownloadView(ProbotsFileDownloadView):
-    model_file_field = 'probots_bot_data'
 
 
 class MatchLogDownloadView(PrivateStorageDetailView):

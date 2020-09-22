@@ -1,13 +1,12 @@
 import os
-from datetime import timedelta
 
 from constance import config
 from django.db.models import Sum
-from django.test import TransactionTestCase, TestCase
-from django.utils import timezone
+from django.test import TransactionTestCase
 
 from aiarena.core.api import Matches
-from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map
+from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map, \
+    ArenaClient
 from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
@@ -170,8 +169,8 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
     def test_match_blocking(self):
         # create an extra arena client for this test
-        self.arenaclientUser2 = User.objects.create_user(username='arenaclient2', email='arenaclient2@dev.aiarena.net',
-                                                         type='ARENA_CLIENT')
+        self.arenaclientUser2 = ArenaClient.objects.create(username='arenaclient2', email='arenaclient2@dev.aiarena.net',
+                                                         type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
         self._create_map('test_map')
@@ -522,8 +521,9 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         self.regularUserBot1.elo = ELO_START_VALUE - 1
         self.regularUserBot1.save()
 
-        match = self._post_to_matches().data
-        self._post_to_results(match['id'], 'Player1Win')
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        self._post_to_results(response.data['id'], 'Player1Win')
 
         # with open(log_file, "r") as f:
         #     self.assertFalse("did not match expected value of" in f.read())
@@ -653,3 +653,13 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
 
         # check result count - should have 2 rounds worth of results
         self.assertEqual(Result.objects.count(), expectedMatchCountPerRound * 2)
+
+
+class SetStatusTestCase(LoggedInMixin, TransactionTestCase):
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(User.objects.get(username='arenaclient1'))
+
+    def test_set_status(self):
+        return self.client.post('/api/arenaclient/set-status/',
+                                {'status': 'idle'})

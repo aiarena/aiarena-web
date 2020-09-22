@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round, ArenaClient
 from aiarena.core.utils import calculate_md5
 
 
@@ -268,8 +268,8 @@ class LoggedInMixin(BaseTestMixin):
                                                    email='staff_user@dev.aiarena.net',
                                                    is_staff=True)
 
-        self.arenaclientUser1 = User.objects.create_user(username='arenaclient1', email='arenaclient@dev.aiarena.net',
-                                                         type='ARENA_CLIENT')
+        self.arenaclientUser1 = ArenaClient.objects.create(username='arenaclient1', email='arenaclient@dev.aiarena.net',
+                                                         type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
         self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
                                                      email='regular_user1@dev.aiarena.net')
 
@@ -311,17 +311,6 @@ class UtilsTestCase(BaseTestMixin, TestCase):
     def test_calc_md5(self):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test-media/../test-media/test_bot.zip')
         self.assertEqual('c96bcfc79318a8b50b0b2c8696400d06', calculate_md5(filename))
-
-
-class UserTestCase(BaseTestMixin, TestCase):
-    def test_user_creation(self):
-        user = User.objects.create(username='test user', email='test@test.com')
-        arenaclient = User.objects.create(username='test arenaclient', email='arenaclient@test.com')
-        arenaclient.type = 'ARENA_CLIENT'
-        with self.assertRaises(ValidationError):
-            arenaclient.clean()
-        arenaclient.owner = user
-        arenaclient.clean()
 
 
 class BotTestCase(LoggedInMixin, TestCase):

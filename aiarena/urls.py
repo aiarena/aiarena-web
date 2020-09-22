@@ -58,7 +58,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('ranking/', core_views.Ranking.as_view(), name='ranking'),
                   path('results/', core_views.Results.as_view(), name='results'),
                   path('arenaclients/', core_views.ArenaClients.as_view(), name='arenaclients'),
-                  path('arenaclients/<int:pk>/', core_views.ArenaClient.as_view(), name='arenaclient'),
+                  path('arenaclients/<int:pk>/', core_views.ArenaClientView.as_view(), name='arenaclient'),
                   path('match-queue/', core_views.MatchQueue.as_view(), name='match_queue'),
                   path('stream/', TemplateView.as_view(template_name='stream.html'), name='stream'),
 
@@ -67,9 +67,6 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('bots/<int:pk>/edit/', core_views.BotUpdate.as_view(), name='bot_edit'),
                   path('bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
                   path('bots/<int:pk>/bot_data', core_views.BotDataDownloadView.as_view()),
-                  path('bots/<int:pk>/probots/bot_zip', core_views.ProbotsZipDownloadView.as_view()),
-                  path('bots/<int:pk>/probots/bot_source', core_views.ProbotsSourceDownloadView.as_view()),
-                  path('bots/<int:pk>/probots/bot_data', core_views.ProbotsDataDownloadView.as_view()),
 
                   path('match-logs/<int:pk>/', core_views.MatchLogDownloadView.as_view()),
                   path('authors/', core_views.AuthorList.as_view(), name='authors'),
