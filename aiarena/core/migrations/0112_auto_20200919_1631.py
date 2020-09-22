@@ -5,27 +5,6 @@ from django.db import migrations, models
 from aiarena import settings
 from aiarena.core.models import User, ArenaClient
 
-
-def migrate_arenaclient_users(apps, schema_editor):
-
-    # Use the current model because the future User model won't have the owner field
-    UserModel = apps.get_model('core', 'User')
-    ac_users = UserModel.objects.filter(type='ARENA_CLIENT')
-
-    for ac_user in ac_users:
-        # find parent class fields:
-        fields = [f.name for f in User._meta.fields]
-
-        # get the values from the user instance
-        values = dict([(x, getattr(ac_user, x)) for x in fields])
-
-        # assign same values to new instance of second model
-        new_instance = ArenaClient.objects.create(**values)
-        new_instance.trusted = True
-        new_instance.ac_owner = new_instance.owner  # owner field will be removed
-        new_instance.save()  # save new one
-
-
 class Migration(migrations.Migration):
     dependencies = [
         ('core', '0111_merge_20200708_2041'),
@@ -38,5 +17,4 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='arenaclients',
                                     to=settings.AUTH_USER_MODEL),
         ),
-        migrations.RunPython(migrate_arenaclient_users),
     ]
