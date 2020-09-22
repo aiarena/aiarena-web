@@ -59,15 +59,9 @@ DATABASES = {
     }
 }
 
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-NOSE_ARGS = [
-    '--with-coverage',
-    '--cover-package=aiarena'
-]
 # Application definition
 
 INSTALLED_APPS = [
-    'django_nose',
     'registration',
     'grappelli.dashboard',
     'grappelli',
@@ -391,7 +385,6 @@ if ENVIRONMENT_TYPE != EnvironmentType.DEVELOPMENT:
     MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
 
     INSTALLED_APPS.remove('sslserver')
-    INSTALLED_APPS.remove('django_nose')
 
 # load this after the env file so if the ELO_K value was overridden, it will be applied properly
 ELO = Elo(ELO_K)
