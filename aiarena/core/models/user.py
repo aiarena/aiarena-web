@@ -106,6 +106,15 @@ class User(AbstractUser):
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         return User.objects.only('id', 'username').exclude(patreon_level='none').order_by('?').first()
 
+    @property
+    def is_arenaclient(self):
+        from .arena_client import ArenaClient  # avoid circular reference
+        try:
+            return (self.arenaclient is not None)
+        except ArenaClient.DoesNotExist:
+            return False
+
+
 
 @receiver(pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):

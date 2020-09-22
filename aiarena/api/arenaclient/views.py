@@ -2,7 +2,7 @@ import logging
 from wsgiref.util import FileWrapper
 
 from constance import config
-from django.db import transaction, connection
+from django.db import transaction
 from django.db.models import Sum, F, Prefetch
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
@@ -14,12 +14,13 @@ from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.exceptions import LadderDisabled
-from aiarena.core.events import EVENT_MANAGER
-from aiarena.core.permissions import IsArenaClientOrAdminUser
-from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
-from aiarena.core.validators import validate_not_inf, validate_not_nan
-from aiarena.core.events import MatchResultReceivedEvent
 from aiarena.core.api import Bots, Matches
+from aiarena.core.events import EVENT_MANAGER
+from aiarena.core.events import MatchResultReceivedEvent
+from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
+from aiarena.core.models.arena_client_status import ArenaClientStatus
+from aiarena.core.permissions import IsArenaClientOrAdminUser, IsArenaClient
+from aiarena.core.validators import validate_not_inf, validate_not_nan
 
 logger = logging.getLogger(__name__)
 
@@ -369,6 +370,24 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     # todo: use a model form
     # todo: avoid results being logged against matches not owned by the submitter
+
+
+class SetArenaClientStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ArenaClientStatus
+        fields = ('status',)
+
+
+class SetArenaClientStatusViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    """
+    SetArenaClientStatusViewSet implements a POST method to record an arena client's status.
+    No reading of models is implemented.
+    """
+    serializer_class = SetArenaClientStatusSerializer
+    permission_classes = [IsArenaClientOrAdminUser]
+
+    def perform_create(self, serializer):
+        serializer.save(arenaclient=self.request.user.arenaclient)
 
 
 def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
