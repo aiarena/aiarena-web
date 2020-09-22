@@ -7,7 +7,10 @@ from aiarena.core.models import User, ArenaClient
 
 
 def migrate_arenaclient_users(apps, schema_editor):
-    ac_users = User.objects.filter(type='ARENA_CLIENT')
+
+    # Use the current model because the future User model won't have the owner field
+    UserModel = apps.get_model('core', 'User')
+    ac_users = UserModel.objects.filter(type='ARENA_CLIENT')
 
     for ac_user in ac_users:
         # find parent class fields:
