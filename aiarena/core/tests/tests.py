@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round, ArenaClient
 from aiarena.core.utils import calculate_md5
 
 
@@ -268,8 +268,8 @@ class LoggedInMixin(BaseTestMixin):
                                                    email='staff_user@dev.aiarena.net',
                                                    is_staff=True)
 
-        self.arenaclientUser1 = User.objects.create_user(username='arenaclient1', email='arenaclient@dev.aiarena.net',
-                                                         type='ARENA_CLIENT')
+        self.arenaclientUser1 = ArenaClient.objects.create(username='arenaclient1', email='arenaclient@dev.aiarena.net',
+                                                         type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
         self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
                                                      email='regular_user1@dev.aiarena.net')
 
