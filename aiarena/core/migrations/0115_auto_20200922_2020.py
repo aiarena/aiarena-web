@@ -2,10 +2,11 @@
 
 from django.db import migrations
 
-from aiarena.core.models import ArenaClient, User
+from aiarena.core.models import ArenaClient
 
 
 def migrate_arenaclient_users(apps, schema_editor):
+    User = apps.get_model('core', 'User')
     ac_users = User.objects.filter(type='ARENA_CLIENT')
 
     for ac_user in ac_users:
