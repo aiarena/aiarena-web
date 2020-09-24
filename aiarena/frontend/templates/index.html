@@ -30,7 +30,12 @@
         </div>
         <div class="divider"><span></span><span><h2>Problems?</h2></span><span></span></div>
         <div id="problems">
-            Any problems with the website can be reported in our <a href="https://discord.gg/yDBzbtC">Discord</a>.
+            Any problems with the website can be reported in our
+            {% if config.DISCORD_INVITE_LINK %}
+                <a href="{{ config.DISCORD_INVITE_LINK }}">Discord</a>.
+            {% else %}
+                Discord.
+            {% endif %}
         </div>
         <div class="divider"><span></span><span><h2>Want to help out?</h2></span><span></span></div>
         <div id="contribute">

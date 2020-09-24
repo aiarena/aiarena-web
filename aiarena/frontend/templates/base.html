@@ -103,8 +103,12 @@
                     </div>
                     <ul class="links">
                             <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-                            <li><a href="https://node01.m1nd.io:8006/">{% trans "Cluster" %}</a></li>
-                            <li><a href="https://aiarena.net/cgi-bin/awstats.pl">{% trans "Web Stats" %}</a></li>
+                            {% if config.ADMIN_CLUSTER_LINK %}
+                            <li><a href="{{ config.ADMIN_CLUSTER_LINK }}">{% trans "Cluster" %}</a></li>
+                            {% endif %}
+                            {% if config.ADMIN_WEBSTATS_LINK %}
+                            <li><a href="{{ config.ADMIN_WEBSTATS_LINK }}">{% trans "Web Stats" %}</a></li>
+                            {% endif %}
                     </ul>
                 </li>
                 {% endif %}
@@ -130,11 +134,21 @@
                     <h3>links</h3>
                     </div>
                     <ul class="links">
-                        <li><a href="https://discord.gg/jx3V65F"> Discord <em class="material-icons md-18" style="font-size: 18px; padding: 0px; padding-right:5px;">launch</em></a>  </li>
-                        <li><a href="https://www.patreon.com/aiarena"> Patreon <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
-                        <li><a href="https://github.com/aiarena"> GitHub <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
-                        <li><a href="https://www.twitch.tv/aiarenastream"> Twitch <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
-                        <li><a href="https://www.youtube.com/channel/UCMlH43XHsq1TacKm5n4Wbiw"> YouTube <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                        {% if config.DISCORD_INVITE_LINK %}
+                        <li><a href="{{ config.DISCORD_INVITE_LINK }}"> Discord <em class="material-icons md-18" style="font-size: 18px; padding: 0px; padding-right:5px;">launch</em></a></li>
+                        {% endif %}
+                        {% if config.PATREON_LINK %}
+                        <li><a href="{{ config.PATREON_LINK }}"> Patreon <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                        {% endif %}
+                        {% if config.GITHUB_LINK %}
+                        <li><a href="{{ config.GITHUB_LINK }}"> GitHub <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                        {% endif %}
+                        {% if config.TWITCH_LINK %}
+                        <li><a href="{{ config.TWITCH_LINK }}"> Twitch <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                        {% endif %}
+                        {% if config.YOUTUBE_LINK %}
+                        <li><a href="{{ config.YOUTUBE_LINK }}"> YouTube <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                        {% endif %}
                     </ul>
                 </li>
                 {% if random_donator %}
