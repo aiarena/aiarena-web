@@ -30,29 +30,29 @@ class PatreonAccountBind(models.Model):
         api_client = PatreonApi(self.access_token)
         user = api_client.current_user()
         patreon_level = 'none'
-        if 'included' in user:
-            for entry in user['included']:
-                if entry['type'] == 'pledge':
-                    if entry['attributes']['amount_cents'] >= 10000:  # diamond
-                        patreon_level = 'diamond'
-                        break
-                    elif entry['attributes']['amount_cents'] >= 5000:  # platinum
-                        patreon_level = 'platinum'
-                        break
-                    elif entry['attributes']['amount_cents'] >= 2500:  # gold
-                        patreon_level = 'gold'
-                        break
-                    elif entry['attributes']['amount_cents'] >= 1000:  # silver
-                        patreon_level = 'silver'
-                        break
-                    elif entry['attributes']['amount_cents'] >= 500:  # bronze
-                        patreon_level = 'bronze'
-                        break
-                    else:
-                        patreon_level = 'none'
-                        break
+        if self.has_pledge(user):
+            patreon_level = self.get_pledge_reward_name(user, self.get_pledge_reward_id(user)).lower()
 
         self.user.patreon_level = patreon_level
         self.user.save()
+
+    def has_pledge(self, user) -> bool:
+        if 'included' in user:
+            for entry in user['included']:
+                if entry['type'] == 'pledge':
+                    return True
+        return False
+
+    def get_pledge_reward_id(self, user) -> str:
+        for entry in user['included']:
+            if entry['type'] == 'pledge':
+                return entry['relationships']['reward']['data']['id']
+        raise Exception('Unable to locate reward for pledge.')
+
+    def get_pledge_reward_name(self, user, id: str) -> str:
+        for entry in user['included']:
+            if entry['type'] == 'reward' and entry['id'] == id:
+                return entry['attributes']['title']
+        raise Exception('Unable to locate reward.')
 
 
