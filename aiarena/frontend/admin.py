@@ -35,7 +35,6 @@ class UserAdmin(admin.ModelAdmin):
         'email',
         'patreon_level',
         'type',
-        'owner',
         'extra_active_bots_per_race',
         'extra_periodic_match_requests',
         'receive_email_comms',
@@ -47,7 +46,6 @@ class UserAdmin(admin.ModelAdmin):
         'is_staff',
         'is_active',
         'date_joined',
-        'owner',
         'receive_email_comms',
         'can_request_games_for_another_authors_bot',
     )

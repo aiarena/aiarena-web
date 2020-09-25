@@ -11,7 +11,7 @@
             <td><strong>Matches (24h)</strong></td>
         </thead>
         <tbody>
-        {% for arenaclient in user_list %}
+        {% for arenaclient in arenaclient_list %}
             <tr>
                 <td>{{ arenaclient.as_html_link }}</td>
                 <td>{{ arenaclient.owner.as_html_link }}</td>

@@ -23,7 +23,8 @@ from wiki.models import ArticleRevision
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
-from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map, \
+    ArenaClient
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
@@ -342,7 +343,7 @@ class Results(ListView):
 
 
 class ArenaClients(ListView):
-    queryset = User.objects.filter(type='ARENA_CLIENT')
+    queryset = ArenaClient.objects.filter(is_active=True)
     # todo: why doesn't this work?
     # queryset = User.objects.filter(type='ARENA_CLIENT').annotate(
     #     matches_1hr=Count('submitted_results', filter=Q(submitted_results__created__gte=timezone.now() - timedelta(hours=1))),
@@ -361,13 +362,13 @@ class ArenaClients(ListView):
         return super().get_context_data(**kwargs)
 
 
-class ArenaClient(DetailView):
+class ArenaClientView(DetailView):
     queryset = User.objects.filter(type='ARENA_CLIENT')
     template_name = 'arenaclient.html'
     context_object_name = 'arenaclient'  # change the context name to avoid overriding the current user oontext object
 
     def get_context_data(self, **kwargs):
-        context = super(ArenaClient, self).get_context_data(**kwargs)
+        context = super(ArenaClientView, self).get_context_data(**kwargs)
 
         context['assigned_matches_list'] = Match.objects.filter(assigned_to=self.object,
                                                                 result__isnull=True).prefetch_related(

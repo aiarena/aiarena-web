@@ -59,15 +59,9 @@ DATABASES = {
     }
 }
 
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-NOSE_ARGS = [
-    '--with-coverage',
-    '--cover-package=aiarena'
-]
 # Application definition
 
 INSTALLED_APPS = [
-    'django_nose',
     'registration',
     'grappelli.dashboard',
     'grappelli',
@@ -208,6 +202,13 @@ CONSTANCE_CONFIG = {
     'ENABLE_ELO_SANITY_CHECK': (True, 'Whether to sanity check the total sum of bot ELO '
                                       'on result submission in order to detect ELO corruption.'),
     'BOT_UPLOADS_ENABLED': (True, 'Whether authors can upload new bots to the website.'),
+    'DISCORD_INVITE_LINK': ('', 'An invite link to the Discord community server.'),
+    'PATREON_LINK': ('', 'Link the Patreon.'),
+    'GITHUB_LINK': ('', 'Link to GitHub.'),
+    'TWITCH_LINK': ('', 'Link to Twitch channel.'),
+    'YOUTUBE_LINK': ('', 'Link to YouTube.'),
+    'ADMIN_CLUSTER_LINK': ('', 'Admin link to the cluster management.'),
+    'ADMIN_WEBSTATS_LINK': ('', 'Admin link to view web stats.'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
@@ -222,6 +223,8 @@ CONSTANCE_CONFIG_FIELDSETS = {
                 'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
     'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',),
     'Match interest analysis': ('ELO_DIFF_RATING_MODIFIER', 'COMBINED_ELO_RATING_DIVISOR',),
+    'Website links': ('DISCORD_INVITE_LINK', 'PATREON_LINK', 'GITHUB_LINK', 'TWITCH_LINK', 'YOUTUBE_LINK',
+                      'ADMIN_CLUSTER_LINK', 'ADMIN_WEBSTATS_LINK', ),
 }
 
 LOGGING = {
@@ -373,6 +376,7 @@ ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
 # django wiki
 WIKI_ACCOUNT_HANDLING = True
+WIKI_ATTACHMENTS_EXTENSIONS = ["pdf", "doc", "odt", "docx", "txt", "zip"]
 WIKI_ACCOUNT_SIGNUP_ALLOWED = False
 SITE_ID = 1
 
@@ -391,7 +395,6 @@ if ENVIRONMENT_TYPE != EnvironmentType.DEVELOPMENT:
     MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
 
     INSTALLED_APPS.remove('sslserver')
-    INSTALLED_APPS.remove('django_nose')
 
 # load this after the env file so if the ELO_K value was overridden, it will be applied properly
 ELO = Elo(ELO_K)
