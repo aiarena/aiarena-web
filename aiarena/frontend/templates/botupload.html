@@ -21,7 +21,13 @@
         {% endif %}
     </form>
     {% else %}
-        <h3>Sorry. bot uploads are currently disabled.</h3>
+        <h3>Sorry. Bot uploads are currently disabled.<br>
+            Please contact the staff on our
+            {% if config.DISCORD_INVITE_LINK %}
+                <a href="{{ config.DISCORD_INVITE_LINK }}">Discord</a>.
+            {% else %}
+                Discord.
+            {% endif %} if you wish to upload a bot.</h3>
     {% endif %}
     {% if messages %}
         <ul class="messages">
