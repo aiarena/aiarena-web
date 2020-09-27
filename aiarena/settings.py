@@ -209,12 +209,14 @@ CONSTANCE_CONFIG = {
     'YOUTUBE_LINK': ('', 'Link to YouTube.'),
     'ADMIN_CLUSTER_LINK': ('', 'Admin link to the cluster management.'),
     'ADMIN_WEBSTATS_LINK': ('', 'Admin link to view web stats.'),
+    'PUBLIC_BANNER_MESSAGE': ('', 'Message displayed publicly at the top of the website.'),
+    'LOGGED_IN_BANNER_MESSAGE': ('', 'Message displayed to logged in users at the top of the website.'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bots': ('BOT_UPLOADS_ENABLED', 'MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
     'General': ('DEBUG_LOGGING_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES',
-                'ENABLE_ELO_SANITY_CHECK'),
+                'ENABLE_ELO_SANITY_CHECK', 'PUBLIC_BANNER_MESSAGE', 'LOGGED_IN_BANNER_MESSAGE'),
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',
                        'MATCH_REQUEST_LIMIT_SILVER_TIER', 'MATCH_REQUEST_LIMIT_GOLD_TIER',
                        'MATCH_REQUEST_LIMIT_PLATINUM_TIER', 'MATCH_REQUEST_LIMIT_DIAMOND_TIER',

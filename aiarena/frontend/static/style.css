@@ -99,6 +99,20 @@ a:hover {
 
 }
 
+#banner-message {
+    margin-left: 75px;
+    margin-right: 75px;
+    margin-bottom: 20px;
+    border: 2px solid #86c232;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+#banner-message-content {
+    margin-left: 5px;
+    margin-right: 5px;
+    text-align: center;
+}
+
 #rules-short-instructions {
     margin-left: 75px;
     margin-right: 75px;
@@ -222,7 +236,7 @@ iframe {
 
 #header {
 
-    height: 200px;
+    /*height: 200px;*/
     padding-top: 35px;
     width: 85.0%;
     align-content: center;
