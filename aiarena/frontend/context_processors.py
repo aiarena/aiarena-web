@@ -13,7 +13,7 @@ def stats(request):
         'match_count_1h': Result.objects.only('id').filter(created__gte=timezone.now() - timedelta(hours=1)).count(),
         'match_count_24h': Result.objects.only('id').filter(created__gte=timezone.now() - timedelta(hours=24)).count(),
         'active_bots': Bot.objects.only('id').filter(active=True).count(),
-        'arenaclients': User.objects.only('id').filter(type='ARENA_CLIENT').count(),
+        'arenaclients': User.objects.only('id').filter(type='ARENA_CLIENT', is_active=True).count(),
         'aiarena_settings': settings,
         'random_donator': User.random_donator(),
         'config': config,

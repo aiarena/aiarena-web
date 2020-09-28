@@ -40,33 +40,7 @@ class PatreonCallbackView(View):
                 messages.add_message(request, messages.SUCCESS, 'Patreon successfully linked.')
 
                 try:
-                    api_client = PatreonApi(account_bind.access_token)
-                    user = api_client.current_user()
-                    patreon_level = 'none'
-                    if 'included' in user:
-                        for entry in user['included']:
-                            if entry['type'] == 'pledge':
-                                if entry['attributes']['amount_cents'] >= 10000:  # diamond
-                                    patreon_level = 'diamond'
-                                    break
-                                elif entry['attributes']['amount_cents'] >= 5000:  # platinum
-                                    patreon_level = 'platinum'
-                                    break
-                                elif entry['attributes']['amount_cents'] >= 2500:  # gold
-                                    patreon_level = 'gold'
-                                    break
-                                elif entry['attributes']['amount_cents'] >= 1000:  # silver
-                                    patreon_level = 'silver'
-                                    break
-                                elif entry['attributes']['amount_cents'] >= 500:  # bronze
-                                    patreon_level = 'bronze'
-                                    break
-                                else:
-                                    patreon_level = 'none'
-                                    break
-
-                    request.user.patreon_level = patreon_level
-                    request.user.save()
+                    account_bind.update_user_patreon_tier()
                 except Exception as e:
                     logger.error("Failed to update patreon tier with error:\n" + traceback.format_exc())
                     messages.add_message(request, messages.WARNING, 'There was an issue updating your account\'s Patreon tier.')

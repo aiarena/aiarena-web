@@ -36,14 +36,24 @@
 
 <body>
 <div id="page">
-    <div id="website-alert" style="height: 40px; background-color: #86c232; text-align: center; color: #3d4536; font-size: 16px; vertical-align:middle;">
-        <h3>
-            Please update all bookmarks to use <span style="text-shadow: 1px 1px #ffffff;">aiarena.net</span> instead of <span style="text-shadow: 1px 1px #ffffff;">ai-arena.net</span>.
-        </h3>
-    </div>
-
 
     <div id="header">
+        {% if config.PUBLIC_BANNER_MESSAGE or config.LOGGED_IN_BANNER_MESSAGE and user.is_authenticated %}
+        <div id="banner-message">
+            <div id="banner-message-content">
+                {% if config.PUBLIC_BANNER_MESSAGE%}
+                <h3>
+                    {{ config.PUBLIC_BANNER_MESSAGE }}
+                </h3>
+                {% endif %}
+                {% if config.LOGGED_IN_BANNER_MESSAGE and user.is_authenticated %}
+                <h3>
+                    {{ config.LOGGED_IN_BANNER_MESSAGE }}
+                </h3>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
         {% block header %}
         <img src="{% static '/img/ai-arena-logo.png' %}" alt="AI Arena Logo" class="center">
         <br>
