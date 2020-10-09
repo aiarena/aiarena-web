@@ -23,7 +23,7 @@ from wiki.models import ArticleRevision
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
-from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map, \
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, Season, Map, \
     ArenaClient
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
@@ -210,14 +210,14 @@ class BotDetail(DetailView):
         return context
 
 
-class BotSeasonStatsDetail(DetailView):
-    model = SeasonParticipation
-    template_name = 'bot_season_stats.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['season_bot_matchups'] = self.object.season_matchup_stats.all().order_by('-win_perc').distinct()
-        return context
+# class BotSeasonStatsDetail(DetailView):
+#     model = SeasonParticipation
+#     template_name = 'bot_season_stats.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['season_bot_matchups'] = self.object.season_matchup_stats.all().order_by('-win_perc').distinct()
+#         return context
 
 
 
@@ -455,11 +455,9 @@ class Index(ListView):
     def get_queryset(self):
         try:
             return Ladders.get_season_ranked_participants(
-                Season.get_current_season(), amount=10).prefetch_related(
-                Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
-                Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
+                Season.get_current_season(), amount=10)  # top 10 bots
         except NoCurrentSeason:
-            return SeasonParticipation.objects.none()
+            return []
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
