@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, SeasonParticipation, Season
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, Season
 
 
 # Filter for the API views

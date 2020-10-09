@@ -9,7 +9,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.reverse import reverse
 from django.db.models import Prefetch
 
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, SeasonParticipation, Season
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, Season
 from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
 logger = logging.getLogger(__name__)
 
@@ -195,25 +195,25 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
-class SeasonParticipationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SeasonParticipation
-        fields = seasonparticipation_include_fields
+# class SeasonParticipationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = SeasonParticipation
+#         fields = seasonparticipation_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
-class SeasonParticipationViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    Result data view
-    """
-    queryset = SeasonParticipation.objects.all()
-    serializer_class = SeasonParticipationSerializer
-
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = seasonparticipation_include_fields
-    search_fields = seasonparticipation_include_fields
-    ordering_fields = seasonparticipation_include_fields
+# class SeasonParticipationViewSet(viewsets.ReadOnlyModelViewSet):
+#     """
+#     Result data view
+#     """
+#     queryset = SeasonParticipation.objects.all()
+#     serializer_class = SeasonParticipationSerializer
+#
+#     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+#     filterset_fields = seasonparticipation_include_fields
+#     search_fields = seasonparticipation_include_fields
+#     ordering_fields = seasonparticipation_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
