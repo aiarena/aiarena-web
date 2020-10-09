@@ -77,8 +77,8 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('seasons/', core_views.SeasonList.as_view(), name='seasons'),
                   path('seasons/<int:pk>/', core_views.SeasonDetail.as_view(), name='season'),
 
-                  path('seasons/stats/<int:pk>/', core_views.BotSeasonStatsDetail.as_view()),
-                  path('seasons/stats/<int:pk>/<slug:slug>', core_views.BotSeasonStatsDetail.as_view(), name='bot_season_stats'),
+                  # path('seasons/stats/<int:pk>/', core_views.BotSeasonStatsDetail.as_view()),
+                  # path('seasons/stats/<int:pk>/<slug:slug>', core_views.BotSeasonStatsDetail.as_view(), name='bot_season_stats'),
 
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   path('requestmatch/', core_views.RequestMatch.as_view(), name='requestmatch'),

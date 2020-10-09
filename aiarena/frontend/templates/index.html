@@ -84,16 +84,16 @@
                 <td><strong>ELO</strong></td>
                 </thead>
                 <tbody>
-                {% for participant in object_list %}
+                {% for bot in object_list %}
                     <tr>
                         <td style="text-align: center">{{ forloop.counter }}</td>
                         <td style="padding-right: 0">
                             {% if patreon_level != 'none' %}
-                                <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
+                                <div class="bot-icon-{{ bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ bot.user.get_patreon_level_display }} supporter"></div>
                             {% endif %}
                         </td>
-                        <td>{{ participant.bot.as_html_link }}</td>
-                        <td>{{ participant.elo }}</td>
+                        <td>{{ bot.as_html_link }}</td>
+                        <td>{{ bot.elo }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
