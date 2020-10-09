@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Season, \
-    SeasonBotMatchupStats, SeasonParticipation, Trophy, User
+    SeasonBotMatchupStats, Trophy, User
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -290,38 +290,13 @@ class ResultAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(SeasonParticipation)
-class SeasonParticipationAdmin(admin.ModelAdmin):
-    
-    list_display = (
-        'id',
-        'season',
-        'bot',
-        'elo',
-        'match_count',
-        'win_perc',
-        'win_count',
-        'loss_perc',
-        'loss_count',
-        'tie_perc',
-        'tie_count',
-        'crash_perc',
-        'crash_count',
-        'elo_graph',
-        'highest_elo',
-        'slug',
-    )
-    list_filter = ('season', 'bot')
-    search_fields = ('slug',)
-
-
 @admin.register(SeasonBotMatchupStats)
 class SeasonBotMatchupStatsAdmin(admin.ModelAdmin):
     
     list_display = (
         'id',
-        'bot',
-        'opponent',
+        'bot1',
+        'bot2',
         'match_count',
         'win_count',
         'win_perc',
@@ -332,7 +307,7 @@ class SeasonBotMatchupStatsAdmin(admin.ModelAdmin):
         'crash_count',
         'crash_perc',
     )
-    list_filter = ('bot', 'opponent')
+    list_filter = ('bot1', 'bot2')
 
 
 @admin.register(Trophy)
