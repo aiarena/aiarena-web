@@ -38,7 +38,6 @@ def get_all_pledges(api_client, campaign_id):
     raw_data = all_pledges.json_data
     for i in range(len(raw_data['data'])):
         name = raw_data['included'][i]['attributes'].get('full_name')
-        print(name)
         if name is not None:
             pledges[name] = raw_data['data'][i]['attributes']['amount_cents']
 
