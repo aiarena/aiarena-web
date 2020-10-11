@@ -4,6 +4,11 @@
 
 {% block content %}
 
-    <h1> HI!!!</h1>
-
+<table>
+{% for name, cents in data.items %}
+    <tr>
+    <td>{{ name }}: {{ cents }}</td>
+    </tr>
+{% endfor %}
+</table>
 {% endblock %}

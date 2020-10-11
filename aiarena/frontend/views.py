@@ -30,28 +30,35 @@ from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
+import patreon
 
-def logic_content(request):
-    """
-    :class:`.FlagLogic` List View
-    """
-    modules = FlagLogic.objects.all().order_by('id')
+def get_all_pledges(api_client, campaign_id):
+    pledges = {}
+    all_pledges = api_client.fetch_page_of_pledges(campaign_id, page_size=999)
+    raw_data = all_pledges.json_data
+    for i in range(len(raw_data['data'])):
+        name = raw_data['included'][i]['attributes'].get('full_name')
+        print(name)
+        if name is not None:
+            pledges[name] = raw_data['data'][i]['attributes']['amount_cents']
 
-    quantity = len(modules)
-    context = {
-            'modules' : modules,
-            'quantity': quantity,
-    }
-
-    return render(request, 'mdsure/staff/logic/flag_logic_section.html', context)
+    return pledges
 
 
 def project_finance(request):
-    data = {'nothing': 'Nothing'}  # request info from financial entities
+
+    access_token = None #  https://www.patreon.com/portal/registration/register-clients - to get the access token
+    api_client = patreon.API(access_token)
+    camp = api_client.fetch_campaign_and_patrons()
+    id = camp.json_data['data'][0]['id']
+
+    data = get_all_pledges(api_client, campaign_id = id)
+    # request info from financial entities
     context = {
             'data' : data
     }
-    return render(request, template_name='finance.html')
+    return render(request, template_name='finance.html', context=context)
+
 
 class UserProfile(LoginRequiredMixin, DetailView):
     model = User

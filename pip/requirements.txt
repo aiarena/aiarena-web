@@ -24,3 +24,4 @@ django-grappelli==2.14.2
 docutils==0.16
 django-debug-toolbar
 drf-yasg
+patreon
