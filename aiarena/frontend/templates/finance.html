@@ -5,9 +5,9 @@
 {% block content %}
 
 <table>
-{% for name, cents in data.items %}
+{% for entity, amount in data.items %}
     <tr>
-    <td>{{ name }}: {{ cents }}</td>
+    <td>{{ entity|title }}: {{ amount|cents_to_usd }}</td>
     </tr>
 {% endfor %}
 </table>
