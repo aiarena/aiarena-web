@@ -32,6 +32,7 @@ class User(AbstractUser):
     )
     email = models.EmailField(unique=True)
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
+    supported_expiration_date = models.DateTimeField(default=None, null=True, blank=True)
     type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
     extra_active_bots_per_race = models.IntegerField(default=0)
     extra_periodic_match_requests = models.IntegerField(default=0)
@@ -99,7 +100,7 @@ class User(AbstractUser):
 
     @property
     def has_donated(self):
-        return self.patreon_level != 'none'
+        return self.patreon_level != 'none' or self.supported_expiration_date is not None
 
     @staticmethod
     def random_donator():
