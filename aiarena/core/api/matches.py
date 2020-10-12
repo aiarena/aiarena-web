@@ -146,6 +146,8 @@ class Matches:
                     and c1.bot_id in %s and c2.bot_id in %s
             """, (tuple(match_ids), tuple(bot_ids), tuple(bot_ids)))) if bot_ids else []
 
+            random.shuffle(available_ladder_matches_to_play)  # make match selection random
+
 
             # if, out of the bots that have a ladder match to play, at least 2 are available, then try starting matches.
             if len(Bots.get_available(bots_with_a_ladder_match_to_play)) >= 2:
