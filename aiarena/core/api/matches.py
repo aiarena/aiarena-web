@@ -57,8 +57,8 @@ class Matches:
                 # Todo: Commented out to avoid log spam. This used to be a last second sanity check.
                 # Todo: Investigate whether it is still the case or whether this is no longer considered a system fault
                 # Todo: worthy of a warning message being logged.
-                # logger.warning(f"Match {match.id} failed to start unexpectedly"
-                #                f" because one of the participants was not available.")
+                logger.warning(f"Match {match.id} failed to start unexpectedly"
+                               f" because one of the participants was not available.")
                 return False
 
             if match.round:  # if this is a ladder match, record the starting elo
