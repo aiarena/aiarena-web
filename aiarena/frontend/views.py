@@ -53,8 +53,9 @@ class UserProfile(LoginRequiredMixin, DetailView):
         context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
         context['max_active_per_race_bot_count'] = self.request.user.get_active_bots_per_race_limit_display()
 
-        now = datetime.astimezone(datetime.now(), tz=UTC)  # cant do delta without passing tz=UTC here
-        context['time_until_expire'] = self.request.user.supported_expiration_date - now  # TODO test this
+        if self.request.user.supported_expiration_date:
+            now = datetime.astimezone(datetime.now(), tz=UTC)  # cant do delta without passing tz=UTC here
+            context['time_until_expire'] = self.request.user.supported_expiration_date - now  # TODO test this
         return context
 
 
