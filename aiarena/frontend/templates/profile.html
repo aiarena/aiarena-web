@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n avatar_tags %}
+{% load i18n avatar_tags core_filters %}
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Profile</h2></span><span></span></div>
@@ -23,6 +23,8 @@
         <div class="author-detail-info">
             <h2>{{ user.username }}</h2>
             <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+            <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+
 
             <strong>Joined</strong><br/>
             {{ user.date_joined|date:"d. N Y" }}
@@ -35,6 +37,12 @@
             <strong>Receive emails</strong><br/>
             {{ user.receive_email_comms }}
             <br/>
+            {% if user.supported_expiration_date %}
+               <strong>Supporter status Expiration</strong><br/>
+                <i>{{ user.supported_expiration_date }}<br/>
+
+                {{ time_until_expire|smooth_timedelta|truncatechars:30 }}</i><br/>
+            {% endif %}
             <br/>
             <a href="{% url 'profile_edit' %}">edit</a>
         </div>
