@@ -1,14 +1,31 @@
 {% extends "base.html" %}
-{% load i18n core_filters wiki_tags %}
+{% load i18n core_filters wiki_tags sheets %}
 
 
 {% block content %}
-
+{% csv "1wm_oZYPZv6t8urGtOCJ1yFtYjq-9WBixJQqaXQ7kiNc" as data %}
 <table>
-{% for entity, amount in data.items %}
-    <tr>
-    <td>{{ entity|title }}: {{ amount|cents_to_usd }}</td>
-    </tr>
-{% endfor %}
+    <thead>
+        <tr>
+        {% for header in data.headers %}
+            <th>{{ header }}</th>
+        {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in data.rows %}
+        <tr>
+            {% for cell in row %}
+                {% if cell == 'MONTHLY INCOME' or cell == 'MONTHLY EXPENSES' or cell == 'LEDGER' %}
+                    <th style="background-color: rgba(97, 137, 47, 0.7)">{{ cell }}</th>
+                {% else %}
+                <td>{{ cell }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
 {% endblock %}
+
+
