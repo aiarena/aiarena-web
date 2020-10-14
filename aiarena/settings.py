@@ -62,6 +62,7 @@ DATABASES = {
 # Application definition
 
 INSTALLED_APPS = [
+    'sheets',
     'registration',
     'grappelli.dashboard',
     'grappelli',
@@ -102,7 +103,9 @@ INSTALLED_APPS = [
     'robots',
     'django.contrib.admindocs',
     'drf_yasg',
+
 ]
+SHEETS_CACHE_DISABLED = True
 
 MIDDLEWARE = [
     # This will be removed automatically in non-development environments
@@ -204,7 +207,6 @@ CONSTANCE_CONFIG = {
     'BOT_UPLOADS_ENABLED': (True, 'Whether authors can upload new bots to the website.'),
     'DISCORD_INVITE_LINK': ('', 'An invite link to the Discord community server.'),
     'PATREON_LINK': ('', 'Link the Patreon.'),
-    'PATREON_ACCESS_TOKEN': ('', 'Access token for api requests to patreon'),
     'GITHUB_LINK': ('', 'Link to GitHub.'),
     'TWITCH_LINK': ('', 'Link to Twitch channel.'),
     'YOUTUBE_LINK': ('', 'Link to YouTube.'),
