@@ -30,56 +30,9 @@ from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
-import patreon
-
-def patreon_connect():
-    access_token = None  # https://www.patreon.com/portal/registration/register-clients - to get the access token
-    api_client = patreon.API(access_token)
-    return api_client
-
-
-def get_patreon_pledges(api_client):
-    campaign = api_client.fetch_campaign_and_patrons()
-    id = campaign.json_data['data'][0]['id']
-    pledges = {}
-    all_pledges = api_client.fetch_page_of_pledges(campaign_id=id, page_size=999)
-    raw_data = all_pledges.json_data
-    for i in range(len(raw_data['data'])):
-        name = raw_data['included'][i]['attributes'].get('full_name')
-        if name is not None:
-            pledges[name] = raw_data['data'][i]['attributes']['amount_cents']
-
-    return pledges
-
-
-def get_patreon_pledge_total(api_client):
-    campaign = api_client.fetch_campaign_and_patrons()
-    return campaign.json_data['data'][0]['attributes']['campaign_pledge_sum']
-
 
 def project_finance(request):
-    # request info from financial entities
-    patreon_api_client = patreon_connect()
-    data = {'patreon'       : get_patreon_pledge_total(patreon_api_client), 'twitch': None, 'youtube': None, 'streamfriends': None,
-            'githubsponsors': None}
-
-    expenses = {
-            'arenaclients': None,
-            'webserver' : None,
-
-    }
-
-    balance = {
-            'current': None
-    }
-
-    context = {
-            'data': data,
-            'expenses' : expenses,
-            'balance': balance
-    }
-    return render(request, template_name='finance.html', context=context)
-
+    return render(request, template_name='finance.html')
 
 class UserProfile(LoginRequiredMixin, DetailView):
     model = User
