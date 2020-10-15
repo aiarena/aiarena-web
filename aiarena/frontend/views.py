@@ -171,7 +171,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 
 class BotList(ListView):
-    queryset = Bot.objects.all().only('name', 'plays_race', 'active', 'type', 'user__username', 'user__type') \
+    queryset = Bot.objects.all().only('name', 'plays_race', 'active', 'type', 'user__username', 'user__type')\
         .select_related('user').order_by('name')
     template_name = 'bots.html'
     paginate_by = 50
@@ -193,7 +193,7 @@ class BotDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = RelativeResult.objects.select_related('match', 'me__bot', 'opponent__bot').defer("me__bot__bot_data") \
+        results = RelativeResult.objects.select_related('match', 'me__bot', 'opponent__bot').defer("me__bot__bot_data")\
             .filter(me__bot=self.object).order_by('-created')
 
         # paginate the results
@@ -223,6 +223,7 @@ class BotSeasonStatsDetail(DetailView):
         return context
 
 
+
 class BotUpdateForm(forms.ModelForm):
     """
     Standard form for updating a bot
@@ -244,6 +245,7 @@ class BotUpdateForm(forms.ModelForm):
             # outside season - don't allow activation
             self.fields['active'].disabled = True
             self.fields['active'].required = False
+
 
     class Meta:
         model = Bot
@@ -327,9 +329,9 @@ class Ranking(TemplateView):
 
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created').prefetch_related(
-            Prefetch('winner'),
-            Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
-                     to_attr='participants'))
+        Prefetch('winner'),
+        Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                 to_attr='participants'))
     template_name = 'results.html'
     paginate_by = 50
 
@@ -356,10 +358,10 @@ class ArenaClients(ListView):
         for arenaclient in self.object_list:
             arenaclient.matches_1hr = Result.objects.filter(match__assigned_to=arenaclient,
                                                             created__gte=timezone.now() - timedelta(
-                                                                    hours=1)).count()
+                                                                hours=1)).count()
             arenaclient.matches_24hr = Result.objects.filter(match__assigned_to=arenaclient,
                                                              created__gte=timezone.now() - timedelta(
-                                                                     hours=24)).count()
+                                                                 hours=24)).count()
         return super().get_context_data(**kwargs)
 
 
@@ -373,13 +375,13 @@ class ArenaClientView(DetailView):
 
         context['assigned_matches_list'] = Match.objects.filter(assigned_to=self.object,
                                                                 result__isnull=True).prefetch_related(
-                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
-                         to_attr='participants'))
+            Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
 
         results = Result.objects.filter(match__assigned_to=self.object).order_by('-created').prefetch_related(
-                Prefetch('winner'),
-                Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
-                         to_attr='participants'))
+            Prefetch('winner'),
+            Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
 
         context['ac_match_count_1h'] = Result.objects.filter(match__assigned_to=self.object,
                                                              created__gte=timezone.now() - timedelta(hours=1)).count()
@@ -456,19 +458,16 @@ class Index(ListView):
     def get_queryset(self):
         try:
             return Ladders.get_season_ranked_participants(
-                    Season.get_current_season(), amount=10).prefetch_related(
-                    Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
-                    Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
+                Season.get_current_season(), amount=10).prefetch_related(
+                Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
+                Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['recently_updated_bots'] = Bot.objects.all().only('bot_zip_updated', 'name',
-                                                                  'user__patreon_level').order_by('-bot_zip_updated')[
-                                           :5]
-        context['new_bots'] = Bot.objects.select_related('user').only('user__patreon_level', 'name',
-                                                                      'created').order_by('-created')[:5]
+        context['recently_updated_bots'] = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
+        context['new_bots'] = Bot.objects.select_related('user').only('user__patreon_level', 'name', 'created').order_by('-created')[:5]
         return context
 
     template_name = 'index.html'
@@ -478,18 +477,18 @@ class MatchQueue(View):
     def get(self, request):
         # Matches without a round are requested ones
         requested_matches = Match.objects.filter(round__isnull=True, result__isnull=True).order_by(
-                F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
-                Prefetch('map'),
-                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
-                         to_attr='participants'))
+            F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
+            Prefetch('map'),
+            Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
 
         # Matches with a round
         rounds = Round.objects.filter(complete=False).order_by(F('id').asc())
         for round in rounds:
             round.matches = Match.objects.filter(round_id=round.id, result__isnull=True).select_related('map').order_by(
-                    F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
-                    Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
-                             to_attr='participants'))
+                F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
+                Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                         to_attr='participants'))
 
         context = {'round_list': rounds, 'requested_matches': requested_matches}
         return render(request, 'match_queue.html', context)
@@ -513,16 +512,15 @@ class SeasonDetail(DetailView):
         context = super(SeasonDetail, self).get_context_data(**kwargs)
         context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
         context['rankings'] = Ladders.get_season_ranked_participants(self.object).prefetch_related(
-                Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
-                Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username', 'type')))
+            Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
+            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type')))
         context['rankings'].count = len(context['rankings'])
         return context
 
 
 class RequestMatchForm(forms.Form):
     bot1 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), empty_label=None, required=True)
-    bot2 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), empty_label='Random',
-                                  required=False)
+    bot2 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), empty_label='Random', required=False)
     map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'), empty_label='Random Ladder Map',
                                  required=False)
     match_count = forms.IntegerField(min_value=1, initial=1)
