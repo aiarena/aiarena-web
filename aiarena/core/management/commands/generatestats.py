@@ -20,25 +20,27 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         bot_id = options['botid']
-
+        seasons = [options['seasonid'] if options['seasonid'] is not None else Season.get_current_season().id]
         if options['allseasons']:
             seasons = Season.objects.all()
-        else:
-            seasons = [options['seasonid'] if options['seasonid'] is not None else Season.get_current_season().id]
 
-            for s in seasons:
+        self.stdout.write(f'looping  {type(seasons)} {len(seasons)}')
+        for s in seasons:
+            if isinstance(s, Season):
                 season_id = s.id
-                if bot_id is not None:
-                    sp = SeasonParticipation.objects.get(season_id=season_id, bot_id=bot_id)
+            else:
+                season_id = s
+            if bot_id is not None:
+                sp = SeasonParticipation.objects.get(season_id=season_id, bot_id=bot_id)
+                with transaction.atomic():
+                    sp.lock_me()
+                    self.stdout.write(f'Generating current season stats for bot {bot_id}...')
+                    StatsGenerator.update_stats(sp)
+            else:
+                for sp in SeasonParticipation.objects.filter(season_id=season_id):
                     with transaction.atomic():
                         sp.lock_me()
-                        self.stdout.write(f'Generating current season stats for bot {bot_id}...')
+                        self.stdout.write(f'Generating current season stats for bot {sp.bot_id}...')
                         StatsGenerator.update_stats(sp)
-                else:
-                    for sp in SeasonParticipation.objects.filter(season_id=season_id):
-                        with transaction.atomic():
-                            sp.lock_me()
-                            self.stdout.write(f'Generating current season stats for bot {sp.bot_id}...')
-                            StatsGenerator.update_stats(sp)
 
         self.stdout.write('Done')
