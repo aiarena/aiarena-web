@@ -20,3 +20,6 @@ class SeasonBotMatchupStats(models.Model):
     tie_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
     crash_count = models.IntegerField(blank=True, null=True)
     crash_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
+
+    def __str__(self):
+        return str(self.bot) + ' VS ' + str(self.opponent)
