@@ -26,30 +26,33 @@ class PatreonAccountBind(models.Model):
         else:
             raise Exception(f"Failed to refresh patreon token for user {self.user.id}. Tokens dump:\n" + json.dumps(tokens))
 
-    def update_user_patreon_tier(self):
+    def update_user_support_tier(self):
         api_client = PatreonApi(self.access_token)
         user = api_client.current_user()
-        patreon_level = 'none'
+        supporter_level = 'none'
         if self.has_pledge(user):
-            patreon_level = self.get_pledge_reward_name(user, self.get_pledge_reward_id(user)).lower()
+            supporter_level = self.get_pledge_reward_name(user, self.get_pledge_reward_id(user)).lower()
 
-        self.user.patreon_level = patreon_level
+        self.user.supporter_level = supporter_level
         self.user.save()
 
-    def has_pledge(self, user) -> bool:
+    @staticmethod
+    def has_pledge(user) -> bool:
         if 'included' in user:
             for entry in user['included']:
                 if entry['type'] == 'pledge':
                     return True
         return False
 
-    def get_pledge_reward_id(self, user) -> str:
+    @staticmethod
+    def get_pledge_reward_id(user) -> str:
         for entry in user['included']:
             if entry['type'] == 'pledge':
                 return entry['relationships']['reward']['data']['id']
         raise Exception('Unable to locate reward for pledge.')
 
-    def get_pledge_reward_name(self, user, id: str) -> str:
+    @staticmethod
+    def get_pledge_reward_name(user, id: str) -> str:
         for entry in user['included']:
             if entry['type'] == 'reward' and entry['id'] == id:
                 return entry['attributes']['title']
