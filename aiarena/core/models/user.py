@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class User(AbstractUser):
-    PATREON_LEVELS = (
+    SUPPORTER_LEVELS = (
         ('none', 'None'),
         ('bronze', 'Bronze'),
         ('silver', 'Silver'),
@@ -31,7 +31,7 @@ class User(AbstractUser):
         ('SERVICE', 'Service'),
     )
     email = models.EmailField(unique=True)
-    patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
+    supporter_level = models.CharField(max_length=16, choices=SUPPORTER_LEVELS, default='none')
     supported_expiration_date = models.DateTimeField(default=None, null=True, blank=True)
     type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
     extra_active_bots_per_race = models.IntegerField(default=0)
@@ -65,14 +65,14 @@ class User(AbstractUser):
     }
 
     def get_active_bots_per_race_limit(self):
-        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.supporter_level]
         if limit is None:
             return None  # no limit
         else:
             return limit + self.extra_active_bots_per_race
 
     def get_active_bots_per_race_limit_display(self):
-        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.supporter_level]
         if limit is None:
             return 'unlimited'  # no limit
         else:
@@ -89,7 +89,7 @@ class User(AbstractUser):
 
     @property
     def requested_matches_limit(self):
-        return self.REQUESTED_MATCHES_LIMIT_MAP[self.patreon_level] + self.extra_periodic_match_requests
+        return self.REQUESTED_MATCHES_LIMIT_MAP[self.supporter_level] + self.extra_periodic_match_requests
 
     @property
     def match_request_count_left(self):
@@ -100,13 +100,13 @@ class User(AbstractUser):
 
     @property
     def has_donated(self):
-        return self.patreon_level != 'none' or self.supported_expiration_date is not None
+        return self.supporter_level != 'none' or self.supported_expiration_date is not None
 
     @staticmethod
     def random_donator():
         # todo: apparently order_by('?') is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return User.objects.only('id', 'username').exclude(patreon_level='none').order_by('?').first()
+        return User.objects.only('id', 'username').exclude(supporter_level='none').order_by('?').first()
 
     @property
     def is_arenaclient(self):

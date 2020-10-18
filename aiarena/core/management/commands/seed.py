@@ -111,11 +111,11 @@ def run_seed(matches, token):
     season = Season.objects.create(previous_season_files_cleaned=True)
     season.open()
 
-    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net', patreon_level='bronze')
-    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net', patreon_level='silver')
-    devuser3 = User.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net', patreon_level='gold')
-    devuser4 = User.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net', patreon_level='platinum')
-    devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net', patreon_level='diamond')
+    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net', supporter_level='bronze')
+    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net', supporter_level='silver')
+    devuser3 = User.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net', supporter_level='gold')
+    devuser4 = User.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net', supporter_level='platinum')
+    devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net', supporter_level='diamond')
 
     with open(BaseTestMixin.test_map_path, 'rb') as map:
         Map.objects.create(name='test_map', file=File(map), active=True)

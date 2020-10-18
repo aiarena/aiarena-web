@@ -462,14 +462,14 @@ class Index(ListView):
             return Ladders.get_season_ranked_participants(
                 Season.get_current_season(), amount=10).prefetch_related(
                 Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
-                Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
+                Prefetch('bot__user', queryset=User.objects.all().only('supporter_level')))  # top 10 bots
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['recently_updated_bots'] = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
-        context['new_bots'] = Bot.objects.select_related('user').only('user__patreon_level', 'name', 'created').order_by('-created')[:5]
+        context['recently_updated_bots'] = Bot.objects.all().only('bot_zip_updated', 'name', 'user__supporter_level').order_by('-bot_zip_updated')[:5]
+        context['new_bots'] = Bot.objects.select_related('user').only('user__supporter_level', 'name', 'created').order_by('-created')[:5]
         return context
 
     template_name = 'index.html'
@@ -515,7 +515,7 @@ class SeasonDetail(DetailView):
         context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
         context['rankings'] = Ladders.get_season_ranked_participants(self.object).prefetch_related(
             Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
-            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type')))
+            Prefetch('bot__user', queryset=User.objects.all().only('supporter_level', 'username', 'type')))
         context['rankings'].count = len(context['rankings'])
         return context
 
