@@ -62,6 +62,7 @@ DATABASES = {
 # Application definition
 
 INSTALLED_APPS = [
+    'sheets',
     'registration',
     'grappelli.dashboard',
     'grappelli',
@@ -102,7 +103,9 @@ INSTALLED_APPS = [
     'robots',
     'django.contrib.admindocs',
     'drf_yasg',
+
 ]
+SHEETS_CACHE_DISABLED = True
 
 MIDDLEWARE = [
     # This will be removed automatically in non-development environments
