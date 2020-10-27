@@ -34,6 +34,9 @@ class SeasonParticipation(models.Model, LockableModelMixin):
     highest_elo = models.IntegerField(blank=True, null=True)
     slug = models.SlugField(max_length=255)
 
+    def __str__(self):
+        return str(self.season) + ' ' + str(self.bot)
+
     def save(self, *args, **kwargs):
         self.slug = slugify(f'{self.bot.name} Season {self.season.number}')
         super().save(*args, **kwargs)

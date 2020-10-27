@@ -58,7 +58,7 @@ class StatsGenerator:
 
     @staticmethod
     def _update_matchup_stats(sp: SeasonParticipation):
-        for season_participation in SeasonParticipation.objects.exclude(bot=sp.bot):
+        for season_participation in SeasonParticipation.objects.filter(season=sp.season).exclude(bot=sp.bot):
             with connection.cursor() as cursor:
                 matchup_stats = SeasonBotMatchupStats.objects.select_for_update() \
                     .get_or_create(bot=sp, opponent=season_participation)[0]
