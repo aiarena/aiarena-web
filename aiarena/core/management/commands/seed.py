@@ -7,8 +7,7 @@ from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match, ArenaClient, \
-    SeasonParticipation
+from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match, ArenaClient
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
@@ -27,13 +26,11 @@ def create_result_with_bot_data_and_logs(match, type, as_user):
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
                                        submitted_by=as_user)
         p1 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=1)
-        sp1 = p1.bot  # which is a SeasonParticipation model
         p1.avg_step_time = 0.111111
         p1.match_log = File(bot1_log)
         p1.save()
 
         p2 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=2)
-        sp2 = p2.bot  # which is a SeasonParticipation model
         p2.avg_step_time = 0.222222
         p2.match_log = File(bot2_log)
         p1.save()
@@ -54,14 +51,14 @@ def create_result(match, type, as_user):
         result = Result.objects.create(match=match, type=type, replay_file=File(result_replay), game_steps=1,
                                        submitted_by=as_user)
         p1 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=1)
-        p1.avg_step_time = random.uniform(0, 0.5)
+        p1.avg_step_time = 0.111111
         p1.match_log = None
         p1.save()
 
         p2 = MatchParticipation.objects.get(match_id=result.match_id, participant_number=2)
-        p2.avg_step_time = random.uniform(0, 0.5)
+        p2.avg_step_time = 0.222222
         p2.match_log = None
-        p2.save()
+        p1.save()
 
         bot1 = Bot.objects.get(pk=p1.bot_id)
         bot1.bot_data = None
@@ -70,6 +67,7 @@ def create_result(match, type, as_user):
         bot2 = Bot.objects.get(pk=p2.bot_id)
         bot2.bot_data = None
         bot2.save()
+
         finalize_result(result, p1, p2, bot1, bot2)
 
 
@@ -96,14 +94,13 @@ def finalize_result(result, p1, p2, bot1, bot2):
 
 
 def run_seed(matches, token):
-    MATCHES = matches
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     arenaclient1 = ArenaClient.objects.create(username='aiarenaclient-001', email='aiarenaclient-001@dev.aiarena.net',
-                                              type='ARENA_CLIENT', owner=devadmin)
+                                            type='ARENA_CLIENT', owner=devadmin)
 
     arenaclient2 = ArenaClient.objects.create(username='aiarenaclient-002', email='aiarenaclient-002@dev.aiarena.net',
-                                              type='ARENA_CLIENT', owner=devadmin)
+                                            type='ARENA_CLIENT', owner=devadmin)
 
     service_user = User.objects.create_user(username='service_user', password='x', email='service_user@dev.aiarena.net',
                                             type='SERVICE')
@@ -114,18 +111,15 @@ def run_seed(matches, token):
     season = Season.objects.create(previous_season_files_cleaned=True)
     season.open()
 
-    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
-                                        patreon_level='bronze')
-    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net',
-                                        patreon_level='silver')
-    devuser3 = User.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net',
-                                        patreon_level='gold')
-    devuser4 = User.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net',
-                                        patreon_level='platinum')
-    devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net',
-                                        patreon_level='diamond')
+    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net', patreon_level='bronze')
+    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net', patreon_level='silver')
+    devuser3 = User.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net', patreon_level='gold')
+    devuser4 = User.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net', patreon_level='platinum')
+    devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net', patreon_level='diamond')
+
     with open(BaseTestMixin.test_map_path, 'rb') as map:
-        Map.objects.get_or_create(name='test_map', file=File(map), active=True)
+        Map.objects.create(name='test_map', file=File(map), active=True)
+
     with open(BaseTestMixin.test_bot_zip_path, 'rb') as bot_zip:
         Bot.objects.create(user=devadmin, name='devadmin_bot1', active=True, plays_race='T', type='python',
                            bot_zip=File(bot_zip))
@@ -157,41 +151,20 @@ def run_seed(matches, token):
         Bot.objects.create(user=devuser5, name='devuser5_bot1', active=True, plays_race='P', type='python',
                            bot_zip=File(bot_zip))
 
-    def run_season():
-
-        for x in range(matches - 1):
+    for x in range(matches - 1):
+        if(bool(random.getrandbits(1))):  # select randomly
             create_result(create_match(arenaclient1), random.choice(Result.TYPES)[0], arenaclient1)
-        try:
-            print(season2.seasonparticipation_set)
-        except Exception as e:
-            pass
-        # so we have a match in progress
-        if matches != 0:
-            create_match(arenaclient1)
+        else:
+            create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)
 
-    run_season()
-    import datetime
+        if x == 0:  # make it so a bot that once was active, is now inactive
+            bot1 = Match.objects.get(result__isnull=False).participant1.bot
+            bot1.active = False
+            bot1.save()
 
-    season.date_closed = datetime.datetime.fromtimestamp(datetime.datetime.timestamp(datetime.datetime.now()))
-    season.save()
-    season.start_closing()
-    season.try_to_close()
-
-    import time
-    while season.is_open:
-        time.sleep(1)
-
-    season2 = Season.objects.create(previous_season_files_cleaned=True)
-    season2.open()
-    matches = MATCHES
-    all_bots = Bot.objects.all()
-
-    for bot in all_bots:
-        bot.active = True
-        bot.save()
-    print(season2.get_current_season())
-
-    run_season()
+    # so we have a match in progress
+    if matches != 0:
+        create_match(arenaclient1)
 
     return new_token
 
@@ -204,7 +177,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--matches', type=int, default=self._DEFAULT_MATCHES_TO_GENERATE,
                             help="Number of matches to generate. Default is {0}.".format(
-                                    self._DEFAULT_MATCHES_TO_GENERATE))
+                                self._DEFAULT_MATCHES_TO_GENERATE))
         parser.add_argument('--token', type=str, default=None,
                             help="Specify the token to use for the arena client."
                                  " Useful to avoid having to reconfigure arena clients in testing")
