@@ -16,7 +16,7 @@ Markdown==3.2.2
 wiki==0.6
 mysql-connector
 matplotlib
-pandas==1.0.5
+pandas==1.1.3
 django-robots==4.0
 django-random-queryset==0.1.3
 django-extensions==3.0.9
