@@ -25,3 +25,4 @@ class News(models.Model):
                 temp += parse_qs(parsed.query)['v'][0]
                 self.yt_link = temp
         super().save(*args, **kwargs)
+
