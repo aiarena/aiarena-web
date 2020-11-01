@@ -24,7 +24,7 @@ from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map, \
-    ArenaClient
+    ArenaClient, News
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
@@ -472,6 +472,7 @@ class Index(ListView):
         context = super().get_context_data(**kwargs)
         context['recently_updated_bots'] = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
         context['new_bots'] = Bot.objects.select_related('user').only('user__patreon_level', 'name', 'created').order_by('-created')[:5]
+        context['news'] = News.objects.all().order_by('date_created')
         return context
 
     template_name = 'index.html'
