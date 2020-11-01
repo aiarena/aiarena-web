@@ -19,13 +19,9 @@ class News(models.Model):
     def save(self, *args, **kwargs):
         if self.yt_link:
             regex = re.compile('^https:\\/\\/www\\.youtube\\.com\\/embed\\/([a-zA-Z0-9])+$')
-            if regex.match(self.yt_link):
-                super().save(*args, **kwargs)
-            else:
+            if not regex.match(self.yt_link):
                 temp = "https://www.youtube.com/embed/"
                 parsed = urlparse.urlparse(self.yt_link)
                 temp += parse_qs(parsed.query)['v'][0]
                 self.yt_link = temp
-                super().save(*args, **kwargs)
-
-
+        super().save(*args, **kwargs)
