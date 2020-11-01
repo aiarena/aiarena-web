@@ -169,6 +169,7 @@ class StatsGenerator:
 
     @staticmethod
     def _get_data(bot_id):
+        # this does not distinct between seasons
         with connection.cursor() as cursor:
             query = (f"""
                 select distinct

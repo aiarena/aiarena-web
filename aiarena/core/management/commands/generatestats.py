@@ -24,7 +24,7 @@ class Command(BaseCommand):
         if options['allseasons']:
             seasons = Season.objects.all()
 
-        self.stdout.write(f'looping  {type(seasons)} {len(seasons)}')
+        self.stdout.write(f'looping   {len(seasons)} Seasons')
         for s in seasons:
             if isinstance(s, Season):
                 season_id = s.id
