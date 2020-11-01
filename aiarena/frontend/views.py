@@ -219,7 +219,8 @@ class BotSeasonStatsDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['season_bot_matchups'] = self.object.season_matchup_stats.filter(bot__season = context['seasonparticipation'].season).order_by('-win_perc').distinct()
+        context['season_bot_matchups'] = self.object.season_matchup_stats.filter(
+            opponent__season=context['seasonparticipation'].season).order_by('-win_perc').distinct()
         return context
 
 
