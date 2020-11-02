@@ -31,6 +31,9 @@ from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
 
+def project_finance(request):
+    return render(request, template_name='finance.html')
+
 class UserProfile(LoginRequiredMixin, DetailView):
     model = User
     redirect_field_name = 'next'
@@ -216,7 +219,8 @@ class BotSeasonStatsDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['season_bot_matchups'] = self.object.season_matchup_stats.all().order_by('-win_perc').distinct()
+        context['season_bot_matchups'] = self.object.season_matchup_stats.filter(
+            opponent__season=context['seasonparticipation'].season).order_by('-win_perc').distinct()
         return context
 
 
@@ -454,10 +458,13 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     def get_queryset(self):
         try:
-            return Ladders.get_season_ranked_participants(
-                Season.get_current_season(), amount=10).prefetch_related(
-                Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
-                Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
+            if Round.objects.filter(season=Season.get_current_season()).count() > 0:
+                return Ladders.get_season_ranked_participants(
+                    Season.get_current_season(), amount=10).prefetch_related(
+                    Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
+                    Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
+            else:
+                return SeasonParticipation.objects.none()
         except NoCurrentSeason:
             return SeasonParticipation.objects.none()
 

@@ -87,6 +87,8 @@ urlpatterns = [  # todo: replace usage of url with path for all these
 
                   url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 
+
+                  path('finance/', core_views.project_finance, name='finance'),
                   path('profile/', core_views.UserProfile.as_view(), name='profile'),
                   path('profile/edit/', core_views.UserProfileUpdate.as_view(), name='profile_edit'),
                   path('profile/token/', core_views.UserTokenDetailView.as_view(), name='profile_token'),

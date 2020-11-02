@@ -9,13 +9,19 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <h3>Melee Ladder</h3>
-            <p>Active: {{ form.active }}</p>
+            <p>Active: {{ form.active }}
+                {{ form.active.errors }}
+            </p>
             <p>Bot zip:<br/>
                 {{ form.bot_zip }}<br/>
-                Publicly downloadable: {{ form.bot_zip_publicly_downloadable }}</p>
+                Publicly downloadable: {{ form.bot_zip_publicly_downloadable }}
+                {{ form.bot_zip.errors }}
+            </p>
             <p>Bot data:<br/>
                 {{ form.bot_data }}<br/>
-                Publicly downloadable: {{ form.bot_data_publicly_downloadable }}</p>
+                Publicly downloadable: {{ form.bot_data_publicly_downloadable }}
+                {{ form.bot_data.errors }}
+            </p>
             <h3>Bot page content</h3>
             <p>
                 {{ form.wiki_article_content }}
