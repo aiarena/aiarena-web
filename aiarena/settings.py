@@ -198,6 +198,18 @@ CONSTANCE_CONFIG = {
     'MATCH_REQUEST_LIMIT_DIAMOND_TIER': (8000, 'The periodic limit of match requests for a diamond patreon tier user.'),
     'REQUESTED_MATCHES_LIMIT_PERIOD': (
         timedelta(days=30), 'The period length for which a user''s match request limit applies.', timedelta),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER': (
+    50, 'The maximum bot zip file size that a free supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER': (
+    100, 'The maximum bot zip file size that a bronze supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER': (
+    200, 'The maximum bot zip file size that a silver supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER': (
+    300, 'The maximum bot zip file size that a gold supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER': (
+    400, 'The maximum bot zip file size that a platinum supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER': (
+    500, 'The maximum bot zip file size that a diamond supporter tier user can upload to the website.'),
     'ELO_DIFF_RATING_MODIFIER': (0.999, 'Affects how the ELO difference between bots in an upset match '
                                         '(lower ranked bot beats higher ranked) affects the interest score: ELO_DIFF_RATING_MODIFIER^ELO_DIFF-1'),
     'COMBINED_ELO_RATING_DIVISOR': (200, 'Controls how the combined bot ELO affects the interest score: '
@@ -224,6 +236,9 @@ CONSTANCE_CONFIG_FIELDSETS = {
                        'MATCH_REQUEST_LIMIT_SILVER_TIER', 'MATCH_REQUEST_LIMIT_GOLD_TIER',
                        'MATCH_REQUEST_LIMIT_PLATINUM_TIER', 'MATCH_REQUEST_LIMIT_DIAMOND_TIER',
                        'REQUESTED_MATCHES_LIMIT_PERIOD',),
+    'File size limits': ('BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER',
+                         'BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER',
+                         'BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER',),
     'Ladders': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',
                 'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
     'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',),
@@ -333,11 +348,6 @@ ELO_K = 8
 
 # starting ELO for bots
 ELO_START_VALUE = 1600
-
-# For convenience
-BOT_ZIP_MAX_SIZE_MB = 50
-# this is the setting that actually dictates the max zip size
-BOT_ZIP_MAX_SIZE = 1024 * 1024 * BOT_ZIP_MAX_SIZE_MB
 
 # This will post results received to another webserver
 # if this is None, it is disabled
