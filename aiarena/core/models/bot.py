@@ -15,11 +15,9 @@ from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
-from aiarena.core.exceptions import BotNotInMatchException, BotAlreadyInMatchException
-from aiarena.core.storage import OverwritePrivateStorage, HardcodedURLFilenamePrivateStorage
+from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
-from aiarena.settings import BOT_ZIP_MAX_SIZE
 from .match import Match
 from .mixins import LockableModelMixin
 from .season import Season
@@ -51,12 +49,20 @@ class Bot(models.Model, LockableModelMixin):
         ('nodejs', 'nodejs'),
         ('python', 'python'),
     )
+    BOT_ZIP_LIMIT_MAP = {
+        "none": config.BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER,
+        "bronze": config.BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER,
+        "silver": config.BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER,
+        "gold": config.BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER,
+        "platinum": config.BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER,
+        "diamond": config.BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER,
+    }
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
-                               max_file_size=BOT_ZIP_MAX_SIZE, validators=[validate_bot_zip_file, ])
+                               validators=[validate_bot_zip_file, ])
     bot_zip_updated = models.DateTimeField(editable=False)
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     bot_zip_publicly_downloadable = models.BooleanField(default=False)
@@ -85,6 +91,10 @@ class Bot(models.Model, LockableModelMixin):
                                                   id=match_id
                                                   )
         return matches.count() > 0
+
+    def get_bot_zip_limit_in_mb(self):
+        limit = self.BOT_ZIP_LIMIT_MAP[self.user.patreon_level]
+        return limit if limit is not None else None
 
     def regen_game_display_id(self):
         self.game_display_id = uuid.uuid4()
