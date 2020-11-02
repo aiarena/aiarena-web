@@ -56,9 +56,9 @@
                     <tr>
                         <td>{{ bot.created|date:"d. N Y - H:i:s" }}</td>
                         <td style="padding-right: 0">
-                        {% with patreon_level=bot.user.patreon_level %}
-                            {% if patreon_level != 'none' %}
-                                <div class="bot-icon-{{ patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
+                        {% with supporter_level=bot.user.supporter_level %}
+                            {% if supporter_level != 'none' %}
+                                <div class="bot-icon-{{ supporter_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_supporter_level_display }} supporter"></div>
                             {% endif %}
                         {% endwith %}
                         </td>
@@ -88,8 +88,8 @@
                     <tr>
                         <td style="text-align: center">{{ forloop.counter }}</td>
                         <td style="padding-right: 0">
-                            {% if patreon_level != 'none' %}
-                                <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
+                            {% if supporter_level != 'none' %}
+                                <div class="bot-icon-{{ participant.bot.user.supporter_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_supporter_level_display }} supporter"></div>
                             {% endif %}
                         </td>
                         <td>{{ participant.bot.as_html_link }}</td>
@@ -114,8 +114,8 @@
                     <tr>
                         <td>{{ bot.bot_zip_updated|date:"d. N Y - H:i:s" }}</td>
                         <td style="padding-right: 0">
-                            {% if patreon_level != 'none' %}
-                                <div class="bot-icon-{{ patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
+                            {% if supporter_level != 'none' %}
+                                <div class="bot-icon-{{ supporter_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_supporter_level_display }} supporter"></div>
                             {% endif %}
                         </td>
                         <td>{{ bot.as_html_link }}</td>

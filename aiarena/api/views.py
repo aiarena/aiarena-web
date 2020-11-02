@@ -42,7 +42,7 @@ round_include_fields = 'id', 'number', 'season', 'started', 'finished', 'complet
 season_include_fields = 'id', 'number', 'date_created', 'date_opened', 'date_closed', 'status',
 seasonparticipation_include_fields = 'id', 'season', 'bot', 'elo',
 user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', \
-                      'type', 'patreon_level'
+                      'type', 'supporter_level'
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS

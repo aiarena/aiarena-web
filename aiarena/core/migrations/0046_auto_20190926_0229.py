@@ -5,20 +5,20 @@ from django.db import migrations, models
 from aiarena.core.models import User
 
 
-def update_None_to_none(apps, schema_editor):
-    User.objects.filter(patreon_level='None').update(patreon_level='none')
-
+# def update_None_to_none(apps, schema_editor):
+#     User.objects.filter(patreon_level='None').update(patreon_level='none')
+#
 class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0045_user_patreon_level'),
     ]
-
-    operations = [
-        migrations.AlterField(
-            model_name='user',
-            name='patreon_level',
-            field=models.CharField(choices=[('none', 'None'), ('bronze', 'Bronze'), ('silver', 'Silver'), ('gold', 'Gold'), ('platinum', 'Platinum'), ('diamond', 'Diamond')], default='none', max_length=16),
-        ),
-        migrations.RunPython(update_None_to_none),
-    ]
+#
+#     operations = [
+#         migrations.AlterField(
+#             model_name='user',
+#             name='patreon_level',
+#             field=models.CharField(choices=[('none', 'None'), ('bronze', 'Bronze'), ('silver', 'Silver'), ('gold', 'Gold'), ('platinum', 'Platinum'), ('diamond', 'Diamond')], default='none', max_length=16),
+#         ),
+#         migrations.RunPython(update_None_to_none),
+#     ]

@@ -40,7 +40,7 @@ class PatreonCallbackView(View):
                 messages.add_message(request, messages.SUCCESS, 'Patreon successfully linked.')
 
                 try:
-                    account_bind.update_user_patreon_tier()
+                    account_bind.update_user_support_tier()
                 except Exception as e:
                     logger.error("Failed to update patreon tier with error:\n" + traceback.format_exc())
                     messages.add_message(request, messages.WARNING, 'There was an issue updating your account\'s Patreon tier.')
