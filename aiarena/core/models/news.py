@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 import urllib.parse as urlparse
 from urllib.parse import parse_qs
@@ -18,8 +19,11 @@ class News(models.Model):
     # youtube videos urls need to be in exact format
     def save(self, *args, **kwargs):
         if self.yt_link:
-            regex = re.compile('^https:\\/\\/www\\.youtube\\.com\\/embed\\/([a-zA-Z0-9])+$')
-            if not regex.match(self.yt_link):
+            embedded_youtube_regex = re.compile('^https:\\/\\/www\\.youtube\\.com\\/embed\\/([a-zA-Z0-9])+$')
+            valid_url = re.compile('^https:\\/\\/www\\.youtube\\.com\\/(embed\\/|watch\\?v)')
+            if not embedded_youtube_regex.match(self.yt_link):
+                if not valid_url.match(self.yt_link):
+                    raise ValidationError("YouTube link needed, with 'https://www.' prefix")
                 temp = "https://www.youtube.com/embed/"
                 parsed = urlparse.urlparse(self.yt_link)
                 temp += parse_qs(parsed.query)['v'][0]
