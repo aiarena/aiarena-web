@@ -6,7 +6,7 @@ import re
 
 
 class News(models.Model):
-    date_created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
     title = models.TextField(max_length=20, blank=True, null=True)
     text = models.TextField(max_length=500, blank=False, null=False)
     yt_link = models.URLField(blank=True, null=True)
@@ -14,7 +14,10 @@ class News(models.Model):
     def __str__(self):
         if self.title:
             return self.title
-        return self.date_created.strftime("%d %b %Y")
+        return self.created.strftime("%d %b %Y - %H:%M:%S")
+
+    def get_date(self):
+        return self.created.strftime("%d %b %Y - %H:%M:%S")
 
     # youtube videos urls need to be in exact format
     def save(self, *args, **kwargs):
@@ -29,4 +32,8 @@ class News(models.Model):
                 temp += parse_qs(parsed.query)['v'][0]
                 self.yt_link = temp
         super().save(*args, **kwargs)
+
+    # for purpose of distinquish news in activity feed
+    def get_model_name(self):
+        return 'News'
 

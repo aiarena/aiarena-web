@@ -351,5 +351,5 @@ class PatreonAccountBindAdmin(admin.ModelAdmin):
 
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
-    list_display = ('date_created', 'title', 'text', 'yt_link')
+    list_display = ('created', 'title', 'text', 'yt_link')
     search_fields = ('title',)

@@ -30,6 +30,7 @@ from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
+from operator import attrgetter
 
 def project_finance(request):
     return render(request, template_name='finance.html')
@@ -470,9 +471,38 @@ class Index(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['recently_updated_bots'] = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
-        context['new_bots'] = Bot.objects.select_related('user').only('user__patreon_level', 'name', 'created').order_by('-created')[:5]
-        context['news'] = News.objects.all().order_by('date_created')
+        # context['recently_updated_bots'], context['new_bots'], context['news']
+
+        bot_updates = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
+        new_bots = Bot.objects.select_related('user').only('user__patreon_level', 'name', 'created').order_by('-created')[:5]
+        news = News.objects.all().order_by('-created')
+
+        bot_objects = []
+        # for purpose of displaying information about bot action, we will add action_type to each to distinquish them in template
+        for bot in bot_updates:
+            bot.action_type = 1
+            bot_objects.append(bot)
+        for bot in new_bots:
+            bot.action_type = 2
+            bot_objects.append(bot)
+
+        # newly created bot has same update time as is its creation time, we will use it in sorting
+        sorted_bot_objects = sorted(bot_objects, key=attrgetter('bot_zip_updated'), reverse=True)
+
+        # merge sorted_bot_objects and news - to be sorted in template
+
+        context['news'] = []
+        i, j = 0, 0
+        while i < len(sorted_bot_objects) and j < len(news):
+            if sorted_bot_objects[i].bot_zip_updated > news[j].created:
+                context['news'].append(sorted_bot_objects[i])
+                i += 1
+
+            else:
+                context['news'].append(news[j])
+                j += 1
+
+        context['news'] = context['news'] + sorted_bot_objects[i:] + news[j:]
         return context
 
     template_name = 'index.html'
