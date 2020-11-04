@@ -1,5 +1,5 @@
 # aiarena-web
-This is an amazing website which gives you the sense of thrill unables you to compete with other bots across the world 
+This is an amazing website which gives you a sense of thrill and enables you to compete with other bots across the world 
 
 [See the live website here](https://aiarena.net/)
 
