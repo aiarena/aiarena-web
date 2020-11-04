@@ -221,6 +221,10 @@ class Bot(models.Model, LockableModelMixin):
     def can_download_bot_data(self, user):
         return self.user == user or self.bot_data_publicly_downloadable or user.is_staff
 
+    # for purpose of distinquish news in activity feed
+    def get_model_name(self):
+        return 'Bot'
+
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
 _UNSAVED_BOT_DATA_FILEFIELD = 'unsaved_bot_data_filefield'
