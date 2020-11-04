@@ -13,7 +13,7 @@ Core ladder/project functionality
 Web API endpoints and functionality
 
 ### aiarena/frontend
-Django template is used for website frontend
+Django templates are used for the website frontend
 
 
 ## License
