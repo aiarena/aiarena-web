@@ -211,7 +211,7 @@ class MatchAdmin(admin.ModelAdmin):
 @admin.register(Bot)
 class BotAdmin(admin.ModelAdmin):
     
-    search_fields = ('name', 'user')
+    search_fields = ('name','user__username')
     list_display = (
         'id',
         'user',
