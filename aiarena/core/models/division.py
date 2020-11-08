@@ -7,6 +7,8 @@ class Division(models.Model):
     name = models.CharField(max_length=50)
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name='divisions')
 
+    # TODO  Promote / Demote every x days  ?    with default of ... one week ?
+
     @property
     def get_bots(self):
         return self.bots.all()

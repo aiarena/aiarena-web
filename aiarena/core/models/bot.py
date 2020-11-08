@@ -18,6 +18,7 @@ from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
+from .division import Division
 from .match import Match
 from .mixins import LockableModelMixin
 from .season import Season
@@ -58,6 +59,7 @@ class Bot(models.Model, LockableModelMixin):
         "diamond": config.BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER,
     }
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
+    divisions = models.ManyToManyField(Division, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
@@ -79,6 +81,10 @@ class Bot(models.Model, LockableModelMixin):
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
+
+    @property
+    def get_divisions(self):
+        return self.divisions.all()
 
     @property
     def current_matches(self):
