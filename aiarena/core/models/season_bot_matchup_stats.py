@@ -1,7 +1,7 @@
 import logging
 
 from django.db import models
-
+from django.utils import timezone
 from aiarena.core.validators import validate_not_nan, validate_not_inf
 from .season_participation import SeasonParticipation
 
@@ -20,6 +20,13 @@ class SeasonBotMatchupStats(models.Model):
     tie_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
     crash_count = models.IntegerField(blank=True, null=True)
     crash_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
+    updated = models.DateTimeField(default=timezone.now)  # populate fields before first save
+
+    def save(self, *args, **kwargs):
+        # update time pre save
+        self.updated = timezone.now()
+        # now we call django's save protocol
+        super(SeasonBotMatchupStats, self).save(*args, **kwargs)
 
     def __str__(self):
         return str(self.bot) + ' VS ' + str(self.opponent)
