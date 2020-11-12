@@ -1,7 +1,8 @@
 import logging
 
+from django.core.files import File
 from django.db import models, transaction
-from django.db.models.signals import pre_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
@@ -9,11 +10,13 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason, MultipleCurrentSeasons
+from .competition import Competition
 from .mixins import LockableModelMixin
+
 
 logger = logging.getLogger(__name__)
 
-
+# todo: include competition name
 def replay_archive_upload_to(instance, filename):
     return '/'.join(['replays', 'season_' + str(instance.number) + '_zip'])
 
@@ -33,6 +36,8 @@ class Season(models.Model, LockableModelMixin):
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
     previous_season_files_cleaned = models.BooleanField(default=False)
+    replay_archive_zip = models.FileField(upload_to=replay_archive_upload_to, blank=True, null=True)
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -76,9 +81,11 @@ class Season(models.Model, LockableModelMixin):
                 self.date_opened = timezone.now()
 
                 # double check bots aren't active and if so deactivate them
+                # also regenerate their display ids
                 for bot in Bot.objects.all():
                     if bot.active:
                         bot.active = False
+                    bot.regen_game_display_id()
                     bot.save()
 
             self.status = 'open'
@@ -97,6 +104,7 @@ class Season(models.Model, LockableModelMixin):
         else:
             return "Cannot start closing a season with a status of {}".format(self.status)
 
+    @transaction.atomic
     def try_to_close(self):
         from .round import Round
         from .bot import Bot
@@ -147,5 +155,14 @@ class Season(models.Model, LockableModelMixin):
 @receiver(pre_save, sender=Season)
 def pre_save_season(sender, instance, **kwargs):
     if instance.number is None:
-        instance.number = Season.objects.all().count() + 1  # todo: redo this for multiladders
+        instance.number = Season.objects.filter(competition=instance.competition).count() + 1
 
+
+@receiver(post_save, sender=Season)
+def post_save_season(sender, instance, created, **kwargs):
+    if created:
+        # create an empty zip file
+        instance.replay_archive_zip.save('filename',  # filename is ignored
+                                         File(
+                                             io.BytesIO(
+                                                 b"PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")))
