@@ -12,7 +12,7 @@ class Map(models.Model):
     name = models.CharField(max_length=50, unique=True)
     file = models.FileField(upload_to=map_file_upload_to, storage=OverwriteStorage())
     active = models.BooleanField(default=False)
-    competition = models.ManyToManyField(Competition)
+    competitions = models.ManyToManyField(Competition, related_name='maps')
 
     def __str__(self):
         return self.name
