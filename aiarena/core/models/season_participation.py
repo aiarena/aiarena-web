@@ -19,7 +19,7 @@ def elo_graph_upload_to(instance, filename):
 
 class SeasonParticipation(models.Model, LockableModelMixin):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    bot = models.ManyToManyField(Bot)
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     match_count = models.IntegerField(default=0)
     win_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
