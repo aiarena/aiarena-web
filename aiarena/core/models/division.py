@@ -13,4 +13,4 @@ class Division(models.Model):
         return self.bots.all()
 
     def __str__(self):
-        return f"[{self.name}] Active Bots: [{len(self.get_bots())}]"
+        return f"[{self.name}] Active Bots: [{len(self.get_bots)}]"
