@@ -3,7 +3,9 @@
 
 
 {% block content %}
-    <div class="divider"><span></span><span><h2>{{ seasonparticipation.bot.as_html_link }} - {{ seasonparticipation.season.as_html_link }} stats</h2></span><span></span></div>
+    <div class="divider">
+        <span></span><span><h2>{{ seasonparticipation.bot.as_html_link }} - {{ seasonparticipation.season.as_html_link }} stats</h2></span><span></span>
+    </div>
     <div id="bot_season_stats">
         <table summary="Table containing season participation information" style="text-align: right">
             <thead>
@@ -12,6 +14,11 @@
             </tr>
             </thead>
             <tbody>
+            <tr style="text-align: right">
+                <td class="mono">Updated:</td>
+                <td colspan="2">{{ updated|timesince }} Ago</td>
+
+            </tr>
             <tr class="mono">
                 <td>Current ELO</td>
                 <td>{{ seasonparticipation.elo }}</td>
@@ -67,6 +74,7 @@
                     <td colspan="2">No stats</td>
                 {% endif %}
             </tr>
+
             </tbody>
         </table>
         <br/>
@@ -102,34 +110,36 @@
                 {% for bot_matchup in season_bot_matchups %}
                     <tr style="text-align: right">
                         <td style="text-align: right">{{ bot_matchup.opponent.bot.as_html_link }}</td>
-                        <td class="mono" style="text-align: left">{{ bot_matchup.opponent.bot.get_plays_race_display }}</td>
+                        <td class="mono"
+                            style="text-align: left">{{ bot_matchup.opponent.bot.get_plays_race_display }}</td>
                         <td class="mono">{{ bot_matchup.match_count }}</td>
                         <td class="mono">{{ bot_matchup.win_count }}</td>
                         {% if bot_matchup.match_count > 0 %}
-                        <td class="mono">{{ bot_matchup.win_perc|floatformat:2 }}</td>
+                            <td class="mono">{{ bot_matchup.win_perc|floatformat:2 }}</td>
                         {% else %}
-                        <td class="mono">N/A</td>
+                            <td class="mono">N/A</td>
                         {% endif %}
                         <td class="mono">{{ bot_matchup.loss_count }}</td>
                         {% if bot_matchup.match_count > 0 %}
-                        <td class="mono">{{ bot_matchup.loss_perc|floatformat:2 }}</td>
+                            <td class="mono">{{ bot_matchup.loss_perc|floatformat:2 }}</td>
                         {% else %}
-                        <td class="mono">N/A</td>
+                            <td class="mono">N/A</td>
                         {% endif %}
                         <td class="mono">{{ bot_matchup.tie_count }}</td>
                         {% if bot_matchup.match_count > 0 %}
-                        <td class="mono">{{ bot_matchup.tie_perc|floatformat:2 }}</td>
+                            <td class="mono">{{ bot_matchup.tie_perc|floatformat:2 }}</td>
                         {% else %}
-                        <td class="mono">N/A</td>
+                            <td class="mono">N/A</td>
                         {% endif %}
                         <td class="mono">{{ bot_matchup.crash_count }}</td>
                         {% if bot_matchup.match_count > 0 %}
-                        <td class="mono">{{ bot_matchup.crash_perc|floatformat:2 }}</td>
+                            <td class="mono">{{ bot_matchup.crash_perc|floatformat:2 }}</td>
                         {% else %}
-                        <td class="mono">N/A</td>
+                            <td class="mono">N/A</td>
                         {% endif %}
                     </tr>
                 {% endfor %}
+
             {% else %}
                 <tr>
                     <td colspan="11">No stats</td>
