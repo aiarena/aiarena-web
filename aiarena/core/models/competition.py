@@ -16,11 +16,13 @@ class Competition(models.Model):
     type = models.CharField(max_length=32,
                             choices=CompetitionType.choices,
                             default=CompetitionType.LEAGUE)
-
     enabled = models.BooleanField(default=False)
 
     def get_type(self):
         return CompetitionType(self.type).name.title()
+
+    def map_pool(self):
+        return self.maps.all()
 
     def get_divisions(self):
         return self.divisions.all()
