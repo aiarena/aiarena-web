@@ -110,7 +110,7 @@ def run_seed(matches, token):
     new_token = Token.objects.create(user=arenaclient1, key=token)
 
     competition = Competition.objects.create(name='TESTCOMP', enabled=True)
-
+    competition.save()
     season = Season.objects.create(previous_season_files_cleaned=True, competition=competition)
     season.open()
 
@@ -121,7 +121,9 @@ def run_seed(matches, token):
     devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net', patreon_level='diamond')
 
     with open(BaseTestMixin.test_map_path, 'rb') as map:
-        Map.objects.create(name='test_map', file=File(map), active=True)
+        m = Map.objects.create(name='test_map', file=File(map), active=True)
+        m.competitions.add(competition)
+        m.save()
 
     with open(BaseTestMixin.test_bot_zip_path, 'rb') as bot_zip:
         Bot.objects.create(user=devadmin, name='devadmin_bot1', active=True, plays_race='T', type='python',
