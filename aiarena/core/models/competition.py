@@ -1,5 +1,9 @@
 import logging
 from django.db import models
+from django.urls import reverse
+from django.utils.functional import cached_property
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +28,17 @@ class Competition(models.Model):
     def map_pool(self):
         return self.maps.all()
 
+    @property
     def get_divisions(self):
         return self.divisions.all()
 
+    @cached_property
+    def get_absolute_url(self):
+        return reverse('competition', kwargs={'pk': self.pk})
+
+    @cached_property
+    def as_html_link(self):
+        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())}</a>')
+
     def __str__(self):
-        return f"{self.name}, {self.get_type()}, Divisions: {len(self.get_divisions())}"
+        return f"{self.name}, {self.get_type()}, Divisions: {len(self.get_divisions)}"
