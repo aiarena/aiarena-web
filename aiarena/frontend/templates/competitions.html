@@ -7,19 +7,16 @@
     <table summary="Table containing bots information" id="botsTable" class="row-hover-highlight">
         <thead>
         <td><strong>Name</strong></td>
-        <td><strong>Author</strong></td>
-        <td><strong>Race</strong></td>
         <td><strong>Type</strong></td>
         <td><strong>Active</strong></td>
         </thead>
         <tbody>
-        {% for bot in bot_list %}
+        {% for competition in object_list %}
             <tr>
-                <td>{{ bot.as_html_link }}</td>
-                <td>{{ bot.user.as_html_link }}</td>
-                <td>{{ bot.get_plays_race_display }}</td>
-                <td>{{ bot.type }}</td>
-                <td>{{ bot.active|pretty_bool }}</td>
+                <td>{{ competition.as_html_link }}</td>
+                <td>{{ competition.get_type }}</td>
+                <td>{{ competition.enabled|pretty_bool }}</td>
+
             </tr>
         {% endfor %}
         </tbody>

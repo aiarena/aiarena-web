@@ -7,6 +7,32 @@ def cents_to_usd(cents):
     return str(float(cents / 100)) + '$'
 
 
+def pretty_bool(value):
+    """
+-   filter for printing the ``Boolean`` values nicely
+
+    :param value: True / False.
+    :type str: string..
+
+    :returns:  ``✔`` / ``✘``
+    :raises: AttributeError, KeyError
+
+    """
+    if value == True:
+        value = '✔'
+        return value
+    if value == False:
+        value = '✘'
+        return value
+    if str(value) == 'yes':
+        value = '✔'
+        return value
+    if str(value) == 'no':
+        value = '✘'
+        return value
+    return value
+
+
 def format_elo_change(value):
     """Custom formatting for ELO change integers"""
     if value is None or value == 0:
@@ -41,5 +67,6 @@ def smooth_timedelta(timedeltaobj):
 
 register = template.Library()
 register.filter('format_elo_change', format_elo_change)
+register.filter('pretty_bool', pretty_bool)
 register.filter('smooth_timedelta', smooth_timedelta)
 register.filter('cents_to_usd', cents_to_usd)

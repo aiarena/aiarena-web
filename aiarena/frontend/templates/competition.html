@@ -1,25 +1,23 @@
 {% extends "base.html" %}
-{% load i18n core_filters %}
+{% load i18n core_filters wiki_tags %}
 
 {% block content %}
 
-    <div class="divider"><span></span><span><h2>Bots</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>{{ object }}</h2></span><span></span></div>
     <table summary="Table containing bots information" id="botsTable" class="row-hover-highlight">
         <thead>
         <td><strong>Name</strong></td>
-        <td><strong>Author</strong></td>
-        <td><strong>Race</strong></td>
-        <td><strong>Type</strong></td>
+        <td><strong>Bots</strong></td>
         <td><strong>Active</strong></td>
         </thead>
         <tbody>
-        {% for bot in bot_list %}
+        {% for division in object.divisions.all %}
             <tr>
-                <td>{{ bot.as_html_link }}</td>
-                <td>{{ bot.user.as_html_link }}</td>
-                <td>{{ bot.get_plays_race_display }}</td>
-                <td>{{ bot.type }}</td>
-                <td>{{ bot.active|pretty_bool }}</td>
+                <td>{{ division.name }}</td>
+                <td>{{ division.get_bots|length }}</td>
+                <td>{{ division.competition.enabled|pretty_bool }}</td>
+
+
             </tr>
         {% endfor %}
         </tbody>
