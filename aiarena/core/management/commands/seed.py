@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match, ArenaClient
+from aiarena.core.models.competition import Competition
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
@@ -108,7 +109,9 @@ def run_seed(matches, token):
     # if token is None it will generate a new one, otherwise it will use the one specified
     new_token = Token.objects.create(user=arenaclient1, key=token)
 
-    season = Season.objects.create(previous_season_files_cleaned=True)
+    competition = Competition.objects.create(name='TESTCOMP', enabled=True)
+
+    season = Season.objects.create(previous_season_files_cleaned=True, competition=competition)
     season.open()
 
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net', patreon_level='bronze')
