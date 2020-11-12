@@ -16,22 +16,22 @@
         <div class="author-detail-info">
             <h2>{{ author.username }}</h2>
 
-            <b>Joined</b><br/>
+            <strong>Joined</strong><br/>
             {{ author.date_joined|date:"d. N Y" }}
             <br/>
 
-            <b>Last login</b><br/>
+            <strong>Last login</strong><br/>
             {{ author.last_login|date:"d. N Y" }}
         </div>
     </div>
     <br>
     <div class="divider"><span></span><span><h2>Bots</h2></span><span></span></div>
-    <table id="author-bot_table">
+    <table summary="Table containing bots information" id="author-bot_table">
         <thead>
-        <td><b>Name</b></td>
-        <td><b>Type</b></td>
-        <td><b>Race</b></td>
-        <td><b>Active</b></td>
+        <td><strong>Name</strong></td>
+        <td><strong>Type</strong></td>
+        <td><strong>Race</strong></td>
+        <td><strong>Active</strong></td>
         </thead>
         {% for bot in bot_list %}
             <tr>

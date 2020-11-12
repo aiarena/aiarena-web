@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from django.utils.functional import cached_property
 
 logger = logging.getLogger(__name__)
 
@@ -32,14 +33,15 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
     type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
-    owner = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
     extra_active_bots_per_race = models.IntegerField(default=0)
     extra_periodic_match_requests = models.IntegerField(default=0)
     receive_email_comms = models.BooleanField(default=True)
+    sync_patreon_status = models.BooleanField(default=True)
 
     # permissions
     can_request_games_for_another_authors_bot = models.BooleanField(default=False)
 
+    @cached_property
     def get_absolute_url(self):
         if self.type == 'WEBSITE_USER':
             return reverse('author', kwargs={'pk': self.pk})
@@ -48,14 +50,9 @@ class User(AbstractUser):
         else:
             raise Exception("This user type does not have a url.")
 
+    @cached_property
     def as_html_link(self):
-        return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url(), escape(self.__str__())))
-
-    def clean(self):
-        if self.type == 'ARENA_CLIENT' and self.owner is None:
-            raise ValidationError("ARENA_CLIENT type requires the owner field to be set.")
-        elif self.type != 'ARENA_CLIENT' and self.owner is not None:
-            raise ValidationError("User type of {} is not allowed to have an owner.".format(self.type))
+        return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url, escape(self.__str__())))
 
     BOTS_PER_RACE_LIMIT_MAP = {
         "none": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
@@ -97,7 +94,7 @@ class User(AbstractUser):
     def match_request_count_left(self):
         from .match import Match
         return self.requested_matches_limit \
-               - Match.objects.filter(requested_by=self,
+               - Match.objects.only('id').filter(requested_by=self,
                                       created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD).count()
 
     @property
@@ -108,7 +105,16 @@ class User(AbstractUser):
     def random_donator():
         # todo: apparently order_by('?') is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return User.objects.exclude(patreon_level='none').order_by('?').first()
+        return User.objects.only('id', 'username').exclude(patreon_level='none').order_by('?').first()
+
+    @property
+    def is_arenaclient(self):
+        from .arena_client import ArenaClient  # avoid circular reference
+        try:
+            return (self.arenaclient is not None)
+        except ArenaClient.DoesNotExist:
+            return False
+
 
 
 @receiver(pre_save, sender=User)

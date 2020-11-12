@@ -37,7 +37,7 @@ class StreamNextReplayViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         # Only matches that featured a bot above the starting ELO
         # exclude matches with only house bots.
-        matches = Match.objects.filter(
+        matches = Match.objects.filter(result__isnull=False, requested_by__isnull=True,
             round__season__seasonparticipation__in=SeasonParticipation.objects.filter(elo__gte=ELO_START_VALUE).exclude(bot__user_id=config.HOUSE_BOTS_USER_ID))
 
         return Result.objects.filter(

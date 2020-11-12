@@ -4,7 +4,7 @@
 {% block content %}
     <div class="divider"><span></span><span><h2>Edit Profile</h2></span><span></span></div>
     <div class="registration-form">
-        <h2 ><i class="material-icons" style="font-size: 48px; vertical-align: -0.35em;;">edit</i>{{ object.username }}</h2>
+        <h2 ><em class="material-icons" style="font-size: 48px; vertical-align: -0.35em;">edit</em>{{ object.username }}</h2>
         <a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a><br/>
         Click to change
         <form method="post" enctype="multipart/form-data">

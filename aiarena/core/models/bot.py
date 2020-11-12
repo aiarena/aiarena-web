@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
@@ -17,8 +18,9 @@ from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
-from aiarena.settings import BOT_ZIP_MAX_SIZE
+from .division import Division
 from .match import Match
+from .mixins import LockableModelMixin
 from .season import Season
 from .user import User
 
@@ -33,7 +35,7 @@ def bot_data_upload_to(instance, filename):
     return '/'.join(['bots', str(instance.id), 'bot_data'])
 
 
-class Bot(models.Model):
+class Bot(models.Model, LockableModelMixin):
     RACES = (
         ('T', 'Terran'),
         ('Z', 'Zerg'),
@@ -48,11 +50,21 @@ class Bot(models.Model):
         ('nodejs', 'nodejs'),
         ('python', 'python'),
     )
+    BOT_ZIP_LIMIT_MAP = {
+        "none": config.BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER,
+        "bronze": config.BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER,
+        "silver": config.BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER,
+        "gold": config.BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER,
+        "platinum": config.BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER,
+        "diamond": config.BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER,
+    }
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
+    divisions = models.ManyToManyField(Division, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
-                               max_file_size=BOT_ZIP_MAX_SIZE, validators=[validate_bot_zip_file, ])
+                               validators=[validate_bot_zip_file, ])
     bot_zip_updated = models.DateTimeField(editable=False)
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     bot_zip_publicly_downloadable = models.BooleanField(default=False)
@@ -71,15 +83,24 @@ class Bot(models.Model):
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
 
     @property
+    def get_divisions(self):
+        return self.divisions.all()
+
+    @property
     def current_matches(self):
-        return Match.objects.filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
+        return Match.objects.only('id').filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
 
     def is_in_match(self, match_id):
-        is_in_match: bool = False
-        for match in self.current_matches:
-            if match.id == match_id:
-                is_in_match = True
-        return is_in_match
+        matches = Match.objects.only('id').filter(matchparticipation__bot=self,
+                                                  started__isnull=False,
+                                                  result__isnull=True,
+                                                  id=match_id
+                                                  )
+        return matches.count() > 0
+
+    def get_bot_zip_limit_in_mb(self):
+        limit = self.BOT_ZIP_LIMIT_MAP[self.user.patreon_level]
+        return limit if limit is not None else None
 
     def regen_game_display_id(self):
         self.game_display_id = uuid.uuid4()
@@ -133,12 +154,14 @@ class Bot(models.Model):
 
     def bot_data_is_currently_frozen(self):
         # dont alter bot_data while the data is locked in a match, unless there was no bot_data initially
-        matches = Match.objects.filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
+        matches = Match.objects.only('id').filter(matchparticipation__bot=self, started__isnull=False,
+                                                  result__isnull=True)
         data_frozen = False
         for match in matches:
             for p in match.matchparticipation_set.filter(bot=self):
                 if p.use_bot_data and p.update_bot_data:
-                    data_frozen = True
+                    data_frozen = True  # todo: maybe we can cache this flag
+                    break
         return self.bot_data and data_frozen
 
     @staticmethod
@@ -156,15 +179,19 @@ class Bot(models.Model):
             raise RuntimeError("I am the only bot.")
         return Bot.objects.filter(active=True).exclude(id=self.id).order_by('?').first()
 
+    @cached_property
     def get_absolute_url(self):
         return reverse('bot', kwargs={'pk': self.pk})
 
+    @cached_property
     def as_html_link(self):
-        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
+        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())}</a>')
 
+    @cached_property
     def as_html_link_with_race(self):
-        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())} ({self.plays_race})</a>')
+        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())} ({self.plays_race})</a>')
 
+    @cached_property
     def expected_executable_filename(self):
         """
         The expected file name that should be run to start the bot.
@@ -199,6 +226,10 @@ class Bot(models.Model):
 
     def can_download_bot_data(self, user):
         return self.user == user or self.bot_data_publicly_downloadable or user.is_staff
+
+    # for purpose of distinquish news in activity feed
+    def get_model_name(self):
+        return 'Bot'
 
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'
@@ -271,6 +302,6 @@ def post_save_bot(sender, instance, created, **kwargs):
         post_save.connect(pre_save_bot, sender=sender)
 
     # register a season participation if the bot has been activated
-    # if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
-    #     from .season_participation import SeasonParticipation
-    #     SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)
+    if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
+        from .season_participation import SeasonParticipation
+        SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)

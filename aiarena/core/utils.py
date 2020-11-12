@@ -46,11 +46,11 @@ def calculate_md5_django_filefield(file, block_size=2 ** 20):
 
 def post_result_to_discord_bot(result):
     try:
-        participants = result.get_match_participants()
-        bots = result.get_match_participant_bots()
+        participants = result.get_match_participants
+        bots = result.get_match_participant_bots
 
-        if result.has_winner():
-            wl_bots = result.get_winner_loser_bots()
+        if result.has_winner:
+            wl_bots = result.get_winner_loser_bots
         else:
             wl_bots = None
 
@@ -75,21 +75,6 @@ def post_result_to_discord_bot(result):
         post_json_content_to_address(json, settings.POST_SUBMITTED_RESULTS_TO_ADDRESS)
     except Exception as e:
         logger.warning(f"Attempt to post result for match_id {result.match_id} to discord failed with error:"
-                       + os.linesep + traceback.format_exc())
-
-def add_result_replay_file_to_season_archive(result):
-    """
-    If there's a replay file, add it to the season's replay archive
-    :param result:
-    :return:
-    """
-    try:
-        if result.replay_file:
-            with ZipFile(result.match.round.season.replay_archive_zip.file.name, "a") as zip_file:
-                file_path = result.replay_file.file.name
-                zip_file.write(file_path, arcname=os.path.basename(file_path))
-    except Exception as e:
-        logger.error(f"Attempt to add replay file for result of match_id {result.match_id} to season archive failed with error:"
                        + os.linesep + traceback.format_exc())
 
 def post_json_content_to_address(json_content, address):

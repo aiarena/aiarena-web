@@ -1,7 +1,7 @@
 import logging
 
 from constance import config
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -21,8 +21,8 @@ class Round(models.Model, LockableModelMixin):
     """ Represents a round of play within a season """
     number = models.IntegerField(blank=True, editable=False)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    started = models.DateTimeField(auto_now_add=True)
-    finished = models.DateTimeField(blank=True, null=True)
+    started = models.DateTimeField(auto_now_add=True, db_index=True)
+    finished = models.DateTimeField(blank=True, null=True, db_index=True)
     complete = models.BooleanField(default=False)
 
     @property
@@ -35,14 +35,12 @@ class Round(models.Model, LockableModelMixin):
     # if all the matches have been run, mark this as complete
     def update_if_completed(self):
         from .match import Match
-        self.lock_me()
-
-        # if there are no matches without results, this round is complete
-        if Match.objects.filter(round=self, result__isnull=True).count() == 0:
-            self.complete = True
-            self.finished = timezone.now()
-            self.save()
-            Season.get_current_season().try_to_close()
+        with transaction.atomic():
+            # if there are no matches without results, this round is complete
+            # if this round close attempt results in a row update, try to close the season
+            if Match.objects.filter(round=self, result__isnull=True).count() == 0 and \
+                    Round.objects.filter(id=self.id, complete=False).update(complete=True, finished=timezone.now()) > 0:
+                self.season.try_to_close()
 
     @staticmethod
     def max_active_rounds_reached():

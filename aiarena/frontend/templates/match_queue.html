@@ -2,18 +2,19 @@
 {% load i18n core_filters %}
 
 {% block content %}
-    {% if requested_matches.count > 0 or round_list.count > 0 %}
-        {% if requested_matches.count > 0 %}
+    {% with requested_count=requested_matches.count %}
+        {% if requested_count > 0 or round_list.count > 0 %}
+        {% if requested_count > 0 %}
             <div class="divider"><span></span><span><h2>Requested matches</h2></span><span></span></div>
-            <table class="row-hover-highlight">
+            <table summary="Table containing information about requested matches" class="row-hover-highlight">
                 <thead>
                 <tr>
-                    <td><b>Match ID</b></td>
-                    <td><b>Bot 1</b></td>
-                    <td><b>Bot 2</b></td>
-                    <td><b>Map</b></td>
-                    <td><b>Started at</b></td>
-                    <td><b>Assigned to</b></td>
+                    <td><strong>Match ID</strong></td>
+                    <td><strong>Bot 1</strong></td>
+                    <td><strong>Bot 2</strong></td>
+                    <td><strong>Map</strong></td>
+                    <td><strong>Started at</strong></td>
+                    <td><strong>Assigned to</strong></td>
                 </tr>
                 </thead>
                 <tbody>
@@ -37,7 +38,7 @@
                             <td>queued...</td>
                         {% endif %}
                         {% if match.assigned_to %}
-                            <td>{{ match.assigned_to }}</td>
+                            <td>{{ match.assigned_to.as_html_link }}</td>
                         {% else %}
                             <td>queued...</td>
                         {% endif %}
@@ -48,15 +49,15 @@
         {% endif %}
         {% for round in round_list %}
             <div class="divider"><span></span><span><h2>{{ round.name }}</h2></span><span></span></div>
-            <table class="row-hover-highlight">
+            <table summary="Table containing information for each round" class="row-hover-highlight">
                 <tbody>
                 <thead>
-                <td><b>Match ID</b></td>
-                <td><b>Bot 1</b></td>
-                <td><b>Bot 2</b></td>
-                <td><b>Map</b></td>
-                <td><b>Started at</b></td>
-                <td><b>Assigned to</b></td>
+                <td><strong>Match ID</strong></td>
+                <td><strong>Bot 1</strong></td>
+                <td><strong>Bot 2</strong></td>
+                <td><strong>Map</strong></td>
+                <td><strong>Started at</strong></td>
+                <td><strong>Assigned to</strong></td>
                 </thead>
                 {% for match in round.matches %}
                     <tr>
@@ -78,7 +79,7 @@
                             <td>queued...</td>
                         {% endif %}
                         {% if match.assigned_to %}
-                            <td>{{ match.assigned_to }}</td>
+                            <td>{{ match.assigned_to.as_html_link }}</td>
                         {% else %}
                             <td>queued...</td>
                         {% endif %}
@@ -88,15 +89,15 @@
             </table>
         {% endfor %}
     {% else %}
-        <table style="min-width: 900px; margin: 0 auto;">
+        <table summary="Table containing match queue information" style="min-width: 900px; margin: 0 auto;">
             <tbody>
             <thead>
-            <td><b>Match ID</b></td>
-            <td><b>Bot 1</b></td>
-            <td><b>Bot 2</b></td>
-            <td><b>Map</b></td>
-            <td><b>Started at</b></td>
-            <td><b>Assigned to</b></td>
+            <td><strong>Match ID</strong></td>
+            <td><strong>Bot 1</strong></td>
+            <td><strong>Bot 2</strong></td>
+            <td><strong>Map</strong></td>
+            <td><strong>Started at</strong></td>
+            <td><strong>Assigned to</strong></td>
             </thead>
             <tr>
                 <td colspan="6">Queued matches will show here.</td>
@@ -104,4 +105,5 @@
             <tbody>
         </table>
     {% endif %}
+    {% endwith %}
 {% endblock %}

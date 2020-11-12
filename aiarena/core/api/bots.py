@@ -23,7 +23,7 @@ class Bots:
                                                '\n'
                                                'We are emailing you to let you know that your bot '
                                                '"' + bot.name + '" has reached our consecutive crash limit and hence been deactivated.\n'
-                                                                 'Please log into ai-arena.net at your convenience to address the issue.\n'
+                                                                 'Please log into aiarena.net at your convenience to address the issue.\n'
                                                                  'Bot logs are available for download when logged in on the bot''s page here: '
                 + settings.SITE_PROTOCOL + '://' + Site.objects.get_current().domain
                 + reverse('bot', kwargs={'pk': bot.id}) + '\n'
@@ -42,6 +42,16 @@ class Bots:
         return Bot.objects.filter(active=True)
 
     @staticmethod
-    def get_active_and_available() -> list:
-        return [bot for bot in Bots.get_active() if not bot.bot_data_is_currently_frozen()]
+    def get_available(bots) -> list:
+        return [bot for bot in bots if not bot.bot_data_is_currently_frozen()]
+
+    @staticmethod
+    def available_is_more_than(bots, amount: int) -> bool:
+        available = 0
+        for bot in bots:
+            if not bot.bot_data_is_currently_frozen():
+                available += 1
+            if available >= amount:
+                return True
+        return False
 

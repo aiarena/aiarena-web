@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from django.utils import timezone
 
 from aiarena.core.models import Result
@@ -15,6 +16,7 @@ class Command(BaseCommand):
         parser.add_argument('--days', type=int,
                             help="Number of days into the past to start cleaning from. Default is {0}.".format(
                                 self._DEFAULT_DAYS_LOOKBACK))
+        parser.add_argument('--verbose', action='store_true', help="Output information with each action.")
 
     def handle(self, *args, **options):
         if options['days'] is not None:
@@ -22,11 +24,18 @@ class Command(BaseCommand):
         else:
             days = self._DEFAULT_DAYS_LOOKBACK
         self.stdout.write('Cleaning up arena client logfiles starting from {0} days into the past...'.format(days))
-        self.stdout.write('Cleaned up {0} logfiles.'.format(self.cleanup_logfiles(days)))
+        self.stdout.write('Cleaned up {0} logfiles.'.format(self.cleanup_logfiles(days, options['verbose'])))
 
-    def cleanup_logfiles(self, days):
-        results = Result.objects.filter(arenaclient_log__isnull=False,
-                                        created__lt=timezone.now() - timedelta(days=days))
+    def cleanup_logfiles(self, days, verbose):
+        self.stdout.write(f'Gathering records to clean...')
+        results = Result.objects.exclude(arenaclient_log='').filter(created__lt=timezone.now() - timedelta(days=days))
+        self.stdout.write(f'{results.count()} records gathered.')
         for result in results:
-            result.arenaclient_log.delete()
+            with transaction.atomic():
+                result.lock_me()
+                result.arenaclient_log_has_been_cleaned = True
+                result.arenaclient_log.delete()
+                result.save()
+                if verbose:
+                    self.stdout.write(f'Match {result.match_id} arena client log deleted.')
         return results.count()

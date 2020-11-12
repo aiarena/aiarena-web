@@ -4,20 +4,20 @@
 
 {% block content %}
 <div class="bot_anker">
-    <div class="anker_header"><i class="material-icons">swap_vert</i><h3>Go to:</h3></div>
-    <div><a href="#bot_top_anker"><b>Top</b></a></div>
-    <div><a href="#bot_rankings_anker"><b>Rankings</b></a></div>
-    <div><a href="#bot_results_anker"><b>Results</b></a></div>
+    <div class="anker_header"><em class="material-icons">swap_vert</em><h3>Go to:</h3></div>
+    <div><a href="#bot_top_anker"><strong>Top</strong></a></div>
+    <div><a href="#bot_rankings_anker"><strong>Rankings</strong></a></div>
+    <div><a href="#bot_results_anker"><strong>Results</strong></a></div>
 </div>
     <div id="bot_top_anker"></div>
     <div class="divider"><span></span><span><h2>{{ bot.name }}</h2></span><span></span></div>
 
     <div id="bot_details_bio">
         <div id="bot_details">
-            <table>
+            <table summary="Table containing bot details">
                 <thead>
                 <tr>
-                    <td><b>Details</b></td>
+                    <td><strong>Details</strong></td>
                     <td>
                         {% if request.user == bot.user %}
                             [<a href="{% url 'bot_edit' bot.pk %}">Edit</a>]
@@ -27,23 +27,23 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td><b>Author</b></td>
+                    <td><strong>Author</strong></td>
                     <td>{{ bot.user.as_html_link }}</td>
                 </tr>
                 <tr>
-                    <td><b>Race</b></td>
+                    <td><strong>Race</strong></td>
                     <td>{{ bot.get_plays_race_display }}</td>
                 </tr>
                 <tr>
-                    <td><b>Type</b></td>
+                    <td><strong>Type</strong></td>
                     <td>{{ bot.get_type_display }}</td>
                 </tr>
                 <tr>
-                    <td><b>Active</b></td>
+                    <td><strong>Active</strong></td>
                     <td>{{ bot.active }}</td>
                 </tr>
                 <tr>
-                    <td><b>Bot Zip</b></td>
+                    <td><strong>Bot Zip</strong></td>
                     <td>
                         {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
                             <a href="{{ bot.bot_zip.url }}">Download</a>
@@ -53,7 +53,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><b>Bot data</b></td>
+                    <td><strong>Bot data</strong></td>
                     <td>
                         {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
                             {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_staff %}
@@ -67,20 +67,20 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><b>Created</b></td>
-                    <td>{{ bot.created }}</td>
+                    <td><strong>Created</strong></td>
+                    <td>{{ bot.created|date:"d. N Y - H:i:s" }}</td>
                 </tr>
                 <tr>
-                    <td><b>Last Updated</b></td>
-                    <td>{{ bot.bot_zip_updated }}</td>
+                    <td><strong>Last Updated</strong></td>
+                    <td>{{ bot.bot_zip_updated|date:"d. N Y - H:i:s" }}</td>
                 </tr>
                 </tbody>
             </table>
             <br/>
-            <table>
+            <table summary="Table containing bot trophies">
                 <thead>
                 <tr>
-                    <td><b>Trophies</b></td>
+                    <td><strong>Trophies</strong></td>
                 </tr>
                 </thead>
                 <tbody>
@@ -101,10 +101,10 @@
             </table>
         </div>
         <div id="bot_bio">
-            <table>
+            <table summary="Table containing the biography">
                 <thead>
                 <tr>
-                    <td><b>Biography</b></td>
+                    <td><strong>Biography</strong></td>
                 </tr>
                 </thead>
                 <tbody>
@@ -122,13 +122,13 @@
     <div id="bot_rankings_anker"></div>
     <div class="divider"><span></span><span><h2>Rankings</h2></span><span></span></div>
     <div id="bot_rankings">
-        <table class="row-hover-highlight">
+        <table summary="Table containing ranking information" class="row-hover-highlight">
             <thead>
             <tr>
-                <td><b>Season</b></td>
-                <td><b>Opened</b></td>
-                <td><b>Closed</b></td>
-                <td><b>ELO</b></td>
+                <td><strong>Season</strong></td>
+                <td><strong>Opened</strong></td>
+                <td><strong>Closed</strong></td>
+                <td><strong>ELO</strong></td>
                 <td></td>
             </tr>
             </thead>
@@ -164,18 +164,19 @@
     <div id="bot_results_anker"></div>
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
-        <table class="row-hover-highlight">
+        <table summary="Table containing bot results" class="row-hover-highlight">
             <thead>
-            <td><b>ID</b></td>
-            <td><b>Date</b></td>
-            <td><b>Opponent</b></td>
-            <td><b>Result</b></td>
-            <td><b>+/-</b></td>
-            <td><b>Avg Step<br/>(ms)</b></td>
-            <td><b>Duration</b></td>
-            <td><b>Replay</b></td>
+            <td><strong>ID</strong></td>
+            <td><strong>Date</strong></td>
+            <td><strong>Opponent</strong></td>
+            <td><strong>Result</strong></td>
+            <td><strong>Cause</strong></td>
+            <td><strong>+/-</strong></td>
+            <td><strong>Avg Step<br/>(ms)</strong></td>
+            <td><strong>Duration</strong></td>
+            <td><strong>Replay</strong></td>
             {% if request.user == bot.user or request.user.is_staff %}
-                <td><b>Log</b></td>
+                <td><strong>Log</strong></td>
             {% endif %}
             </thead>
             <tbody>
@@ -185,18 +186,19 @@
                         <td>{{ result.match.as_html_link }}</td>
                         <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
                         <td>{{ result.opponent.bot.as_html_link }}</td>
-                        <td>{{ result.relative_type }}</td>
+                        <td>{{ result.result }}</td>
+                        <td>{{ result.result_cause }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
                         <td>{{ result.me.step_time_ms|floatformat:3 }}</td>
                         <td>{{ result.game_time_formatted }}</td>
                         {% if result.replay_file %}
-                            <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                            <td><a class="file-link" href="{{ result.replay_file.url }}">Download</a></td>
                         {% else %}
                             <td>Unavailable</td>
                         {% endif %}
                         {% if request.user == bot.user or request.user.is_staff %}
                             {% if result.me.match_log %}
-                                <td><a href="{{ result.me.match_log.url }}">Download</a></td>
+                                <td><a class="file-link" href="{{ result.me.match_log.url }}">Download</a></td>
                             {% else %}
                                 <td>None</td>
                             {% endif %}

@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
+import datetime
 import os
 import sys
 from datetime import timedelta
@@ -20,7 +20,11 @@ from aiarena.core.utils import Elo, EnvironmentType
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
-
+GRAPPELLI_ADMIN_TITLE = "AiArena Admin"
+GRAPPELLI_SWITCH_USER_ORIGINAL = True
+GRAPPELLI_INDEX_DASHBOARD = (
+    "aiarena.frontend.dashboard.CustomIndexDashboard"
+)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -47,21 +51,22 @@ DATABASES = {
         'NAME': 'aiarena',
         'USER': 'aiarena',
         'PASSWORD': 'aiarena',
-        'HOST': 'localhost',  # Or an IP Address that your DB is hosted on
+        'HOST': '127.0.0.1',  # Or an IP Address that your DB is hosted on
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
-        # todo: having this enabled will open a transaction for every request and therefore slow down the site
-        # todo: ideally we will eventually remove this and specify each individual view that needs its own transaction.
-        'ATOMIC_REQUESTS': True,
     }
 }
 
 # Application definition
 
 INSTALLED_APPS = [
+    'sheets',
     'registration',
+    'grappelli.dashboard',
+    'grappelli',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -96,7 +101,11 @@ INSTALLED_APPS = [
     'discord_bind',
     'sslserver',  # This will be removed automatically in non-development environments
     'robots',
+    'django.contrib.admindocs',
+    'drf_yasg',
+
 ]
+SHEETS_CACHE_DISABLED = True
 
 MIDDLEWARE = [
     # This will be removed automatically in non-development environments
@@ -144,7 +153,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100
+    'PAGE_SIZE': 100,
 }
 
 # Constance https://github.com/jazzband/django-constance
@@ -169,10 +178,10 @@ CONSTANCE_CONFIG = {
                                        'Any value below 1 will disable the check for this feature. Default: 0'),
     'MAX_USER_BOT_COUNT': (4, 'Maximum bots a user can have uploaded.'),
     'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE': (1, 'Maximum active bots a user can have per race.'),
-    'ARENACLIENT_DEBUG_ENABLED': (False, 'Enable debugging for arena clients. '
-                                         'This will log extra data in the arena client API. '
-                                         'It will also propagate the setting to the arena clients'),
-    'GETTING_STARTED_URL': ('https://ai-arena.net/wiki/getting-started/',
+    'DEBUG_LOGGING_ENABLED': (False, 'Enable debug logging. '
+                                     'This will log extra data for debugging throughout the website. '
+                                     'It will also propagate the setting to the arena clients'),
+    'GETTING_STARTED_URL': ('https://aiarena.net/wiki/getting-started/',
                             'The URL to send new users to in order to get started.'),
     'DISCORD_CLIENT_ID': ('', 'Client ID used for Discord OAuth'),
     'DISCORD_CLIENT_SECRET': ('', 'Client Secret used for Discord OAuth'),
@@ -184,25 +193,58 @@ CONSTANCE_CONFIG = {
     'MATCH_REQUEST_LIMIT_BRONZE_TIER': (80, 'The periodic limit of match requests for a bronze patreon tier user.'),
     'MATCH_REQUEST_LIMIT_SILVER_TIER': (200, 'The periodic limit of match requests for a silver patreon tier user.'),
     'MATCH_REQUEST_LIMIT_GOLD_TIER': (600, 'The periodic limit of match requests for a gold patreon tier user.'),
-    'MATCH_REQUEST_LIMIT_PLATINUM_TIER': (2000, 'The periodic limit of match requests for a platinum patreon tier user.'),
+    'MATCH_REQUEST_LIMIT_PLATINUM_TIER': (
+    2000, 'The periodic limit of match requests for a platinum patreon tier user.'),
     'MATCH_REQUEST_LIMIT_DIAMOND_TIER': (8000, 'The periodic limit of match requests for a diamond patreon tier user.'),
     'REQUESTED_MATCHES_LIMIT_PERIOD': (
         timedelta(days=30), 'The period length for which a user''s match request limit applies.', timedelta),
-    'ELO_DIFF_RATING_MODIFIER': (0.999, 'Affects how the ELO difference between bots in an upset match (lower ranked bot beats higher ranked) affects the interest score: ELO_DIFF_RATING_MODIFIER^ELO_DIFF-1'),
-    'COMBINED_ELO_RATING_DIVISOR': (200, 'Controls how the combined bot ELO affects the interest score: 1/(1+e^(-AVG_BOT_ELO/COMBINED_ELO_RATING_DIVISOR))-0.5'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER': (
+    50, 'The maximum bot zip file size that a free supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER': (
+    100, 'The maximum bot zip file size that a bronze supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER': (
+    200, 'The maximum bot zip file size that a silver supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER': (
+    300, 'The maximum bot zip file size that a gold supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER': (
+    400, 'The maximum bot zip file size that a platinum supporter tier user can upload to the website.'),
+    'BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER': (
+    500, 'The maximum bot zip file size that a diamond supporter tier user can upload to the website.'),
+    'ELO_DIFF_RATING_MODIFIER': (0.999, 'Affects how the ELO difference between bots in an upset match '
+                                        '(lower ranked bot beats higher ranked) affects the interest score: ELO_DIFF_RATING_MODIFIER^ELO_DIFF-1'),
+    'COMBINED_ELO_RATING_DIVISOR': (200, 'Controls how the combined bot ELO affects the interest score: '
+                                         '1/(1+e^(-AVG_BOT_ELO/COMBINED_ELO_RATING_DIVISOR))-0.5'),
+    'ENABLE_ELO_SANITY_CHECK': (True, 'Whether to sanity check the total sum of bot ELO '
+                                      'on result submission in order to detect ELO corruption.'),
+    'BOT_UPLOADS_ENABLED': (True, 'Whether authors can upload new bots to the website.'),
+    'DISCORD_INVITE_LINK': ('', 'An invite link to the Discord community server.'),
+    'PATREON_LINK': ('', 'Link the Patreon.'),
+    'GITHUB_LINK': ('', 'Link to GitHub.'),
+    'TWITCH_LINK': ('', 'Link to Twitch channel.'),
+    'YOUTUBE_LINK': ('', 'Link to YouTube.'),
+    'ADMIN_CLUSTER_LINK': ('', 'Admin link to the cluster management.'),
+    'ADMIN_WEBSTATS_LINK': ('', 'Admin link to view web stats.'),
+    'PUBLIC_BANNER_MESSAGE': ('', 'Message displayed publicly at the top of the website.'),
+    'LOGGED_IN_BANNER_MESSAGE': ('', 'Message displayed to logged in users at the top of the website.'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
-    'Bots': ('MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
-    'General': ('ARENACLIENT_DEBUG_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES'),
+    'Bots': ('BOT_UPLOADS_ENABLED', 'MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
+    'General': ('DEBUG_LOGGING_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES',
+                'ENABLE_ELO_SANITY_CHECK', 'PUBLIC_BANNER_MESSAGE', 'LOGGED_IN_BANNER_MESSAGE'),
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',
                        'MATCH_REQUEST_LIMIT_SILVER_TIER', 'MATCH_REQUEST_LIMIT_GOLD_TIER',
                        'MATCH_REQUEST_LIMIT_PLATINUM_TIER', 'MATCH_REQUEST_LIMIT_DIAMOND_TIER',
                        'REQUESTED_MATCHES_LIMIT_PERIOD',),
+    'File size limits': ('BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER',
+                         'BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER',
+                         'BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER',),
     'Ladders': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',
                 'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
     'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',),
-    'Match interest analysis': ('ELO_DIFF_RATING_MODIFIER', 'COMBINED_ELO_RATING_DIVISOR',)
+    'Match interest analysis': ('ELO_DIFF_RATING_MODIFIER', 'COMBINED_ELO_RATING_DIVISOR',),
+    'Website links': ('DISCORD_INVITE_LINK', 'PATREON_LINK', 'GITHUB_LINK', 'TWITCH_LINK', 'YOUTUBE_LINK',
+                      'ADMIN_CLUSTER_LINK', 'ADMIN_WEBSTATS_LINK', ),
 }
 
 LOGGING = {
@@ -230,12 +272,12 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['django-file'],
+            'handlers': ['django-file', ],
             'level': 'WARNING',
             'propagate': True,
         },
         'aiarena': {
-            'handlers': ['aiarena-file'],
+            'handlers': ['aiarena-file', ],
             'level': 'WARNING',
             'propagate': True,
         },
@@ -302,21 +344,10 @@ AUTH_USER_MODEL = "core.User"
 FILE_UPLOAD_PERMISSIONS = 0o644
 
 # elo_k for calculating ladder ELO updates
-ELO_K = 16
+ELO_K = 8
 
 # starting ELO for bots
 ELO_START_VALUE = 1600
-
-# Enable a sanity check every time a result is submitted
-ENABLE_ELO_SANITY_CHECK = True
-
-# ELO implementation
-ELO = Elo(ELO_K)
-
-# For convenience
-BOT_ZIP_MAX_SIZE_MB = 50
-# this is the setting that actually dictates the max zip size
-BOT_ZIP_MAX_SIZE = 1024 * 1024 * BOT_ZIP_MAX_SIZE_MB
 
 # This will post results received to another webserver
 # if this is None, it is disabled
@@ -360,6 +391,7 @@ ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
 
 # django wiki
 WIKI_ACCOUNT_HANDLING = True
+WIKI_ATTACHMENTS_EXTENSIONS = ["pdf", "doc", "odt", "docx", "txt", "zip"]
 WIKI_ACCOUNT_SIGNUP_ALLOWED = False
 SITE_ID = 1
 
@@ -378,3 +410,6 @@ if ENVIRONMENT_TYPE != EnvironmentType.DEVELOPMENT:
     MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
 
     INSTALLED_APPS.remove('sslserver')
+
+# load this after the env file so if the ELO_K value was overridden, it will be applied properly
+ELO = Elo(ELO_K)

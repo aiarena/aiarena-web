@@ -1,3 +1,5 @@
+from .arena_client import ArenaClient
+from .arena_client_status import ArenaClientStatus
 from .bot import Bot
 from .map import Map
 from .match import Match
@@ -10,3 +12,5 @@ from .season_participation import SeasonParticipation
 from .trophy import Trophy
 from .user import User
 from .website_notice import WebsiteNotice
+from .relative_result import RelativeResult
+from .news import News

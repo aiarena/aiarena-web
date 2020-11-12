@@ -22,6 +22,10 @@ from django.contrib.sitemaps.views import sitemap
 from django.urls import path, re_path
 from django.views.generic.base import TemplateView
 
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
 from aiarena.frontend import views as core_views
 from aiarena.sitemaps import StaticViewSitemap
 
@@ -29,8 +33,23 @@ sitemaps = {
     'static': StaticViewSitemap,
 }
 
+schema_view = get_schema_view(
+   openapi.Info(
+      title="AI Arena API",
+      default_version='v1',
+      description="AI-Arena API Swagger Documentation",
+      terms_of_service="https://aiarena.net/",
+      contact=openapi.Contact(email="staff@aiarena.net"),
+      license=openapi.License(name="GPLv3"),
+   ),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+)
+
 urlpatterns = [  # todo: replace usage of url with path for all these
                   path('__debug__/', include(debug_toolbar.urls)),
+                  path('grappelli/', include('grappelli.urls')), # Grappelli URLS
+                  path('admin/doc/', include('django.contrib.admindocs.urls')),
                   path('admin/', admin.site.urls),
                   url(r'^accounts/', include('registration.backends.default.urls')),
                   url(r'^accounts/', include('django.contrib.auth.urls')),
@@ -39,7 +58,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('ranking/', core_views.Ranking.as_view(), name='ranking'),
                   path('results/', core_views.Results.as_view(), name='results'),
                   path('arenaclients/', core_views.ArenaClients.as_view(), name='arenaclients'),
-                  path('arenaclients/<int:pk>/', core_views.ArenaClient.as_view(), name='arenaclient'),
+                  path('arenaclients/<int:pk>/', core_views.ArenaClientView.as_view(), name='arenaclient'),
                   path('match-queue/', core_views.MatchQueue.as_view(), name='match_queue'),
                   path('stream/', TemplateView.as_view(template_name='stream.html'), name='stream'),
 
@@ -66,6 +85,10 @@ urlpatterns = [  # todo: replace usage of url with path for all these
 
                   url('avatar/', include('avatar.urls')),
 
+                  url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+
+
+                  path('finance/', core_views.project_finance, name='finance'),
                   path('profile/', core_views.UserProfile.as_view(), name='profile'),
                   path('profile/edit/', core_views.UserProfileUpdate.as_view(), name='profile_edit'),
                   path('profile/token/', core_views.UserTokenDetailView.as_view(), name='profile_token'),

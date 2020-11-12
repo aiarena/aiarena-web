@@ -5,7 +5,7 @@
     <div class="divider"><span></span><span><h2>Match {{ match.id }}</h2></span><span></span></div>
     <div class="registration-form" style="text-align: center; margin-bottom: 40px;">
         <h2>
-            <i class="material-icons" style="font-size: 48px; padding-bottom:15px;">emoji_events</i><br/>
+            <em class="material-icons" style="font-size: 48px; padding-bottom:15px;">emoji_events</em><br/>
 
             {# Participant 1 #}
 
@@ -13,14 +13,14 @@
                 {# ELO movement indicator #}
                 {% if match.participant1.elo_change and match.participant1.elo_change != 0 %}
                     {% if match.participant1.elo_change > 0 %}
-                        <i class="material-icons"
-                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                        <em class="material-icons"
+                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
                     {% elif match.participant1.elo_change < 0 %}
-                        <i class="material-icons"
-                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                        <em class="material-icons"
+                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                     {% endif %}
                 {% else %}
-                    <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_forward</i>
+                    <em class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_forward</em>
                 {% endif %}
 
                 {# ELO change #}
@@ -44,14 +44,14 @@
                 {# ELO movement indicator #}
                 {% if match.participant2.elo_change and match.participant2.elo_change != 0 %}
                     {% if match.participant2.elo_change > 0 %}
-                        <i class="material-icons"
-                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                        <em class="material-icons"
+                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
                     {% elif match.participant2.elo_change < 0 %}
-                        <i class="material-icons"
-                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                        <em class="material-icons"
+                           style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                     {% endif %}
                 {% else %}
-                    <i class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                    <em class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</em>
                 {% endif %}
             {% else %}
             {% endif %}
@@ -65,13 +65,13 @@
         <table id="match_details">
             <thead>
             <tr>
-                <td><b>Started at</b></td>
-                <td><b>Finished at</b></td>
-                <td><b>Assigned to</b></td>
-                <td><b>Result</b></td>
-                <td><b>Winner</b></td>
-                <td><b>Duration</b></td>
-                <td><b>Download</b></td>
+                <td><strong>Started at</strong></td>
+                <td><strong>Finished at</strong></td>
+                <td><strong>Assigned to</strong></td>
+                <td><strong>Result</strong></td>
+                <td><strong>Winner</strong></td>
+                <td><strong>Duration</strong></td>
+                <td><strong>Download</strong></td>
             </tr>
             <thead>
             <tbody>
@@ -87,7 +87,7 @@
                 {% endif %}
 
                 {% if match.assigned_to %}
-                    <td>{{ match.assigned_to }}</td>
+                    <td>{{ match.assigned_to.as_html_link }}</td>
                 {% else %}
                     <td>queued...</td>
                 {% endif %}
@@ -113,13 +113,13 @@
                         None
                     {% else %}
                         {% if match.result.replay_file %}
-                            <a href="{{ match.result.replay_file.url }}">Replay</a>
+                            <a class="file-link" href="{{ match.result.replay_file.url }}">Replay</a>
                         {% endif %}
                         {% if match.result.replay_file and match.result.arenaclient_log %}
                             |
                         {% endif %}
                         {% if match.result.arenaclient_log %}
-                            <a href="{{ match.result.arenaclient_log.url }}">AC Log</a>
+                            <a class="file-link" href="{{ match.result.arenaclient_log.url }}">AC Log</a>
                         {% endif %}
                     {% endif %}
                 </td>
@@ -128,8 +128,8 @@
             </tbody>
             <thead>
             <tr>
-                <td><b>Season</b></td>
-                <td><b>Round</b></td>
+                <td><strong>Season</strong></td>
+                <td><strong>Round</strong></td>
             </tr>
             <thead>
             <tbody>

@@ -22,3 +22,11 @@ class Map(models.Model):
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         return Map.objects.filter(competition=competition).order_by('?').first()
+
+    def activate(self):
+        self.active = True
+        self.save()
+
+    def deactivate(self):
+        self.active = False
+        self.save()

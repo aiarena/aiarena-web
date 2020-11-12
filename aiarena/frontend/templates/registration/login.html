@@ -6,7 +6,7 @@
 <div class="login-form">
 <div class="form-box">
 <form method="post" action="">
-  <i class="material-icons" style="padding:0px; font-size:32px; float:left; padding-right:12x;">how_to_reg</i>
+  <em class="material-icons" style="padding:0px; font-size:32px; float:left; padding-right:12x;">how_to_reg</em>
   <h2 style="padding-top:5px;">Credentials</h2>
   {% csrf_token %}
   {{ form.as_p }}
@@ -16,10 +16,10 @@
 </form>
   </div>
   <div class="pw-reg-box">
-<div class="login-icon"> <i class="material-icons" style="padding:0px; font-size:32px;">mood_bad</i></div>
+<div class="login-icon"> <em class="material-icons" style="padding:0px; font-size:32px;">mood_bad</em></div>
   <div id="pw-reset">  {% trans "Forgot password" %}? <br/><a href="{% url 'password_reset' %}">{% trans "Reset it" %}</a>!</div>
     <br/>
-  <div class="regi-icon"> <i class="material-icons" style="padding:0px;font-size:32px;">sentiment_very_dissatisfied</i></div>
+  <div class="regi-icon"> <em class="material-icons" style="padding:0px;font-size:32px;">sentiment_very_dissatisfied</em></div>
 <div id="register"> {% trans "Not member" %}? <br/><a href="{% url 'registration_register' %}">{% trans "Register" %}</a>!</div>
 </div>
   <br/>

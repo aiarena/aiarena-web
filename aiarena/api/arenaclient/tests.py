@@ -1,19 +1,18 @@
 import os
-from datetime import timedelta
 
 from constance import config
 from django.db.models import Sum
-from django.utils import timezone
+from django.test import TransactionTestCase
 
 from aiarena.core.api import Matches
-from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map
-from aiarena.core.models.competition import Competition
-from aiarena.core.tests.tests import LoggedInTestCase, MatchReadyTestCase
+from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map, \
+    ArenaClient
+from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
 
 
-class MatchesTestCase(LoggedInTestCase):
+class MatchesTestCase(LoggedInMixin, TransactionTestCase):
     def setUp(self):
         super(MatchesTestCase, self).setUp()
         self.regularUser2 = User.objects.create_user(username='regular_user2', password='x',
@@ -33,34 +32,37 @@ class MatchesTestCase(LoggedInTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
+        # no current season
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 200)
+
+        # needs a valid season to be able to activate a bot.
+        self._create_open_season()
+
         # no maps
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # not enough active bots
-        map = self._create_map('test_map')
+        self._create_map('test_map')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # not enough active bots
         bot1 = self._create_bot(self.regularUser1, 'testbot1')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # not enough active bots
         bot2 = self._create_bot(self.regularUser1, 'testbot2')
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
-
-        # needs a valid season to be able to activate a bot.
-        season = self._create_open_season()
-        season.competition.map_set.add(map)
+        self.assertEqual(response.status_code, 200)
 
         # not enough active bots
         bot1.active = True
         bot1.save()
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # success
         bot2.active = True
@@ -102,56 +104,17 @@ class MatchesTestCase(LoggedInTestCase):
 
         # not enough available bots
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)
-
-    def test_previous_match_timeout(self):
-        # avoid old tests breaking that were pre-this feature
-        config.REISSUE_UNFINISHED_MATCHES = False
-
-        self.client.force_login(User.objects.get(username='arenaclient1'))
-        season = self._create_open_season()
-        season.competition.map_set.add(self._create_map('test_map'))
-
-        bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
-        bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
-        bot3 = self._create_active_bot(self.regularUser1, 'testbot3', 'P')
-        bot4 = self._create_active_bot(self.regularUser1, 'testbot4', 'R')
-        bot5 = self._create_active_bot(self.regularUser2, 'testbot5', 'T')
-        bot6 = self._create_active_bot(self.regularUser2, 'testbot6', 'Z')
-        bot7 = self._create_active_bot(self.regularUser2, 'testbot7', 'P')
-        bot8 = self._create_active_bot(self.regularUser2, 'testbot8', 'R')
-
-        response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 201)
-
-        # save the match for modification
-        match1 = Match.objects.get(id=response.data['id'])
-
-        # generate a new match so we can check it isn't interfered with
-        response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 201)
-        match2 = Match.objects.get(id=response.data['id'])
-
-        # set the created time back into the past long enough for it to cause a time out
-        match1.started = timezone.now() - (config.TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
-        match1.save()
-
-        # this should trigger the bots to be forced out of the match
-        response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 201)
-
-        # confirm a result was registered
-        self.assertTrue(match1.result is not None)
 
 
     def test_match_reissue(self):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        season = self._create_open_season()
-        self._create_map('test_map', season.competition)
+        self._create_map('test_map')
+        self._create_open_season()
 
         self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -171,8 +134,8 @@ class MatchesTestCase(LoggedInTestCase):
         config.MAX_ACTIVE_ROUNDS = 2
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        season = self._create_open_season()
-        self._create_map('test_map', season.competition)
+        self._create_map('test_map')
+        self._create_open_season()
 
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -197,7 +160,7 @@ class MatchesTestCase(LoggedInTestCase):
 
         # Round 3 - should fail due to active round limit
         response = self.client.post('/api/arenaclient/matches/')
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
         self.assertTrue('detail' in response.data)
         self.assertEqual(u'There are available bots, but the ladder has reached the maximum active rounds allowed and ' \
                          'serving a new match would require generating a new one. Please wait until matches from current ' \
@@ -206,12 +169,12 @@ class MatchesTestCase(LoggedInTestCase):
 
     def test_match_blocking(self):
         # create an extra arena client for this test
-        self.arenaclientUser2 = User.objects.create_user(username='arenaclient2', email='arenaclient2@dev.aiarena.net',
-                                                         type='ARENA_CLIENT')
+        self.arenaclientUser2 = ArenaClient.objects.create(username='arenaclient2', email='arenaclient2@dev.aiarena.net',
+                                                         type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        season = self._create_open_season()
-        map = self._create_map('test_map', season.competition)
+        self._create_map('test_map')
+        self._create_open_season()
 
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -226,7 +189,7 @@ class MatchesTestCase(LoggedInTestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(u"Failed to start match. There might not be any available participants.", response.data['detail'])
 
-        Matches.request_match(bot1, map=map)
+        Matches.request_match(self.regularUser2, bot1)
 
         # now we should be able to get a match - the requested one
         response = self.client.post('/api/arenaclient/matches/')
@@ -234,7 +197,7 @@ class MatchesTestCase(LoggedInTestCase):
 
 
 
-class ResultsTestCase(LoggedInTestCase):
+class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data')
     uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data_backup')
     uploaded_match_log_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'match-logs', '{0}')
@@ -243,15 +206,16 @@ class ResultsTestCase(LoggedInTestCase):
     def test_create_results(self):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        map = self._create_map('test_map')
-        season = self._create_open_season()
-        season.competition.map_set.add(map)
+        self._create_map('test_map')
+        self._create_open_season()
 
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
 
         # post a standard result
-        match = self._post_to_matches().data
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        match = response.data
         response = self._post_to_results(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
@@ -261,23 +225,20 @@ class ResultsTestCase(LoggedInTestCase):
         # check bot datas exist
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
-        # check hashes
-        match1bot1 = MatchParticipation.objects.get(bot=bot1,
-                                                    match_id=match['id'])  # use this to determine which hash to match
-        if match1bot1.participant_number == 1:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-        else:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+
+        # check hashes match set 0
+        self._check_hashes(bot1, bot2, match['id'], 0)
+
         # check match logs exist
         self.assertTrue(os.path.exists(self.uploaded_arenaclient_log_path.format(match['id'])))
         self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(p1.id)))
         self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(p2.id)))
 
-        # post a standard result
-        match = self._post_to_matches().data
-        response = self._post_to_results(match['id'], 'Player1Win')
+        # Post a result with different bot datas
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        match = response.data
+        self._post_to_results_bot_datas_set_1(match['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
         # check bot datas and their backups exist
@@ -285,14 +246,10 @@ class ResultsTestCase(LoggedInTestCase):
         self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot1.id)))
         self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot2.id)))
-        # todo: change bot_data content so hashes are alterred
-        # check hashes - nothing should have changed
-        if match1bot1.participant_number == 1:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-        else:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+
+        # check hashes - should be updated to set 1
+        self._check_hashes(bot1, bot2, match['id'], 1)
+
         # check match logs exist
         self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(match['id'])))
         self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(p1.id)))
@@ -300,18 +257,11 @@ class ResultsTestCase(LoggedInTestCase):
 
         # post a standard result with no bot1 data
         match = self._post_to_matches().data
-        response = self._post_to_results_no_bot1_data(match['id'], 'Player1Win')
+        response = self._post_to_results_no_bot1_data(match['id'], 'Player1Win', 1)
         self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
-        match3bot1 = MatchParticipation.objects.get(bot=bot1,
-                                                    match_id=match['id'])  # use this to determine which hash to match
-        if match3bot1.participant_number == 1:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-        else:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+        self._check_hashes(bot1, bot2, match['id'], 1)
 
         # ensure no files got wiped
         self.assertTrue(Bot.objects.get(id=bot1.id).bot_data)
@@ -319,53 +269,46 @@ class ResultsTestCase(LoggedInTestCase):
 
         # post a standard result with no bot2 data
         match = self._post_to_matches().data
-        response = self._post_to_results_no_bot2_data(match['id'], 'Player1Win')
+        response = self._post_to_results_no_bot2_data(match['id'], 'Player1Win', 1)
         self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
-        match4bot1 = MatchParticipation.objects.get(bot=bot1,
-                                                    match_id=match['id'])  # use this to determine which hash to match
-        if match4bot1.participant_number == 1:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-        else:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+        self._check_hashes(bot1, bot2, match['id'], 1)
 
         # test that requested matches don't update bot_data
-        match5 = Matches.request_match(bot1, bot2, map, self.staffUser1)
-        self._post_to_results_updated_datas(match5.id, 'Player1Win')
+        match5 = Matches.request_match(self.staffUser1, bot1, bot2, Map.random_active())
+        self._post_to_results_bot_datas_set_1(match5.id, 'Player1Win')
 
         # check hashes - nothing should have changed
-        match5bot1 = MatchParticipation.objects.get(bot=bot1,
-                                                    match_id=match5.id)  # use this to determine which hash to match
-        if match5bot1.participant_number == 1:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
+        self._check_hashes(bot1, bot2, match5.id, 1)
+
+        # post a win without a replay - should fail
+        match = self._post_to_matches().data
+        response = self._post_to_results_no_replay(match['id'], 'Player2Win')
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue('non_field_errors' in response.data)
+        self.assertEqual(response.data['non_field_errors'][0],
+                         'A win/loss or tie result must be accompanied by a replay file.')
+
+        # no hashes should have changed
+        self._check_hashes(bot1, bot2, match['id'], 1)
+
+    def _check_hashes(self, bot1, bot2, match_id, data_index):
+        # check hashes - nothing should have changed
+        match_bot = MatchParticipation.objects.get(bot=bot1,
+                                                   match_id=match_id)  # use this to determine which hash to match
+        if match_bot.participant_number == 1:
+            self.assertEqual(self.test_bot_datas['bot1'][data_index]['hash'], Bot.objects.get(id=bot1.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot_datas['bot2'][data_index]['hash'], Bot.objects.get(id=bot2.id).bot_data_md5hash)
         else:
-            self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-            self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
-
-        # post a win without a replay - now allowed due to corrupt replays being omitted
-        # match = self._post_to_matches().data
-        # response = self._post_to_results_no_replay(match['id'], 'Player2Win')
-        # self.assertEqual(response.status_code, 400)
-        # self.assertTrue('non_field_errors' in response.data)
-        # self.assertEqual(response.data['non_field_errors'][0], 'A win/loss or tie result must contain a replay file.')
-
-        # check hashes - nothing should have changed
-        # if participant.participant_number == 1:
-        #     self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
-        #     self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-        # else:
-        #     self.assertEqual(self.test_bot1_data_hash, Bot.objects.get(id=bot2.id).bot_data_md5hash)
-        #     self.assertEqual(self.test_bot2_data_hash, Bot.objects.get(id=bot1.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot_datas['bot1'][data_index]['hash'], Bot.objects.get(id=bot2.id).bot_data_md5hash)
+            self.assertEqual(self.test_bot_datas['bot2'][data_index]['hash'], Bot.objects.get(id=bot1.id).bot_data_md5hash)
 
     def test_create_result_bot_not_in_match(self):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        season = self._create_open_season()
-        season.competition.map_set.add(self._create_map('test_map'))
+        self._create_map('test_map')
+        self._create_open_season()
 
         # Create 3 bots, so after a round is generated, we'll have some unstarted matches
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
@@ -398,8 +341,8 @@ class ResultsTestCase(LoggedInTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        season = self._create_open_season()
-        season.competition.map_set.add(self._create_map('test_map'))
+        self._create_map('test_map')
+        self._create_open_season()
 
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
@@ -422,7 +365,7 @@ class ResultsTestCase(LoggedInTestCase):
 
         # not enough active bots
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
         # Post a successful match, then retry the crashes to make sure the previous ones don't affect the check
         bot1.active = True
@@ -451,10 +394,10 @@ class ResultsTestCase(LoggedInTestCase):
 
         # not enough active bots
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.status_code, 200)
 
 
-class EloTestCase(LoggedInTestCase):
+class EloTestCase(LoggedInMixin, TransactionTestCase):
     """
     Tests to ensure ELO calculations run properly.
     """
@@ -465,8 +408,8 @@ class EloTestCase(LoggedInTestCase):
 
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
-        season = self._create_open_season()
-        self._create_map('testmap', season.competition)
+        self._create_map('testmap')
+        self._create_open_season()
 
         # activate the required bots
         self.regularUserBot1.active = True
@@ -501,26 +444,26 @@ class EloTestCase(LoggedInTestCase):
         ]
 
         self.expected_resultant_elos = [
-            [1608, 1592],
+            [1604, 1596],
             [1600, 1600],
+            [1604, 1596],
             [1608, 1592],
-            [1616, 1584],
-            [1623, 1577],
-            [1622, 1578],
-            [1621, 1579],
             [1612, 1588],
-            [1611, 1589],
-            [1602, 1598],
-            [1610, 1590],
-            [1618, 1582],
-            [1625, 1575],
+            [1612, 1588],
+            [1612, 1588],
+            [1608, 1592],
+            [1608, 1592],
+            [1604, 1596],
+            [1608, 1592],
+            [1612, 1588],
             [1616, 1584],
-            [1623, 1577],
+            [1612, 1588],
+            [1616, 1584],
+            [1620, 1580],
+            [1620, 1580],
+            [1624, 1576],
+            [1627, 1573],
             [1630, 1570],
-            [1629, 1571],
-            [1636, 1564],
-            [1642, 1558],
-            [1648, 1552],
         ]
 
     def CreateMatch(self):
@@ -578,14 +521,15 @@ class EloTestCase(LoggedInTestCase):
         self.regularUserBot1.elo = ELO_START_VALUE - 1
         self.regularUserBot1.save()
 
-        match = self._post_to_matches().data
-        self._post_to_results(match['id'], 'Player1Win')
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        self._post_to_results(response.data['id'], 'Player1Win')
 
         # with open(log_file, "r") as f:
         #     self.assertFalse("did not match expected value of" in f.read())
 
 
-class RoundRobinGenerationTestCase(MatchReadyTestCase):
+class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
     def setUp(self):
         super(RoundRobinGenerationTestCase, self).setUp()
         self.client.force_login(User.objects.get(username='arenaclient1'))
@@ -709,3 +653,13 @@ class RoundRobinGenerationTestCase(MatchReadyTestCase):
 
         # check result count - should have 2 rounds worth of results
         self.assertEqual(Result.objects.count(), expectedMatchCountPerRound * 2)
+
+
+class SetStatusTestCase(LoggedInMixin, TransactionTestCase):
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(User.objects.get(username='arenaclient1'))
+
+    def test_set_status(self):
+        return self.client.post('/api/arenaclient/set-status/',
+                                {'status': 'idle'})

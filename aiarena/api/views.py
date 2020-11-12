@@ -7,9 +7,10 @@ from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.reverse import reverse
+from django.db.models import Prefetch
 
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, SeasonParticipation, Season
-
+from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
 logger = logging.getLogger(__name__)
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -22,7 +23,8 @@ logger = logging.getLogger(__name__)
 bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
                      'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_zip', \
                      'bot_zip_md5hash', 'bot_data_publicly_downloadable', 'bot_data', 'bot_data_md5hash'
-bot_filter_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
+
+bot_search_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
                     'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_data_publicly_downloadable'
 map_include_fields = 'id', 'name', 'file', 'active',
 map_filter_fields = 'id', 'name', 'active',
@@ -33,7 +35,8 @@ matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', '
                                    'elo_change', 'avg_step_time', 'result', 'result_cause',
 result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps', \
                         'submitted_by', 'arenaclient_log', 'interest_rating', 'date_interest_rating_calculated',
-result_filter_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
+
+result_search_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
                        'submitted_by', 'interest_rating', 'date_interest_rating_calculated',
 round_include_fields = 'id', 'number', 'season', 'started', 'finished', 'complete',
 season_include_fields = 'id', 'number', 'date_created', 'date_opened', 'date_closed', 'status',
@@ -84,6 +87,7 @@ class BotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bot
         fields = bot_include_fields
+        ref_name = "website"
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -92,13 +96,13 @@ class BotViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Bot data view
     """
-    queryset = Bot.objects.all()
+    queryset = Bot.objects.all().select_related('user')
     serializer_class = BotSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = bot_filter_fields
-    search_fields = bot_filter_fields
-    ordering_fields = bot_filter_fields
+    filterset_class = BotFilter
+    search_fields = bot_search_fields
+    ordering_fields = bot_search_fields
 
     @action(detail=True, methods=['GET'], name='Download a bot\'s zip file', url_path='zip')
     def download_zip(self, request, *args, **kwargs):
@@ -127,6 +131,7 @@ class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
         fields = map_include_fields
+        ref_name = 'website'
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -169,11 +174,11 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
-    queryset = MatchParticipation.objects.all()
+    queryset = MatchParticipation.objects.all().select_related('bot', 'bot__user')
     serializer_class = MatchParticipationSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = matchparticipation_filter_fields
+    filterset_class = MatchParticipationFilter
     search_fields = matchparticipation_filter_fields
     ordering_fields = matchparticipation_filter_fields
 
@@ -219,10 +224,10 @@ class ResultSerializer(serializers.ModelSerializer):
     bot2_name = serializers.SerializerMethodField()
 
     def get_bot1_name(self, obj):
-        return obj.match.matchparticipation_set.get(participant_number=1).bot.name
+        return obj.match.participants[0].bot.name
 
     def get_bot2_name(self, obj):
-        return obj.match.matchparticipation_set.get(participant_number=2).bot.name
+        return obj.match.participants[1].bot.name
 
     class Meta:
         model = Result
@@ -235,13 +240,15 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
-    queryset = Result.objects.all()
+    queryset = Result.objects.all().select_related('winner').prefetch_related(
+        Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().select_related('bot'),
+                 to_attr='participants'))
     serializer_class = ResultSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = result_filter_fields
-    search_fields = result_filter_fields
-    ordering_fields = result_filter_fields
+    filterset_class = ResultFilter
+    search_fields = result_search_fields
+    ordering_fields = result_search_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -251,6 +258,7 @@ class MatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Match
         fields = match_include_fields + ('result',)
+        ref_name = 'website'
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -259,11 +267,16 @@ class MatchViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Match data view
     """
-    queryset = Match.objects.all()
+    queryset = Match.objects.all().select_related('result',
+                                                  'map',
+                                                  'assigned_to',
+                                                  'requested_by').prefetch_related(
+        Prefetch('matchparticipation_set', MatchParticipation.objects.all().select_related('bot'),
+                 to_attr='participants'))
     serializer_class = MatchSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = match_include_fields
+    filterset_class = MatchFilter
     search_fields = match_include_fields
     ordering_fields = match_include_fields
 

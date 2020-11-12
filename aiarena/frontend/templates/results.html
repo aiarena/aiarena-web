@@ -3,18 +3,18 @@
 {% load humanize %}
 {% block content %}
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
-    <table class="row-hover-highlight">
+    <table summary="Table containing results" class="row-hover-highlight">
         <thead>
-        <td><b>ID</b></td>
-        <td><b>Date</b></td>
+        <td><strong>ID</strong></td>
+        <td><strong>Date</strong></td>
         {# Remove padding so the bot name and ELO change sit closer together #}
-        <td style="padding-right: 0"><b>Bot 1</b></td>
+        <td style="padding-right: 0"><strong>Bot 1</strong></td>
         <td style="padding-left: 0"></td>
-        <td style="padding-right: 0"><b>Bot 2</b></td>
+        <td style="padding-right: 0"><strong>Bot 2</strong></td>
         <td style="padding-left: 0"></td>
-        <td><b>Result</b></td>
-        <td><b>Duration</b></td>
-        <td><b>Replay</b></td>
+        <td><strong>Result</strong></td>
+        <td><strong>Duration</strong></td>
+        <td><strong>Replay</strong></td>
         </thead>
         <tbody>
         {% for result in result_list %}
@@ -26,7 +26,7 @@
                     {% if p.participant_number == 1 %}
                         <td style="padding-right: 0">
                             {% if result.winner == p.bot %}
-                                <b>[{{ p.bot.as_html_link }}]</b>
+                                <strong>[{{ p.bot.as_html_link }}]</strong>
                             {% else %}
                                 {{ p.bot.as_html_link }}
                             {% endif %}
@@ -36,12 +36,12 @@
                             {{ p.elo_change |format_elo_change }}
                             {% if p.elo_change and p.elo_change != 0 %}
                                 {% if p.elo_change > 0 %}
-                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
                                 {% elif p.elo_change < 0 %}
-                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                                 {% endif %}
                             {% else %}
-                                <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                                <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</em>
                             {% endif %}
                         </td>
                     {% endif %}
@@ -51,7 +51,7 @@
                     {% if p.participant_number == 2 %}
                         <td style="padding-right: 0">
                             {% if result.winner == p.bot %}
-                                <b>[{{ p.bot.as_html_link }}]</b>
+                                <strong>[{{ p.bot.as_html_link }}]</strong>
                             {% else %}
                                 {{ p.bot.as_html_link }}
                             {% endif %}
@@ -61,12 +61,12 @@
                             {{ p.elo_change |format_elo_change }}
                             {% if p.elo_change and p.elo_change != 0 %}
                                 {% if p.elo_change > 0 %}
-                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</i>
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
                                 {% elif p.elo_change < 0 %}
-                                    <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</i>
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                                 {% endif %}
                             {% else %}
-                                <i class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</i>
+                                <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">fast_rewind</em>
                             {% endif %}
                         </td>
                     {% endif %}
@@ -77,7 +77,7 @@
                 <td>{{ result.game_time_formatted }}</td>
 
                 {% if result.replay_file %}
-                    <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                    <td><a class="file-link" href="{{ result.replay_file.url }}">Download</a></td>
                 {% else %}
                     <td>Unavailable</td>
                 {% endif %}

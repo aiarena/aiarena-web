@@ -1,17 +1,19 @@
 from django.db import models
+from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
 
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.validators import validate_not_nan, validate_not_inf
 from .bot import Bot
 from .match import Match
+from .mixins import LockableModelMixin
 
 
 def match_log_upload_to(instance, filename):
     return '/'.join(['match-logs', str(instance.id)])
 
 
-class MatchParticipation(models.Model):
+class MatchParticipation(models.Model, LockableModelMixin):
     RESULT_TYPES = (
         ('none', 'None'),
         ('win', 'Win'),
@@ -50,6 +52,8 @@ class MatchParticipation(models.Model):
     If this is False, update_bot_data is also assumed False"""
     update_bot_data = models.BooleanField(default=True)
     """Whether to update this bot's data after the match."""
+    match_log_has_been_cleaned = models.BooleanField(default=True)
+    """This is set to true when the match log file is deleted by the cleanup job."""
 
     def __str__(self):
         return self.bot.name
@@ -62,24 +66,27 @@ class MatchParticipation(models.Model):
     def crashed(self):
         return self.result == 'loss' and self.result_cause in ['crash', 'timeout', 'initialization_failure']
 
-    @property
+    @cached_property
     def season_participant(self):
-        return self.match.round.season.seasonparticipation_set.get(bot=self.bot)
+        obj = self.__class__.objects.select_related('match', 'match__round', 'match__round__season').get(id=self.id)
+        return obj.match.round.season.seasonparticipation_set.get(bot_id=self.bot_id)
 
-    @property
+    @cached_property
     def allow_parallel_run(self):
         """Whether this bot can participate in this match when already in other non-parallel matches."""
-        return not self.use_bot_data or not self.update_bot_data
+        data_dict = self.__class__.objects.values('use_bot_data', 'update_bot_data').get(id=self.id)
+        return not data_dict['use_bot_data'] or not data_dict['update_bot_data']
 
-    @property
+    @cached_property
     def available_to_start_match(self):
         """Whether this bot can start the match at this time."""
         if not self.allow_parallel_run:
             # Get all the matches that contain this bot that have started and not finished
             # Then check to see if they should block entry into a new match
-            matches = Match.objects.filter(matchparticipation__bot=self.bot, started__isnull=False, result__isnull=True)
+            matches = Match.objects.only('id').filter(matchparticipation__bot_id=self.bot_id, started__isnull=False,
+                                                      result__isnull=True)
             for match in matches:
-                for p in match.matchparticipation_set.filter(bot=self.bot):
+                for p in match.matchparticipation_set.filter(bot_id=self.bot_id):
                     if not p.allow_parallel_run:
                         return False
         return True
@@ -96,7 +103,8 @@ class MatchParticipation(models.Model):
         else:
             raise Exception('Unrecognized result type!')
 
-    def calculate_relative_result_cause(self, result_type):
+    @staticmethod
+    def calculate_result_cause(result_type):
         if result_type in ['Player1Win', 'Player2Win', 'Tie', 'Player1Surrender', 'Player2Surrender']:
             return 'game_rules'
         elif result_type in ['Player1Crash', 'Player2Crash']:

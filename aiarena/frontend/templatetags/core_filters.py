@@ -1,6 +1,12 @@
 from django import template
 
 
+def cents_to_usd(cents):
+    if cents is None:
+        return "--"
+    return str(float(cents / 100)) + '$'
+
+
 def format_elo_change(value):
     """Custom formatting for ELO change integers"""
     if value is None or value == 0:
@@ -36,3 +42,4 @@ def smooth_timedelta(timedeltaobj):
 register = template.Library()
 register.filter('format_elo_change', format_elo_change)
 register.filter('smooth_timedelta', smooth_timedelta)
+register.filter('cents_to_usd', cents_to_usd)

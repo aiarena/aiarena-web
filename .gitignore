@@ -13,3 +13,7 @@ python_env/
 # uploaded files
 media/
 private-media/
+
+# coverage
+.coverage
+coverage-reports

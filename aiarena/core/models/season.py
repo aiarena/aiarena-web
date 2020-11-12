@@ -1,4 +1,3 @@
-import io
 import logging
 
 from django.core.files import File
@@ -37,7 +36,6 @@ class Season(models.Model, LockableModelMixin):
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
     previous_season_files_cleaned = models.BooleanField(default=False)
-    replay_archive_zip = models.FileField(upload_to=replay_archive_upload_to, blank=True, null=True)
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -107,22 +105,25 @@ class Season(models.Model, LockableModelMixin):
 
     @transaction.atomic
     def try_to_close(self):
-        self.lock_me()
-
         from .round import Round
-        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0:
-            self.status = 'closed'
-            self.date_closed = timezone.now()
-            self.save()
+        from .bot import Bot
+        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0 and \
+                Season.objects.filter(id=self.id, status='closing') \
+                .update(status='closed', date_closed=timezone.now()) > 0:
+            # deactivate all bots
+            for bot in Bot.objects.all():
+                bot.active = False
+                bot.save()
             # todo: sanity check replay archive contents against results.
             # todo: then dump results data as JSON?
             # todo: then wipe all replay/log files?
 
     @staticmethod
-    def get_current_season():
+    def get_current_season(select_for_update: bool = False) -> 'Season':
         try:
             #  will fail if there is more than 1 current season or 0 current seasons
-            return Season.objects.get(date_closed__isnull=True)
+            return Season.objects.select_for_update().get(date_closed__isnull=True) \
+                if select_for_update else Season.objects.get(date_closed__isnull=True)
         except Season.DoesNotExist:
             raise NoCurrentSeason()  # todo: separate between core and API exceptions
         except Season.MultipleObjectsReturned:
@@ -154,13 +155,3 @@ class Season(models.Model, LockableModelMixin):
 def pre_save_season(sender, instance, **kwargs):
     if instance.number is None:
         instance.number = Season.objects.filter(competition=instance.competition).count() + 1
-
-
-@receiver(post_save, sender=Season)
-def post_save_season(sender, instance, created, **kwargs):
-    if created:
-        # create an empty zip file
-        instance.replay_archive_zip.save('filename',  # filename is ignored
-                                         File(
-                                             io.BytesIO(
-                                                 b"PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")))

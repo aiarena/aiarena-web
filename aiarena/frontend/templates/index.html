@@ -3,14 +3,14 @@
 
 {% block content %}
 
-    <div class="divider"><span></span><span><h2>Welcome to the AI-Arena!</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>Welcome to the AI Arena!</h2></span><span></span></div>
     <div id="rules-short">
-        <div><h2>Season 1 has started! Want to join the battle?</h2></div>
+        <div><h2>Season 2 has started! Want to join the battle?</h2></div>
         <br/>
         <div id="rules-short-instructions">
             <div class="rules-short-instructions-content">
 
-                <span><h3><i class="material-icons">assignment</i>Instructions</h3></span><br/><br/>
+                <span><h3><em class="material-icons">assignment</em>Instructions</h3></span><br/><br/>
                 <ol>
                     <li><a href="{% url 'registration_register' %}">{% trans "Register" %}</a></li>
                     <li>Read the <a href="{{ config.GETTING_STARTED_URL }}">Getting Started</a> guide</li>
@@ -30,28 +30,37 @@
         </div>
         <div class="divider"><span></span><span><h2>Problems?</h2></span><span></span></div>
         <div id="problems">
-            Any problems with the website can be reported in our <a href="https://discord.gg/yDBzbtC">Discord</a>.
+            Any problems with the website can be reported in our
+            {% if config.DISCORD_INVITE_LINK %}
+                <a href="{{ config.DISCORD_INVITE_LINK }}">Discord</a>.
+            {% else %}
+                Discord.
+            {% endif %}
         </div>
         <div class="divider"><span></span><span><h2>Want to help out?</h2></span><span></span></div>
         <div id="contribute">
-            Refer to the <a href="https://ai-arena.net/wiki/contribute/">wiki</a> on ways to contribute.
+            Refer to the <a href="https://aiarena.net/wiki/contribute/">wiki</a> on ways to contribute.
         </div>
         <br> <!-- extra space -->
-        <div class="divider-full div-transparent-full "></div>
-    </div>
-    <div class="float-half-right">
         <div class="divider"><span></span><span><h2>Top 10 bots</h2></span><span></span></div>
+
         <div id="top10">
-            <table id="resultsTable" cellpadding="2px" style="min-width: 400px">
+            <table summary="Table containing the top10 bots" id="resultsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
                 <thead>
-                <td><b>Rank</b></td>
-                <td><b>Name</b></td>
-                <td><b>ELO</b></td>
+                <td style="text-align: center"><strong>Rank</strong></td>
+                <td></td>
+                <td><strong>Name</strong></td>
+                <td><strong>ELO</strong></td>
                 </thead>
                 <tbody>
-                {% for participant in seasonparticipation_list %}
+                {% for participant in object_list %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td style="text-align: center">{{ forloop.counter }}</td>
+                        <td style="padding-right: 0">
+                            {% if patreon_level != 'none' %}
+                                <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
+                            {% endif %}
+                        </td>
                         <td>{{ participant.bot.as_html_link }}</td>
                         <td>{{ participant.elo }}</td>
                     </tr>
@@ -61,24 +70,56 @@
             <br> <!-- extra space -->
 
         </div>
-        <div class="divider"><span></span><span><h2>Recently updated</h2></span><span></span></div>
-        <div id="top10">
-            <table id="recentlyUpdatedTable" cellpadding="2px" style="min-width: 400px">
-                <thead>
-                <td><b>Date</b></td>
-                <td><b>Bot</b></td>
-                </thead>
-                <tbody>
-                {% for bot in recently_updated_bots %}
-                    <tr>
-                        <td>{{ bot.bot_zip_updated }}</td>
-                        <td>{{ bot.as_html_link }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <br> <!-- extra space -->
+        <div class="divider-full div-transparent-full "></div>
+    </div>
 
+    <div class="float-half-right">
+        <div id="top10">
+            <div class="divider"><span></span><span><h2>Activity feed</h2></span><span></span></div>
+            {% for new in news %}
+                {% if new.get_model_name == 'News' %}
+                    <div>
+                        <table summary="Table containing news" id="newsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
+                            <thead>
+                                <th style="word-break: break-all;"><strong>{{ new }}</strong></th>
+                            </thead>
+                            <tbody>
+                                {% if new.title %}
+                                    <tr style="background-color: rgba(0, 0, 0, 0.1);">
+                                        <td>{{ new.get_date }}</td>
+                                    </tr>
+                                {% endif %}
+                                <tr style="background-color: rgba(0, 0, 0, 0.1);">
+                                    <td style="word-break: break-all;">{{ new.text }}</td>
+                                </tr>
+                                {% if new.yt_link %}
+                                    <tr style="background-color: rgba(0, 0, 0, 0.1);">
+                                        <td>
+                                            <iframe id="yt-video" width="420" height="215" src="{{ new.yt_link }}"></iframe>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <br><br>
+                {% elif new.get_model_name == 'Bot' %}
+                    {% if new.action_type == 1 %}
+                        <div>
+                            <div>{{ new.created|date:"d. N Y - H:i:s" }}</div>
+                            <div>Bot <span style="color: #86c232">{{ new }}</span> was updated.</div>
+                        </div>
+                        <br>
+                    {% elif new.action_type == 2 %}
+                        <div>
+                            <div>{{ new.created|date:"d. N Y - H:i:s" }}</div>
+                            <div>A new bot <span style="color: #86c232">{{ new }}</span> was uploaded.</div>
+                        </div>
+                        <br>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            <br> <!-- extra space -->
         </div>
         <div class="divider-full div-transparent-full "></div>
     </div>

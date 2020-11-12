@@ -5,14 +5,13 @@
 
     <div class="divider"><span></span><span><h2>{{ season.name }}</h2></span><span></span></div>
     <div id="inner_content">
-        <table id="season_details">
+        <table summary="Table containing season details" id="season_details">
             <thead>
             <tr>
-                <td><b>Created</b></td>
-                <td><b>Opened</b></td>
-                <td><b>Closed</b></td>
-                <td><b>Status</b></td>
-                <td><b>Replay Archive</b></td>
+                <td><strong>Created</strong></td>
+                <td><strong>Opened</strong></td>
+                <td><strong>Closed</strong></td>
+                <td><strong>Status</strong></td>
             </tr>
             </thead>
             <tbody>
@@ -29,22 +28,22 @@
                     <td>--</td>
                 {% endif %}
                 <td>{{ season.get_status_display }}</td>
-                <td><a href="{{ season.replay_archive_zip.url }}">Download</a></td>
             </tr>
             </tbody>
         </table>
         <br>
         <div class="divider"><span></span><span><h2>Ranking</h2></span><span></span></div>
-        <table id="season_ranking_table">
+        <table summary="Table containing rankings" id="season_ranking_table">
             <thead>
             <tr>
-                <td><b>Rank</b></td>
-                <td><b>Name</b></td>
-                <td><b>Race</b></td>
-                <td><b>Author</b></td>
-                <td><b>Type</b></td>
-                <td><b>Win %</b></td>
-                <td><b>ELO</b></td>
+                <td style="text-align: center"><strong>Rank</strong></td>
+                <td></td>
+                <td><strong>Name</strong></td>
+                <td><strong>Race</strong></td>
+                <td><strong>Author</strong></td>
+                <td><strong>Type</strong></td>
+                <td><strong>Win %</strong></td>
+                <td><strong>ELO</strong></td>
                 <td></td>
             </tr>
             </thead>
@@ -52,8 +51,15 @@
             {% if rankings.count > 0 %}
                 {% for participant in rankings %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ participant.bot.as_html_link }}</td>
+                        <td style="padding-right: 0; text-align: center">{{ forloop.counter }}</td>
+                        <td style="padding-right: 0">
+                            {% if participant.bot.user.patreon_level != 'none' %}
+                                <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ participant.bot.as_html_link }}
+                        </td>
                         <td>{{ participant.bot.get_plays_race_display }}</td>
                         <td>{{ participant.bot.user.as_html_link }}</td>
                         <td>{{ participant.bot.type }}</td>
@@ -75,12 +81,12 @@
         </table>
         <br>
         <div class="divider"><span></span><span><h2>Rounds</h2></span><span></span></div>
-        <table id="matches_table" style="min-width: 900px; margin: 0 auto;">
+        <table summary="Table containing information about the rounds" id="matches_table" style="min-width: 900px; margin: 0 auto;">
             <tbody>
             <thead>
-            <td><b>Round #</b></td>
-            <td><b>Started at</b></td>
-            <td><b>Finished at</b></td>
+            <td><strong>Round #</strong></td>
+            <td><strong>Started at</strong></td>
+            <td><strong>Finished at</strong></td>
             </thead>
             {% for round in round_list %}
                 <tr>

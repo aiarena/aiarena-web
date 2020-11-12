@@ -24,15 +24,15 @@
             <h2>{{ user.username }}</h2>
             <h3>{{ user.first_name }} {{ user.last_name }}</h3>
 
-            <b>Joined</b><br/>
+            <strong>Joined</strong><br/>
             {{ user.date_joined|date:"d. N Y" }}
             <br/>
 
-            <b>Last login</b><br/>
+            <strong>Last login</strong><br/>
             {{ user.last_login|date:"d. N Y" }}
             <br/>
 
-            <b>Receive emails</b><br/>
+            <strong>Receive emails</strong><br/>
             {{ user.receive_email_comms }}
             <br/>
             <br/>
@@ -68,14 +68,14 @@
     <div class="divider">
         <span></span><span><h2>Bots ({{ bot_list.count }}/{{ max_user_bot_count }})</h2></span><span></span></div>
     <h4 style="float:left; margin-left:65px;">You may have {{ max_active_per_race_bot_count }} active bot(s) per race.</h4><h4 style="float: right; margin-right:65px;">{% if user.has_donated %} Thank you for your donation :){% endif %}</h4>
-    <table id="bot_table" class="row-hover-highlight">
+    <table summary="Table containing information about the authors bots" id="bot_table" class="row-hover-highlight">
         <thead>
-        <td><b>Name</b></td>
-        <td><b>Race</b></td>
-        <td><b>Type</b></td>
-        <td><b>Active</b></td>
-        <td><b>Bot Zip</b></td>
-        <td><b>Data</b></td>
+        <td><strong>Name</strong></td>
+        <td><strong>Race</strong></td>
+        <td><strong>Type</strong></td>
+        <td><strong>Active</strong></td>
+        <td><strong>Bot Zip</strong></td>
+        <td><strong>Data</strong></td>
         <td></td>
         </thead>
         {% for bot in bot_list %}

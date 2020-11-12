@@ -5,12 +5,12 @@
 
 <div class="divider"><span></span><span><h2>{{ round.name }}</h2></span><span></span></div>
 <div id="inner_content">
-<table id="round_details" >
+<table summary="Table containing round details" id="round_details" >
     <thead>
     <tr>
-        <td><b>Season ID</b></td>
-        <td><b>Started at</b></td>
-        <td><b>Finished at</b></td>
+        <td><strong>Season ID</strong></td>
+        <td><strong>Started at</strong></td>
+        <td><strong>Finished at</strong></td>
     </tr>
     </thead>
     <tbody>
@@ -24,15 +24,15 @@
 </div>
 <br>
 <div class="divider"><span></span><span><h2>Matches</h2></span><span></span></div>
-<table id="matches_table" style="min-width: 900px; margin: 0 auto;">
+<table summary="Table containing information about the played matches" id="matches_table" style="min-width: 900px; margin: 0 auto;">
     <tbody>
     <thead>
-        <td><b>Match ID</b></td>
-        <td><b>Bot 1</b></td>
-        <td><b>Bot 2</b></td>
-        <td><b>Started at</b></td>
-        <td><b>Finished at</b></td>
-        <td><b>Assigned to</b></td>
+        <td><strong>Match ID</strong></td>
+        <td><strong>Bot 1</strong></td>
+        <td><strong>Bot 2</strong></td>
+        <td><strong>Started at</strong></td>
+        <td><strong>Finished at</strong></td>
+        <td><strong>Assigned to</strong></td>
     </thead>
     {% for match in round.match_set.all %}
         <tr>
@@ -52,7 +52,7 @@
                 <td>queued...</td>
             {% endif %}
             {% if match.assigned_to %}
-                <td>{{ match.assigned_to }}</td>
+                <td>{{ match.assigned_to.as_html_link }}</td>
             {% else %}
                 <td>queued...</td>
             {% endif %}
