@@ -26,6 +26,7 @@ from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map, \
     ArenaClient, News
 from aiarena.core.models import Trophy
+from aiarena.core.models.competition import Competition
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
@@ -185,6 +186,18 @@ class BotList(ListView):
         context['page_range'] = restrict_page_range(page_obj.paginator.num_pages, page_obj.number)
 
         return context
+
+
+class CompetitionList(ListView):
+    model = Competition
+    queryset = Competition.objects.all()
+    template_name = 'competitions.html'
+    paginate_by = 50
+
+
+class CompetitionDetail(DetailView):
+    model = Competition
+    template_name = 'competition.html'
 
 
 class BotDetail(DetailView):

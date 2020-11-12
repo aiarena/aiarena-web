@@ -74,6 +74,11 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   # path('rounds/', core_views.RoundList.as_view(), name='rounds'), # todo
                   path('rounds/<int:pk>/', core_views.RoundDetail.as_view(), name='round'),
                   path('matches/<int:pk>/', core_views.MatchDetail.as_view(), name='match'),
+
+
+                  path('competitions/', core_views.CompetitionList.as_view(), name='competitions'),
+                  path('competition/<int:pk>/', core_views.CompetitionDetail.as_view(), name='competition'),
+
                   path('seasons/', core_views.SeasonList.as_view(), name='seasons'),
                   path('seasons/<int:pk>/', core_views.SeasonDetail.as_view(), name='season'),
 
