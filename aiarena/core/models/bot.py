@@ -81,6 +81,12 @@ class Bot(models.Model, LockableModelMixin):
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
 
     @property
+    def current_elo_trend(self):
+        from .season_participation import SeasonParticipation
+        season_participation = SeasonParticipation.objects.only('elo', 'trend_comparison_elo').filter(bot=self).get()
+        return season_participation.elo / season_participation.trend_comparison_elo
+
+    @property
     def current_matches(self):
         return Match.objects.only('id').filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
 
