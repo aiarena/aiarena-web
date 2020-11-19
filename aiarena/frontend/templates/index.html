@@ -62,14 +62,7 @@
                             {% endif %}
                         </td>
                         <td>{{ participant.bot.as_html_link }}</td>
-                        <td>
-                            {{ participant.elo }}
-                            {% with trend=participant.bot.current_elo_trend %}
-                                {% if trend > 1 %} ^
-                                {% elif trend < 1 %} v
-                                {% endif %}
-                            {% endwith %}
-                        </td>
+                        <td>{{ participant.elo }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
