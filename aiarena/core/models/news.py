@@ -7,7 +7,7 @@ import re
 
 class News(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    title = models.TextField(max_length=20, blank=True, null=True)
+    title = models.TextField(max_length=40, blank=True, null=True)
     text = models.TextField(max_length=500, blank=False, null=False)
     yt_link = models.URLField(blank=True, null=True)
 
