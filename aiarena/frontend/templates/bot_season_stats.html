@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters wiki_tags %}
+{% load i18n core_filters wiki_tags humanize %}
 
 
 {% block content %}
@@ -14,10 +14,9 @@
             </tr>
             </thead>
             <tbody>
-            <tr style="text-align: right">
-                <td class="mono">Updated</td>
-                <td colspan="2">{{ updated|timesince }} Ago</td>
-
+            <tr class="mono">
+                <td>Updated</td>
+                <td colspan="2">{{ updated|naturaltime }}</td>
             </tr>
             <tr class="mono">
                 <td>Current ELO</td>
