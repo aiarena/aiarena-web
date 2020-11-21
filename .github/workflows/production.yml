@@ -1,0 +1,23 @@
+name: Production Deploy CI
+
+on:
+  push:
+    branches: [ master ]
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Deploy Production
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: cd /home/aiarena/ai-arena/ && git checkout master && git pull origin master && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && python3 manage.py migrate && sudo apachectl graceful && exit
+        host: ${{ secrets.PRODUCTION_HOST }}
+        port: ${{ secrets.PRODUCTION_PORT }}
+        username: ${{ secrets.PRODUCTION_USERNAME }}
+        privateKey: ${{ secrets.PRODUCTION_KEY }}
+
+
+
+
