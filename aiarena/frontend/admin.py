@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Season, \
-    SeasonBotMatchupStats, SeasonParticipation, Trophy, User
+    SeasonBotMatchupStats, SeasonParticipation, Trophy, User, News
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -12,6 +12,7 @@ class StackedItemInline(admin.StackedInline):
 
 class TabularItemInline(admin.TabularInline):
     classes = ("grp-collapse grp-open",)
+
 
 class BotInline(StackedItemInline):
     model = Bot
@@ -210,7 +211,7 @@ class MatchAdmin(admin.ModelAdmin):
 @admin.register(Bot)
 class BotAdmin(admin.ModelAdmin):
     
-    search_fields = ('name', 'user')
+    search_fields = ('name','user__username')
     list_display = (
         'id',
         'user',
@@ -342,6 +343,13 @@ class TrophyAdmin(admin.ModelAdmin):
     list_filter = ('bot',)
     search_fields = ('name',)
 
+
 @admin.register(PatreonAccountBind)
 class PatreonAccountBindAdmin(admin.ModelAdmin):
     list_display = [field.name for field in PatreonAccountBind._meta.fields]
+
+
+@admin.register(News)
+class NewsAdmin(admin.ModelAdmin):
+    list_display = ('created', 'title', 'text', 'yt_link')
+    search_fields = ('title',)

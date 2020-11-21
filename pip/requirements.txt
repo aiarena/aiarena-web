@@ -12,8 +12,8 @@ mysqlclient==2.0.1
 pinax-theme-bootstrap==8.0.1
 pytz==2020.1
 six==1.15.0
-Markdown==3.2.2
-wiki==0.6
+Markdown==3.3.3
+wiki==0.7
 mysql-connector
 matplotlib
 pandas==1.0.5

@@ -4,6 +4,7 @@ import uuid
 from constance import config
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
+from django.db.models import Sum
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -79,6 +80,14 @@ class Bot(models.Model, LockableModelMixin):
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
+
+    @property
+    def current_elo_trend(self):
+        from .relative_result import RelativeResult
+        return (RelativeResult.objects
+            .filter(me__bot=self)
+            .order_by('-created')[:30]
+            .aggregate(Sum('elo_change'))['elo_change__sum'])
 
     @property
     def current_matches(self):
@@ -220,6 +229,10 @@ class Bot(models.Model, LockableModelMixin):
 
     def can_download_bot_data(self, user):
         return self.user == user or self.bot_data_publicly_downloadable or user.is_staff
+
+    # for purpose of distinquish news in activity feed
+    def get_model_name(self):
+        return 'Bot'
 
 
 _UNSAVED_BOT_ZIP_FILEFIELD = 'unsaved_bot_zip_filefield'

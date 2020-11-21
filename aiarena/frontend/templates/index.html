@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
-
+{% load i18n humanize %}
 {% block content %}
 
     <div class="divider"><span></span><span><h2>Welcome to the AI Arena!</h2></span><span></span></div>
@@ -41,40 +40,9 @@
         <div id="contribute">
             Refer to the <a href="https://aiarena.net/wiki/contribute/">wiki</a> on ways to contribute.
         </div>
-        <div class="divider"><span></span><span><h2>New bots</h2></span><span></span></div>
-        <div id="top10">
-            <table summary="Table containing information on new bots" id="NewBotsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
-                <thead>
-                    <tr>
-                        <td><strong>Date</strong></td>
-                        <td></td>
-                        <td><strong>Bot</strong></td>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for bot in new_bots %}
-                    <tr>
-                        <td>{{ bot.created|date:"d. N Y - H:i:s" }}</td>
-                        <td style="padding-right: 0">
-                        {% with patreon_level=bot.user.patreon_level %}
-                            {% if patreon_level != 'none' %}
-                                <div class="bot-icon-{{ patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
-                            {% endif %}
-                        {% endwith %}
-                        </td>
-                        <td>{{ bot.as_html_link }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <br> <!-- extra space -->
-
-        </div>
         <br> <!-- extra space -->
-        <div class="divider-full div-transparent-full "></div>
-    </div>
-    <div class="float-half-right">
         <div class="divider"><span></span><span><h2>Top 10 bots</h2></span><span></span></div>
+
         <div id="top10">
             <table summary="Table containing the top10 bots" id="resultsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
                 <thead>
@@ -93,32 +61,17 @@
                             {% endif %}
                         </td>
                         <td>{{ participant.bot.as_html_link }}</td>
-                        <td>{{ participant.elo }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <br> <!-- extra space -->
-
-        </div>
-        <div class="divider"><span></span><span><h2>Recently updated</h2></span><span></span></div>
-        <div id="top10">
-            <table summary="Table containing information about recently updated bots" id="recentlyUpdatedTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
-                <thead>
-                <td><strong>Date</strong></td>
-                <td></td>
-                <td><strong>Bot</strong></td>
-                </thead>
-                <tbody>
-                {% for bot in recently_updated_bots %}
-                    <tr>
-                        <td>{{ bot.bot_zip_updated|date:"d. N Y - H:i:s" }}</td>
-                        <td style="padding-right: 0">
-                            {% if patreon_level != 'none' %}
-                                <div class="bot-icon-{{ patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
-                            {% endif %}
+                        <td>
+                            {{ participant.elo }}
+                            {% with trend=participant.bot.current_elo_trend %}
+                                <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">
+                                    {% if trend > 0 %} trending_up
+                                    {% elif trend < 0 %} trending_down
+                                    {% else %} fast_rewind
+                                    {% endif %}
+                                </em>
+                            {% endwith %}
                         </td>
-                        <td>{{ bot.as_html_link }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -128,4 +81,90 @@
         </div>
         <div class="divider-full div-transparent-full "></div>
     </div>
+
+    <div class="float-half-right">
+        <div id="news_feed">
+            <div class="divider"><span></span><span><h2>News</h2></span><span></span></div>
+            {% for new in news %}
+                <div class="newSlides">
+                    <div>
+                        <table summary="Table containing news" id="newsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
+                            <thead>
+                                <th><strong>{{ new }}</strong></th>
+                            </thead>
+                            <tbody>
+                                {% if new.title %}
+                                    <tr style="background-color: rgba(0, 0, 0, 0.1);">
+                                        <td>{{ new.get_date }}</td>
+                                    </tr>
+                                {% endif %}
+                                <tr style="background-color: rgba(0, 0, 0, 0.1);">
+                                    <td>{{ new.text }}</td>
+                                </tr>
+                                {% if new.yt_link %}
+                                    <tr style="background-color: rgba(0, 0, 0, 0.1);">
+                                        <td>
+                                            <iframe id="yt-video" width="420" height="215" src="{{ new.yt_link }}"></iframe>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endfor %}
+            <br> <!-- extra space -->
+            <div class="slide-selector">
+                {% for new in news %}
+                    <span class="slide-select" onclick="selectSlide({{ forloop.counter }})"></span>
+                {% endfor %}
+            </div>
+        </div>
+        <div id="activity_feed">
+            <div class="divider"><span></span><span><h2>Activity</h2></span><span></span></div>
+        <table>
+        <thead>
+        <td style="text-align: center"><strong>Time</strong></td>
+        <td><strong>Event</strong></td>
+        </thead>
+            {% for event in events %}
+                <tr>
+                {# newly created bots have same update time as its creation time #}
+                {% if event.bot_zip_updated == event.created %}
+                    <td nowrap>{{ event.bot_zip_updated|naturaltime }}</td>
+                    <td style="text-align: left">{{ event.user.as_html_link }} uploaded a new bot: {{ event.as_html_link }}.</td>
+                {% else %}
+                    <td nowrap>{{ event.bot_zip_updated|naturaltime }}</td>
+                    <td style="text-align: left">Bot {{ event.as_html_link }} was updated.</td>
+                {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+        </div>
+        <div class="divider-full div-transparent-full "></div>
+    </div>
+    <script>
+        var slideIndex = 1;
+        showSlides(slideIndex);
+
+        function selectSlide(n) {
+            showSlides(slideIndex = n);
+        }
+
+        function showSlides(n) {
+            var i;
+            var slides = document.getElementsByClassName("newSlides");
+            var dots = document.getElementsByClassName("slide-select");
+            if (n > slides.length) {slideIndex = 1}
+            if (n < 1) {slideIndex = slides.length}
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slides[slideIndex-1].style.display = "block";
+            dots[slideIndex-1].className += " active";
+        }
+    </script>
 {% endblock %}

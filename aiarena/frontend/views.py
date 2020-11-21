@@ -24,12 +24,13 @@ from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map, \
-    ArenaClient
+    ArenaClient, News
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
+from operator import attrgetter
 
 def project_finance(request):
     return render(request, template_name='finance.html')
@@ -221,6 +222,7 @@ class BotSeasonStatsDetail(DetailView):
         context = super().get_context_data(**kwargs)
         context['season_bot_matchups'] = self.object.season_matchup_stats.filter(
             opponent__season=context['seasonparticipation'].season).order_by('-win_perc').distinct()
+        context['updated'] = context['season_bot_matchups'][0].updated
         return context
 
 
@@ -470,8 +472,11 @@ class Index(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['recently_updated_bots'] = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
-        context['new_bots'] = Bot.objects.select_related('user').only('user__patreon_level', 'name', 'created').order_by('-created')[:5]
+
+        # newly created bots have same update time as its creation time
+        context['events'] = Bot.objects.select_related('user').only('user', 'name', 'created').order_by('-bot_zip_updated')[:10]
+        context['news'] = News.objects.all().order_by('-created')
+
         return context
 
     template_name = 'index.html'
