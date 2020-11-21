@@ -7,7 +7,7 @@ from django.db import transaction
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match, ArenaClient
+from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match, ArenaClient, News
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
@@ -200,6 +200,18 @@ class Command(BaseCommand):
 
             self.stdout.write('Generating {0} match(es)...'.format(options['matches']))
             api_token = run_seed(options['matches'], options['token'])
+
+            self.stdout.write('Creating news items...')
+            News.objects.create(title="News item 1",
+                                text="This is news item number 1!")
+            News.objects.create(title="News item 2",
+                                text="This is news item number 2! Lets add some text to make it longer. "
+                                     "Evening longer still! Lets make it so long that it hopefully exposes any issues "
+                                     "in our testing. Maybe formatting errors, or something like that. "
+                                     "Now lets repeat everything because I'm too lazy to think of any more to say. "
+                                     "This is news item number 1! Lets add some text to make it longer. "
+                                     "Evening longer still! Lets make it so long that it hopefully exposes any issues "
+                                     "in our testing. Maybe formatting errors, or something like that. ")
 
             self.stdout.write('Done. User logins have a password of "x".')
             self.stdout.write('API Token is {0}.'.format(api_token))

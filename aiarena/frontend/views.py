@@ -475,8 +475,8 @@ class Index(ListView):
         # context['recently_updated_bots'], context['new_bots'], context['news']
 
         bot_updates = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
-        new_bots = Bot.objects.select_related('user').only('user__patreon_level', 'name', 'created').order_by('-created')[:5]
-        news = News.objects.all().order_by('-created')
+        new_bots = Bot.objects.select_related('user').only('user', 'name', 'created').order_by('-created')[:5]
+        context['news'] = News.objects.all().order_by('-created')
 
         bot_objects = []
         # for purpose of displaying information about bot action, we will add action_type to each to distinquish them in template
@@ -488,22 +488,7 @@ class Index(ListView):
             bot_objects.append(bot)
 
         # newly created bot has same update time as is its creation time, we will use it in sorting
-        sorted_bot_objects = sorted(bot_objects, key=attrgetter('bot_zip_updated'), reverse=True)
-
-        # merge sorted_bot_objects and news - to be sorted in template
-
-        context['news'] = []
-        i, j = 0, 0
-        while i < len(sorted_bot_objects) and j < len(news):
-            if sorted_bot_objects[i].bot_zip_updated > news[j].created:
-                context['news'].append(sorted_bot_objects[i])
-                i += 1
-
-            else:
-                context['news'].append(news[j])
-                j += 1
-
-        context['news'] = context['news'] + sorted_bot_objects[i:] + news[j:]
+        context['events'] = sorted(bot_objects, key=attrgetter('bot_zip_updated'), reverse=True)
         return context
 
     template_name = 'index.html'

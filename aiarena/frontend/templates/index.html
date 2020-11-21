@@ -1,6 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
-
+{% load i18n humanize %}
 {% block content %}
 
     <div class="divider"><span></span><span><h2>Welcome to the AI Arena!</h2></span><span></span></div>
@@ -84,14 +83,14 @@
     </div>
 
     <div class="float-half-right">
-        <div id="top10">
-            <div class="divider"><span></span><span><h2>Activity feed</h2></span><span></span></div>
+        <div id="news_feed">
+            <div class="divider"><span></span><span><h2>News</h2></span><span></span></div>
             {% for new in news %}
-                {% if new.get_model_name == 'News' %}
+                <div class="newSlides">
                     <div>
                         <table summary="Table containing news" id="newsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
                             <thead>
-                                <th style="word-break: break-all;"><strong>{{ new }}</strong></th>
+                                <th><strong>{{ new }}</strong></th>
                             </thead>
                             <tbody>
                                 {% if new.title %}
@@ -100,7 +99,7 @@
                                     </tr>
                                 {% endif %}
                                 <tr style="background-color: rgba(0, 0, 0, 0.1);">
-                                    <td style="word-break: break-all;">{{ new.text }}</td>
+                                    <td>{{ new.text }}</td>
                                 </tr>
                                 {% if new.yt_link %}
                                     <tr style="background-color: rgba(0, 0, 0, 0.1);">
@@ -112,25 +111,59 @@
                             </tbody>
                         </table>
                     </div>
-                    <br><br>
-                {% elif new.get_model_name == 'Bot' %}
-                    {% if new.action_type == 1 %}
-                        <div>
-                            <div>{{ new.created|date:"d. N Y - H:i:s" }}</div>
-                            <div>Bot <span style="color: #86c232">{{ new }}</span> was updated.</div>
-                        </div>
-                        <br>
-                    {% elif new.action_type == 2 %}
-                        <div>
-                            <div>{{ new.created|date:"d. N Y - H:i:s" }}</div>
-                            <div>A new bot <span style="color: #86c232">{{ new }}</span> was uploaded.</div>
-                        </div>
-                        <br>
-                    {% endif %}
-                {% endif %}
+                </div>
             {% endfor %}
             <br> <!-- extra space -->
+            <div class="slide-selector">
+                {% for new in news %}
+                    <span class="slide-select" onclick="selectSlide({{ forloop.counter }})"></span>
+                {% endfor %}
+            </div>
+        </div>
+        <div id="activity_feed">
+            <div class="divider"><span></span><span><h2>Activity</h2></span><span></span></div>
+        <table>
+        <thead>
+        <td style="text-align: center"><strong>Time</strong></td>
+        <td><strong>Event</strong></td>
+        </thead>
+            {% for event in events %}
+                <tr>
+                {% if event.action_type == 1 %}
+                    <td nowrap>{{ event.created|naturaltime }}</td>
+                    <td style="text-align: left">Bot {{ event.as_html_link }} was updated.</td>
+                {% elif event.action_type == 2 %}
+                    <td nowrap>{{ event.created|naturaltime }}</td>
+                    <td style="text-align: left">{{ event.user.as_html_link }} uploaded a new bot: {{ event.as_html_link }}.</td>
+                {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
         </div>
         <div class="divider-full div-transparent-full "></div>
     </div>
+    <script>
+        var slideIndex = 1;
+        showSlides(slideIndex);
+
+        function selectSlide(n) {
+            showSlides(slideIndex = n);
+        }
+
+        function showSlides(n) {
+            var i;
+            var slides = document.getElementsByClassName("newSlides");
+            var dots = document.getElementsByClassName("slide-select");
+            if (n > slides.length) {slideIndex = 1}
+            if (n < 1) {slideIndex = slides.length}
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slides[slideIndex-1].style.display = "block";
+            dots[slideIndex-1].className += " active";
+        }
+    </script>
 {% endblock %}

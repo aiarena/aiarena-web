@@ -151,6 +151,16 @@ a:hover {
     margin-right: 75px;
 }
 
+#activity_feed {
+    margin-left: 75px;
+    margin-right: 75px;
+}
+
+#news_feed {
+    margin-left: 75px;
+    margin-right: 75px;
+}
+
 #whatisaiarena {
     margin-left: 75px;
     margin-right: 75px;
@@ -729,6 +739,20 @@ tr:hover a:focus {
     margin-left: 0;
 }
 
+#activity_feed table {
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+    margin-left: 0;
+}
+
+#news_feed table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    margin-left: 0;
+}
+
 
 #inner_content {
     width: 100%;
@@ -977,8 +1001,19 @@ font-size: 14px;
     margin: 20px;
 }
 
-/*news feed*/
 #top10 th{
+    height: 35px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#activity_feed th{
+    height: 35px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#news_feed th{
     height: 35px;
     padding-left: 10px;
     padding-right: 10px;
