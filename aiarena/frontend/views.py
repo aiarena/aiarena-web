@@ -472,23 +472,11 @@ class Index(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['recently_updated_bots'], context['new_bots'], context['news']
 
-        bot_updates = Bot.objects.all().only('bot_zip_updated', 'name', 'user__patreon_level').order_by('-bot_zip_updated')[:5]
-        new_bots = Bot.objects.select_related('user').only('user', 'name', 'created').order_by('-created')[:5]
+        # newly created bots have same update time as its creation time
+        context['events'] = Bot.objects.select_related('user').only('user', 'name', 'created').order_by('-bot_zip_updated')[:10]
         context['news'] = News.objects.all().order_by('-created')
 
-        bot_objects = []
-        # for purpose of displaying information about bot action, we will add action_type to each to distinquish them in template
-        for bot in bot_updates:
-            bot.action_type = 1
-            bot_objects.append(bot)
-        for bot in new_bots:
-            bot.action_type = 2
-            bot_objects.append(bot)
-
-        # newly created bot has same update time as is its creation time, we will use it in sorting
-        context['events'] = sorted(bot_objects, key=attrgetter('bot_zip_updated'), reverse=True)
         return context
 
     template_name = 'index.html'
