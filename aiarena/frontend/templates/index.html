@@ -130,7 +130,7 @@
             {% for event in events %}
                 <tr>
                 {# newly created bots have same update time as its creation time #}
-                {% if event.bot_zip_updated == event.created %}
+                {% if event.is_created_event %}
                     <td nowrap>{{ event.bot_zip_updated|naturaltime }}</td>
                     <td style="text-align: left">{{ event.user.as_html_link }} uploaded a new bot: {{ event.as_html_link }}.</td>
                 {% else %}
