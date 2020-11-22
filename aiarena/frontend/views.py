@@ -6,6 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
 from django.db.models import F, Prefetch
@@ -29,8 +30,6 @@ from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
-
-from operator import attrgetter
 
 def project_finance(request):
     return render(request, template_name='finance.html')
@@ -473,8 +472,12 @@ class Index(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # newly created bots have same update time as its creation time
-        context['events'] = Bot.objects.select_related('user').only('user', 'name', 'created').order_by('-bot_zip_updated')[:10]
+        # newly created bots have almost the same update time as its creation time
+        events = Bot.objects.select_related('user').only('user', 'name', 'created').order_by('-bot_zip_updated')[:10]
+        for event in events:
+            # if these are within a second, then the bot was created, not updated
+            event.is_created_event = (event.bot_zip_updated - event.created).seconds <= 1
+        context['events'] = events
         context['news'] = News.objects.all().order_by('-created')
 
         return context
@@ -528,16 +531,50 @@ class SeasonDetail(DetailView):
 
 
 class RequestMatchForm(forms.Form):
-    bot1 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), empty_label=None, required=True)
-    bot2 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), empty_label='Random', required=False)
-    map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'), empty_label='Random Ladder Map',
+    MATCHUP_TYPE_CHOICES = (
+        ('specific_matchup', 'Specific Matchup'),
+        ('random_ladder_bot', 'Random Ladder Bot'),
+    )
+    MATCHUP_RACE_CHOICES = (
+        ('any', 'Any'),
+        ('T', 'Terran'),
+        ('Z', 'Zerg'),
+        ('P', 'Protoss'),
+    )
+    matchup_type = forms.ChoiceField(choices=MATCHUP_TYPE_CHOICES,
+                                     widget=forms.RadioSelect(attrs={'onclick': 'refreshForm();'}),
+                                     required=True, initial='specific_matchup')
+    bot1 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), required=True)
+    # hidden when matchup_type != random_ladder_bot
+    matchup_race = forms.ChoiceField(choices=MATCHUP_RACE_CHOICES,
+                                     widget=forms.RadioSelect(attrs={'onclick': 'refreshForm();'}),
+                                     required=False, initial='any')
+    # hidden when matchup_type != specific_matchup
+    bot2 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'),
+                                  widget=forms.Select(attrs={'required': ''}),  # default this to required initially
+                                  required=False)
+    map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
+                                 empty_label='Random Ladder Map',
                                  required=False)
     match_count = forms.IntegerField(min_value=1, initial=1)
 
-    @transaction.atomic()
-    def request_match(self, user):
-        return [Matches.request_match(user, self.cleaned_data['bot1'], self.cleaned_data['bot2'],
-                                      self.cleaned_data['map']) for _ in range(0, self.cleaned_data['match_count'])]
+    def clean_matchup_race(self):
+        """If matchup_type isn't set, assume it's any"""
+        return 'any' if self.cleaned_data['matchup_race'] is None or self.cleaned_data['matchup_race'] == '' \
+            else self.cleaned_data['matchup_race']
+
+    def clean_bot2(self):
+        """If matchup_type is specific_matchup require a bot2"""
+        matchup_type = self.cleaned_data['matchup_type']
+        bot2 = self.cleaned_data['bot2']
+        if matchup_type == 'specific_matchup' and bot2 is None:
+            raise ValidationError("A bot2 must be specified for a specific matchup.")
+        return self.cleaned_data['bot2']
+
+    # todo: validate form
+
+
+
 
 
 class RequestMatch(LoginRequiredMixin, FormView):
@@ -561,7 +598,29 @@ class RequestMatch(LoginRequiredMixin, FormView):
         if config.ALLOW_REQUESTED_MATCHES:
             if form.cleaned_data['bot1'] != form.cleaned_data['bot2']:
                 if self.request.user.match_request_count_left >= form.cleaned_data['match_count']:
-                    match_list = form.request_match(self.request.user)
+
+                    with transaction.atomic():  # do this all in one commit
+                        match_list = []
+                        if form.cleaned_data['matchup_type'] == 'random_ladder_bot':
+                            bot1 = form.cleaned_data['bot1']
+
+                            for _ in range(0, form.cleaned_data['match_count']):
+                                bot2 = bot1.get_random_active_excluding_self() if form.cleaned_data['matchup_race'] == 'any' \
+                                    else bot1.get_random_active_excluding_self(plays_race=form.cleaned_data['matchup_race'])
+
+                                if bot2 is None:
+                                    messages.error(self.request, "No opponents of that type could be found.")
+                                    return self.render_to_response(self.get_context_data(form=form))
+
+                                match_list.append(Matches.request_match(
+                                    self.request.user, form.cleaned_data['bot1'],
+                                    bot2, form.cleaned_data['map']))
+                        else:  # specific_matchup
+                            for _ in range(0, form.cleaned_data['match_count']):
+                                match_list.append(Matches.request_match(
+                                    self.request.user, form.cleaned_data['bot1'],
+                                    form.cleaned_data['bot2'], form.cleaned_data['map']))
+
                     message = ""
                     for match in match_list:
                         message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"

@@ -189,7 +189,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 500)
         self.assertEqual(u"Failed to start match. There might not be any available participants.", response.data['detail'])
 
-        Matches.request_match(self.regularUser2, bot1)
+        Matches.request_match(self.regularUser2, bot1, bot1.get_random_active_excluding_self())
 
         # now we should be able to get a match - the requested one
         response = self.client.post('/api/arenaclient/matches/')

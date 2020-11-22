@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 class Matches:
     @staticmethod
-    def request_match(user, bot, opponent=None, map=None):
-        # if opponent or map is none, a random one gets chosen
+    def request_match(user, bot, opponent, map=None):
+        # if map is none, a random one gets chosen
         return Match.create(None, map if map is not None else Map.random_active(), bot,
-                            opponent if opponent is not None else bot.get_random_active_excluding_self(),
+                            opponent,
                             user, bot1_update_data=False, bot2_update_data=False)
 
     # todo: have arena client check in with web service in order to delay this
