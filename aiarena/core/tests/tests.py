@@ -186,7 +186,7 @@ class BaseTestMixin(object):
 
         # generate a bot match request to ensure it doesn't bug things out
         bot = Bot.get_random_active()
-        Matches.request_match(self.regularUser2, bot)
+        Matches.request_match(self.regularUser2, bot, bot.get_random_active_excluding_self())
 
         self.client.logout()  # child tests can login if they require
 
