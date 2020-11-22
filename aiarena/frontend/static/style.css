@@ -997,6 +997,18 @@ font-size: 14px;
     margin: 20px;
 }
 
+.request-match-form table {
+    background: none;
+}
+
+.request-match-form td {
+    vertical-align: top;
+}
+
+.request-match-form li {
+    list-style-type: none;
+}
+
 .request-match-bot {
     margin: 20px;
 }

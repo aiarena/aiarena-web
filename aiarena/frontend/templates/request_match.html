@@ -10,7 +10,20 @@
             <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
                   enctype="multipart/form-data">
                 {% csrf_token %}
-                {{ form.as_p }}
+                <p>{{ form.matchup_type }}</p>
+                <table><tr>
+                    <td>
+                        <h3>Bot1:</h3>
+                        <div>{{ form.bot1 }}</div>
+                    </td>
+                    <td>
+                        <h3>Bot2:</h3>
+                        <div id="matchup_race" style="display: none">{{ form.matchup_race }}</div>
+                        <div id="bot2">{{ form.bot2 }}</div>
+                    </td>
+                </tr></table>
+                <p>Map: {{ form.map }}</p>
+                <p>Match Count: {{ form.match_count }}</p>
                 <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
                   {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
             </form>
@@ -28,4 +41,21 @@
             </ul>
         {% endif %}
     </div>
+    <script type="text/javascript">
+
+    function refreshForm() {
+        if (document.getElementById('id_matchup_type_0').checked) {
+            document.getElementById('bot2').style.display = 'block';
+            document.getElementById('id_bot2').required = true
+            document.getElementById('matchup_race').style.display = 'none';
+        }
+        else {
+            document.getElementById('matchup_race').style.display = 'block';
+            document.getElementById('bot2').style.display = 'none';
+            document.getElementById('id_bot2').required = false
+        }
+
+    }
+
+    </script>
 {% endblock %}
