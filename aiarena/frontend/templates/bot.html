@@ -87,7 +87,12 @@
                 {% if bot_trophies.count > 0 %}
                     {% for trophy in bot_trophies %}
                         <tr>
-                            <td>{{ trophy.name }}</td>
+                            <td>
+                                {% if trophy.icon %}
+                                    <img src="{{ trophy.icon.image.url }}" height=30px style="vertical-align: -0.8em;"> 
+                                {% endif %}
+                                {{ trophy.name }}
+                            </td>
                         </tr>
                     {% endfor %}
                 {% else %}
