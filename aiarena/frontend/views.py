@@ -139,7 +139,7 @@ class UserProfileUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 class BotUploadForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = ['name', 'bot_zip', 'plays_race', 'type', 'active']
+        fields = ['name', 'bot_zip', 'bot_data_enabled', 'plays_race', 'type', 'active',]
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
@@ -252,7 +252,7 @@ class BotUpdateForm(forms.ModelForm):
     class Meta:
         model = Bot
         fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
-                  'bot_data_publicly_downloadable']
+                  'bot_data_publicly_downloadable', 'bot_data_enabled']
 
 
 class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
