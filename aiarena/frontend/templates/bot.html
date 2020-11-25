@@ -87,7 +87,12 @@
                 {% if bot_trophies.count > 0 %}
                     {% for trophy in bot_trophies %}
                         <tr>
-                            <td>{{ trophy.name }}</td>
+                            <td>
+                                {% if trophy.icon %}
+                                    <img src="{{ trophy.icon.image.url }}" height=30px style="vertical-align: -0.8em;"> 
+                                {% endif %}
+                                {{ trophy.name }}
+                            </td>
                         </tr>
                     {% endfor %}
                 {% else %}
@@ -189,7 +194,7 @@
                         <td>{{ result.result }}</td>
                         <td>{{ result.result_cause }}</td>
                         <td>{{ result.me.elo_change |format_elo_change }}</td>
-                        <td>{{ result.me.step_time_ms|floatformat:3 }}</td>
+                        <td style='color: {{ result.me.step_time_ms|step_time_color }};'>{{ result.me.step_time_ms|floatformat:3 }}</td>
                         <td>{{ result.game_time_formatted }}</td>
                         {% if result.replay_file %}
                             <td><a class="file-link" href="{{ result.replay_file.url }}">Download</a></td>
