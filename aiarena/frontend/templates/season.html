@@ -71,7 +71,9 @@
                         <td>
                             {{ participant.elo }}
                             {% with trend=participant.bot.current_elo_trend %}
+
                                 <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="Bot ELO changed {{trend}} in the last 30 games">
+
                                     {% if trend > 40 %} arrow_upward
                                     {% elif trend < -40 %} arrow_downward
                                     {% elif trend > 15 %} trending_up
