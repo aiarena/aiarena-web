@@ -86,7 +86,7 @@ class Bot(models.Model, LockableModelMixin):
         from .relative_result import RelativeResult
         return (RelativeResult.objects
             .filter(me__bot=self, match__requested_by__isnull=True)
-            .order_by('-created')[:30]
+            .order_by('-created')[:config.ELO_TREND_N_MATCHES]
             .aggregate(Sum('elo_change'))['elo_change__sum'])
 
     @property

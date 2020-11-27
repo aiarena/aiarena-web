@@ -210,6 +210,7 @@ CONSTANCE_CONFIG = {
     400, 'The maximum bot zip file size that a platinum supporter tier user can upload to the website.'),
     'BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER': (
     500, 'The maximum bot zip file size that a diamond supporter tier user can upload to the website.'),
+    'ELO_TREND_N_MATCHES': (30, 'Number of matches to include in ELO trend calculation'),
     'ELO_DIFF_RATING_MODIFIER': (0.999, 'Affects how the ELO difference between bots in an upset match '
                                         '(lower ranked bot beats higher ranked) affects the interest score: ELO_DIFF_RATING_MODIFIER^ELO_DIFF-1'),
     'COMBINED_ELO_RATING_DIVISOR': (200, 'Controls how the combined bot ELO affects the interest score: '
@@ -231,7 +232,7 @@ CONSTANCE_CONFIG = {
 CONSTANCE_CONFIG_FIELDSETS = {
     'Bots': ('BOT_UPLOADS_ENABLED', 'MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
     'General': ('DEBUG_LOGGING_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES',
-                'ENABLE_ELO_SANITY_CHECK', 'PUBLIC_BANNER_MESSAGE', 'LOGGED_IN_BANNER_MESSAGE'),
+                'ENABLE_ELO_SANITY_CHECK', 'PUBLIC_BANNER_MESSAGE', 'LOGGED_IN_BANNER_MESSAGE', 'ELO_TREND_N_MATCHES'),
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',
                        'MATCH_REQUEST_LIMIT_SILVER_TIER', 'MATCH_REQUEST_LIMIT_GOLD_TIER',
                        'MATCH_REQUEST_LIMIT_PLATINUM_TIER', 'MATCH_REQUEST_LIMIT_DIAMOND_TIER',
