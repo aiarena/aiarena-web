@@ -72,9 +72,11 @@
                             {{ participant.elo }}
                             {% with trend=participant.bot.current_elo_trend %}
                                 <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">
-                                    {% if trend > 10 %} trending_up
-                                    {% elif trend < -10 %} trending_down
-                                    {% else %} fast_rewind
+                                    {% if trend > 40 %} arrow_upward
+                                    {% elif trend < -40 %} arrow_downward
+                                    {% elif trend > 15 %} trending_up
+                                    {% elif trend < -15 %} trending_down
+                                    {% else %} trending_flat
                                     {% endif %}
                                 </em>
                             {% endwith %}</td>
