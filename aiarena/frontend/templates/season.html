@@ -68,7 +68,16 @@
                         {% else %}
                             <td>No stats</td>
                         {% endif %}
-                        <td>{{ participant.elo }}</td>
+                        <td>
+                            {{ participant.elo }}
+                            {% with trend=participant.bot.current_elo_trend %}
+                                <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">
+                                    {% if trend > 10 %} trending_up
+                                    {% elif trend < -10 %} trending_down
+                                    {% else %} fast_rewind
+                                    {% endif %}
+                                </em>
+                            {% endwith %}</td>
                         <td><a href="{% url 'bot_season_stats' participant.id participant.slug %}">Stats</a></td>
 
                     </tr>
