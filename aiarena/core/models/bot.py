@@ -85,7 +85,7 @@ class Bot(models.Model, LockableModelMixin):
     def current_elo_trend(self):
         from .relative_result import RelativeResult
         return (RelativeResult.objects
-            .filter(me__bot=self)
+            .filter(me__bot=self, match__requested_by__isnull=True)
             .order_by('-created')[:30]
             .aggregate(Sum('elo_change'))['elo_change__sum'])
 
