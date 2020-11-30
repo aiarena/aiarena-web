@@ -94,4 +94,47 @@
             </tr>
         {% endfor %}
     </table>
+    {% if requested_matches %}
+        <div class="divider"><span></span><span><h2>Requested matches</h2></span><span></span></div>
+        <table summary="Table containing information about requested matches" class="row-hover-highlight">
+            <thead>
+            <tr>
+                <td><strong>Match ID</strong></td>
+                <td><strong>Bot 1</strong></td>
+                <td><strong>Bot 2</strong></td>
+                <td><strong>Map</strong></td>
+                <td><strong>Started at</strong></td>
+                <td><strong>Assigned to</strong></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for match in requested_matches %}
+                <tr>
+                    <td>{{ match.as_html_link }}</td>
+                    {% for p in match.participants %}
+                        {% if p.participant_number == 1 %}
+                            <td>{{ p.bot.as_html_link }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    {% for p in match.participants %}
+                        {% if p.participant_number == 2 %}
+                            <td>{{ p.bot.as_html_link }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    <td>{{ match.map }}</td>
+                    {% if match.started %}
+                        <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
+                    {% else %}
+                        <td>queued...</td>
+                    {% endif %}
+                    {% if match.assigned_to %}
+                        <td>{{ match.assigned_to.as_html_link }}</td>
+                    {% else %}
+                        <td>queued...</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            <tbody>
+        </table>
+    {% endif %}
 {% endblock %}

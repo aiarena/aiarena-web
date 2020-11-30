@@ -54,6 +54,11 @@ class UserProfile(LoginRequiredMixin, DetailView):
         context['bot_list'] = self.request.user.bots.all()
         context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
         context['max_active_per_race_bot_count'] = self.request.user.get_active_bots_per_race_limit_display()
+        context['requested_matches'] = Match.objects.filter(requested_by=self.object, result__isnull=True).order_by(
+            F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
+            Prefetch('map'),
+            Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
         return context
 
 
