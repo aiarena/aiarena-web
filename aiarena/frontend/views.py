@@ -332,6 +332,7 @@ class Ranking(TemplateView):
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created').prefetch_related(
         Prefetch('winner'),
+        Prefetch('match__requested_by'),
         Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
                  to_attr='participants'))
     template_name = 'results.html'
