@@ -61,6 +61,27 @@ class UserProfile(LoginRequiredMixin, DetailView):
                      to_attr='participants'))
         return context
 
+    # Regenerate the API token
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        match_ids = request.POST.getlist('match_selection')
+        # Get and cancel requested matches
+        matches = Match.objects.filter(pk__in=match_ids, requested_by=self.request.user, result__isnull=True, assigned_to__isnull=True)
+        if matches:
+            message = "Matches " if len(matches)>1 else "Match "
+            for match in matches:
+                result = match.cancel(request.user)
+                if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
+                    raise Exception('Match "%s" does not exist' % match.id)
+                elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
+                    raise Exception('A result already exists for match "%s"' % match.id)
+                message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>{match.id}</a>, "
+            message = message[:-2] + " cancelled."
+            messages.success(self.request, mark_safe(message))
+        else:
+            messages.error(self.request, mark_safe("No matches were found for cancellation."))
+        return redirect('profile')
+
 
 class UserTokenDetailView(LoginRequiredMixin, DetailView):
     model = Token
