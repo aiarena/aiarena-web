@@ -188,6 +188,13 @@ class BaseTestMixin(object):
         bot = Bot.get_random_active()
         Matches.request_match(self.regularUser2, bot, bot.get_random_active_excluding_self())
 
+        # generate match requests from regularUser1
+        bot = Bot.get_random_active()
+        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self())
+        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self())
+        bot = Bot.get_random_active()
+        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self())
+
         self.client.logout()  # child tests can login if they require
 
     def _generate_match_activity(self):
