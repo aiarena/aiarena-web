@@ -93,6 +93,7 @@
                                 {% if result.match.requested_by %}
                                     --
                                 {% else %}
+
                                     {{ p.elo_change |format_elo_change }}
                                     {% if p.elo_change and p.elo_change != 0 %}
                                         {% if p.elo_change > 0 %}
@@ -103,7 +104,7 @@
                                     {% else %}
                                         <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">trending_flat</em>
                                     {% endif %}
-                                {% endif %}
+
                             </td>
                         {% endif %}
                     {% endfor %}
@@ -122,6 +123,7 @@
                                 {% if result.match.requested_by %}
                                     --
                                 {% else %}
+
                                     {{ p.elo_change |format_elo_change }}
                                     {% if p.elo_change and p.elo_change != 0 %}
                                         {% if p.elo_change > 0 %}
@@ -132,7 +134,7 @@
                                     {% else %}
                                         <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">trending_flat</em>
                                     {% endif %}
-                                {% endif %}
+
                             </td>
                         {% endif %}
                     {% endfor %}
