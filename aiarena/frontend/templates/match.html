@@ -9,7 +9,7 @@
 
             {# Participant 1 #}
 
-            {% if match.result %}
+            {% if match.result and not match.requested_by %}
                 {# ELO movement indicator #}
                 {% if match.participant1.elo_change and match.participant1.elo_change != 0 %}
                     {% if match.participant1.elo_change > 0 %}
@@ -20,7 +20,7 @@
                            style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
                     {% endif %}
                 {% else %}
-                    <em class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">fast_forward</em>
+                    <em class="material-icons" style="font-size: 32px; padding: 0; margin:0; vertical-align: -0.3em; ">trending_flat</em>
                 {% endif %}
 
                 {# ELO change #}
@@ -37,7 +37,7 @@
             {# Bot name #}
             {{ match.participant2.bot.as_html_link }}
 
-            {% if match.result %}
+            {% if match.result and not match.requested_by %}
                 {# ELO change #}
                 ({{ match.participant2.elo_change|format_elo_change }})
 
@@ -58,6 +58,9 @@
         </h2>
         <h3>On:</h3>
         <h2>{{ match.map }}</h2>
+        {% if match.requested_by %}
+            <h4>Requested by {{ match.requested_by.as_html_link }}</h4>
+        {% endif %}
 
 
     </div>

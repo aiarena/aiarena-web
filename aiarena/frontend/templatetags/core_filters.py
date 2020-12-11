@@ -10,7 +10,7 @@ def cents_to_usd(cents):
 def format_elo_change(value):
     """Custom formatting for ELO change integers"""
     if value is None or value == 0:
-        return "--"
+        return "0"
     else:
         return "%+d" % value
 
