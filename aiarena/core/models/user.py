@@ -93,8 +93,11 @@ class User(AbstractUser):
     @property
     def match_request_count_left(self):
         from .match import Match
+        from .result import Result
         return self.requested_matches_limit \
                - Match.objects.only('id').filter(requested_by=self,
+                                      created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD).count() \
+               + Result.objects.only('id').filter(submitted_by=self, type='MatchCancelled',
                                       created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD).count()
 
     @property

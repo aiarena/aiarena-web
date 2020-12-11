@@ -54,7 +54,33 @@ class UserProfile(LoginRequiredMixin, DetailView):
         context['bot_list'] = self.request.user.bots.all()
         context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
         context['max_active_per_race_bot_count'] = self.request.user.get_active_bots_per_race_limit_display()
+        context['requested_matches'] = Match.objects.filter(requested_by=self.object, result__isnull=True).order_by(
+            F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
+            Prefetch('map'),
+            Prefetch('matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
         return context
+
+    # Regenerate the API token
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        match_ids = request.POST.getlist('match_selection')
+        # Get and cancel requested matches
+        matches = Match.objects.filter(pk__in=match_ids, requested_by=self.request.user, result__isnull=True, assigned_to__isnull=True)
+        if matches:
+            message = "Matches " if len(matches)>1 else "Match "
+            for match in matches:
+                result = match.cancel(request.user)
+                if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
+                    raise Exception('Match "%s" does not exist' % match.id)
+                elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
+                    raise Exception('A result already exists for match "%s"' % match.id)
+                message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>{match.id}</a>, "
+            message = message[:-2] + " cancelled."
+            messages.success(self.request, mark_safe(message))
+        else:
+            messages.error(self.request, mark_safe("No matches were found for cancellation."))
+        return redirect('profile')
 
 
 class UserTokenDetailView(LoginRequiredMixin, DetailView):
