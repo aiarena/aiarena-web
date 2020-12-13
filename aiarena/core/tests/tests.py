@@ -407,8 +407,8 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
     def test_season_states(self):
         self.client.force_login(self.arenaclientUser1)
 
-        self.assertEqual(Match.objects.filter(result__isnull=True).count(), 12,
-                         msg='This test expects 12 unplayed matches in order to work.')
+        self.assertEqual(Match.objects.filter(result__isnull=True).count(), 15,
+                         msg='This test expects 15 unplayed matches in order to work.')
 
         # cache the bots - list forces the queryset to be evaluated
         bots = list(Bot.objects.all())
