@@ -166,6 +166,50 @@
             </tfoot>
         </table>
     </div>
+    {% if match_participations %}
+        <div id="bot_matches_anker"></div>
+        <div class="divider"><span></span><span><h2>Matches</h2></span><span></span></div>
+        <table summary="Table containing information about queued or in progress matches" class="row-hover-highlight">
+            <thead>
+            <tr>
+                <td><strong>Match ID</strong></td>
+                <td><strong>Bot 1</strong></td>
+                <td><strong>Bot 2</strong></td>
+                <td><strong>Map</strong></td>
+                <td><strong>Started at</strong></td>
+                <td><strong>Assigned to</strong></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for participation in match_participations %}
+                <tr>
+                    <td>{{ participation.match.as_html_link }}</td>
+                    {% for p in participation.match.participants %}
+                        {% if p.participant_number == 1 %}
+                            <td>{{ p.bot.as_html_link }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    {% for p in participation.match.participants %}
+                        {% if p.participant_number == 2 %}
+                            <td>{{ p.bot.as_html_link }}</td>
+                        {% endif %}
+                    {% endfor %}
+                    <td>{{ participation.match.map }}</td>
+                    {% if participation.match.started %}
+                        <td>{{ participation.match.started|date:"d. N Y - H:i:s" }}</td>
+                    {% else %}
+                        <td>queued...</td>
+                    {% endif %}
+                    {% if participation.match.assigned_to %}
+                        <td>{{ participation.match.assigned_to.as_html_link }}</td>
+                    {% else %}
+                        <td>queued...</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            <tbody>
+        </table>
+    {% endif %}
     <div id="bot_results_anker"></div>
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">

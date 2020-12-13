@@ -61,7 +61,6 @@ class UserProfile(LoginRequiredMixin, DetailView):
                      to_attr='participants'))
         return context
 
-    # Regenerate the API token
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         match_ids = request.POST.getlist('match_selection')
@@ -234,6 +233,12 @@ class BotDetail(DetailView):
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
+        context['match_participations'] = MatchParticipation.objects.only("match")\
+            .filter(bot=self.object, match__result__isnull=True)\
+            .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
+            .prefetch_related(
+                Prefetch('match__map'), 
+                Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
         context['result_list'] = results
         context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
         return context

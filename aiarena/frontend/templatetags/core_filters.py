@@ -64,8 +64,22 @@ def step_time_color(value):
     return f"#{''.join(rgb)}"
 
 
+def shorten_naturaltime(naturaltime):
+    # Remove 0xa0 character separating words and replace with spaces
+    naturaltime = " ".join(naturaltime.split())
+    return (naturaltime
+        .replace(' seconds','s').replace(' second','s')
+        .replace(' minutes','m').replace(' minute','m')
+        .replace(' hours','h').replace(' hour','h')
+        .replace(' days','d').replace(' day','d')
+        .replace(' months','mon').replace(' month','mon')
+        .replace(' weeks','w').replace(' week','w')
+        .replace(' years','y').replace(' year','y'))
+
+
 register = template.Library()
 register.filter('format_elo_change', format_elo_change)
 register.filter('smooth_timedelta', smooth_timedelta)
 register.filter('cents_to_usd', cents_to_usd)
 register.filter('step_time_color', step_time_color)
+register.filter('shorten_naturaltime', shorten_naturaltime)

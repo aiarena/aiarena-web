@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n humanize %}
+{% load i18n core_filters humanize %}
 {% block content %}
 
     <div class="divider"><span></span><span><h2>Welcome to the AI Arena!</h2></span><span></span></div>
@@ -146,10 +146,10 @@
                 <tr>
                 {# newly created bots have same update time as its creation time #}
                 {% if event.is_created_event %}
-                    <td nowrap>{{ event.bot_zip_updated|naturaltime }}</td>
+                    <td nowrap>{{ event.bot_zip_updated|naturaltime|shorten_naturaltime }}</td>
                     <td style="text-align: left">{{ event.user.as_html_link }} uploaded a new bot: {{ event.as_html_link }}.</td>
                 {% else %}
-                    <td nowrap>{{ event.bot_zip_updated|naturaltime }}</td>
+                    <td nowrap>{{ event.bot_zip_updated|naturaltime|shorten_naturaltime }}</td>
                     <td style="text-align: left">Bot {{ event.as_html_link }} was updated.</td>
                 {% endif %}
                 </tr>
