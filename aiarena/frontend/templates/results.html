@@ -20,7 +20,7 @@
         {% for result in result_list %}
             <tr>
                 <td>{{ result.match.as_html_link }}</td>
-                <td>{{ result.created|naturaltime }}</td>
+                <td>{{ result.created|naturaltime|shorten_naturaltime }}</td>
 
                 {% for p in result.match.participants %}
                     {% if p.participant_number == 1 %}
