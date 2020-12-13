@@ -77,7 +77,7 @@
             {% for result in result_list %}
                 <tr>
                     <td>{{ result.match.as_html_link }}</td>
-                    <td>{{ result.created|naturaltime }}</td>
+                    <td>{{ result.created|naturaltime|shorten_naturaltime }}</td>
 
                     {% for p in result.match.participants %}
                         {% if p.participant_number == 1 %}
@@ -104,7 +104,7 @@
                                     {% else %}
                                         <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">trending_flat</em>
                                     {% endif %}
-
+                                {% endif %}
                             </td>
                         {% endif %}
                     {% endfor %}
@@ -134,7 +134,7 @@
                                     {% else %}
                                         <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">trending_flat</em>
                                     {% endif %}
-
+                                {% endif %}
                             </td>
                         {% endif %}
                     {% endfor %}
