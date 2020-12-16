@@ -9,7 +9,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
-from django.db.models import F, Prefetch
+from django.db.models import F, Prefetch, Q
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -234,7 +234,7 @@ class BotDetail(DetailView):
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
         context['match_participations'] = MatchParticipation.objects.only("match")\
-            .filter(bot=self.object, match__result__isnull=True)\
+            .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
             .prefetch_related(
                 Prefetch('match__map'), 
