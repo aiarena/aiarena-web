@@ -233,8 +233,8 @@ class BotDetail(DetailView):
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
         context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
-        context['match_participations'] = MatchParticipation.objects.only("match")\
-            .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
+        context['match_participations'] = MatchParticipation.objects.only("match").filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
+
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
             .prefetch_related(
                 Prefetch('match__map'), 
