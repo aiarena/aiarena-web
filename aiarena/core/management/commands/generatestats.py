@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from aiarena.core.models import Bot, SeasonParticipation, Season
+from aiarena.core.models import Bot, CompetitionParticipation, Competition
 from aiarena.core.stats.stats_generator import StatsGenerator
 
 
@@ -20,24 +20,24 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         bot_id = options['botid']
-        seasons = [options['seasonid'] if options['seasonid'] is not None else Season.get_current_season().id]
+        seasons = [options['seasonid'] if options['seasonid'] is not None else Competition.get_current_season().id]
         if options['allseasons']:
-            seasons = Season.objects.all()
+            seasons = Competition.objects.all()
 
         self.stdout.write(f'looping   {len(seasons)} Seasons')
         for s in seasons:
-            if isinstance(s, Season):
+            if isinstance(s, Competition):
                 season_id = s.id
             else:
                 season_id = s
             if bot_id is not None:
-                sp = SeasonParticipation.objects.get(season_id=season_id, bot_id=bot_id)
+                sp = CompetitionParticipation.objects.get(season_id=season_id, bot_id=bot_id)
                 with transaction.atomic():
                     sp.lock_me()
                     self.stdout.write(f'Generating current season stats for bot {bot_id}...')
                     StatsGenerator.update_stats(sp)
             else:
-                for sp in SeasonParticipation.objects.filter(season_id=season_id):
+                for sp in CompetitionParticipation.objects.filter(season_id=season_id):
                     with transaction.atomic():
                         sp.lock_me()
                         self.stdout.write(f'Generating current season stats for bot {sp.bot_id}...')

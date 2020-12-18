@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round, ArenaClient
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient
 from aiarena.core.utils import calculate_md5
 
 
@@ -58,7 +58,7 @@ class BaseTestMixin(object):
         return Map.objects.create(name=name, active=True)
 
     def _create_open_season(self):
-        season = Season.objects.create(previous_season_files_cleaned=True)
+        season = Competition.objects.create(previous_season_files_cleaned=True)
         season.open()
         return season
 
@@ -185,7 +185,7 @@ class BaseTestMixin(object):
         self._generate_match_activity()
 
         # generate a bot match request to ensure it doesn't bug things out
-        bot = Bot.get_random_active()
+        bot = Bot.get_random_available()
         Matches.request_match(self.regularUser2, bot, bot.get_random_active_excluding_self())
 
         # generate match requests from regularUser1
@@ -413,7 +413,7 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         # cache the bots - list forces the queryset to be evaluated
         bots = list(Bot.objects.all())
 
-        season1 = Season.objects.get()
+        season1 = Competition.objects.get()
         self.assertEqual(season1.number, 1)
 
         # start a new round
@@ -457,7 +457,7 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
             bot.full_clean()
 
         # start a new season
-        season2 = Season.objects.create(previous_season_files_cleaned=True)
+        season2 = Competition.objects.create(previous_season_files_cleaned=True)
         self.assertEqual(season2.number, 2)
 
         # not enough active bots

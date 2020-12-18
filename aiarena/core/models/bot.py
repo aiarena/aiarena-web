@@ -21,7 +21,7 @@ from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
 from .match import Match
 from .mixins import LockableModelMixin
-from .season import Season
+from .competition import Competition
 from .user import User
 
 logger = logging.getLogger(__name__)
@@ -215,12 +215,12 @@ class Bot(models.Model, LockableModelMixin):
             return 'run.py'
 
     def current_season_participation(self):
-        return self.seasonparticipation_set.get(season=Season.get_current_season())
+        return self.seasonparticipation_set.get(season=Competition.get_current_season())
 
     def validate_current_season(self):
         if self.active:
             try:
-                Season.get_current_season()
+                Competition.get_current_season()
             except NoCurrentSeason:
                 raise ValidationError('You cannot activate a bot when there is no current season.')
 
@@ -304,7 +304,3 @@ def post_save_bot(sender, instance, created, **kwargs):
         instance.save()
         post_save.connect(pre_save_bot, sender=sender)
 
-    # register a season participation if the bot has been activated
-    if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
-        from .season_participation import SeasonParticipation
-        SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)

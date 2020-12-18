@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction, connection
 
-from aiarena.core.models import Match, Season, SeasonParticipation, Round, MatchParticipation, Result
+from aiarena.core.models import Match, Competition, CompetitionParticipation, Round, MatchParticipation, Result
 from aiarena.settings import ELO_START_VALUE
 
 
@@ -16,9 +16,9 @@ class Command(BaseCommand):
         self.stdout.write(f"Starting ELO re-calculation for season id {options['season_id']}...")
         with transaction.atomic():
             self.stdout.write(f"Locking records...")
-            target_season = Season.objects.select_for_update().get(id=options['season_id'])
+            target_season = Competition.objects.select_for_update().get(id=options['season_id'])
             self.stdout.write(f"Season id {target_season.id} locked.")
-            season_participants = SeasonParticipation.objects.select_for_update().filter(season=target_season)
+            season_participants = CompetitionParticipation.objects.select_for_update().filter(season=target_season)
             self.stdout.write(f"{season_participants.count()} season participants locked.")
             matches = Match.objects.select_for_update().filter(round__season=target_season, result__isnull=False)\
                 .prefetch_related('matchparticipation_set', 'result').order_by('id')

@@ -13,8 +13,8 @@ from django.utils import timezone
 
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round, ArenaClient, \
-    Season
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
+    Competition
 from aiarena.core.utils import calculate_md5
 
 
@@ -62,17 +62,17 @@ class TestingClient:
         assert response.status_code == 302  # redirect on success
         return ArenaClient.objects.get(username=username)
 
-    def create_competition(self, name: str, type: str, enabled: bool) -> Season:
+    def create_competition(self, name: str, type: str, enabled: bool) -> Competition:
         response = self.django_client.post('/admin/core/competition/add/', {'name': name,
                                                                             'type': type,
                                                                             'enabled': enabled, })
 
         assert response.status_code == 302  # redirect on success
-        return Season.objects.get(name=name)
+        return Competition.objects.get(name=name)
 
     def open_competition(self, competition_id: int):
         # The form needs certain details to be valid, so retrieve them
-        competition = Season.objects.get(id=competition_id)
+        competition = Competition.objects.get(id=competition_id)
         response = self.django_client.post(f'/admin/core/competition/{competition}/change/', {
             '_open-season': 'Open season',
             'competition': competition.competition_id, })

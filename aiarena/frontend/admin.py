@@ -1,8 +1,8 @@
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 
-from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Season, \
-    SeasonBotMatchupStats, SeasonParticipation, Trophy, TrophyIcon, User, News
+from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
+    CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -92,50 +92,29 @@ class ArenaClientAdmin(admin.ModelAdmin):
 
 @admin.register(Map)
 class MapAdmin(admin.ModelAdmin):
-    actions = ['activate', 'deactivate']
-    
+
     search_fields = ('name',)
-    list_display = ('id', 'name', 'file', 'active')
-    list_filter = ('active',)
-
-    def activate(self, request, queryset):
-        """
-        Activates selected maps for play.
-        """
-        for map in queryset:
-            map.activate()
-
-    def deactivate(self, request, queryset):
-        """
-        Deactivates selected maps for play.
-        """
-        for map in queryset:
-            map.deactivate()
-
-    activate.short_description = "Activate selected maps"
-    deactivate.short_description = "Deactivate selected maps"
+    list_display = ('id', 'name', 'file')
+    list_filter = ()
 
 
-@admin.register(Season)
+@admin.register(Competition)
 class SeasonAdmin(admin.ModelAdmin):
     
     list_display = (
         'id',
-        'number',
         'date_created',
         'date_opened',
         'date_closed',
         'status',
-        'previous_season_files_cleaned',
     )
     list_filter = (
         'date_created',
         'date_opened',
         'date_closed',
-        'previous_season_files_cleaned',
     )
     # Add the close season button
-    change_form_template = "admin/change_form_season.html"
+    change_form_template = "admin/change_form_competition.html"
 
     def response_change(self, request, obj):
         if "_open-season" in request.POST or "_open-season" in request.POST.get('action'):
@@ -291,7 +270,7 @@ class ResultAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(SeasonParticipation)
+@admin.register(CompetitionParticipation)
 class SeasonParticipationAdmin(admin.ModelAdmin):
     
     list_display = (
@@ -316,7 +295,7 @@ class SeasonParticipationAdmin(admin.ModelAdmin):
     search_fields = ('slug',)
 
 
-@admin.register(SeasonBotMatchupStats)
+@admin.register(CompetitionBotMatchupStats)
 class SeasonBotMatchupStatsAdmin(admin.ModelAdmin):
     
     list_display = (

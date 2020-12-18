@@ -18,7 +18,7 @@ from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.api import Bots, Matches
 from aiarena.core.events import EVENT_MANAGER
 from aiarena.core.events import MatchResultReceivedEvent
-from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
+from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation
 from aiarena.core.models.arena_client_status import ArenaClientStatus
 from aiarena.core.permissions import IsArenaClientOrAdminUser, IsArenaClient
 from aiarena.core.validators import validate_not_inf, validate_not_nan
@@ -317,8 +317,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                             # test here to check ELO total and ensure no corruption
                             match_season = result.match.round.season
-                            expected_elo_sum = settings.ELO_START_VALUE * SeasonParticipation.objects.filter(season=match_season).count()
-                            actual_elo_sum = SeasonParticipation.objects.filter(season=match_season).aggregate(
+                            expected_elo_sum = settings.ELO_START_VALUE * CompetitionParticipation.objects.filter(season=match_season).count()
+                            actual_elo_sum = CompetitionParticipation.objects.filter(season=match_season).aggregate(
                                 Sum('elo'))
 
                             if actual_elo_sum['elo__sum'] != expected_elo_sum:

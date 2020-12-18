@@ -6,14 +6,14 @@ import pandas as pd
 from django.db import connection, transaction
 from django.db.models import Max
 
-from aiarena.core.models import MatchParticipation, SeasonParticipation
-from aiarena.core.models.season_bot_matchup_stats import SeasonBotMatchupStats
+from aiarena.core.models import MatchParticipation, CompetitionParticipation
+from aiarena.core.models.season_bot_matchup_stats import CompetitionBotMatchupStats
 
 
 class StatsGenerator:
 
     @staticmethod
-    def update_stats(sp: SeasonParticipation):
+    def update_stats(sp: CompetitionParticipation):
         sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
                                                            match__result__isnull=False,
                                                            match__round__season=sp.season) \
@@ -57,10 +57,10 @@ class StatsGenerator:
         StatsGenerator._update_matchup_stats(sp)
 
     @staticmethod
-    def _update_matchup_stats(sp: SeasonParticipation):
-        for season_participation in SeasonParticipation.objects.filter(season=sp.season).exclude(bot=sp.bot):
+    def _update_matchup_stats(sp: CompetitionParticipation):
+        for season_participation in CompetitionParticipation.objects.filter(season=sp.season).exclude(bot=sp.bot):
             with connection.cursor() as cursor:
-                matchup_stats = SeasonBotMatchupStats.objects.select_for_update() \
+                matchup_stats = CompetitionBotMatchupStats.objects.select_for_update() \
                     .get_or_create(bot=sp, opponent=season_participation)[0]
 
                 matchup_stats.match_count = StatsGenerator._calculate_matchup_count(cursor, season_participation, sp)

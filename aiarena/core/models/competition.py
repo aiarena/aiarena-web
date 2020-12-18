@@ -9,37 +9,45 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason, MultipleCurrentSeasons
+from .game_type import GameMode
 from .mixins import LockableModelMixin
 
 logger = logging.getLogger(__name__)
 
+class CompetitionType(models.TextChoices):
+    LEAGUE = u'LRR', 'League - Round Robin'
+    # TOURNAMENT = u'T', 'Tournament'
+    # CUSTOM = u'C', 'Custom'
+    # flash_challenge = u'F', 'FlashChallenge'
 
+# todo: remove this
 def replay_archive_upload_to(instance, filename):
     return '/'.join(['replays', 'season_' + str(instance.number) + '_zip'])
 
-class Season(models.Model, LockableModelMixin):
+
+class Competition(models.Model, LockableModelMixin):
     """ Represents a season of play in the context of a ladder """
-    SEASON_STATUSES = (
+    COMPETITION_STATUSES = (
         ('created', 'Created'),  # The initial state for a season. Functionally identical to paused.
         ('paused', 'Paused'),  # While a season is paused, existing rounds can be played, but no new ones are generated.
         ('open', 'Open'),  # When a season is open, new rounds can be generated and played.
         ('closing', 'Closing'),
-        # When a season is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
+        # When a competition is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
         ('closed', 'Closed'),  # Functionally identical to paused, except not intended to change after this status.
     )
-    number = models.IntegerField(blank=True, editable=False)
+    # name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, null=True)
+    type = models.CharField(max_length=32,
+                            choices=CompetitionType.choices,
+                            default=CompetitionType.LEAGUE)
+    game_mode = models.ForeignKey(GameMode, on_delete=models.CASCADE, related_name='game_modes')
     date_created = models.DateTimeField(auto_now_add=True)
     date_opened = models.DateTimeField(blank=True, null=True)
     date_closed = models.DateTimeField(blank=True, null=True)
-    status = models.CharField(max_length=16, choices=SEASON_STATUSES, default='created')
-    previous_season_files_cleaned = models.BooleanField(default=False)
+    status = models.CharField(max_length=16, choices=COMPETITION_STATUSES, default='created', blank=True)
 
     def __str__(self):
         return self.name
-
-    @property
-    def name(self):
-        return 'Season ' + str(self.number)
 
     @property
     def is_paused(self):
@@ -68,9 +76,6 @@ class Season(models.Model, LockableModelMixin):
         from .bot import Bot
         self.lock_me()
 
-        if not self.previous_season_files_cleaned:
-            return "Cannot open a season where previous_season_replays_cleaned has not been marked as True."
-
         if self.status in ['created', 'paused']:
             if self.status == 'created':
                 self.date_opened = timezone.now()
@@ -97,11 +102,12 @@ class Season(models.Model, LockableModelMixin):
         else:
             return "Cannot start closing a season with a status of {}".format(self.status)
 
+    @transaction.atomic
     def try_to_close(self):
         from .round import Round
         from .bot import Bot
         if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0 and \
-                Season.objects.filter(id=self.id, status='closing') \
+                Competition.objects.filter(id=self.id, status='closing') \
                 .update(status='closed', date_closed=timezone.now()) > 0:
             # deactivate all bots
             for bot in Bot.objects.all():
@@ -112,14 +118,14 @@ class Season(models.Model, LockableModelMixin):
             # todo: then wipe all replay/log files?
 
     @staticmethod
-    def get_current_season(select_for_update: bool = False) -> 'Season':
+    def get_current_season(select_for_update: bool = False) -> 'Competition':
         try:
             #  will fail if there is more than 1 current season or 0 current seasons
-            return Season.objects.select_for_update().get(date_closed__isnull=True) \
-                if select_for_update else Season.objects.get(date_closed__isnull=True)
-        except Season.DoesNotExist:
+            return Competition.objects.select_for_update().get(date_closed__isnull=True) \
+                if select_for_update else Competition.objects.get(date_closed__isnull=True)
+        except Competition.DoesNotExist:
             raise NoCurrentSeason()  # todo: separate between core and API exceptions
-        except Season.MultipleObjectsReturned:
+        except Competition.MultipleObjectsReturned:
             raise MultipleCurrentSeasons()  # todo: separate between core and API exceptions
 
     def get_absolute_url(self):
@@ -128,24 +134,18 @@ class Season(models.Model, LockableModelMixin):
     def as_html_link(self):
         return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
 
-    @staticmethod
-    def get_current_season_or_none():
-        try:
-            return Season.get_current_season()
-        except NoCurrentSeason:
-            return None
-        except MultipleCurrentSeasons:
-            return None
+    # @staticmethod
+    # def get_current_season_or_none():
+    #     try:
+    #         return Competition.get_current_season()
+    #     except NoCurrentSeason:
+    #         return None
+    #     except MultipleCurrentSeasons:
+    #         return None
 
     def get_absolute_url(self):
-        return reverse('season', kwargs={'pk': self.pk})
+        return reverse('competition', kwargs={'pk': self.pk})
 
     def as_html_link(self):
         return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
-
-
-@receiver(pre_save, sender=Season)
-def pre_save_season(sender, instance, **kwargs):
-    if instance.number is None:
-        instance.number = Season.objects.all().count() + 1  # todo: redo this for multiladders
 

@@ -3,7 +3,7 @@ import logging
 from constance import config
 from rest_framework import viewsets, serializers
 
-from aiarena.core.models import Result, Bot, Match, SeasonParticipation, User
+from aiarena.core.models import Result, Bot, Match, CompetitionParticipation, User
 from aiarena.core.permissions import IsServiceOrAdminUser
 from aiarena.settings import ELO_START_VALUE
 
@@ -38,7 +38,7 @@ class StreamNextReplayViewSet(viewsets.ReadOnlyModelViewSet):
         # Only matches that featured a bot above the starting ELO
         # exclude matches with only house bots.
         matches = Match.objects.filter(result__isnull=False, requested_by__isnull=True,
-            round__season__seasonparticipation__in=SeasonParticipation.objects.filter(elo__gte=ELO_START_VALUE).exclude(bot__user_id=config.HOUSE_BOTS_USER_ID))
+                                       round__season__seasonparticipation__in=CompetitionParticipation.objects.filter(elo__gte=ELO_START_VALUE).exclude(bot__user_id=config.HOUSE_BOTS_USER_ID))
 
         return Result.objects.filter(
             type__in=['Player1Win', 'Player2Win', 'Player1Surrender', 'Player2Surrender', ],  # Only wins/surrenders

@@ -6,9 +6,9 @@ from .match import Match
 from .match_participation import MatchParticipation
 from .result import Result
 from .round import Round
-from .season import Season
-from .season_bot_matchup_stats import SeasonBotMatchupStats
-from .season_participation import SeasonParticipation
+from .competition import Competition
+from .season_bot_matchup_stats import CompetitionBotMatchupStats
+from .season_participation import CompetitionParticipation
 from .trophy import Trophy
 from .trophy import TrophyIcon
 from .user import User

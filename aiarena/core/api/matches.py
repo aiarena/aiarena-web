@@ -10,7 +10,7 @@ from rest_framework.exceptions import APIException
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds, NoMaps, CurrentSeasonPaused, \
     CurrentSeasonClosing
 from aiarena.core.api import Bots
-from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Season
+from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Competition
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ class Matches:
             if match.round:  # if this is a ladder match, record the starting elo
                 for p in participations:
                     p.starting_elo = p.bot.seasonparticipation_set.only('elo', 'bot_id') \
-                        .get(season=Season.get_current_season()).elo
+                        .get(season=Competition.get_current_season()).elo
                     p.save()
 
             match.started = timezone.now()
@@ -153,7 +153,7 @@ class Matches:
         return None
 
     @staticmethod
-    def _attempt_to_generate_new_round(for_season: Season):
+    def _attempt_to_generate_new_round(for_season: Competition):
         active_maps = Map.objects.filter(active=True).select_for_update()
         if active_maps.count() == 0:
             raise NoMaps()
@@ -177,7 +177,7 @@ class Matches:
         return new_round
 
     @staticmethod
-    def start_next_match(requesting_user, competition: Season):
+    def start_next_match(requesting_user, competition: Competition):
         with transaction.atomic():
             # REQUESTED MATCHES
             match = Matches._attempt_to_start_a_requested_match(requesting_user)

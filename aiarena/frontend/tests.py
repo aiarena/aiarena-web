@@ -1,6 +1,6 @@
 from django.urls import reverse
 
-from aiarena.core.models import Match, Round, Bot, User, Map, Result, Season
+from aiarena.core.models import Match, Round, Bot, User, Map, Result, Competition
 from aiarena.core.tests.tests import FullDataSetMixin
 from django.test import TransactionTestCase, TestCase, RequestFactory, Client
 from .admin import MapAdmin, MatchAdmin, SeasonAdmin
@@ -43,8 +43,8 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
     """ need to make this one work """
     def test_season_admin(self):
         self.factory = RequestFactory()
-        admin = SeasonAdmin(model=Season, admin_site='/admin')
-        season = Season.objects.first()
+        admin = SeasonAdmin(model=Competition, admin_site='/admin')
+        season = Competition.objects.first()
         data = {'action': '_pause-season',
                 '_selected_action': [season, ]}
         class dumb_hack:

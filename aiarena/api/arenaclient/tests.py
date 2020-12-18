@@ -5,7 +5,7 @@ from django.db.models import Sum
 from django.test import TransactionTestCase
 
 from aiarena.core.api import Matches
-from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, SeasonParticipation, Season, Map, \
+from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, Competition, Map, \
     ArenaClient
 from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
@@ -495,7 +495,7 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(sp2.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][1])
 
     def CheckEloSum(self):
-        sumElo = SeasonParticipation.objects.filter(season=Season.get_current_season()).aggregate(Sum('elo'))
+        sumElo = CompetitionParticipation.objects.filter(season=Competition.get_current_season()).aggregate(Sum('elo'))
         self.assertEqual(sumElo['elo__sum'],
                          ELO_START_VALUE * Bot.objects.all().count())  # starting ELO times number of bots
 

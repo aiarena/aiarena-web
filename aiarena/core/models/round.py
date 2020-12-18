@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 from aiarena.api.arenaclient.exceptions import NoMaps, NotEnoughActiveBots, CurrentSeasonPaused, CurrentSeasonClosing
 from .map import Map
 from .mixins import LockableModelMixin
-from .season import Season
+from .competition import Competition
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class Round(models.Model, LockableModelMixin):
     """ Represents a round of play within a season """
     number = models.IntegerField(blank=True, editable=False)
-    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    season = models.ForeignKey(Competition, on_delete=models.CASCADE)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True, db_index=True)
     complete = models.BooleanField(default=False)

@@ -9,7 +9,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.reverse import reverse
 from django.db.models import Prefetch
 
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, SeasonParticipation, Season
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, Competition
 from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
 logger = logging.getLogger(__name__)
 
@@ -197,7 +197,7 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
 
 class SeasonParticipationSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SeasonParticipation
+        model = CompetitionParticipation
         fields = seasonparticipation_include_fields
 
 
@@ -207,7 +207,7 @@ class SeasonParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
-    queryset = SeasonParticipation.objects.all()
+    queryset = CompetitionParticipation.objects.all()
     serializer_class = SeasonParticipationSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
@@ -308,7 +308,7 @@ class RoundViewSet(viewsets.ReadOnlyModelViewSet):
 
 class SeasonSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Season
+        model = Competition
         fields = season_include_fields
 
 
@@ -318,7 +318,7 @@ class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
-    queryset = Season.objects.all()
+    queryset = Competition.objects.all()
     serializer_class = SeasonSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]

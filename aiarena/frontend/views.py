@@ -24,7 +24,7 @@ from wiki.models import ArticleRevision
 from aiarena.api.arenaclient.exceptions import NoCurrentSeason
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
-from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map, \
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, Competition, Map, \
     ArenaClient, News
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
@@ -237,7 +237,7 @@ class BotDetail(DetailView):
             .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
             .prefetch_related(
-                Prefetch('match__map'), 
+                Prefetch('match__map'),
                 Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
         context['result_list'] = results
         context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
@@ -245,7 +245,7 @@ class BotDetail(DetailView):
 
 
 class BotSeasonStatsDetail(DetailView):
-    model = SeasonParticipation
+    model = CompetitionParticipation
     template_name = 'bot_season_stats.html'
 
     def get_context_data(self, **kwargs):
@@ -271,18 +271,10 @@ class BotUpdateForm(forms.ModelForm):
         if self.instance.bot_data_is_currently_frozen():
             self.fields['bot_data'].disabled = True
 
-        try:
-            Season.get_current_season()
-            # in season
-        except NoCurrentSeason:
-            # outside season - don't allow activation
-            self.fields['active'].disabled = True
-            self.fields['active'].required = False
-
 
     class Meta:
         model = Bot
-        fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
+        fields = ['bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
                   'bot_data_publicly_downloadable', 'bot_data_enabled']
 
 
@@ -353,7 +345,7 @@ class Ranking(TemplateView):
     """
 
     def get(self, request, *args, **kwargs):
-        season = Season.get_current_season_or_none()
+        season = Competition.get_current_season_or_none()
         if season is None:
             return render(request, 'ranking_no_season.html')
         else:
@@ -491,15 +483,15 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     def get_queryset(self):
         try:
-            if Round.objects.filter(season=Season.get_current_season()).count() > 0:
+            if Round.objects.filter(season=Competition.get_current_season()).count() > 0:
                 return Ladders.get_season_ranked_participants(
-                    Season.get_current_season(), amount=10).prefetch_related(
+                    Competition.get_current_season(), amount=10).prefetch_related(
                     Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
             else:
-                return SeasonParticipation.objects.none()
+                return CompetitionParticipation.objects.none()
         except NoCurrentSeason:
-            return SeasonParticipation.objects.none()
+            return CompetitionParticipation.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -544,12 +536,12 @@ class MatchDetail(DetailView):
 
 
 class SeasonList(ListView):
-    queryset = Season.objects.all().order_by('-id')
+    queryset = Competition.objects.all().order_by('-id')
     template_name = 'seasons.html'
 
 
 class SeasonDetail(DetailView):
-    model = Season
+    model = Competition
     template_name = 'season.html'
 
     def get_context_data(self, **kwargs):

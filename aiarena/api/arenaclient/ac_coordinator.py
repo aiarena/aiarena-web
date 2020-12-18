@@ -13,7 +13,7 @@ from django.db.models import F
 
 from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.api import Matches
-from aiarena.core.models import Match, Season
+from aiarena.core.models import Match, Competition
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class ACCoordinator:
 
     @staticmethod
     def get_random_competition():
-        return Season.objects.filter(status__in=['open', 'closing']).order_by('?')[0]
+        return Competition.objects.filter(status__in=['open', 'closing']).order_by('?')[0]
 
     @staticmethod
     def next_match(arenaclient: ArenaClient) -> Match:
