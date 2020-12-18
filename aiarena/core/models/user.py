@@ -12,6 +12,7 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.functional import cached_property
 
+from django.utils.translation import gettext_lazy as _
 logger = logging.getLogger(__name__)
 
 
@@ -30,16 +31,17 @@ class User(AbstractUser):
         ('ARENA_CLIENT', 'Arena Client'),
         ('SERVICE', 'Service'),
     )
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now, blank=True)
     email = models.EmailField(unique=True)
-    patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
+    patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none', blank=True)
     type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
-    extra_active_bots_per_race = models.IntegerField(default=0)
-    extra_periodic_match_requests = models.IntegerField(default=0)
-    receive_email_comms = models.BooleanField(default=True)
-    sync_patreon_status = models.BooleanField(default=True)
+    extra_active_bots_per_race = models.IntegerField(default=0, blank=True)
+    extra_periodic_match_requests = models.IntegerField(default=0, blank=True)
+    receive_email_comms = models.BooleanField(default=True, blank=True)
+    sync_patreon_status = models.BooleanField(default=True, blank=True)
 
     # permissions
-    can_request_games_for_another_authors_bot = models.BooleanField(default=False)
+    can_request_games_for_another_authors_bot = models.BooleanField(default=False, blank=True)
 
     @cached_property
     def get_absolute_url(self):
