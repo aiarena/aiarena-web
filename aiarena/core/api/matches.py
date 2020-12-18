@@ -177,7 +177,7 @@ class Matches:
         return new_round
 
     @staticmethod
-    def start_next_match(requesting_user):
+    def start_next_match(requesting_user, competition: Season):
         with transaction.atomic():
             # REQUESTED MATCHES
             match = Matches._attempt_to_start_a_requested_match(requesting_user)
@@ -185,7 +185,6 @@ class Matches:
                 return match  # a match was found - we're done
 
             # LADDER MATCHES
-            current_season = Season.get_current_season()
             # Get rounds with un-started matches
             rounds = Round.objects.raw("""
                 SELECT distinct cr.id from core_round cr 
@@ -194,7 +193,7 @@ class Matches:
                 and finished is null
                 and cm.started is null
                 order by number
-                for update""", (current_season.id,))
+                for update""", (competition.id,))
 
             for round in rounds:
                 match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
@@ -214,7 +213,7 @@ class Matches:
             if Round.max_active_rounds_reached():
                 raise MaxActiveRounds()
             else:  # generate new round
-                round = Matches._attempt_to_generate_new_round(current_season)
+                round = Matches._attempt_to_generate_new_round(competition)
                 match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
                 if match is None:
                     raise APIException("Failed to start match. There might not be any available participants.")

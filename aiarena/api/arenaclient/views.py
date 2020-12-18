@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from aiarena import settings
+from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.api import Bots, Matches
 from aiarena.core.events import EVENT_MANAGER
@@ -83,45 +84,20 @@ class MatchViewSet(viewsets.GenericViewSet):
     permission_classes = [IsArenaClientOrAdminUser]
     throttle_scope = 'arenaclient'
 
-    def create_new_match(self, requesting_user):
-        match = Matches.start_next_match(requesting_user)
-
-        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot')\
+    def load_participants(self, match: Match):
+        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot') \
             .get(match_id=match.id, participant_number=1).bot
-        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot')\
+        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot') \
             .get(match_id=match.id, participant_number=2).bot
+
+    @transaction.atomic()
+    def create(self, request, *args, **kwargs):
+        match = ACCoordinator.next_match(request.user)
+        self.load_participants(match)
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @transaction.atomic()
-    def create(self, request, *args, **kwargs):
-        if config.LADDER_ENABLED:
-            try:
-                if config.REISSUE_UNFINISHED_MATCHES:
-                    # Check for any unfinished matches assigned to this user. If any are present, return that.
-                    unfinished_matches = Match.objects.only('id', 'map')\
-                        .filter(started__isnull=False, assigned_to=request.user,
-                                result__isnull=True).order_by(F('round_id').asc())
-                    if unfinished_matches.count() > 0:
-                        match = unfinished_matches[0]  # todo: re-set started time?
-
-                        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot')\
-                            .get(match_id=match.id, participant_number=1).bot
-                        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot')\
-                            .get(match_id=match.id, participant_number=2).bot
-
-                        serializer = self.get_serializer(match)
-                        return Response(serializer.data, status=status.HTTP_201_CREATED)
-                    else:
-                        return self.create_new_match(request.user)
-                else:
-                    return self.create_new_match(request.user)
-            except Exception as e:
-                logger.exception("Exception while processing request for match.")
-                raise
-        else:
-            raise LadderDisabled()
 
     # todo: check match is in progress/bot is in this match
     @action(detail=True, methods=['GET'], name='Download a participant\'s zip file', url_path='(?P<p_num>\d+)/zip')
