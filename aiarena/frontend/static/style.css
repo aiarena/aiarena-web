@@ -215,22 +215,22 @@ a:hover {
     padding: 0 10px 0 10px;
 }
 
-#bot_season_stats {
+#bot_competition_stats {
     float: left;
     width: 27.0%;
     margin-left: 73px;
 }
 
-#bot_season_stats table {
+#bot_competition_stats table {
     margin: 0;
     padding: 0;
 }
 
-#bot_season_stats_matchups {
+#bot_competition_stats_matchups {
     margin: 0 0 0 73px;
 }
 
-#bot_season_stats_matchups table {
+#bot_competition_stats_matchups table {
     margin: 0;
     padding: 0;
 }

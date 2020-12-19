@@ -5,7 +5,7 @@ import aiarena.core.models.map
 import aiarena.core.models.match_participation
 import aiarena.core.models.mixins
 import aiarena.core.models.result
-import aiarena.core.models.season_participation
+import aiarena.core.models.competition_participation
 import aiarena.core.storage
 import aiarena.core.validators
 from django.conf import settings
@@ -205,7 +205,7 @@ class Migration(migrations.Migration):
                 ('tie_count', models.IntegerField(default=0)),
                 ('crash_perc', models.FloatField(blank=True, null=True, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf])),
                 ('crash_count', models.IntegerField(default=0)),
-                ('elo_graph', models.FileField(blank=True, null=True, storage=aiarena.core.storage.OverwriteStorage(), upload_to=aiarena.core.models.season_participation.elo_graph_upload_to)),
+                ('elo_graph', models.FileField(blank=True, null=True, storage=aiarena.core.storage.OverwriteStorage(), upload_to=aiarena.core.models.competition_participation.elo_graph_upload_to)),
                 ('highest_elo', models.IntegerField(blank=True, null=True)),
                 ('slug', models.SlugField(max_length=255)),
                 ('bot', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Bot')),

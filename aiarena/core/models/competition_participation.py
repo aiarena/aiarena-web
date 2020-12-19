@@ -14,11 +14,11 @@ logger = logging.getLogger(__name__)
 
 
 def elo_graph_upload_to(instance, filename):
-    return '/'.join(['graphs', f'{instance.season_id}_{instance.bot.id}_{instance.bot.name}.png'])
+    return '/'.join(['graphs', f'{instance.competition_id}_{instance.bot.id}_{instance.bot.name}.png'])
 
 
 class CompetitionParticipation(models.Model, LockableModelMixin):
-    season = models.ForeignKey(Competition, on_delete=models.CASCADE)
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     match_count = models.IntegerField(default=0)
@@ -36,12 +36,12 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.season.name + ' ' + str(self.bot)
+        return self.competition.name + ' ' + str(self.bot)
 
     def __str__(self):
-        return str(self.season) + ' ' + str(self.bot)
+        return str(self.competition) + ' ' + str(self.bot)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(f'{self.bot.name} {self.season.name}')
+        self.slug = slugify(f'{self.bot.name} {self.competition.name}')
         super().save(*args, **kwargs)
 

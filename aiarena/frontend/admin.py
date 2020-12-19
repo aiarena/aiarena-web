@@ -99,7 +99,7 @@ class MapAdmin(admin.ModelAdmin):
 
 
 @admin.register(Competition)
-class SeasonAdmin(admin.ModelAdmin):
+class CompetitionAdmin(admin.ModelAdmin):
     
     list_display = (
         'id',
@@ -113,28 +113,28 @@ class SeasonAdmin(admin.ModelAdmin):
         'date_opened',
         'date_closed',
     )
-    # Add the close season button
+    # Add the close competition button
     change_form_template = "admin/change_form_competition.html"
 
     def response_change(self, request, obj):
-        if "_open-season" in request.POST or "_open-season" in request.POST.get('action'):
+        if "_open-competition" in request.POST or "_open-competition" in request.POST.get('action'):
             error = obj.open()
             if error is None:
-                self.message_user(request, "This season is now open.",)
+                self.message_user(request, "This competition is now open.",)
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
-        elif "_pause-season" in request.POST or "_pause-season" in request.POST.get('action'):
+        elif "_pause-competition" in request.POST or "_pause-competition" in request.POST.get('action'):
             error = obj.pause()
             if error is None:
-                self.message_user(request, "This season is now paused.")
+                self.message_user(request, "This competition is now paused.")
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
-        elif "_close-season" in request.POST or "_close-season" in request.POST.get('action'):
+        elif "_close-competition" in request.POST or "_close-competition" in request.POST.get('action'):
             error = obj.start_closing()
             if error is None:
-                self.message_user(request, "This season is now closing.")
+                self.message_user(request, "This competition is now closing.")
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
@@ -147,12 +147,12 @@ class RoundAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'number',
-        'season',
+        'competition',
         'started',
         'finished',
         'complete',
     )
-    list_filter = ('season', 'started', 'finished', 'complete')
+    list_filter = ('competition', 'started', 'finished', 'complete')
 
 
 @admin.register(Match)
@@ -271,11 +271,11 @@ class ResultAdmin(admin.ModelAdmin):
 
 
 @admin.register(CompetitionParticipation)
-class SeasonParticipationAdmin(admin.ModelAdmin):
+class CompetitionParticipationAdmin(admin.ModelAdmin):
     
     list_display = (
         'id',
-        'season',
+        'competition',
         'bot',
         'elo',
         'match_count',
@@ -291,12 +291,12 @@ class SeasonParticipationAdmin(admin.ModelAdmin):
         'highest_elo',
         'slug',
     )
-    list_filter = ('season', 'bot')
+    list_filter = ('competition', 'bot')
     search_fields = ('slug',)
 
 
 @admin.register(CompetitionBotMatchupStats)
-class SeasonBotMatchupStatsAdmin(admin.ModelAdmin):
+class CompetitionBotMatchupStatsAdmin(admin.ModelAdmin):
     
     list_display = (
         'id',

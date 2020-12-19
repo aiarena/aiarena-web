@@ -294,7 +294,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         # Calculate the change in ELO
                         # the bot elos have changed so refresh them
                         # todo: instead of having to refresh, return data from adjust_elo and apply it here
-                        sp1, sp2 = result.get_season_participants
+                        sp1, sp2 = result.get_competition_participants
                         participant1.resultant_elo = sp1.elo
                         participant2.resultant_elo = sp2.elo
                         participant1.elo_change = participant1.resultant_elo - p1_initial_elo
@@ -316,9 +316,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                 logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
 
                             # test here to check ELO total and ensure no corruption
-                            match_season = result.match.round.season
-                            expected_elo_sum = settings.ELO_START_VALUE * CompetitionParticipation.objects.filter(season=match_season).count()
-                            actual_elo_sum = CompetitionParticipation.objects.filter(season=match_season).aggregate(
+                            match_competition = result.match.round.competition
+                            expected_elo_sum = settings.ELO_START_VALUE * CompetitionParticipation.objects.filter(competition=match_competition).count()
+                            actual_elo_sum = CompetitionParticipation.objects.filter(competition=match_competition).aggregate(
                                 Sum('elo'))
 
                             if actual_elo_sum['elo__sum'] != expected_elo_sum:

@@ -37,25 +37,19 @@ class LadderDisabled(APIException):
     default_code = 'ladder_disabled'
 
 
-class CurrentSeasonPaused(APIException):
+class CompetitionPaused(APIException):
     status_code = 200
-    default_detail = 'The current season is paused.'
-    default_code = 'current_season_paused'
+    default_detail = 'The competition is paused.'
+    default_code = 'competition_paused'
 
 
-class CurrentSeasonClosing(APIException):
+class CompetitionClosing(APIException):
     status_code = 200
-    default_detail = 'The current season is closing.'
-    default_code = 'current_season_closing'
+    default_detail = 'This competition is closing.'
+    default_code = 'competition_closing'
 
 
-class NoCurrentSeason(APIException):
+class NoCurrentCompetitions(APIException):
     status_code = 200
-    default_detail = 'There is no current season.'
-    default_code = 'no_current_season'
-
-
-class MultipleCurrentSeasons(Exception):
-    status_code = 200
-    default_detail = 'There are multiple current seasons.'
-    default_code = 'multiple_current_seasons'
+    default_detail = 'There are no current competitions.'
+    default_code = 'no_current_competitions'

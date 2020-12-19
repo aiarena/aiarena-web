@@ -32,12 +32,12 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        # no current season
+        # no current competition
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
 
-        # needs a valid season to be able to activate a bot.
-        self._create_open_season()
+        # needs a valid competition to be able to activate a bot.
+        self._create_open_competition()
 
         # no maps
         response = self._post_to_matches()
@@ -114,7 +114,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
         self._create_map('test_map')
-        self._create_open_season()
+        self._create_open_competition()
 
         self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -135,7 +135,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
         self._create_map('test_map')
-        self._create_open_season()
+        self._create_open_competition()
 
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -174,7 +174,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
         self._create_map('test_map')
-        self._create_open_season()
+        self._create_open_competition()
 
         bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
@@ -207,7 +207,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
         self._create_map('test_map')
-        self._create_open_season()
+        self._create_open_competition()
 
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
@@ -308,7 +308,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
         self._create_map('test_map')
-        self._create_open_season()
+        self._create_open_competition()
 
         # Create 3 bots, so after a round is generated, we'll have some unstarted matches
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
@@ -342,7 +342,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
         self._create_map('test_map')
-        self._create_open_season()
+        self._create_open_competition()
 
         bot1 = self._create_active_bot(self.regularUser1, 'bot1')
         bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
@@ -409,7 +409,7 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
         self._create_map('testmap')
-        self._create_open_season()
+        self._create_open_competition()
 
         # activate the required bots
         self.regularUserBot1.active = True
@@ -489,13 +489,13 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(self.expected_resultant_elos[iteration][1], bot2_participant.resultant_elo)
 
     def CheckFinalElos(self):
-        sp1 = self.regularUserBot1.current_season_participation()
-        sp2 = self.regularUserBot2.current_season_participation()
+        sp1 = self.regularUserBot1.current_competition_participation()
+        sp2 = self.regularUserBot2.current_competition_participation()
         self.assertEqual(sp1.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][0])
         self.assertEqual(sp2.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][1])
 
     def CheckEloSum(self):
-        sumElo = CompetitionParticipation.objects.filter(season=Competition.get_current_season()).aggregate(Sum('elo'))
+        sumElo = CompetitionParticipation.objects.filter(competition=Competition.get_current_competition()).aggregate(Sum('elo'))
         self.assertEqual(sumElo['elo__sum'],
                          ELO_START_VALUE * Bot.objects.all().count())  # starting ELO times number of bots
 

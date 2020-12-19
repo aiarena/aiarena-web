@@ -38,9 +38,9 @@ result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file
 
 result_search_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
                        'submitted_by', 'interest_rating', 'date_interest_rating_calculated',
-round_include_fields = 'id', 'number', 'season', 'started', 'finished', 'complete',
-season_include_fields = 'id', 'number', 'date_created', 'date_opened', 'date_closed', 'status',
-seasonparticipation_include_fields = 'id', 'season', 'bot', 'elo',
+round_include_fields = 'id', 'number', 'competition', 'started', 'finished', 'complete',
+competition_include_fields = 'id', 'number', 'date_created', 'date_opened', 'date_closed', 'status',
+competitionparticipation_include_fields = 'id', 'competition', 'bot', 'elo',
 user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', \
                       'type', 'patreon_level'
 
@@ -195,25 +195,25 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
-class SeasonParticipationSerializer(serializers.ModelSerializer):
+class CompetitionParticipationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompetitionParticipation
-        fields = seasonparticipation_include_fields
+        fields = competitionparticipation_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
-class SeasonParticipationViewSet(viewsets.ReadOnlyModelViewSet):
+class CompetitionParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
     queryset = CompetitionParticipation.objects.all()
-    serializer_class = SeasonParticipationSerializer
+    serializer_class = CompetitionParticipationSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = seasonparticipation_include_fields
-    search_fields = seasonparticipation_include_fields
-    ordering_fields = seasonparticipation_include_fields
+    filterset_fields = competitionparticipation_include_fields
+    search_fields = competitionparticipation_include_fields
+    ordering_fields = competitionparticipation_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -306,25 +306,25 @@ class RoundViewSet(viewsets.ReadOnlyModelViewSet):
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
-class SeasonSerializer(serializers.ModelSerializer):
+class CompetitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Competition
-        fields = season_include_fields
+        fields = competition_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
-class SeasonViewSet(viewsets.ReadOnlyModelViewSet):
+class CompetitionViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Result data view
     """
     queryset = Competition.objects.all()
-    serializer_class = SeasonSerializer
+    serializer_class = CompetitionSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = season_include_fields
-    search_fields = season_include_fields
-    ordering_fields = season_include_fields
+    filterset_fields = competition_include_fields
+    search_fields = competition_include_fields
+    ordering_fields = competition_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS

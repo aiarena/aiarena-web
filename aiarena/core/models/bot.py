@@ -15,7 +15,7 @@ from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
-from aiarena.api.arenaclient.exceptions import NoCurrentSeason
+from aiarena.api.arenaclient.exceptions import NoCurrentCompetitions
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
@@ -150,7 +150,6 @@ class Bot(models.Model, LockableModelMixin):
     def clean(self):
         self.validate_max_bot_count()
         self.validate_active_bot_race_per_user()
-        self.validate_current_season()
 
     def __str__(self):
         return self.name
@@ -213,16 +212,6 @@ class Bot(models.Model, LockableModelMixin):
             return f'{self.name}.js'
         elif self.type == 'python':
             return 'run.py'
-
-    def current_season_participation(self):
-        return self.seasonparticipation_set.get(season=Competition.get_current_season())
-
-    def validate_current_season(self):
-        if self.active:
-            try:
-                Competition.get_current_season()
-            except NoCurrentSeason:
-                raise ValidationError('You cannot activate a bot when there is no current season.')
 
     def can_download_bot_zip(self, user):
         return self.user == user or self.bot_zip_publicly_downloadable or user.is_staff

@@ -6,27 +6,27 @@ from aiarena.settings import ELO_START_VALUE
 
 
 class Command(BaseCommand):
-    help = 'Recalculates a season\'s ELOs based on all matches for that season. This can take a VERY long time. ' \
+    help = 'Recalculates a competition\'s ELOs based on all matches for that competition. This can take a VERY long time. ' \
            'WARNING! Nothing else should attempt to modify the database while this runs.'
 
     def add_arguments(self, parser):
-        parser.add_argument('season_id', type=int, help="The season to recalculate.")
+        parser.add_argument('competition_id', type=int, help="The competition to recalculate.")
 
     def handle(self, *args, **options):
-        self.stdout.write(f"Starting ELO re-calculation for season id {options['season_id']}...")
+        self.stdout.write(f"Starting ELO re-calculation for competition id {options['competition_id']}...")
         with transaction.atomic():
             self.stdout.write(f"Locking records...")
-            target_season = Competition.objects.select_for_update().get(id=options['season_id'])
-            self.stdout.write(f"Season id {target_season.id} locked.")
-            season_participants = CompetitionParticipation.objects.select_for_update().filter(season=target_season)
-            self.stdout.write(f"{season_participants.count()} season participants locked.")
-            matches = Match.objects.select_for_update().filter(round__season=target_season, result__isnull=False)\
+            target_competition = Competition.objects.select_for_update().get(id=options['competition_id'])
+            self.stdout.write(f"Competition id {target_competition.id} locked.")
+            competition_participants = CompetitionParticipation.objects.select_for_update().filter(competition=target_competition)
+            self.stdout.write(f"{competition_participants.count()} competition participants locked.")
+            matches = Match.objects.select_for_update().filter(round__competition=target_competition, result__isnull=False)\
                 .prefetch_related('matchparticipation_set', 'result').order_by('id')
 
             self.stdout.write(f"{matches.count()} matches locked.")
 
             self.stdout.write(f"Resetting all ELOs to starting ELO...", ending='\r')
-            for participant in season_participants:
+            for participant in competition_participants:
                 participant.elo = ELO_START_VALUE
                 participant.save()
             self.stdout.write(f"Resetting all ELOs to starting ELO...done")
@@ -39,17 +39,17 @@ class Command(BaseCommand):
                 p2: MatchParticipation = match.participant2
 
                 # Starting ELO
-                p1.starting_elo = p1.season_participant.elo
-                p2.starting_elo = p2.season_participant.elo
+                p1.starting_elo = p1.competition_participant.elo
+                p2.starting_elo = p2.competition_participant.elo
                 initial_elo_sum = p1.starting_elo + p2.starting_elo
 
                 match.result.adjust_elo()
-                p1.season_participant.refresh_from_db()
-                p2.season_participant.refresh_from_db()
+                p1.competition_participant.refresh_from_db()
+                p2.competition_participant.refresh_from_db()
 
                 # Resultant ELO
-                p1.resultant_elo = p1.season_participant.elo
-                p2.resultant_elo = p2.season_participant.elo
+                p1.resultant_elo = p1.competition_participant.elo
+                p2.resultant_elo = p2.competition_participant.elo
                 resultant_elo_sum = p1.resultant_elo + p2.resultant_elo
 
                 # ELO change

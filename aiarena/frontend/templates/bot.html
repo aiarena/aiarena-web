@@ -139,21 +139,21 @@
             </thead>
             <tbody>
             {% if rankings.count > 0 %}
-                {% for season_participation in rankings %}
+                {% for competition_participation in rankings %}
                     <tr>
-                        <td>{{ season_participation.season.as_html_link }}</td>
-                        {% if season_participation.season.date_opened %}
-                            <td>{{ season_participation.season.date_opened|date:"d. N Y - H:i:s" }}</td>
+                        <td>{{ competition_participation.competition.as_html_link }}</td>
+                        {% if competition_participation.competition.date_opened %}
+                            <td>{{ competition_participation.competition.date_opened|date:"d. N Y - H:i:s" }}</td>
                         {% else %}
                             <td>--</td>
                         {% endif %}
-                        {% if season_participation.season.date_closed %}
-                            <td>{{ season_participation.season.date_closed|date:"d. N Y - H:i:s" }}</td>
+                        {% if competition_participation.competition.date_closed %}
+                            <td>{{ competition_participation.competition.date_closed|date:"d. N Y - H:i:s" }}</td>
                         {% else %}
                             <td>--</td>
                         {% endif %}
-                        <td>{{ season_participation.elo }}</td>
-                        <td><a href="{% url 'bot_season_stats' season_participation.id season_participation.slug %}">Stats</a></td>
+                        <td>{{ competition_participation.elo }}</td>
+                        <td><a href="{% url 'bot_competition_stats' competition_participation.id competition_participation.slug %}">Stats</a></td>
                     </tr>
                 {% endfor %}
             {% else %}

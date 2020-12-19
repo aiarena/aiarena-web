@@ -74,11 +74,11 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   # path('rounds/', core_views.RoundList.as_view(), name='rounds'), # todo
                   path('rounds/<int:pk>/', core_views.RoundDetail.as_view(), name='round'),
                   path('matches/<int:pk>/', core_views.MatchDetail.as_view(), name='match'),
-                  path('seasons/', core_views.SeasonList.as_view(), name='seasons'),
-                  path('seasons/<int:pk>/', core_views.SeasonDetail.as_view(), name='season'),
+                  path('competitions/', core_views.CompetitionList.as_view(), name='competitions'),
+                  path('competitions/<int:pk>/', core_views.CompetitionDetail.as_view(), name='competition'),
 
-                  path('seasons/stats/<int:pk>/', core_views.BotSeasonStatsDetail.as_view()),
-                  path('seasons/stats/<int:pk>/<slug:slug>', core_views.BotSeasonStatsDetail.as_view(), name='bot_season_stats'),
+                  path('competitions/stats/<int:pk>/', core_views.BotCompetitionStatsDetail.as_view()),
+                  path('competitions/stats/<int:pk>/<slug:slug>', core_views.BotCompetitionStatsDetail.as_view(), name='bot_competition_stats'),
 
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   path('requestmatch/', core_views.RequestMatch.as_view(), name='requestmatch'),

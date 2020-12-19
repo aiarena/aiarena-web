@@ -3,7 +3,7 @@ from django.urls import reverse
 from aiarena.core.models import Match, Round, Bot, User, Map, Result, Competition
 from aiarena.core.tests.tests import FullDataSetMixin
 from django.test import TransactionTestCase, TestCase, RequestFactory, Client
-from .admin import MapAdmin, MatchAdmin, SeasonAdmin
+from .admin import MapAdmin, MatchAdmin, CompetitionAdmin
 from django.contrib.messages.middleware import MessageMiddleware
 from django.contrib.sessions.middleware import SessionMiddleware
 
@@ -41,12 +41,12 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
             self.assertTrue(result.type == "MatchCancelled", msg=f"failed to Cancel Match<{match}>, Result<{result}> Using the admin interface ")
 
     """ need to make this one work """
-    def test_season_admin(self):
+    def test_competition_admin(self):
         self.factory = RequestFactory()
-        admin = SeasonAdmin(model=Competition, admin_site='/admin')
-        season = Competition.objects.first()
-        data = {'action': '_pause-season',
-                '_selected_action': [season, ]}
+        admin = CompetitionAdmin(model=Competition, admin_site='/admin')
+        competition = Competition.objects.first()
+        data = {'action': '_pause-competition',
+                '_selected_action': [competition, ]}
         class dumb_hack:
             def __init__(self, name):
                 self.name = name
@@ -68,19 +68,19 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
             return request, admin
 
         request, admin = mock_request_admin(self.factory,data,admin)
-        self.assertEqual(season.status, 'open', msg=f"first season in the test database is not open!")
-        admin.response_change(request, season)
-        self.assertEqual(season.status, 'paused', msg=f"failed responsechange<pause> on Season<{season}> Using the admin interface ")
+        self.assertEqual(competition.status, 'open', msg=f"first competition in the test database is not open!")
+        admin.response_change(request, competition)
+        self.assertEqual(competition.status, 'paused', msg=f"failed responsechange<pause> on Season<{competition}> Using the admin interface ")
 
-        data['action'] = "_open-season"
+        data['action'] = "_open-competition"
         request, admin = mock_request_admin(self.factory, data, admin)
-        admin.response_change(request, season)
-        self.assertEqual(season.status, 'open', msg=f"failed responsechange<open> on Season<{season}> Using the admin interface ")
+        admin.response_change(request, competition)
+        self.assertEqual(competition.status, 'open', msg=f"failed responsechange<open> on Season<{competition}> Using the admin interface ")
 
-        data['action'] = "_close-season"
+        data['action'] = "_close-competition"
         request, admin = mock_request_admin(self.factory, data, admin)
-        admin.response_change(request, season)
-        self.assertEqual(season.status, 'closing', msg=f"failed responsechange<closing> on Season<{season}> Using the admin interface ")
+        admin.response_change(request, competition)
+        self.assertEqual(competition.status, 'closing', msg=f"failed responsechange<closing> on Season<{competition}> Using the admin interface ")
 
 
 

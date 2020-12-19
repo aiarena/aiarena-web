@@ -32,8 +32,8 @@ class ApiReadTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/api/match-participations/')
         self.assertEqual(response.status_code, 200)
 
-    def test_get_api_seasonparticipations_page(self):
-        response = self.client.get('/api/season-participations/')
+    def test_get_api_competitionparticipations_page(self):
+        response = self.client.get('/api/competition-participations/')
         self.assertEqual(response.status_code, 200)
 
     def test_get_api_results_page(self):
@@ -44,8 +44,8 @@ class ApiReadTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/api/rounds/')
         self.assertEqual(response.status_code, 200)
 
-    def test_get_api_seasons_page(self):
-        response = self.client.get('/api/seasons/')
+    def test_get_api_competitions_page(self):
+        response = self.client.get('/api/competitions/')
         self.assertEqual(response.status_code, 200)
 
     def test_get_api_users_page(self):

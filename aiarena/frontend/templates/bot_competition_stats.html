@@ -4,10 +4,10 @@
 
 {% block content %}
     <div class="divider">
-        <span></span><span><h2>{{ seasonparticipation.bot.as_html_link }} - {{ seasonparticipation.season.as_html_link }} stats</h2></span><span></span>
+        <span></span><span><h2>{{ competitionparticipation.bot.as_html_link }} - {{ competitionparticipation.competition.as_html_link }} stats</h2></span><span></span>
     </div>
-    <div id="bot_season_stats">
-        <table summary="Table containing season participation information" style="text-align: right">
+    <div id="bot_competition_stats">
+        <table summary="Table containing competition participation information" style="text-align: right">
             <thead>
             <tr style="text-align: center">
                 <td colspan="3"><strong>Stats</strong></td>
@@ -20,13 +20,13 @@
             </tr>
             <tr class="mono">
                 <td>Current ELO</td>
-                <td>{{ seasonparticipation.elo }}</td>
+                <td>{{ competitionparticipation.elo }}</td>
                 <td></td>
             </tr>
             <tr class="mono">
                 <td>Highest ELO</td>
-                {% if seasonparticipation.highest_elo != None %}
-                    <td>{{ seasonparticipation.highest_elo }}</td>
+                {% if competitionparticipation.highest_elo != None %}
+                    <td>{{ competitionparticipation.highest_elo }}</td>
                     <td></td>
                 {% else %}
                     <td colspan="2">No stats</td>
@@ -34,41 +34,41 @@
             </tr>
             <tr class="mono">
                 <td>Matches</td>
-                <td>{{ seasonparticipation.match_count }}</td>
+                <td>{{ competitionparticipation.match_count }}</td>
                 <td></td>
             </tr>
             <tr class="mono">
                 <td>Wins</td>
-                {% if seasonparticipation.win_perc != None %}
-                    <td>{{ seasonparticipation.win_count }}</td>
-                    <td>{{ seasonparticipation.win_perc|floatformat:2 }}%</td>
+                {% if competitionparticipation.win_perc != None %}
+                    <td>{{ competitionparticipation.win_count }}</td>
+                    <td>{{ competitionparticipation.win_perc|floatformat:2 }}%</td>
                 {% else %}
                     <td colspan="2">No stats</td>
                 {% endif %}
             </tr>
             <tr class="mono">
                 <td>Losses</td>
-                {% if seasonparticipation.loss_perc != None %}
-                    <td>{{ seasonparticipation.loss_count }}</td>
-                    <td>{{ seasonparticipation.loss_perc|floatformat:2 }}%</td>
+                {% if competitionparticipation.loss_perc != None %}
+                    <td>{{ competitionparticipation.loss_count }}</td>
+                    <td>{{ competitionparticipation.loss_perc|floatformat:2 }}%</td>
                 {% else %}
                     <td colspan="2">No stats</td>
                 {% endif %}
             </tr>
             <tr class="mono">
                 <td>Ties</td>
-                {% if seasonparticipation.tie_perc != None %}
-                    <td>{{ seasonparticipation.tie_count }}</td>
-                    <td>{{ seasonparticipation.tie_perc|floatformat:2 }}%</td>
+                {% if competitionparticipation.tie_perc != None %}
+                    <td>{{ competitionparticipation.tie_count }}</td>
+                    <td>{{ competitionparticipation.tie_perc|floatformat:2 }}%</td>
                 {% else %}
                     <td colspan="2">No stats</td>
                 {% endif %}
             </tr>
             <tr class="mono">
                 <td>Crashes</td>
-                {% if seasonparticipation.crash_perc != None %}
-                    <td>{{ seasonparticipation.crash_count }}</td>
-                    <td>{{ seasonparticipation.crash_perc|floatformat:2 }}%</td>
+                {% if competitionparticipation.crash_perc != None %}
+                    <td>{{ competitionparticipation.crash_count }}</td>
+                    <td>{{ competitionparticipation.crash_perc|floatformat:2 }}%</td>
                 {% else %}
                     <td colspan="2">No stats</td>
                 {% endif %}
@@ -79,15 +79,15 @@
         <br/>
     </div>
 
-    {% if seasonparticipation.elo_graph %}
+    {% if competitionparticipation.elo_graph %}
         <div id="elo_graph">
-            <img src="{{ seasonparticipation.elo_graph.url }}" alt="ELOGraph"/>
+            <img src="{{ competitionparticipation.elo_graph.url }}" alt="ELOGraph"/>
         </div>
     {% endif %}
 
     <div class="divider"><span></span><span><h2>Matchups</h2></span><span></span></div>
 
-    <div id="bot_season_stats_matchups">
+    <div id="bot_competition_stats_matchups">
         <table summary="Table containing matchup information" class="row-hover-highlight">
             <thead>
             <tr>
@@ -105,8 +105,8 @@
             </tr>
             </thead>
             <tbody>
-            {% if season_bot_matchups.count > 0 %}
-                {% for bot_matchup in season_bot_matchups %}
+            {% if competition_bot_matchups.count > 0 %}
+                {% for bot_matchup in competition_bot_matchups %}
                     <tr style="text-align: right">
                         <td style="text-align: right">{{ bot_matchup.opponent.bot.as_html_link }}</td>
                         <td class="mono"

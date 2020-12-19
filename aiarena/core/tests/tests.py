@@ -57,10 +57,10 @@ class BaseTestMixin(object):
     def _create_map(self, name):
         return Map.objects.create(name=name, active=True)
 
-    def _create_open_season(self):
-        season = Competition.objects.create(previous_season_files_cleaned=True)
-        season.open()
-        return season
+    def _create_open_competition(self):
+        competition = Competition.objects.create()
+        competition.open()
+        return competition
 
     def _create_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
@@ -293,7 +293,7 @@ class MatchReadyMixin(LoggedInMixin):
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
         config.MAX_USER_BOT_COUNT = 10
 
-        self._create_open_season()
+        self._create_open_competition()
         self._create_map('testmap1')
 
         self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
@@ -327,7 +327,7 @@ class BotTestCase(LoggedInMixin, TestCase):
         config.MAX_USER_BOT_COUNT = 4
 
         # required for active bot
-        self._create_open_season()
+        self._create_open_competition()
 
         # create bot along with bot data
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
@@ -391,12 +391,12 @@ class BotTestCase(LoggedInMixin, TestCase):
         self.assertEqual(self.test_bot_datas['bot2'][0]['hash'], bot1.bot_data_md5hash)
 
 
-class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
+class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
     """
-    Test season rotation
+    Test competition rotation
     """
 
-    def _finish_season_rounds(self):
+    def _finish_competition_rounds(self):
         for x in range(Match.objects.filter(result__isnull=True).count()):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
@@ -404,7 +404,7 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
             response = self._post_to_results(response.data['id'], 'Player1Win')
             self.assertEqual(response.status_code, 201)
 
-    def test_season_states(self):
+    def test_competition_states(self):
         self.client.force_login(self.arenaclientUser1)
 
         self.assertEqual(Match.objects.filter(result__isnull=True).count(), 15,
@@ -413,38 +413,38 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         # cache the bots - list forces the queryset to be evaluated
         bots = list(Bot.objects.all())
 
-        season1 = Competition.objects.get()
-        self.assertEqual(season1.number, 1)
+        competition1 = Competition.objects.get()
+        self.assertEqual(competition1.number, 1)
 
         # start a new round
         # response = self._post_to_matches()
         # self.assertEqual(response.status_code, 201)
 
-        # Pause the season and finish the round
-        season1.pause()
+        # Pause the competition and finish the round
+        competition1.pause()
 
-        self._finish_season_rounds()
+        self._finish_competition_rounds()
 
-        # this should fail due to a new round trying to generate while the season is paused
+        # this should fail due to a new round trying to generate while the competition is paused
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'The current season is paused.', response.data['detail'])
+        self.assertEqual(u'The competition is paused.', response.data['detail'])
 
-        # reopen the season
-        season1.open()
+        # reopen the competition
+        competition1.open()
 
         # start a new round
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
 
-        season1.start_closing()
+        competition1.start_closing()
 
-        # finish the season
-        self._finish_season_rounds()
+        # finish the competition
+        self._finish_competition_rounds()
 
         # successful close
-        season1.refresh_from_db()
-        self.assertEqual(season1.status, 'closed')
+        competition1.refresh_from_db()
+        self.assertEqual(competition1.status, 'closed')
 
         # all bots should be deactivated
         for bot in Bot.objects.all():
@@ -456,9 +456,9 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
             bot.active = True
             bot.full_clean()
 
-        # start a new season
-        season2 = Competition.objects.create(previous_season_files_cleaned=True)
-        self.assertEqual(season2.number, 2)
+        # start a new competition
+        competition2 = Competition.objects.create()
+        self.assertEqual(competition2.number, 2)
 
         # not enough active bots
         response = self._post_to_matches()
@@ -471,13 +471,13 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
             bot.active = True
             bot.save()
 
-        # current season is paused
+        # current competition is paused
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'The current season is paused.', response.data['detail'])
+        self.assertEqual(u'The competition is paused.', response.data['detail'])
 
-        season2.open()
-        # opening a season deactivates bots, so reactivate
+        competition2.open()
+        # opening a competition deactivates bots, so reactivate
         for bot in Bot.objects.all():
             bot.active = True
             bot.save()
@@ -492,8 +492,8 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
 
-        # New round should be number 1 for the new season
-        round = Round.objects.get(season=season2)
+        # New round should be number 1 for the new competition
+        round = Round.objects.get(competition=competition2)
         self.assertEqual(round.number, 1)
 
 
@@ -631,10 +631,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         call_command('generatestats', stdout=out)
         self.assertIn('Done', out.getvalue())
 
-    def test_generatestats_season(self):
+    def test_generatestats_competition(self):
         self._generate_full_data_set()
         out = StringIO()
-        call_command('generatestats', '--seasonid', '1', stdout=out)
+        call_command('generatestats', '--competitionid', '1', stdout=out)
         self.assertIn('Done', out.getvalue())
 
     def test_generatestats_bot(self):

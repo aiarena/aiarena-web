@@ -3,13 +3,13 @@ import logging
 from django.db import models
 from django.utils import timezone
 from aiarena.core.validators import validate_not_nan, validate_not_inf
-from .season_participation import CompetitionParticipation
+from .competition_participation import CompetitionParticipation
 
 logger = logging.getLogger(__name__)
 
 
 class CompetitionBotMatchupStats(models.Model):
-    bot = models.ForeignKey(CompetitionParticipation, on_delete=models.CASCADE, related_name='season_matchup_stats')
+    bot = models.ForeignKey(CompetitionParticipation, on_delete=models.CASCADE, related_name='competition_matchup_stats')
     opponent = models.ForeignKey(CompetitionParticipation, on_delete=models.CASCADE, related_name='opponent_matchup_stats')
     match_count = models.IntegerField(blank=True, null=True)
     win_count = models.IntegerField(blank=True, null=True)

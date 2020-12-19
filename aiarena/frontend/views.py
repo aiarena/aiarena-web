@@ -21,7 +21,7 @@ from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
-from aiarena.api.arenaclient.exceptions import NoCurrentSeason
+from aiarena.api.arenaclient.exceptions import NoCurrentCompetitions
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, Competition, Map, \
@@ -232,7 +232,7 @@ class BotDetail(DetailView):
             results = paginator.page(paginator.num_pages)
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
-        context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
+        context['rankings'] = self.object.competitionparticipation_set.all().order_by('-id')
         context['match_participations'] = MatchParticipation.objects.only("match")\
             .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
@@ -244,15 +244,15 @@ class BotDetail(DetailView):
         return context
 
 
-class BotSeasonStatsDetail(DetailView):
+class BotCompetitionStatsDetail(DetailView):
     model = CompetitionParticipation
-    template_name = 'bot_season_stats.html'
+    template_name = 'bot_competition_stats.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['season_bot_matchups'] = self.object.season_matchup_stats.filter(
-            opponent__season=context['seasonparticipation'].season).order_by('-win_perc').distinct()
-        context['updated'] = context['season_bot_matchups'][0].updated
+        context['competition_bot_matchups'] = self.object.competition_matchup_stats.filter(
+            opponent__competition=context['competitionparticipation'].competition).order_by('-win_perc').distinct()
+        context['updated'] = context['competition_bot_matchups'][0].updated
         return context
 
 
@@ -267,7 +267,7 @@ class BotUpdateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # change the available fields based upon whether the bot_data is available for editing or not
-        # and whether there's a current season
+        # and whether there's a current competition
         if self.instance.bot_data_is_currently_frozen():
             self.fields['bot_data'].disabled = True
 
@@ -340,16 +340,16 @@ class AuthorDetail(DetailView):
 
 class Ranking(TemplateView):
     """
-    If there's a current season, we redirect to that season's page. Otherwise we render a static
+    If there's a current competition, we redirect to that competition's page. Otherwise we render a static
     template explaining that there are no rankings to be viewed currently.
     """
 
     def get(self, request, *args, **kwargs):
-        season = Competition.get_current_season_or_none()
-        if season is None:
-            return render(request, 'ranking_no_season.html')
-        else:
-            return redirect('season', pk=season.pk)
+        # competition = Competition.get_current_competition_or_none()
+        # if competition is None:
+        return render(request, 'ranking_no_competition.html')
+        # else:
+        #     return redirect('competition', pk=competition.pk)
 
 
 class Results(ListView):
@@ -483,14 +483,14 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     def get_queryset(self):
         try:
-            if Round.objects.filter(season=Competition.get_current_season()).count() > 0:
-                return Ladders.get_season_ranked_participants(
-                    Competition.get_current_season(), amount=10).prefetch_related(
+            if Round.objects.filter(competition=Competition.get_current_competition()).count() > 0:
+                return Ladders.get_competition_ranked_participants(
+                    Competition.get_current_competition(), amount=10).prefetch_related(
                     Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
             else:
                 return CompetitionParticipation.objects.none()
-        except NoCurrentSeason:
+        except NoCurrentCompetitions:
             return CompetitionParticipation.objects.none()
 
     def get_context_data(self, **kwargs):
@@ -535,19 +535,19 @@ class MatchDetail(DetailView):
     template_name = 'match.html'
 
 
-class SeasonList(ListView):
+class CompetitionList(ListView):
     queryset = Competition.objects.all().order_by('-id')
-    template_name = 'seasons.html'
+    template_name = 'competitions.html'
 
 
-class SeasonDetail(DetailView):
+class CompetitionDetail(DetailView):
     model = Competition
-    template_name = 'season.html'
+    template_name = 'competition.html'
 
     def get_context_data(self, **kwargs):
-        context = super(SeasonDetail, self).get_context_data(**kwargs)
-        context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
-        context['rankings'] = Ladders.get_season_ranked_participants(self.object).prefetch_related(
+        context = super(CompetitionDetail, self).get_context_data(**kwargs)
+        context['round_list'] = Round.objects.filter(competition_id=self.object.id).order_by('-id')
+        context['rankings'] = Ladders.get_competition_ranked_participants(self.object).prefetch_related(
             Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
             Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type')))
         context['rankings'].count = len(context['rankings'])

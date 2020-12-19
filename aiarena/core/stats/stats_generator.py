@@ -7,7 +7,7 @@ from django.db import connection, transaction
 from django.db.models import Max
 
 from aiarena.core.models import MatchParticipation, CompetitionParticipation
-from aiarena.core.models.season_bot_matchup_stats import CompetitionBotMatchupStats
+from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
 
 
 class StatsGenerator:
@@ -16,32 +16,32 @@ class StatsGenerator:
     def update_stats(sp: CompetitionParticipation):
         sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
                                                            match__result__isnull=False,
-                                                           match__round__season=sp.season) \
+                                                           match__round__competition=sp.competition) \
             .exclude(match__result__type__in=['MatchCancelled', 'InitializationError', 'Error']) \
             .count()
         if sp.match_count != 0:
             sp.win_count = MatchParticipation.objects.filter(bot=sp.bot, result='win',
-                                                             match__round__season=sp.season
+                                                             match__round__competition=sp.competition
                                                              ).count()
             sp.win_perc = sp.win_count / sp.match_count * 100
             sp.loss_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss',
-                                                              match__round__season=sp.season
+                                                              match__round__competition=sp.competition
                                                               ).count()
             sp.loss_perc = sp.loss_count / sp.match_count * 100
             sp.tie_count = MatchParticipation.objects.filter(bot=sp.bot, result='tie',
-                                                             match__round__season=sp.season
+                                                             match__round__competition=sp.competition
                                                              ).count()
             sp.tie_perc = sp.tie_count / sp.match_count * 100
             sp.crash_count = MatchParticipation.objects.filter(bot=sp.bot, result='loss', result_cause__in=['crash',
                                                                                                             'timeout',
                                                                                                             'initialization_failure'],
-                                                               match__round__season=sp.season
+                                                               match__round__competition=sp.competition
                                                                ).count()
             sp.crash_perc = sp.crash_count / sp.match_count * 100
 
             sp.highest_elo = MatchParticipation.objects.filter(bot=sp.bot,
                                                                match__result__isnull=False,
-                                                               match__round__season=sp.season) \
+                                                               match__round__competition=sp.competition) \
                 .aggregate(Max('resultant_elo'))['resultant_elo__max']
 
             graph = StatsGenerator._generate_elo_graph(sp.bot.id)
@@ -58,24 +58,24 @@ class StatsGenerator:
 
     @staticmethod
     def _update_matchup_stats(sp: CompetitionParticipation):
-        for season_participation in CompetitionParticipation.objects.filter(season=sp.season).exclude(bot=sp.bot):
+        for competition_participation in CompetitionParticipation.objects.filter(competition=sp.competition).exclude(bot=sp.bot):
             with connection.cursor() as cursor:
                 matchup_stats = CompetitionBotMatchupStats.objects.select_for_update() \
-                    .get_or_create(bot=sp, opponent=season_participation)[0]
+                    .get_or_create(bot=sp, opponent=competition_participation)[0]
 
-                matchup_stats.match_count = StatsGenerator._calculate_matchup_count(cursor, season_participation, sp)
+                matchup_stats.match_count = StatsGenerator._calculate_matchup_count(cursor, competition_participation, sp)
 
                 if matchup_stats.match_count != 0:
-                    matchup_stats.win_count = StatsGenerator._calculate_win_count(cursor, season_participation, sp)
+                    matchup_stats.win_count = StatsGenerator._calculate_win_count(cursor, competition_participation, sp)
                     matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
 
-                    matchup_stats.loss_count = StatsGenerator._calculate_loss_count(cursor, season_participation, sp)
+                    matchup_stats.loss_count = StatsGenerator._calculate_loss_count(cursor, competition_participation, sp)
                     matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
 
-                    matchup_stats.tie_count = StatsGenerator._calculate_tie_count(cursor, season_participation, sp)
+                    matchup_stats.tie_count = StatsGenerator._calculate_tie_count(cursor, competition_participation, sp)
                     matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
 
-                    matchup_stats.crash_count = StatsGenerator._calculate_crash_count(cursor, season_participation, sp)
+                    matchup_stats.crash_count = StatsGenerator._calculate_crash_count(cursor, competition_participation, sp)
                     matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
                 else:
                     matchup_stats.win_count = 0
@@ -92,84 +92,84 @@ class StatsGenerator:
         return row[0]
 
     @staticmethod
-    def _calculate_matchup_count(cursor, season_participation, sp):
+    def _calculate_matchup_count(cursor, competition_participation, sp):
         return StatsGenerator._run_single_column_query(cursor, """
                 select count(cm.id) as count
                 from core_match cm
                 inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
                 inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
                 inner join core_round cr on cm.round_id = cr.id
-                inner join core_season cs on cr.season_id = cs.id
-                where cs.id = %s -- make sure it's part of the current season
+                inner join core_competition cs on cr.competition_id = cs.id
+                where cs.id = %s -- make sure it's part of the current competition
                 and bot_p.bot_id = %s
                 and opponent_p.bot_id = %s
                 and bot_p.result is not null and bot_p.result != 'none' -- make sure it's a finished match wih a result
-                """, [sp.season_id, sp.bot_id, season_participation.bot_id])
+                """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
 
     @staticmethod
-    def _calculate_win_count(cursor, season_participation, sp):
+    def _calculate_win_count(cursor, competition_participation, sp):
         return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
                     inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
                     inner join core_round cr on cm.round_id = cr.id
-                    inner join core_season cs on cr.season_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current season
+                    inner join core_competition cs on cr.competition_id = cs.id
+                    where cs.id = %s -- make sure it's part of the current competition
                     and bot_p.bot_id = %s
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'win'
-                    """, [sp.season_id, sp.bot_id, season_participation.bot_id])
+                    """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
 
     @staticmethod
-    def _calculate_loss_count(cursor, season_participation, sp):
+    def _calculate_loss_count(cursor, competition_participation, sp):
         return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
                     inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
                     inner join core_round cr on cm.round_id = cr.id
-                    inner join core_season cs on cr.season_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current season
+                    inner join core_competition cs on cr.competition_id = cs.id
+                    where cs.id = %s -- make sure it's part of the current competition
                     and bot_p.bot_id = %s
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'loss'
-                    """, [sp.season_id, sp.bot_id, season_participation.bot_id])
+                    """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
 
     @staticmethod
-    def _calculate_tie_count(cursor, season_participation, sp):
+    def _calculate_tie_count(cursor, competition_participation, sp):
         return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
                     inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
                     inner join core_round cr on cm.round_id = cr.id
-                    inner join core_season cs on cr.season_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current season
+                    inner join core_competition cs on cr.competition_id = cs.id
+                    where cs.id = %s -- make sure it's part of the current competition
                     and bot_p.bot_id = %s
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'tie'
-                    """, [sp.season_id, sp.bot_id, season_participation.bot_id])
+                    """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
 
     @staticmethod
-    def _calculate_crash_count(cursor, season_participation, sp):
+    def _calculate_crash_count(cursor, competition_participation, sp):
         return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
                     inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
                     inner join core_round cr on cm.round_id = cr.id
-                    inner join core_season cs on cr.season_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current season
+                    inner join core_competition cs on cr.competition_id = cs.id
+                    where cs.id = %s -- make sure it's part of the current competition
                     and bot_p.bot_id = %s
                     and opponent_p.bot_id = %s
                     and bot_p.result = 'loss'
                     and bot_p.result_cause in ('crash', 'timeout', 'initialization_failure')
-                    """, [sp.season_id, sp.bot_id, season_participation.bot_id])
+                    """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
 
     @staticmethod
     def _get_data(bot_id):
-        # this does not distinct between seasons
+        # this does not distinct between competitions
         with connection.cursor() as cursor:
             query = (f"""
                 select distinct

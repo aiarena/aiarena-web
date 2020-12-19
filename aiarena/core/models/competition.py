@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from aiarena.api.arenaclient.exceptions import NoCurrentSeason, MultipleCurrentSeasons
+from aiarena.api.arenaclient.exceptions import NoCurrentCompetitions, MultipleCurrentSeasons
 from .game_type import GameMode
 from .mixins import LockableModelMixin
 
@@ -22,15 +22,15 @@ class CompetitionType(models.TextChoices):
 
 # todo: remove this
 def replay_archive_upload_to(instance, filename):
-    return '/'.join(['replays', 'season_' + str(instance.number) + '_zip'])
+    return '/'.join(['replays', 'competition_' + str(instance.number) + '_zip'])
 
 
 class Competition(models.Model, LockableModelMixin):
-    """ Represents a season of play in the context of a ladder """
+    """ Represents a competition of play in the context of a ladder """
     COMPETITION_STATUSES = (
-        ('created', 'Created'),  # The initial state for a season. Functionally identical to paused.
-        ('paused', 'Paused'),  # While a season is paused, existing rounds can be played, but no new ones are generated.
-        ('open', 'Open'),  # When a season is open, new rounds can be generated and played.
+        ('created', 'Created'),  # The initial state for a competition. Functionally identical to paused.
+        ('paused', 'Paused'),  # While a competition is paused, existing rounds can be played, but no new ones are generated.
+        ('open', 'Open'),  # When a competition is open, new rounds can be generated and played.
         ('closing', 'Closing'),
         # When a competition is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
         ('closed', 'Closed'),  # Functionally identical to paused, except not intended to change after this status.
@@ -69,7 +69,7 @@ class Competition(models.Model, LockableModelMixin):
             self.save()
             return None
         else:
-            return "Cannot pause a season with a status of {}".format(self.status)
+            return "Cannot pause a competition with a status of {}".format(self.status)
 
     @transaction.atomic
     def open(self):
@@ -90,7 +90,7 @@ class Competition(models.Model, LockableModelMixin):
             self.save()
             return None
         else:
-            return "Cannot open a season with a status of {}".format(self.status)
+            return "Cannot open a competition with a status of {}".format(self.status)
 
     @transaction.atomic
     def start_closing(self):
@@ -100,13 +100,13 @@ class Competition(models.Model, LockableModelMixin):
             self.save()
             return None
         else:
-            return "Cannot start closing a season with a status of {}".format(self.status)
+            return "Cannot start closing a competition with a status of {}".format(self.status)
 
     @transaction.atomic
     def try_to_close(self):
         from .round import Round
         from .bot import Bot
-        if self.is_closing and Round.objects.filter(season=self, complete=False).count() == 0 and \
+        if self.is_closing and Round.objects.filter(competition=self, complete=False).count() == 0 and \
                 Competition.objects.filter(id=self.id, status='closing') \
                 .update(status='closed', date_closed=timezone.now()) > 0:
             # deactivate all bots
@@ -117,31 +117,11 @@ class Competition(models.Model, LockableModelMixin):
             # todo: then dump results data as JSON?
             # todo: then wipe all replay/log files?
 
-    @staticmethod
-    def get_current_season(select_for_update: bool = False) -> 'Competition':
-        try:
-            #  will fail if there is more than 1 current season or 0 current seasons
-            return Competition.objects.select_for_update().get(date_closed__isnull=True) \
-                if select_for_update else Competition.objects.get(date_closed__isnull=True)
-        except Competition.DoesNotExist:
-            raise NoCurrentSeason()  # todo: separate between core and API exceptions
-        except Competition.MultipleObjectsReturned:
-            raise MultipleCurrentSeasons()  # todo: separate between core and API exceptions
-
     def get_absolute_url(self):
-        return reverse('season', kwargs={'pk': self.pk})
+        return reverse('competition', kwargs={'pk': self.pk})
 
     def as_html_link(self):
         return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
-
-    # @staticmethod
-    # def get_current_season_or_none():
-    #     try:
-    #         return Competition.get_current_season()
-    #     except NoCurrentSeason:
-    #         return None
-    #     except MultipleCurrentSeasons:
-    #         return None
 
     def get_absolute_url(self):
         return reverse('competition', kwargs={'pk': self.pk})

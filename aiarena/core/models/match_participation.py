@@ -67,9 +67,9 @@ class MatchParticipation(models.Model, LockableModelMixin):
         return self.result == 'loss' and self.result_cause in ['crash', 'timeout', 'initialization_failure']
 
     @cached_property
-    def season_participant(self):
-        obj = self.__class__.objects.select_related('match', 'match__round', 'match__round__season').get(id=self.id)
-        return obj.match.round.season.seasonparticipation_set.get(bot_id=self.bot_id)
+    def competition_participant(self):
+        obj = self.__class__.objects.select_related('match', 'match__round', 'match__round__competition').get(id=self.id)
+        return obj.match.round.competition.competitionparticipation_set.get(bot_id=self.bot_id)
 
     @cached_property
     def allow_parallel_run(self):

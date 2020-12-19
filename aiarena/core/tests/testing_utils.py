@@ -74,7 +74,7 @@ class TestingClient:
         # The form needs certain details to be valid, so retrieve them
         competition = Competition.objects.get(id=competition_id)
         response = self.django_client.post(f'/admin/core/competition/{competition}/change/', {
-            '_open-season': 'Open season',
+            '_open-competition': 'Open competition',
             'competition': competition.competition_id, })
 
         assert response.status_code == 302  # redirect on success

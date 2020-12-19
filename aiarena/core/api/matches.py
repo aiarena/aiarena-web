@@ -7,8 +7,8 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import APIException
 
-from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds, NoMaps, CurrentSeasonPaused, \
-    CurrentSeasonClosing
+from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds, NoMaps, CompetitionPaused, \
+    CompetitionClosing
 from aiarena.core.api import Bots
 from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Competition
 
@@ -63,8 +63,8 @@ class Matches:
 
             if match.round:  # if this is a ladder match, record the starting elo
                 for p in participations:
-                    p.starting_elo = p.bot.seasonparticipation_set.only('elo', 'bot_id') \
-                        .get(season=Competition.get_current_season()).elo
+                    p.starting_elo = p.bot.competitionparticipation_set.only('elo', 'bot_id') \
+                        .get(competition=match.round.competition).elo
                     p.save()
 
             match.started = timezone.now()
@@ -153,17 +153,17 @@ class Matches:
         return None
 
     @staticmethod
-    def _attempt_to_generate_new_round(for_season: Competition):
+    def _attempt_to_generate_new_round(for_competition: Competition):
         active_maps = Map.objects.filter(active=True).select_for_update()
         if active_maps.count() == 0:
             raise NoMaps()
 
-        if for_season.is_paused:
-            raise CurrentSeasonPaused()
-        if for_season.is_closing:  # we should technically never hit this
-            raise CurrentSeasonClosing()
+        if for_competition.is_paused:
+            raise CompetitionPaused()
+        if for_competition.is_closing:  # we should technically never hit this
+            raise CompetitionClosing()
 
-        new_round = Round.objects.create(season=for_season)
+        new_round = Round.objects.create(competition=for_competition)
 
         active_bots = Bot.objects.only("id").filter(active=True)
         already_processed_bots = []
@@ -189,7 +189,7 @@ class Matches:
             rounds = Round.objects.raw("""
                 SELECT distinct cr.id from core_round cr 
                 inner join core_match cm on cr.id = cm.round_id
-                where season_id=%s
+                where competition_id=%s
                 and finished is null
                 and cm.started is null
                 order by number
