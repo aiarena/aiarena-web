@@ -97,7 +97,8 @@
                             <li>{% trans "Logged in" %}: {{ user.username }}</li>
                             <li><a href="{% url 'profile' %}">{% trans "Profile" %}</a></li>
                             <li><a href="{% url 'botupload' %}">{% trans "Bot upload" %}</a></li>
-                            <li><a href="{% url "requestmatch" %}">{% trans "Request Match" %}</a></li>
+                            <li><a href="{% url "requestmatch" %}">{% trans "Request Match[All Bots]" %}</a></li>
+                            <li><a href="{% url 'requestmatch-only-active' %}">{% trans "Request Match[Active Bots]" %}</a></li>
                             <li><a href="{% url 'password_change' %}">{% trans "Change password" %}</a></li>
                             <li><a href="{% url 'logout' %}">{% trans "Log out" %}</a></li>
                         {% else %}
