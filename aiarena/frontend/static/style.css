@@ -1004,9 +1004,18 @@ font-family: 'Cutive Mono', monospace;
 font-size: 14px;
 }
 
+
+
+
+
+
+
+
+
 .request-match-form {
     text-align: center;
     margin: 20px;
+
 }
 
 .request-match-form table {
@@ -1015,49 +1024,67 @@ font-size: 14px;
 
 .request-match-form td {
     vertical-align: top;
+
 }
 
 .request-match-form li {
     list-style-type: none;
+
 }
 
 .request-match-bot {
     margin: 20px;
+
 }
 
-#top10 th{
+#top10 th {
     height: 35px;
     padding-left: 10px;
     padding-right: 10px;
 }
 
-#activity_feed th{
+#activity_feed th {
     height: 35px;
     padding-left: 10px;
     padding-right: 10px;
 }
 
-#news_feed th{
+#news_feed th {
     height: 35px;
     padding-left: 10px;
     padding-right: 10px;
 }
 
 .slide-selector {
-  text-align: center;
+    text-align: center;
 }
 
 .slide-select {
-  cursor: pointer;
-  height: 15px;
-  width: 15px;
-  margin: 0 2px;
-  background-color: rgba(255, 255, 255, 0.86);
-  border-radius: 50%;
-  display: inline-block;
-  transition: background-color 0.6s ease;
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: rgba(255, 255, 255, 0.86);
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
 }
 
-.active, .slide-select:hover {
-  background-color: #86c232;
+
+
+.select2-search {
+    background-color: darkslategrey;
+    width: 100%;
+}
+.select2-search input{
+    background-color: lightyellow;
+    width: 100%;
+}
+
+.select2-search select{
+    width: 100%;
+}
+.select2-results {
+    background-color: #0c1d00;
+    width: 100%;
 }
