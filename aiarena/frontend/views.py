@@ -3,6 +3,7 @@ from datetime import timedelta
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
+from django_select2.forms import Select2Widget
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -237,7 +238,7 @@ class BotDetail(DetailView):
             .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
             .prefetch_related(
-                Prefetch('match__map'), 
+                Prefetch('match__map'),
                 Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
         context['result_list'] = results
         context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
@@ -563,6 +564,7 @@ class SeasonDetail(DetailView):
 
 
 class RequestMatchForm(forms.Form):
+
     MATCHUP_TYPE_CHOICES = (
         ('specific_matchup', 'Specific Matchup'),
         ('random_ladder_bot', 'Random Ladder Bot'),
@@ -574,20 +576,24 @@ class RequestMatchForm(forms.Form):
         ('P', 'Protoss'),
     )
     matchup_type = forms.ChoiceField(choices=MATCHUP_TYPE_CHOICES,
-                                     widget=forms.RadioSelect(attrs={'onclick': 'refreshForm();'}),
-                                     required=True, initial='specific_matchup')
-    bot1 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), required=True)
+                                     widget=Select2Widget,
+                                     required=True, initial='specific_matchup',
+                                     )
+    bot1 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), required=True,
+                                  widget=Select2Widget,
+        )
     # hidden when matchup_type != random_ladder_bot
     matchup_race = forms.ChoiceField(choices=MATCHUP_RACE_CHOICES,
-                                     widget=forms.RadioSelect(attrs={'onclick': 'refreshForm();'}),
+                                     widget=Select2Widget,
                                      required=False, initial='any')
     # hidden when matchup_type != specific_matchup
     bot2 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'),
-                                  widget=forms.Select(attrs={'required': ''}),  # default this to required initially
+                                  widget=Select2Widget,  # default this to required initially
                                   required=False)
     map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
-                                 empty_label='Random Ladder Map',
+                                 empty_label='Random Ladder Map', widget=Select2Widget,
                                  required=False)
+
     match_count = forms.IntegerField(min_value=1, initial=1)
 
     def clean_matchup_race(self):
