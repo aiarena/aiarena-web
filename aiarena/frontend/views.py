@@ -3,7 +3,7 @@ from datetime import timedelta
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
-from django_select2.forms import Select2Widget
+from django_select2.forms import Select2Widget, ModelSelect2Widget
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -563,6 +563,64 @@ class SeasonDetail(DetailView):
         return context
 
 
+class BotWidget(Select2Widget):
+    search_fields = [
+            "name__icontains"
+    ]
+
+
+class RequestMatchOnlyActiveForm(forms.Form):
+
+    MATCHUP_TYPE_CHOICES = (
+        ('specific_matchup', 'Specific Matchup'),
+        ('random_ladder_bot', 'Random Ladder Bot'),
+    )
+    MATCHUP_RACE_CHOICES = (
+        ('any', 'Any'),
+        ('T', 'Terran'),
+        ('Z', 'Zerg'),
+        ('P', 'Protoss'),
+    )
+    matchup_type = forms.ChoiceField(choices=MATCHUP_TYPE_CHOICES,
+                                     widget=Select2Widget,
+                                     required=True, initial='specific_matchup',
+                                     )
+    bot1 = forms.ModelChoiceField(queryset=Bot.objects.filter(active=True).only('name'), required=True,
+                                  widget=BotWidget,
+        )
+    # hidden when matchup_type != random_ladder_bot
+    matchup_race = forms.ChoiceField(choices=MATCHUP_RACE_CHOICES,
+                                     widget=Select2Widget,
+                                     required=False, initial='any')
+    # hidden when matchup_type != specific_matchup
+    bot2 = forms.ModelChoiceField(queryset=Bot.objects.filter(active=True).only('name'),
+                                  widget=BotWidget,  # default this to required initially
+                                  required=False, help_text="Author or Bot name")
+    map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
+                                 empty_label='Random Ladder Map', widget=Select2Widget,
+                                 required=False)
+
+    match_count = forms.IntegerField(min_value=1, initial=1)
+
+    def clean_matchup_race(self):
+        """If matchup_type isn't set, assume it's any"""
+        return 'any' if self.cleaned_data['matchup_race'] is None or self.cleaned_data['matchup_race'] == '' \
+            else self.cleaned_data['matchup_race']
+
+    def clean_bot2(self):
+        """If matchup_type is specific_matchup require a bot2"""
+        matchup_type = self.cleaned_data['matchup_type']
+        bot2 = self.cleaned_data['bot2']
+        if matchup_type == 'specific_matchup' and bot2 is None:
+            raise ValidationError("A bot2 must be specified for a specific matchup.")
+        return self.cleaned_data['bot2']
+
+    # todo: validate form
+
+
+
+
+
 class RequestMatchForm(forms.Form):
 
     MATCHUP_TYPE_CHOICES = (
@@ -580,7 +638,7 @@ class RequestMatchForm(forms.Form):
                                      required=True, initial='specific_matchup',
                                      )
     bot1 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), required=True,
-                                  widget=Select2Widget,
+                                  widget=BotWidget,
         )
     # hidden when matchup_type != random_ladder_bot
     matchup_race = forms.ChoiceField(choices=MATCHUP_RACE_CHOICES,
@@ -588,8 +646,8 @@ class RequestMatchForm(forms.Form):
                                      required=False, initial='any')
     # hidden when matchup_type != specific_matchup
     bot2 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'),
-                                  widget=Select2Widget,  # default this to required initially
-                                  required=False)
+                                  widget=BotWidget,  # default this to required initially
+                                  required=False, help_text="Author or Bot name")
     map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
                                  empty_label='Random Ladder Map', widget=Select2Widget,
                                  required=False)
@@ -617,6 +675,66 @@ class RequestMatchForm(forms.Form):
 
 class RequestMatch(LoginRequiredMixin, FormView):
     form_class = RequestMatchForm
+    template_name = 'request_match.html'
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # If not staff, only allow requesting games against this user's bots
+        if not self.request.user.is_staff and not self.request.user.can_request_games_for_another_authors_bot:
+            form.fields['bot1'].queryset = Bot.objects.only('name').filter(user=self.request.user)
+        return form
+
+    def get_success_url(self):
+        return reverse('requestmatch')
+
+    def form_valid(self, form):
+        if config.ALLOW_REQUESTED_MATCHES:
+            if form.cleaned_data['bot1'] != form.cleaned_data['bot2']:
+                if self.request.user.match_request_count_left >= form.cleaned_data['match_count']:
+
+                    with transaction.atomic():  # do this all in one commit
+                        match_list = []
+                        if form.cleaned_data['matchup_type'] == 'random_ladder_bot':
+                            bot1 = form.cleaned_data['bot1']
+
+                            for _ in range(0, form.cleaned_data['match_count']):
+                                bot2 = bot1.get_random_active_excluding_self() if form.cleaned_data['matchup_race'] == 'any' \
+                                    else bot1.get_random_active_excluding_self(plays_race=form.cleaned_data['matchup_race'])
+
+                                if bot2 is None:
+                                    messages.error(self.request, "No opponents of that type could be found.")
+                                    return self.render_to_response(self.get_context_data(form=form))
+
+                                match_list.append(Matches.request_match(
+                                    self.request.user, form.cleaned_data['bot1'],
+                                    bot2, form.cleaned_data['map']))
+                        else:  # specific_matchup
+                            for _ in range(0, form.cleaned_data['match_count']):
+                                match_list.append(Matches.request_match(
+                                    self.request.user, form.cleaned_data['bot1'],
+                                    form.cleaned_data['bot2'], form.cleaned_data['map']))
+
+                    message = ""
+                    for match in match_list:
+                        message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
+                    messages.success(self.request, mark_safe(message))
+                    return super().form_valid(form)
+                else:
+                    messages.error(self.request, "That number of matches exceeds your match request limit.")
+                    return self.render_to_response(self.get_context_data(form=form))
+            else:
+                messages.error(self.request, "Sorry - you cannot request matches between the same bot.")
+                return self.render_to_response(self.get_context_data(form=form))
+        else:
+            messages.error(self.request, "Sorry. Requested matches are currently disabled.")
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+class RequestMatchOnlyActive(LoginRequiredMixin, FormView):
+    form_class = RequestMatchOnlyActiveForm
     template_name = 'request_match.html'
 
     def get_login_url(self):
