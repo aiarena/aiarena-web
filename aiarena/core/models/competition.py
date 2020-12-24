@@ -1,28 +1,22 @@
 import logging
 
 from django.db import models, transaction
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from aiarena.api.arenaclient.exceptions import NoCurrentCompetitions, MultipleCurrentSeasons
 from .game_type import GameMode
 from .mixins import LockableModelMixin
 
 logger = logging.getLogger(__name__)
+
 
 class CompetitionType(models.TextChoices):
     LEAGUE = u'LRR', 'League - Round Robin'
     # TOURNAMENT = u'T', 'Tournament'
     # CUSTOM = u'C', 'Custom'
     # flash_challenge = u'F', 'FlashChallenge'
-
-# todo: remove this
-def replay_archive_upload_to(instance, filename):
-    return '/'.join(['replays', 'competition_' + str(instance.number) + '_zip'])
 
 
 class Competition(models.Model, LockableModelMixin):
