@@ -2,6 +2,21 @@
 
 from django.db import migrations
 
+from aiarena.core.models import Competition
+from aiarena.core.models.game import Game
+from aiarena.core.models.game_type import GameMode
+
+
+def update_name(apps, schema_editor):
+    # set initial names
+    for competition in Competition.objects.all():
+        competition.name = f"AI Arena - Season {competition.id}"
+        competition.save()
+
+def create_game_mode(apps, schema_editor):
+    game = Game.objects.create(name='StarCraft II')
+    GameMode.objects.create(name='Melee', game=game)
+
 
 class Migration(migrations.Migration):
 
@@ -14,4 +29,6 @@ class Migration(migrations.Migration):
             old_name='Season',
             new_name='Competition',
         ),
+        migrations.RunPython(update_name),
+        migrations.RunPython(create_game_mode),
     ]
