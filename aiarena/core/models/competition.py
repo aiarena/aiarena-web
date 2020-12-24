@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class CompetitionType(models.TextChoices):
-    LEAGUE = u'LRR', 'League - Round Robin'
+    LEAGUE = u'L', 'League - Round Robin'
     # TOURNAMENT = u'T', 'Tournament'
     # CUSTOM = u'C', 'Custom'
     # flash_challenge = u'F', 'FlashChallenge'
@@ -35,7 +35,7 @@ class Competition(models.Model, LockableModelMixin):
                             choices=CompetitionType.choices,
                             default=CompetitionType.LEAGUE)
     game_mode = models.ForeignKey(GameMode, on_delete=models.CASCADE, related_name='game_modes')
-    date_created = models.DateTimeField(auto_now_add=True)
+    date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_opened = models.DateTimeField(blank=True, null=True)
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=COMPETITION_STATUSES, default='created', blank=True)

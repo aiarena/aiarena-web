@@ -3,6 +3,8 @@ from django.http import HttpResponseRedirect
 
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
     CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News
+from aiarena.core.models.game import Game
+from aiarena.core.models.game_type import GameMode
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -20,7 +22,6 @@ class BotInline(StackedItemInline):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    inlines = [BotInline]
     search_fields = ('username',)
     list_display = (
         'id',
@@ -339,3 +340,13 @@ class PatreonAccountBindAdmin(admin.ModelAdmin):
 class NewsAdmin(admin.ModelAdmin):
     list_display = ('created', 'title', 'text', 'yt_link')
     search_fields = ('title',)
+
+@admin.register(Game)
+class GameAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+@admin.register(GameMode)
+class GameModeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'game')
+    search_fields = ('name', 'game')

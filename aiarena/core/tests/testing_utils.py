@@ -15,6 +15,8 @@ from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
     Competition
+from aiarena.core.models.game import Game
+from aiarena.core.models.game_type import GameMode
 from aiarena.core.utils import calculate_md5
 
 
@@ -46,8 +48,7 @@ class TestingClient:
                                                                      'password': password,
                                                                      'email': email,
                                                                      'type': type,
-                                                                     'owner': owner_id,
-                                                                     'patreon_level': patreon_level})
+                                                                     'owner': owner_id,})
 
         assert response.status_code == 302  # redirect on success
         return User.objects.get(username=username)
@@ -62,20 +63,31 @@ class TestingClient:
         assert response.status_code == 302  # redirect on success
         return ArenaClient.objects.get(username=username)
 
-    def create_competition(self, name: str, type: str, enabled: bool) -> Competition:
+    def create_game(self, name: str) -> Game:
+        response = self.django_client.post('/admin/core/game/add/', {'name': name,})
+
+        assert response.status_code == 302
+        return Game.objects.get(name=name)
+
+    def create_gamemode(self, name: str, game_id: int) -> GameMode:
+        response = self.django_client.post('/admin/core/gamemode/add/', {'name': name,
+                                                                         'game': game_id,})
+
+        assert response.status_code == 302
+        return GameMode.objects.get(name=name, game_id=game_id)
+
+    def create_competition(self, name: str, type: str, game_mode_id: int) -> Competition:
         response = self.django_client.post('/admin/core/competition/add/', {'name': name,
                                                                             'type': type,
-                                                                            'enabled': enabled, })
+                                                                            'game_mode': game_mode_id, })
 
         assert response.status_code == 302  # redirect on success
         return Competition.objects.get(name=name)
 
     def open_competition(self, competition_id: int):
-        # The form needs certain details to be valid, so retrieve them
-        competition = Competition.objects.get(id=competition_id)
-        response = self.django_client.post(f'/admin/core/competition/{competition}/change/', {
+        response = self.django_client.post(f'/admin/core/competition/{competition_id}/change/', {
             '_open-competition': 'Open competition',
-            'competition': competition.competition_id, })
+            'competition': competition_id, })
 
         assert response.status_code == 302  # redirect on success
 

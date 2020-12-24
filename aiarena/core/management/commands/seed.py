@@ -4,10 +4,13 @@ from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.test import Client
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Season, Match, ArenaClient, News
+from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Competition, Match, ArenaClient, News
+from aiarena.core.models.competition import Competition
+from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
@@ -82,7 +85,7 @@ def finalize_result(result, p1, p2, bot1, bot2):
     # Calculate the change in ELO
     # the bot elos have changed so refresh them
     # todo: instead of having to refresh, return data from adjust_elo and apply it here
-    sp1, sp2 = result.get_season_participants
+    sp1, sp2 = result.get_competition_participants
     p1.resultant_elo = sp1.elo
     p2.resultant_elo = sp2.elo
     p1.elo_change = p1.resultant_elo - p1_initial_elo
@@ -92,81 +95,104 @@ def finalize_result(result, p1, p2, bot1, bot2):
 
     result.match.round.update_if_completed()
 
-
 def run_seed(matches, token):
+
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
-    arenaclient1 = ArenaClient.objects.create(username='aiarenaclient-001', email='aiarenaclient-001@dev.aiarena.net',
-                                            type='ARENA_CLIENT', owner=devadmin)
+    client = TestingClient()
+    client.login_as(devadmin)
 
-    arenaclient2 = ArenaClient.objects.create(username='aiarenaclient-002', email='aiarenaclient-002@dev.aiarena.net',
-                                            type='ARENA_CLIENT', owner=devadmin)
+    arenaclient1 = client.create_arenaclient('aiarenaclient-001', 'aiarenaclient-001@dev.aiarena.net', devadmin.id)
+    client.create_arenaclient('aiarenaclient-002', 'aiarenaclient-002@dev.aiarena.net', devadmin.id)
+    client.create_user('service_user', 'x', 'service_user@dev.aiarena.net', 'SERVICE', devadmin.id)
 
-    service_user = User.objects.create_user(username='service_user', password='x', email='service_user@dev.aiarena.net',
-                                            type='SERVICE')
+    game = client.create_game('StarCraft II')
+    gamemode = client.create_gamemode('Melee', game.id)
 
-    # if token is None it will generate a new one, otherwise it will use the one specified
-    new_token = Token.objects.create(user=arenaclient1, key=token)
+    competition1 = client.create_competition('Competition 1', 'L', gamemode.id)
+    client.open_competition(competition1.id)
 
-    season = Season.objects.create(previous_season_files_cleaned=True)
-    season.open()
-
-    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net', patreon_level='bronze')
-    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net', patreon_level='silver')
-    devuser3 = User.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net', patreon_level='gold')
-    devuser4 = User.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net', patreon_level='platinum')
-    devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net', patreon_level='diamond')
+    competition2 = client.create_competition('Competition 2', 'L', gamemode.id)
+    client.open_competition(competition1.id)
 
     with open(BaseTestMixin.test_map_path, 'rb') as map:
-        Map.objects.create(name='test_map', file=File(map), active=True)
+        m1 = Map.objects.create(name='test_map1', file=File(map))
+        m1.competitions.add(competition1)
+        m1.save()
+
+        m2 = Map.objects.create(name='test_map2', file=File(map))
+        m2.competitions.add(competition2)
+        m2.save()
+
+        # unused map
+        Map.objects.create(name='test_map3', file=File(map))
+
+    # assume the frontend is working by this point and create these the easiest way
+    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
+                                        patreon_level='bronze')
+    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net',
+                                        patreon_level='silver')
+    devuser3 = User.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net',
+                                        patreon_level='gold')
+    devuser4 = User.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net',
+                                        patreon_level='platinum')
+    devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net',
+                                        patreon_level='diamond')
 
     with open(BaseTestMixin.test_bot_zip_path, 'rb') as bot_zip:
-        Bot.objects.create(user=devadmin, name='devadmin_bot1', active=True, plays_race='T', type='python',
+        Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race='T', type='python',
                            bot_zip=File(bot_zip))
-        Bot.objects.create(user=devadmin, name='devadmin_bot2', active=True, plays_race='Z', type='python',
+        Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))
         Bot.objects.create(user=devadmin, name='devadmin_bot3', plays_race='P', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        Bot.objects.create(user=devuser1, name='devuser1_bot1', active=True, plays_race='P', type='python',
+        Bot.objects.create(user=devuser1, name='devuser1_bot1', plays_race='P', type='python',
                            bot_zip=File(bot_zip))
-        Bot.objects.create(user=devuser1, name='devuser1_bot2', active=True, plays_race='Z', type='python',
+        Bot.objects.create(user=devuser1, name='devuser1_bot2', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))
         Bot.objects.create(user=devuser1, name='devuser1_bot3', plays_race='T', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        Bot.objects.create(user=devuser2, name='devuser2_bot1', active=True, plays_race='P', type='python',
+        Bot.objects.create(user=devuser2, name='devuser2_bot1', plays_race='P', type='python',
                            bot_zip=File(bot_zip))
-        Bot.objects.create(user=devuser2, name='devuser2_bot2', active=True, plays_race='T', type='python',
+        Bot.objects.create(user=devuser2, name='devuser2_bot2', plays_race='T', type='python',
                            bot_zip=File(bot_zip))
         Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        Bot.objects.create(user=devuser3, name='devuser3_bot1', active=True, plays_race='T', type='python',
+        Bot.objects.create(user=devuser3, name='devuser3_bot1', plays_race='T', type='python',
                            bot_zip=File(bot_zip))
 
-        Bot.objects.create(user=devuser4, name='devuser4_bot1', active=True, plays_race='Z', type='python',
+        Bot.objects.create(user=devuser4, name='devuser4_bot1', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))
 
-        Bot.objects.create(user=devuser5, name='devuser5_bot1', active=True, plays_race='P', type='python',
+        Bot.objects.create(user=devuser5, name='devuser5_bot1', plays_race='P', type='python',
                            bot_zip=File(bot_zip))
 
-    for x in range(matches - 1):
-        if(bool(random.getrandbits(1))):  # select randomly
-            create_result(create_match(arenaclient1), random.choice(Result.TYPES)[0], arenaclient1)
-        else:
-            create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)
+        # if token is None it will generate a new one, otherwise it will use the one specified
+        api_token = Token.objects.create(user=arenaclient1, key=token)
+        client.set_api_token(api_token)
 
-        if x == 0:  # make it so a bot that once was active, is now inactive
-            bot1 = Match.objects.get(result__isnull=False).participant1.bot
-            bot1.active = False
-            bot1.save()
+        # TODO: DO THESE VIA THE API
+        for x in range(matches - 1):
+            client.request_match()
+            if (bool(random.getrandbits(1))):  # select randomly
+                create_result(create_match(arenaclient1), random.choice(Result.TYPES)[0], arenaclient1)
+            else:
+                create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)
 
-    # so we have a match in progress
-    if matches != 0:
-        create_match(arenaclient1)
+            if x == 0:  # make it so a bot that once was active, is now inactive
+                bot1 = Match.objects.get(result__isnull=False).participant1.bot
+                bot1.active = False
+                bot1.save()
 
-    return new_token
+        # so we have a match in progress
+        if matches != 0:
+            create_match(arenaclient1)
+
+        return api_token
+
 
 
 class Command(BaseCommand):

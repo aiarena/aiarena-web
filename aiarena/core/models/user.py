@@ -34,7 +34,7 @@ class User(AbstractUser):
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now, blank=True)
     email = models.EmailField(unique=True)
     patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none', blank=True)
-    type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
+    type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER', blank=True)
     extra_active_bots_per_race = models.IntegerField(default=0, blank=True)
     extra_periodic_match_requests = models.IntegerField(default=0, blank=True)
     receive_email_comms = models.BooleanField(default=True, blank=True)
