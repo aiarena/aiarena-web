@@ -14,7 +14,7 @@ pinax-theme-bootstrap==8.0.1
 pytz==2020.1
 six==1.15.0
 Markdown
-wiki==0.6
+wiki==0.7
 mysql-connector
 matplotlib
 pandas==1.0.5
