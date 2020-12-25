@@ -20,27 +20,25 @@
             <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
                   enctype="multipart/form-data">
             <style>
-                input, select  {width:40%;}
+                input, select  {width:55%;}
             </style>
                 {% csrf_token %}
                 <p>{{ form.matchup_type }}</p>
-                <table>
-                    <tr>
-                        <td>
-                            <h3>Bot1:</h3>
-                            <div>{{ form.bot1 }}</div>
-                        </td>
-                        <td>
-                            <h3>Bot2:</h3>
-                            <div id="matchup_race" style="display: none">{{ form.matchup_race }}</div>
-                            <div id="bot2">{{ form.bot2 }}</div>
-                        </td>
-                    </tr>
-                </table>
+                <table><tr>
+                    <td>
+                        <h3>Bot1:</h3>
+                        <div>{{ form.bot1 }}</div>
+                    </td>
+                    <td>
+                        <h3>Bot2:</h3>
+                        <div id="matchup_race" style="display: none">{{ form.matchup_race }}</div>
+                        <div id="bot2">{{ form.bot2 }}</div>
+                    </td>
+                </tr></table>
                 <p>Map: {{ form.map }}</p>
                 <p>Match Count: {{ form.match_count }}</p>
                 <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
-                        {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
+                  {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
             </form>
             {% if user.match_request_count_left <= 0 %}
                 <h3>You have reached your match request limit.</h3>
