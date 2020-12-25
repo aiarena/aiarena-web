@@ -36,6 +36,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Dependencies
       run: |
+        python -m pip install --upgrade pip
         python ./pip/pip-install.py --python=python --pip=pip
     - name: Verify MariaDB connection
       env:
