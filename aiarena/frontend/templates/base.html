@@ -5,9 +5,10 @@
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static "style.css" %}?v=2">
-    <link rel="shortcut icon" href="{%  static 'img/favicon.ico' %}">
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
     <link href="https://fonts.googleapis.com/css?family=Gugi&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Cutive+Mono&display=swap" rel="stylesheet">
 
@@ -20,16 +21,26 @@
 
     {#Jquery cdn#}
     <script src="https://code.jquery.com/jquery-3.5.1.js"
-  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
-  crossorigin="anonymous">
+            integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+            crossorigin="anonymous">
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
+            integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A=="
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.css"
+          integrity="sha512-p209YNS54RKxuGVBVhL+pZPTioVDcYPZPYYlKWS9qVvQwrlzxBxkR8/48SCP58ieEuBosYiPUS970ixAfI/w/A=="
+          crossorigin="anonymous"/>
 
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-    
-      gtag('config', 'UA-153791853-1');
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'UA-153791853-1');
     </script>
 
 </head>
@@ -39,37 +50,37 @@
 
     <div id="header">
         {% if config.PUBLIC_BANNER_MESSAGE or config.LOGGED_IN_BANNER_MESSAGE and user.is_authenticated %}
-        <div id="banner-message">
-            <div id="banner-message-content">
-                {% if config.PUBLIC_BANNER_MESSAGE%}
-                <h3>
-                    {{ config.PUBLIC_BANNER_MESSAGE }}
-                </h3>
-                {% endif %}
-                {% if config.LOGGED_IN_BANNER_MESSAGE and user.is_authenticated %}
-                <h3>
-                    {{ config.LOGGED_IN_BANNER_MESSAGE }}
-                </h3>
-                {% endif %}
+            <div id="banner-message">
+                <div id="banner-message-content">
+                    {% if config.PUBLIC_BANNER_MESSAGE %}
+                        <h3>
+                            {{ config.PUBLIC_BANNER_MESSAGE }}
+                        </h3>
+                    {% endif %}
+                    {% if config.LOGGED_IN_BANNER_MESSAGE and user.is_authenticated %}
+                        <h3>
+                            {{ config.LOGGED_IN_BANNER_MESSAGE }}
+                        </h3>
+                    {% endif %}
+                </div>
             </div>
-        </div>
         {% endif %}
         {% block header %}
-        <img src="{% static '/img/ai-arena-logo.png' %}" alt="AI Arena Logo" class="center">
-        <br>
-        <h1 class="site-title">StarCraft II AI Arena</h1>
+            <img src="{% static '/img/ai-arena-logo.png' %}" alt="AI Arena Logo" class="center">
+            <br>
+            <h1 class="site-title">StarCraft II AI Arena</h1>
         {% endblock %}
     </div>
 
 
-      <div id="sidebar">
+    <div id="sidebar">
         {% block sidebar %}
             <ul id="sidebar-items">
                 <li>
                     <div id="sidebar-header">
-                    <em class="material-icons">pages</em>
-                    <h3> pages</h3>
-                        </div>
+                        <em class="material-icons">pages</em>
+                        <h3> pages</h3>
+                    </div>
                     <ul class="links">
                         <li><a href="{% url 'home' %}">{% trans "Home" %}</a></li>
                         <li><a href="{% url 'wiki:root' %}">{% trans "Wiki" %}</a></li>
@@ -90,15 +101,15 @@
                 <li>
                     <div id="sidebar-header">
                         <em class="material-icons">person</em>
-                    <h3>user</h3>
+                        <h3>user</h3>
                     </div>
                     <ul class="links">
                         {% if user.is_authenticated %}
                             <li>{% trans "Logged in" %}: {{ user.username }}</li>
                             <li><a href="{% url 'profile' %}">{% trans "Profile" %}</a></li>
                             <li><a href="{% url 'botupload' %}">{% trans "Bot upload" %}</a></li>
-                            <li><a href="{% url "requestmatch" %}">{% trans "Request Match[All Bots]" %}</a></li>
-                            <li><a href="{% url 'requestmatch-only-active' %}">{% trans "Request Match[Active Bots]" %}</a></li>
+                            <li><a href="{% url "requestmatch" %}">{% trans "Request Match" %}</a></li>
+                            {#                            <li><a href="{% url 'requestmatch-only-active' %}">{% trans "Request Match[Active Bots]" %}</a></li>#}
                             <li><a href="{% url 'password_change' %}">{% trans "Change password" %}</a></li>
                             <li><a href="{% url 'logout' %}">{% trans "Log out" %}</a></li>
                         {% else %}
@@ -108,27 +119,27 @@
                 </li>
 
                 {% if user.is_staff %}
-                <li>
-                    <div id="sidebar-header">
-                        <em class="material-icons">bug_report</em>
-                    <h3>admin</h3>
-                    </div>
-                    <ul class="links">
+                    <li>
+                        <div id="sidebar-header">
+                            <em class="material-icons">bug_report</em>
+                            <h3>admin</h3>
+                        </div>
+                        <ul class="links">
                             <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
                             {% if config.ADMIN_CLUSTER_LINK %}
-                            <li><a href="{{ config.ADMIN_CLUSTER_LINK }}">{% trans "Cluster" %}</a></li>
+                                <li><a href="{{ config.ADMIN_CLUSTER_LINK }}">{% trans "Cluster" %}</a></li>
                             {% endif %}
                             {% if config.ADMIN_WEBSTATS_LINK %}
-                            <li><a href="{{ config.ADMIN_WEBSTATS_LINK }}">{% trans "Web Stats" %}</a></li>
+                                <li><a href="{{ config.ADMIN_WEBSTATS_LINK }}">{% trans "Web Stats" %}</a></li>
                             {% endif %}
-                    </ul>
-                </li>
+                        </ul>
+                    </li>
                 {% endif %}
 
                 <li>
                     <div id="sidebar-header">
                         <em class="material-icons">show_chart</em>
-                    <h3>stats</h3>
+                        <h3>stats</h3>
                     </div>
                     <ul class="links">
                         <li>Date: {% now "d. N Y" %}</li>
@@ -143,34 +154,44 @@
                 <li>
                     <div id="sidebar-header">
                         <em class="material-icons">link</em>
-                    <h3>links</h3>
+                        <h3>links</h3>
                     </div>
                     <ul class="links">
                         {% if config.DISCORD_INVITE_LINK %}
-                        <li><a href="{{ config.DISCORD_INVITE_LINK }}"> Discord <em class="material-icons md-18" style="font-size: 18px; padding: 0px; padding-right:5px;">launch</em></a></li>
+                            <li><a href="{{ config.DISCORD_INVITE_LINK }}"> Discord <em class="material-icons md-18"
+                                                                                        style="font-size: 18px; padding: 0px; padding-right:5px;">launch</em></a>
+                            </li>
                         {% endif %}
                         {% if config.PATREON_LINK %}
-                        <li><a href="{{ config.PATREON_LINK }}"> Patreon <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                            <li><a href="{{ config.PATREON_LINK }}"> Patreon <em class="material-icons md-18"
+                                                                                 style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a>
+                            </li>
                         {% endif %}
                         {% if config.GITHUB_LINK %}
-                        <li><a href="{{ config.GITHUB_LINK }}"> GitHub <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                            <li><a href="{{ config.GITHUB_LINK }}"> GitHub <em class="material-icons md-18"
+                                                                               style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a>
+                            </li>
                         {% endif %}
                         {% if config.TWITCH_LINK %}
-                        <li><a href="{{ config.TWITCH_LINK }}"> Twitch <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                            <li><a href="{{ config.TWITCH_LINK }}"> Twitch <em class="material-icons md-18"
+                                                                               style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a>
+                            </li>
                         {% endif %}
                         {% if config.YOUTUBE_LINK %}
-                        <li><a href="{{ config.YOUTUBE_LINK }}"> YouTube <em class="material-icons md-18" style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a></li>
+                            <li><a href="{{ config.YOUTUBE_LINK }}"> YouTube <em class="material-icons md-18"
+                                                                                 style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a>
+                            </li>
                         {% endif %}
                     </ul>
                 </li>
                 {% if random_donator %}
-                <li>
-                    <div id="sidebar-header">
-                    <em class="material-icons">favorite</em>
-                    <h3>supporters</h3>
-                    </div>
-                    Thank you to {{ random_donator.as_html_link }} for your support!
-                </li>
+                    <li>
+                        <div id="sidebar-header">
+                            <em class="material-icons">favorite</em>
+                            <h3>supporters</h3>
+                        </div>
+                        Thank you to {{ random_donator.as_html_link }} for your support!
+                    </li>
                 {% endif %}
             </ul>
         {% endblock %}
@@ -189,21 +210,21 @@
 </div>
 </body>
 <script>
-setInterval(function() {
-    let links = document.getElementsByClassName('file-link');
-    for (i = 0; i < links.length; i++) {
-        let link = links[i];
-        let mykey = "visited-" + link;
-        if (localStorage.getItem(mykey)) {
-            links[i].style.color = 'red';
+    setInterval(function () {
+        let links = document.getElementsByClassName('file-link');
+        for (i = 0; i < links.length; i++) {
+            let link = links[i];
+            let mykey = "visited-" + link;
+            if (localStorage.getItem(mykey)) {
+                links[i].style.color = 'red';
+            }
         }
-    }
-}, 3000);
+    }, 3000);
 
-$(`a.file-link`).click(function() {
-    $(this).css('color', 'red');
+    $(`a.file-link`).click(function () {
+        $(this).css('color', 'red');
 
-    localStorage.setItem('visited-' + this.href, true);
-});
+        localStorage.setItem('visited-' + this.href, true);
+    });
 </script>
 </html>
