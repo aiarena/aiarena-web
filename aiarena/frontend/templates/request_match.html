@@ -27,12 +27,12 @@
                 <table><tr>
                     <td>
                         <h3>Bot1:</h3>
-                        <div>{{ form.bot1 }}</div>
+                        <div>{{ form.bot1|wordwrap:1 }}</div>
                     </td>
                     <td>
                         <h3>Bot2:</h3>
                         <div id="matchup_race" style="display: none">{{ form.matchup_race }}</div>
-                        <div id="bot2">{{ form.bot2 }}</div>
+                        <div id="bot2">{{ form.bot2|wordwrap:7 }}</div>
                     </td>
                 </tr></table>
                 <p>Map: {{ form.map }}</p>
@@ -70,7 +70,7 @@
 
         }
 
-        setInterval(refreshForm, 3000);
+        setInterval(refreshForm, 400);
     </script>
 
 
