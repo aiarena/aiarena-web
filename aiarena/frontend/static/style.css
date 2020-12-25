@@ -1085,7 +1085,7 @@ font-size: 14px;
     width: 100%;
 }
 .select2-results {
-    background-color: #bff6bf;
+    background-color: #bff6bf !important;
     color: black;
     width: 100%;
 }
