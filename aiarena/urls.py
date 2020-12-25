@@ -83,7 +83,6 @@ urlpatterns = [  # todo: replace usage of url with path for all these
 
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   path('requestmatch/', core_views.RequestMatch.as_view(), name='requestmatch'),
-                  path('requestmatch_active/', core_views.RequestMatchOnlyActive.as_view(), name='requestmatch-only-active'),
 
                   url('avatar/', include('avatar.urls')),
 
