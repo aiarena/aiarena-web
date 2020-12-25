@@ -571,12 +571,12 @@ class BotWidget(Select2Widget):
 
 class BotChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, bot_object):
-        str_fmt = "{0:>20}{1:>20}{2:>20}\n{3:>20}"
+        str_fmt = "{0:>20} {1:>20} {2:>20} \n{3:>20}"
         if bot_object.active:
             active = '✔'
         else:
             active = '✘'
-        return str_fmt.format(bot_object.name, bot_object.plays_race, active, bot_object.user.username)
+        return str_fmt.format(active, bot_object.name, bot_object.plays_race, bot_object.user.username)
 
 
 class RequestMatchForm(forms.Form):
@@ -597,7 +597,6 @@ class RequestMatchForm(forms.Form):
                                      )
     bot1 = BotChoiceField(queryset=Bot.objects.all(), required=True,
                                   widget=BotWidget)
-    botdev = Bot.objects.all()
     # hidden when matchup_type != random_ladder_bot
     matchup_race = forms.ChoiceField(choices=MATCHUP_RACE_CHOICES,
                                      widget=Select2Widget,
@@ -626,9 +625,6 @@ class RequestMatchForm(forms.Form):
         return self.cleaned_data['bot2']
 
     # todo: validate form
-
-
-
 
 
 class RequestMatch(LoginRequiredMixin, FormView):
