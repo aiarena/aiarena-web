@@ -3,3 +3,4 @@ django-constance[database]==2.7.0
 django-sslserver
 django-debug-toolbar
 coverage
+django-fakeredis
