@@ -7,9 +7,12 @@ from .admin import MapAdmin, MatchAdmin, SeasonAdmin
 from django.contrib.messages.middleware import MessageMiddleware
 from django.contrib.sessions.middleware import SessionMiddleware
 
+from django_fakeredis import FakeRedis
+
 class AdminMethodsTestCase(FullDataSetMixin, TestCase):
 
    # admin uses this functionality
+    @FakeRedis("django_redis.get_redis_connection")
     def test_map_admin(self):
         self.factory = RequestFactory()
         test_maps = Map.objects.all()
@@ -23,6 +26,7 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
         for tmap in test_maps:
             self.assertTrue(tmap.active, msg=f"failed to activate Map<{tmap}> Using the admin interface ")
 
+    @FakeRedis("django_redis.get_redis_connection")
     def test_match_admin(self):
         self.factory = RequestFactory()
         test_matches= Match.objects.all()
@@ -41,6 +45,9 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
             self.assertTrue(result.type == "MatchCancelled", msg=f"failed to Cancel Match<{match}>, Result<{result}> Using the admin interface ")
 
     """ need to make this one work """
+
+
+    @FakeRedis("django_redis.get_redis_connection")
     def test_season_admin(self):
         self.factory = RequestFactory()
         admin = SeasonAdmin(model=Season, admin_site='/admin')
@@ -51,8 +58,7 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
             def __init__(self, name):
                 self.name = name
 
-
-
+        @FakeRedis("django_redis.get_redis_connection")
         def mock_request_admin(factory, data, admin):
             request = factory.post(reverse("admin:index"), data=data)
             request.user = User.objects.first()
@@ -89,6 +95,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
     Tests to ensure website pages don't break.
     """
 
+    @FakeRedis("django_redis.get_redis_connection")
     def test_render_pages(self):
         # index
         response = self.client.get('/')
