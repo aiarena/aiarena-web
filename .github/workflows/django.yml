@@ -28,6 +28,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: shogo82148/actions-setup-redis@v1
+      with:
+        redis-version: '6.x'
+    - run: redis-cli ping
     - name: Checkout submodules
       uses: textbook/git-checkout-submodule-action@master
     - name: Set up Python ${{ matrix.python-version }}
