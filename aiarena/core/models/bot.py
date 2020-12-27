@@ -15,7 +15,7 @@ from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
-from aiarena.api.arenaclient.exceptions import NoCurrentCompetitions
+from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
@@ -61,7 +61,6 @@ class Bot(models.Model, LockableModelMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
-    active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                validators=[validate_bot_zip_file, ])
     bot_zip_updated = models.DateTimeField(editable=False)

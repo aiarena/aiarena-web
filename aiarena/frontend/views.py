@@ -21,7 +21,7 @@ from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
-from aiarena.api.arenaclient.exceptions import NoCurrentCompetitions
+from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, Competition, Map, \
@@ -164,7 +164,7 @@ class UserProfileUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 class BotUploadForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = ['name', 'bot_zip', 'bot_data_enabled', 'plays_race', 'type', 'active',]
+        fields = ['name', 'bot_zip', 'bot_data_enabled', 'plays_race', 'type', ]
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
@@ -490,7 +490,7 @@ class Index(ListView):
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
             else:
                 return CompetitionParticipation.objects.none()
-        except NoCurrentCompetitions:
+        except NoCurrentlyAvailableCompetitions:
             return CompetitionParticipation.objects.none()
 
     def get_context_data(self, **kwargs):

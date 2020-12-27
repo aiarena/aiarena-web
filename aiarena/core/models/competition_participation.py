@@ -19,7 +19,7 @@ def elo_graph_upload_to(instance, filename):
 
 class CompetitionParticipation(models.Model, LockableModelMixin):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
-    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='competition_participations')
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     match_count = models.IntegerField(default=0)
     win_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
@@ -37,9 +37,6 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
 
     def __str__(self):
         return self.competition.name + ' ' + str(self.bot)
-
-    def __str__(self):
-        return str(self.competition) + ' ' + str(self.bot)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(f'{self.bot.name} {self.competition.name}')

@@ -197,7 +197,6 @@ class BotAdmin(admin.ModelAdmin):
         'user',
         'name',
         'created',
-        'active',
         'bot_zip',
         'bot_zip_updated',
         'bot_zip_md5hash',
@@ -214,7 +213,6 @@ class BotAdmin(admin.ModelAdmin):
     list_filter = (
         'user',
         'created',
-        'active',
         'bot_zip_updated',
         'bot_zip_publicly_downloadable',
         'bot_data_enabled',

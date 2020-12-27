@@ -1,23 +1,10 @@
-from datetime import datetime
-import os
-from datetime import timedelta
-from io import StringIO
-
-from constance import config
-from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.core.management import call_command, CommandError
-from django.test import TestCase, TransactionTestCase, Client
-from django.utils import timezone
+from django.test import Client
 
-from aiarena.core.api import Matches
-from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
+from aiarena.core.models import User, Bot, Match, Result, MatchParticipation, ArenaClient, \
     Competition
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_type import GameMode
-from aiarena.core.utils import calculate_md5
 
 
 class TestingClient:
@@ -85,13 +72,20 @@ class TestingClient:
         return Competition.objects.get(name=name)
 
     def open_competition(self, competition_id: int):
+        competition = Competition.objects.get(id=competition_id)
         response = self.django_client.post(f'/admin/core/competition/{competition_id}/change/', {
             '_open-competition': 'Open competition',
-            'competition': competition_id, })
+            'competition': competition_id,
+            'name': competition.name,  # required by the form
+            'type': competition.type,  # required by the form
+            'game_mode': competition.game_mode_id,  # required by the form
+        })
 
-        assert response.status_code == 302  # redirect on success
+        assert response.status_code == 302
 
-    def request_match(self):
+    def request_match(self) -> Match:
         response = self.django_client.post(f'/api/arenaclient/matches/', self.get_api_headers())
 
-        assert response.status_code == 302  # redirect on success
+        assert response.status_code == 201
+        return Match.objects.get(id=response.data['id'])
+

@@ -8,16 +8,13 @@ from django.test import Client
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Competition, Match, ArenaClient, News
+from aiarena.core.models import User, Map, Bot, Result, MatchParticipation, Competition, Match, ArenaClient, News, \
+    CompetitionParticipation
 from aiarena.core.models.competition import Competition
 from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 from aiarena.core.api import Matches
-
-
-def create_match(as_user):
-    return Matches.start_next_match(as_user)
 
 
 def create_result_with_bot_data_and_logs(match, type, as_user):
@@ -113,7 +110,7 @@ def run_seed(matches, token):
     client.open_competition(competition1.id)
 
     competition2 = client.create_competition('Competition 2', 'L', gamemode.id)
-    client.open_competition(competition1.id)
+    client.open_competition(competition2.id)
 
     with open(BaseTestMixin.test_map_path, 'rb') as map:
         m1 = Map.objects.create(name='test_map1', file=File(map))
@@ -140,47 +137,58 @@ def run_seed(matches, token):
                                         patreon_level='diamond')
 
     with open(BaseTestMixin.test_bot_zip_path, 'rb') as bot_zip:
-        Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race='T', type='python',
+        bot = Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race='T', type='python',
                            bot_zip=File(bot_zip))
-        Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race='Z', type='python',
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
+        bot = Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
         Bot.objects.create(user=devadmin, name='devadmin_bot3', plays_race='P', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        Bot.objects.create(user=devuser1, name='devuser1_bot1', plays_race='P', type='python',
+        bot = Bot.objects.create(user=devuser1, name='devuser1_bot1', plays_race='P', type='python',
                            bot_zip=File(bot_zip))
-        Bot.objects.create(user=devuser1, name='devuser1_bot2', plays_race='Z', type='python',
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
+        bot = Bot.objects.create(user=devuser1, name='devuser1_bot2', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
         Bot.objects.create(user=devuser1, name='devuser1_bot3', plays_race='T', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        Bot.objects.create(user=devuser2, name='devuser2_bot1', plays_race='P', type='python',
+        bot = Bot.objects.create(user=devuser2, name='devuser2_bot1', plays_race='P', type='python',
                            bot_zip=File(bot_zip))
-        Bot.objects.create(user=devuser2, name='devuser2_bot2', plays_race='T', type='python',
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
+        bot = Bot.objects.create(user=devuser2, name='devuser2_bot2', plays_race='T', type='python',
                            bot_zip=File(bot_zip))
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
         Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        Bot.objects.create(user=devuser3, name='devuser3_bot1', plays_race='T', type='python',
+        bot = Bot.objects.create(user=devuser3, name='devuser3_bot1', plays_race='T', type='python',
                            bot_zip=File(bot_zip))
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
-        Bot.objects.create(user=devuser4, name='devuser4_bot1', plays_race='Z', type='python',
+        bot = Bot.objects.create(user=devuser4, name='devuser4_bot1', plays_race='Z', type='python',
                            bot_zip=File(bot_zip))
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
-        Bot.objects.create(user=devuser5, name='devuser5_bot1', plays_race='P', type='python',
+        bot = Bot.objects.create(user=devuser5, name='devuser5_bot1', plays_race='P', type='python',
                            bot_zip=File(bot_zip))
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
         # if token is None it will generate a new one, otherwise it will use the one specified
         api_token = Token.objects.create(user=arenaclient1, key=token)
         client.set_api_token(api_token)
 
-        # TODO: DO THESE VIA THE API
+        # TODO: TEST MULTIPLE ACs
         for x in range(matches - 1):
-            client.request_match()
-            if (bool(random.getrandbits(1))):  # select randomly
-                create_result(create_match(arenaclient1), random.choice(Result.TYPES)[0], arenaclient1)
-            else:
-                create_result_with_bot_data_and_logs(create_match(arenaclient1), 'Player1Crash', arenaclient1)
+            match = client.request_match()
 
             if x == 0:  # make it so a bot that once was active, is now inactive
                 bot1 = Match.objects.get(result__isnull=False).participant1.bot
@@ -189,7 +197,7 @@ def run_seed(matches, token):
 
         # so we have a match in progress
         if matches != 0:
-            create_match(arenaclient1)
+            client.request_match()
 
         return api_token
 

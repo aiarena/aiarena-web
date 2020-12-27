@@ -49,7 +49,7 @@ class CompetitionClosing(APIException):
     default_code = 'competition_closing'
 
 
-class NoCurrentCompetitions(APIException):
+class NoCurrentlyAvailableCompetitions(APIException):
     status_code = 200
-    default_detail = 'There are no current competitions.'
+    default_detail = 'There are no currently available competitions.'
     default_code = 'no_current_competitions'

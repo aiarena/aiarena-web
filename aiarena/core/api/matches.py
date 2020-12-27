@@ -10,7 +10,9 @@ from rest_framework.exceptions import APIException
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds, NoMaps, CompetitionPaused, \
     CompetitionClosing
 from aiarena.core.api import Bots
-from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Competition
+from aiarena.core.api.competitions import Competitions
+from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Competition, \
+    CompetitionParticipation
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +65,7 @@ class Matches:
 
             if match.round:  # if this is a ladder match, record the starting elo
                 for p in participations:
-                    p.starting_elo = p.bot.competitionparticipation_set.only('elo', 'bot_id') \
+                    p.starting_elo = p.bot.competition_participations.only('elo', 'bot_id') \
                         .get(competition=match.round.competition).elo
                     p.save()
 
@@ -153,25 +155,25 @@ class Matches:
         return None
 
     @staticmethod
-    def _attempt_to_generate_new_round(for_competition: Competition):
-        active_maps = Map.objects.filter(active=True).select_for_update()
+    def _attempt_to_generate_new_round(competition: Competition):
+        active_maps = Map.objects.filter(competitions__in=[competition, ]).select_for_update()
         if active_maps.count() == 0:
             raise NoMaps()
 
-        if for_competition.is_paused:
+        if competition.is_paused:
             raise CompetitionPaused()
-        if for_competition.is_closing:  # we should technically never hit this
+        if competition.is_closing:  # we should technically never hit this
             raise CompetitionClosing()
 
-        new_round = Round.objects.create(competition=for_competition)
+        new_round = Round.objects.create(competition=competition)
 
-        active_bots = Bot.objects.only("id").filter(active=True)
+        active_bots = Competitions.get_active_bots(competition=competition)
         already_processed_bots = []
 
         # loop through and generate matches for all active bots
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
-            for bot2 in Bot.objects.only("id").filter(active=True).exclude(id__in=already_processed_bots):
+            for bot2 in Competitions.get_active_bots(competition=competition).exclude(id__in=already_processed_bots):
                 Match.create(new_round, random.choice(active_maps), bot1, bot2)
 
         return new_round
@@ -202,7 +204,8 @@ class Matches:
 
             # If none of the previous matches were able to start, and we don't have 2 active bots available,
             # then we give up.
-            active_bots = Bot.objects.only("id").filter(active=True).select_for_update()
+            # todo: does this need to be a select_for_update?
+            active_bots = Competitions.get_active_bots(competition).select_for_update()
             if not Bots.available_is_more_than(active_bots, 2):
                 raise NotEnoughAvailableBots()
 

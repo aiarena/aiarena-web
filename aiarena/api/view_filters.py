@@ -17,7 +17,6 @@ class BotFilter(filters.FilterSet):
             'id',
             'name',
             'created',
-            'active',
             'plays_race',
             'type',
             'game_display_id',
