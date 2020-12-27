@@ -571,12 +571,21 @@ class BotWidget(Select2Widget):
 
 class BotChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, bot_object):
-        str_fmt = "{0:>20} {1:>20} {2:>20} \n{3:>20}"
+        str_fmt = "{0:>20} {1:>20} [{2:>20}] {3:>20}"
         if bot_object.active:
             active = '✔'
         else:
             active = '✘'
-        return str_fmt.format(active, bot_object.name, bot_object.plays_race, bot_object.user.username)
+        race = bot_object.plays_race
+        if race == 'T':
+            race = 'Terran'
+        elif race == 'P':
+            race = 'Protoss'
+        elif race == 'Z':
+            race = 'Zerg'
+        elif race == 'R':
+            race = 'Random'
+        return str_fmt.format(active, race, bot_object.name,  bot_object.user.username)
 
 
 class RequestMatchForm(forms.Form):
