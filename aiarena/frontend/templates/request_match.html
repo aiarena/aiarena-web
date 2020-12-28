@@ -89,20 +89,24 @@
                 document.getElementById('bot2').style.width = '100%';
                 document.getElementById('id_bot2').required = true
                 document.getElementById('matchup_race').style.display = 'none';
+                clearInterval(removeX);
             } else {
                 document.getElementById('matchup_race').style.display = 'block';
-
                 document.querySelector("#matchup_race > span").style.width = 100 + '%';
-
                 document.getElementById('bot2').style.display = 'none';
-                document.getElementById('id_bot2').required = false
+                document.getElementById('id_bot2').required = false;
+                setInterval(removeX, 10);
             }
 
         }
-        function removeX(){
-            document.querySelector("#select2-id_matchup_race-container > span").remove();
+        function removeX() {
+                if (document.getElementById('bot2').style.display === 'none'){
+                    document.querySelector("#select2-id_matchup_race-container > span").remove();
+                }
+
+
         }
-        setInterval(removeX, 10)
+
     </script>
 
 
