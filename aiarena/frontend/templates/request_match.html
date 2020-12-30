@@ -4,9 +4,6 @@
     <div class="divider"><span></span><span><h2>Request Match </h2></span><span></span></div>
 
     <div class="request-match-form flex-container">
-        <p>Match request limit: {{ user.requested_matches_limit }}
-            per {{ config.REQUESTED_MATCHES_LIMIT_PERIOD|smooth_timedelta }}</p>
-        Match requests left: {{ user.match_request_count_left }}
         {% if config.ALLOW_REQUESTED_MATCHES %}
             {{ form.media.css }}
 
@@ -17,6 +14,7 @@
             <p>Match request limit: {{ user.requested_matches_limit }}
                 per {{ config.REQUESTED_MATCHES_LIMIT_PERIOD|smooth_timedelta }}</p>
             Match requests left: {{ user.match_request_count_left }}
+
             <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
                   enctype="multipart/form-data">
                 <style>
