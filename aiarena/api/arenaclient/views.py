@@ -90,7 +90,6 @@ class MatchViewSet(viewsets.GenericViewSet):
         match.bot2 = MatchParticipation.objects.select_related('bot').only('bot') \
             .get(match_id=match.id, participant_number=2).bot
 
-    @transaction.atomic()
     def create(self, request, *args, **kwargs):
         match = ACCoordinator.next_match(request.user)
         self.load_participants(match)
