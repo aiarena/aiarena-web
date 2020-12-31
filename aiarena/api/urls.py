@@ -17,8 +17,10 @@ router.register(r'competitions', publicapi_views.CompetitionViewSet, basename='a
 router.register(r'users', publicapi_views.UserViewSet, basename='api_user')
 
 # arena client
-router.register(r'arenaclient/matches', arenaclient_views.MatchViewSet, basename='match')  # todo: prefix basename with ac
-router.register(r'arenaclient/results', arenaclient_views.ResultViewSet, basename='result')  # todo: prefix basename with ac
+router.register(r'arenaclient/matches', arenaclient_views.MatchViewSet, basename='match')  # legacy todo: remove once ACs updated
+router.register(r'arenaclient/results', arenaclient_views.ResultViewSet, basename='result')  # legacy todo: remove once ACs updated
+router.register(r'arenaclient/next-match', arenaclient_views.MatchViewSet, basename='ac_next_match')
+router.register(r'arenaclient/submit-result', arenaclient_views.ResultViewSet, basename='ac_submit_result')
 router.register(r'arenaclient/set-status', arenaclient_views.SetArenaClientStatusViewSet, basename='api_ac_set_status')
 
 # stream
