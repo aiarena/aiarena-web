@@ -189,15 +189,16 @@ def run_seed(matches, token):
         # TODO: TEST MULTIPLE ACs
         for x in range(matches - 1):
             match = client.request_match()
+            client.submit_result(match.id, 'Player1Win')
 
-            if x == 0:  # make it so a bot that once was active, is now inactive
-                bot1 = Match.objects.get(result__isnull=False).participant1.bot
-                bot1.active = False
-                bot1.save()
+            # if x == 0:  # make it so a bot that once was active, is now inactive
+            #     bot1 = Match.objects.get(result__isnull=False).participant1.bot
+            #     bot1.active = False
+            #     bot1.save()
 
         # so we have a match in progress
-        if matches != 0:
-            client.request_match()
+        # if matches != 0:
+        #     client.request_match()
 
         return api_token
 

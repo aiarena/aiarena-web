@@ -1,10 +1,11 @@
-from django.core.files import File
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 
-from aiarena.core.models import User, Bot, Match, Result, MatchParticipation, ArenaClient, \
+from aiarena.core.models import User, Match, Result, ArenaClient, \
     Competition
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_type import GameMode
+from aiarena.core.tests.tests import BaseTestMixin
 
 
 class TestingClient:
@@ -88,4 +89,34 @@ class TestingClient:
 
         assert response.status_code == 201
         return Match.objects.get(id=response.data['id'])
+
+    def submit_result(self, match_id: int, type: str) -> Result:
+        with open(BaseTestMixin.test_replay_path, 'rb') as replay_file, \
+            open(BaseTestMixin.test_arenaclient_log_path, 'rb') as arenaclient_log, \
+            open(BaseTestMixin.test_bot_datas['bot1'][0]['path'], 'rb') as bot1_data, \
+            open(BaseTestMixin.test_bot_datas['bot2'][0]['path'], 'rb') as bot2_data, \
+            open(BaseTestMixin.test_bot1_match_log_path, 'rb') as bot1_log, \
+            open(BaseTestMixin.test_bot2_match_log_path, 'rb') as bot2_log:
+            response = self.django_client.post(f'/api/arenaclient/results/',
+                                               {'match': match_id,
+                                                'type': type,
+                                                'replay_file': SimpleUploadedFile("replay_file.SC2Replay",
+                                                                                  replay_file.read()),
+                                                'game_steps': '1234',
+                                                'arenaclient_log': SimpleUploadedFile("arenaclient_log.log",
+                                                                                      arenaclient_log.read()),
+                                                'bot1_data': SimpleUploadedFile("bot1_data.log",
+                                                                                bot1_data.read()),
+                                                'bot2_data': SimpleUploadedFile("bot2_data.log",
+                                                                                bot2_data.read()),
+                                                'bot1_log': SimpleUploadedFile("bot1_log.log",
+                                                                                bot1_log.read()),
+                                                'bot2_log': SimpleUploadedFile("bot2_log.log",
+                                                                                bot2_log.read()),
+                                                'bot1_avg_step_time': '0.111',
+                                                'bot2_avg_step_time': '0.222',},
+                                               **self.get_api_headers())
+
+            assert response.status_code == 201
+            return Result.objects.get(id=response.data['result_id'])
 
