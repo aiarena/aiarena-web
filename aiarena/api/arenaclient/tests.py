@@ -44,7 +44,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 200)
 
         # not enough active bots
-        self._create_map('test_map')
+        self._create_map_for_competition('test_map')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
 
@@ -113,11 +113,11 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
     def test_match_reissue(self):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map('test_map')
+        self._create_map_for_competition('test_map')
         self._create_open_competition()
 
-        self._create_active_bot(self.regularUser1, 'testbot1', 'T')
-        self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
+        self._create_active_bot_for_competition(self.regularUser1, 'testbot1', 'T')
+        self._create_active_bot_for_competition(self.regularUser1, 'testbot2', 'Z')
 
         response_m1 = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response_m1.status_code, 201)
@@ -134,13 +134,13 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         config.MAX_ACTIVE_ROUNDS = 2
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map('test_map')
+        self._create_map_for_competition('test_map')
         self._create_open_competition()
 
-        bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
-        bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
-        bot3 = self._create_active_bot(self.regularUser1, 'testbot3', 'P')
-        bot4 = self._create_active_bot(self.regularUser1, 'testbot4', 'R')
+        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'testbot1', 'T')
+        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'testbot2', 'Z')
+        bot3 = self._create_active_bot_for_competition(self.regularUser1, 'testbot3', 'P')
+        bot4 = self._create_active_bot_for_competition(self.regularUser1, 'testbot4', 'R')
 
         # Round 1
         response = self.client.post('/api/arenaclient/matches/')
@@ -173,11 +173,11 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map('test_map')
+        self._create_map_for_competition('test_map')
         self._create_open_competition()
 
-        bot1 = self._create_active_bot(self.regularUser1, 'testbot1', 'T')
-        bot2 = self._create_active_bot(self.regularUser1, 'testbot2', 'Z')
+        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'testbot1', 'T')
+        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'testbot2', 'Z')
 
         # this should tie up both bots
         response = self.client.post('/api/arenaclient/matches/')
@@ -206,11 +206,11 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     def test_create_results(self):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map('test_map')
+        self._create_map_for_competition('test_map')
         self._create_open_competition()
 
-        bot1 = self._create_active_bot(self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
+        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'bot2', 'Z')
 
         # post a standard result
         response = self._post_to_matches()
@@ -307,13 +307,13 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     def test_create_result_bot_not_in_match(self):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map('test_map')
+        self._create_map_for_competition('test_map')
         self._create_open_competition()
 
         # Create 3 bots, so after a round is generated, we'll have some unstarted matches
-        bot1 = self._create_active_bot(self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
-        bot3 = self._create_active_bot(self.regularUser1, 'bot3', 'P')
+        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'bot2', 'Z')
+        bot3 = self._create_active_bot_for_competition(self.regularUser1, 'bot3', 'P')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         match = response.data
@@ -341,11 +341,11 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map('test_map')
+        self._create_map_for_competition('test_map')
         self._create_open_competition()
 
-        bot1 = self._create_active_bot(self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot(self.regularUser1, 'bot2', 'Z')
+        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'bot2', 'Z')
 
         # log more crashes than should be allowed
         for count in range(config.BOT_CONSECUTIVE_CRASH_LIMIT):
@@ -408,7 +408,7 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
 
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
-        self._create_map('testmap')
+        self._create_map_for_competition('testmap')
         self._create_open_competition()
 
         # activate the required bots

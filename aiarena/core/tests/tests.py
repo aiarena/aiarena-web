@@ -12,7 +12,8 @@ from django.utils import timezone
 
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
+    CompetitionParticipation
 from aiarena.core.utils import calculate_md5
 
 
@@ -54,11 +55,17 @@ class BaseTestMixin(object):
     test_replay_path = 'aiarena/core/tests/test-media/testReplay.SC2Replay'
     test_map_path = 'aiarena/core/tests/test-media/AutomatonLE.SC2Map'
 
-    def _create_map(self, name):
-        return Map.objects.create(name=name, active=True)
+    def setUp(self):
+        from aiarena.core.tests.testing_utils import TestingClient  # avoid circular import
+        self.test_client = TestingClient()
 
-    def _create_open_competition(self):
-        competition = Competition.objects.create()
+    def _create_map_for_competition(self, name, competition_id):
+        map = Map.objects.create(name=name)
+        map.competitions.add = Competition.objects.get(id=competition_id)
+        return map
+
+    def _create_open_competition(self, gamemode_id: int):
+        competition = Competition.objects.create(game_mode_id=gamemode_id)
         competition.open()
         return competition
 
@@ -70,11 +77,12 @@ class BaseTestMixin(object):
             bot.save()
             return bot
 
-    def _create_active_bot(self, user, name, plays_race='T'):
+    def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python', active=True)
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python')
             bot.full_clean()
             bot.save()
+            CompetitionParticipation.objects.create(bot_id=bot.id, competition_id=competition_id)
             return bot
 
     def _post_to_matches(self):
@@ -178,7 +186,11 @@ class BaseTestMixin(object):
     def _generate_full_data_set(self):
         self.client.login(username='staff_user', password='x')
 
-        self._create_map('testmap2')
+        game = self.client.create_game('StarCraft II')
+        gamemode = self.client.create_gamemode('Melee', game.id)
+
+        competition = self._create_open_competition(gamemode.id)
+        self._create_map_for_competition('testmap2')
         self._generate_extra_users()
         self._generate_extra_bots()
 
@@ -250,9 +262,9 @@ class BaseTestMixin(object):
 
     def _generate_extra_bots(self):
         self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
-        self.regularUser2Bot2 = self._create_active_bot(self.regularUser2, 'regularUser2Bot2')
-        self.regularUser3Bot1 = self._create_active_bot(self.regularUser3, 'regularUser3Bot1')
-        self.regularUser3Bot2 = self._create_active_bot(self.regularUser3, 'regularUser3Bot2', 'Z')
+        self.regularUser2Bot2 = self._create_active_bot_for_competition(self.regularUser2, 'regularUser2Bot2')
+        self.regularUser3Bot1 = self._create_active_bot_for_competition(self.regularUser3, 'regularUser3Bot1')
+        self.regularUser3Bot2 = self._create_active_bot_for_competition(self.regularUser3, 'regularUser3Bot2', 'Z')
         self.regularUser4Bot1 = self._create_bot(self.regularUser4, 'regularUser4Bot1')
         self.regularUser4Bot2 = self._create_bot(self.regularUser4, 'regularUser4Bot2')
 
@@ -271,6 +283,7 @@ class LoggedInMixin(BaseTestMixin):
     """
 
     def setUp(self):
+        super().setUp()
         self.staffUser1 = User.objects.create_user(username='staff_user', password='x',
                                                    email='staff_user@dev.aiarena.net',
                                                    is_staff=True)
@@ -293,14 +306,17 @@ class MatchReadyMixin(LoggedInMixin):
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
         config.MAX_USER_BOT_COUNT = 10
 
-        self._create_open_competition()
-        self._create_map('testmap1')
+        game = self.test_client.create_game('StarCraft II')
+        gamemode = self.test_client.create_gamemode('Melee', game.id)
 
-        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
-        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
+        competition = self._create_open_competition(gamemode.id)
+        self._create_map_for_competition('testmap1', competition.id)
+
+        self.regularUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot1', 'T')
+        self.regularUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot2', 'Z')
         self.regularUser1Bot2 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
-        self.staffUser1Bot1 = self._create_active_bot(self.staffUser1, 'staffUser1Bot1', 'T')
-        self.staffUser1Bot2 = self._create_active_bot(self.staffUser1, 'staffUser1Bot2', 'Z')
+        self.staffUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot1', 'T')
+        self.staffUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot2', 'Z')
 
 
 # Use this to pre-build a fuller dataset for testing
