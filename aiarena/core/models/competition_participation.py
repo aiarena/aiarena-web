@@ -39,7 +39,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     def validate_unique(self, exclude=None):
         bot_limit = self.user.get_active_bots_per_race_limit()
         if CompetitionParticipation.objects.exclude(pk=self.pk)\
-                .filter(bot__user=self.bot.user, bot__plays_race=self.bot.plays_race).count() >= bot_limit:
+                .filter(bot__user=self.bot.user, bot__plays_race=self.bot.plays_race, active=True).count() >= bot_limit:
             raise ValidationError(
                     'Too many active bots playing that race already exist for this user.'
                     ' You are allowed ' + str(bot_limit) + ' active bot(s) per race.')
