@@ -1,5 +1,6 @@
 import logging
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
@@ -34,6 +35,15 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     highest_elo = models.IntegerField(blank=True, null=True)
     slug = models.SlugField(max_length=255)
     active = models.BooleanField(default=True)
+
+    def validate_unique(self, exclude=None):
+        bot_limit = self.user.get_active_bots_per_race_limit()
+        if CompetitionParticipation.objects.exclude(pk=self.pk)\
+                .filter(bot__user=self.bot.user, bot__plays_race=self.bot.plays_race).count() >= bot_limit:
+            raise ValidationError(
+                    'Too many active bots playing that race already exist for this user.'
+                    ' You are allowed ' + str(bot_limit) + ' active bot(s) per race.')
+        super().validate_unique(exclude=exclude)
 
     def __str__(self):
         return self.competition.name + ' ' + str(self.bot)

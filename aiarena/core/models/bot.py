@@ -126,20 +126,6 @@ class Bot(models.Model, LockableModelMixin):
 
         self.wiki_article = article
 
-    # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
-    def validate_active_bot_race_per_user(self):
-        bot_limit = self.user.get_active_bots_per_race_limit()
-
-        # None means no limit
-        if bot_limit is not None:
-            # if the active bots playing the same race exceeds the allowed count, then back out
-            if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
-                    id=self.id).count() >= bot_limit \
-                    and self.active:
-                raise ValidationError(
-                    'Too many active bots playing that race already exist for this user.'
-                    ' You are allowed ' + str(bot_limit) + ' active bot(s) per race.')
-
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
             raise ValidationError(
@@ -148,7 +134,6 @@ class Bot(models.Model, LockableModelMixin):
 
     def clean(self):
         self.validate_max_bot_count()
-        self.validate_active_bot_race_per_user()
 
     def __str__(self):
         return self.name
