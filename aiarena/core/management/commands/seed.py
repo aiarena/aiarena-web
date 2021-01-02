@@ -31,16 +31,16 @@ def run_seed(matches, token):
     client.open_competition(competition2.id)
 
     with open(BaseTestMixin.test_map_path, 'rb') as map:
-        m1 = Map.objects.create(name='test_map1', file=File(map))
+        m1 = Map.objects.create(name='test_map1', file=File(map), game_mode=gamemode)
         m1.competitions.add(competition1)
         m1.save()
 
-        m2 = Map.objects.create(name='test_map2', file=File(map))
+        m2 = Map.objects.create(name='test_map2', file=File(map), game_mode=gamemode)
         m2.competitions.add(competition2)
         m2.save()
 
         # unused map
-        Map.objects.create(name='test_map3', file=File(map))
+        Map.objects.create(name='test_map3', file=File(map), game_mode=gamemode)
 
     # assume the frontend is working by this point and create these the easiest way
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
