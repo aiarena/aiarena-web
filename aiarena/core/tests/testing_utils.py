@@ -12,11 +12,11 @@ from aiarena.core.tests.tests import BaseTestMixin
 class TestingClient:
     TEST_PASSWORD = 'x'
 
-    def __init__(self):
-        self.django_client = Client()
+    def __init__(self, django_client=Client()):
+        self.django_client = django_client
         self.api_token: str = None
 
-    def login_as(self, user: User):
+    def login(self, user: User):
         self.django_client.force_login(user)
 
     def set_api_token(self, api_token: str):

@@ -39,7 +39,7 @@ class Bots:
 
     @staticmethod
     def get_active() -> QuerySet:
-        return Bot.objects.filter(active=True)
+        return Bot.objects.filter(competition_participations__active=True)
 
     @staticmethod
     def get_available(bots) -> list:

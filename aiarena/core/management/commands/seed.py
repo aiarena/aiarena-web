@@ -15,7 +15,7 @@ def run_seed(matches, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     client = TestingClient()
-    client.login_as(devadmin)
+    client.login(devadmin)
 
     arenaclient1 = client.create_arenaclient('aiarenaclient-001', 'aiarenaclient-001@dev.aiarena.net', devadmin.id)
     client.create_arenaclient('aiarenaclient-002', 'aiarenaclient-002@dev.aiarena.net', devadmin.id)

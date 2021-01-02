@@ -156,14 +156,11 @@ class Bot(models.Model, LockableModelMixin):
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         return Bot.objects.filter(active=True).order_by('?').first()
 
-    @staticmethod
-    def active_count():
-        return Bot.objects.filter(active=True).count()
-
-    def get_random_active_excluding_self(self, **kwargs):
-        if Bot.active_count() <= 1:
+    def get_random_active_excluding_self(self):
+        from ..api import Bots  # avoid circular reference
+        if Bots.get_active().count() <= 1:
             raise RuntimeError("I am the only bot.")
-        return Bot.objects.filter(active=True, **kwargs).exclude(id=self.id).order_by('?').first()
+        return Bots.get_active().exclude(id=self.id).order_by('?').first()
 
     @cached_property
     def get_absolute_url(self):

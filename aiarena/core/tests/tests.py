@@ -57,11 +57,12 @@ class BaseTestMixin(object):
 
     def setUp(self):
         from aiarena.core.tests.testing_utils import TestingClient  # avoid circular import
-        self.test_client = TestingClient()
+        self.test_client = TestingClient(self.client)
 
     def _create_map_for_competition(self, name, competition_id):
-        map = Map.objects.create(name=name)
-        map.competitions.add = Competition.objects.get(id=competition_id)
+        competition = Competition.objects.get(id=competition_id)
+        map = Map.objects.create(name=name, game_mode=competition.game_mode)
+        map.competitions.add(competition)
         return map
 
     def _create_open_competition(self, gamemode_id: int):
@@ -184,21 +185,17 @@ class BaseTestMixin(object):
                                      })
 
     def _generate_full_data_set(self):
-        self.client.login(username='staff_user', password='x')
+        self.test_client.login(User.objects.get(username='staff_user'))
 
-        game = self.client.create_game('StarCraft II')
-        gamemode = self.client.create_gamemode('Melee', game.id)
-
-        competition = self._create_open_competition(gamemode.id)
-        self._create_map_for_competition('testmap2')
         self._generate_extra_users()
         self._generate_extra_bots()
 
         self._generate_match_activity()
 
         # generate a bot match request to ensure it doesn't bug things out
-        bot = Bot.get_random_available()
-        Matches.request_match(self.regularUser2, bot, bot.get_random_active_excluding_self())
+        from aiarena.core.api import Bots  # avoid circular reference
+        bots = Bots.get_available(Bot.objects.all())
+        Matches.request_match(self.regularUser2, bots[0], bots[0].get_random_active_excluding_self())
 
         # generate match requests from regularUser1
         bot = Bot.get_random_active()
@@ -261,10 +258,11 @@ class BaseTestMixin(object):
         self.assertEqual(response.status_code, 201)
 
     def _generate_extra_bots(self):
+        competition = Competition.objects.get()
         self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
-        self.regularUser2Bot2 = self._create_active_bot_for_competition(self.regularUser2, 'regularUser2Bot2')
-        self.regularUser3Bot1 = self._create_active_bot_for_competition(self.regularUser3, 'regularUser3Bot1')
-        self.regularUser3Bot2 = self._create_active_bot_for_competition(self.regularUser3, 'regularUser3Bot2', 'Z')
+        self.regularUser2Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser2, 'regularUser2Bot2')
+        self.regularUser3Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser3, 'regularUser3Bot1')
+        self.regularUser3Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser3, 'regularUser3Bot2', 'Z')
         self.regularUser4Bot1 = self._create_bot(self.regularUser4, 'regularUser4Bot1')
         self.regularUser4Bot2 = self._create_bot(self.regularUser4, 'regularUser4Bot2')
 
@@ -519,8 +517,8 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
     """
 
     def test_cancel_matches(self):
-        botCount = Bot.objects.filter(active=True).count()
-        expectedMatchCountPerRound = int(botCount / 2 * (botCount - 1))
+        count = CompetitionParticipation.objects.filter(active=True).count()
+        expectedMatchCountPerRound = int(count / 2 * (count - 1))
 
         # test match doesn't exist
         with self.assertRaisesMessage(CommandError, 'Match "12345" does not exist'):
