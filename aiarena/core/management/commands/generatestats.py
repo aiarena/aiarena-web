@@ -15,30 +15,28 @@ class Command(BaseCommand):
                                                        "their stats generated.")
         parser.add_argument('--competitionid', type=int, help="The competition id to generate stats for. "
                                                        "If this isn't supplied all "
-                                                       "active competitions will be used")
+                                                       "open competitions will be used")
         parser.add_argument('--allcompetitions', type=bool, help="Run this for all competition")
 
     def handle(self, *args, **options):
         bot_id = options['botid']
-        competition = [options['competitionid'] if options['competitionid'] is not None else
-                       Competition.objects.filter(status__in=['open', 'closing'])]
         if options['allcompetitions']:
-            competition = Competition.objects.all()
+            competitions = Competition.objects.all()
+        elif options['competitionid']:
+            competitions = Competition.objects.filter(id=options['competitionid'])
+        else:
+            competitions = Competition.objects.filter(status__in=['open', 'closing'])
 
-        self.stdout.write(f'looping   {len(competition)} Competitions')
-        for s in competition:
-            if isinstance(s, Competition):
-                competition_id = s.id
-            else:
-                competition_id = s
+        self.stdout.write(f'looping   {len(competitions)} Competitions')
+        for competition in competitions:
             if bot_id is not None:
-                sp = CompetitionParticipation.objects.get(competition_id=competition_id, bot_id=bot_id)
+                sp = CompetitionParticipation.objects.get(competition_id=competition.id, bot_id=bot_id)
                 with transaction.atomic():
                     sp.lock_me()
                     self.stdout.write(f'Generating current competition stats for bot {bot_id}...')
                     StatsGenerator.update_stats(sp)
             else:
-                for sp in CompetitionParticipation.objects.filter(competition_id=competition_id):
+                for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
                     with transaction.atomic():
                         sp.lock_me()
                         self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
