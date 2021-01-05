@@ -7,6 +7,7 @@ from django.test import TransactionTestCase
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, Competition, Map, \
     ArenaClient
+from aiarena.core.models.game_type import GameMode
 from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
@@ -37,7 +38,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 200)
 
         # needs a valid competition to be able to activate a bot.
-        self._create_open_competition()
+        self._create_game_mode_and_open_competition()
 
         # no maps
         response = self._post_to_matches()
@@ -113,11 +114,11 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
     def test_match_reissue(self):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map_for_competition('test_map')
-        self._create_open_competition()
+        comp = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('test_map', comp.id)
 
-        self._create_active_bot_for_competition(self.regularUser1, 'testbot1', 'T')
-        self._create_active_bot_for_competition(self.regularUser1, 'testbot2', 'Z')
+        self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot1', 'T')
+        self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', 'Z')
 
         response_m1 = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response_m1.status_code, 201)
@@ -134,13 +135,13 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         config.MAX_ACTIVE_ROUNDS = 2
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map_for_competition('test_map')
-        self._create_open_competition()
+        comp = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('test_map', comp.id)
 
-        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'testbot1', 'T')
-        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'testbot2', 'Z')
-        bot3 = self._create_active_bot_for_competition(self.regularUser1, 'testbot3', 'P')
-        bot4 = self._create_active_bot_for_competition(self.regularUser1, 'testbot4', 'R')
+        bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot1', 'T')
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', 'Z')
+        bot3 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot3', 'P')
+        bot4 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot4', 'R')
 
         # Round 1
         response = self.client.post('/api/arenaclient/matches/')
@@ -173,11 +174,11 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
-        self._create_map_for_competition('test_map')
-        self._create_open_competition()
+        comp = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('test_map', comp.id)
 
-        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'testbot1', 'T')
-        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'testbot2', 'Z')
+        bot1 = self._create_active_bot_for_competition(comp.id,  self.regularUser1, 'testbot1', 'T')
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', 'Z')
 
         # this should tie up both bots
         response = self.client.post('/api/arenaclient/matches/')
@@ -206,11 +207,11 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     def test_create_results(self):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map_for_competition('test_map')
-        self._create_open_competition()
+        comp = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('test_map', comp.id)
 
-        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'bot2', 'Z')
+        bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', 'Z')
 
         # post a standard result
         response = self._post_to_matches()
@@ -276,7 +277,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._check_hashes(bot1, bot2, match['id'], 1)
 
         # test that requested matches don't update bot_data
-        match5 = Matches.request_match(self.staffUser1, bot1, bot2, Map.random_active())
+        match5 = Matches.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get(id=1))
         self._post_to_results_bot_datas_set_1(match5.id, 'Player1Win')
 
         # check hashes - nothing should have changed
@@ -307,13 +308,13 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     def test_create_result_bot_not_in_match(self):
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map_for_competition('test_map')
-        self._create_open_competition()
+        comp = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('test_map', comp.id)
 
         # Create 3 bots, so after a round is generated, we'll have some unstarted matches
-        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'bot2', 'Z')
-        bot3 = self._create_active_bot_for_competition(self.regularUser1, 'bot3', 'P')
+        bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', 'Z')
+        bot3 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot3', 'P')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         match = response.data
@@ -341,11 +342,11 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
-        self._create_map_for_competition('test_map')
-        self._create_open_competition()
+        comp = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('test_map', comp.id)
 
-        bot1 = self._create_active_bot_for_competition(self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot_for_competition(self.regularUser1, 'bot2', 'Z')
+        bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot1')
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', 'Z')
 
         # log more crashes than should be allowed
         for count in range(config.BOT_CONSECUTIVE_CRASH_LIMIT):
@@ -408,8 +409,8 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
 
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
-        self._create_map_for_competition('testmap')
-        self._create_open_competition()
+        comp = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('test_map', comp.id)
 
         # activate the required bots
         self.regularUserBot1.active = True
@@ -495,7 +496,8 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(sp2.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][1])
 
     def CheckEloSum(self):
-        sumElo = CompetitionParticipation.objects.filter(competition=Competition.get_current_competition()).aggregate(Sum('elo'))
+        comp = Competition.objects.get(id=1)
+        sumElo = CompetitionParticipation.objects.filter(competition=comp).aggregate(Sum('elo'))
         self.assertEqual(sumElo['elo__sum'],
                          ELO_START_VALUE * Bot.objects.all().count())  # starting ELO times number of bots
 

@@ -111,7 +111,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 302)
 
         # bot
-        active_bot = Bot.objects.filter(active=True)[0]
+        active_bot = Bot.objects.filter(competition_participations__active=True)[0]
         response = self.client.get('/bots/{0}/'.format(active_bot.id))
         self.assertEqual(response.status_code, 200)
 
@@ -143,7 +143,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
 
         # ranking
         response = self.client.get('/ranking/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
         # results
         response = self.client.get('/results/')

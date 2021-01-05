@@ -196,7 +196,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 
 class BotList(ListView):
-    queryset = Bot.objects.all().only('name', 'plays_race', 'active', 'type', 'user__username', 'user__type')\
+    queryset = Bot.objects.all().only('name', 'plays_race', 'type', 'user__username', 'user__type')\
         .select_related('user').order_by('name')
     template_name = 'bots.html'
     paginate_by = 50
@@ -232,7 +232,7 @@ class BotDetail(DetailView):
             results = paginator.page(paginator.num_pages)
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
-        context['rankings'] = self.object.competitionparticipation_set.all().order_by('-id')
+        context['rankings'] = self.object.competition_participations.all().order_by('-id')
         context['match_participations'] = MatchParticipation.objects.only("match")\
             .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
@@ -483,9 +483,10 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     def get_queryset(self):
         try:
-            if Round.objects.filter(competition=Competition.get_current_competition()).count() > 0:
+            comp = Competition.objects.get(id=1)
+            if Round.objects.filter(competition=comp).count() > 0:
                 return Ladders.get_competition_ranked_participants(
-                    Competition.get_current_competition(), amount=10).prefetch_related(
+                    comp, amount=10).prefetch_related(
                     Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
             else:

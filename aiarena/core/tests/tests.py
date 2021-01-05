@@ -71,6 +71,13 @@ class BaseTestMixin(object):
         competition.open()
         return competition
 
+    def _create_game_mode_and_open_competition(self):
+        game = self.test_client.create_game("StarCraft II")
+        gamde_mode = self.test_client.create_gamemode('Melee', game.id)
+        competition = self.test_client.create_competition('Competition 1', 'L', gamde_mode.id)
+        self.test_client.open_competition(competition.id)
+        return competition
+
     def _create_bot(self, user, name, plays_race='T'):
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
             bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race,
@@ -343,6 +350,8 @@ class BotTestCase(LoggedInMixin, TestCase):
         config.MAX_USER_BOT_COUNT = 4
 
         # required for active bot
+        self.test_client.create_game('StarCraft II')
+        self.test_client.create_game('StarCraft II')
         self._create_open_competition()
 
         # create bot along with bot data

@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 class Matches:
     @staticmethod
     def request_match(user, bot, opponent, map: Map=None, game_mode: GameMode=None):
-        assert map is not None or game_mode is not None
         # if map is none, a game mode must be supplied and a random map gets chosen
+        assert map is not None or game_mode is not None
         return Match.create(None, map if map is not None else Maps.random_of_game_mode(game_mode), bot,
                             opponent,
                             user, bot1_update_data=False, bot2_update_data=False)

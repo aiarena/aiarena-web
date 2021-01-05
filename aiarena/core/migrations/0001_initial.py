@@ -296,4 +296,25 @@ class Migration(migrations.Migration):
                 ('arenaclient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='statuses', to='core.ArenaClient')),
             ],
         ),
+        migrations.RunSQL("""
+    drop view if exists core_relativeresult;
+    create view core_relativeresult as
+                       select cr.id as id,
+                       me_mp.id as me_id,
+                       cm.id as match_id,
+                       cr.created as created,
+                       opponent_mp.id as opponent_id,
+                       me_mp.result as result,
+                       me_mp.result_cause as result_cause,
+                       me_mp.elo_change as elo_change,
+                       me_mp.avg_step_time as avg_step_time,
+                       DATE_FORMAT(SEC_TO_TIME(cr.game_steps/22.4), '%H:%i:%S') as game_time_formatted,
+                       cr.game_steps as game_steps,
+                              cr.replay_file as replay_file,
+                              me_mp.match_log as match_log
+                       from core_result cr
+                       join core_match cm on cr.match_id = cm.id
+                       join core_matchparticipation me_mp on cm.id = me_mp.match_id
+                       join core_matchparticipation opponent_mp on cm.id = opponent_mp.match_id and me_mp.participant_number!=opponent_mp.participant_number
+    """),
     ]
