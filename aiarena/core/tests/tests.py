@@ -319,7 +319,7 @@ class MatchReadyMixin(LoggedInMixin):
         game = self.test_client.create_game('StarCraft II')
         gamemode = self.test_client.create_gamemode('Melee', game.id)
 
-        competition = self._create_open_competition(gamemode.id)
+        competition = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('testmap1', competition.id)
 
         self.regularUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot1', 'T')
@@ -352,17 +352,19 @@ class BotTestCase(LoggedInMixin, TestCase):
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
         config.MAX_USER_BOT_COUNT = 4
 
-        # required for active bot
-        self.test_client.create_game('StarCraft II')
-        self.test_client.create_game('StarCraft II')
-        self._create_open_competition()
+        self.test_client.login(self.staffUser1)
 
-        # create bot along with bot data
+        # required for active bot
+        competition = self._create_game_mode_and_open_competition()
+
+        # create active bot along with bot data
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
             bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data),
-                       plays_race='T', type='python', active=True)
+                       plays_race='T', type='python')
             bot1.full_clean()
             bot1.save()
+            CompetitionParticipation.objects.create(competition=competition, bot=bot1, active=True)
+
 
         # test display id regen
         prev_bot_display_id = bot1.game_display_id
@@ -394,12 +396,12 @@ class BotTestCase(LoggedInMixin, TestCase):
 
         # test active bots per race limit for user
         # all bots should be the same race, so just pick any
-        inactive_bot = Bot.objects.filter(user=self.regularUser1, active=False)[0]
+        inactive_bot = Bot.objects.filter(user=self.regularUser1, competition_participations__isnull=True).first()
         with self.assertRaisesMessage(ValidationError,
                                       'Too many active bots playing that race already exist for this user.'
                                       ' You are allowed 1 active bot(s) per race.'):
-            inactive_bot.active = True
-            inactive_bot.full_clean()  # run validation
+            cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=True)
+            cp.full_clean()
 
         # test updating bot_zip
         with open(self.test_bot_zip_updated_path, 'rb') as bot_zip_updated:
