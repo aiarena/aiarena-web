@@ -1,6 +1,7 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
+from typing import List
 
 from aiarena.core.models import User, Match, Result, ArenaClient, \
     Competition
@@ -31,6 +32,9 @@ class TestingClient:
                     email: str,
                     type: str,
                     owner_id: int) -> User:
+        if User.objects.filter(username=username).exists():
+            raise Exception('That already exists!')
+
         url = reverse('admin:core_user_add')
         response = self.django_client.post(url, {'username': username,
                                                  'password': password,
@@ -42,6 +46,9 @@ class TestingClient:
         return User.objects.get(username=username)
 
     def create_arenaclient(self, username: str, email: str, owner_id: int) -> ArenaClient:
+        if ArenaClient.objects.filter(username=username).exists():
+            raise Exception('That already exists!')
+
         url = reverse('admin:core_arenaclient_add')
         response = self.django_client.post(url, {'username': username,
                                                  'email': email,
@@ -53,6 +60,9 @@ class TestingClient:
         return ArenaClient.objects.get(username=username)
 
     def create_game(self, name: str) -> Game:
+        if Game.objects.filter(name=name).exists():
+            raise Exception('That already exists!')
+
         url = reverse('admin:core_game_add')
         response = self.django_client.post(url, {'name': name, })
 
@@ -60,6 +70,9 @@ class TestingClient:
         return Game.objects.get(name=name)
 
     def create_gamemode(self, name: str, game_id: int) -> GameMode:
+        if GameMode.objects.filter(name=name, game_id=game_id).exists():
+            raise Exception('That already exists!')
+
         url = reverse('admin:core_gamemode_add')
         response = self.django_client.post(url, {'name': name,
                                                  'game': game_id, })
@@ -68,6 +81,9 @@ class TestingClient:
         return GameMode.objects.get(name=name, game_id=game_id)
 
     def create_competition(self, name: str, type: str, game_mode_id: int) -> Competition:
+        if Competition.objects.filter(name=name).exists():
+            raise Exception('That already exists!')
+
         url = reverse('admin:core_competition_add')
         response = self.django_client.post(url, {'name': name,
                                                  'type': type,
