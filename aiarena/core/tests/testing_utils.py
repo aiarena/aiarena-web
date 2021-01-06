@@ -20,6 +20,9 @@ class TestingClient:
     def login(self, user: User):
         self.django_client.force_login(user)
 
+    def logout(self):
+        self.django_client.logout()
+
     def set_api_token(self, api_token: str):
         self.api_token = api_token
 
@@ -42,7 +45,8 @@ class TestingClient:
                                                  'type': type,
                                                  'owner': owner_id, })
 
-        assert response.status_code == 302  # redirect on success
+        # we should be redirected back to the changelist
+        assert response.status_code == 302 and response.url == reverse('admin:core_user_changelist')
         return User.objects.get(username=username)
 
     def create_arenaclient(self, username: str, email: str, owner_id: int) -> ArenaClient:
@@ -56,7 +60,8 @@ class TestingClient:
                                                  'type': 'ARENA_CLIENT',
                                                  'owner': owner_id, })
 
-        assert response.status_code == 302  # redirect on success
+        # we should be redirected back to the changelist
+        assert response.status_code == 302 and response.url == reverse('admin:core_arenaclient_changelist')
         return ArenaClient.objects.get(username=username)
 
     def create_game(self, name: str) -> Game:
@@ -66,7 +71,8 @@ class TestingClient:
         url = reverse('admin:core_game_add')
         response = self.django_client.post(url, {'name': name, })
 
-        assert response.status_code == 302
+        # we should be redirected back to the changelist
+        assert response.status_code == 302 and response.url == reverse('admin:core_game_changelist')
         return Game.objects.get(name=name)
 
     def create_gamemode(self, name: str, game_id: int) -> GameMode:
@@ -77,7 +83,8 @@ class TestingClient:
         response = self.django_client.post(url, {'name': name,
                                                  'game': game_id, })
 
-        assert response.status_code == 302
+        # we should be redirected back to the changelist
+        assert response.status_code == 302 and response.url == reverse('admin:core_gamemode_changelist')
         return GameMode.objects.get(name=name, game_id=game_id)
 
     def create_competition(self, name: str, type: str, game_mode_id: int) -> Competition:
@@ -89,7 +96,8 @@ class TestingClient:
                                                  'type': type,
                                                  'game_mode': game_mode_id, })
 
-        assert response.status_code == 302  # redirect on success
+        # we should be redirected back to the changelist
+        assert response.status_code == 302 and response.url == reverse('admin:core_competition_changelist')
         return Competition.objects.get(name=name)
 
     def open_competition(self, competition_id: int):
@@ -104,7 +112,38 @@ class TestingClient:
         }
         response = self.django_client.post(url, data)
 
-        assert response.status_code == 302
+        # we should be redirected back to the same page
+        assert response.status_code == 302 and response.url == '.'
+
+    def pause_competition(self, competition_id: int):
+        competition = Competition.objects.get(id=competition_id)
+        url = reverse('admin:core_competition_change', args=(competition.pk,))
+        data = {
+            '_pause-competition': 'Pause competition',
+            'competition': competition_id,
+            'name': competition.name,  # required by the form
+            'type': competition.type,  # required by the form
+            'game_mode': competition.game_mode_id,  # required by the form
+        }
+        response = self.django_client.post(url, data)
+
+        # we should be redirected back to the same page
+        assert response.status_code == 302 and response.url == '.'
+
+    def close_competition(self, competition_id: int):
+        competition = Competition.objects.get(id=competition_id)
+        url = reverse('admin:core_competition_change', args=(competition.pk,))
+        data = {
+            '_close-competition': 'Close competition',
+            'competition': competition_id,
+            'name': competition.name,  # required by the form
+            'type': competition.type,  # required by the form
+            'game_mode': competition.game_mode_id,  # required by the form
+        }
+        response = self.django_client.post(url, data)
+
+        # we should be redirected back to the same page
+        assert response.status_code == 302 and response.url == '.'
 
     def request_match(self) -> Match:
         url = reverse('ac_next_match-list')
@@ -112,6 +151,17 @@ class TestingClient:
 
         assert response.status_code == 201
         return Match.objects.get(id=response.data['id'])
+
+    def cancel_matches(self, match_ids: List[int]):
+        url = reverse('admin:core_match_changelist')
+        data = {
+            'action': ['cancel_matches'],
+            '_selected_action': match_ids,
+        }
+        response = self.django_client.post(url, data)
+
+        # we should be redirected back to the same page
+        assert response.status_code == 302 and response.url == url
 
     def submit_result(self, match_id: int, type: str) -> Result:
         with open(BaseTestMixin.test_replay_path, 'rb') as replay_file, \

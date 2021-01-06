@@ -1,87 +1,43 @@
-from django.urls import reverse
+from django.test import TransactionTestCase, TestCase
 
-from aiarena.core.models import Match, Round, Bot, User, Map, Result, Competition
+from aiarena.core.models import Match, Round, Bot, User, Result, Competition
 from aiarena.core.tests.tests import FullDataSetMixin
-from django.test import TransactionTestCase, TestCase, RequestFactory, Client
-from .admin import MapAdmin, MatchAdmin, CompetitionAdmin
-from django.contrib.messages.middleware import MessageMiddleware
-from django.contrib.sessions.middleware import SessionMiddleware
+
 
 class AdminMethodsTestCase(FullDataSetMixin, TestCase):
 
-   # admin uses this functionality
-    def test_map_admin(self):
-        self.factory = RequestFactory()
-        test_maps = Map.objects.all()
-        admin = MapAdmin(model=Map, admin_site='/admin')
-        request = self.factory.get('/admin')
-        request.user = User.objects.first()
-        admin.deactivate(request, test_maps)
-        for tmap in test_maps:
-            self.assertFalse(tmap.active, msg=f"failed to deactivate Map<{tmap}> Using the admin interface ")
-        admin.activate(request, test_maps)
-        for tmap in test_maps:
-            self.assertTrue(tmap.active, msg=f"failed to activate Map<{tmap}> Using the admin interface ")
+    def setUp(self):
+        super().setUp()
+        # all tests need us logged in as staff
+        self.test_client.login(self.staffUser1)
 
-    def test_match_admin(self):
-        self.factory = RequestFactory()
-        test_matches= Match.objects.all()
-        admin = MatchAdmin(model=Map, admin_site='/admin')
-        request = self.factory.get('/admin')
-        request.user = User.objects.first()
-        no_result_matches = []
-        for match in test_matches:
-            results = Result.objects.filter(match=match)
-            if len(results): # this match has a result pre made in the test db
-                continue
-            no_result_matches.append(match)
-        admin.cancel_matches(request, no_result_matches)
-        for match in no_result_matches:
+    def test_admin_match_cancelling(self):
+        matches = Match.objects.filter(result__isnull=True)
+        match_ids = [match.id for match in matches]
+        self.test_client.cancel_matches(match_ids)
+        for match in matches:
             result = Result.objects.get(match=match)
-            self.assertTrue(result.type == "MatchCancelled", msg=f"failed to Cancel Match<{match}>, Result<{result}> Using the admin interface ")
+            self.assertTrue(result.type == "MatchCancelled",
+                            msg=f"failed to Cancel Match<{match}>, Result<{result}> Using the admin interface ")
 
-    """ need to make this one work """
-    def test_competition_admin(self):
-        self.factory = RequestFactory()
-        admin = CompetitionAdmin(model=Competition, admin_site='/admin')
+    def test_admin_competition_statuses(self):
         competition = Competition.objects.first()
-        data = {'action': '_pause-competition',
-                '_selected_action': [competition, ]}
-        class dumb_hack:
-            def __init__(self, name):
-                self.name = name
-
-
-
-        def mock_request_admin(factory, data, admin):
-            request = factory.post(reverse("admin:index"), data=data)
-            request.user = User.objects.first()
-            """Annotate a request object with a session"""
-            middleware = SessionMiddleware()
-            middleware.process_request(request)
-            request.session.save()
-            """Annotate a request object with a messages"""
-            middleware = MessageMiddleware()
-            middleware.process_request(request)
-            request.session.save()
-            admin.admin_site = dumb_hack(name=admin.admin_site)
-            return request, admin
-
-        request, admin = mock_request_admin(self.factory,data,admin)
         self.assertEqual(competition.status, 'open', msg=f"first competition in the test database is not open!")
-        admin.response_change(request, competition)
-        self.assertEqual(competition.status, 'paused', msg=f"failed responsechange<pause> on Season<{competition}> Using the admin interface ")
 
-        data['action'] = "_open-competition"
-        request, admin = mock_request_admin(self.factory, data, admin)
-        admin.response_change(request, competition)
-        self.assertEqual(competition.status, 'open', msg=f"failed responsechange<open> on Season<{competition}> Using the admin interface ")
+        self.test_client.pause_competition(competition.id)
+        competition = Competition.objects.first()
+        self.assertEqual(competition.status, 'paused',
+                         msg=f"failed responsechange<pause> on Competition<{competition}> Using the admin interface ")
 
-        data['action'] = "_close-competition"
-        request, admin = mock_request_admin(self.factory, data, admin)
-        admin.response_change(request, competition)
-        self.assertEqual(competition.status, 'closing', msg=f"failed responsechange<closing> on Season<{competition}> Using the admin interface ")
+        self.test_client.open_competition(competition.id)
+        competition.refresh_from_db()
+        self.assertEqual(competition.status, 'open',
+                         msg=f"failed responsechange<open> on Competition<{competition}> Using the admin interface ")
 
+        self.test_client.close_competition(competition.id)
+        competition.refresh_from_db()
+        self.assertEqual(competition.status, 'closing',
+                         msg=f"failed responsechange<closing> on Competition<{competition}> Using the admin interface ")
 
 
 class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):

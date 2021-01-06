@@ -118,21 +118,21 @@ class CompetitionAdmin(admin.ModelAdmin):
     change_form_template = "admin/change_form_competition.html"
 
     def response_change(self, request, obj):
-        if "_open-competition" in request.POST or "_open-competition" in request.POST.get('action'):
+        if "_open-competition" in request.POST:
             error = obj.open()
             if error is None:
                 self.message_user(request, "This competition is now open.",)
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
-        elif "_pause-competition" in request.POST or "_pause-competition" in request.POST.get('action'):
+        elif "_pause-competition" in request.POST:
             error = obj.pause()
             if error is None:
                 self.message_user(request, "This competition is now paused.")
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
-        elif "_close-competition" in request.POST or "_close-competition" in request.POST.get('action'):
+        elif "_close-competition" in request.POST:
             error = obj.start_closing()
             if error is None:
                 self.message_user(request, "This competition is now closing.")

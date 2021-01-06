@@ -29,8 +29,7 @@ class Competition(models.Model, LockableModelMixin):
         # When a competition is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
         ('closed', 'Closed'),  # Functionally identical to paused, except not intended to change after this status.
     )
-    # name = models.CharField(max_length=50, unique=True)
-    name = models.CharField(max_length=50, null=True)
+    name = models.CharField(max_length=50, unique=True)
     type = models.CharField(max_length=32,
                             choices=CompetitionType.choices,
                             default=CompetitionType.LEAGUE)

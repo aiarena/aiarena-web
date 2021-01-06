@@ -67,7 +67,7 @@ class BaseTestMixin(object):
         return map
 
     def _create_open_competition(self, gamemode_id: int):
-        competition = Competition.objects.create(game_mode_id=gamemode_id)
+        competition = Competition.objects.create(name='Competition 1', type='L', game_mode_id=gamemode_id)
         competition.open()
         return competition
 
@@ -213,7 +213,7 @@ class BaseTestMixin(object):
         bot = Bot.get_random_active()
         Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
 
-        self.client.logout()  # child tests can login if they require
+        self.test_client.logout()  # child tests can login if they require
 
     def _generate_match_activity(self):
         response = self._post_to_matches()
@@ -293,7 +293,9 @@ class LoggedInMixin(BaseTestMixin):
         super().setUp()
         self.staffUser1 = User.objects.create_user(username='staff_user', password='x',
                                                    email='staff_user@dev.aiarena.net',
-                                                   is_staff=True)
+                                                   is_staff=True,
+                                                   is_superuser=True,
+                                                   is_active=True)
 
         self.arenaclientUser1 = ArenaClient.objects.create(username='arenaclient1', email='arenaclient@dev.aiarena.net',
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
@@ -307,12 +309,13 @@ class MatchReadyMixin(LoggedInMixin):
     """
 
     def setUp(self):
-        super(MatchReadyMixin, self).setUp()
+        super().setUp()
 
         # raise the configured per user limits
         config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
         config.MAX_USER_BOT_COUNT = 10
 
+        self.test_client.login(self.staffUser1)
         game = self.test_client.create_game('StarCraft II')
         gamemode = self.test_client.create_gamemode('Melee', game.id)
 
@@ -333,7 +336,7 @@ class FullDataSetMixin(MatchReadyMixin):
     """
 
     def setUp(self):
-        super(FullDataSetMixin, self).setUp()
+        super().setUp()
         self._generate_full_data_set()
 
 
