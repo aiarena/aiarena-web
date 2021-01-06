@@ -14,8 +14,10 @@ def update_name(apps, schema_editor):
         competition.save()
 
 def create_game_mode(apps, schema_editor):
-    game = Game.objects.create(name='StarCraft II')
-    GameMode.objects.create(name='Melee', game=game)
+    """ If these is an existing competition, it will need a game and game mode """
+    if Competition.objects.count() > 0:
+        game = Game.objects.create(name='StarCraft II')
+        GameMode.objects.create(name='Melee', game=game)
 
 
 class Migration(migrations.Migration):
