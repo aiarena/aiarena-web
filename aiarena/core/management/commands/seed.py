@@ -1,6 +1,7 @@
 from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+from django_fakeredis import FakeRedis
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
