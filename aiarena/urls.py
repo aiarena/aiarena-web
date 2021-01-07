@@ -56,7 +56,6 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   url(r'^accounts/', include('django.contrib.auth.urls')),
                   url(r'^$', core_views.Index.as_view(), name='home'),
                   path('api/', include('aiarena.api.urls')),
-                  path('ranking/', core_views.Ranking.as_view(), name='ranking'),
                   path('results/', core_views.Results.as_view(), name='results'),
                   path('arenaclients/', core_views.ArenaClients.as_view(), name='arenaclients'),
                   path('arenaclients/<int:pk>/', core_views.ArenaClientView.as_view(), name='arenaclient'),

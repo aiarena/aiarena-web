@@ -339,20 +339,6 @@ class AuthorDetail(DetailView):
         return context
 
 
-class Ranking(TemplateView):
-    """
-    If there's a current competition, we redirect to that competition's page. Otherwise we render a static
-    template explaining that there are no rankings to be viewed currently.
-    """
-
-    def get(self, request, *args, **kwargs):
-        # competition = Competition.get_current_competition_or_none()
-        # if competition is None:
-        return render(request, 'ranking_no_competition.html')
-        # else:
-        #     return redirect('competition', pk=competition.pk)
-
-
 class Results(ListView):
     queryset = Result.objects.all().order_by('-created').prefetch_related(
         Prefetch('winner'),
