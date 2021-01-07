@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
+    'django_select2',
     'avatar',
     'aiarena.core',
     'aiarena.frontend',
@@ -156,6 +157,26 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100,
 }
 
+CACHES = {
+    "default": {	
+        "BACKEND": "django_redis.cache.RedisCache",	
+        "LOCATION": "redis://127.0.0.1:6379/1",	
+        "OPTIONS": {	
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        }	
+    },
+    'select2': {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+# Tell select2 which cache configuration to use:
+SELECT2_CACHE_BACKEND = "select2"
+# SELECT2_CSS = ''
 # Constance https://github.com/jazzband/django-constance
 # !IMPORTANT! If you override this setting in an env.py,
 # don't forget to remove 'constance.backends.database' from the INSTALLED_APPS array

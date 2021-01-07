@@ -1,31 +1,68 @@
 {% extends "base.html" %}
-{% load i18n core_filters  %}
-
+{% load i18n core_filters %}
 {% block content %}
-    <div class="divider"><span></span><span><h2>Request Match</h2></span><span></span></div>
-    <div class="request-match-form">
+    <div class="divider"><span></span><span><h2>Request Match </h2></span><span></span></div>
+
+    <div class="request-match-form flex-container">
         {% if config.ALLOW_REQUESTED_MATCHES %}
-            <p>Match request limit: {{ user.requested_matches_limit }} per {{ config.REQUESTED_MATCHES_LIMIT_PERIOD|smooth_timedelta }}</p>
+            {{ form.media.css }}
+
+            {% if user.match_request_count_left <= 0 %}
+                <h3>You have reached your match request limit.</h3>
+            {% endif %}
+
+            <p>Match request limit: {{ user.requested_matches_limit }}
+                per {{ config.REQUESTED_MATCHES_LIMIT_PERIOD|smooth_timedelta }}</p>
             Match requests left: {{ user.match_request_count_left }}
+
             <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
                   enctype="multipart/form-data">
+                <style>
+                    input, select {
+                        width: 100%;
+                    }
+
+                </style>
                 {% csrf_token %}
-                <p>{{ form.matchup_type }}</p>
-                <table><tr>
-                    <td>
-                        <h3>Bot1:</h3>
-                        <div>{{ form.bot1 }}</div>
-                    </td>
-                    <td>
-                        <h3>Bot2:</h3>
-                        <div id="matchup_race" style="display: none">{{ form.matchup_race }}</div>
-                        <div id="bot2">{{ form.bot2 }}</div>
-                    </td>
-                </tr></table>
+                <p onchange="refreshForm()">{{ form.matchup_type }}</p>
+
+                <center>
+                    <table style="display: table-footer-group">
+                    <thead>
+                    <tr>
+                        <th>Bot1:</th>
+                        <th>Bot2:</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+
+                            <div style="position: relative;">{{ form.bot1 }}</div>
+
+                        </td>
+
+                        <td>
+
+                            <div id="bot2" style="position: relative;">{{ form.bot2 }}</div>
+                            <div id="matchup_race" style="display: none; width: 100%; position: relative;">{{ form.matchup_race }}</div>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td></td>
+                        <td>
+
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table></center>
                 <p>Map: {{ form.map }}</p>
                 <p>Match Count: {{ form.match_count }}</p>
                 <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
-                  {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
+                        {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
             </form>
             {% if user.match_request_count_left <= 0 %}
                 <h3>You have reached your match request limit.</h3>
@@ -41,21 +78,36 @@
             </ul>
         {% endif %}
     </div>
+    {{ form.media.js }}
     <script type="text/javascript">
 
-    function refreshForm() {
-        if (document.getElementById('id_matchup_type_0').checked) {
-            document.getElementById('bot2').style.display = 'block';
-            document.getElementById('id_bot2').required = true
-            document.getElementById('matchup_race').style.display = 'none';
-        }
-        else {
-            document.getElementById('matchup_race').style.display = 'block';
-            document.getElementById('bot2').style.display = 'none';
-            document.getElementById('id_bot2').required = false
-        }
+        function refreshForm() {
+            if (document.getElementById('id_matchup_type').value !== 'random_ladder_bot') {
+                document.getElementById('bot2').style.display = 'block';
+                document.getElementById('bot2').style.width = '100%';
+                document.getElementById('id_bot2').required = true
+                document.getElementById('matchup_race').style.display = 'none';
 
-    }
+                clearInterval(removeX);
+            } else {
+                document.getElementById('matchup_race').style.display = 'block';
+                document.querySelector("#matchup_race > span").style.width = 100 + '%';
+                document.getElementById('bot2').style.display = 'none';
+                document.getElementById('id_bot2').required = false;
+                setInterval(removeX, 10);
+            }
+
+        }
+        function removeX() {
+                if (document.getElementById('bot2').style.display === 'none'){
+                    document.querySelector("#select2-id_matchup_race-container > span").remove();
+                }
+
+
+        }
 
     </script>
+
+
+
 {% endblock %}

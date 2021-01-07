@@ -3,6 +3,7 @@ from datetime import timedelta
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
+from django_select2.forms import Select2Widget, ModelSelect2Widget
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -555,7 +556,33 @@ class CompetitionDetail(DetailView):
         return context
 
 
+class BotWidget(Select2Widget):
+    search_fields = [
+            "name__icontains"
+    ]
+
+
+class BotChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, bot_object):
+        str_fmt = "{0:>20} {1:>20} [{2:>20} ] {3:>20}"
+        if bot_object.active:
+            active = '✔'
+        else:
+            active = '✘'
+        race = bot_object.plays_race
+        if race == 'T':
+            race = 'Terran'
+        elif race == 'P':
+            race = 'Protoss'
+        elif race == 'Z':
+            race = 'Zerg'
+        elif race == 'R':
+            race = 'Random'
+        return str_fmt.format(active, race, bot_object.name,  bot_object.user.username)
+
+
 class RequestMatchForm(forms.Form):
+
     MATCHUP_TYPE_CHOICES = (
         ('specific_matchup', 'Specific Matchup'),
         ('random_ladder_bot', 'Random Ladder Bot'),
@@ -567,20 +594,23 @@ class RequestMatchForm(forms.Form):
         ('P', 'Protoss'),
     )
     matchup_type = forms.ChoiceField(choices=MATCHUP_TYPE_CHOICES,
-                                     widget=forms.RadioSelect(attrs={'onclick': 'refreshForm();'}),
-                                     required=True, initial='specific_matchup')
-    bot1 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'), required=True)
+                                     widget=Select2Widget,
+                                     required=True, initial='specific_matchup',
+                                     )
+    bot1 = BotChoiceField(queryset=Bot.objects.all(), required=True,
+                                  widget=BotWidget)
     # hidden when matchup_type != random_ladder_bot
     matchup_race = forms.ChoiceField(choices=MATCHUP_RACE_CHOICES,
-                                     widget=forms.RadioSelect(attrs={'onclick': 'refreshForm();'}),
+                                     widget=Select2Widget,
                                      required=False, initial='any')
     # hidden when matchup_type != specific_matchup
-    bot2 = forms.ModelChoiceField(queryset=Bot.objects.only('name').order_by('name'),
-                                  widget=forms.Select(attrs={'required': ''}),  # default this to required initially
-                                  required=False)
+    bot2 = BotChoiceField(queryset=Bot.objects.all(),
+                                  widget=BotWidget,  # default this to required initially
+                                  required=False, help_text="Author or Bot name")
     map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
-                                 empty_label='Random Ladder Map',
+                                 empty_label='Random Ladder Map', widget=Select2Widget,
                                  required=False)
+
     match_count = forms.IntegerField(min_value=1, initial=1)
 
     def clean_matchup_race(self):
@@ -599,9 +629,6 @@ class RequestMatchForm(forms.Form):
     # todo: validate form
 
 
-
-
-
 class RequestMatch(LoginRequiredMixin, FormView):
     form_class = RequestMatchForm
     template_name = 'request_match.html'
@@ -613,7 +640,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
         form = super().get_form(form_class)
         # If not staff, only allow requesting games against this user's bots
         if not self.request.user.is_staff and not self.request.user.can_request_games_for_another_authors_bot:
-            form.fields['bot1'].queryset = Bot.objects.only('name').filter(user=self.request.user)
+            form.fields['bot1'].queryset = Bot.objects.filter(user=self.request.user)
         return form
 
     def get_success_url(self):
