@@ -20,14 +20,14 @@ logger = logging.getLogger(__name__)
 # Allowing filtering/etc on sensitive fields could leak information.
 # Serializer fields are also manually specified so new private fields don't accidentally get leaked.
 
-bot_include_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
+bot_include_fields = 'id', 'user', 'name', 'created', 'plays_race', 'type', \
                      'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_zip', \
                      'bot_zip_md5hash', 'bot_data_publicly_downloadable', 'bot_data', 'bot_data_md5hash'
 
-bot_search_fields = 'id', 'user', 'name', 'created', 'active', 'plays_race', 'type', \
+bot_search_fields = 'id', 'user', 'name', 'created', 'plays_race', 'type', \
                     'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_data_publicly_downloadable'
-map_include_fields = 'id', 'name', 'file', 'active',
-map_filter_fields = 'id', 'name', 'active',
+map_include_fields = 'id', 'name', 'file',
+map_filter_fields = 'id', 'name',
 match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round', 'requested_by',
 matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
                                     'elo_change', 'avg_step_time', 'match_log', 'result', 'result_cause',
@@ -39,7 +39,7 @@ result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file
 result_search_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
                        'submitted_by', 'interest_rating', 'date_interest_rating_calculated',
 round_include_fields = 'id', 'number', 'competition', 'started', 'finished', 'complete',
-competition_include_fields = 'id', 'number', 'date_created', 'date_opened', 'date_closed', 'status',
+competition_include_fields = 'id', 'date_created', 'date_opened', 'date_closed', 'status',
 competitionparticipation_include_fields = 'id', 'competition', 'bot', 'elo',
 user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', \
                       'type', 'patreon_level'

@@ -3,6 +3,7 @@ import os
 from constance import config
 from django.db.models import Sum
 from django.test import TransactionTestCase
+from rest_framework.authtoken.models import Token
 
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, Competition, Map, \
@@ -31,43 +32,48 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         # avoid old tests breaking that were pre-this feature
         config.REISSUE_UNFINISHED_MATCHES = False
 
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self.test_client.login(self.staffUser1)
+        self.test_client.set_api_token(Token.objects.get(user=self.arenaclientUser1))
 
         # no current competition
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
 
         # needs a valid competition to be able to activate a bot.
-        self._create_game_mode_and_open_competition()
+        comp = self._create_game_mode_and_open_competition()
 
         # no maps
+        self.test_client.login(self.arenaclientUser1)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
 
         # not enough active bots
-        self._create_map_for_competition('test_map')
+        self._create_map_for_competition('test_map', comp.id)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
 
         # not enough active bots
         bot1 = self._create_bot(self.regularUser1, 'testbot1')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
 
         # not enough active bots
         bot2 = self._create_bot(self.regularUser1, 'testbot2')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
 
         # not enough active bots
-        bot1.active = True
-        bot1.save()
+        bot1.competition_participations.create(competition=comp)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
 
         # success
-        bot2.active = True
-        bot2.save()
+        bot2.competition_participations.create(competition=comp)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
 
@@ -113,13 +119,14 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
     def test_match_reissue(self):
 
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self.test_client.login(self.staffUser1)
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
 
         self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot1', 'T')
         self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', 'Z')
 
+        self.test_client.login(self.arenaclientUser1)
         response_m1 = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response_m1.status_code, 201)
 
@@ -134,7 +141,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         config.REISSUE_UNFINISHED_MATCHES = False
         config.MAX_ACTIVE_ROUNDS = 2
 
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self.test_client.login(self.staffUser1)
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
 
@@ -144,6 +151,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         bot4 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot4', 'R')
 
         # Round 1
+        self.test_client.login(self.arenaclientUser1)
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 201)
         response = self.client.post('/api/arenaclient/matches/')
@@ -173,24 +181,26 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.arenaclientUser2 = ArenaClient.objects.create(username='arenaclient2', email='arenaclient2@dev.aiarena.net',
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
 
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self.test_client.login(self.staffUser1)
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
 
         bot1 = self._create_active_bot_for_competition(comp.id,  self.regularUser1, 'testbot1', 'T')
         bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', 'Z')
 
+        self.test_client.login(self.arenaclientUser1)
         # this should tie up both bots
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 201)
 
         # we shouldn't be able to get a new match
-        self.client.force_login(User.objects.get(username='arenaclient2'))
+        self.test_client.login(self.arenaclientUser2)
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 500)
         self.assertEqual(u"Failed to start match. There might not be any available participants.", response.data['detail'])
 
-        Matches.request_match(self.regularUser2, bot1, bot1.get_random_active_excluding_self())
+        Matches.request_match(self.regularUser2, bot1, bot1.get_random_active_excluding_self(),
+                              game_mode=GameMode.objects.first())
 
         # now we should be able to get a match - the requested one
         response = self.client.post('/api/arenaclient/matches/')
@@ -205,7 +215,8 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     uploaded_arenaclient_log_path = os.path.join(MEDIA_ROOT, 'arenaclient-logs', '{0}_arenaclientlog.zip')
 
     def test_create_results(self):
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self.test_client.login(self.staffUser1)
+        self.test_client.set_api_token(Token.objects.get(user=self.arenaclientUser1))
 
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
@@ -306,7 +317,8 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
             self.assertEqual(self.test_bot_datas['bot2'][data_index]['hash'], Bot.objects.get(id=bot1.id).bot_data_md5hash)
 
     def test_create_result_bot_not_in_match(self):
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self.test_client.login(self.staffUser1)
+        self.test_client.set_api_token(Token.objects.get(user=self.arenaclientUser1))
 
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
@@ -340,13 +352,15 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         # This is the feature we're testing, so turn it on
         config.BOT_CONSECUTIVE_CRASH_LIMIT = 3  # todo: this update doesn't work.
 
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self.test_client.login(self.staffUser1)
 
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
 
         bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot1')
         bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', 'Z')
+
+        self.test_client.set_api_token(Token.objects.get(user=self.arenaclientUser1))
 
         # log more crashes than should be allowed
         for count in range(config.BOT_CONSECUTIVE_CRASH_LIMIT):
@@ -361,16 +375,18 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
             self.assertEqual(response.status_code, 201)
 
         # The bot should be disabled
-        bot1.refresh_from_db()
-        self.assertFalse(bot1.active)
+        for cp in bot1.competition_participations.all():
+            self.assertFalse(cp.active)
 
         # not enough active bots
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
 
         # Post a successful match, then retry the crashes to make sure the previous ones don't affect the check
-        bot1.active = True
-        bot1.save()
+        cp = bot1.competition_participations.first()
+        cp.active = True
+        cp.save()
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         match = response.data
@@ -390,12 +406,13 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
             self.assertEqual(response.status_code, 201)
 
         # The bot should be disabled
-        bot1.refresh_from_db()
-        self.assertFalse(bot1.active)
+        for cp in bot1.competition_participations.all():
+            self.assertFalse(cp.active)
 
         # not enough active bots
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
 
 
 class EloTestCase(LoggedInMixin, TransactionTestCase):
@@ -405,18 +422,19 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
 
     def setUp(self):
         super(EloTestCase, self).setUp()
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+
+        self.test_client.login(self.staffUser1)
 
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
 
+        self.test_client.login(self.arenaclientUser1)
+
         # activate the required bots
-        self.regularUserBot1.active = True
-        self.regularUserBot1.save()
-        self.regularUserBot2.active = True
-        self.regularUserBot2.save()
+        self.regularUserBot1.competition_participations.create(competition=comp)
+        self.regularUserBot2.competition_participations.create(competition=comp)
 
         # expected_win_sequence and expected_resultant_elos should have this many entries
         self.num_matches_to_play = 20
@@ -490,13 +508,13 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(self.expected_resultant_elos[iteration][1], bot2_participant.resultant_elo)
 
     def CheckFinalElos(self):
-        sp1 = self.regularUserBot1.current_competition_participation()
-        sp2 = self.regularUserBot2.current_competition_participation()
-        self.assertEqual(sp1.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][0])
-        self.assertEqual(sp2.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][1])
+        cp1 = self.regularUserBot1.competition_participations.get()
+        cp2 = self.regularUserBot2.competition_participations.get()
+        self.assertEqual(cp1.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][0])
+        self.assertEqual(cp2.elo, self.expected_resultant_elos[self.num_matches_to_play - 1][1])
 
     def CheckEloSum(self):
-        comp = Competition.objects.get(id=1)
+        comp = Competition.objects.get()
         sumElo = CompetitionParticipation.objects.filter(competition=comp).aggregate(Sum('elo'))
         self.assertEqual(sumElo['elo__sum'],
                          ELO_START_VALUE * Bot.objects.all().count())  # starting ELO times number of bots
@@ -533,14 +551,14 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
 
 class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
     def setUp(self):
-        super(RoundRobinGenerationTestCase, self).setUp()
+        super().setUp()
         self.client.force_login(User.objects.get(username='arenaclient1'))
 
     def test_round_robin_generation(self):
         # avoid old tests breaking that were pre-this feature
         config.REISSUE_UNFINISHED_MATCHES = False
 
-        botCount = Bot.objects.filter(active=True).count()
+        botCount = CompetitionParticipation.objects.filter(active=True).count()
         expectedMatchCountPerRound = int(botCount / 2 * (botCount - 1))
         self.assertGreater(botCount, 1)  # check we have more than 1 bot
 

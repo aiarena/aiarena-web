@@ -9,6 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command, CommandError
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
@@ -299,6 +300,8 @@ class LoggedInMixin(BaseTestMixin):
 
         self.arenaclientUser1 = ArenaClient.objects.create(username='arenaclient1', email='arenaclient@dev.aiarena.net',
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
+        Token.objects.create(user=self.arenaclientUser1)
+
         self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
                                                      email='regular_user1@dev.aiarena.net')
 

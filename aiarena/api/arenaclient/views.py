@@ -376,7 +376,7 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
     if config.BOT_CONSECUTIVE_CRASH_LIMIT < 1:
         return  # Check is disabled
 
-    if not triggering_participant.bot.active:
+    if not triggering_participant.bot.competition_participations.filter(active=True).exists():
         return  # No use running the check - bot is already inactive.
 
     # Get recent match participation records for this bot

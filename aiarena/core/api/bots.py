@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 class Bots:
     @staticmethod
     def disable_and_send_crash_alert(bot: Bot):
-        bot.active = False
-        bot.save()
+        bot.competition_participations.update(active=False)
         try:
             send_mail(  # todo: template this
                 'AI Arena - ' + bot.name + ' deactivated due to crashing',
