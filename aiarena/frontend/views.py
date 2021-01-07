@@ -565,7 +565,7 @@ class BotWidget(Select2Widget):
 class BotChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, bot_object):
         str_fmt = "{0:>20} {1:>20} [{2:>20} ] {3:>20}"
-        if bot_object.active:
+        if bot_object.competition_participations.filter(active=True).exists():
             active = '✔'
         else:
             active = '✘'
