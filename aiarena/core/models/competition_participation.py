@@ -44,11 +44,21 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
                     'Too many active bots playing that race already exist for this user.'
                     ' You are allowed ' + str(bot_limit) + ' active bot(s) per race.')
         super().validate_unique(exclude=exclude)
+        
 
+    def clean(self):
+        self.validate_competition_accepting_new_participants()
+        super().clean()
+        
     def __str__(self):
         return self.competition.name + ' ' + str(self.bot)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(f'{self.bot.name} {self.competition.name}')
         super().save(*args, **kwargs)
+
+    def validate_competition_accepting_new_participants(self):
+        if self.id is None and not self.competition.is_accepting_new_participants:
+            raise ValidationError('That competition is not accepting new participants.')
+
 

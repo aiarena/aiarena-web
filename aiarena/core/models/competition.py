@@ -23,6 +23,7 @@ class Competition(models.Model, LockableModelMixin):
     """ Represents a competition of play in the context of a ladder """
     COMPETITION_STATUSES = (
         ('created', 'Created'),  # The initial state for a competition. Functionally identical to paused.
+        ('frozen', 'Frozen'),  # While a competition is frozen, no matches are played
         ('paused', 'Paused'),  # While a competition is paused, existing rounds can be played, but no new ones are generated.
         ('open', 'Open'),  # When a competition is open, new rounds can be generated and played.
         ('closing', 'Closing'),
@@ -55,9 +56,19 @@ class Competition(models.Model, LockableModelMixin):
         return self.status == 'closing'
 
     @transaction.atomic
+    def freeze(self):
+        self.lock_me()
+        if self.status in ['open', 'paused']:
+            self.status = 'frozen'
+            self.save()
+            return None
+        else:
+            return "Cannot freeze a competition with a status of {}".format(self.status)
+
+    @transaction.atomic
     def pause(self):
         self.lock_me()
-        if self.status == 'open':
+        if self.status in ['open', 'frozen']:
             self.status = 'paused'
             self.save()
             return None
@@ -66,18 +77,11 @@ class Competition(models.Model, LockableModelMixin):
 
     @transaction.atomic
     def open(self):
-        from .bot import Bot
         self.lock_me()
 
-        if self.status in ['created', 'paused']:
+        if self.status in ['created', 'paused', 'frozen']:
             if self.status == 'created':
                 self.date_opened = timezone.now()
-
-                # double check bots aren't active and if so deactivate them
-                for bot in Bot.objects.all():
-                    if bot.active:
-                        bot.active = False
-                    bot.save()
 
             self.status = 'open'
             self.save()
@@ -98,14 +102,8 @@ class Competition(models.Model, LockableModelMixin):
     @transaction.atomic
     def try_to_close(self):
         from .round import Round
-        from .bot import Bot
-        if self.is_closing and Round.objects.filter(competition=self, complete=False).count() == 0 and \
-                Competition.objects.filter(id=self.id, status='closing') \
-                .update(status='closed', date_closed=timezone.now()) > 0:
-            # deactivate all bots
-            for bot in Bot.objects.all():
-                bot.active = False
-                bot.save()
+        if self.is_closing and Round.objects.filter(competition=self, complete=False).count() == 0:
+            Competition.objects.filter(id=self.id, status='closing').update(status='closed', date_closed=timezone.now())
             # todo: sanity check replay archive contents against results.
             # todo: then dump results data as JSON?
             # todo: then wipe all replay/log files?
@@ -121,4 +119,8 @@ class Competition(models.Model, LockableModelMixin):
 
     def as_html_link(self):
         return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
+
+    @property
+    def is_accepting_new_participants(self):
+        return self.status not in ['closing', 'closed']
 

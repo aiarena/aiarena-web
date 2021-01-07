@@ -316,9 +316,6 @@ class MatchReadyMixin(LoggedInMixin):
         config.MAX_USER_BOT_COUNT = 10
 
         self.test_client.login(self.staffUser1)
-        game = self.test_client.create_game('StarCraft II')
-        gamemode = self.test_client.create_gamemode('Melee', game.id)
-
         competition = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('testmap1', competition.id)
 
@@ -444,11 +441,17 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         bots = list(Bot.objects.all())
 
         competition1 = Competition.objects.get()
-        self.assertEqual(competition1.number, 1)
 
         # start a new round
         # response = self._post_to_matches()
         # self.assertEqual(response.status_code, 201)
+
+        # Freeze the competition - now we shouldn't receive any new matches
+        competition1.freeze()
+
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
 
         # Pause the competition and finish the round
         competition1.pause()
@@ -469,6 +472,12 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
         competition1.start_closing()
 
+        # Activating a bot should now fail
+        with self.assertRaisesMessage(ValidationError, 'That competition is not accepting new participants.'):
+            bot = Bot.objects.filter(competition_participations__isnull=True).first()
+            cp = CompetitionParticipation(competition=competition1, bot=bot)
+            cp.full_clean()  # causes validation to run
+
         # finish the competition
         self._finish_competition_rounds()
 
@@ -476,47 +485,45 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         competition1.refresh_from_db()
         self.assertEqual(competition1.status, 'closed')
 
-        # all bots should be deactivated
-        for bot in Bot.objects.all():
-            self.assertFalse(bot.active)
-
         # Activating a bot should fail
-        with self.assertRaises(ValidationError):
-            bot = Bot.objects.all()[0]
-            bot.active = True
-            bot.full_clean()
+        with self.assertRaisesMessage(ValidationError, 'That competition is not accepting new participants.'):
+            bot = Bot.objects.filter(competition_participations__isnull=True).first()
+            cp = CompetitionParticipation(competition=competition1, bot=bot)
+            cp.full_clean()  # causes validation to run
 
         # start a new competition
-        competition2 = Competition.objects.create()
-        self.assertEqual(competition2.number, 2)
+        competition2 = Competition.objects.create(game_mode=GameMode.objects.first())
 
-        # not enough active bots
+        # no currently available competitions
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'Not enough available bots for a match. Wait until more bots become available.',
+        self.assertEqual(u'There are no currently available competitions.',
                          response.data['detail'])
 
-        # activate the bots - this should be possible, but just in case
+        # active bots
         for bot in Bot.objects.all():
-            bot.active = True
-            bot.save()
+            CompetitionParticipation.objects.create(bot=bot, competition=competition2)
 
         # current competition is paused
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'The competition is paused.', response.data['detail'])
+        self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
 
         competition2.open()
-        # opening a competition deactivates bots, so reactivate
-        for bot in Bot.objects.all():
-            bot.active = True
-            bot.save()
 
         # check no bot display IDs have changed
         # they used to change in previous website versions - make sure they no longer do
         for bot in bots:
             updated_bot = Bot.objects.get(id=bot.id)
             self.assertEqual(updated_bot.game_display_id, bot.game_display_id)
+
+        # no maps
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_maps', response.data['detail'].code)
+
+        map = Map.objects.first()
+        map.competitions.add(competition2)
 
         # start a new round
         response = self._post_to_matches()

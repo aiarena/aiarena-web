@@ -25,7 +25,7 @@ class ACCoordinator:
 
     @staticmethod
     def next_competition_match(arenaclient: ArenaClient):
-        for competition in Competition.objects.filter(status__in=['open', 'closing']):
+        for competition in Competition.objects.filter(status__in=['open', 'closing', 'paused']):
             # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
             with transaction.atomic():
                 # this call will apply a select for update, so we do it inside an atomic block
