@@ -103,10 +103,6 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/matches/{0}/'.format(Match.objects.all()[0].id))
         self.assertEqual(response.status_code, 200)
 
-        # ranking
-        response = self.client.get('/ranking/')
-        self.assertEqual(response.status_code, 200)
-
         # results
         response = self.client.get('/results/')
         self.assertEqual(response.status_code, 200)
