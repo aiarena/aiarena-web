@@ -96,8 +96,8 @@ def shorten_naturaltime(naturaltime):
     naturaltime = " ".join(naturaltime.split())
     return (naturaltime
             .replace(' seconds', 's').replace(' second', 's')
-            .replace(' minutes', 'm').replace(' minute', 'm')
-            .replace(' hours', 'h').replace(' hour', 'h')
+            .replace(' minutes', 'm').replace('a minute', '1m')
+            .replace(' hours', 'h').replace('an hour', '1h')
             .replace(' days', 'd').replace(' day', 'd')
             .replace(' months', 'mon').replace(' month', 'mon')
             .replace(' weeks', 'w').replace(' week', 'w')
