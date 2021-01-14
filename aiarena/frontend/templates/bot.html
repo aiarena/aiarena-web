@@ -39,10 +39,6 @@
                     <td>{{ bot.get_type_display }}</td>
                 </tr>
                 <tr>
-                    <td><strong>Active</strong></td>
-                    <td>{{ bot.active }}</td>
-                </tr>
-                <tr>
                     <td><strong>Bot Zip</strong></td>
                     <td>
                         {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}

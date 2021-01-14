@@ -8,10 +8,6 @@
         </h2>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <h3>Melee Ladder</h3>
-            <p>Active: {{ form.active }}
-                {{ form.active.errors }}
-            </p>
             <p>Bot zip:<br/>
                 {{ form.bot_zip }}<br/>
                 Publicly downloadable: {{ form.bot_zip_publicly_downloadable }}
