@@ -73,7 +73,6 @@
         <td><strong>Name</strong></td>
         <td><strong>Race</strong></td>
         <td><strong>Type</strong></td>
-        <td><strong>Active</strong></td>
         <td><strong>Bot Zip</strong></td>
         <td><strong>Data</strong></td>
         <td></td>
@@ -83,7 +82,6 @@
                 <td>{{ bot.as_html_link }}</td>
                 <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.type }}</td>
-                <td>{{ bot.active }}</td>
                 <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
                 {% if bot.bot_data %}
                     <td><a href="{{ bot.bot_data.url }}">Download</a></td>
