@@ -69,7 +69,7 @@ class MatchParticipation(models.Model, LockableModelMixin):
     @cached_property
     def competition_participant(self):
         obj = self.__class__.objects.select_related('match', 'match__round', 'match__round__competition').get(id=self.id)
-        return obj.match.round.competition.competitionparticipation_set.get(bot_id=self.bot_id)
+        return obj.match.round.competition.participations.get(bot_id=self.bot_id)
 
     @cached_property
     def allow_parallel_run(self):
