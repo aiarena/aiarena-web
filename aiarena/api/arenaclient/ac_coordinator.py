@@ -25,7 +25,9 @@ class ACCoordinator:
 
     @staticmethod
     def next_competition_match(arenaclient: ArenaClient):
-        for competition in Competition.objects.filter(status__in=['open', 'closing', 'paused']):
+        # todo: apparently this is really slow
+        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
+        for competition in Competition.objects.filter(status__in=['open', 'closing', 'paused']).order_by('?'):
             # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
             with transaction.atomic():
                 # this call will apply a select for update, so we do it inside an atomic block
