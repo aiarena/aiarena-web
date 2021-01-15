@@ -59,10 +59,11 @@ def run_seed(matches, token):
         bot = Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race='T', type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
         bot = Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race='Z', type='python',
                                  bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
         Bot.objects.create(user=devadmin, name='devadmin_bot3', plays_race='P', type='python',
                            bot_zip=File(bot_zip))  # inactive bot
@@ -70,6 +71,7 @@ def run_seed(matches, token):
         bot = Bot.objects.create(user=devuser1, name='devuser1_bot1', plays_race='P', type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
         bot = Bot.objects.create(user=devuser1, name='devuser1_bot2', plays_race='Z', type='python',
                                  bot_zip=File(bot_zip))
@@ -95,11 +97,12 @@ def run_seed(matches, token):
 
         bot = Bot.objects.create(user=devuser4, name='devuser4_bot1', plays_race='Z', type='python',
                                  bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
         bot = Bot.objects.create(user=devuser5, name='devuser5_bot1', plays_race='P', type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
         # if token is None it will generate a new one, otherwise it will use the one specified
         api_token = Token.objects.create(user=arenaclient1, key=token)
@@ -112,14 +115,14 @@ def run_seed(matches, token):
             # todo: submit different types of results.
             client.submit_result(match.id, 'Player1Win')
 
-            # if x == 0:  # make it so a bot that once was active, is now inactive
-            #     bot1 = Match.objects.get(result__isnull=False).participant1.bot
-            #     bot1.active = False
-            #     bot1.save()
+            if x == 0:  # make it so a bot that once was active, is now inactive
+                bot1 = CompetitionParticipation.objects.filter(active=True).first()
+                bot1.active = False
+                bot1.save()
 
         # so we have a match in progress
-        # if matches != 0:
-        #     client.request_match()
+        if matches != 0:
+            client.request_match()
 
         return api_token
 
