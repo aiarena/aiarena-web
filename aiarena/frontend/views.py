@@ -3,6 +3,7 @@ from datetime import timedelta
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
+from django.http import Http404
 from django_select2.forms import Select2Widget, ModelSelect2Widget
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -345,7 +346,13 @@ class CompetitionParticipationList(SuccessMessageMixin, LoginRequiredMixin, Crea
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['competitionparticipation_list'] = CompetitionParticipation.objects.filter(bot_id=self.kwargs['pk'])
-        context['bot'] = Bot.objects.get(id=self.kwargs['pk'])
+
+        try:
+            context['bot'] = Bot.objects.get(id=self.kwargs['pk'], user=self.request.user)
+        except Bot.DoesNotExist:
+            # avoid users accessing another user's bot
+            raise Http404("No bot found matching the query")
+
         return context
 
     def get_form_kwargs(self):
@@ -362,7 +369,7 @@ class CompetitionParticipationList(SuccessMessageMixin, LoginRequiredMixin, Crea
         return reverse('login')
 
     def get_success_url(self):
-        return reverse('bot_competitions', kwargs={'pk': self.object.pk})
+        return reverse('bot_competitions', kwargs={'pk': self.object.bot_id})
 
 
 class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
