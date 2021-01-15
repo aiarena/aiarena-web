@@ -372,9 +372,18 @@ class CompetitionParticipationList(SuccessMessageMixin, LoginRequiredMixin, Crea
 
 
 class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
-    template_name = 'competitionparticipation_edit.html'
+    template_name = 'bot_competitionparticipation_edit.html'
     model = CompetitionParticipation
     fields = ['active',]
+
+    redirect_field_name = 'next'
+    success_message = "Competition participation saved."
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('bot_competitions', kwargs={'pk': self.kwargs['bot_id']})
 
 class AuthorList(ListView):
     queryset = User.objects.filter(is_active=1, type='WEBSITE_USER').order_by('username')
