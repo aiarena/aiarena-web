@@ -377,7 +377,7 @@ class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, Up
     fields = ['active',]
 
     redirect_field_name = 'next'
-    success_message = "Competition participation saved."
+    success_message = "Competition participation updated."
 
     def get_login_url(self):
         return reverse('login')
