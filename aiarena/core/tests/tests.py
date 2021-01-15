@@ -376,7 +376,7 @@ class BotTestCase(LoggedInMixin, TestCase):
     @FakeRedis("django_redis.get_redis_connection")
     def test_bot_creation_and_update(self):
         # set the configured per user limits for this test
-        config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE = 1
+        config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER = 1
         config.MAX_USER_BOT_COUNT = 4
 
         self.test_client.login(self.staffUser1)
