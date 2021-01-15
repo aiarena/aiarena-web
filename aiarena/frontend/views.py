@@ -328,8 +328,7 @@ class CompetitionParticipationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         bot_id = kwargs.pop('bot_id')
         super().__init__(*args, **kwargs)
-        self.fields['competition'].queryset = Competition.objects.exclude(participations__bot_id=bot_id)\
-            .filter(participations__isnull=True)
+        self.fields['competition'].queryset = Competition.objects.exclude(participations__bot_id=bot_id)
 
     class Meta:
         model = CompetitionParticipation
