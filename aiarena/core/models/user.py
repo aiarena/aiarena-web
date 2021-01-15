@@ -56,7 +56,7 @@ class User(AbstractUser):
     def as_html_link(self):
         return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url, escape(self.__str__())))
 
-    BOTS_PER_RACE_LIMIT_MAP = {
+    BOTS_LIMIT_MAP = {
         "none": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
         "bronze": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
         "silver": 2,
@@ -65,15 +65,15 @@ class User(AbstractUser):
         "diamond": None  # No limit
     }
 
-    def get_active_bots_per_race_limit(self):
-        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+    def get_active_bots_limit(self):
+        limit = self.BOTS_LIMIT_MAP[self.patreon_level]
         if limit is None:
             return None  # no limit
         else:
             return limit + self.extra_active_bots_per_race
 
-    def get_active_bots_per_race_limit_display(self):
-        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+    def get_active_bots_limit_display(self):
+        limit = self.BOTS_LIMIT_MAP[self.patreon_level]
         if limit is None:
             return 'unlimited'  # no limit
         else:

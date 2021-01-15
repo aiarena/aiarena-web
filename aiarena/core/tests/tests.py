@@ -421,12 +421,17 @@ class BotTestCase(LoggedInMixin, TestCase):
                                       'No more bots may be added for this user.'.format(config.MAX_USER_BOT_COUNT)):
             self._create_bot(self.regularUser1, 'testbot{0}'.format(config.MAX_USER_BOT_COUNT))
 
+
         # test active bots per race limit for user
-        # all bots should be the same race, so just pick any
+        # this shouldn't trip the validation
         inactive_bot = Bot.objects.filter(user=self.regularUser1, competition_participations__isnull=True).first()
+        cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=False)
+        cp.full_clean()
+
+        # this should trip the validation
         with self.assertRaisesMessage(ValidationError,
-                                      'Too many active bots playing that race already exist for this user.'
-                                      ' You are allowed 1 active bot(s) per race.'):
+                                      'Too many active participations already exist for this user.'
+                                      ' You are allowed 1 active participations.'):
             cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=True)
             cp.full_clean()
 
