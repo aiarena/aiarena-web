@@ -76,6 +76,7 @@
         <td><strong>Bot Zip</strong></td>
         <td><strong>Data</strong></td>
         <td></td>
+        <td></td>
         </thead>
         {% for bot in bot_list %}
             <tr>
@@ -89,6 +90,7 @@
                     <td>No bot data</td>
                 {% endif %}
                 <td><a href="{% url 'bot_edit' bot.pk %}">Edit</a></td>
+                <td><a href="{% url 'bot_competitions' bot.pk %}">Competitions</a></td>
             </tr>
         {% endfor %}
     </table>

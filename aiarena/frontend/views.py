@@ -323,6 +323,53 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         return super(BotUpdate, self).form_valid(form)
 
 
+class CompetitionParticipationForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        bot_id = kwargs.pop('bot_id')
+        super().__init__(*args, **kwargs)
+        self.fields['competition'].queryset = Competition.objects.exclude(participations__bot_id=bot_id)\
+            .filter(participations__isnull=True)
+
+    class Meta:
+        model = CompetitionParticipation
+        fields = ['competition', ]
+
+
+class CompetitionParticipationList(SuccessMessageMixin, LoginRequiredMixin, CreateView):
+    template_name = 'bot_competitions.html'
+    form_class = CompetitionParticipationForm
+
+    redirect_field_name = 'next'
+    success_message = "Competition joined."
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['competitionparticipation_list'] = CompetitionParticipation.objects.filter(bot_id=self.kwargs['pk'])
+        context['bot'] = Bot.objects.get(id=self.kwargs['pk'])
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'bot_id': self.kwargs['pk']})
+
+        # set the associated bot
+        if kwargs['instance'] is None:
+            kwargs['instance'] = CompetitionParticipation()
+        kwargs['instance'].bot = Bot.objects.get(pk=self.kwargs['pk'])
+        return kwargs
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('bot_competitions', kwargs={'pk': self.object.pk})
+
+
+class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    template_name = 'competitionparticipation_edit.html'
+    model = CompetitionParticipation
+    fields = ['active',]
+
 class AuthorList(ListView):
     queryset = User.objects.filter(is_active=1, type='WEBSITE_USER').order_by('username')
     template_name = 'authors.html'

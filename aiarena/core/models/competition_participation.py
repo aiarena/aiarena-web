@@ -19,7 +19,7 @@ def elo_graph_upload_to(instance, filename):
 
 
 class CompetitionParticipation(models.Model, LockableModelMixin):
-    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name='participations')
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='competition_participations')
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     match_count = models.IntegerField(default=0)
