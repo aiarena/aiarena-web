@@ -338,7 +338,7 @@ class MatchReadyMixin(LoggedInMixin):
         super().setUp()
 
         # raise the configured per user limits
-        config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
+        config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER = 10
         config.MAX_USER_BOT_COUNT = 10
 
         self.test_client.login(self.staffUser1)
@@ -376,7 +376,7 @@ class BotTestCase(LoggedInMixin, TestCase):
     @FakeRedis("django_redis.get_redis_connection")
     def test_bot_creation_and_update(self):
         # set the configured per user limits for this test
-        config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
+        config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE = 1
         config.MAX_USER_BOT_COUNT = 4
 
         self.test_client.login(self.staffUser1)
@@ -431,7 +431,7 @@ class BotTestCase(LoggedInMixin, TestCase):
         # this should trip the validation
         with self.assertRaisesMessage(ValidationError,
                                       'Too many active participations already exist for this user.'
-                                      ' You are allowed 1 active participations.'):
+                                      ' You are allowed 1 active participations in competitions.'):
             cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=True)
             cp.full_clean()
 

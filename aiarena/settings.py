@@ -198,7 +198,18 @@ CONSTANCE_CONFIG = {
     'BOT_CONSECUTIVE_CRASH_LIMIT': (0, 'The number of consecutive crashes after which a bot is deactivated. '
                                        'Any value below 1 will disable the check for this feature. Default: 0'),
     'MAX_USER_BOT_COUNT': (4, 'Maximum bots a user can have uploaded.'),
-    'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE': (1, 'Maximum active bots a user can have per race.'),
+    'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER': (4, 'Maximum active competition participations a free tier'
+                                                        ' user can have at one time.'),
+    'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER': (4, 'Maximum active competition participations a bronze tier'
+                                                          ' user can have at one time.'),
+    'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER': (8, 'Maximum active competition participations a silver tier'
+                                                          ' user can have at one time.'),
+    'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER': (16, 'Maximum active competition participations a gold tier'
+                                                          ' user can have at one time.'),
+    'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER': (32, 'Maximum active competition participations a platinum tier'
+                                                            ' user can have at one time.'),
+    'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER': (9999, 'Maximum active competition participations a diamond tier'
+                                                          ' user can have at one time.'),
     'DEBUG_LOGGING_ENABLED': (False, 'Enable debug logging. '
                                      'This will log extra data for debugging throughout the website. '
                                      'It will also propagate the setting to the arena clients'),
@@ -251,7 +262,10 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
-    'Bots': ('BOT_UPLOADS_ENABLED', 'MAX_USER_BOT_COUNT', 'MAX_USER_BOT_COUNT_ACTIVE_PER_RACE',),
+    'Bots': ('BOT_UPLOADS_ENABLED', 'MAX_USER_BOT_COUNT', 'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER',
+             'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER', 'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER',
+             'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER', 'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER',
+             'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER',),
     'General': ('DEBUG_LOGGING_ENABLED', 'GETTING_STARTED_URL', 'HOUSE_BOTS_USER_ID', 'ALLOW_REQUESTED_MATCHES',
                 'ENABLE_ELO_SANITY_CHECK', 'PUBLIC_BANNER_MESSAGE', 'LOGGED_IN_BANNER_MESSAGE', 'ELO_TREND_N_MATCHES'),
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',

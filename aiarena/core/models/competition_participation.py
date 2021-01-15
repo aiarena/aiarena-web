@@ -43,7 +43,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
                     .filter(bot__user=self.bot.user, active=True).count() >= bot_limit:
                 raise ValidationError(
                         'Too many active participations already exist for this user.'
-                        ' You are allowed ' + str(bot_limit) + ' active participations.')
+                        ' You are allowed ' + str(bot_limit) + ' active participations in competitions.')
         super().validate_unique(exclude=exclude)
         
 

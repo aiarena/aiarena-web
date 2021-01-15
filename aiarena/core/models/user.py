@@ -57,12 +57,12 @@ class User(AbstractUser):
         return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url, escape(self.__str__())))
 
     BOTS_LIMIT_MAP = {
-        "none": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
-        "bronze": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
-        "silver": 2,
-        "gold": 3,
-        "platinum": 5,
-        "diamond": None  # No limit
+        "none": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
+        "bronze": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
+        "silver": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
+        "gold": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
+        "platinum": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
+        "diamond": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER
     }
 
     def get_active_bots_limit(self):
