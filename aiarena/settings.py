@@ -197,7 +197,7 @@ CONSTANCE_CONFIG = {
                                          'when an arena client requests a match.'),
     'BOT_CONSECUTIVE_CRASH_LIMIT': (0, 'The number of consecutive crashes after which a bot is deactivated. '
                                        'Any value below 1 will disable the check for this feature. Default: 0'),
-    'MAX_USER_BOT_COUNT': (4, 'Maximum bots a user can have uploaded.'),
+    'MAX_USER_BOT_COUNT': (20, 'Maximum bots a user can have uploaded.'),
     'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER': (4, 'Maximum active competition participations a free tier'
                                                         ' user can have at one time.'),
     'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER': (4, 'Maximum active competition participations a bronze tier'

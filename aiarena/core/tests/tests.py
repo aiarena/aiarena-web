@@ -96,8 +96,8 @@ class BaseTestMixin(object):
 
     @FakeRedis("django_redis.get_redis_connection")
     def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race='T'):
-        with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python')
+        with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
             bot.full_clean()
             bot.save()
             CompetitionParticipation.objects.create(bot_id=bot.id, competition_id=competition_id)
@@ -375,23 +375,24 @@ class BotTestCase(LoggedInMixin, TestCase):
 
     @FakeRedis("django_redis.get_redis_connection")
     def test_bot_creation_and_update(self):
-        # set the configured per user limits for this test
-        config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER = 1
-        config.MAX_USER_BOT_COUNT = 4
 
         self.test_client.login(self.staffUser1)
 
         # required for active bot
         competition = self._create_game_mode_and_open_competition()
 
-        # create active bot along with bot data
-        with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
-            bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data),
-                       plays_race='T', type='python')
-            bot1.full_clean()
-            bot1.save()
-            CompetitionParticipation.objects.create(competition=competition, bot=bot1, active=True)
+        # test max bots for user
+        for i in range(0, config.MAX_USER_BOT_COUNT):
+            if i < config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER:
+                self._create_active_bot_for_competition(competition.id, self.regularUser1, 'testbot{0}'.format(i))
+            else:
+                self._create_bot(self.regularUser1, 'testbot{0}'.format(i))
+        with self.assertRaisesMessage(ValidationError,
+                                      'Maximum bot count of {0} already reached. '
+                                      'No more bots may be added for this user.'.format(config.MAX_USER_BOT_COUNT)):
+            self._create_bot(self.regularUser1, 'testbot{0}'.format(config.MAX_USER_BOT_COUNT))
 
+        bot1 = Bot.objects.first()
 
         # test display id regen
         prev_bot_display_id = bot1.game_display_id
@@ -413,13 +414,6 @@ class BotTestCase(LoggedInMixin, TestCase):
         # check the bot file backup now exists
         self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip_backup'.format(bot1.id)))
 
-        # test max bots for user
-        for i in range(1, config.MAX_USER_BOT_COUNT):
-            self._create_bot(self.regularUser1, 'testbot{0}'.format(i))
-        with self.assertRaisesMessage(ValidationError,
-                                      'Maximum bot count of {0} already reached. '
-                                      'No more bots may be added for this user.'.format(config.MAX_USER_BOT_COUNT)):
-            self._create_bot(self.regularUser1, 'testbot{0}'.format(config.MAX_USER_BOT_COUNT))
 
 
         # test active bots per race limit for user
@@ -431,7 +425,7 @@ class BotTestCase(LoggedInMixin, TestCase):
         # this should trip the validation
         with self.assertRaisesMessage(ValidationError,
                                       'Too many active participations already exist for this user.'
-                                      ' You are allowed 1 active participations in competitions.'):
+                                      ' You are allowed 4 active participations in competitions.'):
             cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=True)
             cp.full_clean()
 
