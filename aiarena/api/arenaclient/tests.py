@@ -558,7 +558,11 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         # avoid old tests breaking that were pre-this feature
         config.REISSUE_UNFINISHED_MATCHES = False
 
-        botCount = CompetitionParticipation.objects.filter(active=True).count()
+        # freeze every comp but one, so we can get anticipatable results
+        active_comp = Competition.objects.filter(status='open').first()
+        Competition.objects.exclude(id=active_comp.id).update(status='frozen')
+
+        botCount = CompetitionParticipation.objects.filter(active=True, competition=active_comp).count()
         expectedMatchCountPerRound = int(botCount / 2 * (botCount - 1))
         self.assertGreater(botCount, 1)  # check we have more than 1 bot
 

@@ -72,8 +72,8 @@ class BaseTestMixin(object):
         return map
 
     @FakeRedis("django_redis.get_redis_connection")
-    def _create_open_competition(self, gamemode_id: int):
-        competition = Competition.objects.create(name='Competition 1', type='L', game_mode_id=gamemode_id)
+    def _create_open_competition(self, gamemode_id: int, name='Competition 1'):
+        competition = Competition.objects.create(name=name, type='L', game_mode_id=gamemode_id)
         competition.open()
         return competition
 
@@ -288,7 +288,7 @@ class BaseTestMixin(object):
 
     @FakeRedis("django_redis.get_redis_connection")
     def _generate_extra_bots(self):
-        competition = Competition.objects.get()
+        competition = Competition.objects.order_by('id').first()
         self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
         self.regularUser2Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser2, 'regularUser2Bot2')
         self.regularUser3Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser3, 'regularUser3Bot1')
@@ -347,9 +347,21 @@ class MatchReadyMixin(LoggedInMixin):
 
         self.regularUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot1', 'T')
         self.regularUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot2', 'Z')
-        self.regularUser1Bot2 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
+        self.regularUser1Bot3 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
         self.staffUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot1', 'T')
         self.staffUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot2', 'Z')
+
+        # add another competition
+        game_mode = GameMode.objects.first()
+        competition2 = self._create_open_competition(game_mode.id, "Competition 2")
+        self._create_map_for_competition('testmap2', competition2.id)
+
+        # use some existing bots
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot1.id, competition_id=competition2.id)
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot1.id, competition_id=competition2.id)
+        # and also create some new bots
+        self.regularUser1Bot4 = self._create_active_bot_for_competition(competition2.id, self.regularUser1, 'regularUser1Bot4', 'P')
+        self.staffUser1Bot3 = self._create_active_bot_for_competition(competition2.id, self.staffUser1, 'staffUser1Bot3', 'P')
 
 
 # Use this to pre-build a fuller dataset for testing
@@ -453,8 +465,8 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
     """
 
     @FakeRedis("django_redis.get_redis_connection")
-    def _finish_competition_rounds(self):
-        for x in range(Match.objects.filter(result__isnull=True).count()):
+    def _finish_competition_rounds(self, exclude_competition_id):
+        for x in range(Match.objects.exclude(round__competition_id=exclude_competition_id).filter(result__isnull=True).count()):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
 
@@ -465,17 +477,16 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
     def test_competition_states(self):
         self.client.force_login(self.arenaclientUser1)
 
-        self.assertEqual(Match.objects.filter(result__isnull=True).count(), 15,
-                         msg='This test expects 15 unplayed matches in order to work.')
+        # freeze competition2, so we can get anticipatable results
+        competition1 = Competition.objects.filter(status='open').first()
+        competition2 = Competition.objects.exclude(id=competition1.id).get()
+        competition2.freeze()
+
+        self.assertEqual(Match.objects.exclude(round__competition_id=competition2.id).filter(result__isnull=True)
+                         .count(), 19, msg='This test expects 19 unplayed matches in order to work.')
 
         # cache the bots - list forces the queryset to be evaluated
         bots = list(Bot.objects.all())
-
-        competition1 = Competition.objects.get()
-
-        # start a new round
-        # response = self._post_to_matches()
-        # self.assertEqual(response.status_code, 201)
 
         # Freeze the competition - now we shouldn't receive any new matches
         competition1.freeze()
@@ -487,7 +498,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         # Pause the competition and finish the round
         competition1.pause()
 
-        self._finish_competition_rounds()
+        self._finish_competition_rounds(competition2.id)
 
         # this should fail due to a new round trying to generate while the competition is paused
         response = self._post_to_matches()
@@ -510,7 +521,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
             cp.full_clean()  # causes validation to run
 
         # finish the competition
-        self._finish_competition_rounds()
+        self._finish_competition_rounds(competition2.id)
 
         # successful close
         competition1.refresh_from_db()
@@ -572,7 +583,12 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
     @FakeRedis("django_redis.get_redis_connection")
     def test_cancel_matches(self):
-        count = CompetitionParticipation.objects.filter(active=True).count()
+        # freeze competition2, so we can get anticipatable results
+        competition1 = Competition.objects.filter(status='open').first()
+        competition2 = Competition.objects.exclude(id=competition1.id).get()
+        competition2.freeze()
+
+        count = CompetitionParticipation.objects.filter(competition_id=competition1.id, active=True).count()
         expectedMatchCountPerRound = int(count / 2 * (count - 1))
 
         # test match doesn't exist
