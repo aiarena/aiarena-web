@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 import logging
 
 from constance import config
-from django.db import transaction
+from django.db import transaction, connection
 from django.db.models import F
 
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoCurrentlyAvailableCompetitions
@@ -25,9 +25,9 @@ class ACCoordinator:
 
     @staticmethod
     def next_competition_match(arenaclient: ArenaClient):
-        # todo: apparently this is really slow
-        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        for competition in Competition.objects.filter(status__in=['open', 'closing', 'paused']).order_by('?'):
+        competition_ids = ACCoordinator._get_competition_priority_order()
+        for id in competition_ids:
+            competition = Competition.objects.get(id=id)
             # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
             with transaction.atomic():
                 # this call will apply a select for update, so we do it inside an atomic block
@@ -56,3 +56,54 @@ class ACCoordinator:
                 raise
         else:
             raise LadderDisabled()
+
+    @staticmethod
+    def _get_competition_priority_order():
+        """
+        Returns a list of competition ids in priority order with respect to the current number of active participants
+         in each competition verses each competition's share of the most recent 100 matches.
+         In otherwords, campetitions with higher active participant counts should play more matches overall.
+        :return:
+        """
+        with connection.cursor() as cursor:
+            # I don't know why but for some reason CTEs didn't work so here; have a massive query.
+            cursor.execute("""
+                select perc_active.competition_id
+                from (select competition_id, competition_participations.competition_participations_cnt / total_active_cnt as perc_active
+                      from (select cp.competition_id, count(cp.competition_id) competition_participations_cnt
+                            from core_competitionparticipation cp
+                                     join core_competition cc on cp.competition_id = cc.id
+                            where cp.active = 1
+                              and cc.status in ('open', 'closing', 'paused')
+                            group by cp.competition_id) as competition_participations
+                               join
+                           (select count(*) total_active_cnt
+                            from core_competitionparticipation cp
+                                     join core_competition cc on cp.competition_id = cc.id
+                            where cp.active = 1
+                              and cc.status in ('open', 'closing', 'paused')) as competition_participations_total) as perc_active
+                         left join
+                     (select competition_id, perc_recent_matches_cnt / recent_matches_total_cnt as perc_recent_matches
+                      from (select competition_id, count(competition_id) perc_recent_matches_cnt
+                            from (select competition_id
+                                  from core_match cm
+                                           join core_round cr on cm.round_id = cr.id
+                                           join core_competition cc on cr.competition_id = cc.id
+                                  where cm.started is not null
+                                    and cc.status in ('open', 'closing', 'paused')
+                                  order by cm.started desc
+                                  limit 100) as matches
+                            group by competition_id) as recent_matches
+                               join
+                           (select count(*) recent_matches_total_cnt
+                            from core_match cm
+                                     join core_round cr on cm.round_id = cr.id
+                                     join core_competition cc on cr.competition_id = cc.id
+                            where cm.started is not null
+                              and cc.status in ('open', 'closing', 'paused')
+                            order by cm.started desc
+                            limit 100) as recent_matches_total) as perc_recent_matches
+                     on perc_recent_matches.competition_id = perc_active.competition_id
+                order by COALESCE(perc_recent_matches, 0) - perc_active
+            """)
+            return [row[0] for row in cursor.fetchall()]  # return competition ids
