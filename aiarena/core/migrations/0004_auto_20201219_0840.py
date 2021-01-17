@@ -9,7 +9,7 @@ from aiarena.core.models.game_type import GameMode
 
 def update_name(apps, schema_editor):
     # set initial names
-    for competition in Competition.objects.all():
+    for competition in Competition.objects.only('id').all():
         competition.name = f"AI Arena - Season {competition.id}"
         competition.save()
 
