@@ -52,8 +52,24 @@
     ```
     python manage.py seed
     ```
+    
+9. Change Redis caches to Dummies in `aiarena/settings.py`
+    ```
+    CACHES = {
+        "default": {	
+            # "BACKEND": "django_redis.cache.RedisCache",
+            "BACKEND": 'django.core.cache.backends.dummy.DummyCache',
+            ...
+        },
+        'select2': {
+            # "BACKEND": "django_redis.cache.RedisCache",
+            "BACKEND": 'django.core.cache.backends.dummy.DummyCache',
+            ...
+        }
+    }
+    ```
 
-9. Launch the Website then navigate your browser to `http://127.0.0.1:8000/`
+10. Launch the Website then navigate your browser to `http://127.0.0.1:8000/`
     ```
     python manage.py runserver
     ```
