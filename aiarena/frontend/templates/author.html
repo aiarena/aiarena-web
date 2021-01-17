@@ -31,14 +31,12 @@
         <td><strong>Name</strong></td>
         <td><strong>Type</strong></td>
         <td><strong>Race</strong></td>
-        <td><strong>Active</strong></td>
         </thead>
         {% for bot in bot_list %}
             <tr>
                 <td>{{ bot.as_html_link }}</td>
                 <td>{{ bot.type }}</td>
                 <td>{{ bot.get_plays_race_display }}</td>
-                <td>{{ bot.active }}</td>
             </tr>
         {% endfor %}
     </table>

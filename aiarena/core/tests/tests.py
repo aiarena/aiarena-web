@@ -9,10 +9,13 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command, CommandError
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
+from rest_framework.authtoken.models import Token
 
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
-from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Season, Round, ArenaClient
+from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
+    CompetitionParticipation
+from aiarena.core.models.game_type import GameMode
 from aiarena.core.utils import calculate_md5
 
 from django_fakeredis import FakeRedis
@@ -57,14 +60,30 @@ class BaseTestMixin(object):
     test_map_path = 'aiarena/core/tests/test-media/AutomatonLE.SC2Map'
 
     @FakeRedis("django_redis.get_redis_connection")
-    def _create_map(self, name):
-        return Map.objects.create(name=name, active=True)
+    def setUp(self):
+        from aiarena.core.tests.testing_utils import TestingClient  # avoid circular import
+        self.test_client = TestingClient(self.client)
 
     @FakeRedis("django_redis.get_redis_connection")
-    def _create_open_season(self):
-        season = Season.objects.create(previous_season_files_cleaned=True)
-        season.open()
-        return season
+    def _create_map_for_competition(self, name, competition_id):
+        competition = Competition.objects.get(id=competition_id)
+        map = Map.objects.create(name=name, game_mode=competition.game_mode)
+        map.competitions.add(competition)
+        return map
+
+    @FakeRedis("django_redis.get_redis_connection")
+    def _create_open_competition(self, gamemode_id: int, name='Competition 1'):
+        competition = Competition.objects.create(name=name, type='L', game_mode_id=gamemode_id)
+        competition.open()
+        return competition
+
+    @FakeRedis("django_redis.get_redis_connection")
+    def _create_game_mode_and_open_competition(self):
+        game = self.test_client.create_game("StarCraft II")
+        gamde_mode = self.test_client.create_gamemode('Melee', game.id)
+        competition = self.test_client.create_competition('Competition 1', 'L', gamde_mode.id)
+        self.test_client.open_competition(competition.id)
+        return competition
 
     @FakeRedis("django_redis.get_redis_connection")
     def _create_bot(self, user, name, plays_race='T'):
@@ -76,11 +95,12 @@ class BaseTestMixin(object):
             return bot
 
     @FakeRedis("django_redis.get_redis_connection")
-    def _create_active_bot(self, user, name, plays_race='T'):
-        with open(self.test_bot_zip_path, 'rb') as bot_zip:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), plays_race=plays_race, type='python', active=True)
+    def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race='T'):
+        with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
             bot.full_clean()
             bot.save()
+            CompetitionParticipation.objects.create(bot_id=bot.id, competition_id=competition_id)
             return bot
 
     @FakeRedis("django_redis.get_redis_connection")
@@ -192,26 +212,27 @@ class BaseTestMixin(object):
 
     @FakeRedis("django_redis.get_redis_connection")
     def _generate_full_data_set(self):
-        self.client.login(username='staff_user', password='x')
+        self.test_client.login(User.objects.get(username='staff_user'))
 
-        self._create_map('testmap2')
         self._generate_extra_users()
         self._generate_extra_bots()
 
         self._generate_match_activity()
 
         # generate a bot match request to ensure it doesn't bug things out
-        bot = Bot.get_random_active()
-        Matches.request_match(self.regularUser2, bot, bot.get_random_active_excluding_self())
+        from aiarena.core.api import Bots  # avoid circular reference
+        game_mode = GameMode.objects.get(name='Melee')
+        bots = Bots.get_available(Bot.objects.all())
+        Matches.request_match(self.regularUser2, bots[0], bots[0].get_random_active_excluding_self(), game_mode=game_mode)
 
         # generate match requests from regularUser1
         bot = Bot.get_random_active()
-        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self())
-        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self())
+        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
+        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
         bot = Bot.get_random_active()
-        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self())
+        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
 
-        self.client.logout()  # child tests can login if they require
+        self.test_client.logout()  # child tests can login if they require
 
     @FakeRedis("django_redis.get_redis_connection")
     def _generate_match_activity(self):
@@ -267,10 +288,11 @@ class BaseTestMixin(object):
 
     @FakeRedis("django_redis.get_redis_connection")
     def _generate_extra_bots(self):
+        competition = Competition.objects.order_by('id').first()
         self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
-        self.regularUser2Bot2 = self._create_active_bot(self.regularUser2, 'regularUser2Bot2')
-        self.regularUser3Bot1 = self._create_active_bot(self.regularUser3, 'regularUser3Bot1')
-        self.regularUser3Bot2 = self._create_active_bot(self.regularUser3, 'regularUser3Bot2', 'Z')
+        self.regularUser2Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser2, 'regularUser2Bot2')
+        self.regularUser3Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser3, 'regularUser3Bot1')
+        self.regularUser3Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser3, 'regularUser3Bot2', 'Z')
         self.regularUser4Bot1 = self._create_bot(self.regularUser4, 'regularUser4Bot1')
         self.regularUser4Bot2 = self._create_bot(self.regularUser4, 'regularUser4Bot2')
 
@@ -291,12 +313,17 @@ class LoggedInMixin(BaseTestMixin):
 
     @FakeRedis("django_redis.get_redis_connection")
     def setUp(self):
+        super().setUp()
         self.staffUser1 = User.objects.create_user(username='staff_user', password='x',
                                                    email='staff_user@dev.aiarena.net',
-                                                   is_staff=True)
+                                                   is_staff=True,
+                                                   is_superuser=True,
+                                                   is_active=True)
 
         self.arenaclientUser1 = ArenaClient.objects.create(username='arenaclient1', email='arenaclient@dev.aiarena.net',
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
+        Token.objects.create(user=self.arenaclientUser1)
+
         self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
                                                      email='regular_user1@dev.aiarena.net')
 
@@ -308,20 +335,33 @@ class MatchReadyMixin(LoggedInMixin):
 
     @FakeRedis("django_redis.get_redis_connection")
     def setUp(self):
-        super(MatchReadyMixin, self).setUp()
+        super().setUp()
 
         # raise the configured per user limits
-        config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 10
+        config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER = 10
         config.MAX_USER_BOT_COUNT = 10
 
-        self._create_open_season()
-        self._create_map('testmap1')
+        self.test_client.login(self.staffUser1)
+        competition = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('testmap1', competition.id)
 
-        self.regularUser1Bot1 = self._create_active_bot(self.regularUser1, 'regularUser1Bot1', 'T')
-        self.regularUser1Bot2 = self._create_active_bot(self.regularUser1, 'regularUser1Bot2', 'Z')
-        self.regularUser1Bot2 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
-        self.staffUser1Bot1 = self._create_active_bot(self.staffUser1, 'staffUser1Bot1', 'T')
-        self.staffUser1Bot2 = self._create_active_bot(self.staffUser1, 'staffUser1Bot2', 'Z')
+        self.regularUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot1', 'T')
+        self.regularUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot2', 'Z')
+        self.regularUser1Bot3 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
+        self.staffUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot1', 'T')
+        self.staffUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot2', 'Z')
+
+        # add another competition
+        game_mode = GameMode.objects.first()
+        competition2 = self._create_open_competition(game_mode.id, "Competition 2")
+        self._create_map_for_competition('testmap2', competition2.id)
+
+        # use some existing bots
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot1.id, competition_id=competition2.id)
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot1.id, competition_id=competition2.id)
+        # and also create some new bots
+        self.regularUser1Bot4 = self._create_active_bot_for_competition(competition2.id, self.regularUser1, 'regularUser1Bot4', 'P')
+        self.staffUser1Bot3 = self._create_active_bot_for_competition(competition2.id, self.staffUser1, 'staffUser1Bot3', 'P')
 
 
 # Use this to pre-build a fuller dataset for testing
@@ -332,7 +372,7 @@ class FullDataSetMixin(MatchReadyMixin):
 
     @FakeRedis("django_redis.get_redis_connection")
     def setUp(self):
-        super(FullDataSetMixin, self).setUp()
+        super().setUp()
         self._generate_full_data_set()
 
 
@@ -347,19 +387,24 @@ class BotTestCase(LoggedInMixin, TestCase):
 
     @FakeRedis("django_redis.get_redis_connection")
     def test_bot_creation_and_update(self):
-        # set the configured per user limits for this test
-        config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE = 1
-        config.MAX_USER_BOT_COUNT = 4
+
+        self.test_client.login(self.staffUser1)
 
         # required for active bot
-        self._create_open_season()
+        competition = self._create_game_mode_and_open_competition()
 
-        # create bot along with bot data
-        with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
-            bot1 = Bot(user=self.regularUser1, name='testbot', bot_zip=File(bot_zip), bot_data=File(bot_data),
-                       plays_race='T', type='python', active=True)
-            bot1.full_clean()
-            bot1.save()
+        # test max bots for user
+        for i in range(0, config.MAX_USER_BOT_COUNT):
+            if i < config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER:
+                self._create_active_bot_for_competition(competition.id, self.regularUser1, 'testbot{0}'.format(i))
+            else:
+                self._create_bot(self.regularUser1, 'testbot{0}'.format(i))
+        with self.assertRaisesMessage(ValidationError,
+                                      'Maximum bot count of {0} already reached. '
+                                      'No more bots may be added for this user.'.format(config.MAX_USER_BOT_COUNT)):
+            self._create_bot(self.regularUser1, 'testbot{0}'.format(config.MAX_USER_BOT_COUNT))
+
+        bot1 = Bot.objects.first()
 
         # test display id regen
         prev_bot_display_id = bot1.game_display_id
@@ -381,22 +426,20 @@ class BotTestCase(LoggedInMixin, TestCase):
         # check the bot file backup now exists
         self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip_backup'.format(bot1.id)))
 
-        # test max bots for user
-        for i in range(1, config.MAX_USER_BOT_COUNT):
-            self._create_bot(self.regularUser1, 'testbot{0}'.format(i))
-        with self.assertRaisesMessage(ValidationError,
-                                      'Maximum bot count of {0} already reached. '
-                                      'No more bots may be added for this user.'.format(config.MAX_USER_BOT_COUNT)):
-            self._create_bot(self.regularUser1, 'testbot{0}'.format(config.MAX_USER_BOT_COUNT))
+
 
         # test active bots per race limit for user
-        # all bots should be the same race, so just pick any
-        inactive_bot = Bot.objects.filter(user=self.regularUser1, active=False)[0]
+        # this shouldn't trip the validation
+        inactive_bot = Bot.objects.filter(user=self.regularUser1, competition_participations__isnull=True).first()
+        cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=False)
+        cp.full_clean()
+
+        # this should trip the validation
         with self.assertRaisesMessage(ValidationError,
-                                      'Too many active bots playing that race already exist for this user.'
-                                      ' You are allowed 1 active bot(s) per race.'):
-            inactive_bot.active = True
-            inactive_bot.full_clean()  # run validation
+                                      'Too many active participations already exist for this user.'
+                                      ' You are allowed 4 active participations in competitions.'):
+            cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=True)
+            cp.full_clean()
 
         # test updating bot_zip
         with open(self.test_bot_zip_updated_path, 'rb') as bot_zip_updated:
@@ -416,14 +459,14 @@ class BotTestCase(LoggedInMixin, TestCase):
         self.assertEqual(self.test_bot_datas['bot2'][0]['hash'], bot1.bot_data_md5hash)
 
 
-class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
+class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
     """
-    Test season rotation
+    Test competition rotation
     """
 
     @FakeRedis("django_redis.get_redis_connection")
-    def _finish_season_rounds(self):
-        for x in range(Match.objects.filter(result__isnull=True).count()):
+    def _finish_competition_rounds(self, exclude_competition_id):
+        for x in range(Match.objects.exclude(round__competition_id=exclude_competition_id).filter(result__isnull=True).count()):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
 
@@ -431,83 +474,84 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
             self.assertEqual(response.status_code, 201)
 
     @FakeRedis("django_redis.get_redis_connection")
-    def test_season_states(self):
+    def test_competition_states(self):
         self.client.force_login(self.arenaclientUser1)
 
-        self.assertEqual(Match.objects.filter(result__isnull=True).count(), 15,
-                         msg='This test expects 15 unplayed matches in order to work.')
+        # freeze competition2, so we can get anticipatable results
+        competition1 = Competition.objects.filter(status='open').first()
+        competition2 = Competition.objects.exclude(id=competition1.id).get()
+        competition2.freeze()
+
+        self.assertEqual(Match.objects.exclude(round__competition_id=competition2.id).filter(result__isnull=True)
+                         .count(), 19, msg='This test expects 19 unplayed matches in order to work.')
 
         # cache the bots - list forces the queryset to be evaluated
         bots = list(Bot.objects.all())
 
-        season1 = Season.objects.get()
-        self.assertEqual(season1.number, 1)
+        # Freeze the competition - now we shouldn't receive any new matches
+        competition1.freeze()
 
-        # start a new round
-        # response = self._post_to_matches()
-        # self.assertEqual(response.status_code, 201)
-
-        # Pause the season and finish the round
-        season1.pause()
-
-        self._finish_season_rounds()
-
-        # this should fail due to a new round trying to generate while the season is paused
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'The current season is paused.', response.data['detail'])
+        self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
 
-        # reopen the season
-        season1.open()
+        # Pause the competition and finish the round
+        competition1.pause()
+
+        self._finish_competition_rounds(competition2.id)
+
+        # this should fail due to a new round trying to generate while the competition is paused
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'The competition is paused.', response.data['detail'])
+
+        # reopen the competition
+        competition1.open()
 
         # start a new round
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
 
-        season1.start_closing()
+        competition1.start_closing()
 
-        # finish the season
-        self._finish_season_rounds()
+        # Activating a bot should now fail
+        with self.assertRaisesMessage(ValidationError, 'That competition is not accepting new participants.'):
+            bot = Bot.objects.filter(competition_participations__isnull=True).first()
+            cp = CompetitionParticipation(competition=competition1, bot=bot)
+            cp.full_clean()  # causes validation to run
+
+        # finish the competition
+        self._finish_competition_rounds(competition2.id)
 
         # successful close
-        season1.refresh_from_db()
-        self.assertEqual(season1.status, 'closed')
-
-        # all bots should be deactivated
-        for bot in Bot.objects.all():
-            self.assertFalse(bot.active)
+        competition1.refresh_from_db()
+        self.assertEqual(competition1.status, 'closed')
 
         # Activating a bot should fail
-        with self.assertRaises(ValidationError):
-            bot = Bot.objects.all()[0]
-            bot.active = True
-            bot.full_clean()
+        with self.assertRaisesMessage(ValidationError, 'That competition is not accepting new participants.'):
+            bot = Bot.objects.filter(competition_participations__isnull=True).first()
+            cp = CompetitionParticipation(competition=competition1, bot=bot)
+            cp.full_clean()  # causes validation to run
 
-        # start a new season
-        season2 = Season.objects.create(previous_season_files_cleaned=True)
-        self.assertEqual(season2.number, 2)
+        # start a new competition
+        competition2 = Competition.objects.create(game_mode=GameMode.objects.first())
 
-        # not enough active bots
+        # no currently available competitions
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'Not enough available bots for a match. Wait until more bots become available.',
+        self.assertEqual(u'There are no currently available competitions.',
                          response.data['detail'])
 
-        # activate the bots - this should be possible, but just in case
+        # active bots
         for bot in Bot.objects.all():
-            bot.active = True
-            bot.save()
+            CompetitionParticipation.objects.create(bot=bot, competition=competition2)
 
-        # current season is paused
+        # current competition is paused
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'The current season is paused.', response.data['detail'])
+        self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
 
-        season2.open()
-        # opening a season deactivates bots, so reactivate
-        for bot in Bot.objects.all():
-            bot.active = True
-            bot.save()
+        competition2.open()
 
         # check no bot display IDs have changed
         # they used to change in previous website versions - make sure they no longer do
@@ -515,12 +559,20 @@ class SeasonsTestCase(FullDataSetMixin, TransactionTestCase):
             updated_bot = Bot.objects.get(id=bot.id)
             self.assertEqual(updated_bot.game_display_id, bot.game_display_id)
 
+        # no maps
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(u'no_maps', response.data['detail'].code)
+
+        map = Map.objects.first()
+        map.competitions.add(competition2)
+
         # start a new round
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
 
-        # New round should be number 1 for the new season
-        round = Round.objects.get(season=season2)
+        # New round should be number 1 for the new competition
+        round = Round.objects.get(competition=competition2)
         self.assertEqual(round.number, 1)
 
 
@@ -531,8 +583,13 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
     @FakeRedis("django_redis.get_redis_connection")
     def test_cancel_matches(self):
-        botCount = Bot.objects.filter(active=True).count()
-        expectedMatchCountPerRound = int(botCount / 2 * (botCount - 1))
+        # freeze competition2, so we can get anticipatable results
+        competition1 = Competition.objects.filter(status='open').first()
+        competition2 = Competition.objects.exclude(id=competition1.id).get()
+        competition2.freeze()
+
+        count = CompetitionParticipation.objects.filter(competition_id=competition1.id, active=True).count()
+        expectedMatchCountPerRound = int(count / 2 * (count - 1))
 
         # test match doesn't exist
         with self.assertRaisesMessage(CommandError, 'Match "12345" does not exist'):
@@ -662,10 +719,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIn('Done', out.getvalue())
 
     @FakeRedis("django_redis.get_redis_connection")
-    def test_generatestats_season(self):
+    def test_generatestats_competition(self):
         self._generate_full_data_set()
         out = StringIO()
-        call_command('generatestats', '--seasonid', '1', stdout=out)
+        call_command('generatestats', '--competitionid', '1', stdout=out)
         self.assertIn('Done', out.getvalue())
 
     @FakeRedis("django_redis.get_redis_connection")

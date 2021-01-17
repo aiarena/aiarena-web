@@ -1,8 +1,10 @@
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 
-from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Season, \
-    SeasonBotMatchupStats, SeasonParticipation, Trophy, TrophyIcon, User, News
+from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
+    CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News
+from aiarena.core.models.game import Game
+from aiarena.core.models.game_type import GameMode
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -20,7 +22,6 @@ class BotInline(StackedItemInline):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    inlines = [BotInline]
     search_fields = ('username',)
     list_display = (
         'id',
@@ -36,7 +37,7 @@ class UserAdmin(admin.ModelAdmin):
         'email',
         'patreon_level',
         'type',
-        'extra_active_bots_per_race',
+        'extra_active_competition_participations',
         'extra_periodic_match_requests',
         'receive_email_comms',
         'can_request_games_for_another_authors_bot',
@@ -71,7 +72,7 @@ class ArenaClientAdmin(admin.ModelAdmin):
         'patreon_level',
         'type',
         'owner',
-        'extra_active_bots_per_race',
+        'extra_active_competition_participations',
         'extra_periodic_match_requests',
         'receive_email_comms',
         'can_request_games_for_another_authors_bot',
@@ -92,70 +93,49 @@ class ArenaClientAdmin(admin.ModelAdmin):
 
 @admin.register(Map)
 class MapAdmin(admin.ModelAdmin):
-    actions = ['activate', 'deactivate']
-    
+
     search_fields = ('name',)
-    list_display = ('id', 'name', 'file', 'active')
-    list_filter = ('active',)
-
-    def activate(self, request, queryset):
-        """
-        Activates selected maps for play.
-        """
-        for map in queryset:
-            map.activate()
-
-    def deactivate(self, request, queryset):
-        """
-        Deactivates selected maps for play.
-        """
-        for map in queryset:
-            map.deactivate()
-
-    activate.short_description = "Activate selected maps"
-    deactivate.short_description = "Deactivate selected maps"
+    list_display = ('id', 'name', 'file')
+    list_filter = ()
 
 
-@admin.register(Season)
-class SeasonAdmin(admin.ModelAdmin):
+@admin.register(Competition)
+class CompetitionAdmin(admin.ModelAdmin):
     
     list_display = (
         'id',
-        'number',
         'date_created',
         'date_opened',
         'date_closed',
         'status',
-        'previous_season_files_cleaned',
     )
     list_filter = (
         'date_created',
         'date_opened',
         'date_closed',
-        'previous_season_files_cleaned',
     )
-    # Add the close season button
-    change_form_template = "admin/change_form_season.html"
+    # Add the close competition button
+    change_form_template = "admin/change_form_competition.html"
 
     def response_change(self, request, obj):
-        if "_open-season" in request.POST or "_open-season" in request.POST.get('action'):
+        if "_open-competition" in request.POST:
             error = obj.open()
             if error is None:
-                self.message_user(request, "This season is now open.",)
+                self.message_user(request, "This competition is now open.",)
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
-        elif "_pause-season" in request.POST or "_pause-season" in request.POST.get('action'):
+        elif "_pause-competition" in request.POST:
             error = obj.pause()
             if error is None:
-                self.message_user(request, "This season is now paused.")
+                self.message_user(request, "This competition is now paused.")
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
-        elif "_close-season" in request.POST or "_close-season" in request.POST.get('action'):
+        elif "_close-competition" in request.POST:
             error = obj.start_closing()
             if error is None:
-                self.message_user(request, "This season is now closing.")
+                self.message_user(request, "This competition is now closing.")
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
@@ -168,12 +148,12 @@ class RoundAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'number',
-        'season',
+        'competition',
         'started',
         'finished',
         'complete',
     )
-    list_filter = ('season', 'started', 'finished', 'complete')
+    list_filter = ('competition', 'started', 'finished', 'complete')
 
 
 @admin.register(Match)
@@ -217,7 +197,6 @@ class BotAdmin(admin.ModelAdmin):
         'user',
         'name',
         'created',
-        'active',
         'bot_zip',
         'bot_zip_updated',
         'bot_zip_md5hash',
@@ -234,7 +213,6 @@ class BotAdmin(admin.ModelAdmin):
     list_filter = (
         'user',
         'created',
-        'active',
         'bot_zip_updated',
         'bot_zip_publicly_downloadable',
         'bot_data_enabled',
@@ -291,12 +269,12 @@ class ResultAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(SeasonParticipation)
-class SeasonParticipationAdmin(admin.ModelAdmin):
+@admin.register(CompetitionParticipation)
+class CompetitionParticipationAdmin(admin.ModelAdmin):
     
     list_display = (
         'id',
-        'season',
+        'competition',
         'bot',
         'elo',
         'match_count',
@@ -312,12 +290,12 @@ class SeasonParticipationAdmin(admin.ModelAdmin):
         'highest_elo',
         'slug',
     )
-    list_filter = ('season', 'bot')
+    list_filter = ('competition', 'bot')
     search_fields = ('slug',)
 
 
-@admin.register(SeasonBotMatchupStats)
-class SeasonBotMatchupStatsAdmin(admin.ModelAdmin):
+@admin.register(CompetitionBotMatchupStats)
+class CompetitionBotMatchupStatsAdmin(admin.ModelAdmin):
     
     list_display = (
         'id',
@@ -360,3 +338,13 @@ class PatreonAccountBindAdmin(admin.ModelAdmin):
 class NewsAdmin(admin.ModelAdmin):
     list_display = ('created', 'title', 'text', 'yt_link')
     search_fields = ('title',)
+
+@admin.register(Game)
+class GameAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+@admin.register(GameMode)
+class GameModeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'game')
+    search_fields = ('name', 'game')

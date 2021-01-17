@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load i18n core_filters wiki_tags humanize %}
+
+
+{% block content %}
+    <div class="divider">
+        <span></span><span><h2>{{ competitionparticipation.bot.as_html_link }} - {{ competitionparticipation.competition.as_html_link }} stats</h2></span><span></span>
+    </div>
+    <div id="bot_competition_stats">
+        <table summary="Table containing competition participation information" style="text-align: right">
+            <thead>
+            <tr style="text-align: center">
+                <td colspan="3"><strong>Stats</strong></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="mono">
+                <td>Updated</td>
+                <td colspan="2">{{ updated|naturaltime|shorten_naturaltime }}</td>
+            </tr>
+            <tr class="mono">
+                <td>Current ELO</td>
+                <td>{{ competitionparticipation.elo }}</td>
+                <td></td>
+            </tr>
+            <tr class="mono">
+                <td>Highest ELO</td>
+                {% if competitionparticipation.highest_elo != None %}
+                    <td>{{ competitionparticipation.highest_elo }}</td>
+                    <td></td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+            <tr class="mono">
+                <td>Matches</td>
+                <td>{{ competitionparticipation.match_count }}</td>
+                <td></td>
+            </tr>
+            <tr class="mono">
+                <td>Wins</td>
+                {% if competitionparticipation.win_perc != None %}
+                    <td>{{ competitionparticipation.win_count }}</td>
+                    <td>{{ competitionparticipation.win_perc|floatformat:2 }}%</td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+            <tr class="mono">
+                <td>Losses</td>
+                {% if competitionparticipation.loss_perc != None %}
+                    <td>{{ competitionparticipation.loss_count }}</td>
+                    <td>{{ competitionparticipation.loss_perc|floatformat:2 }}%</td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+            <tr class="mono">
+                <td>Ties</td>
+                {% if competitionparticipation.tie_perc != None %}
+                    <td>{{ competitionparticipation.tie_count }}</td>
+                    <td>{{ competitionparticipation.tie_perc|floatformat:2 }}%</td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+            <tr class="mono">
+                <td>Crashes</td>
+                {% if competitionparticipation.crash_perc != None %}
+                    <td>{{ competitionparticipation.crash_count }}</td>
+                    <td>{{ competitionparticipation.crash_perc|floatformat:2 }}%</td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+
+            </tbody>
+        </table>
+        <br/>
+    </div>
+
+    {% if competitionparticipation.elo_graph %}
+        <div id="elo_graph">
+            <img src="{{ competitionparticipation.elo_graph.url }}" alt="ELOGraph"/>
+        </div>
+    {% endif %}
+
+    <div class="divider"><span></span><span><h2>Matchups</h2></span><span></span></div>
+
+    <div id="bot_competition_stats_matchups">
+        <table summary="Table containing matchup information" class="row-hover-highlight">
+            <thead>
+            <tr>
+                <td style="text-align: right"><strong>Opponent</strong></td>
+                <td style="text-align: left"><strong>Race</strong></td>
+                <td><strong>Matches</strong></td>
+                <td><strong>Win</strong></td>
+                <td><strong>%</strong></td>
+                <td><strong>Loss</strong></td>
+                <td><strong>%</strong></td>
+                <td><strong>Tie</strong></td>
+                <td><strong>%</strong></td>
+                <td><strong>Crash</strong></td>
+                <td><strong>%</strong></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% if competition_bot_matchups.count > 0 %}
+                {% for bot_matchup in competition_bot_matchups %}
+                    <tr style="text-align: right">
+                        <td style="text-align: right">{{ bot_matchup.opponent.bot.as_html_link }}</td>
+                        <td class="mono"
+                            style="text-align: left">{{ bot_matchup.opponent.bot.get_plays_race_display }}</td>
+                        <td class="mono">{{ bot_matchup.match_count }}</td>
+                        <td class="mono">{{ bot_matchup.win_count }}</td>
+                        {% if bot_matchup.match_count > 0 %}
+                            <td class="mono">{{ bot_matchup.win_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td class="mono">N/A</td>
+                        {% endif %}
+                        <td class="mono">{{ bot_matchup.loss_count }}</td>
+                        {% if bot_matchup.match_count > 0 %}
+                            <td class="mono">{{ bot_matchup.loss_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td class="mono">N/A</td>
+                        {% endif %}
+                        <td class="mono">{{ bot_matchup.tie_count }}</td>
+                        {% if bot_matchup.match_count > 0 %}
+                            <td class="mono">{{ bot_matchup.tie_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td class="mono">N/A</td>
+                        {% endif %}
+                        <td class="mono">{{ bot_matchup.crash_count }}</td>
+                        {% if bot_matchup.match_count > 0 %}
+                            <td class="mono">{{ bot_matchup.crash_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td class="mono">N/A</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+
+            {% else %}
+                <tr>
+                    <td colspan="11">No stats</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+        <br/>
+    </div>
+{% endblock %}
+

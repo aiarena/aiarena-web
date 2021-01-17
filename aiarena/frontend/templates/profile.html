@@ -67,15 +67,18 @@
     <br>
     <div class="divider">
         <span></span><span><h2>Bots ({{ bot_list.count }}/{{ max_user_bot_count }})</h2></span><span></span></div>
-    <h4 style="float:left; margin-left:65px;">You may have {{ max_active_per_race_bot_count }} active bot(s) per race.</h4><h4 style="float: right; margin-right:65px;">{% if user.has_donated %} Thank you for your donation :){% endif %}</h4>
+    <h4 style="float:left; margin-left:65px;">You may have {{ max_active_active_competition_participations_count }} active competition participations.</h4>
+    <h4 style="float: right; margin-right:65px;">
+        {% if user.has_donated %} Thank you for your donation :){% elif config.PATREON_LINK %}Want more? Consider <a href="{{ config.PATREON_LINK }}">supporting us</a>.{% endif %}
+    </h4>
     <table summary="Table containing information about the authors bots" id="bot_table" class="row-hover-highlight">
         <thead>
         <td><strong>Name</strong></td>
         <td><strong>Race</strong></td>
         <td><strong>Type</strong></td>
-        <td><strong>Active</strong></td>
         <td><strong>Bot Zip</strong></td>
         <td><strong>Data</strong></td>
+        <td></td>
         <td></td>
         </thead>
         {% for bot in bot_list %}
@@ -83,7 +86,6 @@
                 <td>{{ bot.as_html_link }}</td>
                 <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.type }}</td>
-                <td>{{ bot.active }}</td>
                 <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
                 {% if bot.bot_data %}
                     <td><a href="{{ bot.bot_data.url }}">Download</a></td>
@@ -91,6 +93,7 @@
                     <td>No bot data</td>
                 {% endif %}
                 <td><a href="{% url 'bot_edit' bot.pk %}">Edit</a></td>
+                <td><a href="{% url 'bot_competitions' bot.pk %}">Competitions</a></td>
             </tr>
         {% endfor %}
     </table>

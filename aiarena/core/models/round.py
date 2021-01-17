@@ -9,18 +9,18 @@ from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from aiarena.api.arenaclient.exceptions import NoMaps, NotEnoughActiveBots, CurrentSeasonPaused, CurrentSeasonClosing
+from aiarena.api.arenaclient.exceptions import NoMaps, NotEnoughActiveBots, CompetitionPaused, CompetitionClosing
 from .map import Map
 from .mixins import LockableModelMixin
-from .season import Season
+from .competition import Competition
 
 logger = logging.getLogger(__name__)
 
 
 class Round(models.Model, LockableModelMixin):
-    """ Represents a round of play within a season """
+    """ Represents a round of play within a competition """
     number = models.IntegerField(blank=True, editable=False)
-    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
     finished = models.DateTimeField(blank=True, null=True, db_index=True)
     complete = models.BooleanField(default=False)
@@ -37,10 +37,10 @@ class Round(models.Model, LockableModelMixin):
         from .match import Match
         with transaction.atomic():
             # if there are no matches without results, this round is complete
-            # if this round close attempt results in a row update, try to close the season
+            # if this round close attempt results in a row update, try to close the competition
             if Match.objects.filter(round=self, result__isnull=True).count() == 0 and \
                     Round.objects.filter(id=self.id, complete=False).update(complete=True, finished=timezone.now()) > 0:
-                self.season.try_to_close()
+                self.competition.try_to_close()
 
     @staticmethod
     def max_active_rounds_reached():
@@ -56,4 +56,4 @@ class Round(models.Model, LockableModelMixin):
 @receiver(pre_save, sender=Round)
 def pre_save_round(sender, instance, **kwargs):
     if instance.number is None:
-        instance.number = Round.objects.filter(season=instance.season).count() + 1
+        instance.number = Round.objects.filter(competition=instance.competition).count() + 1

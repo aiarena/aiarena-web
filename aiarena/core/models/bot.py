@@ -15,13 +15,13 @@ from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
-from aiarena.api.arenaclient.exceptions import NoCurrentSeason
+from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
 from .match import Match
 from .mixins import LockableModelMixin
-from .season import Season
+from .competition import Competition
 from .user import User
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,6 @@ class Bot(models.Model, LockableModelMixin):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
-    active = models.BooleanField(default=False)  # todo: change this to instead be an enrollment in a ladder?
     bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
                                validators=[validate_bot_zip_file, ])
     bot_zip_updated = models.DateTimeField(editable=False)
@@ -127,20 +126,6 @@ class Bot(models.Model, LockableModelMixin):
 
         self.wiki_article = article
 
-    # todo: once multiple ladders comes in, this will need to be updated to 1 bot race per ladder per user.
-    def validate_active_bot_race_per_user(self):
-        bot_limit = self.user.get_active_bots_per_race_limit()
-
-        # None means no limit
-        if bot_limit is not None:
-            # if the active bots playing the same race exceeds the allowed count, then back out
-            if Bot.objects.filter(user=self.user, active=True, plays_race=self.plays_race).exclude(
-                    id=self.id).count() >= bot_limit \
-                    and self.active:
-                raise ValidationError(
-                    'Too many active bots playing that race already exist for this user.'
-                    ' You are allowed ' + str(bot_limit) + ' active bot(s) per race.')
-
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
             raise ValidationError(
@@ -149,8 +134,6 @@ class Bot(models.Model, LockableModelMixin):
 
     def clean(self):
         self.validate_max_bot_count()
-        self.validate_active_bot_race_per_user()
-        self.validate_current_season()
 
     def __str__(self):
         return self.name
@@ -171,16 +154,13 @@ class Bot(models.Model, LockableModelMixin):
     def get_random_active():
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return Bot.objects.filter(active=True).order_by('?').first()
+        return Bot.objects.filter(competition_participations__active=True).order_by('?').first()
 
-    @staticmethod
-    def active_count():
-        return Bot.objects.filter(active=True).count()
-
-    def get_random_active_excluding_self(self, **kwargs):
-        if Bot.active_count() <= 1:
+    def get_random_active_excluding_self(self):
+        from ..api import Bots  # avoid circular reference
+        if Bots.get_active().count() <= 1:
             raise RuntimeError("I am the only bot.")
-        return Bot.objects.filter(active=True, **kwargs).exclude(id=self.id).order_by('?').first()
+        return Bots.get_active().exclude(id=self.id).order_by('?').first()
 
     @cached_property
     def get_absolute_url(self):
@@ -213,16 +193,6 @@ class Bot(models.Model, LockableModelMixin):
             return f'{self.name}.js'
         elif self.type == 'python':
             return 'run.py'
-
-    def current_season_participation(self):
-        return self.seasonparticipation_set.get(season=Season.get_current_season())
-
-    def validate_current_season(self):
-        if self.active:
-            try:
-                Season.get_current_season()
-            except NoCurrentSeason:
-                raise ValidationError('You cannot activate a bot when there is no current season.')
 
     def can_download_bot_zip(self, user):
         return self.user == user or self.bot_zip_publicly_downloadable or user.is_staff
@@ -304,7 +274,3 @@ def post_save_bot(sender, instance, created, **kwargs):
         instance.save()
         post_save.connect(pre_save_bot, sender=sender)
 
-    # register a season participation if the bot has been activated
-    if instance.active and instance.seasonparticipation_set.filter(season=Season.get_current_season()).count() == 0:
-        from .season_participation import SeasonParticipation
-        SeasonParticipation.objects.create(season=Season.get_current_season(), bot=instance)

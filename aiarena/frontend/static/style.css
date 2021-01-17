@@ -215,22 +215,22 @@ a:hover {
     padding: 0 10px 0 10px;
 }
 
-#bot_season_stats {
+#bot_competition_stats {
     float: left;
     width: 27.0%;
     margin-left: 73px;
 }
 
-#bot_season_stats table {
+#bot_competition_stats table {
     margin: 0;
     padding: 0;
 }
 
-#bot_season_stats_matchups {
+#bot_competition_stats_matchups {
     margin: 0 0 0 73px;
 }
 
-#bot_season_stats_matchups table {
+#bot_competition_stats_matchups table {
     margin: 0;
     padding: 0;
 }
@@ -986,6 +986,46 @@ background-color: #3d4536;
     padding-top: 10px;
     padding-left: 30px;
     padding-bottom: 30px;
+}
+
+.join-competition-form{
+    margin-left: 75px;
+    margin-right: 75px;
+    border: 2px solid #86c232;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding-top: 10px;
+    padding-left: 30px;
+    padding-bottom: 10px;
+}
+
+.edit-competition-participation-form{
+    margin-left: 75px;
+    margin-right: 75px;
+    border: 2px solid #86c232;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding-top: 10px;
+    padding-left: 30px;
+    padding-bottom: 10px;
+}
+
+.messages{
+    margin-left: 75px;
+    margin-right: 75px;
+    border: 2px solid #86c232;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding-top: 10px;
+    padding-left: 30px;
+    padding-bottom: 10px;
+    text-align: center;
+    list-style-type: none;
+}
+
+.messages .success{
+    color: #86c232;
+}
+
+.messages .failure{
+    color: #c84f4f;
 }
 
 .unlink-account-form{

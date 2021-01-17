@@ -13,11 +13,12 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from aiarena import settings
+from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.api import Bots, Matches
 from aiarena.core.events import EVENT_MANAGER
 from aiarena.core.events import MatchResultReceivedEvent
-from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, SeasonParticipation
+from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation
 from aiarena.core.models.arena_client_status import ArenaClientStatus
 from aiarena.core.permissions import IsArenaClientOrAdminUser, IsArenaClient
 from aiarena.core.validators import validate_not_inf, validate_not_nan
@@ -83,45 +84,19 @@ class MatchViewSet(viewsets.GenericViewSet):
     permission_classes = [IsArenaClientOrAdminUser]
     throttle_scope = 'arenaclient'
 
-    def create_new_match(self, requesting_user):
-        match = Matches.start_next_match(requesting_user)
-
-        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot')\
+    def load_participants(self, match: Match):
+        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot') \
             .get(match_id=match.id, participant_number=1).bot
-        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot')\
+        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot') \
             .get(match_id=match.id, participant_number=2).bot
+
+    def create(self, request, *args, **kwargs):
+        match = ACCoordinator.next_match(request.user)
+        self.load_participants(match)
 
         serializer = self.get_serializer(match)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @transaction.atomic()
-    def create(self, request, *args, **kwargs):
-        if config.LADDER_ENABLED:
-            try:
-                if config.REISSUE_UNFINISHED_MATCHES:
-                    # Check for any unfinished matches assigned to this user. If any are present, return that.
-                    unfinished_matches = Match.objects.only('id', 'map')\
-                        .filter(started__isnull=False, assigned_to=request.user,
-                                result__isnull=True).order_by(F('round_id').asc())
-                    if unfinished_matches.count() > 0:
-                        match = unfinished_matches[0]  # todo: re-set started time?
-
-                        match.bot1 = MatchParticipation.objects.select_related('bot').only('bot')\
-                            .get(match_id=match.id, participant_number=1).bot
-                        match.bot2 = MatchParticipation.objects.select_related('bot').only('bot')\
-                            .get(match_id=match.id, participant_number=2).bot
-
-                        serializer = self.get_serializer(match)
-                        return Response(serializer.data, status=status.HTTP_201_CREATED)
-                    else:
-                        return self.create_new_match(request.user)
-                else:
-                    return self.create_new_match(request.user)
-            except Exception as e:
-                logger.exception("Exception while processing request for match.")
-                raise
-        else:
-            raise LadderDisabled()
 
     # todo: check match is in progress/bot is in this match
     @action(detail=True, methods=['GET'], name='Download a participant\'s zip file', url_path='(?P<p_num>\d+)/zip')
@@ -318,7 +293,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         # Calculate the change in ELO
                         # the bot elos have changed so refresh them
                         # todo: instead of having to refresh, return data from adjust_elo and apply it here
-                        sp1, sp2 = result.get_season_participants
+                        sp1, sp2 = result.get_competition_participants
                         participant1.resultant_elo = sp1.elo
                         participant2.resultant_elo = sp2.elo
                         participant1.elo_change = participant1.resultant_elo - p1_initial_elo
@@ -340,9 +315,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                 logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
 
                             # test here to check ELO total and ensure no corruption
-                            match_season = result.match.round.season
-                            expected_elo_sum = settings.ELO_START_VALUE * SeasonParticipation.objects.filter(season=match_season).count()
-                            actual_elo_sum = SeasonParticipation.objects.filter(season=match_season).aggregate(
+                            match_competition = result.match.round.competition
+                            expected_elo_sum = settings.ELO_START_VALUE * CompetitionParticipation.objects.filter(competition=match_competition).count()
+                            actual_elo_sum = CompetitionParticipation.objects.filter(competition=match_competition).aggregate(
                                 Sum('elo'))
 
                             if actual_elo_sum['elo__sum'] != expected_elo_sum:
@@ -401,7 +376,7 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
     if config.BOT_CONSECUTIVE_CRASH_LIMIT < 1:
         return  # Check is disabled
 
-    if not triggering_participant.bot.active:
+    if not triggering_participant.bot.competition_participations.filter(active=True).exists():
         return  # No use running the check - bot is already inactive.
 
     # Get recent match participation records for this bot
