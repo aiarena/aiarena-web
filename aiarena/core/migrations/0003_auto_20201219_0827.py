@@ -98,10 +98,4 @@ class Migration(migrations.Migration):
                 ('game', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='game_modes', to='core.Game')),
             ],
         ),
-        migrations.AddField(
-            model_name='season',
-            name='game_mode',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='game_modes', to='core.GameMode'),
-            preserve_default=False,
-        ),
     ]
