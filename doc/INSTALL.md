@@ -52,8 +52,31 @@
     ```
     python manage.py seed
     ```
+    
+9. Configure local cache. Some components require the use of a redis server. 
+    * If you have Docker installed, it can easily be installed and run. 
+        1. Install Redis
+           ```
+           docker pull redis
+           ```
+        2. Run Redis, this command uses Docker's port forwarding to let the django server access the container. 
+           ```
+           docker run --name my-redis-container -p 6379:6379 -d redis
+           ```
+     * You can also install Redis on your machine by following the instructions [here](https://redis.io/download)
+     * If you don't need Redis, you can use a dummy cache. Keep in mind that anything that needs Redis may not work properly. Replace the `CACHES` variable in `aiarena/settings.py` with the following:
+        ```
+        CACHES = {
+            "default": {	
+                'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
+            },
+            'select2': {
+                'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
+            }
+        }
+        ```
 
-9. Launch the Website then navigate your browser to `http://127.0.0.1:8000/`
+10. Launch the Website then navigate your browser to `http://127.0.0.1:8000/`
     ```
     python manage.py runserver
     ```
