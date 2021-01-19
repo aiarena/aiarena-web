@@ -136,6 +136,35 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         self.assertEqual(response_m1.data['id'], response_m2.data['id'])
 
+    def test_match_requests_no_open_competition(self):
+        """
+        Tests that match requests still run when no competitions are open.
+        :return:
+        """
+
+        self.test_client.login(self.staffUser1)
+        game = self.test_client.create_game("StarCraft II")
+        game_mode = self.test_client.create_gamemode('Melee', game.id)
+        Map.objects.create(name="testmap", game_mode=game_mode)
+
+        bot1 = self._create_bot(self.regularUser1, 'testbot1', 'T')
+        bot2 = self._create_bot(self.regularUser1, 'testbot2', 'Z')
+
+        self.test_client.login(self.arenaclientUser1)
+
+        # we shouldn't be able to get a new match
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(u"no_current_competitions", response.data['detail'].code)
+
+        Matches.request_match(self.regularUser2, bot1, bot1.get_random_excluding_self(),
+                              game_mode=game_mode)
+
+        # now we should be able to get a match - the requested one
+        response = self.client.post('/api/arenaclient/matches/')
+        self.assertEqual(response.status_code, 201)
+
+
     def test_max_active_rounds(self):
         # we don't want to have to create lots of arenaclients for multiple matches
         config.REISSUE_UNFINISHED_MATCHES = False

@@ -84,7 +84,7 @@ class Matches:
             return False
 
     @staticmethod
-    def _attempt_to_start_a_requested_match(requesting_user: User):
+    def attempt_to_start_a_requested_match(requesting_user: User):
         # Try get a requested match
         matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round') \
             .filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
@@ -185,46 +185,40 @@ class Matches:
         return new_round
 
     @staticmethod
-    def start_next_match(requesting_user, competition: Competition):
-        with transaction.atomic():
-            # REQUESTED MATCHES
-            match = Matches._attempt_to_start_a_requested_match(requesting_user)
+    def start_next_match_for_competition(requesting_user, competition: Competition):
+        # LADDER MATCHES
+        # Get rounds with un-started matches
+        rounds = Round.objects.raw("""
+            SELECT distinct cr.id from core_round cr 
+            inner join core_match cm on cr.id = cm.round_id
+            where competition_id=%s
+            and finished is null
+            and cm.started is null
+            order by number
+            for update""", (competition.id,))
+
+        for round in rounds:
+            match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
             if match is not None:
                 return match  # a match was found - we're done
 
-            # LADDER MATCHES
-            # Get rounds with un-started matches
-            rounds = Round.objects.raw("""
-                SELECT distinct cr.id from core_round cr 
-                inner join core_match cm on cr.id = cm.round_id
-                where competition_id=%s
-                and finished is null
-                and cm.started is null
-                order by number
-                for update""", (competition.id,))
+        # If none of the previous matches were able to start, and we don't have 2 active bots available,
+        # then we give up.
+        # todo: does this need to be a select_for_update?
+        active_bots = Competitions.get_active_bots(competition).select_for_update()
+        if not Bots.available_is_more_than(active_bots, 2):
+            raise NotEnoughAvailableBots()
 
-            for round in rounds:
-                match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
-                if match is not None:
-                    return match  # a match was found - we're done
+        # If we get to here, then we have
+        # - no matches from any existing round we can start
+        # - at least 2 active bots available for play
 
-            # If none of the previous matches were able to start, and we don't have 2 active bots available,
-            # then we give up.
-            # todo: does this need to be a select_for_update?
-            active_bots = Competitions.get_active_bots(competition).select_for_update()
-            if not Bots.available_is_more_than(active_bots, 2):
-                raise NotEnoughAvailableBots()
-
-            # If we get to here, then we have
-            # - no matches from any existing round we can start
-            # - at least 2 active bots available for play
-
-            if Round.max_active_rounds_reached():
-                raise MaxActiveRounds()
-            else:  # generate new round
-                round = Matches._attempt_to_generate_new_round(competition)
-                match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
-                if match is None:
-                    raise APIException("Failed to start match. There might not be any available participants.")
-                else:
-                    return match
+        if Round.max_active_rounds_reached():
+            raise MaxActiveRounds()
+        else:  # generate new round
+            round = Matches._attempt_to_generate_new_round(competition)
+            match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
+            if match is None:
+                raise APIException("Failed to start match. There might not be any available participants.")
+            else:
+                return match

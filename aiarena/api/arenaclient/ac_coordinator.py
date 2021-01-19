@@ -25,6 +25,12 @@ class ACCoordinator:
 
     @staticmethod
     def next_competition_match(arenaclient: ArenaClient):
+        # REQUESTED MATCHES
+        with transaction.atomic():
+            match = Matches.attempt_to_start_a_requested_match(arenaclient)
+            if match is not None:
+                return match  # a match was found - we're done
+
         competition_ids = ACCoordinator._get_competition_priority_order()
         for id in competition_ids:
             competition = Competition.objects.get(id=id)
@@ -32,7 +38,7 @@ class ACCoordinator:
             with transaction.atomic():
                 # this call will apply a select for update, so we do it inside an atomic block
                 if Competitions.check_has_matches_to_play_and_apply_locks(competition):
-                    return Matches.start_next_match(arenaclient, competition)
+                    return Matches.start_next_match_for_competition(arenaclient, competition)
 
         raise NoCurrentlyAvailableCompetitions()
 

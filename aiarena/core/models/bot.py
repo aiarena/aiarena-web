@@ -162,6 +162,11 @@ class Bot(models.Model, LockableModelMixin):
             raise RuntimeError("I am the only bot.")
         return Bots.get_active().exclude(id=self.id).order_by('?').first()
 
+    def get_random_excluding_self(self):
+        if Bot.objects.all().count() <= 1:
+            raise RuntimeError("I am the only bot.")
+        return Bot.objects.exclude(id=self.id).order_by('?').first()
+
     @cached_property
     def get_absolute_url(self):
         return reverse('bot', kwargs={'pk': self.pk})
