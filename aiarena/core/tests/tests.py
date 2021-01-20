@@ -491,6 +491,13 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         # Freeze the competition - now we shouldn't receive any new matches
         competition1.freeze()
 
+        # play all the requested matches
+        for i in range(Match.objects.filter(requested_by__isnull=False).count()):
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201)
+            response = self._post_to_results(response.data['id'], 'Player1Win')
+            self.assertEqual(response.status_code, 201)
+
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
