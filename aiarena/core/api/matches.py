@@ -24,9 +24,8 @@ class Matches:
     def request_match(user, bot, opponent, map: Map=None, game_mode: GameMode=None):
         # if map is none, a game mode must be supplied and a random map gets chosen
         assert map is not None or game_mode is not None
-        map = Maps.random_of_game_mode(game_mode)
         if map is None:
-            raise NoMaps()
+            map = Maps.random_of_game_mode(game_mode)
         return Match.create(None, map, bot,
                             opponent,
                             user, bot1_update_data=False, bot2_update_data=False)
