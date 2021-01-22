@@ -104,9 +104,10 @@ class Competition(models.Model, LockableModelMixin):
         from .round import Round
         if self.is_closing and Round.objects.filter(competition=self, complete=False).count() == 0:
             Competition.objects.filter(id=self.id, status='closing').update(status='closed', date_closed=timezone.now())
-            # todo: sanity check replay archive contents against results.
-            # todo: then dump results data as JSON?
-            # todo: then wipe all replay/log files?
+
+            # deactivate bots in this competition
+            from . import CompetitionParticipation  # avoid circular reference
+            CompetitionParticipation.objects.filter(competition=self).update(active=False)
 
     def get_absolute_url(self):
         return reverse('competition', kwargs={'pk': self.pk})

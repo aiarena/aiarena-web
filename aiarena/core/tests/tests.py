@@ -534,6 +534,10 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         competition1.refresh_from_db()
         self.assertEqual(competition1.status, 'closed')
 
+        # participants should be deactivated now
+        for cp in CompetitionParticipation.objects.filter(competition=competition1):
+            self.assertFalse(cp.active)
+
         # Activating a bot should fail
         with self.assertRaisesMessage(ValidationError, 'That competition is not accepting new participants.'):
             bot = Bot.objects.filter(competition_participations__isnull=True).first()
