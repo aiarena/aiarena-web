@@ -6,7 +6,7 @@ from aiarena.core.models import CompetitionParticipation
 
 
 def deactivate_participants_of_closed_competitions(apps, schema_editor):
-    CompetitionParticipation.objects.filter(status='closed').update(active=False)
+    CompetitionParticipation.objects.filter(competition__status='closed').update(active=False)
 
 class Migration(migrations.Migration):
 
