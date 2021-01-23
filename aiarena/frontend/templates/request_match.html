@@ -25,6 +25,9 @@
                 </style>
                 {% csrf_token %}
                 <p onchange="refreshForm()">{{ form.matchup_type }}</p>
+                <p onchange="filterBots()">
+                    {{ form.show_active_only }} {{ form.show_active_only.label }}
+                </p>
 
                 <center>
                     <table style="display: table-footer-group">
@@ -96,15 +99,30 @@
                 document.getElementById('id_bot2').required = false;
                 setInterval(removeX, 10);
             }
-
         }
+
         function removeX() {
                 if (document.getElementById('bot2').style.display === 'none'){
                     document.querySelector("#select2-id_matchup_race-container > span").remove();
                 }
-
-
         }
+
+        function filterBots() {
+            function filterActive(option) { // Empties the option's label and CSS hides it
+                let active_cb = $("#id_show_active_only")[0]
+                if (!active_cb.checked || (active_cb.checked && option.text.includes("✔"))) {
+                    return option.text;
+                }
+                return false;
+            }
+
+            $('#id_bot1').select2({ templateResult: filterActive });
+            $('#id_bot2').select2({ templateResult: filterActive });
+        }
+
+        $( document ).ready(function() {
+            filterBots() // In case initial value for #id_show_active_only changes or page is reloaded
+        });
 
     </script>
 
