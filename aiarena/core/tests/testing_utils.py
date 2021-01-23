@@ -1,6 +1,9 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
+from django.contrib.messages.middleware import MessageMiddleware
+from django.contrib.sessions.middleware import SessionMiddleware
+
 from typing import List
 
 from aiarena.core.models import User, Match, Result, ArenaClient, \
@@ -144,6 +147,35 @@ class TestingClient:
 
         # we should be redirected back to the same page
         assert response.status_code == 302 and response.url == '.'
+
+
+    def annotate_request_messages(self, request):
+        """Annotate a request object with a session"""
+        middleware = SessionMiddleware()
+        middleware.process_request(request)
+        request.session.save()
+
+        """Annotate a request object with a messages"""
+        middleware = MessageMiddleware()
+        middleware.process_request(request)
+        request.session.save()
+
+        return request
+
+
+    def mock_post_request(self, user):
+        from django.test.client import RequestFactory
+        rf = RequestFactory()
+        post_request = rf.post('/')
+        post_request.user = user
+        return self.annotate_request_messages(post_request)
+
+    def mock_get_request(self, user):
+        from django.test.client import RequestFactory
+        rf = RequestFactory()
+        get_request = rf.get('/')
+        get_request.user = user
+        return self.annotate_request_messages(get_request)
 
     def request_match(self) -> Match:
         url = reverse('ac_next_match-list')
