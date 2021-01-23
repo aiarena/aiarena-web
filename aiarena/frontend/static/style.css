@@ -1131,5 +1131,9 @@ font-size: 14px;
 }
 
 .select2-results__option:empty {
-    display: none !important;
+    display: none;
+}
+
+.line-up-and-center {
+    display:flex; justify-content: center;
 }
