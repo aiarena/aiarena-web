@@ -651,6 +651,7 @@ class RequestMatchForm(forms.Form):
     matchup_race = forms.ChoiceField(choices=MATCHUP_RACE_CHOICES,
                                      widget=Select2Widget,
                                      required=False, initial='any')
+    show_active_only = forms.BooleanField(label='Active Bots Only', required=False)
     # hidden when matchup_type != specific_matchup
     bot2 = BotChoiceField(queryset=Bot.objects.all(),
                                   widget=BotWidget,  # default this to required initially
