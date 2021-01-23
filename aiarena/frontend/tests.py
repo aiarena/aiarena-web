@@ -147,3 +147,30 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         # requestmatch
         response = self.client.get('/requestmatch/')
         self.assertEqual(response.status_code, 200)
+
+
+class RequestMatchTestCase(FullDataSetMixin, TestCase):
+
+    @FakeRedis("django_redis.get_redis_connection")
+    def setUp(self):
+        super().setUp()
+
+    @FakeRedis("django_redis.get_redis_connection")
+    def test_request_match_regular_user(self) -> Match:
+        from .views import RequestMatch
+        from django.urls.base import reverse
+        from aiarena.frontend.views import RequestMatchForm
+        # log in as a regular user
+        self.user = self.regularUser1
+        data = {
+                'matchup_type': 'specific_matchup',
+                'bot1'        : 1,
+                'bot2'        : 3,
+                'matchup_race': 'any',
+                'map'         : 1,
+                'match_count' : 1,
+        }
+        form = RequestMatchForm(data=data)
+        request_match_view = RequestMatch(request=self.test_client.mock_post_request(self.user))
+        form.full_clean()
+        assert request_match_view.form_valid(form).status_code == 302, f"request_match_view.form_valid(form) = {request_match_view.form_valid(form)}"
