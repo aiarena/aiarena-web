@@ -160,7 +160,7 @@ class RequestMatchTestCase(FullDataSetMixin, TestCase):
     def test_request_match_regular_user(self) -> Match:
 
         # log in as a regular user
-        self.user = self.regularUser1
+        self.client.login(self.regularUser1)
         url = reverse('requestmatch')
         data = {
                 'matchup_type': 'specific_matchup',
