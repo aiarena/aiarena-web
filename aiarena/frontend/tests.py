@@ -170,5 +170,6 @@ class RequestMatchTestCase(FullDataSetMixin, TestCase):
                 'map'         : 1,
                 'match_count' : 1,
         }
-
-        assert self.client.django_client.post(url, data).status_code in {302, 200}, f"{self.client.django_client.post(url, data).status_code}"
+        # when running the entire suite,  the expected status code is 200
+        # when running only this testcase the expected status code is 302
+        assert self.client.django_client.post(url, data).status_code in {200}, f"{self.client.django_client.post(url, data).status_code}"
