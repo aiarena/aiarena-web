@@ -1129,3 +1129,7 @@ font-size: 14px;
     color: black;
     width: 100%;
 }
+
+.select2-results__option:empty {
+    display: none !important;
+}
