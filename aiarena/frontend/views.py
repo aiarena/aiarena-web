@@ -699,7 +699,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
                             for _ in range(0, form.cleaned_data['match_count']):
                                 bot2 = bot1.get_random_active_excluding_self() if form.cleaned_data['matchup_race'] == 'any' \
-                                    else bot1.get_random_active_excluding_self(plays_race=form.cleaned_data['matchup_race'])
+                                    else bot1.get_active_excluding_self.filter(plays_race=form.cleaned_data['matchup_race'])
 
                                 if bot2 is None:
                                     messages.error(self.request, "No opponents of that type could be found.")
