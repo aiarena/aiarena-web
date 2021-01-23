@@ -1,8 +1,8 @@
 from django.test import TransactionTestCase, TestCase
-
+from django.urls.base import reverse
 from aiarena.core.models import Match, Round, Bot, User, Result, Competition
 from aiarena.core.tests.tests import FullDataSetMixin
-
+from aiarena.core.tests.testing_utils import TestingClient
 
 from django_fakeredis import FakeRedis
 
@@ -154,14 +154,14 @@ class RequestMatchTestCase(FullDataSetMixin, TestCase):
     @FakeRedis("django_redis.get_redis_connection")
     def setUp(self):
         super().setUp()
+        self.client = TestingClient()
 
     @FakeRedis("django_redis.get_redis_connection")
     def test_request_match_regular_user(self) -> Match:
-        from .views import RequestMatch
-        from django.urls.base import reverse
-        from aiarena.frontend.views import RequestMatchForm
+
         # log in as a regular user
         self.user = self.regularUser1
+        url = reverse('requestmatch')
         data = {
                 'matchup_type': 'specific_matchup',
                 'bot1'        : 1,
@@ -170,7 +170,5 @@ class RequestMatchTestCase(FullDataSetMixin, TestCase):
                 'map'         : 1,
                 'match_count' : 1,
         }
-        form = RequestMatchForm(data=data)
-        request_match_view = RequestMatch(request=self.test_client.mock_post_request(self.user))
-        form.full_clean()
-        assert request_match_view.form_valid(form).status_code == 302, f"request_match_view.form_valid(form) = {request_match_view.form_valid(form)}"
+
+        assert self.client.django_client.post(url,data).status_code == 302, f"{self.client.django_client.post(url,data).status_code}"
