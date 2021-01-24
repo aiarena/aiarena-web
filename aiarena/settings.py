@@ -190,9 +190,6 @@ CONSTANCE_CONFIG = {
     'TIMEOUT_MATCHES_AFTER': (
         timedelta(hours=1),
         'How long to wait before the website should time out a running match.', timedelta),
-    'MAX_ACTIVE_ROUNDS': (2, 'The maximum rounds the ladder can run simultaneously. '
-                             'The ladder will stop generating new rounds once this number '
-                             'is reached until previous active rounds are finished off.'),
     'REISSUE_UNFINISHED_MATCHES': (True, 'Whether to reissue previously assigned unfinished matches '
                                          'when an arena client requests a match.'),
     'BOT_CONSECUTIVE_CRASH_LIMIT': (0, 'The number of consecutive crashes after which a bot is deactivated. '
@@ -275,7 +272,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'File size limits': ('BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER',
                          'BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER',
                          'BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER',),
-    'Ladders': ('LADDER_ENABLED', 'MAX_ACTIVE_ROUNDS', 'TIMEOUT_MATCHES_AFTER',
+    'Ladders': ('LADDER_ENABLED', 'TIMEOUT_MATCHES_AFTER',
                 'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
     'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',),
     'Match interest analysis': ('ELO_DIFF_RATING_MODIFIER', 'COMBINED_ELO_RATING_DIVISOR',),

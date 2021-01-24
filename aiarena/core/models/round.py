@@ -42,10 +42,6 @@ class Round(models.Model, LockableModelMixin):
                     Round.objects.filter(id=self.id, complete=False).update(complete=True, finished=timezone.now()) > 0:
                 self.competition.try_to_close()
 
-    @staticmethod
-    def max_active_rounds_reached():
-        return Round.objects.filter(complete=False).count() >= config.MAX_ACTIVE_ROUNDS
-
     def get_absolute_url(self):
         return reverse('round', kwargs={'pk': self.pk})
 

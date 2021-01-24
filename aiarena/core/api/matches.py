@@ -212,7 +212,7 @@ class Matches:
         # - no matches from any existing round we can start
         # - at least 2 active bots available for play
 
-        if Round.max_active_rounds_reached():
+        if Competitions.has_reached_maximum_active_rounds(competition):
             raise MaxActiveRounds()
         else:  # generate new round
             round = Matches._attempt_to_generate_new_round(competition)

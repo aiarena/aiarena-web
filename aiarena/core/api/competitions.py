@@ -27,3 +27,7 @@ class Competitions:
         relevant database locks"""
         # todo: add check for whether new rounds can be generated here
         return Competitions.get_active_participants(competition).select_for_update().count() >= 2
+
+    @staticmethod
+    def has_reached_maximum_active_rounds(competition: Competition):
+        return competition.round_set.filter(complete=False).count() >= competition.max_active_rounds

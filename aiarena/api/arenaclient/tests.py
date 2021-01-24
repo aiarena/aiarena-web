@@ -168,9 +168,10 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
     def test_max_active_rounds(self):
         # we don't want to have to create lots of arenaclients for multiple matches
         config.REISSUE_UNFINISHED_MATCHES = False
-        config.MAX_ACTIVE_ROUNDS = 2
 
         self.test_client.login(self.staffUser1)
+
+        # competitions will default to max 2 active rounds
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
 
