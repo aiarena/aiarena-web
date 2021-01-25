@@ -7,19 +7,26 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework.exceptions import APIException
 
-from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds, NoMaps, CurrentSeasonPaused, \
-    CurrentSeasonClosing
+from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds, NoMaps, CompetitionPaused, \
+    CompetitionClosing
 from aiarena.core.api import Bots
-from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Season
+from aiarena.core.api.competitions import Competitions
+from aiarena.core.api.maps import Maps
+from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Competition, \
+    CompetitionParticipation
+from aiarena.core.models.game_type import GameMode
 
 logger = logging.getLogger(__name__)
 
 
 class Matches:
     @staticmethod
-    def request_match(user, bot, opponent, map=None):
-        # if map is none, a random one gets chosen
-        return Match.create(None, map if map is not None else Map.random_active(), bot,
+    def request_match(user, bot, opponent, map: Map=None, game_mode: GameMode=None):
+        # if map is none, a game mode must be supplied and a random map gets chosen
+        assert map is not None or game_mode is not None
+        if map is None:
+            map = Maps.random_of_game_mode(game_mode)
+        return Match.create(None, map, bot,
                             opponent,
                             user, bot1_update_data=False, bot2_update_data=False)
 
@@ -63,8 +70,8 @@ class Matches:
 
             if match.round:  # if this is a ladder match, record the starting elo
                 for p in participations:
-                    p.starting_elo = p.bot.seasonparticipation_set.only('elo', 'bot_id') \
-                        .get(season=Season.get_current_season()).elo
+                    p.starting_elo = p.bot.competition_participations.only('elo', 'bot_id') \
+                        .get(competition=match.round.competition).elo
                     p.save()
 
             match.started = timezone.now()
@@ -76,7 +83,7 @@ class Matches:
             return False
 
     @staticmethod
-    def _attempt_to_start_a_requested_match(requesting_user: User):
+    def attempt_to_start_a_requested_match(requesting_user: User):
         # Try get a requested match
         matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round') \
             .filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
@@ -153,70 +160,64 @@ class Matches:
         return None
 
     @staticmethod
-    def _attempt_to_generate_new_round(for_season: Season):
-        active_maps = Map.objects.filter(active=True).select_for_update()
+    def _attempt_to_generate_new_round(competition: Competition):
+        active_maps = Map.objects.filter(competitions__in=[competition, ]).select_for_update()
         if active_maps.count() == 0:
             raise NoMaps()
 
-        if for_season.is_paused:
-            raise CurrentSeasonPaused()
-        if for_season.is_closing:  # we should technically never hit this
-            raise CurrentSeasonClosing()
+        if competition.is_paused:
+            raise CompetitionPaused()
+        if competition.is_closing:  # we should technically never hit this
+            raise CompetitionClosing()
 
-        new_round = Round.objects.create(season=for_season)
+        new_round = Round.objects.create(competition=competition)
 
-        active_bots = Bot.objects.only("id").filter(active=True)
+        active_bots = Competitions.get_active_bots(competition=competition)
         already_processed_bots = []
 
         # loop through and generate matches for all active bots
         for bot1 in active_bots:
             already_processed_bots.append(bot1.id)
-            for bot2 in Bot.objects.only("id").filter(active=True).exclude(id__in=already_processed_bots):
+            for bot2 in Competitions.get_active_bots(competition=competition).exclude(id__in=already_processed_bots):
                 Match.create(new_round, random.choice(active_maps), bot1, bot2)
 
         return new_round
 
     @staticmethod
-    def start_next_match(requesting_user):
-        with transaction.atomic():
-            # REQUESTED MATCHES
-            match = Matches._attempt_to_start_a_requested_match(requesting_user)
+    def start_next_match_for_competition(requesting_user, competition: Competition):
+        # LADDER MATCHES
+        # Get rounds with un-started matches
+        rounds = Round.objects.raw("""
+            SELECT distinct cr.id from core_round cr 
+            inner join core_match cm on cr.id = cm.round_id
+            where competition_id=%s
+            and finished is null
+            and cm.started is null
+            order by number
+            for update""", (competition.id,))
+
+        for round in rounds:
+            match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
             if match is not None:
                 return match  # a match was found - we're done
 
-            # LADDER MATCHES
-            current_season = Season.get_current_season()
-            # Get rounds with un-started matches
-            rounds = Round.objects.raw("""
-                SELECT distinct cr.id from core_round cr 
-                inner join core_match cm on cr.id = cm.round_id
-                where season_id=%s
-                and finished is null
-                and cm.started is null
-                order by number
-                for update""", (current_season.id,))
+        # If none of the previous matches were able to start, and we don't have 2 active bots available,
+        # then we give up.
+        # todo: does this need to be a select_for_update?
+        active_bots = Competitions.get_active_bots(competition).select_for_update()
+        if not Bots.available_is_more_than(active_bots, 2):
+            raise NotEnoughAvailableBots()
 
-            for round in rounds:
-                match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
-                if match is not None:
-                    return match  # a match was found - we're done
+        # If we get to here, then we have
+        # - no matches from any existing round we can start
+        # - at least 2 active bots available for play
 
-            # If none of the previous matches were able to start, and we don't have 2 active bots available,
-            # then we give up.
-            active_bots = Bot.objects.only("id").filter(active=True).select_for_update()
-            if not Bots.available_is_more_than(active_bots, 2):
-                raise NotEnoughAvailableBots()
-
-            # If we get to here, then we have
-            # - no matches from any existing round we can start
-            # - at least 2 active bots available for play
-
-            if Round.max_active_rounds_reached():
-                raise MaxActiveRounds()
-            else:  # generate new round
-                round = Matches._attempt_to_generate_new_round(current_season)
-                match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
-                if match is None:
-                    raise APIException("Failed to start match. There might not be any available participants.")
-                else:
-                    return match
+        if Competitions.has_reached_maximum_active_rounds(competition):
+            raise MaxActiveRounds()
+        else:  # generate new round
+            round = Matches._attempt_to_generate_new_round(competition)
+            match = Matches._attempt_to_start_a_ladder_match(requesting_user, round)
+            if match is None:
+                raise APIException("Failed to start match. There might not be any available participants.")
+            else:
+                return match

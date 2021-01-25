@@ -3,6 +3,7 @@ from datetime import timedelta
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
+from django.http import Http404
 from django_select2.forms import Select2Widget, ModelSelect2Widget
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -22,10 +23,10 @@ from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
-from aiarena.api.arenaclient.exceptions import NoCurrentSeason
+from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
-from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, SeasonParticipation, Season, Map, \
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, Competition, Map, \
     ArenaClient, News
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
@@ -54,7 +55,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
         # Add in the user's bots
         context['bot_list'] = self.request.user.bots.all()
         context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
-        context['max_active_per_race_bot_count'] = self.request.user.get_active_bots_per_race_limit_display()
+        context['max_active_active_competition_participations_count'] = self.request.user.get_active_competition_participations_limit_display()
         context['requested_matches'] = Match.objects.filter(requested_by=self.object, result__isnull=True).order_by(
             F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
             Prefetch('map'),
@@ -165,7 +166,7 @@ class UserProfileUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 class BotUploadForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = ['name', 'bot_zip', 'bot_data_enabled', 'plays_race', 'type', 'active',]
+        fields = ['name', 'bot_zip', 'bot_data_enabled', 'plays_race', 'type', ]
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
@@ -197,7 +198,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 
 class BotList(ListView):
-    queryset = Bot.objects.all().only('name', 'plays_race', 'active', 'type', 'user__username', 'user__type')\
+    queryset = Bot.objects.all().only('name', 'plays_race', 'type', 'user__username', 'user__type')\
         .select_related('user').order_by('name')
     template_name = 'bots.html'
     paginate_by = 50
@@ -233,7 +234,7 @@ class BotDetail(DetailView):
             results = paginator.page(paginator.num_pages)
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
-        context['rankings'] = self.object.seasonparticipation_set.all().order_by('-id')
+        context['rankings'] = self.object.competition_participations.all().order_by('-id')
         context['match_participations'] = MatchParticipation.objects.only("match")\
             .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
@@ -245,15 +246,15 @@ class BotDetail(DetailView):
         return context
 
 
-class BotSeasonStatsDetail(DetailView):
-    model = SeasonParticipation
-    template_name = 'bot_season_stats.html'
+class BotCompetitionStatsDetail(DetailView):
+    model = CompetitionParticipation
+    template_name = 'bot_competition_stats.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['season_bot_matchups'] = self.object.season_matchup_stats.filter(
-            opponent__season=context['seasonparticipation'].season).order_by('-win_perc').distinct()
-        context['updated'] = context['season_bot_matchups'][0].updated
+        context['competition_bot_matchups'] = self.object.competition_matchup_stats.filter(
+            opponent__competition=context['competitionparticipation'].competition).order_by('-win_perc').distinct()
+        context['updated'] = context['competition_bot_matchups'][0].updated
         return context
 
 
@@ -268,22 +269,14 @@ class BotUpdateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # change the available fields based upon whether the bot_data is available for editing or not
-        # and whether there's a current season
+        # and whether there's a current competition
         if self.instance.bot_data_is_currently_frozen():
             self.fields['bot_data'].disabled = True
-
-        try:
-            Season.get_current_season()
-            # in season
-        except NoCurrentSeason:
-            # outside season - don't allow activation
-            self.fields['active'].disabled = True
-            self.fields['active'].required = False
 
 
     class Meta:
         model = Bot
-        fields = ['active', 'bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
+        fields = ['bot_zip', 'bot_zip_publicly_downloadable', 'bot_data',
                   'bot_data_publicly_downloadable', 'bot_data_enabled']
 
 
@@ -331,6 +324,67 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
         return super(BotUpdate, self).form_valid(form)
 
 
+class CompetitionParticipationForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        bot_id = kwargs.pop('bot_id')
+        super().__init__(*args, **kwargs)
+        self.fields['competition'].queryset = Competition.objects.exclude(participations__bot_id=bot_id)
+
+    class Meta:
+        model = CompetitionParticipation
+        fields = ['competition', ]
+
+
+class CompetitionParticipationList(SuccessMessageMixin, LoginRequiredMixin, CreateView):
+    template_name = 'bot_competitions.html'
+    form_class = CompetitionParticipationForm
+
+    redirect_field_name = 'next'
+    success_message = "Competition joined."
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['competitionparticipation_list'] = CompetitionParticipation.objects.filter(bot_id=self.kwargs['pk'])
+
+        try:
+            context['bot'] = Bot.objects.get(id=self.kwargs['pk'], user=self.request.user)
+        except Bot.DoesNotExist:
+            # avoid users accessing another user's bot
+            raise Http404("No bot found matching the query")
+
+        return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'bot_id': self.kwargs['pk']})
+
+        # set the associated bot
+        if kwargs['instance'] is None:
+            kwargs['instance'] = CompetitionParticipation()
+        kwargs['instance'].bot = Bot.objects.get(pk=self.kwargs['pk'])
+        return kwargs
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('bot_competitions', kwargs={'pk': self.object.bot_id})
+
+
+class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
+    template_name = 'bot_competitionparticipation_edit.html'
+    model = CompetitionParticipation
+    fields = ['active',]
+
+    redirect_field_name = 'next'
+    success_message = "Competition participation updated."
+
+    def get_login_url(self):
+        return reverse('login')
+
+    def get_success_url(self):
+        return reverse('bot_competitions', kwargs={'pk': self.kwargs['bot_id']})
+
 class AuthorList(ListView):
     queryset = User.objects.filter(is_active=1, type='WEBSITE_USER').order_by('username')
     template_name = 'authors.html'
@@ -345,20 +399,6 @@ class AuthorDetail(DetailView):
         context = super(AuthorDetail, self).get_context_data(**kwargs)
         context['bot_list'] = Bot.objects.select_related('user').filter(user_id=self.object.id).order_by('-created')
         return context
-
-
-class Ranking(TemplateView):
-    """
-    If there's a current season, we redirect to that season's page. Otherwise we render a static
-    template explaining that there are no rankings to be viewed currently.
-    """
-
-    def get(self, request, *args, **kwargs):
-        season = Season.get_current_season_or_none()
-        if season is None:
-            return render(request, 'ranking_no_season.html')
-        else:
-            return redirect('season', pk=season.pk)
 
 
 class Results(ListView):
@@ -492,15 +532,16 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 class Index(ListView):
     def get_queryset(self):
         try:
-            if Round.objects.filter(season=Season.get_current_season()).count() > 0:
-                return Ladders.get_season_ranked_participants(
-                    Season.get_current_season(), amount=10).prefetch_related(
+            comp = Competition.objects.get(id=1)
+            if Round.objects.filter(competition=comp).count() > 0:
+                return Ladders.get_competition_ranked_participants(
+                    comp, amount=10).prefetch_related(
                     Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
             else:
-                return SeasonParticipation.objects.none()
-        except NoCurrentSeason:
-            return SeasonParticipation.objects.none()
+                return CompetitionParticipation.objects.none()
+        except NoCurrentlyAvailableCompetitions:
+            return CompetitionParticipation.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -544,19 +585,19 @@ class MatchDetail(DetailView):
     template_name = 'match.html'
 
 
-class SeasonList(ListView):
-    queryset = Season.objects.all().order_by('-id')
-    template_name = 'seasons.html'
+class CompetitionList(ListView):
+    queryset = Competition.objects.all().order_by('-id')
+    template_name = 'competitions.html'
 
 
-class SeasonDetail(DetailView):
-    model = Season
-    template_name = 'season.html'
+class CompetitionDetail(DetailView):
+    model = Competition
+    template_name = 'competition.html'
 
     def get_context_data(self, **kwargs):
-        context = super(SeasonDetail, self).get_context_data(**kwargs)
-        context['round_list'] = Round.objects.filter(season_id=self.object.id).order_by('-id')
-        context['rankings'] = Ladders.get_season_ranked_participants(self.object).prefetch_related(
+        context = super(CompetitionDetail, self).get_context_data(**kwargs)
+        context['round_list'] = Round.objects.filter(competition_id=self.object.id).order_by('-id')
+        context['rankings'] = Ladders.get_competition_ranked_participants(self.object).prefetch_related(
             Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
             Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type')))
         context['rankings'].count = len(context['rankings'])
@@ -572,7 +613,7 @@ class BotWidget(Select2Widget):
 class BotChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, bot_object):
         str_fmt = "{0:>20} {1:>20} [{2:>20} ] {3:>20}"
-        if bot_object.active:
+        if bot_object.competition_participations.filter(active=True).exists():
             active = '✔'
         else:
             active = '✘'
@@ -643,13 +684,6 @@ class RequestMatch(LoginRequiredMixin, FormView):
     def get_login_url(self):
         return reverse('login')
 
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        # If not staff, only allow requesting games against this user's bots
-        if not self.request.user.is_staff and not self.request.user.can_request_games_for_another_authors_bot:
-            form.fields['bot1'].queryset = Bot.objects.filter(user=self.request.user)
-        return form
-
     def get_success_url(self):
         return reverse('requestmatch')
 
@@ -665,7 +699,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
                             for _ in range(0, form.cleaned_data['match_count']):
                                 bot2 = bot1.get_random_active_excluding_self() if form.cleaned_data['matchup_race'] == 'any' \
-                                    else bot1.get_random_active_excluding_self(plays_race=form.cleaned_data['matchup_race'])
+                                    else bot1.get_active_excluding_self.filter(plays_race=form.cleaned_data['matchup_race'])
 
                                 if bot2 is None:
                                     messages.error(self.request, "No opponents of that type could be found.")

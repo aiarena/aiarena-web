@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from aiarena.core.models import Bot, SeasonParticipation, Season
+from aiarena.core.models import Bot, CompetitionParticipation, Competition
 from aiarena.core.stats.stats_generator import StatsGenerator
 
 
@@ -13,34 +13,33 @@ class Command(BaseCommand):
         parser.add_argument('--botid', type=int, help="The bot id to generate the stats for. "
                                                        "If this isn't supplied, all bots will have "
                                                        "their stats generated.")
-        parser.add_argument('--seasonid', type=int, help="The season id t generate stats for. "
-                                                       "If this isn't supplied the currently "
-                                                       "active season will ne used")
-        parser.add_argument('--allseasons', type=bool, help="Run this for all seasons")
+        parser.add_argument('--competitionid', type=int, help="The competition id to generate stats for. "
+                                                       "If this isn't supplied all "
+                                                       "open competitions will be used")
+        parser.add_argument('--allcompetitions', type=bool, help="Run this for all competition")
 
     def handle(self, *args, **options):
         bot_id = options['botid']
-        seasons = [options['seasonid'] if options['seasonid'] is not None else Season.get_current_season().id]
-        if options['allseasons']:
-            seasons = Season.objects.all()
+        if options['allcompetitions']:
+            competitions = Competition.objects.all()
+        elif options['competitionid']:
+            competitions = Competition.objects.filter(id=options['competitionid'])
+        else:
+            competitions = Competition.objects.filter(status__in=['open', 'closing'])
 
-        self.stdout.write(f'looping   {len(seasons)} Seasons')
-        for s in seasons:
-            if isinstance(s, Season):
-                season_id = s.id
-            else:
-                season_id = s
+        self.stdout.write(f'looping   {len(competitions)} Competitions')
+        for competition in competitions:
             if bot_id is not None:
-                sp = SeasonParticipation.objects.get(season_id=season_id, bot_id=bot_id)
+                sp = CompetitionParticipation.objects.get(competition_id=competition.id, bot_id=bot_id)
                 with transaction.atomic():
                     sp.lock_me()
-                    self.stdout.write(f'Generating current season stats for bot {bot_id}...')
+                    self.stdout.write(f'Generating current competition stats for bot {bot_id}...')
                     StatsGenerator.update_stats(sp)
             else:
-                for sp in SeasonParticipation.objects.filter(season_id=season_id):
+                for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
                     with transaction.atomic():
                         sp.lock_me()
-                        self.stdout.write(f'Generating current season stats for bot {sp.bot_id}...')
+                        self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
                         StatsGenerator.update_stats(sp)
 
         self.stdout.write('Done')

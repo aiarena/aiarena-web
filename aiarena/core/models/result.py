@@ -150,8 +150,8 @@ class Result(models.Model, LockableModelMixin):
             return None
 
     @cached_property
-    def get_winner_loser_season_participants(self):
-        bot1, bot2 = self.get_season_participants
+    def get_winner_loser_competition_participants(self):
+        bot1, bot2 = self.get_competition_participants
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
             return bot1, bot2
         elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
@@ -170,13 +170,13 @@ class Result(models.Model, LockableModelMixin):
             raise Exception('There was no winner or loser for this match.')
 
     @cached_property
-    def get_season_participants(self):
+    def get_competition_participants(self):
         """Returns the SeasonParticipant models for the MatchParticipants"""
         from .match_participation import MatchParticipation
         match_id = self.match_id
         first = MatchParticipation.objects.get(match_id=match_id, participant_number=1)
         second = MatchParticipation.objects.get(match_id=match_id, participant_number=2)
-        return first.season_participant, second.season_participant
+        return first.competition_participant, second.competition_participant
 
     @cached_property
     def get_match_participants(self):
@@ -202,15 +202,15 @@ class Result(models.Model, LockableModelMixin):
 
     def adjust_elo(self):
         if self.has_winner:
-            sp_winner, sp_loser = self.get_winner_loser_season_participants
+            sp_winner, sp_loser = self.get_winner_loser_competition_participants
             self._apply_elo_delta(ELO.calculate_elo_delta(sp_winner.elo, sp_loser.elo, 1.0), sp_winner, sp_loser)
         elif self.type == 'Tie':
-            sp_first, sp_second = self.get_season_participants
+            sp_first, sp_second = self.get_competition_participants
             self._apply_elo_delta(ELO.calculate_elo_delta(sp_first.elo, sp_second.elo, 0.5), sp_first, sp_second)
 
     @cached_property
     def get_initial_elos(self):
-        first, second = self.get_season_participants
+        first, second = self.get_competition_participants
         return first.elo, second.elo
 
     def _apply_elo_delta(self, delta, sp1, sp2):

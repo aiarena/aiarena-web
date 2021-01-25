@@ -12,6 +12,7 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.functional import cached_property
 
+from django.utils.translation import gettext_lazy as _
 logger = logging.getLogger(__name__)
 
 
@@ -30,16 +31,17 @@ class User(AbstractUser):
         ('ARENA_CLIENT', 'Arena Client'),
         ('SERVICE', 'Service'),
     )
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now, blank=True)
     email = models.EmailField(unique=True)
-    patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none')
-    type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER')
-    extra_active_bots_per_race = models.IntegerField(default=0)
-    extra_periodic_match_requests = models.IntegerField(default=0)
-    receive_email_comms = models.BooleanField(default=True)
-    sync_patreon_status = models.BooleanField(default=True)
+    patreon_level = models.CharField(max_length=16, choices=PATREON_LEVELS, default='none', blank=True)
+    type = models.CharField(max_length=16, choices=USER_TYPES, default='WEBSITE_USER', blank=True)
+    extra_active_competition_participations = models.IntegerField(default=0, blank=True)
+    extra_periodic_match_requests = models.IntegerField(default=0, blank=True)
+    receive_email_comms = models.BooleanField(default=True, blank=True)
+    sync_patreon_status = models.BooleanField(default=True, blank=True)
 
     # permissions
-    can_request_games_for_another_authors_bot = models.BooleanField(default=False)
+    can_request_games_for_another_authors_bot = models.BooleanField(default=False, blank=True)
 
     @cached_property
     def get_absolute_url(self):
@@ -54,28 +56,28 @@ class User(AbstractUser):
     def as_html_link(self):
         return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url, escape(self.__str__())))
 
-    BOTS_PER_RACE_LIMIT_MAP = {
-        "none": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
-        "bronze": config.MAX_USER_BOT_COUNT_ACTIVE_PER_RACE,
-        "silver": 2,
-        "gold": 3,
-        "platinum": 5,
-        "diamond": None  # No limit
+    BOTS_LIMIT_MAP = {
+        "none": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
+        "bronze": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
+        "silver": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
+        "gold": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
+        "platinum": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
+        "diamond": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER
     }
 
-    def get_active_bots_per_race_limit(self):
-        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+    def get_active_bots_limit(self):
+        limit = self.BOTS_LIMIT_MAP[self.patreon_level]
         if limit is None:
             return None  # no limit
         else:
-            return limit + self.extra_active_bots_per_race
+            return limit + self.extra_active_competition_participations
 
-    def get_active_bots_per_race_limit_display(self):
-        limit = self.BOTS_PER_RACE_LIMIT_MAP[self.patreon_level]
+    def get_active_competition_participations_limit_display(self):
+        limit = self.BOTS_LIMIT_MAP[self.patreon_level]
         if limit is None:
             return 'unlimited'  # no limit
         else:
-            return limit + self.extra_active_bots_per_race
+            return limit + self.extra_active_competition_participations
 
     REQUESTED_MATCHES_LIMIT_MAP = {
         "none": config.MATCH_REQUEST_LIMIT_FREE_TIER,

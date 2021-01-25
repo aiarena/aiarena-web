@@ -1,93 +1,48 @@
-from django.urls import reverse
-
-from aiarena.core.models import Match, Round, Bot, User, Map, Result, Season
+from django.test import TransactionTestCase, TestCase
+from django.urls.base import reverse
+from aiarena.core.models import Match, Round, Bot, User, Result, Competition
 from aiarena.core.tests.tests import FullDataSetMixin
-from django.test import TransactionTestCase, TestCase, RequestFactory, Client
-from .admin import MapAdmin, MatchAdmin, SeasonAdmin
-from django.contrib.messages.middleware import MessageMiddleware
-from django.contrib.sessions.middleware import SessionMiddleware
+from aiarena.core.tests.testing_utils import TestingClient
 
 from django_fakeredis import FakeRedis
 
 class AdminMethodsTestCase(FullDataSetMixin, TestCase):
 
-   # admin uses this functionality
     @FakeRedis("django_redis.get_redis_connection")
-    def test_map_admin(self):
-        self.factory = RequestFactory()
-        test_maps = Map.objects.all()
-        admin = MapAdmin(model=Map, admin_site='/admin')
-        request = self.factory.get('/admin')
-        request.user = User.objects.first()
-        admin.deactivate(request, test_maps)
-        for tmap in test_maps:
-            self.assertFalse(tmap.active, msg=f"failed to deactivate Map<{tmap}> Using the admin interface ")
-        admin.activate(request, test_maps)
-        for tmap in test_maps:
-            self.assertTrue(tmap.active, msg=f"failed to activate Map<{tmap}> Using the admin interface ")
+    def setUp(self):
+        super().setUp()
+        # all tests need us logged in as staff
+        self.test_client.login(self.staffUser1)
 
     @FakeRedis("django_redis.get_redis_connection")
-    def test_match_admin(self):
-        self.factory = RequestFactory()
-        test_matches= Match.objects.all()
-        admin = MatchAdmin(model=Map, admin_site='/admin')
-        request = self.factory.get('/admin')
-        request.user = User.objects.first()
-        no_result_matches = []
-        for match in test_matches:
-            results = Result.objects.filter(match=match)
-            if len(results): # this match has a result pre made in the test db
-                continue
-            no_result_matches.append(match)
-        admin.cancel_matches(request, no_result_matches)
-        for match in no_result_matches:
+    def test_admin_match_cancelling(self):
+        matches = Match.objects.filter(result__isnull=True)
+        match_ids = [match.id for match in matches]
+        self.test_client.cancel_matches(match_ids)
+        for match in matches:
             result = Result.objects.get(match=match)
-            self.assertTrue(result.type == "MatchCancelled", msg=f"failed to Cancel Match<{match}>, Result<{result}> Using the admin interface ")
-
-    """ need to make this one work """
-
+            self.assertTrue(result.type == "MatchCancelled",
+                            msg=f"failed to Cancel Match<{match}>, Result<{result}> Using the admin interface ")
 
     @FakeRedis("django_redis.get_redis_connection")
-    def test_season_admin(self):
-        self.factory = RequestFactory()
-        admin = SeasonAdmin(model=Season, admin_site='/admin')
-        season = Season.objects.first()
-        data = {'action': '_pause-season',
-                '_selected_action': [season, ]}
-        class dumb_hack:
-            def __init__(self, name):
-                self.name = name
+    def test_admin_competition_statuses(self):
+        competition = Competition.objects.first()
+        self.assertEqual(competition.status, 'open', msg=f"first competition in the test database is not open!")
 
-        @FakeRedis("django_redis.get_redis_connection")
-        def mock_request_admin(factory, data, admin):
-            request = factory.post(reverse("admin:index"), data=data)
-            request.user = User.objects.first()
-            """Annotate a request object with a session"""
-            middleware = SessionMiddleware()
-            middleware.process_request(request)
-            request.session.save()
-            """Annotate a request object with a messages"""
-            middleware = MessageMiddleware()
-            middleware.process_request(request)
-            request.session.save()
-            admin.admin_site = dumb_hack(name=admin.admin_site)
-            return request, admin
+        self.test_client.pause_competition(competition.id)
+        competition = Competition.objects.first()
+        self.assertEqual(competition.status, 'paused',
+                         msg=f"failed responsechange<pause> on Competition<{competition}> Using the admin interface ")
 
-        request, admin = mock_request_admin(self.factory,data,admin)
-        self.assertEqual(season.status, 'open', msg=f"first season in the test database is not open!")
-        admin.response_change(request, season)
-        self.assertEqual(season.status, 'paused', msg=f"failed responsechange<pause> on Season<{season}> Using the admin interface ")
+        self.test_client.open_competition(competition.id)
+        competition.refresh_from_db()
+        self.assertEqual(competition.status, 'open',
+                         msg=f"failed responsechange<open> on Competition<{competition}> Using the admin interface ")
 
-        data['action'] = "_open-season"
-        request, admin = mock_request_admin(self.factory, data, admin)
-        admin.response_change(request, season)
-        self.assertEqual(season.status, 'open', msg=f"failed responsechange<open> on Season<{season}> Using the admin interface ")
-
-        data['action'] = "_close-season"
-        request, admin = mock_request_admin(self.factory, data, admin)
-        admin.response_change(request, season)
-        self.assertEqual(season.status, 'closing', msg=f"failed responsechange<closing> on Season<{season}> Using the admin interface ")
-
+        self.test_client.close_competition(competition.id)
+        competition.refresh_from_db()
+        self.assertEqual(competition.status, 'closing',
+                         msg=f"failed responsechange<closing> on Competition<{competition}> Using the admin interface ")
 
 
 class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
@@ -118,7 +73,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 302)
 
         # bot
-        active_bot = Bot.objects.filter(active=True)[0]
+        active_bot = Bot.objects.filter(competition_participations__active=True)[0]
         response = self.client.get('/bots/{0}/'.format(active_bot.id))
         self.assertEqual(response.status_code, 200)
 
@@ -147,10 +102,6 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         # match
         response = self.client.get('/matches/{0}/'.format(Match.objects.all()[0].id))
         self.assertEqual(response.status_code, 200)
-
-        # ranking
-        response = self.client.get('/ranking/')
-        self.assertEqual(response.status_code, 302)
 
         # results
         response = self.client.get('/results/')
@@ -196,3 +147,29 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         # requestmatch
         response = self.client.get('/requestmatch/')
         self.assertEqual(response.status_code, 200)
+
+
+class RequestMatchTestCase(FullDataSetMixin, TestCase):
+
+    @FakeRedis("django_redis.get_redis_connection")
+    def setUp(self):
+        super().setUp()
+        self.client = TestingClient()
+
+    @FakeRedis("django_redis.get_redis_connection")
+    def test_request_match_regular_user(self) -> Match:
+
+        # log in as a regular user
+        self.client.login(self.regularUser1)
+        url = reverse('requestmatch')
+        data = {
+                'matchup_type': 'specific_matchup',
+                'bot1'        : 1,
+                'bot2'        : 3,
+                'matchup_race': 'any',
+                'map'         : 1,
+                'match_count' : 1,
+        }
+        # when running the entire suite,  the expected status code is 200
+        # when running only this testcase the expected status code is 302
+        assert self.client.django_client.post(url, data).status_code in {200}, f"{self.client.django_client.post(url, data).status_code}"

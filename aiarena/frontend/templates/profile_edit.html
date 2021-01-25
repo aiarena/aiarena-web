@@ -3,6 +3,13 @@
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Edit Profile</h2></span><span></span></div>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     <div class="registration-form">
         <h2 ><em class="material-icons" style="font-size: 48px; vertical-align: -0.35em;">edit</em>{{ object.username }}</h2>
         <a href="{% url 'avatar_change' %}">{% avatar user 150 %}</a><br/>
@@ -12,14 +19,6 @@
             {{ form.as_p }}
 
             <input id="submit-button" type=submit value="Submit"/>
-
-            {% if messages %}
-                <ul class="messages">
-                    {% for message in messages %}
-                        <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
         </form>
     </div>
 {% endblock %}

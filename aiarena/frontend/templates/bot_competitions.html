@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <div class="divider"><span></span><span><h2>{{ bot.name }}: Competitions</h2></span><span></span></div>
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <div class="join-competition-form">
+        <form method="post">
+            {% csrf_token %}
+            <table id="joinCompetitionTable">
+                <tbody>
+                <tr>
+                    <td style="width: 100%">{{ form.as_p }}</td>
+                    <td><input id="submit-button" type=submit value="Join"/></td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <br/>
+    <table id="competitionsTable" class="row-hover-highlight">
+        <thead>
+        <td><strong>Competition</strong></td>
+        <td><strong>Active</strong></td>
+        <td></td>
+        </thead>
+        <tbody>
+        {% for cp in competitionparticipation_list %}
+            <tr>
+                <td>{{ cp.competition.as_html_link }}</td>
+                <td>{{ cp.active }}</td>
+                <td><a href="{% url 'bot_competition_edit' bot.id cp.pk %}">Edit</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

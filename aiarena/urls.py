@@ -56,7 +56,6 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   url(r'^accounts/', include('django.contrib.auth.urls')),
                   url(r'^$', core_views.Index.as_view(), name='home'),
                   path('api/', include('aiarena.api.urls')),
-                  path('ranking/', core_views.Ranking.as_view(), name='ranking'),
                   path('results/', core_views.Results.as_view(), name='results'),
                   path('arenaclients/', core_views.ArenaClients.as_view(), name='arenaclients'),
                   path('arenaclients/<int:pk>/', core_views.ArenaClientView.as_view(), name='arenaclient'),
@@ -68,6 +67,10 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('bots/<int:pk>/edit/', core_views.BotUpdate.as_view(), name='bot_edit'),
                   path('bots/<int:pk>/bot_zip', core_views.BotZipDownloadView.as_view()),
                   path('bots/<int:pk>/bot_data', core_views.BotDataDownloadView.as_view()),
+                  path('bots/<int:pk>/competitions/', core_views.CompetitionParticipationList.as_view(),
+                       name='bot_competitions'),
+                  path('bots/<int:bot_id>/competitions/<int:pk>', core_views.CompetitionParticipationUpdate.as_view(),
+                       name='bot_competition_edit'),
 
                   path('match-logs/<int:pk>/', core_views.MatchLogDownloadView.as_view()),
                   path('authors/', core_views.AuthorList.as_view(), name='authors'),
@@ -75,11 +78,11 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   # path('rounds/', core_views.RoundList.as_view(), name='rounds'), # todo
                   path('rounds/<int:pk>/', core_views.RoundDetail.as_view(), name='round'),
                   path('matches/<int:pk>/', core_views.MatchDetail.as_view(), name='match'),
-                  path('seasons/', core_views.SeasonList.as_view(), name='seasons'),
-                  path('seasons/<int:pk>/', core_views.SeasonDetail.as_view(), name='season'),
+                  path('competitions/', core_views.CompetitionList.as_view(), name='competitions'),
+                  path('competitions/<int:pk>/', core_views.CompetitionDetail.as_view(), name='competition'),
 
-                  path('seasons/stats/<int:pk>/', core_views.BotSeasonStatsDetail.as_view()),
-                  path('seasons/stats/<int:pk>/<slug:slug>', core_views.BotSeasonStatsDetail.as_view(), name='bot_season_stats'),
+                  path('competitions/stats/<int:pk>/', core_views.BotCompetitionStatsDetail.as_view()),
+                  path('competitions/stats/<int:pk>/<slug:slug>', core_views.BotCompetitionStatsDetail.as_view(), name='bot_competition_stats'),
 
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   path('requestmatch/', core_views.RequestMatch.as_view(), name='requestmatch'),

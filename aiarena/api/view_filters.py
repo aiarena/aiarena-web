@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, SeasonParticipation, Season
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, Competition
 
 
 # Filter for the API views
@@ -17,7 +17,6 @@ class BotFilter(filters.FilterSet):
             'id',
             'name',
             'created',
-            'active',
             'plays_race',
             'type',
             'game_display_id',

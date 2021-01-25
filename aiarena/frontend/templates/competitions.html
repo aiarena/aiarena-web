@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+
+    <div class="divider"><span></span><span><h2>Competitions</h2></span><span></span></div>
+    <table summary="Table containing competitions information" id="competitions_table" class="hover_table">
+        <thead>
+        <tr>
+            <td><strong>competition #</strong></td>
+            <td><strong>Created</strong></td>
+            <td><strong>Opened</strong></td>
+            <td><strong>Closed</strong></td>
+            <td><strong>Status</strong></td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for competition in competition_list %}
+            <tr>
+                <td>{{ competition.as_html_link }}</td>
+                <td>{{ competition.date_created|date:"d. N Y - H:i:s" }}</td>
+                {% if competition.date_opened %}
+                    <td>{{ competition.date_opened|date:"d. N Y - H:i:s" }}</td>
+                {% else %}
+                    <td>--</td>
+                {% endif %}
+                {% if competition.date_closed %}
+                    <td>{{ competition.date_closed|date:"d. N Y - H:i:s" }}</td>
+                {% else %}
+                    <td>--</td>
+                {% endif %}
+                <td>{{ competition.get_status_display }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
