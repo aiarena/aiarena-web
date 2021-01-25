@@ -895,7 +895,13 @@ float: left;
 }
 
 input{
-margin-right:10px;}
+margin-right:10px;
+}
+
+input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel] {
+    padding: 5px;
+    border-radius: 5px;
+}
 
 #submit-button {
 text-align: center;
@@ -1044,13 +1050,70 @@ font-family: 'Cutive Mono', monospace;
 font-size: 14px;
 }
 
+.flex-container, .flex-container>form {
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+}
 
+.flex-container>p {
+    box-sizing: border-box;
+    width: 100%;
+    flex-basis: 100%;
+}
 
+.flex-container div {
+    box-sizing: border-box;
+    width: 100%;
+}
 
+.flex-container div.flex-row-half {
+    padding: 10px;
+    width: 50%;
+}
 
+.flex-container div.flex-row-short {
+    padding: 10px;
+    width: 30%;
+}
 
+.flex-container div.flex-row {
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+}
 
+.flex-container div.flex-row {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+}
 
+.flex-container div.flex-row--title {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+    padding: 0;
+}
+
+div.flex-row input {
+    box-sizing: border-box;
+    width: 100%;
+    margin-right: 0;
+}
 
 .request-match-form {
     text-align: center;
