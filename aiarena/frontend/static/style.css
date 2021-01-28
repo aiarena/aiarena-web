@@ -482,6 +482,7 @@ h1 .site-title {
 p {
     line-height: 1.5em;
     margin: 1.6em 0;
+    font-size: 16px;
 }
 
 .center {
@@ -898,9 +899,12 @@ input{
 margin-right:10px;
 }
 
-input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel], select {
-    padding: 6px;
+input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel], select, textarea {
+    padding: 3px;
     border-radius: 5px;
+    color: #444;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 16px;
 }
 
 #submit-button {
@@ -1113,6 +1117,7 @@ font-size: 14px;
     box-sizing: border-box;
     width: 100%;
     margin-right: 0;
+    text-align: center;
 }
 
 .request-match-form {
