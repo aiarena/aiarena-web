@@ -13,62 +13,44 @@
 
             <p>Match request limit: {{ user.requested_matches_limit }}
                 per {{ config.REQUESTED_MATCHES_LIMIT_PERIOD|smooth_timedelta }}</p>
-            Match requests left: {{ user.match_request_count_left }}
+            <p>Match requests left: {{ user.match_request_count_left }}</p>
 
             <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
                   enctype="multipart/form-data">
-                <style>
-                    input, select {
-                        width: 100%;
-                    }
-
-                </style>
                 {% csrf_token %}
-                <center>
-                    <div class="line-up-and-center">
-                        <p class="line-up-and-center" style="width:40%" onchange="refreshForm()">
-                            Matchup Type: <span style="margin-left: 5px; width:60%">{{ form.matchup_type }}</span>
-                        </p>
-                        <p class="line-up-and-center" style="width:20%;" onchange="filterBots()" id="active_bots_cb">
-                            <span style="width:10%">{{ form.show_active_only }}</span>
-                            <span style="margin-left: 5px">{{ form.show_active_only.label }}</span>
-                        </p>
+                <div class="flex-container">
+                </div>
+                
+                <div class="flex-row-short" onchange="refreshForm()">
+                    <div class="flex-row--title">Matchup Type</div>
+                    <div class="flex-row">{{ form.matchup_type }}</div>
+                </div>
+                <div class="flex-row-short" onchange="filterBots()" id="active_bots_cb">
+                    <span style="width:10%">{{ form.show_active_only }}</span>
+                    <span style="margin-left: 5px">{{ form.show_active_only.label }}</span>
+                </div>
+                <div class="flex-container">
+                    <div class="flex-row-short">
+                        <div class="flex-row--title">Bot1</div><div class="flex-row">{{ form.bot1 }}</div>
                     </div>
-
-
-                    <br>
-
-                    <table style="width: 90%">
-                        <colgroup>
-                            <col style="width: auto" />
-                            <col style="width: 50%" />
-                        </colgroup>
-                        <thead>
-                            <tr>
-                                <th>Bot1:</th>
-                                <th>Bot2:</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div style="position: relative;">{{ form.bot1 }}</div>
-                                </td>
-                                <td>
-                                    <div id="bot2" style="position: relative;">{{ form.bot2 }}</div>
-                                    <div id="matchup_race" style="position: relative;">{{ form.matchup_race }}</div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <br>
-                    <p style="width:40%">Map: {{ form.map }}</p>
-                    <p style="width:10%">Match Count: {{ form.match_count }}</p>
+                    <div class="flex-row-short">
+                        <div class="flex-row--title">Bot2</div>
+                        <div class="flex-row">
+                            <div id="bot2">{{ form.bot2 }}</div>
+                            <div id="matchup_race">{{ form.matchup_race }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-row-short">
+                    <div class="flex-row--title">Map</div><div class="flex-row">{{ form.map }}</div>
+                </div>
+                <label class="flex-row-short">
+                    <div class="flex-row--title">Match Count</div><div class="flex-row">{{ form.match_count }}</div>
+                </label>
+                <div class="flex-row">
                     <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
                             {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
-                </center>
-
+                </div>
             </form>
             {% if user.match_request_count_left <= 0 %}
                 <h3>You have reached your match request limit.</h3>
