@@ -1192,3 +1192,11 @@ div.flex-row input {
     color: black;
     width: 100%;
 }
+
+.select2-results__option:empty {
+    display: none;
+}
+
+.line-up-and-center {
+    display:flex; justify-content: center;
+}

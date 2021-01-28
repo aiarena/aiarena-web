@@ -18,7 +18,13 @@
             <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
                   enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="flex-row"><div class="flex-row-short" onchange="refreshForm()">{{ form.matchup_type }}</div></div>
+                <div class="flex-container">
+                    <div class="flex-row-short" onchange="refreshForm()">{{ form.matchup_type }}</div>
+                    <div class="flex-row-short" onchange="filterBots()">
+                        <span style="width:10%">{{ form.show_active_only }}</span>
+                        <span style="margin-left: 5px">{{ form.show_active_only.label }}</span>
+                    </div>
+                </div>
                 
                 <div class="flex-container">
                     <div class="flex-row-half">
@@ -62,27 +68,37 @@
         function refreshForm() {
             if (document.getElementById('id_matchup_type').value !== 'random_ladder_bot') {
                 document.getElementById('bot2').style.display = 'block';
-                document.getElementById('bot2').style.width = '100%';
-                document.getElementById('id_bot2').required = true
+                document.getElementById('id_bot2').required = true;
+                document.getElementById('id_show_active_only').disabled = false;
                 document.getElementById('matchup_race').style.display = 'none';
 
-                clearInterval(removeX);
             } else {
-                document.getElementById('matchup_race').style.display = 'block';
-                document.querySelector("#matchup_race > span").style.width = 100 + '%';
                 document.getElementById('bot2').style.display = 'none';
                 document.getElementById('id_bot2').required = false;
-                setInterval(removeX, 10);
+                document.getElementById('id_show_active_only').disabled = true;
+
+                document.getElementById('matchup_race').style.display = 'block';
+                document.getElementById('matchup_race').style.width = '100%';
+            }
+        }
+
+        function filterBots() {
+            function filterActive(option) { // Empties the option's label and CSS hides it
+                let active_cb = $("#id_show_active_only")[0];
+                if (!active_cb.checked || (active_cb.checked && option.text.includes("✔"))) {
+                    return option.text;
+                }
+                return false;
             }
 
+            $('#id_bot1').select2({ templateResult: filterActive });
+            $('#id_bot2').select2({ templateResult: filterActive });
         }
-        function removeX() {
-                if (document.getElementById('bot2').style.display === 'none'){
-                    document.querySelector("#select2-id_matchup_race-container > span").remove();
-                }
 
-
-        }
+        $( document ).ready(function() {
+            filterBots() // In case initial value for #id_show_active_only changes or page is reloaded
+            refreshForm()
+        });
 
     </script>
 
