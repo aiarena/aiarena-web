@@ -898,7 +898,7 @@ input{
 margin-right:10px;
 }
 
-input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel] {
+input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel], select {
     padding: 6px;
     border-radius: 5px;
 }
