@@ -899,7 +899,7 @@ margin-right:10px;
 }
 
 input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel] {
-    padding: 5px;
+    padding: 6px;
     border-radius: 5px;
 }
 
@@ -1065,22 +1065,22 @@ font-size: 14px;
     flex-basis: 100%;
 }
 
-.flex-container div {
+.flex-container div, .flex-container label {
     box-sizing: border-box;
     width: 100%;
 }
 
-.flex-container div.flex-row-half {
+.flex-container .flex-row-half {
     padding: 10px;
     width: 50%;
 }
 
-.flex-container div.flex-row-short {
+.flex-container .flex-row-short {
     padding: 10px;
     width: 30%;
 }
 
-.flex-container div.flex-row {
+.flex-container .flex-row {
     padding: 10px;
     width: 100%;
     display: flex;
@@ -1090,7 +1090,7 @@ font-size: 14px;
     align-content: flex-start;
 }
 
-.flex-container div.flex-row {
+.flex-container .flex-row {
     width: 100%;
     display: flex;
     flex-flow: column;
@@ -1099,7 +1099,7 @@ font-size: 14px;
     align-content: flex-start;
 }
 
-.flex-container div.flex-row--title {
+.flex-container .flex-row--title {
     width: 100%;
     display: flex;
     flex-flow: column;
@@ -1109,7 +1109,7 @@ font-size: 14px;
     padding: 0;
 }
 
-div.flex-row input {
+.flex-row input {
     box-sizing: border-box;
     width: 100%;
     margin-right: 0;
@@ -1174,6 +1174,9 @@ div.flex-row input {
 }
 
 
+.flex-container .select2 {
+    width: 100% !important; /* Use containers to control the select sizes instead */
+}
 
 .select2-search {
     background-color: darkslategrey;

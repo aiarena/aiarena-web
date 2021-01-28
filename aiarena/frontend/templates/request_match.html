@@ -19,30 +19,34 @@
                   enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="flex-container">
-                    <div class="flex-row-short" onchange="refreshForm()">{{ form.matchup_type }}</div>
-                    <div class="flex-row-short" onchange="filterBots()">
-                        <span style="width:10%">{{ form.show_active_only }}</span>
-                        <span style="margin-left: 5px">{{ form.show_active_only.label }}</span>
-                    </div>
                 </div>
                 
+                <div class="flex-row-short" onchange="refreshForm()">
+                    <div class="flex-row--title">Matchup Type</div>
+                    <div class="flex-row">{{ form.matchup_type }}</div>
+                </div>
+                <div class="flex-row-short" onchange="filterBots()" id="active_bots_cb">
+                    <span style="width:10%">{{ form.show_active_only }}</span>
+                    <span style="margin-left: 5px">{{ form.show_active_only.label }}</span>
+                </div>
                 <div class="flex-container">
-                    <div class="flex-row-half">
+                    <div class="flex-row-short">
                         <div class="flex-row--title">Bot1</div><div class="flex-row">{{ form.bot1 }}</div>
                     </div>
-                    <div class="flex-row-half">
-                        <div class="flex-row--title">Bot2</div><div class="flex-row">
+                    <div class="flex-row-short">
+                        <div class="flex-row--title">Bot2</div>
+                        <div class="flex-row">
                             <div id="bot2">{{ form.bot2 }}</div>
                             <div id="matchup_race">{{ form.matchup_race }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="flex-row-short">
-                    <div class="flex-row">Map</div><div class="flex-row">{{ form.map }}</div>
+                    <div class="flex-row--title">Map</div><div class="flex-row">{{ form.map }}</div>
                 </div>
-                <div class="flex-row-short">
-                    <div class="flex-row">Match Count</div><div class="flex-row">{{ form.match_count }}</div>
-                </div>
+                <label class="flex-row-short">
+                    <div class="flex-row--title">Match Count</div><div class="flex-row">{{ form.match_count }}</div>
+                </label>
                 <div class="flex-row">
                     <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
                             {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
