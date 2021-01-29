@@ -1219,3 +1219,8 @@ font-size: 14px;
 .line-up-and-center {
     display:flex; justify-content: center;
 }
+
+.filter-form {
+    margin-left: 54px;
+    justify-content: left
+}

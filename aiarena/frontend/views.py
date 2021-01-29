@@ -24,6 +24,7 @@ from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 import django_tables2 as tables
 from django_tables2 import RequestConfig, SingleTableMixin
+import django_filters as filters
 
 from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
 from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
@@ -220,7 +221,6 @@ class BotResultTable(tables.Table):
     # Settings for individual columns
     # match could be a LinkColumn, but used ".as_html_link" since that is being used elsewhere.
     match = tables.Column(verbose_name="ID")
-    opponent = tables.Column()
     created = tables.DateTimeColumn(format="d. N Y - H:i:s", verbose_name="Date")
     result_cause = tables.Column(verbose_name="Cause")
     elo_change = tables.Column(verbose_name="+/-")
@@ -261,7 +261,29 @@ class BotResultTable(tables.Table):
         return "Download"
 
 
-class BotDetail(DetailView, SingleTableMixin):
+class RelativeResultFilter(filters.FilterSet):
+    opponent = filters.CharFilter(label='Opponent', field_name='opponent__bot__name', lookup_expr='contains')
+    result = filters.ChoiceFilter(label='Result', choices=MatchParticipation.RESULT_TYPES[1:])
+    result_cause = filters.ChoiceFilter(label='Cause', choices=MatchParticipation.CAUSE_TYPES)
+    avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time")
+
+    class Meta:
+        model = RelativeResult
+        fields = ['opponent', 'result', 'result_cause', 'avg_step_time']
+
+    # Custom filter to match scale
+    def filter_avg_step_time(self, queryset, name, value):
+        if value:
+            if value.start is not None and value.stop is not None:
+                return queryset.filter(avg_step_time__range=[value.start/1000, value.stop/1000])
+            elif value.start is not None:
+                return queryset.filter(avg_step_time__gte=value.start/1000)
+            elif value.stop is not None:
+                return queryset.filter(avg_step_time__lte=value.stop/1000)
+        return queryset
+
+
+class BotDetail(DetailView):
     model = Bot
     template_name = 'bot.html'
 
@@ -269,19 +291,20 @@ class BotDetail(DetailView, SingleTableMixin):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
         # Create Table
-        result_table = BotResultTable(
-            data=RelativeResult.objects
+        results_qs = (RelativeResult.objects
                 .select_related('match', 'me__bot', 'opponent__bot')
                 .defer("me__bot__bot_data")
                 .filter(me__bot=self.object)
-                .order_by('-created')
-        )
+                .order_by('-created'))
+        result_filter = RelativeResultFilter(self.request.GET, queryset=results_qs)
+        result_table = BotResultTable(data=result_filter.qs)
         # Exclude log column if not staff or user
         if not (self.request.user == self.object.user or self.request.user.is_staff):
             result_table.exclude = ("match_log",)
         # Update table based on request information
         RequestConfig(self.request, paginate={"per_page": 30}).configure(result_table)
         context['results_table'] = result_table
+        context['filter'] = result_filter
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
         context['rankings'] = self.object.competition_participations.all().order_by('-id')

@@ -212,6 +212,32 @@
     <div id="bot_results_anker"></div>
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
+        <form method="get" class="filter-form flex-container" style="margin-bottom: 30px">
+            {{ filter.form.non_field_errors }}
+            <div class="flex-row-short" style="width: 35%">
+                {{ filter.form.opponent.errors }}
+                <label for="{{ filter.form.opponent.id_for_label }}">Opponent:</label>
+                {{ filter.form.opponent }}
+            </div>
+            <div class="flex-row-short" style="width: 20%">
+                {{ filter.form.result.errors }}
+                <label for="{{ filter.form.result.id_for_label }}">Result:</label>
+                {{ filter.form.result }}
+            </div>
+            <div class="flex-row-short">
+                {{ filter.form.result_cause.errors }}
+                <label for="{{ filter.form.result_cause.id_for_label }}">Cause:</label>
+                {{ filter.form.result_cause }}
+            </div>
+            <div class="flex-row-half" style="width: 100%">
+                {{ filter.form.avg_step_time.errors }}
+                <label for="{{ filter.form.avg_step_time.id_for_label }}">Avg Step (ms):</label>
+                {{ filter.form.avg_step_time }}
+            </div>
+            <div class="flex-row-short">
+                <input id=submit-button type="submit" value="Filter" />
+            </div>
+        </form>
         {% render_table results_table %}
     </div>
 {% endblock %}
