@@ -22,7 +22,10 @@ from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
+import django_tables2 as tables
+from django_tables2 import RequestConfig, SingleTableMixin
 
+from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
 from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
@@ -213,25 +216,72 @@ class BotList(ListView):
         return context
 
 
-class BotDetail(DetailView):
+class BotResultTable(tables.Table):
+    # Settings for individual columns
+    # match could be a LinkColumn, but used ".as_html_link" since that is being used elsewhere.
+    match = tables.Column(verbose_name="ID")
+    opponent = tables.Column()
+    created = tables.DateTimeColumn(format="d. N Y - H:i:s", verbose_name="Date")
+    result_cause = tables.Column(verbose_name="Cause")
+    elo_change = tables.Column(verbose_name="+/-")
+    avg_step_time = tables.Column(
+        verbose_name="Avg Step(ms)",
+        attrs={"td": {"style": lambda value: f"color: {step_time_color(value)};'"}})
+    game_time_formatted = tables.Column(verbose_name="Duration")
+    replay_file = tables.URLColumn(verbose_name="Replay", orderable=False)
+    match_log = tables.URLColumn(verbose_name="Log", orderable=False)
+
+    # Settings for the Table
+    class Meta:
+        attrs = {
+            "class": "row-hover-highlight",
+            "style": "text-align: center;",
+            "thead": {"style": "height: 35px;"},
+        }
+        model = RelativeResult
+        fields = ('match', 'created', 'opponent', 'result', 'result_cause', 'elo_change', 'avg_step_time', 'game_time_formatted', 'replay_file', 'match_log')
+
+    # Custom Column Rendering
+    def render_match(self, value):
+        return value.as_html_link
+
+    def render_opponent(self, value):
+        return value.bot.as_html_link
+
+    def render_elo_change(self, record, value):
+        return "--" if record.match.requested_by else format_elo_change(value)
+
+    def render_avg_step_time(self, value):
+        return value*1000
+
+    def render_replay_file(self, value):
+        return "Download"
+
+    def render_match_log(self, value):
+        return "Download"
+
+
+class BotDetail(DetailView, SingleTableMixin):
     model = Bot
     template_name = 'bot.html'
 
     def get_context_data(self, **kwargs):
         context = super(BotDetail, self).get_context_data(**kwargs)
 
-        results = RelativeResult.objects.select_related('match', 'me__bot', 'opponent__bot').defer("me__bot__bot_data")\
-            .filter(me__bot=self.object).order_by('-created')
-
-        # paginate the results
-        page = self.request.GET.get('page', 1)
-        paginator = Paginator(results, 30)
-        try:
-            results = paginator.page(page)
-        except PageNotAnInteger:
-            results = paginator.page(1)
-        except EmptyPage:
-            results = paginator.page(paginator.num_pages)
+        # Create Table
+        result_table = BotResultTable(
+            data=RelativeResult.objects
+                .select_related('match', 'me__bot', 'opponent__bot')
+                .defer("me__bot__bot_data")
+                .filter(me__bot=self.object)
+                .order_by('-created')
+        )
+        # Exclude log column if not staff or user
+        if not (self.request.user == self.object.user or self.request.user.is_staff):
+            result_table.exclude = ("match_log",)
+        # Update table based on request information
+        RequestConfig(self.request, paginate={"per_page": 30}).configure(result_table)
+        context['results_table'] = result_table
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
         context['rankings'] = self.object.competition_participations.all().order_by('-id')
@@ -241,8 +291,7 @@ class BotDetail(DetailView):
             .prefetch_related(
                 Prefetch('match__map'),
                 Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
-        context['result_list'] = results
-        context['results_page_range'] = restrict_page_range(paginator.num_pages, results.number)
+
         return context
 
 
