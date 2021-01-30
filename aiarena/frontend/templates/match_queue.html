@@ -4,53 +4,97 @@
 {% block content %}
     {% with requested_count=requested_matches.count %}
         {% if requested_count > 0 or round_list.count > 0 %}
-        {% if requested_count > 0 %}
-            <div class="divider"><span></span><span><h2>Requested matches</h2></span><span></span></div>
-            <table summary="Table containing information about requested matches" class="row-hover-highlight">
-                <thead>
-                <tr>
+            {% if requested_count > 0 %}
+                <div class="divider"><span></span><span><h2>Requested matches</h2></span><span></span></div>
+                <table summary="Table containing information about requested matches" class="row-hover-highlight">
+                    <thead>
+                    <tr>
+                        <td><strong>Match ID</strong></td>
+                        <td><strong>Bot 1</strong></td>
+                        <td><strong>Bot 2</strong></td>
+                        <td><strong>Map</strong></td>
+                        <td><strong>Started at</strong></td>
+                        <td><strong>Assigned to</strong></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for match in requested_matches %}
+                        <tr>
+                            <td>{{ match.as_html_link }}</td>
+                            {% for p in match.participants %}
+                                {% if p.participant_number == 1 %}
+                                    <td>{{ p.bot.as_html_link }}</td>
+                                {% endif %}
+                            {% endfor %}
+                            {% for p in match.participants %}
+                                {% if p.participant_number == 2 %}
+                                    <td>{{ p.bot.as_html_link }}</td>
+                                {% endif %}
+                            {% endfor %}
+                            <td>{{ match.map }}</td>
+                            {% if match.started %}
+                                <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
+                            {% else %}
+                                <td>queued...</td>
+                            {% endif %}
+                            {% if match.assigned_to %}
+                                <td>{{ match.assigned_to.as_html_link }}</td>
+                            {% else %}
+                                <td>queued...</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    <tbody>
+                </table>
+            {% endif %}
+            <div class="divider">
+                    <span></span><span><h2><input class="form-control" id="roundFilter" type="text" placeholder="Filter"></h2></span><span></span></div>
+            {% for round in round_list %}
+                <div class="divider">
+                    <span></span><span><h2>{{ round.name }} [{{ round.competition }}]</h2></span><span></span></div>
+                <table summary="Table containing information for each round" class="row-hover-highlight">
+
+                    <thead>
                     <td><strong>Match ID</strong></td>
                     <td><strong>Bot 1</strong></td>
                     <td><strong>Bot 2</strong></td>
                     <td><strong>Map</strong></td>
                     <td><strong>Started at</strong></td>
                     <td><strong>Assigned to</strong></td>
-                </tr>
-                </thead>
-                <tbody>
-                {% for match in requested_matches %}
-                    <tr>
-                        <td>{{ match.as_html_link }}</td>
-                        {% for p in match.participants %}
-                            {% if p.participant_number == 1 %}
-                                <td>{{ p.bot.as_html_link }}</td>
+                    </thead>
+                <tbody id="RoundTable">
+                    {% for match in round.matches %}
+                        <tr>
+                            <td>{{ match.as_html_link }}</td>
+                            {% for p in match.participants %}
+                                {% if p.participant_number == 1 %}
+                                    <td>{{ p.bot.as_html_link }}</td>
+                                {% endif %}
+                            {% endfor %}
+                            {% for p in match.participants %}
+                                {% if p.participant_number == 2 %}
+                                    <td>{{ p.bot.as_html_link }}</td>
+                                {% endif %}
+                            {% endfor %}
+                            <td>{{ match.map }}</td>
+                            {% if match.started %}
+                                <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
+                            {% else %}
+                                <td>queued...</td>
                             {% endif %}
-                        {% endfor %}
-                        {% for p in match.participants %}
-                            {% if p.participant_number == 2 %}
-                                <td>{{ p.bot.as_html_link }}</td>
+                            {% if match.assigned_to %}
+                                <td>{{ match.assigned_to.as_html_link }}</td>
+                            {% else %}
+                                <td>queued...</td>
                             {% endif %}
-                        {% endfor %}
-                        <td>{{ match.map }}</td>
-                        {% if match.started %}
-                            <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
-                        {% else %}
-                            <td>queued...</td>
-                        {% endif %}
-                        {% if match.assigned_to %}
-                            <td>{{ match.assigned_to.as_html_link }}</td>
-                        {% else %}
-                            <td>queued...</td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-                <tbody>
-            </table>
-        {% endif %}
-        {% for round in round_list %}
-            <div class="divider"><span></span><span><h2>{{ round.name }}</h2></span><span></span></div>
-            <table summary="Table containing information for each round" class="row-hover-highlight">
-                <tbody>
+                        </tr>
+                    {% endfor %}
+                    <tbody>
+                </table>
+            {% endfor %}
+        {% else %}
+            <table summary="Table containing match queue information" style="min-width: 900px; margin: 0 auto;">
+
                 <thead>
                 <td><strong>Match ID</strong></td>
                 <td><strong>Bot 1</strong></td>
@@ -59,51 +103,25 @@
                 <td><strong>Started at</strong></td>
                 <td><strong>Assigned to</strong></td>
                 </thead>
-                {% for match in round.matches %}
-                    <tr>
-                        <td>{{ match.as_html_link }}</td>
-                        {% for p in match.participants %}
-                            {% if p.participant_number == 1 %}
-                                <td>{{ p.bot.as_html_link }}</td>
-                            {% endif %}
-                        {% endfor %}
-                        {% for p in match.participants %}
-                            {% if p.participant_number == 2 %}
-                                <td>{{ p.bot.as_html_link }}</td>
-                            {% endif %}
-                        {% endfor %}
-                        <td>{{ match.map }}</td>
-                        {% if match.started %}
-                            <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
-                        {% else %}
-                            <td>queued...</td>
-                        {% endif %}
-                        {% if match.assigned_to %}
-                            <td>{{ match.assigned_to.as_html_link }}</td>
-                        {% else %}
-                            <td>queued...</td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
+                <tbody id="RoundTable2">
+                <tr>
+                    <td colspan="6">Queued matches will show here.</td>
+                </tr>
                 <tbody>
             </table>
-        {% endfor %}
-    {% else %}
-        <table summary="Table containing match queue information" style="min-width: 900px; margin: 0 auto;">
-            <tbody>
-            <thead>
-            <td><strong>Match ID</strong></td>
-            <td><strong>Bot 1</strong></td>
-            <td><strong>Bot 2</strong></td>
-            <td><strong>Map</strong></td>
-            <td><strong>Started at</strong></td>
-            <td><strong>Assigned to</strong></td>
-            </thead>
-            <tr>
-                <td colspan="6">Queued matches will show here.</td>
-            </tr>
-            <tbody>
-        </table>
-    {% endif %}
+        {% endif %}
     {% endwith %}
+    <script>
+        $(document).ready(function () {
+            $("#roundFilter").on("keyup", function () {
+                let value = $(this).val().toLowerCase();
+                $("#RoundTable tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+                $("#RoundTable2 tr").filter(function () {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
 {% endblock %}

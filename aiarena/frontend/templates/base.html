@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css?family=Cutive+Mono&display=swap" rel="stylesheet">
 
 
-    <title>{% block title %}AI Arena{% endblock %}</title>
+    <title>{% block title %}SC2 AI Arena{% endblock %}</title>
 
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -68,7 +68,7 @@
         {% block header %}
             <img src="{% static '/img/ai-arena-logo.png' %}" alt="AI Arena Logo" class="center">
             <br>
-            <h1 class="site-title">StarCraft II AI Arena</h1>
+            <h1 class="site-title">SC2 AI Arena</h1>
         {% endblock %}
     </div>
 
@@ -143,7 +143,6 @@
                         <li>Time: {% now "H:i:s" %} UTC</li>
                         <li>Matches (1h): {{ match_count_1h }}</li>
                         <li>Matches (24h): {{ match_count_24h }}</li>
-                        <li>Active Bots: {{ active_bots }}</li>
                         <li><a href="{% url 'arenaclients' %}">Arena Clients</a>: {{ arenaclients }}</li>
                     </ul>
                 </li>

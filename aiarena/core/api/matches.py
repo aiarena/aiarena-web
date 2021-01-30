@@ -14,7 +14,7 @@ from aiarena.core.api.competitions import Competitions
 from aiarena.core.api.maps import Maps
 from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Competition, \
     CompetitionParticipation
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +23,11 @@ class Matches:
     @staticmethod
     def request_match(user, bot, opponent, map: Map=None, game_mode: GameMode=None):
         # if map is none, a game mode must be supplied and a random map gets chosen
-        assert map is not None or game_mode is not None
         if map is None:
-            map = Maps.random_of_game_mode(game_mode)
+            if game_mode:
+                map = Maps.random_of_game_mode(game_mode)
+            else:
+                map = Map.objects.first() # maybe improve this logic,  perhaps a random map and not just the first one
         return Match.create(None, map, bot,
                             opponent,
                             user, bot1_update_data=False, bot2_update_data=False)

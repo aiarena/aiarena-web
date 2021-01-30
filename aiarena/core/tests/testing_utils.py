@@ -7,9 +7,9 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from typing import List
 
 from aiarena.core.models import User, Match, Result, ArenaClient, \
-    Competition
+    Competition, Bot, Map
 from aiarena.core.models.game import Game
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 from aiarena.core.tests.tests import BaseTestMixin
 
 
@@ -148,7 +148,28 @@ class TestingClient:
         # we should be redirected back to the same page
         assert response.status_code == 302 and response.url == '.'
 
-    def request_match(self) -> Match:
+    def request_match(self,
+                      matchup_type: str,
+                      bot1: Bot,
+                      bot2: Bot,
+                      matchup_race: str,
+                      map: Map,
+                      match_count: int) -> Match:
+        url = reverse('requestmatch')
+        data = {
+                'matchup_type': matchup_type,
+                'bot1'        : bot1.id,
+                'bot2'        : bot2.id,
+                'matchup_race': matchup_race,
+                'map'         : map.id,
+                'match_count' : match_count,
+        }
+        response = self.django_client.post(url, data)
+
+        assert response.status_code == 302 and response.url == url
+        return Match.objects.filter(requested_by=response.wsgi_request.user).order_by('-created').first()
+
+    def next_match(self) -> Match:
         url = reverse('ac_next_match-list')
         response = self.django_client.post(url, self.get_api_headers())
 

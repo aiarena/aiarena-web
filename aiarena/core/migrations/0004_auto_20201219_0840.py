@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 from aiarena.core.models import Competition
 from aiarena.core.models.game import Game
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 
 
 def update_name(apps, schema_editor):
