@@ -13,6 +13,12 @@ ul.pagination {
     margin-right: 50px;
 }
 
+/* dirty hack to get django-tables2 paginator to align with table */
+.table-container ul.pagination {
+    margin-left: 55px;
+    width: 90.1%;
+}
+
 ul.pagination li {
     display: table-cell;
     font-weight: normal;
@@ -1212,4 +1218,9 @@ font-size: 14px;
 
 .line-up-and-center {
     display:flex; justify-content: center;
+}
+
+.filter-form {
+    margin-left: 54px;
+    justify-content: left
 }

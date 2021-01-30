@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n core_filters wiki_tags %}
+{% load render_table from django_tables2 %}
 
 
 {% block content %}
@@ -211,89 +212,33 @@
     <div id="bot_results_anker"></div>
     <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
     <div id="bot_results">
-        <table summary="Table containing bot results" class="row-hover-highlight">
-            <thead>
-            <td><strong>ID</strong></td>
-            <td><strong>Date</strong></td>
-            <td><strong>Opponent</strong></td>
-            <td><strong>Result</strong></td>
-            <td><strong>Cause</strong></td>
-            <td><strong>+/-</strong></td>
-            <td><strong>Avg Step<br/>(ms)</strong></td>
-            <td><strong>Duration</strong></td>
-            <td><strong>Replay</strong></td>
-            {% if request.user == bot.user or request.user.is_staff %}
-                <td><strong>Log</strong></td>
-            {% endif %}
-            </thead>
-            <tbody>
-            {% if result_list.paginator.count > 0 %}
-                {% for result in result_list %}
-                    <tr>
-                        <td>{{ result.match.as_html_link }}</td>
-                        <td>{{ result.created|date:"d. N Y - H:i:s" }}</td>
-                        <td>{{ result.opponent.bot.as_html_link }}</td>
-                        <td>{{ result.result }}</td>
-                        <td>{{ result.result_cause }}</td>
-
-                        <td>
-                            {% if result.match.requested_by %}
-                                --
-                            {% else %}
-                                {{ result.me.elo_change |format_elo_change }}
-                            {% endif %}
-
-                        <td style='color: {{ result.me.step_time_ms|step_time_color }};'>{{ result.me.step_time_ms|floatformat:3 }}</td>
-                        <td>{{ result.game_time_formatted }}</td>
-                        {% if result.replay_file %}
-                            <td><a class="file-link" href="{{ result.replay_file.url }}">Download</a></td>
-                        {% else %}
-                            <td>Unavailable</td>
-                        {% endif %}
-                        {% if request.user == bot.user or request.user.is_staff %}
-                            {% if result.me.match_log %}
-                                <td><a class="file-link" href="{{ result.me.match_log.url }}">Download</a></td>
-                            {% else %}
-                                <td>None</td>
-                            {% endif %}
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="8">No results</td>
-                </tr>
-            {% endif %}
-            </tbody>
-            <tfoot>
-            </tfoot>
-        </table>
-        <div class="pagination">
-            {% if result_list.has_other_pages %}
-                <ul class="pagination">
-                    {% if result_list.has_previous %}
-                        <li>
-                            <a href="?page={{ result_list.previous_page_number }}#bot_results">&laquo;</a>
-                        </li>
-                    {% else %}
-                        <li class="disabled"><span>&laquo;</span></li>
-                    {% endif %}
-                    {% for page_num in results_page_range %}
-                        {% if result_list.number == page_num %}
-                            <li class="active"><span>{{ page_num }}</span></li>
-                        {% else %}
-                            <li><a href="?page={{ page_num }}#bot_results">{{ page_num }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if result_list.has_next %}
-                        <li><a href="?page={{ result_list.next_page_number }}#bot_results">&raquo;</a>
-                        </li>
-                    {% else %}
-                        <li class="disabled"><span>&raquo;</span></li>
-                    {% endif %}
-                </ul>
-            {% endif %}
-        </div>
+        <form method="get" class="filter-form flex-container" style="margin-bottom: 30px">
+            {{ filter.form.non_field_errors }}
+            <div class="flex-row-short" style="width: 35%">
+                {{ filter.form.opponent.errors }}
+                <label for="{{ filter.form.opponent.id_for_label }}">Opponent:</label>
+                {{ filter.form.opponent }}
+            </div>
+            <div class="flex-row-short" style="width: 20%">
+                {{ filter.form.result.errors }}
+                <label for="{{ filter.form.result.id_for_label }}">Result:</label>
+                {{ filter.form.result }}
+            </div>
+            <div class="flex-row-short">
+                {{ filter.form.result_cause.errors }}
+                <label for="{{ filter.form.result_cause.id_for_label }}">Cause:</label>
+                {{ filter.form.result_cause }}
+            </div>
+            <div class="flex-row-half" style="width: 100%">
+                {{ filter.form.avg_step_time.errors }}
+                <label for="{{ filter.form.avg_step_time.id_for_label }}">Avg Step (ms):</label>
+                {{ filter.form.avg_step_time }}
+            </div>
+            <div class="flex-row-short">
+                <input id=submit-button type="submit" value="Filter" />
+            </div>
+        </form>
+        {% render_table results_table %}
     </div>
 {% endblock %}
 

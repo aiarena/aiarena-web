@@ -28,3 +28,4 @@ drf-yasg
 django-sheets@git+git://github.com/eladyaniv01/django-sheets.git@master#egg=sheets
 django-redis
 django-select2
+django-tables2

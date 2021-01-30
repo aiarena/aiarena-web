@@ -104,7 +104,7 @@ INSTALLED_APPS = [
     'robots',
     'django.contrib.admindocs',
     'drf_yasg',
-
+    'django_tables2',
 ]
 SHEETS_CACHE_DISABLED = True
 
