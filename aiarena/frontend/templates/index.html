@@ -2,10 +2,8 @@
 {% load i18n core_filters humanize %}
 {% block content %}
 
-    <div class="divider"><span></span><span><h2>Welcome to the AI Arena!</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>Welcome to SC2 AI Arena!</h2></span><span></span></div>
     <div id="rules-short">
-        <div><h2>Season 2 has started! Want to join the battle?</h2></div>
-        <br/>
         <div id="rules-short-instructions">
             <div class="rules-short-instructions-content">
 
@@ -21,9 +19,9 @@
     </div>
 
     <div class="float-half-left">
-        <div class="divider"><span></span><span><h2>What is AI Arena?</h2></span><span></span></div>
+        <div class="divider"><span></span><span><h2>What is SC2 AI Arena?</h2></span><span></span></div>
         <div id="whatisaiarena">
-            The AI Arena ladder provides an environment where Scripted and Deep Learning AIs fight in Starcraft 2.<br/>
+            The SC2 AI Arena ladder provides an environment where Scripted and Deep Learning AIs fight in Starcraft 2.<br/>
             <br/>
             Matches are run 24/7 and <a href="{% url 'stream' %}">streamed</a> to various live-stream platforms.
         </div>
@@ -40,64 +38,6 @@
         <div id="contribute">
             Refer to the <a href="https://aiarena.net/wiki/contribute/">wiki</a> on ways to contribute.
         </div>
-        <br> <!-- extra space -->
-        <div class="divider"><span></span><span><h2>Top 10 bots</h2></span><span></span></div>
-
-        <div id="top10">
-            <table summary="Table containing the top10 bots" id="resultsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
-                <thead>
-                <td style="text-align: center"><strong>Rank</strong></td>
-                <td></td>
-                <td><strong>Name</strong></td>
-                <td><strong>ELO</strong></td>
-                </thead>
-                <tbody>
-                {% for participant in object_list %}
-                    <tr>
-                        <td style="text-align: center">{{ forloop.counter }}</td>
-                        <td style="padding-right: 0">
-                            {% if patreon_level != 'none' %}
-                                <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
-                            {% endif %}
-                        </td>
-                        <td>{{ participant.bot.as_html_link }}</td>
-                        <td>
-                            {{ participant.elo }}
-                            {% with trend=participant.bot.current_elo_trend %}
-                                {% if trend > 40 %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
-                                        trending_flat
-                                    </em>
-                                {% elif trend < -40 %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(90deg);" title="ELO changed {{trend}} in the last 30 games">
-                                        trending_flat
-                                    </em>
-                                {% elif trend > 15 %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO gained {{trend}} in the last 30 games">
-                                        trending_up
-                                    </em>
-                                {% elif trend < -15 %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
-                                        trending_down
-                                    </em>
-                                {% else %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
-                                        trending_flat
-                                    </em>
-                                {% endif %}
-                            {% endwith %}
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <br> <!-- extra space -->
-
-        </div>
-        <div class="divider-full div-transparent-full "></div>
-    </div>
-
-    <div class="float-half-right">
         <div id="news_feed">
             <div class="divider"><span></span><span><h2>News</h2></span><span></span></div>
             {% for new in news %}
@@ -134,6 +74,16 @@
                     <span class="slide-select" onclick="selectSlide({{ forloop.counter }})"></span>
                 {% endfor %}
             </div>
+        </div>
+        <div class="divider-full div-transparent-full "></div>
+    </div>
+
+    <div class="float-half-right">
+        <div class="divider"><span></span><span><h2>Where is the old sc2ai.net website?</h2></span><span></span></div>
+        <div id="whathappenedtosc2ai">
+            SC2 AI and AI Arena have merged to become SC2 AI Arena. The SC2 AI ladder now runs on the AI Arena infrastructure.<br/>
+            <br/>
+            The old sc2ai.net website can be accessed at <a href="http://archive.sc2ai.net/">archive.sc2ai.net</a>
         </div>
         <div id="activity_feed">
             <div class="divider"><span></span><span><h2>Activity</h2></span><span></span></div>

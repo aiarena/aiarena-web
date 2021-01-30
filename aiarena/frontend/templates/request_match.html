@@ -24,45 +24,51 @@
 
                 </style>
                 {% csrf_token %}
-                <p onchange="refreshForm()">{{ form.matchup_type }}</p>
-
                 <center>
-                    <table style="display: table-footer-group">
-                    <thead>
-                    <tr>
-                        <th>Bot1:</th>
-                        <th>Bot2:</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>
+                    <div class="line-up-and-center">
+                        <p class="line-up-and-center" style="width:40%" onchange="refreshForm()">
+                            Matchup Type: <span style="margin-left: 5px; width:60%">{{ form.matchup_type }}</span>
+                        </p>
+                        <p class="line-up-and-center" style="width:20%;" onchange="filterBots()" id="active_bots_cb">
+                            <span style="width:10%">{{ form.show_active_only }}</span>
+                            <span style="margin-left: 5px">{{ form.show_active_only.label }}</span>
+                        </p>
+                    </div>
 
-                            <div style="position: relative;">{{ form.bot1 }}</div>
 
-                        </td>
+                    <br>
 
-                        <td>
+                    <table style="width: 90%">
+                        <colgroup>
+                            <col style="width: auto" />
+                            <col style="width: 50%" />
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Bot1:</th>
+                                <th>Bot2:</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="position: relative;">{{ form.bot1 }}</div>
+                                </td>
+                                <td>
+                                    <div id="bot2" style="position: relative;">{{ form.bot2 }}</div>
+                                    <div id="matchup_race" style="position: relative;">{{ form.matchup_race }}</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                            <div id="bot2" style="position: relative;">{{ form.bot2 }}</div>
-                            <div id="matchup_race" style="display: none; width: 100%; position: relative;">{{ form.matchup_race }}</div>
+                    <br>
+                    <p style="width:40%">Map: {{ form.map }}</p>
+                    <p style="width:10%">Match Count: {{ form.match_count }}</p>
+                    <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
+                            {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
+                </center>
 
-                        </td>
-                    </tr>
-                    </tbody>
-                    <tfoot>
-                    <tr>
-                        <td></td>
-                        <td>
-
-                        </td>
-                    </tr>
-                    </tfoot>
-                </table></center>
-                <p>Map: {{ form.map }}</p>
-                <p>Match Count: {{ form.match_count }}</p>
-                <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
-                        {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
             </form>
             {% if user.match_request_count_left <= 0 %}
                 <h3>You have reached your match request limit.</h3>
@@ -84,27 +90,37 @@
         function refreshForm() {
             if (document.getElementById('id_matchup_type').value !== 'random_ladder_bot') {
                 document.getElementById('bot2').style.display = 'block';
-                document.getElementById('bot2').style.width = '100%';
-                document.getElementById('id_bot2').required = true
+                document.getElementById('id_bot2').required = true;
+                document.getElementById('id_show_active_only').disabled = false;
                 document.getElementById('matchup_race').style.display = 'none';
 
-                clearInterval(removeX);
             } else {
-                document.getElementById('matchup_race').style.display = 'block';
-                document.querySelector("#matchup_race > span").style.width = 100 + '%';
                 document.getElementById('bot2').style.display = 'none';
                 document.getElementById('id_bot2').required = false;
-                setInterval(removeX, 10);
+                document.getElementById('id_show_active_only').disabled = true;
+
+                document.getElementById('matchup_race').style.display = 'block';
+                document.getElementById('matchup_race').style.width = '100%';
+            }
+        }
+
+        function filterBots() {
+            function filterActive(option) { // Empties the option's label and CSS hides it
+                let active_cb = $("#id_show_active_only")[0];
+                if (!active_cb.checked || (active_cb.checked && option.text.includes("✔"))) {
+                    return option.text;
+                }
+                return false;
             }
 
+            $('#id_bot1').select2({ templateResult: filterActive });
+            $('#id_bot2').select2({ templateResult: filterActive });
         }
-        function removeX() {
-                if (document.getElementById('bot2').style.display === 'none'){
-                    document.querySelector("#select2-id_matchup_race-container > span").remove();
-                }
 
-
-        }
+        $( document ).ready(function() {
+            filterBots() // In case initial value for #id_show_active_only changes or page is reloaded
+            refreshForm()
+        });
 
     </script>
 
