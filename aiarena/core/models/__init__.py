@@ -7,6 +7,7 @@ from .competition_participation import CompetitionParticipation
 from .game import Game
 from .game_mode import GameMode
 from .map import Map
+from .map_pool import MapPool
 from .match import Match
 from .match_participation import MatchParticipation
 from .news import News
