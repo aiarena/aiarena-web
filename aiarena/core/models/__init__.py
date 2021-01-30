@@ -15,3 +15,5 @@ from .user import User
 from .website_notice import WebsiteNotice
 from .relative_result import RelativeResult
 from .news import News
+from .match_tag import MatchTag
+from .tag import Tag

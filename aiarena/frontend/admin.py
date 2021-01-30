@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
-    CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News
+    CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News, MatchTag, Tag
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_type import GameMode
 from aiarena.patreon.models import PatreonAccountBind
@@ -170,7 +170,7 @@ class MatchAdmin(admin.ModelAdmin):
         'require_trusted_arenaclient',
     )
     list_filter = ('created', 'started', 'require_trusted_arenaclient')
-    search_fields = ['id']
+    search_fields = ['id', 'tags__tag__name']
     actions = ['cancel_matches']
 
     def cancel_matches(self, request, queryset):
@@ -348,3 +348,25 @@ class GameAdmin(admin.ModelAdmin):
 class GameModeAdmin(admin.ModelAdmin):
     list_display = ('name', 'game')
     search_fields = ('name', 'game')
+
+
+@admin.register(MatchTag)
+class MatchTagAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'tag',
+    )
+    list_filter = (
+        'user',
+    )
+    search_fields = ('tag__name',)
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+    )
+    search_fields = ('name',)

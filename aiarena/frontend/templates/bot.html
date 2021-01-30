@@ -234,6 +234,11 @@
                 <label for="{{ filter.form.avg_step_time.id_for_label }}">Avg Step (ms):</label>
                 {{ filter.form.avg_step_time }}
             </div>
+            <div class="flex-row-half" style="width: 100%">
+                {{ filter.form.tags.errors }}
+                <label for="{{ filter.form.tags.id_for_label }}">Tags (comma separated):</label>
+                {{ filter.form.tags }}
+            </div>
             <div class="flex-row-short">
                 <input id=submit-button type="submit" value="Filter" />
             </div>

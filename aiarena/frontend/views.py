@@ -230,6 +230,11 @@ class BotResultTable(tables.Table):
     game_time_formatted = tables.Column(verbose_name="Duration")
     replay_file = tables.URLColumn(verbose_name="Replay", orderable=False)
     match_log = tables.URLColumn(verbose_name="Log", orderable=False)
+    match__tags = tables.ManyToManyColumn(verbose_name="Tags")
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
 
     # Settings for the Table
     class Meta:
@@ -239,7 +244,7 @@ class BotResultTable(tables.Table):
             "thead": {"style": "height: 35px;"},
         }
         model = RelativeResult
-        fields = ('match', 'created', 'opponent', 'result', 'result_cause', 'elo_change', 'avg_step_time', 'game_time_formatted', 'replay_file', 'match_log')
+        fields = ('match', 'created', 'opponent', 'result', 'result_cause', 'elo_change', 'avg_step_time', 'game_time_formatted', 'replay_file', 'match_log', 'match__tags')
 
     # Custom Column Rendering
     def render_match(self, value):
@@ -260,16 +265,25 @@ class BotResultTable(tables.Table):
     def render_match_log(self, value):
         return "Download"
 
+    def render_match__tags(self, value):
+        tag_str = ", ".join(str(mt.tag) for mt in value.filter(user=self.user).order_by('tag__name'))
+        return mark_safe(f"<abbr title=\"{tag_str}\">Hover</abbr>")
+
 
 class RelativeResultFilter(filters.FilterSet):
     opponent = filters.CharFilter(label='Opponent', field_name='opponent__bot__name', lookup_expr='contains')
     result = filters.ChoiceFilter(label='Result', choices=MatchParticipation.RESULT_TYPES[1:])
     result_cause = filters.ChoiceFilter(label='Cause', choices=MatchParticipation.CAUSE_TYPES)
     avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time")
+    tags = filters.CharFilter(label='Tags', method="filter_tags")
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = RelativeResult
-        fields = ['opponent', 'result', 'result_cause', 'avg_step_time']
+        fields = ['opponent', 'result', 'result_cause', 'avg_step_time', 'tags']
 
     # Custom filter to match scale
     def filter_avg_step_time(self, queryset, name, value):
@@ -280,6 +294,14 @@ class RelativeResultFilter(filters.FilterSet):
                 return queryset.filter(avg_step_time__gte=value.start/1000)
             elif value.stop is not None:
                 return queryset.filter(avg_step_time__lte=value.stop/1000)
+        return queryset
+
+    # Custom filter to match scale
+    def filter_tags(self, queryset, name, value):
+        tag_values = [v.strip() for v in value.split(",") if v]
+        queryset = queryset.filter(me__bot__user=self.user)
+        for v in tag_values:
+            queryset = queryset.filter(match__tags__tag__name__iexact=v)
         return queryset
 
 
@@ -296,8 +318,8 @@ class BotDetail(DetailView):
                 .defer("me__bot__bot_data")
                 .filter(me__bot=self.object)
                 .order_by('-created'))
-        result_filter = RelativeResultFilter(self.request.GET, queryset=results_qs)
-        result_table = BotResultTable(data=result_filter.qs)
+        result_filter = RelativeResultFilter(self.request.GET, queryset=results_qs, user=self.request.user)
+        result_table = BotResultTable(data=result_filter.qs, user=self.request.user)
         # Exclude log column if not staff or user
         if not (self.request.user == self.object.user or self.request.user.is_staff):
             result_table.exclude = ("match_log",)
