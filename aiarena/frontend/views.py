@@ -30,8 +30,9 @@ from aiarena.frontend.templatetags.core_filters import step_time_color, format_e
 from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
-from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, Competition, Map, \
-    ArenaClient, News
+from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
+    Competition, Map, \
+    ArenaClient, News, MapPool
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
@@ -217,6 +218,12 @@ class BotList(ListView):
         return context
 
 
+class FileURLColumn(tables.URLColumn):
+    """File URLs are incorrect without this"""
+    def get_url(self, value):
+        return value.url
+
+
 class BotResultTable(tables.Table):
     # Settings for individual columns
     # match could be a LinkColumn, but used ".as_html_link" since that is being used elsewhere.
@@ -228,8 +235,8 @@ class BotResultTable(tables.Table):
         verbose_name="Avg Step(ms)",
         attrs={"td": {"style": lambda value: f"color: {step_time_color(value)};'"}})
     game_time_formatted = tables.Column(verbose_name="Duration")
-    replay_file = tables.URLColumn(verbose_name="Replay", orderable=False)
-    match_log = tables.URLColumn(verbose_name="Log", orderable=False)
+    replay_file = FileURLColumn(verbose_name="Replay", orderable=False)
+    match_log = FileURLColumn(verbose_name="Log", orderable=False)
 
     # Settings for the Table
     class Meta:
@@ -713,6 +720,10 @@ class RequestMatchForm(forms.Form):
         ('Z', 'Zerg'),
         ('P', 'Protoss'),
     )
+    MAP_SELECTION_TYPE = (
+        ('specific_map', 'Specific Map'),
+        ('map_pool', 'Map Pool'),
+    )
     matchup_type = forms.ChoiceField(choices=MATCHUP_TYPE_CHOICES,
                                      widget=Select2Widget,
                                      required=True, initial='specific_matchup',
@@ -728,8 +739,14 @@ class RequestMatchForm(forms.Form):
     bot2 = BotChoiceField(queryset=Bot.objects.all(),
                                   widget=BotWidget,  # default this to required initially
                                   required=False, help_text="Author or Bot name")
+    map_selection_type = forms.ChoiceField(choices=MAP_SELECTION_TYPE,
+                                     widget=Select2Widget,
+                                     required=True, initial='map_pool')
     map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
                                  empty_label='Random Ladder Map', widget=Select2Widget,
+                                 required=False)
+    map_pool = forms.ModelChoiceField(queryset=MapPool.objects.only('name').order_by('name'),
+                                 widget=Select2Widget,
                                  required=False)
 
     match_count = forms.IntegerField(min_value=1, initial=1)
