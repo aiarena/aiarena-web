@@ -1,5 +1,5 @@
 from aiarena.core.models import Competition, Map
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 
 
 class Maps:

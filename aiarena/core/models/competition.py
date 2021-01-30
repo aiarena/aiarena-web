@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from .game_type import GameMode
+from .game_mode import GameMode
 from .mixins import LockableModelMixin
 
 logger = logging.getLogger(__name__)

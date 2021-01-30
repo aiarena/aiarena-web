@@ -9,7 +9,7 @@ from typing import List
 from aiarena.core.models import User, Match, Result, ArenaClient, \
     Competition
 from aiarena.core.models.game import Game
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 from aiarena.core.tests.tests import BaseTestMixin
 
 

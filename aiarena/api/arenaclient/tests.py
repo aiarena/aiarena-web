@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, Competition, Map, \
     ArenaClient
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT

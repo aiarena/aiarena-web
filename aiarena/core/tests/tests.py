@@ -15,7 +15,7 @@ from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
     CompetitionParticipation
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 from aiarena.core.utils import calculate_md5
 
 from django_fakeredis import FakeRedis
