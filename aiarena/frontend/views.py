@@ -720,10 +720,6 @@ class RequestMatchForm(forms.Form):
         ('Z', 'Zerg'),
         ('P', 'Protoss'),
     )
-    MAP_SELECTION_TYPE = (
-        ('specific_map', 'Specific Map'),
-        ('map_pool', 'Map Pool'),
-    )
     matchup_type = forms.ChoiceField(choices=MATCHUP_TYPE_CHOICES,
                                      widget=Select2Widget,
                                      required=True, initial='specific_matchup',
@@ -739,14 +735,8 @@ class RequestMatchForm(forms.Form):
     bot2 = BotChoiceField(queryset=Bot.objects.all(),
                                   widget=BotWidget,  # default this to required initially
                                   required=False, help_text="Author or Bot name")
-    map_selection_type = forms.ChoiceField(choices=MAP_SELECTION_TYPE,
-                                     widget=Select2Widget,
-                                     required=True, initial='map_pool')
     map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
                                  empty_label='Random Ladder Map', widget=Select2Widget,
-                                 required=False)
-    map_pool = forms.ModelChoiceField(queryset=MapPool.objects.only('name').order_by('name'),
-                                 widget=Select2Widget,
                                  required=False)
 
     match_count = forms.IntegerField(min_value=1, initial=1)
