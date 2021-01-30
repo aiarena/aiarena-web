@@ -110,7 +110,7 @@ def run_seed(matches, token):
 
         # TODO: TEST MULTIPLE ACs
         for x in range(matches - 1):
-            match = client.request_match()
+            match = client.next_match()
 
             # todo: submit different types of results.
             client.submit_result(match.id, 'Player1Win')
@@ -122,7 +122,7 @@ def run_seed(matches, token):
 
         # so we have a match in progress
         if matches != 0:
-            client.request_match()
+            client.next_match()
 
         return api_token
 

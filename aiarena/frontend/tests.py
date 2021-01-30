@@ -1,6 +1,6 @@
 from django.test import TransactionTestCase, TestCase
 from django.urls.base import reverse
-from aiarena.core.models import Match, Round, Bot, User, Result, Competition
+from aiarena.core.models import Match, Round, Bot, User, Result, Competition, Map
 from aiarena.core.tests.tests import FullDataSetMixin
 from aiarena.core.tests.testing_utils import TestingClient
 
@@ -152,24 +152,10 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
 class RequestMatchTestCase(FullDataSetMixin, TestCase):
 
     @FakeRedis("django_redis.get_redis_connection")
-    def setUp(self):
-        super().setUp()
-        self.client = TestingClient()
-
-    @FakeRedis("django_redis.get_redis_connection")
-    def test_request_match_regular_user(self) -> Match:
-
+    def test_request_match_regular_user(self):
         # log in as a regular user
-        self.client.login(self.regularUser1)
-        url = reverse('requestmatch')
-        data = {
-                'matchup_type': 'specific_matchup',
-                'bot1'        : 1,
-                'bot2'        : 3,
-                'matchup_race': 'any',
-                'map'         : 1,
-                'match_count' : 1,
-        }
-        # when running the entire suite,  the expected status code is 200
-        # when running only this testcase the expected status code is 302
-        assert self.client.django_client.post(url, data).status_code in {200}, f"{self.client.django_client.post(url, data).status_code}"
+        self.test_client.login(self.regularUser1)
+        bot1 = Bot.objects.all().first()
+        bot2 = Bot.objects.all().last()
+        map = Map.objects.all().first()
+        self.test_client.request_match('specific_matchup', bot1, bot2, 'any', map, 1)
