@@ -1,7 +1,6 @@
 from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
-from django_fakeredis import FakeRedis
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
@@ -11,7 +10,6 @@ from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 
-@FakeRedis("django_redis.get_redis_connection")
 def run_seed(matches, token):
     devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
@@ -132,7 +130,6 @@ class Command(BaseCommand):
 
     _DEFAULT_MATCHES_TO_GENERATE = 20
 
-    @FakeRedis("django_redis.get_redis_connection")
     def add_arguments(self, parser):
         parser.add_argument('--matches', type=int, default=self._DEFAULT_MATCHES_TO_GENERATE,
                             help="Number of matches to generate. Default is {0}.".format(
@@ -143,7 +140,6 @@ class Command(BaseCommand):
         parser.add_argument('--flush', action='store_true', help="Whether to flush the existing database data.")
         parser.add_argument('--migrate', action='store_true', help="Whether to migrate the database first.")
 
-    @FakeRedis("django_redis.get_redis_connection")
     def handle(self, *args, **options):
 
         if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT \

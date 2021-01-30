@@ -4,17 +4,13 @@ from aiarena.core.models import Match, Round, Bot, User, Result, Competition, Ma
 from aiarena.core.tests.tests import FullDataSetMixin
 from aiarena.core.tests.testing_utils import TestingClient
 
-from django_fakeredis import FakeRedis
-
 class AdminMethodsTestCase(FullDataSetMixin, TestCase):
 
-    @FakeRedis("django_redis.get_redis_connection")
     def setUp(self):
         super().setUp()
         # all tests need us logged in as staff
         self.test_client.login(self.staffUser1)
 
-    @FakeRedis("django_redis.get_redis_connection")
     def test_admin_match_cancelling(self):
         matches = Match.objects.filter(result__isnull=True)
         match_ids = [match.id for match in matches]
@@ -24,7 +20,6 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
             self.assertTrue(result.type == "MatchCancelled",
                             msg=f"failed to Cancel Match<{match}>, Result<{result}> Using the admin interface ")
 
-    @FakeRedis("django_redis.get_redis_connection")
     def test_admin_competition_statuses(self):
         competition = Competition.objects.first()
         self.assertEqual(competition.status, 'open', msg=f"first competition in the test database is not open!")
@@ -50,7 +45,6 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
     Tests to ensure website pages don't break.
     """
 
-    @FakeRedis("django_redis.get_redis_connection")
     def test_render_pages(self):
         # index
         response = self.client.get('/')
@@ -151,7 +145,6 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
 
 class RequestMatchTestCase(FullDataSetMixin, TestCase):
 
-    @FakeRedis("django_redis.get_redis_connection")
     def test_request_match_regular_user(self):
         # log in as a regular user
         self.test_client.login(self.regularUser1)
