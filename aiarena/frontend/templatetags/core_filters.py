@@ -82,12 +82,13 @@ def step_time_color(value):
     minpoint = 10  # Step times
     midpoint = 30
     maxpoint = 50
-    if value > midpoint:
-        weight = (value - midpoint) / (maxpoint - midpoint)
-        rgb = get_color(weight, high_color, mid_color)
-    elif value <= midpoint:
-        weight = (value - minpoint) / (midpoint - minpoint)
-        rgb = get_color(weight, mid_color, low_color)
+    if isinstance(value, int):
+        if value > midpoint:
+            weight = (value - midpoint) / (maxpoint - midpoint)
+            rgb = get_color(weight, high_color, mid_color)
+        elif value <= midpoint:
+            weight = (value - minpoint) / (midpoint - minpoint)
+            rgb = get_color(weight, mid_color, low_color)
     return f"#{''.join(rgb)}"
 
 
