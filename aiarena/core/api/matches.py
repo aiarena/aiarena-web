@@ -14,7 +14,7 @@ from aiarena.core.api.competitions import Competitions
 from aiarena.core.api.maps import Maps
 from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Competition, \
     CompetitionParticipation
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 
 logger = logging.getLogger(__name__)
 

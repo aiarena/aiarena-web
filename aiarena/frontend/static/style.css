@@ -13,6 +13,12 @@ ul.pagination {
     margin-right: 50px;
 }
 
+/* dirty hack to get django-tables2 paginator to align with table */
+.table-container ul.pagination {
+    margin-left: 55px;
+    width: 90.1%;
+}
+
 ul.pagination li {
     display: table-cell;
     font-weight: normal;
@@ -487,6 +493,7 @@ h1 .site-title {
 p {
     line-height: 1.5em;
     margin: 1.6em 0;
+    font-size: 16px;
 }
 
 .center {
@@ -900,7 +907,16 @@ float: left;
 }
 
 input{
-margin-right:10px;}
+margin-right:10px;
+}
+
+input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel], select, textarea {
+    padding: 3px;
+    border-radius: 5px;
+    color: #444;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 16px;
+}
 
 #submit-button {
 text-align: center;
@@ -1049,13 +1065,71 @@ font-family: 'Cutive Mono', monospace;
 font-size: 14px;
 }
 
+.flex-container, .flex-container>form {
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+}
 
+.flex-container>p {
+    box-sizing: border-box;
+    width: 100%;
+    flex-basis: 100%;
+}
 
+.flex-container div, .flex-container label {
+    box-sizing: border-box;
+    width: 100%;
+}
 
+.flex-container .flex-row-half {
+    padding: 10px;
+    width: 50%;
+}
 
+.flex-container .flex-row-short {
+    padding: 10px;
+    width: 30%;
+}
 
+.flex-container .flex-row {
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+}
 
+.flex-container .flex-row {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+}
 
+.flex-container .flex-row--title {
+    width: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+    padding: 0;
+}
+
+.flex-row input {
+    box-sizing: border-box;
+    width: 100%;
+    margin-right: 0;
+    text-align: center;
+}
 
 .request-match-form {
     text-align: center;
@@ -1116,6 +1190,9 @@ font-size: 14px;
 }
 
 
+.flex-container .select2 {
+    width: 100% !important; /* Use containers to control the select sizes instead */
+}
 
 .select2-search {
     background-color: darkslategrey;
@@ -1141,4 +1218,9 @@ font-size: 14px;
 
 .line-up-and-center {
     display:flex; justify-content: center;
+}
+
+.filter-form {
+    margin-left: 54px;
+    justify-content: left
 }

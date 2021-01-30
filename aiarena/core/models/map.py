@@ -1,7 +1,7 @@
 from django.db import models
 
 from aiarena.core.models.competition import Competition
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 from aiarena.core.storage import OverwriteStorage
 
 

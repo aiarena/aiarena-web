@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
     CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News
 from aiarena.core.models.game import Game
-from aiarena.core.models.game_type import GameMode
+from aiarena.core.models.game_mode import GameMode
 from aiarena.patreon.models import PatreonAccountBind
 
 

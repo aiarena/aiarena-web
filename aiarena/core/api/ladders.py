@@ -16,7 +16,7 @@ class Ladders:
         last_round = Ladders.get_most_recent_round(competition)
 
         if last_round is None:
-            return CompetitionParticipation.objects.none()
+            return CompetitionParticipation.objects.filter(competition=competition)
 
         limit = f" LIMIT {amount}" if amount else ""
         query = "select distinct csp.id, elo, bot_id, win_perc, slug " \
