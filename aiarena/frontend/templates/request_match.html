@@ -41,8 +41,21 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex-row-short">
-                    <div class="flex-row--title">Map</div><div class="flex-row">{{ form.map }}</div>
+                <div class="flex-container">
+                    <div class="flex-row-short" onchange="refreshForm()">
+                        <div class="flex-row--title">Map Selection Type</div>
+                        <div class="flex-row">{{ form.map_selection_type }}</div>
+                    </div>
+                    <div class="flex-row-short">
+                        <div id="map">
+                            <div class="flex-row--title">Map</div>
+                            <div class="flex-row">{{ form.map }}</div>
+                        </div>
+                        <div id="map_pool">
+                            <div class="flex-row--title">Map Pool</div>
+                            <div class="flex-row">{{ form.map_pool }}</div>
+                        </div>
+                    </div>
                 </div>
                 <label class="flex-row-short">
                     <div class="flex-row--title">Match Count</div><div class="flex-row">{{ form.match_count }}</div>
@@ -82,7 +95,21 @@
                 document.getElementById('id_show_active_only').disabled = true;
 
                 document.getElementById('matchup_race').style.display = 'block';
-                document.getElementById('matchup_race').style.width = '100%';
+            }
+
+            if (document.getElementById('id_map_selection_type').value !== 'map_pool') {
+                document.getElementById('map').style.display = 'block';
+                document.getElementById('id_map').required = true;
+
+                document.getElementById('map_pool').style.display = 'none';
+                document.getElementById('id_map_pool').required = false;
+
+            } else {
+                document.getElementById('map').style.display = 'none';
+                document.getElementById('id_map').required = false;
+
+                document.getElementById('map_pool').style.display = 'block';
+                document.getElementById('id_map_pool').required = true;
             }
         }
 
