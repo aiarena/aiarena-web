@@ -741,7 +741,7 @@ class RequestMatchForm(forms.Form):
                                   required=False, help_text="Author or Bot name")
     map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
                                  empty_label='Random Ladder Map', widget=Select2Widget,
-                                 required=False)
+                                 required=True)
 
     match_count = forms.IntegerField(min_value=1, initial=1)
 
