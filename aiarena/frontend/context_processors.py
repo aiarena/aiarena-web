@@ -2,6 +2,8 @@ from datetime import timedelta
 
 from constance import config
 from django.utils import timezone
+from django.core.cache import cache
+import hashlib
 
 from aiarena import settings
 from aiarena.core.models import Bot, Result, User
@@ -16,4 +18,19 @@ def stats(request):
         'aiarena_settings': settings,
         'random_donator': User.random_donator(),
         'config': config,
+        "style_md5": style_md5()
     }
+
+def style_md5() -> str:
+    md5_value = cache.get("style_md5")
+    if md5_value is None:
+        md5_value = md5("aiarena/frontend/static/style.css")[0:8]
+        cache.set('style_md5', 'md5_value', 3600)
+    return md5_value
+
+def md5(fname):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
