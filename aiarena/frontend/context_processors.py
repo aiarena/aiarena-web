@@ -30,6 +30,7 @@ def style_md5() -> str:
         except Exception as e:
             # in remote envs we provide the absolute path
             path = '/home/aiarena/ai-arena/aiarena/frontend/static/style.css'
+            md5_value = md5(path)[0:8]
         cache.set('style_md5', 'md5_value', 3600)
     return md5_value
 
