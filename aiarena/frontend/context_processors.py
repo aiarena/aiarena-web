@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 
 from constance import config
@@ -10,6 +11,9 @@ from aiarena.core.models import Bot, Result, User
 
 
 # these are available globally in the django templates
+from aiarena.settings import BASE_DIR
+
+
 def stats(request):
     return {
         'match_count_1h': Result.objects.only('id').filter(created__gte=timezone.now() - timedelta(hours=1)).count(),
@@ -24,7 +28,7 @@ def stats(request):
 def style_md5() -> str:
     md5_value = cache.get("style_md5")
     if md5_value is None:
-        md5_value = md5("aiarena/frontend/static/style.css")[0:8]
+        md5_value = md5(os.path.join(BASE_DIR, "aiarena/frontend/static/style.css"))[0:8]
         cache.set('style_md5', md5_value, 3600)
     return md5_value
 
