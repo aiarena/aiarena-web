@@ -3,13 +3,6 @@
 
 {% block content %}
     <div class="divider"><span></span><span><h2>{{ object }}</h2></span><span></span></div>
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
     <div class="edit-competition-participation-form">
         <form method="post">
             {% csrf_token %}
