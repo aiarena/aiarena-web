@@ -771,21 +771,25 @@ class RequestMatchForm(forms.Form):
 
     def clean_map_pool(self):
         """If map_selection_type is map_pool require a map_pool"""
-        map_selection_type = self.cleaned_data['map_selection_type']
-        map_pool = self.cleaned_data['map_pool']
-        if map_selection_type == 'map_pool' and map_pool is None:
-            raise ValidationError("A map pool must be specified Map Selection Type is Map Pool")
-        return self.cleaned_data['map_pool']
+        try:
+            map_selection_type = self.cleaned_data['map_selection_type']
+            map_pool = self.cleaned_data['map_pool']
+            if map_selection_type == 'map_pool' and map_pool is None:
+                raise ValidationError("A map pool must be specified Map Selection Type is Map Pool")
+            return self.cleaned_data['map_pool']
+        except KeyError:
+            raise ValidationError("Map Selection Type is required")
 
     def clean_map(self):
         """If map_selection_type is map require a map"""
-        map_selection_type = self.cleaned_data['map_selection_type']
-        map = self.cleaned_data['map']
-        if map_selection_type == 'map' and map is None:
-            raise ValidationError("A map must be specified when Map Selection Type is Map.")
-        return self.cleaned_data['map']
-
-    # todo: validate form
+        try:
+            map_selection_type = self.cleaned_data['map_selection_type']
+            map = self.cleaned_data['map']
+            if map_selection_type == 'map' and map is None:
+                raise ValidationError("A map must be specified when Map Selection Type is Map.")
+            return self.cleaned_data['map']
+        except KeyError:
+            raise ValidationError("Map Selection Type is required")
 
 
 class RequestMatch(LoginRequiredMixin, FormView):

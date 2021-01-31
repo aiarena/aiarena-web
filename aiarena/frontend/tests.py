@@ -1,6 +1,6 @@
 from django.test import TransactionTestCase, TestCase
 from django.urls.base import reverse
-from aiarena.core.models import Match, Round, Bot, User, Result, Competition, Map
+from aiarena.core.models import Match, Round, Bot, User, Result, Competition, Map, MapPool
 from aiarena.core.tests.tests import FullDataSetMixin
 from aiarena.core.tests.testing_utils import TestingClient
 
@@ -151,4 +151,10 @@ class RequestMatchTestCase(FullDataSetMixin, TestCase):
         bot1 = Bot.objects.all().first()
         bot2 = Bot.objects.all().last()
         map = Map.objects.all().first()
-        self.test_client.request_match('specific_matchup', bot1, bot2, 'any', map, 1)
+
+        # Request specific map
+        self.test_client.request_match('specific_matchup', bot1, bot2, 'any', 'specific_map', map, None, 3)
+
+        # Request map pool
+        self.test_client.request_match('specific_matchup', bot1, bot2, 'any', 'map_pool', None,
+                                       MapPool.objects.first(), 3)

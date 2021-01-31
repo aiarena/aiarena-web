@@ -14,7 +14,7 @@ from rest_framework.authtoken.models import Token
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
-    CompetitionParticipation
+    CompetitionParticipation, MapPool
 from aiarena.core.models.game_mode import GameMode
 from aiarena.core.utils import calculate_md5
 
@@ -67,6 +67,11 @@ class BaseTestMixin(object):
         competition = Competition.objects.get(id=competition_id)
         map = Map.objects.create(name=name, game_mode=competition.game_mode)
         map.competitions.add(competition)
+        return map
+
+
+    def _create_map_for_game_mode(self, name, game_mode_id):
+        map = Map.objects.create(name=name, game_mode_id=game_mode_id)
         return map
 
 
@@ -341,7 +346,7 @@ class MatchReadyMixin(LoggedInMixin):
 
         self.test_client.login(self.staffUser1)
         competition = self._create_game_mode_and_open_competition()
-        self._create_map_for_competition('testmap1', competition.id)
+        m1 = self._create_map_for_competition('testmap1', competition.id)
 
         self.regularUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot1', 'T')
         self.regularUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot2', 'Z')
@@ -352,7 +357,13 @@ class MatchReadyMixin(LoggedInMixin):
         # add another competition
         game_mode = GameMode.objects.first()
         competition2 = self._create_open_competition(game_mode.id, "Competition 2")
-        self._create_map_for_competition('testmap2', competition2.id)
+        m2 = self._create_map_for_competition('testmap2', competition2.id)
+
+        self._create_map_for_game_mode('testmap3', competition.game_mode_id)
+
+        map_pool = MapPool.objects.create(name='Map pool 1')
+        map_pool.maps.add(m1)
+        map_pool.maps.add(m2)
 
         # use some existing bots
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot1.id, competition_id=competition2.id)
