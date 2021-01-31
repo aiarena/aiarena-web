@@ -259,7 +259,10 @@ class BotResultTable(tables.Table):
         return "--" if record.match.requested_by else format_elo_change(value)
 
     def render_avg_step_time(self, value):
-        return value*1000
+        try:
+            return int(float(value) * 1000)
+        except ValueError:
+            return "--"
 
     def render_replay_file(self, value):
         return "Download"
