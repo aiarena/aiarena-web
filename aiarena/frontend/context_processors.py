@@ -25,7 +25,7 @@ def style_md5() -> str:
     md5_value = cache.get("style_md5")
     if md5_value is None:
         md5_value = md5("aiarena/frontend/static/style.css")[0:8]
-        cache.set('style_md5', 'md5_value', 3600)
+        cache.set('style_md5', md5_value, 3600)
     return md5_value
 
 def md5(fname):
