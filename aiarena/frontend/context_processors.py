@@ -24,7 +24,12 @@ def stats(request):
 def style_md5() -> str:
     md5_value = cache.get("style_md5")
     if md5_value is None:
-        md5_value = md5("aiarena/frontend/static/style.css")[0:8]
+        path = 'aiarena/frontend/static/style.css'
+        try:
+            md5_value = md5(path)[0:8]
+        except Exception as e:
+            # in remote envs we provide the absolute path
+            path = '/home/aiarena/ai-arena/aiarena/frontend/static/style.css'
         cache.set('style_md5', 'md5_value', 3600)
     return md5_value
 
