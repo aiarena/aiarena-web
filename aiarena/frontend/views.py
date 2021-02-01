@@ -236,8 +236,8 @@ class BotResultTable(tables.Table):
         verbose_name="Avg Step(ms)",
         attrs={"td": {"style": lambda value: f"color: {step_time_color(value)};'"}})
     game_time_formatted = tables.Column(verbose_name="Duration")
-    replay_file = FileURLColumn(verbose_name="Replay", orderable=False)
-    match_log = FileURLColumn(verbose_name="Log", orderable=False)
+    replay_file = FileURLColumn(verbose_name="Replay", orderable=False, attrs={"a": {"class": "file-link"}})
+    match_log = FileURLColumn(verbose_name="Log", orderable=False, attrs={"a": {"class": "file-link"}})
 
     # Settings for the Table
     class Meta:
