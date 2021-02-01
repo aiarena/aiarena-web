@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.core.models import User, Map, Bot, News, \
-    CompetitionParticipation
+    CompetitionParticipation, MapPool
 from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
@@ -40,6 +40,10 @@ def run_seed(matches, token):
 
         # unused map
         Map.objects.create(name='test_map3', file=File(map), game_mode=gamemode)
+
+    map_pool = MapPool.objects.create(name='test_map_pool')
+    map_pool.maps.add(m1)
+    map_pool.maps.add(m2)
 
     # assume the frontend is working by this point and create these the easiest way
     devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',

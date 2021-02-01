@@ -1,13 +1,11 @@
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
-from django.contrib.messages.middleware import MessageMiddleware
-from django.contrib.sessions.middleware import SessionMiddleware
 
 from typing import List
 
 from aiarena.core.models import User, Match, Result, ArenaClient, \
-    Competition, Bot, Map
+    Competition, Bot, Map, MapPool
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
 from aiarena.core.tests.tests import BaseTestMixin
@@ -153,7 +151,9 @@ class TestingClient:
                       bot1: Bot,
                       bot2: Bot,
                       matchup_race: str,
+                      map_selection_type: str,
                       map: Map,
+                      map_pool: MapPool,
                       match_count: int) -> Match:
         url = reverse('requestmatch')
         data = {
@@ -161,7 +161,9 @@ class TestingClient:
                 'bot1'        : bot1.id,
                 'bot2'        : bot2.id,
                 'matchup_race': matchup_race,
-                'map'         : map.id,
+                'map_selection_type': map_selection_type,
+                'map'         : map.id if map is not None else '',
+                'map_pool'    : map_pool.id if map_pool is not None else '',
                 'match_count' : match_count,
         }
         response = self.django_client.post(url, data)

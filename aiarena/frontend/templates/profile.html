@@ -3,14 +3,6 @@
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Profile</h2></span><span></span></div>
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
     <div id="author_detail">
         <div class="author-details-avatar-container">
             <div class="author-avatar">

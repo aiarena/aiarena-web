@@ -26,6 +26,7 @@ import django_tables2 as tables
 from django_tables2 import RequestConfig, SingleTableMixin
 import django_filters as filters
 
+from aiarena.core.api.maps import Maps
 from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
 from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.api.ladders import Ladders
@@ -259,7 +260,10 @@ class BotResultTable(tables.Table):
         return "--" if record.match.requested_by else format_elo_change(value)
 
     def render_avg_step_time(self, value):
-        return value*1000
+        try:
+            return int(float(value) * 1000)
+        except ValueError:
+            return "--"
 
     def render_replay_file(self, value):
         return "Download"
@@ -407,7 +411,8 @@ class CompetitionParticipationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         bot_id = kwargs.pop('bot_id')
         super().__init__(*args, **kwargs)
-        self.fields['competition'].queryset = Competition.objects.exclude(participations__bot_id=bot_id)
+        self.fields['competition'].queryset \
+            = Competition.objects.exclude(Q(status__in=['closing', 'closed']) | Q(participations__bot_id=bot_id))
 
     class Meta:
         model = CompetitionParticipation
@@ -720,6 +725,10 @@ class RequestMatchForm(forms.Form):
         ('Z', 'Zerg'),
         ('P', 'Protoss'),
     )
+    MAP_SELECTION_TYPE = (
+        ('map_pool', 'Map Pool'),
+        ('specific_map', 'Specific Map'),
+    )
     matchup_type = forms.ChoiceField(choices=MATCHUP_TYPE_CHOICES,
                                      widget=Select2Widget,
                                      required=True, initial='specific_matchup',
@@ -735,8 +744,14 @@ class RequestMatchForm(forms.Form):
     bot2 = BotChoiceField(queryset=Bot.objects.all(),
                                   widget=BotWidget,  # default this to required initially
                                   required=False, help_text="Author or Bot name")
+    map_selection_type = forms.ChoiceField(choices=MAP_SELECTION_TYPE,
+                                     widget=Select2Widget,
+                                     required=True, initial='map_pool')
     map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
-                                 empty_label='Random Ladder Map', widget=Select2Widget,
+                                 widget=Select2Widget,
+                                 required=False)
+    map_pool = forms.ModelChoiceField(queryset=MapPool.objects.filter(maps__isnull=False).distinct().only('name').order_by('name'),
+                                 widget=Select2Widget,
                                  required=False)
 
     match_count = forms.IntegerField(min_value=1, initial=1)
@@ -754,7 +769,27 @@ class RequestMatchForm(forms.Form):
             raise ValidationError("A bot2 must be specified for a specific matchup.")
         return self.cleaned_data['bot2']
 
-    # todo: validate form
+    def clean_map_pool(self):
+        """If map_selection_type is map_pool require a map_pool"""
+        try:
+            map_selection_type = self.cleaned_data['map_selection_type']
+            map_pool = self.cleaned_data['map_pool']
+            if map_selection_type == 'map_pool' and map_pool is None:
+                raise ValidationError("A map pool must be specified Map Selection Type is Map Pool")
+            return self.cleaned_data['map_pool']
+        except KeyError:
+            raise ValidationError("Map Selection Type is required")
+
+    def clean_map(self):
+        """If map_selection_type is map require a map"""
+        try:
+            map_selection_type = self.cleaned_data['map_selection_type']
+            map = self.cleaned_data['map']
+            if map_selection_type == 'map' and map is None:
+                raise ValidationError("A map must be specified when Map Selection Type is Map.")
+            return self.cleaned_data['map']
+        except KeyError:
+            raise ValidationError("Map Selection Type is required")
 
 
 class RequestMatch(LoginRequiredMixin, FormView):
@@ -766,6 +801,12 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
     def get_success_url(self):
         return reverse('requestmatch')
+
+    def _get_map(self, form):
+        if form.cleaned_data['map_selection_type'] == 'map_pool':
+            return Maps.random_from_map_pool(form.cleaned_data['map_pool'])
+        else:
+            return form.cleaned_data['map']
 
     def form_valid(self, form):
         if config.ALLOW_REQUESTED_MATCHES:
@@ -787,12 +828,12 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
                                 match_list.append(Matches.request_match(
                                     self.request.user, form.cleaned_data['bot1'],
-                                    bot2, form.cleaned_data['map']))
+                                    bot2, self._get_map(form)))
                         else:  # specific_matchup
                             for _ in range(0, form.cleaned_data['match_count']):
                                 match_list.append(Matches.request_match(
                                     self.request.user, form.cleaned_data['bot1'],
-                                    form.cleaned_data['bot2'], form.cleaned_data['map']))
+                                    form.cleaned_data['bot2'], self._get_map(form)))
 
                     message = ""
                     for match in match_list:
