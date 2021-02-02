@@ -25,6 +25,7 @@ from wiki.models import ArticleRevision
 import django_tables2 as tables
 from django_tables2 import RequestConfig, SingleTableMixin
 import django_filters as filters
+from django_filters.widgets import RangeWidget
 
 from aiarena.core.api.maps import Maps
 from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
@@ -236,8 +237,8 @@ class BotResultTable(tables.Table):
         verbose_name="Avg Step(ms)",
         attrs={"td": {"style": lambda value: f"color: {step_time_color(value)};'"}})
     game_time_formatted = tables.Column(verbose_name="Duration")
-    replay_file = FileURLColumn(verbose_name="Replay", orderable=False)
-    match_log = FileURLColumn(verbose_name="Log", orderable=False)
+    replay_file = FileURLColumn(verbose_name="Replay", orderable=False, attrs={"a": {"class": "file-link"}})
+    match_log = FileURLColumn(verbose_name="Log", orderable=False, attrs={"a": {"class": "file-link"}})
 
     # Settings for the Table
     class Meta:
@@ -273,14 +274,25 @@ class BotResultTable(tables.Table):
 
 
 class RelativeResultFilter(filters.FilterSet):
-    opponent = filters.CharFilter(label='Opponent', field_name='opponent__bot__name', lookup_expr='contains')
+    MATCH_TYPES = (
+        ("competition", "Competition"),
+        ("requested", "Requested"),
+    )
+
+    opponent = filters.CharFilter(label='Opponent', field_name='opponent__bot__name', lookup_expr='icontains')
+    race = filters.ChoiceFilter(label="Race", choices=Bot.RACES, field_name='opponent__bot__plays_race')
     result = filters.ChoiceFilter(label='Result', choices=MatchParticipation.RESULT_TYPES[1:])
     result_cause = filters.ChoiceFilter(label='Cause', choices=MatchParticipation.CAUSE_TYPES)
-    avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time")
+    avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time",
+                                        widget=RangeWidget(attrs={"size": 4}))
+    match_type = filters.ChoiceFilter(label='Match Type', choices=MATCH_TYPES, method="filter_match_types")
+    competition = filters.ModelChoiceFilter(label="Competition", queryset=Competition.objects.all(),
+                                            field_name='match__round__competition')
+    map = filters.CharFilter(label='Map', field_name='match__map__name', lookup_expr='icontains')
 
     class Meta:
         model = RelativeResult
-        fields = ['opponent', 'result', 'result_cause', 'avg_step_time']
+        fields = ['opponent__bot__name', 'opponent__bot__plays_race', 'result', 'result_cause', 'avg_step_time']
 
     # Custom filter to match scale
     def filter_avg_step_time(self, queryset, name, value):
@@ -291,6 +303,13 @@ class RelativeResultFilter(filters.FilterSet):
                 return queryset.filter(avg_step_time__gte=value.start/1000)
             elif value.stop is not None:
                 return queryset.filter(avg_step_time__lte=value.stop/1000)
+        return queryset
+
+    def filter_match_types(self, queryset, name, value):
+        if value == self.MATCH_TYPES[0][0]:
+            return queryset.filter(match__requested_by__isnull=True)
+        elif value == self.MATCH_TYPES[1][0]:
+            return queryset.filter(match__requested_by__isnull=False)
         return queryset
 
 
