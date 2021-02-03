@@ -244,15 +244,15 @@
                 <label for="{{ filter.form.match_type.id_for_label }}">Match Type:</label>
                 {{ filter.form.match_type }}
             </div>
-            <div class="flex-row-short" style="width: 17%">
-                {{ filter.form.competition.errors }}
-                <label for="{{ filter.form.competition.id_for_label }}">Competition:</label>
-                {{ filter.form.competition }}
-            </div>
             <div class="flex-row-short" style="width: 23%">
                 {{ filter.form.map.errors }}
                 <label for="{{ filter.form.map.id_for_label }}">Map:</label>
                 {{ filter.form.map }}
+            </div>
+            <div class="flex-row-short">
+                {{ filter.form.competition.errors }}
+                <label for="{{ filter.form.competition.id_for_label }}">Competition:</label>
+                {{ filter.form.competition }}
             </div>
             <div class="flex-row-half" style="width: 100%">
                 <input id=submit-button type="submit" value="Filter" />
