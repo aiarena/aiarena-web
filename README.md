@@ -1,5 +1,5 @@
 # aiarena-web
-A website for running the aiarena.net ladder.
+A Website for running the aiarena.net ladder.
 
 [See the live website here](https://aiarena.net/)
 
