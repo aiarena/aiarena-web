@@ -12,7 +12,7 @@ jobs:
     - name: Deploy Staging
       uses: garygrossgarten/github-action-ssh@release
       with:
-        command: cd /home/aiarena/ai-arena/ && git checkout staging && git pull origin staging && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && /home/aiarena/cleardb.sh && python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py purgesensitivedata && sudo apachectl graceful && pw=`cat ~/.redis` && redis-cli -a "$pw" -n 1 FLUSHDB && exit
+        command: cd /home/aiarena/ai-arena/ && git checkout staging && git pull origin staging && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && /home/aiarena/cleardb.sh && python3 manage.py migrate && python3 manage.py purgesensitivedata && sudo apachectl graceful && pw=`cat ~/.redis` && redis-cli -a "$pw" -n 1 FLUSHDB && exit
         host: ${{ secrets.STAGING_HOST }}
         port: ${{ secrets.STAGING_PORT }}
         username: ${{ secrets.STAGING_USERNAME }}
