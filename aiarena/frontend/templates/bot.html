@@ -254,6 +254,13 @@
                 <label for="{{ filter.form.competition.id_for_label }}">Competition:</label>
                 {{ filter.form.competition }}
             </div>
+                {% if user.is_authenticated %}
+                    <div class="flex-row-half">
+                        {{ filter.form.tags.errors }}
+                        <label for="{{ filter.form.tags.id_for_label }}">Tags (comma separated):</label>
+                        {{ filter.form.tags }}
+                    </div>
+                {% endif %}
             <div class="flex-row-half" style="width: 100%">
                 <input id=submit-button type="submit" value="Filter" />
             </div>
