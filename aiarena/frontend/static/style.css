@@ -4,6 +4,7 @@ div.pagination {
     margin-left: 60px;
     margin-right: 50px;
 }
+
 ul.pagination {
     display: table;
     padding: 0;
@@ -246,7 +247,7 @@ a:hover {
     padding: 0;
 }
 
-#elo_graph img{
+#elo_graph img {
     width: 60%;
     background-color: rgba(0, 0, 0, 0.4);
 }
@@ -673,27 +674,27 @@ a:hover, a:visited, a:link, a:active {
     height: 27px;
 }
 
-.bot-icon-none  {
+.bot-icon-none {
     display: none
 }
 
-.bot-icon-bronze  {
+.bot-icon-bronze {
     background-image: url("/static/bot-icons/bronze.png");
 }
 
-.bot-icon-silver  {
+.bot-icon-silver {
     background-image: url("/static/bot-icons/silver.png");
 }
 
-.bot-icon-gold  {
+.bot-icon-gold {
     background-image: url("/static/bot-icons/gold.png");
 }
 
-.bot-icon-platinum  {
+.bot-icon-platinum {
     background-image: url("/static/bot-icons/platinum.png");
 }
 
-.bot-icon-diamond  {
+.bot-icon-diamond {
     background-image: url("/static/bot-icons/diamond.png");
 }
 
@@ -811,52 +812,54 @@ tr:hover a:focus {
     text-align: center;
 }
 
-.author-details-avatar-container{
+.author-details-avatar-container {
     margin-left: 80px;
 }
 
-.author-detail-info{
-float: left;
-padding-left: 30px;
+.author-detail-info {
+    float: left;
+    padding-left: 30px;
 }
 
-#author-bot_table{
-width: 85%;
-margin: 0px;
+#author-bot_table {
+    width: 85%;
+    margin: 0px;
     padding: 0px;
     margin-left: 80px;
 
 }
 
 .bot_anker {
-margin-top: 20px;
-position:fixed;
-margin-left:-60px;
-padding-left: 0px;
-}
-.bot_anker h3{
-font-size: 16px;
-float:left;
-padding-bottom: -10px;
+    margin-top: 20px;
+    position: fixed;
+    margin-left: -60px;
+    padding-left: 0px;
 }
 
-.anker_header{
-
-border-bottom: 1px solid #ccc;
-padding-bottom: 40px;
-padding-right:3px;
+.bot_anker h3 {
+    font-size: 16px;
+    float: left;
+    padding-bottom: -10px;
 }
 
-.bot_anker div{
-margin-right: 8px;
-margin-bottom: 5px;
-text-align: right;
+.anker_header {
+
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 40px;
+    padding-right: 3px;
 }
+
+.bot_anker div {
+    margin-right: 8px;
+    margin-bottom: 5px;
+    text-align: right;
+}
+
 .bot_anker i {
     padding-top: 12px;
     float: left;
 
-    }
+}
 
 .login-form {
     margin-left: 75px;
@@ -866,51 +869,55 @@ text-align: right;
     padding-top: 10px;
     padding-left: 30px;
     padding-bottom: 20px;
-height: 210px;
+    height: 210px;
 }
+
 .form-box {
-float: left;}
+    float: left;
+}
 
 #pw-reset {
-float:left;
-margin-bottom: 20px;
-padding-top: 15px;
-
-}
-#register{
-float: left;
-margin-bottom: 20px;
+    float: left;
+    margin-bottom: 20px;
+    padding-top: 15px;
 
 }
 
-.login-icon{
-float: left;
-padding:0px;
-margin: 0px;
-padding-top: 15px;
-padding-right: 10px;
-}
-
-.regi-icon{
-float: left;
-padding:0px;
-margin: 0px;
-
-padding-right: 10px;
+#register {
+    float: left;
+    margin-bottom: 20px;
 
 }
-.pw-reg-box{
-float: left;
+
+.login-icon {
+    float: left;
+    padding: 0px;
+    margin: 0px;
+    padding-top: 15px;
+    padding-right: 10px;
+}
+
+.regi-icon {
+    float: left;
+    padding: 0px;
+    margin: 0px;
+
+    padding-right: 10px;
+
+}
+
+.pw-reg-box {
+    float: left;
     margin-right: 90px;
     padding-top: 50px;
     margin-left: 70px;
 }
 
-input{
-margin-right:10px;
+input {
+    margin-right: 10px;
 }
 
-input[type=text],input[type=password],input[type=email],input[type=number],input[type=search],input[type=tel], select, textarea {
+input[type=text], input[type=password], input[type=email], input[type=number], input[type=search], input[type=tel], select, textarea {
     padding: 3px;
     border-radius: 5px;
     color: #444;
@@ -919,23 +926,23 @@ input[type=text],input[type=password],input[type=email],input[type=number],input
 }
 
 #submit-button {
-text-align: center;
-width: 220px;
-height: 35px;
-font-size: 18px;
-background-color: #61892f;
-color: white;
-font-family: 'Quicksand', sans-serif;
-font-weight: bold;
-border: 0;
+    text-align: center;
+    width: 220px;
+    height: 35px;
+    font-size: 18px;
+    background-color: #61892f;
+    color: white;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    border: 0;
 }
 
 #submit-button:hover {
-background-color: #86c232;
+    background-color: #86c232;
 }
 
 #submit-button:disabled {
-background-color: #3d4536;
+    background-color: #3d4536;
 }
 
 #profile_link_buttons {
@@ -999,7 +1006,7 @@ background-color: #3d4536;
     background-color: #86c232;
 }
 
-.registration-form{
+.registration-form {
     margin-left: 75px;
     margin-right: 75px;
     border: 2px solid #86c232;
@@ -1009,7 +1016,7 @@ background-color: #3d4536;
     padding-bottom: 30px;
 }
 
-.join-competition-form{
+.join-competition-form {
     margin-left: 75px;
     margin-right: 75px;
     border: 2px solid #86c232;
@@ -1019,7 +1026,7 @@ background-color: #3d4536;
     padding-bottom: 10px;
 }
 
-.edit-competition-participation-form{
+.edit-competition-participation-form {
     margin-left: 75px;
     margin-right: 75px;
     border: 2px solid #86c232;
@@ -1029,7 +1036,7 @@ background-color: #3d4536;
     padding-bottom: 10px;
 }
 
-.messages{
+.messages {
     margin-left: 75px;
     margin-right: 75px;
     border: 2px solid #86c232;
@@ -1041,15 +1048,15 @@ background-color: #3d4536;
     list-style-type: none;
 }
 
-.messages .success{
+.messages .success {
     color: #86c232;
 }
 
-.messages .failure{
+.messages .failure {
     color: #c84f4f;
 }
 
-.unlink-account-form{
+.unlink-account-form {
     margin-left: 75px;
     margin-right: 75px;
     border: 2px solid #86c232;
@@ -1060,12 +1067,12 @@ background-color: #3d4536;
     text-align: center;
 }
 
-.mono{
-font-family: 'Cutive Mono', monospace;
-font-size: 14px;
+.mono {
+    font-family: 'Cutive Mono', monospace;
+    font-size: 14px;
 }
 
-.flex-container, .flex-container>form {
+.flex-container, .flex-container > form {
     box-sizing: border-box;
     display: flex;
     flex-flow: row wrap;
@@ -1074,7 +1081,7 @@ font-size: 14px;
     align-content: flex-start;
 }
 
-.flex-container>p {
+.flex-container > p {
     box-sizing: border-box;
     width: 100%;
     flex-basis: 100%;
@@ -1198,16 +1205,18 @@ font-size: 14px;
     background-color: darkslategrey;
     width: 100%;
 }
-.select2-search input{
+
+.select2-search input {
     background-color: lightyellow;
     width: 100%;
 }
 
-.select2-search select{
+.select2-search select {
     width: 100%;
 }
+
 .select2-results {
-    background-color: #bff6bf !important;
+    background-color: white !important;
     color: black;
     width: 100%;
 }
@@ -1217,7 +1226,8 @@ font-size: 14px;
 }
 
 .line-up-and-center {
-    display:flex; justify-content: center;
+    display: flex;
+    justify-content: center;
 }
 
 .filter-form {
@@ -1292,4 +1302,92 @@ font-size: 14px;
 
 .bootstrap-tagsinput .tag [data-role="remove"]:hover:active {
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+@charset "UTF-8";
+
+@font-face {
+    font-family: "starcraft2-font";
+    src: url("fonts/starcraft2-font.eot");
+    src: url("fonts/starcraft2-font.eot?#iefix") format("embedded-opentype"),
+    url("fonts/starcraft2-font.woff") format("woff"),
+    url("fonts/starcraft2-font.ttf") format("truetype"),
+    url("fonts/starcraft2-font.svg#starcraft2-font") format("svg");
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+[data-icon]:before {
+    font-family: "starcraft2-font" !important;
+    content: attr(data-icon);
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    speak: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+[class^="sc2-"]:before,
+[class*=" sc2-"]:before {
+    font-family: "starcraft2-font" !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-variant: normal !important;
+    text-transform: none !important;
+    speak: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.sc2-bronze:before {
+    content: "\61";
+}
+
+.sc2-diamond:before {
+    content: "\62";
+}
+
+.sc2-gold:before {
+    content: "\63";
+}
+
+.sc2-grandmaster:before {
+    content: "\64";
+}
+
+.sc2-master:before {
+    content: "\65";
+}
+
+.sc2-platinum:before {
+    content: "\66";
+}
+
+.sc2-protoss:before {
+    content: "\67";
+    color: sandybrown;
+}
+
+.sc2-random:before {
+    content: "\68";
+    color: red;
+}
+
+.sc2-sliver:before {
+    content: "\69";
+}
+
+.sc2-terran:before {
+    content: "\6a";
+    color: blue;
+}
+
+.sc2-zerg:before {
+    content: "\6b";
+    color: purple;
 }
