@@ -307,7 +307,7 @@ class RelativeResultFilter(filters.FilterSet):
     tags = filters.CharFilter(
         label='Tags',
         method="filter_tags",
-        widget=forms.TextInput(attrs={"style": "width: 100%"})
+        widget=forms.TextInput(attrs={"data-role": "tagsinput", "style": "width: 100%"})
     )
 
     class Meta:
