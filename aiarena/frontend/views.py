@@ -280,8 +280,12 @@ class BotResultTable(tables.Table):
         return "Download"
 
     def render_match__tags(self, value):
-        tag_str = ", ".join(str(mt.tag) for mt in value.filter(user=self.user).order_by('tag__name'))
-        return mark_safe(f"<abbr title=\"{tag_str}\">Hover</abbr>")
+        user_tags = value.filter(user=self.user)
+        if len(user_tags) > 0:
+            tag_str = ", ".join(str(mt.tag) for mt in user_tags.order_by('tag__name'))
+            return mark_safe(f"<abbr title=\"{tag_str}\">Hover<{len(user_tags)}></abbr>")
+        else:
+            return "—"
 
 
 class RelativeResultFilter(filters.FilterSet):
