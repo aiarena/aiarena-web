@@ -723,6 +723,7 @@ class MatchQueue(View):
 
 class MatchTagForm(forms.Form):
     tags = forms.CharField(
+        required=False,
         widget=forms.TextInput(
             attrs={
                 "data-role": "tagsinput",
@@ -733,7 +734,8 @@ class MatchTagForm(forms.Form):
 
     def clean_tags(self):
         """convert tags from single string to list"""
-        return self.cleaned_data['tags'].lower().split(",")
+        data = self.cleaned_data['tags'].lower().split(",")
+        return [tag.strip() for tag in data if tag]
 
 
 class MatchTagFormView(SingleObjectMixin, FormView):
@@ -748,12 +750,14 @@ class MatchTagFormView(SingleObjectMixin, FormView):
         form = MatchTagForm(request.POST)
         if request.user.is_authenticated and form.is_valid():
             match = self.get_object()
-            tag_strs = form.cleaned_data["tags"]
             match_tags = []
-            for tag in tag_strs:
+            for tag in form.cleaned_data["tags"]:
                 tag_obj = Tag.objects.get_or_create(name=tag)
                 match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=request.user)[0])
-            match.tags.remove(*match.tags.filter(user=request.user))
+
+            # remove tags for this match that belong to this user and were not sent in the form
+            match.tags.remove(*match.tags.filter(user=request.user).exclude(id__in=[mt.id for mt in match_tags]))
+            # add everything, this shouldn't cause duplicates
             match.tags.add(*match_tags)
 
         return super().post(request, *args, **kwargs)

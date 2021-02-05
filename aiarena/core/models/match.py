@@ -2,6 +2,8 @@ import logging
 from enum import Enum
 
 from django.db import models, transaction
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
@@ -98,9 +100,18 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
             if match.round is not None:
                 match.round.update_if_completed()
 
-
     def get_absolute_url(self):
         return reverse('match', kwargs={'pk': self.pk})
 
     def as_html_link(self):
         return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
+
+
+@receiver(m2m_changed, sender=Match.tags.through)
+def delete_orphan_match_tags(sender, **kwargs):
+    # when something is removed from the m2m:
+    if kwargs['action'] == 'post_remove':
+        # select removed tags and check if they are not linked to any Match, and delete it
+        for mt in MatchTag.objects.filter(pk__in=kwargs['pk_set']):
+            if not mt.match_set.all():
+                mt.delete()
