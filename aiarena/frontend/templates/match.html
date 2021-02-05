@@ -155,9 +155,10 @@
         {% if user.is_authenticated %}
             <form method="post" class="flex-container" style="justify-content: left; margin-left: 60px; margin-top: 30px">
                 {% csrf_token %}
+                {{ match_tag_form.non_field_errors }}
                 <div class="flex-row-half" style="width: 95%">
                     {{ match_tag_form.tags.errors }}
-                    <label for="{{ match_tag_form.tags.id_for_label }}">Tags(comma separated):</label>
+                    <label for="{{ match_tag_form.tags.id_for_label }}">Tags(comma separated)</label>
                     {{ match_tag_form.tags }}
                 </div>
                 <div class="flex-row-short">
