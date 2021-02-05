@@ -10,11 +10,13 @@ from .map import Map
 from .map_pool import MapPool
 from .match import Match
 from .match_participation import MatchParticipation
+from .match_tag import MatchTag
 from .news import News
 from .relative_result import RelativeResult
 from .result import Result
 from .round import Round
 from .trophy import Trophy
 from .trophy import TrophyIcon
+from .tag import Tag
 from .user import User
 from .website_notice import WebsiteNotice
