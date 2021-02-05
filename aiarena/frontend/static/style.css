@@ -1370,12 +1370,12 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
 
 .sc2-protoss:before {
     content: "\67";
-    color: sandybrown;
+    color: #006600;
 }
 
 .sc2-random:before {
     content: "\68";
-    color: red;
+    color: #ff9900;
 }
 
 .sc2-sliver:before {
@@ -1389,5 +1389,5 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
 
 .sc2-zerg:before {
     content: "\6b";
-    color: purple;
+    color: #800000;
 }

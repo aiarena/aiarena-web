@@ -142,8 +142,15 @@
                 return option.text;
             }
 
-            $('#id_bot1').select2({templateResult: renderRace});
-            $('#id_bot2').select2({templateResult: renderRace});
+            $('#id_bot1').select2({
+                templateResult: renderRace,
+                templateSelection: renderRace
+            });
+            $('#id_bot2').select2({
+                templateResult: renderRace,
+                templateSelection: renderRace
+            });
+
         }
 
         $(document).ready(function () {
