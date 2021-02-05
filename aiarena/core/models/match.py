@@ -12,6 +12,7 @@ from .map import Map
 from .mixins import LockableModelMixin, RandomManagerMixin
 from .round import Round
 from .user import User
+from .match_tag import MatchTag
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
                                      related_name='requested_matches')
     require_trusted_arenaclient = models.BooleanField(default=True)
     """Whether this match should require it be run on a trusted arena client"""
+    tags = models.ManyToManyField(MatchTag)
 
     def __str__(self):
         return self.id.__str__()

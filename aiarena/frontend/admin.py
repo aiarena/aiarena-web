@@ -2,7 +2,7 @@ from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
 
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
-    CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News, MapPool
+    CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News, MapPool, MatchTag, Tag
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
 from aiarena.patreon.models import PatreonAccountBind
@@ -356,3 +356,25 @@ class GameAdmin(admin.ModelAdmin):
 class GameModeAdmin(admin.ModelAdmin):
     list_display = ('name', 'game')
     search_fields = ('name', 'game')
+
+
+@admin.register(MatchTag)
+class MatchTagAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'tag',
+    )
+    list_filter = (
+        'user',
+    )
+    search_fields = ('tag__name',)
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'name',
+    )
+    search_fields = ('name',)
