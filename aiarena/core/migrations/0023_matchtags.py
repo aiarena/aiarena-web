@@ -11,25 +11,25 @@ class Migration(migrations.Migration):
         ('core', '0022_auto_20210205_0519'),
     ]
 
-    # operations = [
-    #     migrations.CreateModel(
-    #         name='Tag',
-    #         fields=[
-    #             ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-    #             ('name', models.CharField(max_length=32, unique=True)),
-    #         ],
-    #     ),
-    #     migrations.CreateModel(
-    #         name='MatchTag',
-    #         fields=[
-    #             ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-    #             ('tag', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Tag')),
-    #             ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-    #         ],
-    #     ),
-    #     migrations.AddField(
-    #         model_name='match',
-    #         name='tags',
-    #         field=models.ManyToManyField(to='core.MatchTag'),
-    #     ),
-    # ]
+    operations = [
+        migrations.CreateModel(
+            name='Tag',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name', models.CharField(max_length=32, unique=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='MatchTag',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('tag', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.Tag')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.AddField(
+            model_name='match',
+            name='tags',
+            field=models.ManyToManyField(to='core.MatchTag'),
+        ),
+    ]
