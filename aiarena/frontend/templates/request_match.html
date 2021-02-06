@@ -20,7 +20,7 @@
                 {% csrf_token %}
                 <div class="flex-container">
                 </div>
-                
+
                 <div class="flex-row-short" onchange="refreshForm()">
                     <div class="flex-row--title">Matchup Type</div>
                     <div class="flex-row">{{ form.matchup_type }}</div>
@@ -31,7 +31,8 @@
                 </div>
                 <div class="flex-container">
                     <div class="flex-row-short">
-                        <div class="flex-row--title">Bot1</div><div class="flex-row">{{ form.bot1 }}</div>
+                        <div class="flex-row--title">Bot1</div>
+                        <div class="flex-row">{{ form.bot1 }}</div>
                     </div>
                     <div class="flex-row-short">
                         <div class="flex-row--title">Bot2</div>
@@ -58,7 +59,8 @@
                     </div>
                 </div>
                 <label class="flex-row-short">
-                    <div class="flex-row--title">Match Count</div><div class="flex-row">{{ form.match_count }}</div>
+                    <div class="flex-row--title">Match Count</div>
+                    <div class="flex-row">{{ form.match_count }}</div>
                 </label>
                 <div class="flex-row">
                     <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
@@ -115,13 +117,48 @@
                 return false;
             }
 
-            $('#id_bot1').select2({ templateResult: filterActive });
-            $('#id_bot2').select2({ templateResult: filterActive });
+            $('#id_bot1').select2({templateResult: filterActive});
+            $('#id_bot2').select2({templateResult: filterActive});
         }
 
-        $( document ).ready(function() {
+        function renderIcons() {
+            function renderRace(option) { // Empties the option's label and CSS hides it
+                if (option.text.includes('Terran')) {
+                    let txt = option.text.replace("Terran", "");
+                    return $(`<span><i class="sc2 sc2-terran"></i>  ${txt}</span>`);
+                }
+                if (option.text.includes('Protoss')) {
+                    let txt = option.text.replace("Protoss", "");
+                    return $(`<span><i class="sc2 sc2-protoss"></i>  ${txt}</span>`);
+                }
+                if (option.text.includes('Zerg')) {
+                    let txt = option.text.replace("Zerg", "");
+                    return $(`<span><i class="sc2 sc2-zerg" style="size=50;"></i>  ${txt}</span>`);
+                }
+                if (option.text.includes('Random')) {
+                    let txt = option.text.replace("Random", "");
+                    return $(`<span><i class="sc2 sc2-random" style="size=50;"></i>  ${txt}</span>`);
+                }
+                return option.text;
+            }
+
+            $('#id_bot1').select2({
+                templateResult: renderRace,
+                templateSelection: renderRace
+            });
+            $('#id_bot2').select2({
+                templateResult: renderRace,
+                templateSelection: renderRace
+            });
+
+        }
+
+        $(document).ready(function () {
+
+
             filterBots() // In case initial value for #id_show_active_only changes or page is reloaded
             refreshForm()
+            renderIcons()
         });
 
     </script>

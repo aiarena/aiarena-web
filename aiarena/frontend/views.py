@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView, TemplateView, DeleteView
+from django.views.generic.detail import SingleObjectMixin
 from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
@@ -34,7 +35,7 @@ from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
     Competition, Map, \
-    ArenaClient, News, MapPool
+    ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.frontend.utils import restrict_page_range
@@ -239,6 +240,11 @@ class BotResultTable(tables.Table):
     game_time_formatted = tables.Column(verbose_name="Duration")
     replay_file = FileURLColumn(verbose_name="Replay", orderable=False, attrs={"a": {"class": "file-link"}})
     match_log = FileURLColumn(verbose_name="Log", orderable=False, attrs={"a": {"class": "file-link"}})
+    match__tags = tables.ManyToManyColumn(verbose_name="Tags")
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
 
     # Settings for the Table
     class Meta:
@@ -248,7 +254,8 @@ class BotResultTable(tables.Table):
             "thead": {"style": "height: 35px;"},
         }
         model = RelativeResult
-        fields = ('match', 'created', 'opponent', 'result', 'result_cause', 'elo_change', 'avg_step_time', 'game_time_formatted', 'replay_file', 'match_log')
+        fields = ('match', 'created', 'opponent', 'result', 'result_cause', 'elo_change', 'avg_step_time',
+                  'game_time_formatted', 'replay_file', 'match_log', 'match__tags')
 
     # Custom Column Rendering
     def render_match(self, value):
@@ -272,6 +279,14 @@ class BotResultTable(tables.Table):
     def render_match_log(self, value):
         return "Download"
 
+    def render_match__tags(self, value):
+        user_tags = value.filter(user=self.user)
+        if len(user_tags) > 0:
+            tag_str = ", ".join(str(mt.tag) for mt in user_tags.order_by('tag__name'))
+            return mark_safe(f"<abbr title=\"{tag_str}\">Hover<{len(user_tags)}></abbr>")
+        else:
+            return "—"
+
 
 class RelativeResultFilter(filters.FilterSet):
     MATCH_TYPES = (
@@ -286,13 +301,26 @@ class RelativeResultFilter(filters.FilterSet):
     avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time",
                                         widget=RangeWidget(attrs={"size": 4}))
     match_type = filters.ChoiceFilter(label='Match Type', choices=MATCH_TYPES, method="filter_match_types")
-    competition = filters.ModelChoiceFilter(label="Competition", queryset=Competition.objects.all(),
-                                            field_name='match__round__competition')
+    competition = filters.ModelChoiceFilter(
+        label="Competition",
+        queryset=Competition.objects.all(),
+        field_name='match__round__competition',
+        widget=forms.Select(attrs={"style": "width: 100%"})
+    )
     map = filters.CharFilter(label='Map', field_name='match__map__name', lookup_expr='icontains')
+    tags = filters.CharFilter(
+        label='Tags',
+        method="filter_tags",
+        widget=forms.TextInput(attrs={"data-role": "tagsinput", "style": "width: 100%"})
+    )
 
     class Meta:
         model = RelativeResult
-        fields = ['opponent__bot__name', 'opponent__bot__plays_race', 'result', 'result_cause', 'avg_step_time']
+        fields = ['opponent__bot__name', 'opponent__bot__plays_race', 'result', 'result_cause', 'avg_step_time', 'tags']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
 
     # Custom filter to match scale
     def filter_avg_step_time(self, queryset, name, value):
@@ -312,6 +340,13 @@ class RelativeResultFilter(filters.FilterSet):
             return queryset.filter(match__requested_by__isnull=False)
         return queryset
 
+    def filter_tags(self, queryset, name, value):
+        if self.user.is_authenticated:  # Causes error if user is anonymous
+            tag_values = [v.strip() for v in value.split(",") if v]
+            for v in tag_values:
+                queryset = queryset.filter(match__tags__tag__name__iexact=v, match__tags__user=self.user)
+        return queryset
+
 
 class BotDetail(DetailView):
     model = Bot
@@ -326,11 +361,14 @@ class BotDetail(DetailView):
                 .defer("me__bot__bot_data")
                 .filter(me__bot=self.object)
                 .order_by('-created'))
-        result_filter = RelativeResultFilter(self.request.GET, queryset=results_qs)
-        result_table = BotResultTable(data=result_filter.qs)
+        result_filter = RelativeResultFilter(self.request.GET, queryset=results_qs, user=self.request.user)
+        result_table = BotResultTable(data=result_filter.qs, user=self.request.user)
         # Exclude log column if not staff or user
         if not (self.request.user == self.object.user or self.request.user.is_staff):
             result_table.exclude = ("match_log",)
+        # Exclude tags column if anonymous user
+        if not self.request.user.is_authenticated:
+            result_table.exclude = ("match__tags",)
         # Update table based on request information
         RequestConfig(self.request, paginate={"per_page": 30}).configure(result_table)
         context['results_table'] = result_table
@@ -683,9 +721,68 @@ class MatchQueue(View):
         return render(request, 'match_queue.html', context)
 
 
-class MatchDetail(DetailView):
+class MatchTagForm(forms.Form):
+    tags = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "data-role": "tagsinput",
+                "style": "width: 60%",
+            }
+        )
+    )
+
+    def clean_tags(self):
+        """convert tags from single string to list"""
+        data = self.cleaned_data['tags'].lower().split(",")
+        return [tag.strip() for tag in data if tag]
+
+
+class MatchTagFormView(SingleObjectMixin, FormView):
     model = Match
     template_name = 'match.html'
+    form_class = MatchTagForm
+
+    def get_success_url(self):
+        return reverse('match', kwargs={'pk': self.kwargs['pk']})
+
+    def post(self, request, *args, **kwargs):
+        form = MatchTagForm(request.POST)
+        if request.user.is_authenticated and form.is_valid():
+            match = self.get_object()
+            match_tags = []
+            for tag in form.cleaned_data["tags"]:
+                tag_obj = Tag.objects.get_or_create(name=tag)
+                match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=request.user)[0])
+
+            # remove tags for this match that belong to this user and were not sent in the form
+            match.tags.remove(*match.tags.filter(user=request.user).exclude(id__in=[mt.id for mt in match_tags]))
+            # add everything, this shouldn't cause duplicates
+            match.tags.add(*match_tags)
+
+        return super().post(request, *args, **kwargs)
+
+
+class MatchDisplay(DetailView):
+    model = Match
+    template_name = 'match.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            tags = self.object.tags.filter(user=self.request.user)
+            context['match_tag_form'] = MatchTagForm(initial={'tags': ",".join(str(mtag.tag) for mtag in tags)})
+        return context
+
+
+class MatchDetail(View):
+    def get(self, request, *args, **kwargs):
+        view = MatchDisplay.as_view()
+        return view(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        view = MatchTagFormView.as_view()
+        return view(request, *args, **kwargs)
 
 
 class CompetitionList(ListView):
