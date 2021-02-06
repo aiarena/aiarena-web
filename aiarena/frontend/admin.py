@@ -137,6 +137,7 @@ class CompetitionAdmin(admin.ModelAdmin):
             'date_opened',
             'date_closed',
             'status',
+            'max_active_rounds',
     )
     list_filter = (
             'date_created',
