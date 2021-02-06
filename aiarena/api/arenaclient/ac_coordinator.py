@@ -16,33 +16,43 @@ from django.db.models import F
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoCurrentlyAvailableCompetitions
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Competition
-
+import time
 logger = logging.getLogger(__name__)
 
+REQUEST_INTERVAL_ALLOWED = 10
 
 class ACCoordinator:
     """Coordinates all the Arena Clients and which matches they play."""
+    def __init__(self):
+        self.last_request = time.monotonic()
 
-    @staticmethod
-    def next_competition_match(arenaclient: ArenaClient):
+    def _request_interval_check(self):
+        if time.monotonic() - self.last_request > REQUEST_INTERVAL_ALLOWED:
+            self.last_request = time.monotonic()
+            return True
+        return False
+
+    def next_competition_match(self, arenaclient: ArenaClient):
+
         # REQUESTED MATCHES
         with transaction.atomic():
             match = Matches.attempt_to_start_a_requested_match(arenaclient)
             if match is not None:
                 return match  # a match was found - we're done
+        if self._request_interval_check():
+            competition_ids = ACCoordinator._get_competition_priority_order()
+            for id in competition_ids:
+                competition = Competition.objects.get(id=id)
+                # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
+                with transaction.atomic():
+                    # this call will apply a select for update, so we do it inside an atomic block
+                    if Competitions.check_has_matches_to_play_and_apply_locks(competition):
+                        return Matches.start_next_match_for_competition(arenaclient, competition)
 
-        competition_ids = ACCoordinator._get_competition_priority_order()
-        for id in competition_ids:
-            competition = Competition.objects.get(id=id)
-            # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
-            with transaction.atomic():
-                # this call will apply a select for update, so we do it inside an atomic block
-                if Competitions.check_has_matches_to_play_and_apply_locks(competition):
-                    return Matches.start_next_match_for_competition(arenaclient, competition)
+            raise NoCurrentlyAvailableCompetitions()
+        else:
+            raise TooManyRequests()
 
-        raise NoCurrentlyAvailableCompetitions()
-
-    @staticmethod
     def next_match(arenaclient: ArenaClient) -> Match:
         if config.LADDER_ENABLED:
             try:

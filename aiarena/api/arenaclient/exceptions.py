@@ -30,6 +30,10 @@ class MaxActiveRounds(APIException):
                      'rounds become available.'
     default_code = 'max_active_rounds'
 
+class TooManyRequests(APIException):
+    status_code = 200
+    default_detail = 'Our server is dealing with previous requests, please try again in a few seconds'
+    default_code = 'too_many_requests'
 
 class LadderDisabled(APIException):
     status_code = 200
