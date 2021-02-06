@@ -131,8 +131,10 @@ class MapPoolAdmin(admin.ModelAdmin):
 @admin.register(Competition)
 class CompetitionAdmin(admin.ModelAdmin):
     list_display = (
-            'name',
             'id',
+            'name',
+            'type',
+            'game_mode',
             'date_created',
             'date_opened',
             'date_closed',
