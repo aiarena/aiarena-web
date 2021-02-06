@@ -57,38 +57,61 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(ArenaClient)
 class ArenaClientAdmin(admin.ModelAdmin):
     search_fields = ('username',)
+    ordering = ['username']
     list_display = (
-        'id',
-        'password',
-        'last_login',
-        'is_superuser',
-        'username',
-        'first_name',
-        'last_name',
-        'is_staff',
-        'is_active',
-        'date_joined',
-        'email',
-        'patreon_level',
-        'type',
-        'owner',
-        'extra_active_competition_participations',
-        'extra_periodic_match_requests',
-        'receive_email_comms',
-        'can_request_games_for_another_authors_bot',
-        'trusted',
+            'username',
+            'id',
+            'password',
+            'last_login',
+            'is_superuser',
+            'first_name',
+            'last_name',
+            'is_staff',
+            'is_active',
+            'date_joined',
+            'email',
+            'patreon_level',
+            'type',
+            'owner',
+            'extra_active_competition_participations',
+            'extra_periodic_match_requests',
+            'receive_email_comms',
+            'can_request_games_for_another_authors_bot',
+            'trusted',
     )
     list_filter = (
-        'last_login',
-        'is_superuser',
-        'is_staff',
-        'is_active',
-        'date_joined',
-        'owner',
-        'receive_email_comms',
-        'can_request_games_for_another_authors_bot',
-        'trusted',
+            'last_login',
+            'is_superuser',
+            'is_staff',
+            'is_active',
+            'date_joined',
+            'owner',
+            'receive_email_comms',
+            'can_request_games_for_another_authors_bot',
+            'trusted',
     )
+    actions = ['activate', 'deactivate']
+
+    def activate(self, request, queryset):
+        """
+        Activate an AC without having to go into its detail view
+
+        """
+        for ac in queryset:
+            ac.is_active = True
+            ac.save()
+
+    def deactivate(self, request, queryset):
+        """
+        Deactivate an AC without having to go into its detail view
+
+        """
+        for ac in queryset:
+            ac.is_active = False
+            ac.save()
+
+    activate.short_description = "Activate ArenaClient/s"
+    deactivate.short_description = "Deactivate ArenaClient/s"
 
 
 @admin.register(Map)
