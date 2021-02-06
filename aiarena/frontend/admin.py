@@ -24,32 +24,32 @@ class BotInline(StackedItemInline):
 class UserAdmin(admin.ModelAdmin):
     search_fields = ('username',)
     list_display = (
-        'id',
-        'password',
-        'last_login',
-        'is_superuser',
-        'username',
-        'first_name',
-        'last_name',
-        'is_staff',
-        'is_active',
-        'date_joined',
-        'email',
-        'patreon_level',
-        'type',
-        'extra_active_competition_participations',
-        'extra_periodic_match_requests',
-        'receive_email_comms',
-        'can_request_games_for_another_authors_bot',
+            'id',
+            'password',
+            'last_login',
+            'is_superuser',
+            'username',
+            'first_name',
+            'last_name',
+            'is_staff',
+            'is_active',
+            'date_joined',
+            'email',
+            'patreon_level',
+            'type',
+            'extra_active_competition_participations',
+            'extra_periodic_match_requests',
+            'receive_email_comms',
+            'can_request_games_for_another_authors_bot',
     )
     list_filter = (
-        'last_login',
-        'is_superuser',
-        'is_staff',
-        'is_active',
-        'date_joined',
-        'receive_email_comms',
-        'can_request_games_for_another_authors_bot',
+            'last_login',
+            'is_superuser',
+            'is_staff',
+            'is_active',
+            'date_joined',
+            'receive_email_comms',
+            'can_request_games_for_another_authors_bot',
     )
     raw_id_fields = ('groups', 'user_permissions')
 
@@ -116,7 +116,6 @@ class ArenaClientAdmin(admin.ModelAdmin):
 
 @admin.register(Map)
 class MapAdmin(admin.ModelAdmin):
-
     search_fields = ('name',)
     list_display = ('id', 'name', 'file')
     list_filter = ()
@@ -124,7 +123,6 @@ class MapAdmin(admin.ModelAdmin):
 
 @admin.register(MapPool)
 class MapPoolAdmin(admin.ModelAdmin):
-
     search_fields = ('name',)
     list_display = ('id', 'name')
     list_filter = ()
@@ -132,18 +130,18 @@ class MapPoolAdmin(admin.ModelAdmin):
 
 @admin.register(Competition)
 class CompetitionAdmin(admin.ModelAdmin):
-    
     list_display = (
-        'id',
-        'date_created',
-        'date_opened',
-        'date_closed',
-        'status',
+            'name',
+            'id',
+            'date_created',
+            'date_opened',
+            'date_closed',
+            'status',
     )
     list_filter = (
-        'date_created',
-        'date_opened',
-        'date_closed',
+            'date_created',
+            'date_opened',
+            'date_closed',
     )
     # Add the close competition button
     change_form_template = "admin/change_form_competition.html"
@@ -152,7 +150,7 @@ class CompetitionAdmin(admin.ModelAdmin):
         if "_open-competition" in request.POST:
             error = obj.open()
             if error is None:
-                self.message_user(request, "This competition is now open.",)
+                self.message_user(request, "This competition is now open.", )
             else:
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
@@ -175,30 +173,28 @@ class CompetitionAdmin(admin.ModelAdmin):
 
 @admin.register(Round)
 class RoundAdmin(admin.ModelAdmin):
-    
     list_display = (
-        'id',
-        'number',
-        'competition',
-        'started',
-        'finished',
-        'complete',
+            'id',
+            'number',
+            'competition',
+            'started',
+            'finished',
+            'complete',
     )
     list_filter = ('competition', 'started', 'finished', 'complete')
 
 
 @admin.register(Match)
 class MatchAdmin(admin.ModelAdmin):
-    
     list_display = (
-        'id',
-        'map',
-        'created',
-        'started',
-        'assigned_to',
-        'round',
-        'requested_by',
-        'require_trusted_arenaclient',
+            'id',
+            'map',
+            'created',
+            'started',
+            'assigned_to',
+            'round',
+            'requested_by',
+            'require_trusted_arenaclient',
     )
     list_filter = ('created', 'started', 'require_trusted_arenaclient')
     search_fields = ['id']
@@ -221,105 +217,101 @@ class MatchAdmin(admin.ModelAdmin):
 
 @admin.register(Bot)
 class BotAdmin(admin.ModelAdmin):
-    
-    search_fields = ('name','user__username')
+    search_fields = ('name', 'user__username')
     list_display = (
-        'id',
-        'user',
-        'name',
-        'created',
-        'bot_zip',
-        'bot_zip_updated',
-        'bot_zip_md5hash',
-        'bot_zip_publicly_downloadable',
-        'bot_data_enabled',
-        'bot_data',
-        'bot_data_md5hash',
-        'bot_data_publicly_downloadable',
-        'plays_race',
-        'type',
-        'game_display_id',
-        'wiki_article',
+            'id',
+            'user',
+            'name',
+            'created',
+            'bot_zip',
+            'bot_zip_updated',
+            'bot_zip_md5hash',
+            'bot_zip_publicly_downloadable',
+            'bot_data_enabled',
+            'bot_data',
+            'bot_data_md5hash',
+            'bot_data_publicly_downloadable',
+            'plays_race',
+            'type',
+            'game_display_id',
+            'wiki_article',
     )
     list_filter = (
-        'user',
-        'created',
-        'bot_zip_updated',
-        'bot_zip_publicly_downloadable',
-        'bot_data_enabled',
-        'bot_data_publicly_downloadable',
-        'wiki_article',
+            'user',
+            'created',
+            'bot_zip_updated',
+            'bot_zip_publicly_downloadable',
+            'bot_data_enabled',
+            'bot_data_publicly_downloadable',
+            'wiki_article',
     )
 
 
 @admin.register(MatchParticipation)
 class MatchParticipationAdmin(admin.ModelAdmin):
-    
     list_display = (
-        'id',
-        'match',
-        'participant_number',
-        'bot',
-        'starting_elo',
-        'resultant_elo',
-        'elo_change',
-        'match_log',
-        'avg_step_time',
-        'result',
-        'result_cause',
-        'use_bot_data',
-        'update_bot_data',
+            'id',
+            'match',
+            'participant_number',
+            'bot',
+            'starting_elo',
+            'resultant_elo',
+            'elo_change',
+            'match_log',
+            'avg_step_time',
+            'result',
+            'result_cause',
+            'use_bot_data',
+            'update_bot_data',
     )
     list_filter = ('use_bot_data', 'update_bot_data')
 
 
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
-    
     list_display = (
-        'id',
-        'match',
-        'winner',
-        'type',
-        'created',
-        'replay_file',
-        'game_steps',
-        'submitted_by',
-        'arenaclient_log',
-        'interest_rating',
-        'date_interest_rating_calculated',
-        'replay_file_has_been_cleaned',
+            'id',
+            'match',
+            'winner',
+            'type',
+            'created',
+            'replay_file',
+            'game_steps',
+            'submitted_by',
+            'arenaclient_log',
+            'interest_rating',
+            'date_interest_rating_calculated',
+            'replay_file_has_been_cleaned',
     )
     list_filter = (
-        'match',
-        'winner',
-        'created',
-        'submitted_by',
-        'date_interest_rating_calculated',
-        'replay_file_has_been_cleaned',
+            'match',
+            'winner',
+            'created',
+            'submitted_by',
+            'date_interest_rating_calculated',
+            'replay_file_has_been_cleaned',
     )
 
 
 @admin.register(CompetitionParticipation)
 class CompetitionParticipationAdmin(admin.ModelAdmin):
-    
     list_display = (
-        'id',
-        'competition',
-        'bot',
-        'elo',
-        'match_count',
-        'win_perc',
-        'win_count',
-        'loss_perc',
-        'loss_count',
-        'tie_perc',
-        'tie_count',
-        'crash_perc',
-        'crash_count',
-        'elo_graph',
-        'highest_elo',
-        'slug',
+            'id',
+            'competition',
+            'bot',
+            'elo',
+            'match_count',
+            'win_perc',
+            'win_count',
+            'loss_perc',
+            'loss_count',
+            'tie_perc',
+            'tie_count',
+            'crash_perc',
+            'crash_count',
+            'elo_graph',
+            'highest_elo',
+            'slug',
     )
     list_filter = ('competition', 'bot')
     search_fields = ('slug',)
@@ -327,27 +319,25 @@ class CompetitionParticipationAdmin(admin.ModelAdmin):
 
 @admin.register(CompetitionBotMatchupStats)
 class CompetitionBotMatchupStatsAdmin(admin.ModelAdmin):
-    
     list_display = (
-        'id',
-        'bot',
-        'opponent',
-        'match_count',
-        'win_count',
-        'win_perc',
-        'loss_count',
-        'loss_perc',
-        'tie_count',
-        'tie_perc',
-        'crash_count',
-        'crash_perc',
+            'id',
+            'bot',
+            'opponent',
+            'match_count',
+            'win_count',
+            'win_perc',
+            'loss_count',
+            'loss_perc',
+            'tie_count',
+            'tie_perc',
+            'crash_count',
+            'crash_perc',
     )
     list_filter = ('bot', 'opponent')
 
 
 @admin.register(Trophy)
 class TrophyAdmin(admin.ModelAdmin):
-    
     list_display = ('id', 'bot', 'name', 'icon')
     list_filter = ('bot',)
     search_fields = ('name',)
@@ -355,7 +345,6 @@ class TrophyAdmin(admin.ModelAdmin):
 
 @admin.register(TrophyIcon)
 class TrophyIconAdmin(admin.ModelAdmin):
-    
     list_display = ('id', 'name', 'image')
     search_fields = ('name',)
 
@@ -370,10 +359,12 @@ class NewsAdmin(admin.ModelAdmin):
     list_display = ('created', 'title', 'text', 'yt_link')
     search_fields = ('title',)
 
+
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
+
 
 @admin.register(GameMode)
 class GameModeAdmin(admin.ModelAdmin):
@@ -384,12 +375,12 @@ class GameModeAdmin(admin.ModelAdmin):
 @admin.register(MatchTag)
 class MatchTagAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'user',
-        'tag',
+            'id',
+            'user',
+            'tag',
     )
     list_filter = (
-        'user',
+            'user',
     )
     search_fields = ('tag__name',)
 
@@ -397,7 +388,7 @@ class MatchTagAdmin(admin.ModelAdmin):
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
-        'name',
+            'id',
+            'name',
     )
     search_fields = ('name',)
