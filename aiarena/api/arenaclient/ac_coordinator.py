@@ -89,8 +89,8 @@ class ACCoordinator:
                             where cp.active = 1
                               and cc.status in ('open', 'closing', 'paused')) as competition_participations_total) as perc_active
                          left join
-                     (select competition_id, perc_recent_matches_cnt / recent_matches_total_cnt as perc_recent_matches
-                      from (select competition_id, count(competition_id) perc_recent_matches_cnt
+                     (select competition_id, perc_recent_matches_cnt / total_matches_cnt as perc_recent_matches
+                      from (select competition_id, count(competition_id) perc_recent_matches_cnt, count(*) total_matches_cnt
                             from (select competition_id
                                   from core_match cm
                                            join core_round cr on cm.round_id = cr.id
@@ -99,16 +99,7 @@ class ACCoordinator:
                                     and cc.status in ('open', 'closing', 'paused')
                                   order by cm.started desc
                                   limit 100) as matches
-                            group by competition_id) as recent_matches
-                               join
-                           (select count(*) recent_matches_total_cnt
-                            from core_match cm
-                                     join core_round cr on cm.round_id = cr.id
-                                     join core_competition cc on cr.competition_id = cc.id
-                            where cm.started is not null
-                              and cc.status in ('open', 'closing', 'paused')
-                            order by cm.started desc
-                            limit 100) as recent_matches_total) as perc_recent_matches
+                            group by competition_id) as recent_matches) as perc_recent_matches
                      on perc_recent_matches.competition_id = perc_active.competition_id
                 order by COALESCE(perc_recent_matches, 0) - perc_active
             """)
