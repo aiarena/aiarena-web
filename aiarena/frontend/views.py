@@ -363,12 +363,13 @@ class BotDetail(DetailView):
                 .order_by('-created'))
         result_filter = RelativeResultFilter(self.request.GET, queryset=results_qs, user=self.request.user)
         result_table = BotResultTable(data=result_filter.qs, user=self.request.user)
+        result_table.exclude = []
         # Exclude log column if not staff or user
         if not (self.request.user == self.object.user or self.request.user.is_staff):
-            result_table.exclude = ("match_log",)
+            result_table.exclude.append("match_log")
         # Exclude tags column if anonymous user
         if not self.request.user.is_authenticated:
-            result_table.exclude = ("match__tags",)
+            result_table.exclude.append("match__tags")
         # Update table based on request information
         RequestConfig(self.request, paginate={"per_page": 30}).configure(result_table)
         context['results_table'] = result_table
@@ -394,7 +395,7 @@ class BotCompetitionStatsDetail(DetailView):
         context = super().get_context_data(**kwargs)
         context['competition_bot_matchups'] = self.object.competition_matchup_stats.filter(
             opponent__competition=context['competitionparticipation'].competition).order_by('-win_perc').distinct()
-        context['updated'] = context['competition_bot_matchups'][0].updated
+        context['updated'] = context['competition_bot_matchups'][0].updated if context['competition_bot_matchups'] else "Never"
         return context
 
 

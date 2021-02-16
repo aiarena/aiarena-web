@@ -80,11 +80,10 @@ class Bot(models.Model, LockableModelMixin):
     game_display_id = models.UUIDField(default=uuid.uuid4)
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
 
-    @property
-    def current_elo_trend(self):
+    def current_elo_trend(self, competition):
         from .relative_result import RelativeResult
         return (RelativeResult.objects
-            .filter(me__bot=self, match__requested_by__isnull=True)
+            .filter(me__bot=self, match__requested_by__isnull=True, match__round__competition=competition)
             .order_by('-created')[:config.ELO_TREND_N_MATCHES]
             .aggregate(Sum('elo_change'))['elo_change__sum'])
 
