@@ -105,6 +105,10 @@ def shorten_naturaltime(naturaltime):
             .replace(' years', 'y').replace(' year', 'y'))
 
 
+def bot_competition_trend(bot, competition):
+    return bot.current_elo_trend(competition)
+
+
 register = template.Library()
 register.filter('pretty_bool', pretty_bool)
 register.filter('format_elo_change', format_elo_change)
@@ -112,3 +116,4 @@ register.filter('smooth_timedelta', smooth_timedelta)
 register.filter('cents_to_usd', cents_to_usd)
 register.filter('step_time_color', step_time_color)
 register.filter('shorten_naturaltime', shorten_naturaltime)
+register.simple_tag(bot_competition_trend, name='bot_competition_trend')

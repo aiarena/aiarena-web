@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n core_filters %}
 
 {% block content %}
 
@@ -70,7 +70,7 @@
                         {% endif %}
                         <td>
                             {{ participant.elo }}
-                            {% with trend=participant.bot.current_elo_trend %}
+                            {% bot_competition_trend participant.bot competition as trend %}
                                 {% if trend > 40 %}
                                     <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
                                         trending_flat
@@ -92,7 +92,7 @@
                                         trending_flat
                                     </em>
                                 {% endif %}
-                            {% endwith %}</td>
+                            </td>
                         <td><a href="{% url 'bot_competition_stats' participant.id participant.slug %}">Stats</a></td>
 
                     </tr>
