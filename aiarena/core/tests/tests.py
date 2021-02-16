@@ -659,6 +659,12 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
     def test_cleanup_replays_and_logs(self):
         NUM_MATCHES = 12
         self.client.login(username='staff_user', password='x')
+
+        # freeze competition2, so we can get anticipatable results
+        competition1 = Competition.objects.filter(status='open').first()
+        competition2 = Competition.objects.exclude(id=competition1.id).get()
+        competition2.freeze()
+
         # generate some matches so we have replays to delete...
         for x in range(NUM_MATCHES):  # 12 = two rounds
             response = self._post_to_matches()
