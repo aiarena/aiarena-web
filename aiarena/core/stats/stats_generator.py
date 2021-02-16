@@ -176,7 +176,7 @@ class StatsGenerator:
                     cb.name, 
                     cp.resultant_elo as elo, 
                     cr.created as date
-                from aiarena.core_matchparticipation cp
+                from core_matchparticipation cp
                     inner join core_result cr on cp.match_id = cr.match_id
                     left join core_bot cb on cp.bot_id = cb.id
                     left join core_match cm on cp.match_id = cm.id
