@@ -189,8 +189,6 @@ class StatsGenerator:
             elo_over_time.to_csv('./tmp/tmp.csv')
             elo_over_time = pd.read_csv('./tmp/tmp.csv')
             elo_over_time = elo_over_time.drop('Unnamed: 0', axis=1)
-            # Need to explicitly recast column to datetime
-            elo_over_time['2'] = pd.to_datetime(elo_over_time['2'])
         return elo_over_time
 
     @staticmethod
