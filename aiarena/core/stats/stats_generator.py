@@ -44,7 +44,7 @@ class StatsGenerator:
                                                                match__round__competition=sp.competition) \
                 .aggregate(Max('resultant_elo'))['resultant_elo__max']
 
-            graph = StatsGenerator._generate_elo_graph(sp.bot.id)
+            graph = StatsGenerator._generate_elo_graph(sp.bot.id, sp.competition_id)
             if graph is not None:
                 sp.elo_graph.save('elo.png', graph)
         else:
@@ -168,19 +168,23 @@ class StatsGenerator:
                     """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
 
     @staticmethod
-    def _get_data(bot_id):
+    def _get_data(bot_id, competition_id):
         # this does not distinct between competitions
         with connection.cursor() as cursor:
             query = (f"""
-                select distinct
-                cb.name, 
-                cp.resultant_elo as elo, 
-                cr.created as date 
+                select 
+                    cb.name, 
+                    cp.resultant_elo as elo, 
+                    cr.created as date
                 from core_matchparticipation cp
                     inner join core_result cr on cp.match_id = cr.match_id
                     left join core_bot cb on cp.bot_id = cb.id
+                    left join core_match cm on cp.match_id = cm.id
+                    left join core_round crnd on cm.round_id = crnd.id
+                    left join core_competition cc on crnd.competition_id = cc.id
                 where resultant_elo is not null 
                     and bot_id = {bot_id} 
+                    and competition_id = {competition_id}
                 order by cr.created
                 """)
             cursor.execute(query)
@@ -194,33 +198,32 @@ class StatsGenerator:
     @staticmethod
     def _generate_plot_image(df):
         plot = io.BytesIO()
-        ax = plt.gca()
-        plt.rc('xtick', labelsize=22)
-        graph = df.plot(kind='line', x='Date', y='ELO', ax=ax, figsize=(12, 9), color=('#86c232'))
-        graph.spines["top"].set_visible(False)
-        graph.spines["right"].set_visible(False)
-        graph.spines["left"].set_color('#86c232')
-        graph.spines["bottom"].set_color('#86c232')
-        graph.autoscale(enable=True, axis='x')
-        graph.get_xaxis().tick_bottom()
-        graph.get_yaxis().tick_left()
 
-        plt.title('ELO over time', fontsize=20, color=('#86c232'))
-        plt.xticks()
+        fig, ax = plt.subplots(figsize=(12, 9))
+        ax.plot(df["Date"], df['ELO'], color='#86c232')
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_color('#86c232')
+        ax.spines["bottom"].set_color('#86c232')
+        ax.autoscale(enable=True, axis='x')
+        ax.get_xaxis().tick_bottom()
+        ax.get_yaxis().tick_left()
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%b-%d'))
         ax.tick_params(axis='x', colors='#86c232', labelsize=16)
         ax.tick_params(axis='y', colors='#86c232', labelsize=16)
-        ax.get_legend().remove()
+        plt.title('ELO over time', fontsize=20, color=('#86c232'))
+
         plt.tight_layout()  # Avoids savefig cutting off x-label
         plt.savefig(plot, format="png", transparent=True)
         plt.cla()  # Clears axis in preparation for new graph
         return plot
 
     @staticmethod
-    def _generate_elo_graph(bot_id: int):
-        df = StatsGenerator._get_data(bot_id)
+    def _generate_elo_graph(bot_id: int, competition_id: int):
+        df = StatsGenerator._get_data(bot_id, competition_id)
         if not df.empty:
             df['1'] = pd.to_numeric(df['1'])
+            df['2'] = pd.to_datetime(df['2'])
             df.columns = ['Name', 'ELO', 'Date']
 
             return StatsGenerator._generate_plot_image(df)
