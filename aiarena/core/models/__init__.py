@@ -19,4 +19,3 @@ from .trophy import Trophy
 from .trophy import TrophyIcon
 from .tag import Tag
 from .user import User
-from .website_notice import WebsiteNotice
