@@ -864,10 +864,10 @@ class RequestMatchForm(forms.Form):
     map_selection_type = forms.ChoiceField(choices=MAP_SELECTION_TYPE,
                                      widget=Select2Widget,
                                      required=True, initial='map_pool')
-    map = forms.ModelChoiceField(queryset=Map.objects.only('name').order_by('name'),
+    map = forms.ModelChoiceField(queryset=Map.objects.filter(enabled=True).only('name').order_by('name'),
                                  widget=Select2Widget,
                                  required=False)
-    map_pool = forms.ModelChoiceField(queryset=MapPool.objects.filter(maps__isnull=False).distinct().only('name').order_by('name'),
+    map_pool = forms.ModelChoiceField(queryset=MapPool.objects.filter(maps__isnull=False, enabled=True).distinct().only('name').order_by('name'),
                                  widget=Select2Widget,
                                  required=False)
 
