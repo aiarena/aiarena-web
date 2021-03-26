@@ -7,7 +7,7 @@ django-filter==2.4.0
 django-private-storage==2.2.2
 django-registration-redux==2.8
 django-avatar==5.0.0
-djangorestframework==3.11.1
+djangorestframework==3.12.3
 wheel
 mysqlclient==2.0.1
 pinax-theme-bootstrap==8.0.1
