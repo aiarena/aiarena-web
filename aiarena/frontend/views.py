@@ -11,7 +11,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
-from django.db.models import F, Prefetch, Q
+from django.db.models import F, Prefetch, Q, Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -696,6 +696,19 @@ class Index(ListView):
         context['events'] = events
         context['news'] = News.objects.all().order_by('-created')
 
+        competitions = Competition.objects.filter(status='open').annotate(num_participants=Count('participations')).order_by('-num_participants')
+        context['competitions'] = []
+        for comp in competitions:
+            if Round.objects.filter(competition=comp).count() > 0:
+                top10 = Ladders.get_competition_ranked_participants(
+                    comp, amount=10).prefetch_related(
+                    Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
+                    Prefetch('bot__user', queryset=User.objects.all().only('patreon_level'))
+                )  # top 10 bots
+                context['competitions'].append({
+                    'competition': comp,
+                    'top10': top10,
+                })
         return context
 
     template_name = 'index.html'
