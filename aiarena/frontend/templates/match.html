@@ -155,13 +155,24 @@
                 {{ match_tag_form.non_field_errors }}
                 <div class="flex-row-half" style="width: 95%">
                     {{ match_tag_form.tags.errors }}
-                    <label for="{{ match_tag_form.tags.id_for_label }}">Tags(comma separated)</label>
+                    <label for="{{ match_tag_form.tags.id_for_label }}">Tags (comma separated, max 32 chars each, accepts A-Z, a-z, 0-9, space and _)</label>
                     {{ match_tag_form.tags }}
                 </div>
                 <div class="flex-row-short">
                     <input id=submit-button type="submit" value="Save" />
                 </div>
             </form>
+            <script>
+            // Prevent tags from being added if they don't follow the rules
+            $('input').on('beforeItemAdd', function(event) {
+                // check tag contents
+                if (!/^[a-zA-Z0-9 _]+$/.test(event.item) || event.item.length>32) {
+                    console.log(event.item.length)
+                    // set to true to prevent the item getting added
+                    event.cancel = true;
+                }
+            });
+            </script>
         {% endif %}
     </div>
 {% endblock %}
