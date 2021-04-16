@@ -737,7 +737,7 @@ class MatchTagForm(forms.Form):
     def clean_tags(self):
         """convert tags from single string to list"""
         data = self.cleaned_data['tags'].lower().split(",")
-        return [re.sub('[^a-zA-Z0-9 _]', '', tag.strip())[:32] for tag in data if tag]
+        return [re.sub('[^a-zA-Z0-9 _]', '', tag.strip())[:32] for tag in data if tag][:32]
 
 
 class MatchTagFormView(SingleObjectMixin, FormView):
