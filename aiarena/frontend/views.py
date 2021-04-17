@@ -1,4 +1,3 @@
-import re
 from datetime import timedelta
 
 from constance import config
@@ -29,6 +28,7 @@ from django_tables2 import RequestConfig, SingleTableMixin
 import django_filters as filters
 from django_filters.widgets import RangeWidget
 
+from aiarena import shared_functions
 from aiarena.core.api.maps import Maps
 from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
 from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
@@ -343,7 +343,7 @@ class RelativeResultFilter(filters.FilterSet):
 
     def filter_tags(self, queryset, name, value):
         if self.user.is_authenticated:  # Causes error if user is anonymous
-            tag_values = [v.strip() for v in value.split(",") if v]
+            tag_values = shared_functions.parse_tags(value)
             for v in tag_values:
                 queryset = queryset.filter(match__tags__tag__name__iexact=v, match__tags__user=self.user)
         return queryset
@@ -728,16 +728,13 @@ class MatchTagForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "data-role": "tagsinput",
-                "style": "width: 60%",
+                "data-role": "tagsinput"
             }
         )
     )
 
     def clean_tags(self):
-        """convert tags from single string to list"""
-        data = self.cleaned_data['tags'].lower().split(",")
-        return [re.sub('[^a-zA-Z0-9 _]', '', tag.strip())[:32] for tag in data if tag][:32]
+        return shared_functions.parse_tags(self.cleaned_data['tags'])
 
 
 class MatchTagFormView(SingleObjectMixin, FormView):
