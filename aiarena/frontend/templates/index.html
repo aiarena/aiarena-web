@@ -71,7 +71,7 @@
             <br> <!-- extra space -->
             <div class="slide-selector">
                 {% for new in news %}
-                    <span class="slide-select" onclick="selectSlide({{ forloop.counter }})"></span>
+                    <span class="slide-select" id="newsSlideSelect" onclick="selectSlide({{ forloop.counter }})"></span>
                 {% endfor %}
             </div>
         </div>
@@ -85,6 +85,71 @@
             <br/>
             The old sc2ai.net website can be accessed at <a href="http://archive.sc2ai.net/">archive.sc2ai.net</a>
         </div>
+        {% if competitions %}
+            <div id="competition_feed">
+                <div class="divider"><span></span><span><h2>Competitions</h2></span><span></span></div>
+                {% for item in competitions %}
+                    <div class="compSlides">
+                        <div>
+                            <div style="text-align: center"><h3>{{ item.competition.as_html_link }}</h3></div>
+                            <table summary="Table containing the top10 bots" id="resultsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
+                                <thead>
+                                <td style="text-align: center"><strong>Rank</strong></td>
+                                <td></td>
+                                <td><strong>Name</strong></td>
+                                <td><strong>ELO</strong></td>
+                                </thead>
+                                <tbody>
+                                    {% for participant in item.top10 %}
+                                        <tr>
+                                            <td style="text-align: center">{{ forloop.counter }}</td>
+                                            <td style="padding-right: 0">
+                                                {% if patreon_level != 'none' %}
+                                                    <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ participant.bot.as_html_link }}</td>
+                                            <td>
+                                                {{ participant.elo }}
+                                                {% with trend=participant.bot.current_elo_trend %}
+                                                    {% if trend > 40 %}
+                                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
+                                                            trending_flat
+                                                        </em>
+                                                    {% elif trend < -40 %}
+                                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(90deg);" title="ELO changed {{trend}} in the last 30 games">
+                                                            trending_flat
+                                                        </em>
+                                                    {% elif trend > 15 %}
+                                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO gained {{trend}} in the last 30 games">
+                                                            trending_up
+                                                        </em>
+                                                    {% elif trend < -15 %}
+                                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
+                                                            trending_down
+                                                        </em>
+                                                    {% else %}
+                                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
+                                                            trending_flat
+                                                        </em>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+                <br> <!-- extra space -->
+                <div class="slide-selector">
+                    {% for item in competitions %}
+                        <span class="slide-select" id="compSlideSelect" onclick="selectCompSlide({{ forloop.counter }})"></span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
         <div id="activity_feed">
             <div class="divider"><span></span><span><h2>Activity</h2></span><span></span></div>
         <table>
@@ -119,7 +184,7 @@
         function showSlides(n) {
             var i;
             var slides = document.getElementsByClassName("newSlides");
-            var dots = document.getElementsByClassName("slide-select");
+            var dots = document.querySelectorAll('[id=newsSlideSelect]');
             if (n > slides.length) {slideIndex = 1}
             if (n < 1) {slideIndex = slides.length}
             for (i = 0; i < slides.length; i++) {
@@ -130,6 +195,29 @@
             }
             slides[slideIndex-1].style.display = "block";
             dots[slideIndex-1].className += " active";
+        }
+
+        var compSlideIndex = 1;
+        showCompSlides(compSlideIndex);
+
+        function selectCompSlide(n) {
+            showCompSlides(compSlideIndex = n);
+        }
+
+        function showCompSlides(n) {
+            var i;
+            var slides = document.getElementsByClassName("compSlides");
+            var dots = document.querySelectorAll('[id=compSlideSelect]');
+            if (n > slides.length) {compSlideIndex = 1}
+            if (n < 1) {compSlideIndex = slides.length}
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slides[compSlideIndex-1].style.display = "block";
+            dots[compSlideIndex-1].className += " active";
         }
     </script>
 {% endblock %}

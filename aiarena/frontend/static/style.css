@@ -168,6 +168,11 @@ a:hover {
     margin-right: 75px;
 }
 
+#competition_feed {
+    margin-left: 75px;
+    margin-right: 75px;
+}
+
 #whatisaiarena {
     margin-left: 75px;
     margin-right: 75px;
@@ -766,6 +771,12 @@ tr:hover a:focus {
     margin-left: 0;
 }
 
+#competition_feed table {
+    width: 100%;
+    text-align: left;
+    border-collapse: collapse;
+    margin-left: 0;
+}
 
 #inner_content {
     width: 100%;
@@ -1181,6 +1192,12 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
     padding-right: 10px;
 }
 
+#competition_feed th {
+    height: 35px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .slide-selector {
     text-align: center;
 }
@@ -1194,6 +1211,10 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
     border-radius: 50%;
     display: inline-block;
     transition: background-color 0.6s ease;
+}
+
+.slide-select.active {
+    background-color: rgba(97, 137, 47, 1);
 }
 
 
