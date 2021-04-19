@@ -38,6 +38,7 @@ from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipat
     ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
+from aiarena.core.utils import parse_tags
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
@@ -342,7 +343,7 @@ class RelativeResultFilter(filters.FilterSet):
 
     def filter_tags(self, queryset, name, value):
         if self.user.is_authenticated:  # Causes error if user is anonymous
-            tag_values = [v.strip() for v in value.split(",") if v]
+            tag_values = parse_tags(value)
             for v in tag_values:
                 queryset = queryset.filter(match__tags__tag__name__iexact=v, match__tags__user=self.user)
         return queryset
@@ -740,16 +741,13 @@ class MatchTagForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "data-role": "tagsinput",
-                "style": "width: 60%",
+                "data-role": "tagsinput"
             }
         )
     )
 
     def clean_tags(self):
-        """convert tags from single string to list"""
-        data = self.cleaned_data['tags'].lower().split(",")
-        return [tag.strip() for tag in data if tag]
+        return parse_tags(self.cleaned_data['tags'])
 
 
 class MatchTagFormView(SingleObjectMixin, FormView):

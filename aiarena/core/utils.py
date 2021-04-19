@@ -1,3 +1,4 @@
+import re
 import json
 import logging
 import os
@@ -9,6 +10,14 @@ from zipfile import ZipFile
 from aiarena import settings
 
 logger = logging.getLogger(__name__)
+
+
+def parse_tags(tags):
+    """convert tags from single string to list if applicable, and then cleans the tags"""
+    if isinstance(tags, str):
+        tags = tags.lower().split(",")
+    return [re.sub('[^a-z0-9 _]', '', tag.strip())[:32] for tag in tags if tag][:32]
+
 
 def calculate_md5(file, block_size=2 ** 20):
     """Returns MD% checksum for given file.
