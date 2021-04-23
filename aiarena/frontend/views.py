@@ -11,7 +11,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
-from django.db.models import F, Prefetch, Q
+from django.db.models import F, Prefetch, Q, Count
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -38,6 +38,7 @@ from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipat
     ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
+from aiarena.core.utils import parse_tags
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
@@ -342,7 +343,7 @@ class RelativeResultFilter(filters.FilterSet):
 
     def filter_tags(self, queryset, name, value):
         if self.user.is_authenticated:  # Causes error if user is anonymous
-            tag_values = [v.strip() for v in value.split(",") if v]
+            tag_values = parse_tags(value)
             for v in tag_values:
                 queryset = queryset.filter(match__tags__tag__name__iexact=v, match__tags__user=self.user)
         return queryset
@@ -696,6 +697,19 @@ class Index(ListView):
         context['events'] = events
         context['news'] = News.objects.all().order_by('-created')
 
+        competitions = Competition.objects.filter(status='open').annotate(num_participants=Count('participations')).order_by('-num_participants')
+        context['competitions'] = []
+        for comp in competitions:
+            if Round.objects.filter(competition=comp).count() > 0:
+                top10 = Ladders.get_competition_ranked_participants(
+                    comp, amount=10).prefetch_related(
+                    Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
+                    Prefetch('bot__user', queryset=User.objects.all().only('patreon_level'))
+                )  # top 10 bots
+                context['competitions'].append({
+                    'competition': comp,
+                    'top10': top10,
+                })
         return context
 
     template_name = 'index.html'
@@ -727,16 +741,13 @@ class MatchTagForm(forms.Form):
         required=False,
         widget=forms.TextInput(
             attrs={
-                "data-role": "tagsinput",
-                "style": "width: 60%",
+                "data-role": "tagsinput"
             }
         )
     )
 
     def clean_tags(self):
-        """convert tags from single string to list"""
-        data = self.cleaned_data['tags'].lower().split(",")
-        return [tag.strip() for tag in data if tag]
+        return parse_tags(self.cleaned_data['tags'])
 
 
 class MatchTagFormView(SingleObjectMixin, FormView):

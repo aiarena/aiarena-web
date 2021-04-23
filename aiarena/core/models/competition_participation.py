@@ -33,7 +33,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     crash_count = models.IntegerField(default=0)
     elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True)
     highest_elo = models.IntegerField(blank=True, null=True)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, blank=True)
     active = models.BooleanField(default=True)
 
     def validate_unique(self, exclude=None):

@@ -75,7 +75,8 @@ class ACCoordinator:
             # I don't know why but for some reason CTEs didn't work so here; have a massive query.
             cursor.execute("""
                 select perc_active.competition_id
-                from (select competition_id, competition_participations.competition_participations_cnt / total_active_cnt as perc_active
+                from (select competition_id, 
+                competition_participations.competition_participations_cnt / total_active_cnt as perc_active
                       from (select cp.competition_id, count(cp.competition_id) competition_participations_cnt
                             from core_competitionparticipation cp
                                      join core_competition cc on cp.competition_id = cc.id
@@ -90,7 +91,17 @@ class ACCoordinator:
                               and cc.status in ('open', 'closing', 'paused')) as competition_participations_total) as perc_active
                          left join
                      (select competition_id, perc_recent_matches_cnt / recent_matches_total_cnt as perc_recent_matches
-                      from (select competition_id, count(competition_id) perc_recent_matches_cnt, count(*) recent_matches_total_cnt
+                      from (select competition_id,
+                                   count(competition_id)       perc_recent_matches_cnt,
+                                   (select count(*)
+                                    from (select competition_id
+                                          from core_match cm
+                                                   join core_round cr on cm.round_id = cr.id
+                                                   join core_competition cc on cr.competition_id = cc.id
+                                          where cm.started is not null
+                                            and cc.status in ('open', 'closing', 'paused')
+                                          order by cm.started desc
+                                          limit 100) matches2) recent_matches_total_cnt
                             from (select competition_id
                                   from core_match cm
                                            join core_round cr on cm.round_id = cr.id
@@ -98,8 +109,8 @@ class ACCoordinator:
                                   where cm.started is not null
                                     and cc.status in ('open', 'closing', 'paused')
                                   order by cm.started desc
-                                  limit 100) as matches
-                            group by competition_id) as recent_matchesl) as perc_recent_matches
+                                  limit 100) matches
+                            group by competition_id) as recent_matches) as perc_recent_matches
                      on perc_recent_matches.competition_id = perc_active.competition_id
                 order by COALESCE(perc_recent_matches, 0) - perc_active
             """)
