@@ -1,5 +1,5 @@
 Werkzeug==1.0.1
-django-constance[database]==2.7.0
+django-constance[database]==2.8.0
 django-sslserver
 django-debug-toolbar
 coverage
