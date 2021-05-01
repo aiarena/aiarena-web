@@ -4,6 +4,8 @@ from zipfile import ZipFile, BadZipFile
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
+from aiarena import settings
+
 
 def validate_not_nan(value):
     if math.isnan(value):
@@ -45,3 +47,8 @@ def validate_bot_zip_file_size(value):
     if value.size > limit * 1024 * 1024:  # convert limit to bytes
         raise ValidationError(f'File too large. Size should not exceed {limit} MB. '
                               f'You can donate to the ladder to increase this limit.')
+
+
+validate_match_tag = RegexValidator(settings.MATCH_TAG_REGEX,
+                                   'Only alphanumeric (a-z, 0-9), space ( ) and underscore (_) '
+                                   'characters are allowed.')

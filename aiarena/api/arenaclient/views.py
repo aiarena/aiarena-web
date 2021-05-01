@@ -18,7 +18,7 @@ from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.api import Bots, Matches
 from aiarena.core.events import EVENT_MANAGER
 from aiarena.core.events import MatchResultReceivedEvent
-from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation
+from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation, MatchTag, Tag
 from aiarena.core.models.arena_client_status import ArenaClientStatus
 from aiarena.core.permissions import IsArenaClientOrAdminUser, IsArenaClient
 from aiarena.core.validators import validate_not_inf, validate_not_nan
@@ -157,6 +157,18 @@ class SubmitResultCombinedSerializer(serializers.Serializer):
     bot1_avg_step_time = FloatField(required=False, validators=[validate_not_nan, validate_not_inf])
     bot2_avg_step_time = FloatField(required=False, validators=[validate_not_nan, validate_not_inf])
 
+    # tags
+    bot1_tags = serializers.ListField(
+        required=False, 
+        child=serializers.RegexField(regex=settings.MATCH_TAG_REGEX, min_length=1, max_length=settings.MATCH_TAG_LENGTH_LIMIT),
+        max_length=settings.MATCH_TAG_PER_MATCH_LIMIT
+    )
+    bot2_tags = serializers.ListField(
+        required=False, 
+        child=serializers.RegexField(regex=settings.MATCH_TAG_REGEX, min_length=1, max_length=settings.MATCH_TAG_LENGTH_LIMIT),
+        max_length=settings.MATCH_TAG_PER_MATCH_LIMIT
+    )
+
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
@@ -187,9 +199,11 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                                  f"bot1_avg_step_time: {serializer.validated_data.get('bot1_avg_step_time')} "
                                  f"bot1_log: {serializer.validated_data.get('bot1_log')} "
                                  f"bot1_data: {serializer.validated_data.get('bot1_data')} "
+                                 f"bot1_tags: {serializer.validated_data.get('bot1_tags')} "
                                  f"bot2_avg_step_time: {serializer.validated_data.get('bot2_avg_step_time')} "
                                  f"bot2_log: {serializer.validated_data.get('bot2_log')} "
                                  f"bot2_data: {serializer.validated_data.get('bot2_data')} "
+                                 f"bot2_tags: {serializer.validated_data.get('bot2_tags')} "
                                  )
 
                 with transaction.atomic():
@@ -279,6 +293,28 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         bot1.save()
                     if bot2 is not None:
                         bot2.save()
+
+                    bot1_tags = serializer.validated_data.get('bot1_tags')
+                    if bot1_tags is not None:
+                        p1_match_tags = []
+                        for tag in bot1_tags:
+                            tag_obj = Tag.objects.get_or_create(name=tag)
+                            p1_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1.user)[0])
+                        # remove tags for this match that belong to this user and were not sent in the form
+                        match.tags.remove(*match.tags.filter(user=bot1.user).exclude(id__in=[mt.id for mt in p1_match_tags]))
+                        # add everything, this shouldn't cause duplicates
+                        match.tags.add(*p1_match_tags)
+
+                    bot2_tags = serializer.validated_data.get('bot2_tags')
+                    if bot2_tags is not None:
+                        p2_match_tags = []
+                        for tag in bot2_tags:
+                            tag_obj = Tag.objects.get_or_create(name=tag)
+                            p2_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot2.user)[0])
+                        # remove tags for this match that belong to this user and were not sent in the form
+                        match.tags.remove(*match.tags.filter(user=bot2.user).exclude(id__in=[mt.id for mt in p2_match_tags]))
+                        # add everything, this shouldn't cause duplicates
+                        match.tags.add(*p2_match_tags)
 
                     # Only do these actions if the match is part of a round
                     if result.match.round is not None:

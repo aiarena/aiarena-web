@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 def parse_tags(tags):
     """convert tags from single string to list if applicable, and then cleans the tags"""
     if isinstance(tags, str):
-        tags = tags.lower().split(",")
-    return [re.sub('[^a-z0-9 _]', '', tag.strip())[:32] for tag in tags if tag][:32]
+        tags = tags.split(",")
+    return [re.sub(settings.MATCH_TAG_REGEX, '', tag.lower().strip())[:settings.MATCH_TAG_LENGTH_LIMIT] for tag in tags if tag][:settings.MATCH_TAG_PER_MATCH_LIMIT]
 
 
 def calculate_md5(file, block_size=2 ** 20):
