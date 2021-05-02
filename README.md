@@ -1,5 +1,6 @@
 # aiarena-web
-A website for running the aiarena.net ladder.
+This is an amazing website which gives you a sense of thrill and enables you to compete with other bots across the world 
+<img src="Images/img1.png"><img src="Images/img2.png">
 
 [See the live website here](https://aiarena.net/)
 
@@ -13,7 +14,7 @@ Core ladder/project functionality
 Web API endpoints and functionality
 
 ### aiarena/frontend
-Django template website frontend
+Django templates are used for the website frontend
 
 
 ## License
