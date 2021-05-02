@@ -15,6 +15,7 @@ from rest_framework.reverse import reverse
 from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled
+from aiarena.core.utils import parse_tags
 from aiarena.core.api import Bots, Matches
 from aiarena.core.events import EVENT_MANAGER
 from aiarena.core.events import MatchResultReceivedEvent
@@ -158,16 +159,8 @@ class SubmitResultCombinedSerializer(serializers.Serializer):
     bot2_avg_step_time = FloatField(required=False, validators=[validate_not_nan, validate_not_inf])
 
     # tags
-    bot1_tags = serializers.ListField(
-        required=False, 
-        child=serializers.RegexField(regex=settings.MATCH_TAG_REGEX, min_length=1, max_length=settings.MATCH_TAG_LENGTH_LIMIT),
-        max_length=settings.MATCH_TAG_PER_MATCH_LIMIT
-    )
-    bot2_tags = serializers.ListField(
-        required=False, 
-        child=serializers.RegexField(regex=settings.MATCH_TAG_REGEX, min_length=1, max_length=settings.MATCH_TAG_LENGTH_LIMIT),
-        max_length=settings.MATCH_TAG_PER_MATCH_LIMIT
-    )
+    bot1_tags = serializers.ListField(required=False, child=serializers.CharField(allow_blank=True))
+    bot2_tags = serializers.ListField(required=False, child=serializers.CharField(allow_blank=True))
 
 
 class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -294,27 +287,44 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     if bot2 is not None:
                         bot2.save()
 
-                    bot1_tags = serializer.validated_data.get('bot1_tags')
-                    if bot1_tags is not None:
-                        p1_match_tags = []
-                        for tag in bot1_tags:
-                            tag_obj = Tag.objects.get_or_create(name=tag)
-                            p1_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1.user)[0])
-                        # remove tags for this match that belong to this user and were not sent in the form
-                        match.tags.remove(*match.tags.filter(user=bot1.user).exclude(id__in=[mt.id for mt in p1_match_tags]))
-                        # add everything, this shouldn't cause duplicates
-                        match.tags.add(*p1_match_tags)
+                    # Save Tags
+                    bot1_user = participant1.bot.user
+                    bot2_user = participant2.bot.user
+                    bot1_tags = parse_tags(serializer.validated_data.get('bot1_tags'))
+                    bot2_tags = parse_tags(serializer.validated_data.get('bot2_tags'))
+                    # Union tags if both bots belong to the same user
+                    if bot1_user==bot2_user:
+                        total_tags = list(set(bot1_tags if bot1_tags else []) | set(bot2_tags if bot2_tags else [])) 
 
-                    bot2_tags = serializer.validated_data.get('bot2_tags')
-                    if bot2_tags is not None:
-                        p2_match_tags = []
-                        for tag in bot2_tags:
-                            tag_obj = Tag.objects.get_or_create(name=tag)
-                            p2_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot2.user)[0])
-                        # remove tags for this match that belong to this user and were not sent in the form
-                        match.tags.remove(*match.tags.filter(user=bot2.user).exclude(id__in=[mt.id for mt in p2_match_tags]))
-                        # add everything, this shouldn't cause duplicates
-                        match.tags.add(*p2_match_tags)
+                        if total_tags:
+                            total_match_tags = []
+                            for tag in total_tags:
+                                tag_obj = Tag.objects.get_or_create(name=tag)
+                                total_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1_user)[0])
+                            # remove tags for this match that belong to this user and were not sent in the form
+                            match.tags.remove(*match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in total_match_tags]))
+                            # add everything, this shouldn't cause duplicates
+                            match.tags.add(*total_match_tags)
+                    else:
+                        if bot1_tags:
+                            p1_match_tags = []
+                            for tag in bot1_tags:
+                                tag_obj = Tag.objects.get_or_create(name=tag)
+                                p1_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1_user)[0])
+                            # remove tags for this match that belong to this user and were not sent in the form
+                            match.tags.remove(*match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in p1_match_tags]))
+                            # add everything, this shouldn't cause duplicates
+                            match.tags.add(*p1_match_tags)
+
+                        if bot2_tags:
+                            p2_match_tags = []
+                            for tag in bot2_tags:
+                                tag_obj = Tag.objects.get_or_create(name=tag)
+                                p2_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot2_user)[0])
+                            # remove tags for this match that belong to this user and were not sent in the form
+                            match.tags.remove(*match.tags.filter(user=bot2_user).exclude(id__in=[mt.id for mt in p2_match_tags]))
+                            # add everything, this shouldn't cause duplicates
+                            match.tags.add(*p2_match_tags)
 
                     # Only do these actions if the match is part of a round
                     if result.match.round is not None:
