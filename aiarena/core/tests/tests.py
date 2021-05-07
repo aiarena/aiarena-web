@@ -14,7 +14,7 @@ from rest_framework.authtoken.models import Token
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
-    CompetitionParticipation, MapPool
+    CompetitionParticipation, MapPool, MatchTag, Tag
 from aiarena.core.models.game_mode import GameMode
 from aiarena.core.utils import calculate_md5
 
@@ -112,22 +112,27 @@ class BaseTestMixin(object):
 
 
     def _post_to_results_custom(self, match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log,
-                                arenaclient_log):
-        return self.client.post('/api/arenaclient/results/',
-                                {'match': match_id,
-                                 'type': result_type,
-                                 'replay_file': replay_file,
-                                 'game_steps': 500,
-                                 'bot1_data': bot1_data,
-                                 'bot2_data': bot2_data,
-                                 'bot1_log': bot1_log,
-                                 'bot2_log': bot2_log,
-                                 'bot1_avg_step_time': 0.2,
-                                 'bot2_avg_step_time': 0.1,
-                                 'arenaclient_log': arenaclient_log})
+                                arenaclient_log, bot1_tags=None, bot2_tags=None):
+        payload = {
+            'match': match_id,
+            'type': result_type,
+            'replay_file': replay_file,
+            'game_steps': 500,
+            'bot1_data': bot1_data,
+            'bot2_data': bot2_data,
+            'bot1_log': bot1_log,
+            'bot2_log': bot2_log,
+            'bot1_avg_step_time': 0.2,
+            'bot2_avg_step_time': 0.1,
+            'arenaclient_log': arenaclient_log,
+        }
+        if bot1_tags: payload['bot1_tags'] = bot1_tags
+        if bot2_tags: payload['bot2_tags'] = bot2_tags
+
+        return self.client.post('/api/arenaclient/results/', payload)
 
 
-    def _post_to_results(self, match_id, result_type):
+    def _post_to_results(self, match_id, result_type, bot1_tags=None, bot2_tags=None):
         """
         Posts a generic result.
         :param match_id:
@@ -136,12 +141,13 @@ class BaseTestMixin(object):
         """
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
-        with open(filename, 'rb') as replay_file, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot1_data, open(
-                self.test_bot_datas['bot2'][0]['path'], 'rb') as bot2_data, open(self.test_bot1_match_log_path,
-                                                                    'rb') as bot1_log, open(
-            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
-                                                                   'rb') as arenaclient_log:
-            return self._post_to_results_custom(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log)
+        with open(filename, 'rb') as replay_file, open(
+                self.test_bot_datas['bot1'][0]['path'], 'rb') as bot1_data, open(
+                self.test_bot_datas['bot2'][0]['path'], 'rb') as bot2_data, open(
+                self.test_bot1_match_log_path, 'rb') as bot1_log, open(
+                self.test_bot2_match_log_path, 'rb') as bot2_log, open(
+                self.test_arenaclient_log_path, 'rb') as arenaclient_log:
+            return self._post_to_results_custom(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log, bot1_tags, bot2_tags)
 
 
     def _post_to_results_bot_datas_set_1(self, match_id, result_type):
@@ -466,6 +472,113 @@ class BotTestCase(LoggedInMixin, TestCase):
 
         bot1.refresh_from_db()
         self.assertEqual(self.test_bot_datas['bot2'][0]['hash'], bot1.bot_data_md5hash)
+
+
+class MatchTagsTestCase(MatchReadyMixin, TestCase):
+    """
+    Test submission of match tags
+    """
+
+    def _send_tags(self, bot1_tags, bot2_tags, results_resp_code=201):
+        match_response = self._post_to_matches()
+        self.assertEqual(match_response.status_code, 201)
+        result_response = self._post_to_results(match_response.data['id'], 'Player1Win', bot1_tags=bot1_tags, bot2_tags=bot2_tags)
+        self.assertEqual(result_response.status_code, results_resp_code)
+        return (match_response, result_response)
+
+    def test_results_with_tags(self):
+        az_symbols = 'abcdefghijklmnopqrstuvwxyz'
+        num_symbols = '0123456789'
+        extra_symbols = ' _ _ ' 
+        game_mode = GameMode.objects.first()
+
+        self.client.force_login(self.arenaclientUser1)
+
+        # No tags
+        Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_response, result_response = self._send_tags(None, None)
+        self.assertTrue(Match.objects.get(id=match_response.data['id']).tags.all().count()==0)
+
+        # 1 side tags
+        Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_response, result_response = self._send_tags(['abc'], None)
+        match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
+        self.assertTrue(match_tags.count()==1)
+        for mt in match_tags:
+            self.assertEqual(mt.user, self.staffUser1)
+
+        Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_response, result_response = self._send_tags(None, ['abc'])
+        match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
+        self.assertTrue(match_tags.count()==1)
+        for mt in match_tags:
+            self.assertEqual(mt.user, self.regularUser1)
+
+        # Check that tags are correct, stripped and attributed to the correct user
+        _temp_tag1 = 'tes1t_ test2'
+        _temp_tags = [az_symbols, num_symbols, extra_symbols, _temp_tag1]
+        bot1_tags_list = [_temp_tags, [_temp_tag1]]
+        bot2_tags_list = [[_temp_tag1], _temp_tags]
+        for i in range(2):
+            Matches.request_match(self.regularUser1, self.regularUser1Bot1, self.staffUser1Bot1, game_mode=game_mode)
+            match_response, _ = self._send_tags(bot1_tags_list[i], bot2_tags_list[i])
+            match = Match.objects.get(id=match_response.data['id'])
+            user1 = match.participant1.bot.user
+            user2 = match.participant2.bot.user
+            tag_matched = [False, False, False]
+            user_matched = [False, False]
+            match_tags = match.tags.all()
+            # Total recorded tags are correct
+            self.assertEqual(match_tags.count(), len(bot1_tags_list[i]+bot2_tags_list[i]))
+            for mt in match_tags:
+                # If common tag, make sure its the correct user
+                if mt.tag.name == _temp_tag1:
+                    if mt.user == user1: user_matched[0] = True
+                    elif mt.user == user2: user_matched[1] = True
+                else:
+                    if i == 0:
+                        self.assertEqual(mt.user, user1)
+                    elif i == 1:
+                        self.assertEqual(mt.user, user2)
+                    # Tags that are not common
+                    if mt.tag.name == az_symbols: tag_matched[0] = True
+                    elif mt.tag.name == num_symbols: tag_matched[1] = True
+                    # Check that whitespace is stripped
+                    elif mt.tag.name == extra_symbols.strip(): tag_matched[2] = True
+            self.assertTrue(all(tag_matched))
+            self.assertTrue(all(user_matched))
+
+        # Check that if both bots belong to the same user, tags unioned
+        bot1_tags = _temp_tags
+        bot2_tags = [_temp_tag1, 'qwerty']
+        Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.staffUser1Bot1, game_mode=game_mode)
+        match_response, _ = self._send_tags(bot1_tags, bot2_tags)
+        match = Match.objects.get(id=match_response.data['id'])
+        match_tags = match.tags.all()
+        # Total recorded tags are correct
+        self.assertEqual(match_tags.count(), len(set(bot1_tags) | set(bot2_tags)))
+
+        # Check that invalid tags get processed to be valid rather than causing validation errors
+        # This is to prevent tags from causing a result to fail submission
+        Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_response, result_response = self._send_tags(
+            bot1_tags=['!', '2', 'A', '', az_symbols+num_symbols+extra_symbols], 
+            bot2_tags=['123']
+        )
+        match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
+        tags_matched = ['2', 'a', 'abcdefghijklmnopqrstuvwxyz012345', '123']
+        self.assertTrue(match_tags.count()==4)
+
+        # Too many tags
+        Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_response, result_response = self._send_tags(
+            bot1_tags=[str(i) for i in range(50)], 
+            bot2_tags=[str(i) for i in range(50)]
+        )
+        match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
+        self.assertTrue(match_tags.count()==64)
+
+        
 
 
 class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
