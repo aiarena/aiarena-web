@@ -438,3 +438,8 @@ if ENVIRONMENT_TYPE != EnvironmentType.DEVELOPMENT:
 
 # load this after the env file so if the ELO_K value was overridden, it will be applied properly
 ELO = Elo(ELO_K)
+
+# Match Tag Constants
+MATCH_TAG_REGEX = r'[^a-z0-9 _]'
+MATCH_TAG_LENGTH_LIMIT = 32
+MATCH_TAG_PER_MATCH_LIMIT = 32
