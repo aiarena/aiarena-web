@@ -38,9 +38,12 @@ class StreamNextReplayViewSet(viewsets.ReadOnlyModelViewSet):
         # Only matches that featured a bot above the starting ELO
         # exclude matches with only house bots.
         matches = Match.objects.filter(result__isnull=False, requested_by__isnull=True,
-                                       round__competition__participations__in=CompetitionParticipation.objects.filter(elo__gte=ELO_START_VALUE).exclude(bot__user_id=config.HOUSE_BOTS_USER_ID))
+                                       matchparticipation__bot__competition_participations__in=
+                                       CompetitionParticipation.objects.filter(elo__gte=ELO_START_VALUE)
+                                       .exclude(bot__user_id=config.HOUSE_BOTS_USER_ID))
 
         return Result.objects.filter(
             type__in=['Player1Win', 'Player2Win', 'Player1Surrender', 'Player2Surrender', ],  # Only wins/surrenders
             match__in=matches
         ).order_by('-created')
+
