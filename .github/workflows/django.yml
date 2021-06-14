@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     services:
       mariadb:
@@ -54,6 +53,9 @@ jobs:
           PORT: ${{ job.services.mariadb.ports[3306] }}
       run: | 
         mysql --host="127.0.0.1" --port "$PORT" -uroot -paiarena -e "GRANT ALL PRIVILEGES ON test_aiarena.* to aiarena WITH GRANT OPTION;";
+    - name: Migrate
+      run: |
+        python manage.py migrate --noinput
     - name: Run Tests
       env:
           NOFAKE_REDIS: 1
