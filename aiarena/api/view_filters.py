@@ -1,5 +1,49 @@
 from django_filters import rest_framework as filters
+from django.db.models import Q
+from rest_framework.exceptions import ValidationError
+
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, Competition
+
+
+# Filter for items containing ALL tags in comma separated string
+# If passed value contains a "|", then it will filter for items containing tags by ANY users in comma separated string on LHS of separator
+class TagsFilter(filters.CharFilter):
+    def __init__(self, field_name2, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.field_name2 = field_name2
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+
+        # Check for pipe separator
+        if '|' in value:
+            users_str, tags_str = [s.strip() for s in value.split('|')]
+        else:
+            users_str = ""
+            tags_str = value
+
+        # Build query for users
+        user_query = Q()
+        if users_str:
+            try:
+                users = [int(s) for s in users_str.split(',')]
+            except ValueError:
+                raise ValidationError("When using pipe separator (\"|\"), Expecting user_id (int) on LHS and tag_name on RHS of separator.")
+            lookup = '%s__%s' % (self.field_name2, self.lookup_expr)
+            for v in users:
+                user_query = user_query | Q(**{lookup: v})
+
+        # Build query for tags
+        tag_query = Q()
+        if tags_str:
+            tags = [s.strip() for s in tags_str.split(',')]
+            lookup = '%s__%s' % (self.field_name, self.lookup_expr)
+            for v in tags:
+                if v:
+                    tag_query = tag_query & Q(**{lookup: v})
+        
+        return self.get_method(qs)(user_query & tag_query)
 
 
 # Filter for the API views
@@ -34,6 +78,7 @@ class MatchParticipationFilter(filters.FilterSet):
     min_avg_step_time = filters.NumberFilter(field_name="avg_step_time", lookup_expr='gte')
     max_avg_step_time = filters.NumberFilter(field_name="avg_step_time", lookup_expr='lte')
     avg_step_time = filters.NumberFilter(field_name="avg_step_time")
+    tags = TagsFilter(field_name="match__tags__tag__name", field_name2="match__tags__user")
 
     class Meta:
         model = MatchParticipation
@@ -81,7 +126,8 @@ class MatchFilter(filters.FilterSet):
     assigned_to = filters.NumberFilter(field_name="assigned_to")
     requested_by = filters.NumberFilter(field_name="requested_by")
     map = filters.NumberFilter(field_name="map")
-
+    tags = TagsFilter(field_name="tags__tag__name", field_name2="tags__user")
+    
     class Meta:
         model = Match
         fields = [

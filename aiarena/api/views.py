@@ -9,7 +9,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.reverse import reverse
 from django.db.models import Prefetch
 
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, Competition
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, Competition, Tag, MatchTag
 from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,8 @@ bot_search_fields = 'id', 'user', 'name', 'created', 'plays_race', 'type', \
                     'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_data_publicly_downloadable'
 map_include_fields = 'id', 'name', 'file',
 map_filter_fields = 'id', 'name',
-match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round', 'requested_by',
+matchtag_include_fields = 'user',
+match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round', 'requested_by', 'tags'
 matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
                                     'elo_change', 'avg_step_time', 'match_log', 'result', 'result_cause',
 matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
@@ -253,8 +254,19 @@ class ResultViewSet(viewsets.ReadOnlyModelViewSet):
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
+class MatchTagSerializer(serializers.ModelSerializer):
+    tag_name = serializers.SerializerMethodField()
+
+    def get_tag_name(self, obj):
+        return obj.tag.name
+
+    class Meta:
+        model = MatchTag
+        fields = matchtag_include_fields + ('tag_name',)
+
 class MatchSerializer(serializers.ModelSerializer):
     result = ResultSerializer()
+    tags = MatchTagSerializer(many=True)
     class Meta:
         model = Match
         fields = match_include_fields + ('result',)
