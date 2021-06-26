@@ -267,6 +267,7 @@ class MatchTagSerializer(serializers.ModelSerializer):
 class MatchSerializer(serializers.ModelSerializer):
     result = ResultSerializer()
     tags = MatchTagSerializer(many=True)
+
     class Meta:
         model = Match
         fields = match_include_fields + ('result',)

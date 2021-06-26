@@ -78,7 +78,6 @@ class MatchParticipationFilter(filters.FilterSet):
     min_avg_step_time = filters.NumberFilter(field_name="avg_step_time", lookup_expr='gte')
     max_avg_step_time = filters.NumberFilter(field_name="avg_step_time", lookup_expr='lte')
     avg_step_time = filters.NumberFilter(field_name="avg_step_time")
-    tags = TagsFilter(field_name="match__tags__tag__name", field_name2="match__tags__user")
 
     class Meta:
         model = MatchParticipation
@@ -126,6 +125,7 @@ class MatchFilter(filters.FilterSet):
     assigned_to = filters.NumberFilter(field_name="assigned_to")
     requested_by = filters.NumberFilter(field_name="requested_by")
     map = filters.NumberFilter(field_name="map")
+    bot = filters.NumberFilter(field_name="matchparticipation__bot")
     tags = TagsFilter(field_name="tags__tag__name", field_name2="tags__user")
     
     class Meta:
