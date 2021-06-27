@@ -29,7 +29,7 @@ class TagsFilter(filters.CharFilter):
             try:
                 users = [int(s) for s in users_str.split(',')]
             except ValueError:
-                raise ValidationError("When using pipe separator (\"|\"), Expecting user_id (int) on LHS and tag_name on RHS of separator.")
+                raise ValidationError({"tags":["When using pipe separator (|), Expecting user_id (int) on LHS and tag_name on RHS of separator."]})
             lookup = '%s__%s' % (self.field_name2, self.lookup_expr)
             for v in users:
                 user_query = user_query | Q(**{lookup: v})
