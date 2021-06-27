@@ -256,9 +256,12 @@
                     <label for="{{ filter.form.competition.id_for_label }}">Competition</label>
                     {{ filter.form.competition }}
                 </div>
-                    {% if user.is_authenticated %}
-                        {% include "tagsinput/tagsinput.html" with form=filter.form %}
-                    {% endif %}
+                {% include "tagsinput/tagsinput.html" with form=filter.form %}
+                <div class="flex-row-short">
+                    <label for="{{ filter.form.tags_by_all.id_for_label }}">
+                        {{ filter.form.tags_by_all }} Search Everyone's Tags
+                    </label>
+                </div>
                 <div class="flex-row-half" style="width: 100%; padding-bottom: 25px">
                     <input id=submit-button type="submit" value="Filter" />
                 </div>

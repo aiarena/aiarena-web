@@ -245,6 +245,7 @@ class BotResultTable(tables.Table):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        self.tags_by_all_value = kwargs.pop('tags_by_all_value', False)
         super().__init__(*args, **kwargs)
 
     # Settings for the Table
@@ -281,10 +282,23 @@ class BotResultTable(tables.Table):
         return "Download"
 
     def render_match__tags(self, value):
-        user_tags = value.filter(user=self.user)
+        tag_str = ""
+        user_tags = value.filter(user=self.user) if self.user.is_authenticated else []
         if len(user_tags) > 0:
-            tag_str = ", ".join(str(mt.tag) for mt in user_tags.order_by('tag__name'))
-            return mark_safe(f"<abbr title=\"{tag_str}\">Hover<{len(user_tags)}></abbr>")
+            tag_str += "My Tags:\n" if self.tags_by_all_value else ""
+            tag_str += ", ".join(str(mt.tag) for mt in user_tags.order_by('tag__name'))
+
+        others_tags_dict = {}
+        if self.tags_by_all_value:
+            # Distinct Tag Names
+            others_tags = value.exclude(user=self.user) if self.user.is_authenticated else value.all()
+            others_tags_dict = { str(mt.tag):None for mt in others_tags.order_by('tag__name') }
+            if len(others_tags) > 0:
+                tag_str += ("\n\n" if len(tag_str)>0 else "") + "Other's Tags:\n"
+                tag_str += ", ".join(t for t in others_tags_dict)
+
+        if len(tag_str) > 0: 
+            return mark_safe(f"<abbr title=\"{tag_str}\">Hover<{len(user_tags) + len(others_tags_dict)}></abbr>")
         else:
             return "—"
 
@@ -314,6 +328,8 @@ class RelativeResultFilter(filters.FilterSet):
         method="filter_tags",
         widget=forms.TextInput(attrs={"data-role": "tagsinput", "style": "width: 100%"})
     )
+    # Just need the widget, value is passed on init to be used in tag filter
+    tags_by_all = filters.BooleanFilter(label='Search Everyones Tags', method="no_filter", widget=forms.CheckboxInput)
 
     class Meta:
         model = RelativeResult
@@ -321,8 +337,10 @@ class RelativeResultFilter(filters.FilterSet):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        self.tags_by_all_value = kwargs.pop('tags_by_all_value', False)
         super().__init__(*args, **kwargs)
-
+        # Set Widget initial value based on passed value
+        self.form.fields['tags_by_all'].widget.attrs = {'checked': self.tags_by_all_value}
     # Custom filter to match scale
     def filter_avg_step_time(self, queryset, name, value):
         if value:
@@ -342,10 +360,16 @@ class RelativeResultFilter(filters.FilterSet):
         return queryset
 
     def filter_tags(self, queryset, name, value):
-        if self.user.is_authenticated:  # Causes error if user is anonymous
-            tag_values = parse_tags(value)
+        tag_values = parse_tags(value)
+        if not self.tags_by_all_value and self.user.is_authenticated:  # Causes error if user is anonymous
             for v in tag_values:
                 queryset = queryset.filter(match__tags__tag__name__iexact=v, match__tags__user=self.user)
+        else:
+            for v in tag_values:
+                queryset = queryset.filter(match__tags__tag__name__iexact=v)
+        return queryset.distinct()
+
+    def no_filter(self, queryset, name, value):
         return queryset
 
 
@@ -362,15 +386,17 @@ class BotDetail(DetailView):
                 .defer("me__bot__bot_data")
                 .filter(me__bot=self.object)
                 .order_by('-created'))
-        result_filter = RelativeResultFilter(self.request.GET, queryset=results_qs, user=self.request.user)
-        result_table = BotResultTable(data=result_filter.qs, user=self.request.user)
+
+        # Get tags_by_all and remove it from params to prevent errors
+        params = self.request.GET.copy()
+        tags_by_all = params.pop('tags_by_all')[0]=='on' if 'tags_by_all' in params else False
+        # Run filters, create table
+        result_filter = RelativeResultFilter(params, queryset=results_qs, user=self.request.user, tags_by_all_value=tags_by_all)
+        result_table = BotResultTable(data=result_filter.qs, user=self.request.user, tags_by_all_value=tags_by_all)
         result_table.exclude = []
         # Exclude log column if not staff or user
         if not (self.request.user == self.object.user or self.request.user.is_staff):
             result_table.exclude.append("match_log")
-        # Exclude tags column if anonymous user
-        if not self.request.user.is_authenticated:
-            result_table.exclude.append("match__tags")
         # Update table based on request information
         RequestConfig(self.request, paginate={"per_page": 30}).configure(result_table)
         context['results_table'] = result_table
