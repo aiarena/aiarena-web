@@ -257,11 +257,7 @@
                     {{ filter.form.competition }}
                 </div>
                     {% if user.is_authenticated %}
-                        <div id="tagsinput-div" class="flex-row-half" style="width: 95%">
-                            {{ filter.form.tags.errors }}
-                            <label for="{{ filter.form.tags.id_for_label }}">Tags (comma separated, max 32 tags at 32 chars each, accepts a-z, 0-9, space and _)</label>
-                            {{ filter.form.tags }}
-                        </div>
+                        {% include "tagsinput/tagsinput.html" with form=filter.form %}
                     {% endif %}
                 <div class="flex-row-half" style="width: 100%; padding-bottom: 25px">
                     <input id=submit-button type="submit" value="Filter" />
@@ -285,19 +281,6 @@
                 }
             });
         }
-        // Prevent tags from being added if they don't follow the rules
-        $('#tagsinput-div :input').on('beforeItemAdd', function(event) {
-            // check tag contents
-            if (!/^[a-z0-9 _]+$/.test(event.item)) {
-                // set to true to prevent the item getting added
-                event.cancel = true;
-            }
-        });
-
-        $('#tagsinput-div :input').tagsinput({
-            maxChars: 32,
-            maxTags: 32
-        });
     </script>
 {% endblock %}
 
