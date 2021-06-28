@@ -330,6 +330,7 @@ class RelativeResultFilter(filters.FilterSet):
     )
     # Just need the widget, value is passed on init to be used in tag filter
     tags_by_all = filters.BooleanFilter(label='Search Everyones Tags', method="no_filter", widget=forms.CheckboxInput)
+    tags_partial_match = filters.BooleanFilter(label='Partially Match Tags', method="no_filter", widget=forms.CheckboxInput)
 
     class Meta:
         model = RelativeResult
@@ -338,9 +339,12 @@ class RelativeResultFilter(filters.FilterSet):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.tags_by_all_value = kwargs.pop('tags_by_all_value', False)
+        self.tags_partial_match_value = kwargs.pop('tags_partial_match_value', False)
         super().__init__(*args, **kwargs)
         # Set Widget initial value based on passed value
         self.form.fields['tags_by_all'].widget.attrs = {'checked': self.tags_by_all_value}
+        self.form.fields['tags_partial_match'].widget.attrs = {'checked': self.tags_partial_match_value}
+
     # Custom filter to match scale
     def filter_avg_step_time(self, queryset, name, value):
         if value:
@@ -361,13 +365,13 @@ class RelativeResultFilter(filters.FilterSet):
 
     def filter_tags(self, queryset, name, value):
         tag_values = parse_tags(value)
-        if not self.tags_by_all_value and self.user.is_authenticated:  # Causes error if user is anonymous
-            for v in tag_values:
-                queryset = queryset.filter(match__tags__tag__name__iexact=v, match__tags__user=self.user)
-        else:
-            for v in tag_values:
-                queryset = queryset.filter(match__tags__tag__name__iexact=v)
-        return queryset.distinct()
+        # User or All
+        query = Q(match__tags__user=self.user) if not self.tags_by_all_value and self.user.is_authenticated else Q()
+        # Full or Partial Match
+        lookup = "match__tags__tag__name__" + ("icontains" if self.tags_partial_match_value else "iexact")
+        for v in tag_values:
+            query = query & Q(**{lookup:v})
+        return queryset.filter(query).distinct()
 
     def no_filter(self, queryset, name, value):
         return queryset
@@ -390,8 +394,10 @@ class BotDetail(DetailView):
         # Get tags_by_all and remove it from params to prevent errors
         params = self.request.GET.copy()
         tags_by_all = params.pop('tags_by_all')[0]=='on' if 'tags_by_all' in params else False
+        tags_partial_match = params.pop('tags_partial_match')[0]=='on' if 'tags_partial_match' in params else False
         # Run filters, create table
-        result_filter = RelativeResultFilter(params, queryset=results_qs, user=self.request.user, tags_by_all_value=tags_by_all)
+        result_filter = RelativeResultFilter(params, queryset=results_qs, 
+            user=self.request.user, tags_by_all_value=tags_by_all, tags_partial_match_value=tags_partial_match)
         result_table = BotResultTable(data=result_filter.qs, user=self.request.user, tags_by_all_value=tags_by_all)
         result_table.exclude = []
         # Exclude log column if not staff or user
