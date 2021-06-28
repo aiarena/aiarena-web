@@ -153,31 +153,38 @@
             <form method="post" class="flex-container" style="justify-content: left; margin-left: 60px; margin-top: 30px">
                 {% csrf_token %}
                 {{ match_tag_form.non_field_errors }}
-                <div id="tagsinput-div" class="flex-row-half" style="width: 95%">
-                    {{ match_tag_form.tags.errors }}
-                    <label for="{{ match_tag_form.tags.id_for_label }}">Tags (comma separated, max 32 tags at 32 chars each, accepts a-z, 0-9, space and _)</label>
-                    {{ match_tag_form.tags }}
-                </div>
+                {% include "tagsinput/tagsinput.html" with form=match_tag_form %}
                 <div class="flex-row-short">
                     <input id=submit-button type="submit" value="Save" />
                 </div>
             </form>
-            <script>
-            // Prevent tags from being added if they don't follow the rules
-            $('#tagsinput-div :input').on('beforeItemAdd', function(event) {
-                // check tag contents
-                if (!/^[a-z0-9 _]+$/.test(event.item)) {
-                    // set to true to prevent the item getting added
-                    event.cancel = true;
-                }
-            });
-
-            $('#tagsinput-div :input').tagsinput({
-                maxChars: 32,
-                maxTags: 32
-            });
-
-            </script>
         {% endif %}
     </div>
+    {% if others_tags_dict|length > 0 %}
+    <div class="divider"><span></span><span><h2> Tags by Others </h2></span><span></span></div>
+    <table id="tags_list" style="text-align:left;">
+        <colgroup>
+            <col span="1" style="width: 20%;">
+            <col span="1" style="width: 80%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <td><strong>Tagged By</strong></td>
+                <td><strong>Tags</strong></td>
+            </tr>
+        <thead>
+        <tbody>
+            {% for user, tags in others_tags_dict.items %}
+            <tr>
+                <td>
+                    {{ user }}
+                </td>
+                <td>
+                    {{ tags }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 {% endblock %}
