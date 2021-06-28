@@ -364,9 +364,13 @@ class RelativeResultFilter(filters.FilterSet):
         return queryset
 
     def filter_tags(self, queryset, name, value):
+        # An unauthenticated user will have no tags
+        if not self.user.is_authenticated and not self.tags_by_all_value: 
+            return queryset.none()
+
         tag_values = parse_tags(value)
         # User or All
-        query = Q(match__tags__user=self.user) if not self.tags_by_all_value and self.user.is_authenticated else Q()
+        query = Q(match__tags__user=self.user) if not self.tags_by_all_value else Q()
         # Full or Partial Match
         lookup = "match__tags__tag__name__" + ("icontains" if self.tags_partial_match_value else "iexact")
         for v in tag_values:
