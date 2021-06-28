@@ -814,8 +814,19 @@ class MatchDisplay(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-            tags = self.object.tags.filter(user=self.request.user)
+            tags = self.object.tags.filter(user=self.request.user).all()
             context['match_tag_form'] = MatchTagForm(initial={'tags': ",".join(str(mtag.tag) for mtag in tags)})
+            others_tags = self.object.tags.exclude(user=self.request.user).all()
+        else:
+            others_tags = self.object.tags.all()
+        
+        others_tags_dict = {}
+        for mt in others_tags:
+            if mt.user.as_html_link not in others_tags_dict:
+                others_tags_dict[mt.user.as_html_link] = str(mt.tag)
+            else:
+                others_tags_dict[mt.user.as_html_link] += ", " + str(mt.tag)
+        context['others_tags_dict'] = others_tags_dict
         return context
 
 

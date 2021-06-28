@@ -160,4 +160,31 @@
             </form>
         {% endif %}
     </div>
+    {% if others_tags_dict|length > 0 %}
+    <div class="divider"><span></span><span><h2> Tags by Others </h2></span><span></span></div>
+    <table id="tags_list" style="text-align:left;">
+        <colgroup>
+            <col span="1" style="width: 20%;">
+            <col span="1" style="width: 80%;">
+        </colgroup>
+        <thead>
+            <tr>
+                <td><strong>Tagged By</strong></td>
+                <td><strong>Tags</strong></td>
+            </tr>
+        <thead>
+        <tbody>
+            {% for user, tags in others_tags_dict.items %}
+            <tr>
+                <td>
+                    {{ user }}
+                </td>
+                <td>
+                    {{ tags }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 {% endblock %}
