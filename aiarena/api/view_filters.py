@@ -8,9 +8,10 @@ from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParti
 # Filter for items containing ALL tags in comma separated string
 # If passed value contains a "|", then it will filter for items containing tags by ANY users in comma separated string on LHS of separator
 class TagsFilter(filters.CharFilter):
-    def __init__(self, field_name2, *args, **kwargs):
+    def __init__(self, field_name2, *args, lookup_expr2='exact', **kwargs):
         super().__init__(*args, **kwargs)
         self.field_name2 = field_name2
+        self.lookup_expr2 = lookup_expr2
 
     def filter(self, qs, value):
         if not value:
@@ -30,7 +31,7 @@ class TagsFilter(filters.CharFilter):
                 users = [int(s) for s in users_str.split(',')]
             except ValueError:
                 raise ValidationError({"tags":["When using pipe separator (|), Expecting user_id (int) on LHS and tag_name on RHS of separator."]})
-            lookup = '%s__%s' % (self.field_name2, self.lookup_expr)
+            lookup = '%s__%s' % (self.field_name2, self.lookup_expr2)
             for v in users:
                 user_query = user_query | Q(**{lookup: v})
 
@@ -126,7 +127,8 @@ class MatchFilter(filters.FilterSet):
     requested_by = filters.NumberFilter(field_name="requested_by")
     map = filters.NumberFilter(field_name="map")
     bot = filters.NumberFilter(field_name="matchparticipation__bot")
-    tags = TagsFilter(field_name="tags__tag__name", field_name2="tags__user")
+    tags = TagsFilter(field_name="tags__tag__name", field_name2="tags__user", lookup_expr='iexact')
+    tags__icontains = TagsFilter(field_name="tags__tag__name", field_name2="tags__user", lookup_expr='icontains')
     
     class Meta:
         model = Match
