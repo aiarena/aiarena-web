@@ -1,0 +1,22 @@
+<div id="tagsinput-div" class="flex-row-half" style="width: 95%">
+    {{ form.tags.errors }}
+    <label for="{{ filter.form.tags.id_for_label }}">Tags (comma separated, max 32 tags at 32 chars each, accepts a-z, 0-9, space and _)</label>
+    {{ form.tags }}
+</div>
+<script>
+    // Prevent tags from being added if they don't follow the rules
+    $('#tagsinput-div :input').on('beforeItemAdd', function(event) {
+        // check tag contents
+        if (!/^[a-z0-9 _]+$/.test(event.item)) {
+            // Cancel current event
+            event.cancel = true;
+            // Sanitize input and start a new add event
+            $(this).tagsinput('add', event.item.toLowerCase().replace(/[^a-z0-9 _]+/g, ""));
+        }
+    });
+
+    $('#tagsinput-div :input').tagsinput({
+        maxChars: 32,
+        maxTags: 32
+    });
+</script>
