@@ -38,7 +38,7 @@ from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipat
     ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
-from aiarena.core.utils import parse_tags
+from aiarena.core.utils import parse_tags, filter_tags
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
@@ -363,19 +363,18 @@ class RelativeResultFilter(filters.FilterSet):
             return queryset.filter(match__requested_by__isnull=False)
         return queryset
 
-    def filter_tags(self, queryset, name, value):
+    def filter_tags(self, qs, name, value):
         # An unauthenticated user will have no tags
         if not self.user.is_authenticated and not self.tags_by_all_value: 
-            return queryset.none()
+            return qs.none()
 
-        tag_values = parse_tags(value)
-        # User or All
-        query = Q(match__tags__user=self.user) if not self.tags_by_all_value else Q()
-        # Full or Partial Match
-        lookup = "match__tags__tag__name__" + ("icontains" if self.tags_partial_match_value else "iexact")
-        for v in tag_values:
-            query = query & Q(**{lookup:v})
-        return queryset.filter(query).distinct()
+        if not self.tags_by_all_value:
+            value = str(self.user.id) + "|" + value
+
+        if self.tags_partial_match_value:
+            return filter_tags(qs, value, "match__tags__tag__name", "icontains", "match__tags__user")
+        else:
+            return filter_tags(qs, value, "match__tags__tag__name", "iexact", "match__tags__user")
 
     def no_filter(self, queryset, name, value):
         return queryset

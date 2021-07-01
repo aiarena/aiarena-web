@@ -1,50 +1,7 @@
 from django_filters import rest_framework as filters
-from django.db.models import Q
-from rest_framework.exceptions import ValidationError
 
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, Competition
-
-
-# Filter for items containing ALL tags in comma separated string
-# If passed value contains a "|", then it will filter for items containing tags by ANY users in comma separated string on LHS of separator
-class TagsFilter(filters.CharFilter):
-    def __init__(self, field_name2, *args, lookup_expr2='exact', **kwargs):
-        super().__init__(*args, **kwargs)
-        self.field_name2 = field_name2
-        self.lookup_expr2 = lookup_expr2
-
-    def filter(self, qs, value):
-        if not value:
-            return qs
-
-        # Check for pipe separator
-        if '|' in value:
-            users_str, tags_str = [s.strip() for s in value.split('|')]
-        else:
-            users_str = ""
-            tags_str = value
-
-        # Build query for users
-        user_query = Q()
-        if users_str:
-            try:
-                users = [int(s) for s in users_str.split(',')]
-            except ValueError:
-                raise ValidationError({"tags":["When using pipe separator (|), Expecting user_id (int) on LHS and tag_name on RHS of separator."]})
-            lookup = '%s__%s' % (self.field_name2, self.lookup_expr2)
-            for v in users:
-                user_query = user_query | Q(**{lookup: v})
-
-        # Build query for tags
-        tag_query = Q()
-        if tags_str:
-            tags = [s.strip() for s in tags_str.split(',')]
-            lookup = '%s__%s' % (self.field_name, self.lookup_expr)
-            for v in tags:
-                if v:
-                    tag_query = tag_query & Q(**{lookup: v})
-        
-        return self.get_method(qs)(user_query & tag_query)
+from aiarena.core.utils import filter_tags
 
 
 # Filter for the API views
@@ -127,8 +84,8 @@ class MatchFilter(filters.FilterSet):
     requested_by = filters.NumberFilter(field_name="requested_by")
     map = filters.NumberFilter(field_name="map")
     bot = filters.NumberFilter(field_name="matchparticipation__bot")
-    tags = TagsFilter(field_name="tags__tag__name", field_name2="tags__user", lookup_expr='iexact')
-    tags__icontains = TagsFilter(field_name="tags__tag__name", field_name2="tags__user", lookup_expr='icontains')
+    tags = filters.CharFilter(method="filter_tags__exact")
+    tags__icontains = filters.CharFilter(method="filter_tags__icontains")
     
     class Meta:
         model = Match
@@ -137,3 +94,9 @@ class MatchFilter(filters.FilterSet):
             'created',
             'started'
         ]
+
+    def filter_tags__exact(self, qs, name, value):
+        return filter_tags(qs, value, "tags__tag__name", "iexact", "tags__user")
+
+    def filter_tags__icontains(self, qs, name, value):
+        return filter_tags(qs, value, "tags__tag__name", "icontains", "tags__user")
