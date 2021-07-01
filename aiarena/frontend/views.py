@@ -38,7 +38,8 @@ from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipat
     ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
-from aiarena.core.utils import parse_tags, filter_tags
+from aiarena.core.utils import parse_tags
+from aiarena.core.d_utils import filter_tags
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
