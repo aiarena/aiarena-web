@@ -1,6 +1,6 @@
 import logging
-from django.db.models.fields import CharField
-from django.db.models import Q, Aggregate, CharField
+from django.db.models.fields import CharField, TextField
+from django.db.models import Q, Aggregate
 from rest_framework.exceptions import ValidationError
 
 # File for housing utils that require 'django' or would break CI if placed in utils.py
@@ -11,13 +11,12 @@ class GroupConcat(Aggregate):
     function = 'GROUP_CONCAT'
     template = '%(function)s(%(distinct)s%(expressions)s%(ordering)s%(separator)s)'
 
-    def __init__(self, expression, distinct=False, ordering=None, separator=',', **extra):
+    def __init__(self, expression, ordering=None, separator=',', **extra):
         super(GroupConcat, self).__init__(
             expression,
-            distinct='DISTINCT ' if distinct else '',
             ordering=' ORDER BY %s' % ordering if ordering is not None else '',
             separator=' SEPARATOR "%s"' % separator,
-            output_field=CharField(),
+            output_field=TextField(),
             **extra
         )
 
