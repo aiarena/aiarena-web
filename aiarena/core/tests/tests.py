@@ -505,14 +505,14 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
         self.assertTrue(match_tags.count()==1)
         for mt in match_tags:
-            self.assertEqual(mt.user, self.staffUser1)
+            self.assertEqual(mt.user.websiteuser, self.staffUser1)
 
         Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(None, ['abc'])
         match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
         self.assertTrue(match_tags.count()==1)
         for mt in match_tags:
-            self.assertEqual(mt.user, self.regularUser1)
+            self.assertEqual(mt.user.websiteuser, self.regularUser1)
 
         # Check that tags are correct, stripped and attributed to the correct user
         _temp_tag1 = 'tes1t_ test2'
