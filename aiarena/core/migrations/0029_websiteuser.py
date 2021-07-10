@@ -16,7 +16,7 @@ def migrate_website_users(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0027_mappool_enabled'),
+        ('core', '0028_auto_20210419_2336'),
     ]
 
     operations = [
