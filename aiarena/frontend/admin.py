@@ -1,5 +1,8 @@
+from django import forms
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
+from wiki.editors import getEditor
+from wiki.models import ArticleRevision
 
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
     CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News, MapPool, MatchTag, Tag, \
@@ -126,6 +129,33 @@ class BotAdmin(admin.ModelAdmin):
     )
 
 
+class CompetitionAdminForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        # We can't assume that kwargs['initial'] exists!
+        if 'initial' not in kwargs:
+            kwargs['initial'] = {}
+        kwargs['initial'].update({'wiki_article_content': kwargs['instance'].wiki_article.current_revision.content})
+        super().__init__(*args, **kwargs)
+
+    wiki_article_content = forms.CharField(label='Description article content', required=False,
+                                           widget=getEditor().get_widget())
+
+    def clean_wiki_article_content(self):
+        """If the article content changed, save it."""
+        if self.instance.wiki_article.current_revision.content != self.cleaned_data['wiki_article_content']:
+            revision = ArticleRevision()
+            revision.inherit_predecessor(self.instance.wiki_article)
+            revision.title = self.instance.name
+            revision.content = self.cleaned_data['wiki_article_content']
+            revision.deleted = False
+            self.instance.wiki_article.add_revision(revision)
+
+    class Meta:
+        model = Competition
+        exclude = []
+
+
 @admin.register(Competition)
 class CompetitionAdmin(admin.ModelAdmin):
     list_display = (
@@ -146,6 +176,7 @@ class CompetitionAdmin(admin.ModelAdmin):
     )
     # Add the close competition button
     change_form_template = "admin/change_form_competition.html"
+    form = CompetitionAdminForm
 
     def response_change(self, request, obj):
         if "_open-competition" in request.POST:
