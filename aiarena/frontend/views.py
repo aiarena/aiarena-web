@@ -986,7 +986,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         if config.ALLOW_REQUESTED_MATCHES:
             if form.cleaned_data['bot1'] != form.cleaned_data['bot2']:
-                if self.request.user.match_request_count_left >= form.cleaned_data['match_count']:
+                if self.request.user.websiteuser.match_request_count_left >= form.cleaned_data['match_count']:
 
                     with transaction.atomic():  # do this all in one commit
                         match_list = []
