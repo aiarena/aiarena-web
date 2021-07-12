@@ -5,13 +5,13 @@ from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.core.models import User, Map, Bot, News, \
-    CompetitionParticipation, MapPool
+    CompetitionParticipation, MapPool, WebsiteUser
 from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
 
 def run_seed(matches, token):
-    devadmin = User.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
+    devadmin = WebsiteUser.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
 
     client = TestingClient()
     client.login(devadmin)
