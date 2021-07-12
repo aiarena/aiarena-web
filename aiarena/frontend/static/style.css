@@ -203,9 +203,16 @@ a:hover {
     margin-left: 73px;
 }
 
+#competition_details_description {
+}
+
 #bot_details {
     float: left;
     width: 35.0%;
+}
+
+#competition_details {
+    float: left;
 }
 
 #bot_details table {
@@ -219,6 +226,12 @@ a:hover {
     width: 60.0%;
 }
 
+#competition_description {
+    float: right;
+    width: 60.0%;
+    margin-right: 50px;
+}
+
 #bot_bio table {
     margin: 0;
     width: 100.0%;
@@ -229,6 +242,10 @@ a:hover {
 }
 
 #bot_wiki_article {
+    padding: 0 10px 0 10px;
+}
+
+#competition_wiki_article {
     padding: 0 10px 0 10px;
 }
 

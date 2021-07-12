@@ -1,36 +1,70 @@
 {% extends "base.html" %}
-{% load i18n core_filters %}
+{% load i18n core_filters wiki_tags %}
 
 {% block content %}
 
     <div class="divider"><span></span><span><h2>{{ competition.name }}</h2></span><span></span></div>
     <div id="inner_content">
-        <table summary="Table containing competition details" id="competition_details">
-            <thead>
-            <tr>
-                <td><strong>Created</strong></td>
-                <td><strong>Opened</strong></td>
-                <td><strong>Closed</strong></td>
-                <td><strong>Status</strong></td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>{{ competition.date_created|date:"d. N Y - H:i:s" }}</td>
-                {% if competition.date_opened %}
-                    <td>{{ competition.date_opened|date:"d. N Y - H:i:s" }}</td>
-                {% else %}
-                    <td>--</td>
-                {% endif %}
-                {% if competition.date_closed %}
-                    <td>{{ competition.date_closed|date:"d. N Y - H:i:s" }}</td>
-                {% else %}
-                    <td>--</td>
-                {% endif %}
-                <td>{{ competition.get_status_display }}</td>
-            </tr>
-            </tbody>
-        </table>
+        <div id="competition_details_description">
+            <div id="competition_details">
+                <table summary="Table containing competition details">
+                    <thead>
+                    <tr>
+                        <td><strong>Details</strong></td>
+                        <td></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><strong>Created</strong></td>
+                        <td>{{ competition.date_created|date:"d. N Y - H:i:s" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Opened</strong></td>
+                        <td>
+                            {% if competition.date_opened %}
+                                {{ competition.date_opened|date:"d. N Y - H:i:s" }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Closed</strong></td>
+                        <td>
+                            {% if competition.date_closed %}
+                                {{ competition.date_closed|date:"d. N Y - H:i:s" }}
+                            {% else %}
+                                --
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status</strong></td>
+                        <td>{{ competition.get_status_display }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="competition_description">
+                <table summary="Table containing the competition description">
+                    <thead>
+                    <tr>
+                        <td><strong>Description</strong></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            <div id="competition_wiki_article">
+                                {% wiki_render competition.wiki_article %}
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <br>
         <div class="divider"><span></span><span><h2>Ranking</h2></span><span></span></div>
         <table summary="Table containing rankings" id="competition_ranking_table">
