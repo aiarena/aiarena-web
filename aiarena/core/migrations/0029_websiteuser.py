@@ -6,13 +6,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def migrate_website_users(apps, schema_editor):
-    User = apps.get_model('core', 'User')
-    WebsiteUser = apps.get_model('core', 'WebsiteUser')
-    for website_user in User.objects.filter(type='WEBSITE_USER'):
-        website_user.__class__ = WebsiteUser  # convert to new class
-        website_user.save()
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -34,5 +27,4 @@ class Migration(migrations.Migration):
                 ('objects', django.contrib.auth.models.UserManager()),
             ],
         ),
-        migrations.RunPython(migrate_website_users),
     ]
