@@ -40,6 +40,7 @@ class Competition(models.Model, LockableModelMixin):
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=COMPETITION_STATUSES, default='created', blank=True)
     max_active_rounds = models.IntegerField(default=2, blank=True)
+    interest = models.IntegerField(default=0, blank=True)
 
     def __str__(self):
         return self.name
