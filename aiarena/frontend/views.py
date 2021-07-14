@@ -845,8 +845,14 @@ class MatchDetail(View):
 
 
 class CompetitionList(ListView):
-    queryset = Competition.objects.all().order_by('-id')
+    queryset = Competition.objects.exclude(status='closed').order_by('-id')
     template_name = 'competitions.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['closed_competitions'] = Competition.objects.filter(status='closed').order_by('-id')
+
+        return context
 
 
 class CompetitionDetail(DetailView):
