@@ -3,6 +3,7 @@ from datetime import timedelta
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
+from django.db.models.fields import IntegerField
 from django.http import Http404
 from django_select2.forms import Select2Widget, ModelSelect2Widget
 from django.contrib import messages
@@ -11,7 +12,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
-from django.db.models import F, Prefetch, Q, Count
+from django.db.models import F, Prefetch, Q, Count, Case, When, Sum, Value
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -35,7 +36,7 @@ from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
     Competition, Map, \
-    ArenaClient, News, MapPool, MatchTag, Tag
+    ArenaClient, News, MapPool, MatchTag, Tag, competition_participation
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
@@ -733,7 +734,17 @@ class Index(ListView):
         context['events'] = events
         context['news'] = News.objects.all().order_by('-created')
 
-        competitions = Competition.objects.filter(status='open').annotate(num_participants=Count('participations')).order_by('-num_participants')
+        competitions = Competition.objects.filter(status='open').annotate(num_participants=Count('participations'))
+        # Count active bots of the user in each competition
+        if self.request.user.is_authenticated:
+            competitions = (competitions.annotate(n_active_bots=Sum(Case(
+                When(participations__bot__user=self.request.user, participations__active=True, then=1),
+                default=0,
+                output_field=IntegerField()))))
+        else:
+            competitions = competitions.annotate(n_active_bots=Value(0, IntegerField()))
+        # Order competitions as they are to be shown on home page
+        competitions = competitions.order_by('-n_active_bots','-interest','-num_participants')
         context['competitions'] = []
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
@@ -845,8 +856,14 @@ class MatchDetail(View):
 
 
 class CompetitionList(ListView):
-    queryset = Competition.objects.all().order_by('-id')
+    queryset = Competition.objects.exclude(status='closed').order_by('-id')
     template_name = 'competitions.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['closed_competitions'] = Competition.objects.filter(status='closed').order_by('-id')
+
+        return context
 
 
 class CompetitionDetail(DetailView):

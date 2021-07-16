@@ -101,6 +101,11 @@
                 <tfoot>
                 </tfoot>
             </table>
+            {% if user == bot.user %}
+            <form action="{% url 'bot_competitions' bot.pk %}">
+                <input class="join-competitions-button" type="submit" value="Join Competitions" style="margin-top: 20px; margin-left: 60px;"/>
+            </form>
+            {% endif %}
         </div>
         <div id="bot_bio">
             <table summary="Table containing the biography">
@@ -257,9 +262,9 @@
                     {{ filter.form.competition }}
                 </div>
                 {% include "tagsinput/tagsinput.html" with form=filter.form %}
-                <div class="flex-row-short">
+                <div class="flex-row-short"  style="width: 35%">
                     <label for="{{ filter.form.tags_by_all.id_for_label }}">
-                        {{ filter.form.tags_by_all }} Search Everyone's Tags
+                        {{ filter.form.tags_by_all }} Show and Search Everyone's Tags
                     </label>
                 </div>
                 <div class="flex-row-short">
