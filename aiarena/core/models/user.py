@@ -129,8 +129,8 @@ class User(AbstractUser, LockableModelMixin):
         except WebsiteUser.DoesNotExist:
             return False
 
-# Hot fix to avoid new website users from having their passwords set as unusable.
-# @receiver(pre_save, sender=User)
-# def pre_save_user(sender, instance, **kwargs):
-#     if not instance.is_websiteuser:
-#         instance.set_unusable_password()
+# Don't allow non WebsiteUsers to login to the website.
+@receiver(pre_save, sender=User)
+def pre_save_user(sender, instance, **kwargs):
+    if not instance.is_websiteuser:
+        instance.set_unusable_password()
