@@ -349,6 +349,8 @@ SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts")
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
 ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 
+REGISTRATION_FORM = 'aiarena.frontend.forms.WebsiteUserRegistrationForm'
+
 # This is the default address to send emails from
 DEFAULT_FROM_EMAIL = 'noreply@localhost'
 
