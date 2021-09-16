@@ -234,7 +234,7 @@ class BotResultTable(tables.Table):
     # Settings for individual columns
     # match could be a LinkColumn, but used ".as_html_link" since that is being used elsewhere.
     match = tables.Column(verbose_name="ID")
-    created = tables.DateTimeColumn(format="d. N Y - H:i:s", verbose_name="Date")
+    created = tables.DateTimeColumn(format="d N y, H:i", verbose_name="Date")
     result_cause = tables.Column(verbose_name="Cause")
     elo_change = tables.Column(verbose_name="+/-")
     avg_step_time = tables.Column(
@@ -266,7 +266,7 @@ class BotResultTable(tables.Table):
         return value.as_html_link
 
     def render_opponent(self, value):
-        return value.bot.as_html_link
+        return value.bot.as_truncated_html_link
 
     def render_elo_change(self, record, value):
         return "--" if record.match.requested_by else format_elo_change(value)
