@@ -35,10 +35,10 @@
         <td><strong>Assigned to</strong></td>
     </thead>
     {% for match in round.match_set.all %}
-        <tr>
+        <tr> 
             <td>{{ match.as_html_link }}</td>
-            <td>{{ match.participant1.bot.as_html_link }}</td>
-            <td>{{ match.participant2.bot.as_html_link }}</td>
+            <td>{{ match.participant1.bot.as_truncated_html_link }}</td>
+            <td>{{ match.participant2.bot.as_truncated_html_link }}</td>
             {% if match.started %}
                 <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
             {% else %}
