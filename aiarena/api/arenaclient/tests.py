@@ -778,8 +778,16 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
                 div_participants[cp.division_num] = 1
         return div_participants
 
-    def _get_expected_matches_per_div(self, div_participants):
-        return { k: int(v / 2 * (v - 1)) for k, v in div_participants.items() }
+    def _get_expected_matches_per_div(self, round):
+        matches_per_div = dict()
+        for m in Match.objects.filter(round=round):
+            div = m.participant1.competition_participant.division_num
+            self.assertEqual(div, m.participant2.competition_participant.division_num)
+            if div in matches_per_div:
+                matches_per_div[div] += 1
+            else:
+                matches_per_div[div] = 1
+        return matches_per_div
 
     def _complete_round(self, competition, exp_round, exp_div_participant_count, exp_n_matches):
         # this should trigger a new round
@@ -792,9 +800,8 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertIsNone(round.finished)
         self.assertFalse(round.complete)
         # check match count, also checks divisions are in elo order
-        div_participant_count = self._get_div_participant_count(competition)
-        self.assertEqual(div_participant_count, exp_div_participant_count)
-        exp_matches_per_div = self._get_expected_matches_per_div(div_participant_count)
+        self.assertEqual(self._get_div_participant_count(competition), exp_div_participant_count)
+        exp_matches_per_div = self._get_expected_matches_per_div(round)
         self.assertEqual(exp_matches_per_div, exp_n_matches)
         total_exp_matches_per_div = sum(exp_matches_per_div.values())
         self.assertEqual(Match.objects.filter(round=round).count(), total_exp_matches_per_div)
