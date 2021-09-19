@@ -11,7 +11,7 @@ from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from aiarena.core.api import Matches
+from aiarena.core.api import Matches, Competitions
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
     CompetitionParticipation, MapPool, WebsiteUser, Tag

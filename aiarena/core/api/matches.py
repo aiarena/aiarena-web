@@ -174,14 +174,51 @@ class Matches:
 
         new_round = Round.objects.create(competition=competition)
 
-        active_bots = Competitions.get_active_bots(competition=competition)
-        already_processed_bots = []
-
-        # loop through and generate matches for all active bots
-        for bot1 in active_bots:
-            already_processed_bots.append(bot1.id)
-            for bot2 in Competitions.get_active_bots(competition=competition).exclude(id__in=already_processed_bots):
-                Match.create(new_round, random.choice(active_maps), bot1, bot2)
+        # Update divisions
+        if competition.rounds_this_cyle+1 >= competition.rounds_per_cyle:
+            # converted straight to list to preserve order and prevent issues like the same bot appearing multiple times 
+            # when updating bot divisions
+            active_participants = list(CompetitionParticipation.objects
+                .only("id","division_num")
+                .filter(competition=competition, active=True)
+                .order_by('elo'))
+            competition.rounds_this_cyle = 0
+            n_active_participants = len(active_participants)
+            # Update number of divisions
+            if competition.should_split_divisions(n_active_participants) or competition.should_merge_divisions(n_active_participants):
+                if n_active_participants > competition.target_division_size:
+                    competition.n_divisions = n_active_participants // competition.target_division_size 
+                else:
+                    competition.n_divisions = 1
+            # Update bot division numbers
+            updated_participants = []
+            current_div_num = competition.n_divisions - 1
+            div_size, rem = divmod(n_active_participants, competition.n_divisions)
+            for d in [active_participants[i*div_size+min(i, rem):(i+1)*div_size+min(i+1, rem)] for i in range(competition.n_divisions)]:
+                for p in d:
+                    p.division_num = current_div_num
+                    updated_participants.append(p)
+                current_div_num -= 1
+            CompetitionParticipation.objects.bulk_update(updated_participants, ['division_num'])
+            
+        else:
+            competition.rounds_this_cyle += 1
+        competition.save()
+        
+        # Get updated participants
+        active_participants = (CompetitionParticipation.objects
+            .only("id","division_num","bot")
+            .filter(competition=competition, active=True))
+        already_processed_participants = []
+        # loop through and generate matches for all active participants
+        for participant1 in active_participants:
+            already_processed_participants.append(participant1.id)
+            active_participants_in_div = (CompetitionParticipation.objects
+                .only("bot")
+                .filter(competition=competition, active=True, division_num=participant1.division_num)
+                .exclude(id__in=already_processed_participants))
+            for participant2 in active_participants_in_div:
+                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot)
 
         return new_round
 

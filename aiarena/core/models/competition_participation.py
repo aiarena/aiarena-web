@@ -3,6 +3,7 @@ import logging
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
+from django.core.validators import MinValueValidator
 
 from aiarena.settings import ELO_START_VALUE
 from .bot import Bot
@@ -35,6 +36,10 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     highest_elo = models.IntegerField(blank=True, null=True)
     slug = models.SlugField(max_length=255, blank=True)
     active = models.BooleanField(default=True)
+
+    # Tracks the division the player is in in the Competition. 
+    # Highest division will be 0 and lowest will be competition.target_n_divisions-1
+    division_num = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
     def validate_unique(self, exclude=None):
         if self.active:

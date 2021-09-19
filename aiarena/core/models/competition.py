@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from django.core.validators import MinValueValidator
 
 from .game_mode import GameMode
 from .mixins import LockableModelMixin
@@ -42,8 +43,26 @@ class Competition(models.Model, LockableModelMixin):
     max_active_rounds = models.IntegerField(default=2, blank=True)
     interest = models.IntegerField(default=0, blank=True)
 
+    # Defines target number of divisions to create when a new cycle begins.
+    target_n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
+    n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
+    # Defines the minimum size of each division, also defines when divisions will split. 
+    target_division_size = models.IntegerField(default=2, validators=[MinValueValidator(2)], blank=True)
+    # Defines the number of rounds between division updates.
+    rounds_per_cyle = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
+    # Tracks the number of rounds that have completed this cycle.
+    rounds_this_cyle = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+    # Defines the number of matches that need to be played before promotions are allowed for a player.
+    n_placements = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+
     def __str__(self):
         return self.name
+
+    def should_split_divisions(self, n_bots):
+        return self.n_divisions < self.target_n_divisions and n_bots >= (self.n_divisions+1)*self.target_division_size
+
+    def should_merge_divisions(self, n_bots):
+        return self.n_divisions > 1 and n_bots <= (self.n_divisions-1)*self.target_division_size + self.target_division_size//2
 
     @property
     def is_paused(self):
