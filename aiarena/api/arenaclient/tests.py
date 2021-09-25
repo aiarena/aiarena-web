@@ -868,10 +868,10 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         _exp_par = lambda x, y: {'n':x,'p':y}
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot1.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot1.id, competition_id=competition.id)
-        self._complete_cycle(competition, [1,2], {0:_exp_par(2,2)}, {0:1})
+        self._complete_cycle(competition, [1,2], {1:_exp_par(2,2)}, {1:1})
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot2.id, competition_id=competition.id)
-        self._complete_cycle(competition, [3,4], {0:_exp_par(3,3)}, {0:3})
-        self._complete_cycle(competition, [5,6], {0:_exp_par(3,1)}, {0:3})
+        self._complete_cycle(competition, [3,4], {1:_exp_par(3,3)}, {1:3})
+        self._complete_cycle(competition, [5,6], {1:_exp_par(3,1)}, {1:3})
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
@@ -886,8 +886,8 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
             u = User.objects.create_user(username=f'regular_user{100+j}', password='x', email=f'regular_user{100+j}@dev.aiarena.net')
             for i in range(3):
                 self._create_active_bot_for_competition(competition.id, u, f'{u.username}Bot{i+1}')
-        self._complete_cycle(competition, [7,8], {0:_exp_par(7,4), 1:_exp_par(7,7), 2:_exp_par(8,8)}, {0:21, 1:21, 2:28})
-        self._complete_cycle(competition, [9,10], {0:_exp_par(7,0), 1:_exp_par(7,0), 2:_exp_par(8,0)}, {0:21, 1:21, 2:28})
+        self._complete_cycle(competition, [7,8], {1:_exp_par(7,4), 2:_exp_par(7,7), 3:_exp_par(8,8)}, {1:21, 2:21, 3:28})
+        self._complete_cycle(competition, [9,10], {1:_exp_par(7,0), 2:_exp_par(7,0), 3:_exp_par(8,0)}, {1:21, 2:21, 3:28})
 
     
     def test_division_matchmaking(self):
@@ -897,64 +897,64 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         # Start Rounds
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot1.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot1.id, competition_id=competition.id)
-        self._complete_cycle(competition, [1,2,3], {0:_exp_par(2)}, {0:1})
+        self._complete_cycle(competition, [1,2,3], {1:_exp_par(2)}, {1:1})
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot2.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
-        self._complete_cycle(competition, [4,5,6], {0:_exp_par(4)}, {0:6})
+        self._complete_cycle(competition, [4,5,6], {1:_exp_par(4)}, {1:6})
         # Split to 2 divs
         self.ru1b3_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
         self.su1b3_cp = CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
-        self._complete_cycle(competition, [7,8,9], {0:_exp_par(3), 1:_exp_par(3)}, {0:3, 1:3})
+        self._complete_cycle(competition, [7,8,9], {1:_exp_par(3), 2:_exp_par(3)}, {1:3, 2:3})
         # Bot inactive dont merge yet
         self.ru1b3_cp.active = False
         self.ru1b3_cp.save()
-        self._complete_cycle(competition, [10,11,12], {0:_exp_par(2), 1:_exp_par(3)}, {0:1, 1:3})
+        self._complete_cycle(competition, [10,11,12], {1:_exp_par(2), 2:_exp_par(3)}, {1:1, 2:3})
         # Merge threshold reached
         self.su1b3_cp.active = False
         self.su1b3_cp.save()
-        self._complete_cycle(competition, [13,14,15], {0:_exp_par(4)}, {0:6})
+        self._complete_cycle(competition, [13,14,15], {1:_exp_par(4)}, {1:6})
         # Non equal divisions
         self.ru1b3_cp.active = True
         self.ru1b3_cp.save()
         self.su1b3_cp.active = True
         self.su1b3_cp.save()
         self.ru1b4_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
-        self._complete_cycle(competition, [16,17,18], {0:_exp_par(3), 1:_exp_par(4)}, {0:3, 1:6})
+        self._complete_cycle(competition, [16,17,18], {1:_exp_par(3), 2:_exp_par(4)}, {1:3, 2:6})
         # Split to 3 divs
         self.ru2b1_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot1.id, competition_id=competition.id)
         self.ru2b2_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot2.id, competition_id=competition.id)
-        self._complete_cycle(competition, [19,20,21], {0:_exp_par(3), 1:_exp_par(3), 2:_exp_par(3)}, {0:3, 1:3, 2:3})
+        self._complete_cycle(competition, [19,20,21], {1:_exp_par(3), 2:_exp_par(3), 3:_exp_par(3)}, {1:3, 2:3, 3:3})
         # Merge again
         self.ru1b3_cp.active = False
         self.ru1b3_cp.save()
-        self._complete_cycle(competition, [22,23,24], {0:_exp_par(2), 1:_exp_par(3), 2:_exp_par(3)}, {0:1, 1:3, 2:3})
+        self._complete_cycle(competition, [22,23,24], {1:_exp_par(2), 2:_exp_par(3), 3:_exp_par(3)}, {1:1, 2:3, 3:3})
         self.su1b3_cp.active = False
         self.su1b3_cp.save()
-        self._complete_cycle(competition, [25,26,27], {0:_exp_par(3), 1:_exp_par(4)}, {0:3, 1:6})
+        self._complete_cycle(competition, [25,26,27], {1:_exp_par(3), 2:_exp_par(4)}, {1:3, 2:6})
         self.ru2b1_cp.active = False
         self.ru2b1_cp.save()
-        self._complete_cycle(competition, [28,29,30],{0:_exp_par(3), 1:_exp_par(3)}, {0:3, 1:3})
+        self._complete_cycle(competition, [28,29,30],{1:_exp_par(3), 2:_exp_par(3)}, {1:3, 2:3})
         self.ru1b3_cp.active = True
         self.ru1b3_cp.save()
         self.su1b3_cp.active = True
         self.su1b3_cp.save()
         self.ru2b1_cp.active = True
         self.ru2b1_cp.save()
-        self._complete_cycle(competition, [31,32,33], {0:_exp_par(3), 1:_exp_par(3), 2:_exp_par(3)}, {0:3, 1:3, 2:3})
+        self._complete_cycle(competition, [31,32,33], {1:_exp_par(3), 2:_exp_par(3), 3:_exp_par(3)}, {1:3, 2:3, 3:3})
         # Grow equally
         CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot1.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot2.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot1.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot2.id, competition_id=competition.id)
-        self._complete_cycle(competition, [34,35,36], {0:_exp_par(4), 1:_exp_par(4), 2:_exp_par(5)}, {0:6, 1:6, 2:10})
+        self._complete_cycle(competition, [34,35,36], {1:_exp_par(4), 2:_exp_par(4), 3:_exp_par(5)}, {1:6, 2:6, 3:10})
         self._create_active_bot_for_competition(competition.id, self.regularUser2, 'regularUser2Bot100')
-        self._complete_cycle(competition, [37,38,39], {0:_exp_par(4), 1:_exp_par(5), 2:_exp_par(5)}, {0:6, 1:10, 2:10})
+        self._complete_cycle(competition, [37,38,39], {1:_exp_par(4), 2:_exp_par(5), 3:_exp_par(5)}, {1:6, 2:10, 3:10})
         # Not more splits
         for j in range(3):
             u = User.objects.create_user(username=f'regular_user{100+j}', password='x', email=f'regular_user{100+j}@dev.aiarena.net')
             for i in range(3):
                 self._create_active_bot_for_competition(competition.id, u, f'{u.username}Bot{i+1}')
-        self._complete_cycle(competition, [40,41,42], {0:_exp_par(7), 1:_exp_par(8), 2:_exp_par(8)}, {0:21, 1:28, 2:28})
+        self._complete_cycle(competition, [40,41,42], {1:_exp_par(7), 2:_exp_par(8), 3:_exp_par(8)}, {1:21, 2:28, 3:28})
 
         
 class SetStatusTestCase(LoggedInMixin, TransactionTestCase):

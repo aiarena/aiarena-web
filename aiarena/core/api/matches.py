@@ -218,11 +218,11 @@ class Matches:
             updated_participants = []
             if new_round.number <= 1:
                 divs = [active_participants]
-                current_div_num = 0
+                current_div_num = CompetitionParticipation.MIN_DIVISION
             else:
                 div_size, rem = divmod(n_active_participants, competition.n_divisions)
                 divs = [active_participants[i*div_size+min(i, rem):(i+1)*div_size+min(i+1, rem)] for i in range(competition.n_divisions)]
-                current_div_num = competition.n_divisions - 1
+                current_div_num = competition.n_divisions - 1 + CompetitionParticipation.MIN_DIVISION
             for d in divs:
                 for p in d:
                     updated_participants.append(p)
