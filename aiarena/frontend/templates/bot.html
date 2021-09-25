@@ -135,6 +135,7 @@
                 <td><strong>Season</strong></td>
                 <td><strong>Opened</strong></td>
                 <td><strong>Closed</strong></td>
+                <td><strong>Division</strong></td>
                 <td><strong>ELO</strong></td>
                 <td></td>
             </tr>
@@ -154,6 +155,7 @@
                         {% else %}
                             <td>--</td>
                         {% endif %}
+                        <td>{{ competition_participation.division_num }}</td>
                         <td>{{ competition_participation.elo }}</td>
                         <td><a href="{% url 'bot_competition_stats' competition_participation.id competition_participation.slug %}">Stats</a></td>
                     </tr>

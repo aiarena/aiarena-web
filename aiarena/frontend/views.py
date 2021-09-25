@@ -873,10 +873,14 @@ class CompetitionDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(CompetitionDetail, self).get_context_data(**kwargs)
         context['round_list'] = Round.objects.filter(competition_id=self.object.id).order_by('-id')
-        context['rankings'] = Ladders.get_competition_ranked_participants(self.object).prefetch_related(
+        all_participants = list(Ladders.get_competition_ranked_participants(self.object).prefetch_related(
             Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
-            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type')))
-        context['rankings'].count = len(context['rankings'])
+            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
+        context['divisions'] = dict()
+        for participant in all_participants:
+            if participant.division_num not in context['divisions']:
+                context['divisions'][participant.division_num] = []
+            context['divisions'][participant.division_num].append(participant)
         return context
 
 

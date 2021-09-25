@@ -24,6 +24,11 @@ def run_seed(matches, token):
     gamemode = client.create_gamemode('Melee', game.id)
 
     competition1 = client.create_competition('Competition 1', 'L', gamemode.id)
+    competition1.target_n_divisions = 2
+    competition1.target_division_size = 2
+    competition1.n_placements = 2
+    competition1.rounds_per_cycle = 1
+    competition1.save()
     client.open_competition(competition1.id)
 
     competition2 = client.create_competition('Competition 2', 'L', gamemode.id)
@@ -132,7 +137,7 @@ def run_seed(matches, token):
 class Command(BaseCommand):
     help = "Seed database for testing and development."
 
-    _DEFAULT_MATCHES_TO_GENERATE = 20
+    _DEFAULT_MATCHES_TO_GENERATE = 50
 
     def add_arguments(self, parser):
         parser.add_argument('--matches', type=int, default=self._DEFAULT_MATCHES_TO_GENERATE,
