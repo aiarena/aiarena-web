@@ -33,8 +33,8 @@
         </table>
         <br>
         <div class="divider"><span></span><span><h2>Rankings</h2></span><span></span></div>
-        {% for div_num, division in divisions.items %}
-            <div class="divider" style='width:50%'><span></span><span><h2>Division {{div_num}}</h2></span><span></span></div>
+        {% for div_title, division in divisions.items %}
+            <div class="divider" style='width:50%'><span></span><span><h2>{{div_title}}</h2></span><span></span></div>
             <table summary="Table containing rankings" id="competition_ranking_table">
                 <thead>
                 <tr>
@@ -71,30 +71,34 @@
                                 <td>No stats</td>
                             {% endif %}
                             <td>
-                                {{ participant.elo }}
-                                {% bot_competition_trend participant.bot competition as trend %}
-                                    {% if trend > 40 %}
-                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
-                                            trending_flat
-                                        </em>
-                                    {% elif trend < -40 %}
-                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(90deg);" title="ELO changed {{trend}} in the last 30 games">
-                                            trending_flat
-                                        </em>
-                                    {% elif trend > 15 %}
-                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO gained {{trend}} in the last 30 games">
-                                            trending_up
-                                        </em>
-                                    {% elif trend < -15 %}
-                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
-                                            trending_down
-                                        </em>
-                                    {% else %}
-                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
-                                            trending_flat
-                                        </em>
-                                    {% endif %}
-                                </td>
+                                {% if participant.in_placements %}
+                                    Placements
+                                {% else %}
+                                    {{ participant.elo }}
+                                    {% bot_competition_trend participant.bot competition as trend %}
+                                        {% if trend > 40 %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
+                                                trending_flat
+                                            </em>
+                                        {% elif trend < -40 %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(90deg);" title="ELO changed {{trend}} in the last 30 games">
+                                                trending_flat
+                                            </em>
+                                        {% elif trend > 15 %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO gained {{trend}} in the last 30 games">
+                                                trending_up
+                                            </em>
+                                        {% elif trend < -15 %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
+                                                trending_down
+                                            </em>
+                                        {% else %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
+                                                trending_flat
+                                            </em>
+                                        {% endif %}
+                                {% endif %}
+                            </td>
                             <td><a href="{% url 'bot_competition_stats' participant.id participant.slug %}">Stats</a></td>
 
                         </tr>

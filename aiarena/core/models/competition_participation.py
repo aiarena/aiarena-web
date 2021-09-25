@@ -38,9 +38,11 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     active = models.BooleanField(default=True)
 
     # Tracks the division the player is in in the Competition. 
-    # Highest division will be 0 and lowest will be competition.target_n_divisions-1
+    # Highest division will be 1 and lowest will be competition.target_n_divisions
+    # Only players that haven't been placed into the latest cycle should have division_num=DEFAULT_DIVISION
     MIN_DIVISION = 1
-    division_num = models.IntegerField(default=MIN_DIVISION, validators=[MinValueValidator(MIN_DIVISION)])
+    DEFAULT_DIVISION = 0
+    division_num = models.IntegerField(default=DEFAULT_DIVISION, validators=[MinValueValidator(DEFAULT_DIVISION)])
     in_placements = models.BooleanField(default=True)
 
     def validate_unique(self, exclude=None):
