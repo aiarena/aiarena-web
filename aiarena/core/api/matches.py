@@ -5,6 +5,7 @@ from enum import Enum
 from constance import config
 from django.db import transaction
 from django.utils import timezone
+from django.db.models import Count
 from rest_framework.exceptions import APIException
 
 from aiarena.api.arenaclient.exceptions import NotEnoughAvailableBots, MaxActiveRounds, NoMaps, CompetitionPaused, \
@@ -173,16 +174,38 @@ class Matches:
             raise CompetitionClosing()
 
         new_round = Round.objects.create(competition=competition)
+        if competition.rounds_this_cycle >= competition.rounds_per_cycle:
+            competition.rounds_this_cycle = 1
+        else:
+            competition.rounds_this_cycle += 1
 
         # Update divisions
-        if competition.rounds_this_cyle+1 >= competition.rounds_per_cyle:
-            # converted straight to list to preserve order and prevent issues like the same bot appearing multiple times 
-            # when updating bot divisions
-            active_participants = list(CompetitionParticipation.objects
-                .only("id","division_num")
+        # Does not split on the first cycle of every competition so initial participants can be accuarately ranked
+        if competition.rounds_this_cycle == 1:
+            # Get match counts to determine which bots are still in placements
+            match_counts = list(MatchParticipation.objects
+                .filter(match__result__isnull=False,  match__round__competition=competition)
+                .exclude(match__result__type__in=['MatchCancelled', 'InitializationError', 'Error'])
+                .values('bot')
+                .annotate(match_count = Count('bot')))
+            match_counts = { vs['bot']:vs['match_count'] for vs in match_counts }
+            # Order bots out of placement by elo, order bots in placement by games played
+            all_participants = (CompetitionParticipation.objects
+                .only("id","bot__id","division_num","elo","match_count")
                 .filter(competition=competition, active=True)
                 .order_by('elo'))
-            competition.rounds_this_cyle = 0
+            if competition.n_placements <= 0:
+                existing_participants = list(all_participants)
+                placement_participants = []
+            else:
+                existing_participants = sorted(
+                    all_participants.filter(bot__id__in=[k for k, v in match_counts.items() if v >= competition.n_placements]),
+                    key=lambda p: p.elo)
+                placement_participants = sorted(
+                    all_participants.exclude(bot__id__in=[p.bot.id for p in existing_participants]), 
+                    key=lambda p: (match_counts[p.bot.id] if p.bot.id in match_counts else 0, -p.elo),
+                    reverse=True)
+            active_participants =  placement_participants + existing_participants
             n_active_participants = len(active_participants)
             # Update number of divisions
             if competition.should_split_divisions(n_active_participants) or competition.should_merge_divisions(n_active_participants):
@@ -194,15 +217,18 @@ class Matches:
             updated_participants = []
             current_div_num = competition.n_divisions - 1
             div_size, rem = divmod(n_active_participants, competition.n_divisions)
-            for d in [active_participants[i*div_size+min(i, rem):(i+1)*div_size+min(i+1, rem)] for i in range(competition.n_divisions)]:
+            if new_round.number <= 1:
+                divs = [active_participants]
+            else:
+                divs = [active_participants[i*div_size+min(i, rem):(i+1)*div_size+min(i+1, rem)] for i in range(competition.n_divisions)]
+            for d in divs:
                 for p in d:
-                    p.division_num = current_div_num
                     updated_participants.append(p)
+                    p.division_num = current_div_num
+                    p.match_count = match_counts[p.bot.id] if p.bot.id in match_counts else 0
+                    p.in_placements = p.match_count < competition.n_placements
                 current_div_num -= 1
-            CompetitionParticipation.objects.bulk_update(updated_participants, ['division_num'])
-            
-        else:
-            competition.rounds_this_cyle += 1
+            CompetitionParticipation.objects.bulk_update(updated_participants, ['division_num', 'in_placements', 'match_count'])
         competition.save()
         
         # Get updated participants

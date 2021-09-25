@@ -767,15 +767,30 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         div_participants = dict()
         current_elo = -1
         current_div = competition.target_n_divisions
-        for cp in CompetitionParticipation.objects.filter(active=True, competition=competition).only('division_num','elo').order_by('-division_num','elo'):
-            self.assertGreaterEqual(cp.elo, current_elo)
-            self.assertLessEqual(cp.division_num, current_div)
+        current_match_count = -1
+        current_in_placements = True
+        existing_participants = CompetitionParticipation.objects.filter(active=True, competition=competition, in_placements=False).only('division_num','elo','match_count','in_placements').order_by('-division_num','elo')
+        placement_participants = CompetitionParticipation.objects.filter(active=True, competition=competition, in_placements=True).only('division_num','elo','match_count','in_placements').order_by('-division_num','match_count','elo')
+        for cp in list(placement_participants) + list(existing_participants):
+            if cp.in_placements:
+                self.assertEqual(current_in_placements, True) # Preceding bot should be in placement
+                self.assertGreaterEqual(cp.match_count, current_match_count) # Asc match count
+                if competition.n_placements > 0 and competition.rounds_this_cycle==1:
+                    self.assertLess(cp.match_count, competition.n_placements) # Should have less matches played than placement reqs
+            else:
+                if not current_in_placements and competition.rounds_this_cycle==1:
+                    self.assertGreaterEqual(cp.elo, current_elo) # Asc ELO
+                self.assertGreaterEqual(cp.match_count, competition.n_placements) # Should have at least equal matches played than placement reqs
+            self.assertLessEqual(cp.division_num, current_div) # Desc Div nums
+            current_match_count = cp.match_count
+            current_in_placements = cp.in_placements
             current_elo = cp.elo
             current_div = cp.division_num
             if cp.division_num in div_participants:
-                div_participants[cp.division_num] += 1
+                div_participants[cp.division_num]['n'] += 1
+                div_participants[cp.division_num]['p'] += 1 if cp.in_placements else 0
             else:
-                div_participants[cp.division_num] = 1
+                div_participants[cp.division_num] = { 'n':1, 'p':1 if cp.in_placements else 0}
         return div_participants
 
     def _get_expected_matches_per_div(self, round):
@@ -800,6 +815,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertIsNone(round.finished)
         self.assertFalse(round.complete)
         # check match count, also checks divisions are in elo order
+        competition.refresh_from_db()
         self.assertEqual(self._get_div_participant_count(competition), exp_div_participant_count)
         exp_matches_per_div = self._get_expected_matches_per_div(round)
         self.assertEqual(exp_matches_per_div, exp_n_matches)
@@ -823,84 +839,115 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertEqual(round.number, exp_round)
         self.assertIsNotNone(round.finished)
         self.assertTrue(round.complete)
-    
-    def test_division_matchmaking(self):
+
+    def _complete_cycle(self, competition, exp_rounds, exp_div_participant_count, exp_n_matches):
+        for i in range(competition.rounds_per_cycle):
+            self._complete_round(competition, exp_rounds[i], exp_div_participant_count, exp_n_matches)
+            self.assertEqual(competition.rounds_this_cycle, i+1)
+
+    def _set_up_competition(self, target_divs, div_size, rpc=1, n_placements=0): 
         # avoid old tests breaking that were pre-this feature
         config.REISSUE_UNFINISHED_MATCHES = False
 
         # freeze every comp but one, so we can get anticipatable results
-        competition = self._create_open_competition(GameMode.objects.first().id, 'Two Division Test Competition')
+        competition = self._create_open_competition(GameMode.objects.first().id, 'Test Competition')
         # Set up division settings
-        competition.target_n_divisions = 3
-        competition.n_divisions = 1
-        competition.target_division_size = 3
+        competition.target_n_divisions = target_divs
+        competition.target_division_size = div_size
+        competition.n_placements = n_placements
+        competition.rounds_per_cycle = rpc
         competition.save()
         Competition.objects.exclude(id=competition.id).update(status='frozen')
         self._create_map_for_competition('testmapdiv1', competition.id)
         self.assertEqual(Match.objects.count(), 0)  # starting with 0 matches
         self.assertEqual(Round.objects.count(), 0)  # starting with 0 rounds
+        return competition
 
+    def test_placements_enabled(self):
+        competition = self._set_up_competition(3, 3, 2, 6)
+        _exp_par = lambda x, y: {'n':x,'p':y}
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot1.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot1.id, competition_id=competition.id)
+        self._complete_cycle(competition, [1,2], {0:_exp_par(2,2)}, {0:1})
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot2.id, competition_id=competition.id)
+        self._complete_cycle(competition, [3,4], {0:_exp_par(3,3)}, {0:3})
+        self._complete_cycle(competition, [5,6], {0:_exp_par(3,1)}, {0:3})
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot1.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot2.id, competition_id=competition.id)
+        self._complete_cycle(competition, [7,8], {0:_exp_par(3,0), 1:_exp_par(3,3), 2:_exp_par(3,3)}, {0:3, 1:3, 2:3})
+        self._complete_cycle(competition, [9,10], {0:_exp_par(3,0), 1:_exp_par(3,3), 2:_exp_par(3,3)}, {0:3, 1:3, 2:3})
+        self._complete_cycle(competition, [11,12], {0:_exp_par(3,0), 1:_exp_par(3,0), 2:_exp_par(3,0)}, {0:3, 1:3, 2:3})
+
+    
+    def test_division_matchmaking(self):
+        competition = self._set_up_competition(3, 3, 3)
+
+        _exp_par = lambda x: {'n':x,'p':0}
         # Start Rounds
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot1.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot1.id, competition_id=competition.id)
-        self._complete_round(competition, 1, {0:2}, {0:1})
+        self._complete_cycle(competition, [1,2,3], {0:_exp_par(2)}, {0:1})
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot2.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
-        self._complete_round(competition, 2, {0:4}, {0:6})
+        self._complete_cycle(competition, [4,5,6], {0:_exp_par(4)}, {0:6})
         # Split to 2 divs
         self.ru1b3_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
         self.su1b3_cp = CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
+        self._complete_cycle(competition, [7,8,9], {0:_exp_par(3), 1:_exp_par(3)}, {0:3, 1:3})
         # Bot inactive dont merge yet
-        self._complete_round(competition, 3, {0:3, 1:3}, {0:3, 1:3})
         self.ru1b3_cp.active = False
         self.ru1b3_cp.save()
-        self._complete_round(competition, 4, {0:2, 1:3}, {0:1, 1:3})
+        self._complete_cycle(competition, [10,11,12], {0:_exp_par(2), 1:_exp_par(3)}, {0:1, 1:3})
         # Merge threshold reached
         self.su1b3_cp.active = False
         self.su1b3_cp.save()
-        self._complete_round(competition, 5, {0:4}, {0:6})
+        self._complete_cycle(competition, [13,14,15], {0:_exp_par(4)}, {0:6})
         # Non equal divisions
         self.ru1b3_cp.active = True
         self.ru1b3_cp.save()
         self.su1b3_cp.active = True
         self.su1b3_cp.save()
         self.ru1b4_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
-        self._complete_round(competition, 6, {0:3, 1:4}, {0:3, 1:6})
+        self._complete_cycle(competition, [16,17,18], {0:_exp_par(3), 1:_exp_par(4)}, {0:3, 1:6})
         # Split to 3 divs
         self.ru2b1_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot1.id, competition_id=competition.id)
         self.ru2b2_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot2.id, competition_id=competition.id)
-        self._complete_round(competition, 7, {0:3, 1:3, 2:3}, {0:3, 1:3, 2:3})
+        self._complete_cycle(competition, [19,20,21], {0:_exp_par(3), 1:_exp_par(3), 2:_exp_par(3)}, {0:3, 1:3, 2:3})
         # Merge again
         self.ru1b3_cp.active = False
         self.ru1b3_cp.save()
-        self._complete_round(competition, 8, {0:2, 1:3, 2:3}, {0:1, 1:3, 2:3})
+        self._complete_cycle(competition, [22,23,24], {0:_exp_par(2), 1:_exp_par(3), 2:_exp_par(3)}, {0:1, 1:3, 2:3})
         self.su1b3_cp.active = False
         self.su1b3_cp.save()
-        self._complete_round(competition, 9, {0:3, 1:4}, {0:3, 1:6})
+        self._complete_cycle(competition, [25,26,27], {0:_exp_par(3), 1:_exp_par(4)}, {0:3, 1:6})
         self.ru2b1_cp.active = False
         self.ru2b1_cp.save()
-        self._complete_round(competition, 10, {0:3, 1:3}, {0:3, 1:3})
+        self._complete_cycle(competition, [28,29,30],{0:_exp_par(3), 1:_exp_par(3)}, {0:3, 1:3})
         self.ru1b3_cp.active = True
         self.ru1b3_cp.save()
         self.su1b3_cp.active = True
         self.su1b3_cp.save()
         self.ru2b1_cp.active = True
         self.ru2b1_cp.save()
-        self._complete_round(competition, 11, {0:3, 1:3, 2:3}, {0:3, 1:3, 2:3})
+        self._complete_cycle(competition, [31,32,33], {0:_exp_par(3), 1:_exp_par(3), 2:_exp_par(3)}, {0:3, 1:3, 2:3})
         # Grow equally
         CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot1.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot2.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot1.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot2.id, competition_id=competition.id)
-        self._complete_round(competition, 12, {0:4, 1:4, 2:5}, {0:6, 1:6, 2:10})
+        self._complete_cycle(competition, [34,35,36], {0:_exp_par(4), 1:_exp_par(4), 2:_exp_par(5)}, {0:6, 1:6, 2:10})
         self._create_active_bot_for_competition(competition.id, self.regularUser2, 'regularUser2Bot100')
-        self._complete_round(competition, 13, {0:4, 1:5, 2:5}, {0:6, 1:10, 2:10})
+        self._complete_cycle(competition, [37,38,39], {0:_exp_par(4), 1:_exp_par(5), 2:_exp_par(5)}, {0:6, 1:10, 2:10})
         # Not more splits
         for j in range(3):
             u = User.objects.create_user(username=f'regular_user{100+j}', password='x', email=f'regular_user{100+j}@dev.aiarena.net')
             for i in range(3):
                 self._create_active_bot_for_competition(competition.id, u, f'{u.username}Bot{i+1}')
-        self._complete_round(competition, 14, {0:7, 1:8, 2:8}, {0:21, 1:28, 2:28})
+        self._complete_cycle(competition, [40,41,42], {0:_exp_par(7), 1:_exp_par(8), 2:_exp_par(8)}, {0:21, 1:28, 2:28})
 
         
 class SetStatusTestCase(LoggedInMixin, TransactionTestCase):

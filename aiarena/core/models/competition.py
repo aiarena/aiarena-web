@@ -49,9 +49,9 @@ class Competition(models.Model, LockableModelMixin):
     # Defines the minimum size of each division, also defines when divisions will split. 
     target_division_size = models.IntegerField(default=2, validators=[MinValueValidator(2)], blank=True)
     # Defines the number of rounds between division updates.
-    rounds_per_cyle = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
+    rounds_per_cycle = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     # Tracks the number of rounds that have completed this cycle.
-    rounds_this_cyle = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+    rounds_this_cycle = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
     # Defines the number of matches that need to be played before promotions are allowed for a player.
     n_placements = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
 
