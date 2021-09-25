@@ -210,17 +210,19 @@ class Matches:
             # Update number of divisions
             if competition.should_split_divisions(n_active_participants) or competition.should_merge_divisions(n_active_participants):
                 if n_active_participants > competition.target_division_size:
-                    competition.n_divisions = n_active_participants // competition.target_division_size 
+                    # Limit to target so that if lots join at once it doesn't overshoot
+                    competition.n_divisions = min(competition.target_n_divisions, n_active_participants // competition.target_division_size)
                 else:
                     competition.n_divisions = 1
             # Update bot division numbers
             updated_participants = []
-            current_div_num = competition.n_divisions - 1
-            div_size, rem = divmod(n_active_participants, competition.n_divisions)
             if new_round.number <= 1:
                 divs = [active_participants]
+                current_div_num = 0
             else:
+                div_size, rem = divmod(n_active_participants, competition.n_divisions)
                 divs = [active_participants[i*div_size+min(i, rem):(i+1)*div_size+min(i+1, rem)] for i in range(competition.n_divisions)]
+                current_div_num = competition.n_divisions - 1
             for d in divs:
                 for p in d:
                     updated_participants.append(p)

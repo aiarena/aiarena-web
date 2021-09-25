@@ -878,9 +878,16 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot1.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot2.id, competition_id=competition.id)
-        self._complete_cycle(competition, [7,8], {0:_exp_par(3,0), 1:_exp_par(3,3), 2:_exp_par(3,3)}, {0:3, 1:3, 2:3})
-        self._complete_cycle(competition, [9,10], {0:_exp_par(3,0), 1:_exp_par(3,3), 2:_exp_par(3,3)}, {0:3, 1:3, 2:3})
-        self._complete_cycle(competition, [11,12], {0:_exp_par(3,0), 1:_exp_par(3,0), 2:_exp_par(3,0)}, {0:3, 1:3, 2:3})
+        CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot1.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot2.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot1.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot2.id, competition_id=competition.id)
+        for j in range(3):
+            u = User.objects.create_user(username=f'regular_user{100+j}', password='x', email=f'regular_user{100+j}@dev.aiarena.net')
+            for i in range(3):
+                self._create_active_bot_for_competition(competition.id, u, f'{u.username}Bot{i+1}')
+        self._complete_cycle(competition, [7,8], {0:_exp_par(7,4), 1:_exp_par(7,7), 2:_exp_par(8,8)}, {0:21, 1:21, 2:28})
+        self._complete_cycle(competition, [9,10], {0:_exp_par(7,0), 1:_exp_par(7,0), 2:_exp_par(8,0)}, {0:21, 1:21, 2:28})
 
     
     def test_division_matchmaking(self):
