@@ -185,7 +185,7 @@ class Bot(models.Model, LockableModelMixin):
     def as_truncated_html_link(self):
         name = escape(self.__str__())
         limit = 20
-        return mark_safe(f'<a href="{self.get_absolute_url}">{(name[:limit] + "...") if len(name) > limit + 3 else name}</a>')
+        return mark_safe(f'<a href="{self.get_absolute_url}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>')
 
     @cached_property
     def as_html_link_with_race(self):
