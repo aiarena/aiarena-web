@@ -155,7 +155,11 @@
                         {% else %}
                             <td>--</td>
                         {% endif %}
-                        <td>{{ competition_participation.division_num }}</td>
+                        {% if competition_participation.division_num > 0 %}
+                            <td>{{ competition_participation.division_num }}</td>
+                        {% else %}
+                            <td>--</td>
+                        {% endif %}
                         <td>{{ competition_participation.elo }}</td>
                         <td><a href="{% url 'bot_competition_stats' competition_participation.id competition_participation.slug %}">Stats</a></td>
                     </tr>
