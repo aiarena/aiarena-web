@@ -209,20 +209,16 @@ class Matches:
             n_active_participants = len(active_participants)
             # Update number of divisions
             if competition.should_split_divisions(n_active_participants) or competition.should_merge_divisions(n_active_participants):
-                if n_active_participants > competition.target_division_size:
+                if new_round.number > 1 and n_active_participants > competition.target_division_size:
                     # Limit to target so that if lots join at once it doesn't overshoot
                     competition.n_divisions = min(competition.target_n_divisions, n_active_participants // competition.target_division_size)
                 else:
                     competition.n_divisions = 1
             # Update bot division numbers
             updated_participants = []
-            if new_round.number <= 1:
-                divs = [active_participants]
-                current_div_num = CompetitionParticipation.MIN_DIVISION
-            else:
-                div_size, rem = divmod(n_active_participants, competition.n_divisions)
-                divs = [active_participants[i*div_size+min(i, rem):(i+1)*div_size+min(i+1, rem)] for i in range(competition.n_divisions)]
-                current_div_num = competition.n_divisions - 1 + CompetitionParticipation.MIN_DIVISION
+            div_size, rem = divmod(n_active_participants, competition.n_divisions)
+            divs = [active_participants[i*div_size+min(i, rem):(i+1)*div_size+min(i+1, rem)] for i in range(competition.n_divisions)]
+            current_div_num = competition.n_divisions - 1 + CompetitionParticipation.MIN_DIVISION
             for d in divs:
                 for p in d:
                     updated_participants.append(p)
@@ -236,7 +232,7 @@ class Matches:
         # Get updated participants
         active_participants = (CompetitionParticipation.objects
             .only("id","division_num","bot")
-            .filter(competition=competition, active=True))
+            .filter(competition=competition, active=True, division_num__gte=CompetitionParticipation.MIN_DIVISION))
         already_processed_participants = []
         # loop through and generate matches for all active participants
         for participant1 in active_participants:

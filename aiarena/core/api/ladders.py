@@ -21,7 +21,7 @@ class Ladders:
                 ),
                 capped_match_count=Case(
                     When(in_placements=False, then=competition.n_placements+1),
-                    When(in_placements=True, match_count__gt=competition.n_placements+1, then=competition.n_placements),
+                    When(in_placements=True, match_count__gt=competition.n_placements, then=competition.n_placements),
                     default='match_count'
                 )
             )

@@ -769,8 +769,14 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         current_div = competition.target_n_divisions
         current_match_count = -1
         current_in_placements = True
-        existing_participants = CompetitionParticipation.objects.filter(active=True, competition=competition, in_placements=False).only('division_num','elo','match_count','in_placements').order_by('-division_num','elo')
-        placement_participants = CompetitionParticipation.objects.filter(active=True, competition=competition, in_placements=True).only('division_num','elo','match_count','in_placements').order_by('-division_num','match_count','elo')
+        existing_participants = (CompetitionParticipation.objects
+            .filter(active=True, competition=competition, in_placements=False, division_num__gte=CompetitionParticipation.MIN_DIVISION)
+            .only('division_num','elo','match_count','in_placements')
+            .order_by('-division_num','elo'))
+        placement_participants = (CompetitionParticipation.objects
+            .filter(active=True, competition=competition, in_placements=True, division_num__gte=CompetitionParticipation.MIN_DIVISION)
+            .only('division_num','elo','match_count','in_placements')
+            .order_by('-division_num','match_count','elo'))
         for cp in list(placement_participants) + list(existing_participants):
             if cp.in_placements:
                 self.assertEqual(current_in_placements, True) # Preceding bot should be in placement
@@ -889,6 +895,35 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         self._complete_cycle(competition, [7,8], {1:_exp_par(7,4), 2:_exp_par(7,7), 3:_exp_par(8,8)}, {1:21, 2:21, 3:28})
         self._complete_cycle(competition, [9,10], {1:_exp_par(7,0), 2:_exp_par(7,0), 3:_exp_par(8,0)}, {1:21, 2:21, 3:28})
 
+    def test_first_round_no_split(self):
+        competition = self._set_up_competition(2, 2, 5)
+        _exp_par = lambda x, y: {'n':x,'p':y}
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot1.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot2.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot1.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot2.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot1.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot2.id, competition_id=competition.id)
+        self._complete_cycle(competition, [1,2,3,4,5], {1:_exp_par(10,0)}, {1:45})
+        self._complete_cycle(competition, [6,7,8,9,10], {1:_exp_par(5,0), 2:_exp_par(5,0)}, {1:10, 2:10})
+
+    def test_no_insertions_mid_cycle(self):
+        # And also no matches between those without divisions
+        competition = self._set_up_competition(2, 4, 3)
+        _exp_par = lambda x, y: {'n':x,'p':y}
+
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
+        self._complete_round(competition, 1, {1:_exp_par(2,0)}, {1:1})
+        CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
+        self._complete_round(competition, 2, {1:_exp_par(2,0)}, {1:1})
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
+        self._complete_round(competition, 3, {1:_exp_par(2,0)}, {1:1})
+        self._complete_round(competition, 4, {1:_exp_par(4,0)}, {1:6})
     
     def test_division_matchmaking(self):
         competition = self._set_up_competition(3, 3, 3)
