@@ -190,12 +190,12 @@
                     <td>{{ participation.match.as_html_link }}</td>
                     {% for p in participation.match.participants %}
                         {% if p.participant_number == 1 %}
-                            <td>{{ p.bot.as_html_link }}</td>
+                            <td>{{ p.bot.as_truncated_html_link }}</td>
                         {% endif %}
                     {% endfor %}
                     {% for p in participation.match.participants %}
                         {% if p.participant_number == 2 %}
-                            <td>{{ p.bot.as_html_link }}</td>
+                            <td>{{ p.bot.as_truncated_html_link }}</td>
                         {% endif %}
                     {% endfor %}
                     <td>{{ participation.match.map }}</td>
