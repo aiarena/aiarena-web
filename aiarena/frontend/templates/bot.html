@@ -135,6 +135,7 @@
                 <td><strong>Season</strong></td>
                 <td><strong>Opened</strong></td>
                 <td><strong>Closed</strong></td>
+                <td><strong>Division</strong></td>
                 <td><strong>ELO</strong></td>
                 <td></td>
             </tr>
@@ -151,6 +152,11 @@
                         {% endif %}
                         {% if competition_participation.competition.date_closed %}
                             <td>{{ competition_participation.competition.date_closed|date:"d. N Y - H:i:s" }}</td>
+                        {% else %}
+                            <td>--</td>
+                        {% endif %}
+                        {% if competition_participation.division_num > 0 %}
+                            <td>{{ competition_participation.division_num }}</td>
                         {% else %}
                             <td>--</td>
                         {% endif %}

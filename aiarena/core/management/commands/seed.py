@@ -24,6 +24,11 @@ def run_seed(matches, token):
     gamemode = client.create_gamemode('Melee', game.id)
 
     competition1 = client.create_competition('Competition 1', 'L', gamemode.id)
+    competition1.target_n_divisions = 2
+    competition1.target_division_size = 2
+    competition1.n_placements = 2
+    competition1.rounds_per_cycle = 1
+    competition1.save()
     client.open_competition(competition1.id)
 
     competition2 = client.create_competition('Competition 2', 'L', gamemode.id)
@@ -46,15 +51,15 @@ def run_seed(matches, token):
     map_pool.maps.add(m2)
 
     # assume the frontend is working by this point and create these the easiest way
-    devuser1 = User.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
+    devuser1 = WebsiteUser.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
                                         patreon_level='bronze')
-    devuser2 = User.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net',
+    devuser2 = WebsiteUser.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net',
                                         patreon_level='silver')
-    devuser3 = User.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net',
+    devuser3 = WebsiteUser.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net',
                                         patreon_level='gold')
-    devuser4 = User.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net',
+    devuser4 = WebsiteUser.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net',
                                         patreon_level='platinum')
-    devuser5 = User.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net',
+    devuser5 = WebsiteUser.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net',
                                         patreon_level='diamond')
 
     with open(BaseTestMixin.test_bot_zip_path, 'rb') as bot_zip:
@@ -126,13 +131,26 @@ def run_seed(matches, token):
         if matches != 0:
             client.next_match()
 
+        # bot still in placement
+        bot = Bot.objects.create(user=devadmin, name='devadmin_bot100', plays_race='T', type='python',
+                                 bot_zip=File(bot_zip))
+        cp = CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+        competition1.refresh_from_db()
+        cp.division_num = competition1.n_divisions
+        cp.save()
+
+        # bot that just joined the competition
+        bot = Bot.objects.create(user=devadmin, name='devadmin_bot101', plays_race='T', type='python',
+                                 bot_zip=File(bot_zip))
+        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
         return api_token
 
 
 class Command(BaseCommand):
     help = "Seed database for testing and development."
 
-    _DEFAULT_MATCHES_TO_GENERATE = 20
+    _DEFAULT_MATCHES_TO_GENERATE = 50
 
     def add_arguments(self, parser):
         parser.add_argument('--matches', type=int, default=self._DEFAULT_MATCHES_TO_GENERATE,

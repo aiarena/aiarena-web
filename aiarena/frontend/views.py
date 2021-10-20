@@ -559,6 +559,12 @@ class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, Up
     redirect_field_name = 'next'
     success_message = "Competition participation updated."
 
+    def form_valid(self, form):
+        self.object = form.save()
+        if not self.object.active:
+            self.object.division_num = CompetitionParticipation.DEFAULT_DIVISION
+        return super(UpdateView, self).form_valid(form)
+
     def get_login_url(self):
         return reverse('login')
 
@@ -873,10 +879,15 @@ class CompetitionDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(CompetitionDetail, self).get_context_data(**kwargs)
         context['round_list'] = Round.objects.filter(competition_id=self.object.id).order_by('-id')
-        context['rankings'] = Ladders.get_competition_ranked_participants(self.object).prefetch_related(
+        all_participants = list(Ladders.get_competition_ranked_participants(self.object, include_placements=True).prefetch_related(
             Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
-            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type')))
-        context['rankings'].count = len(context['rankings'])
+            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
+        context['divisions'] = dict()
+        to_title = lambda x: f"Awaiting Entry" if x==CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
+        for participant in all_participants:
+            if to_title(participant.division_num) not in context['divisions']:
+                context['divisions'][to_title(participant.division_num)] = []
+            context['divisions'][to_title(participant.division_num)].append(participant)
         return context
 
 
