@@ -2,7 +2,7 @@ import logging
 
 from django.db.models import Max, Case, When
 
-from aiarena.core.models import Competition, CompetitionParticipation, Round
+from aiarena.core.models import Competition, CompetitionParticipation, Round, Match
 
 logger = logging.getLogger(__name__)
 
@@ -11,9 +11,10 @@ logger = logging.getLogger(__name__)
 
 class Ladders:
     @staticmethod
-    def get_competition_ranked_participants(competition: Competition, amount=None, include_placements=False):
-        participants = (CompetitionParticipation.objects
+    def _get_competition_participants(competition: Competition):
+        return (CompetitionParticipation.objects
             .only("id","bot__id","division_num","elo","win_perc","slug","in_placements")
+            .filter(competition=competition)
             .annotate(
                 ranked_division_num=Case(
                     When(division_num=CompetitionParticipation.DEFAULT_DIVISION, then=competition.n_divisions+1),
@@ -25,11 +26,31 @@ class Ladders:
                     default='match_count'
                 )
             )
-            .filter(competition=competition, active=True)
-            .order_by("ranked_division_num", '-capped_match_count', '-elo'))
+            .order_by("ranked_division_num", '-capped_match_count', '-elo')
+        )
+
+
+    @staticmethod
+    def get_competition_ranked_participants(competition: Competition, amount=None, include_placements=False):
+        participants = Ladders._get_competition_participants(competition).filter(active=True)
         if not include_placements:
             # Keep those out of placement and have a division
             participants = participants.filter(in_placements=False, division_num__gte=CompetitionParticipation.MIN_DIVISION)
+        return participants if amount is None else participants[:amount]
+
+
+    @staticmethod
+    def get_competition_last_round_participants(competition: Competition, amount=None):
+        # only return SeasonParticipations that are included in the most recent round
+        last_round = Ladders.get_most_recent_round(competition)
+        if last_round is None:
+            return CompetitionParticipation.objects.filter(competition=competition)
+        bot_ids = Match.objects.select_related('match_participation').filter(round=last_round).values('matchparticipation__bot__id').distinct()
+
+        participants = (Ladders._get_competition_participants(competition)
+            .filter(bot__id__in=bot_ids, division_num__gte=CompetitionParticipation.MIN_DIVISION)
+        )
+
         return participants if amount is None else participants[:amount]
 
     @staticmethod

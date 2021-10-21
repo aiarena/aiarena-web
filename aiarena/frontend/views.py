@@ -879,9 +879,13 @@ class CompetitionDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(CompetitionDetail, self).get_context_data(**kwargs)
         context['round_list'] = Round.objects.filter(competition_id=self.object.id).order_by('-id')
-        all_participants = list(Ladders.get_competition_ranked_participants(self.object, include_placements=True).prefetch_related(
-            Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
-            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
+        if self.object.status == 'closed':
+            all_participants = Ladders.get_competition_last_round_participants(self.object)
+        else:
+            all_participants = Ladders.get_competition_ranked_participants(self.object, include_placements=True)
+        all_participants = list(all_participants.prefetch_related(
+                Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
+                Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
         context['divisions'] = dict()
         to_title = lambda x: f"Awaiting Entry" if x==CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
         for participant in all_participants:
