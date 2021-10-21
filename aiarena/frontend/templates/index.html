@@ -97,6 +97,7 @@
                                 <td style="text-align: center"><strong>Rank</strong></td>
                                 <td></td>
                                 <td><strong>Name</strong></td>
+                                <td><strong>DIV</strong></td>
                                 <td><strong>ELO</strong></td>
                                 </thead>
                                 <tbody>
@@ -109,6 +110,7 @@
                                                 {% endif %}
                                             </td>
                                             <td>{{ participant.bot.as_truncated_html_link }}</td>
+                                            <td style="text-align: center">{{ participant.division_num }}</td>
                                             <td>
                                                 {{ participant.elo }}
                                                 {% bot_competition_trend participant.bot item.competition as trend %}
