@@ -140,5 +140,31 @@
             {% endfor %}
             <tbody>
         </table>
+        <div class="pagination">
+            {% if round_list.has_other_pages %}
+                <ul class="pagination">
+                    {% if round_list.has_previous %}
+                        <li>
+                            <a href="?page={{ round_list.previous_page_number }}">&laquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                    {% for page_num in round_page_range %}
+                        {% if round_list.number == page_num %}
+                            <li class="active"><span>{{ page_num }}</span></li>
+                        {% else %}
+                            <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if round_list.has_next %}
+                        <li><a href="?page={{ round_list.next_page_number }}">&raquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
