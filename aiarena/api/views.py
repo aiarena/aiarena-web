@@ -1,16 +1,18 @@
 import logging
 from wsgiref.util import FileWrapper
 
+from django.db.models import Prefetch
 from django.http import HttpResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.reverse import reverse
-from django.db.models import Prefetch
 
-from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, Competition, Tag, MatchTag
 from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
+from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, \
+    Competition, MatchTag, Game, GameMode, MapPool
+
 logger = logging.getLogger(__name__)
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -20,30 +22,48 @@ logger = logging.getLogger(__name__)
 # Allowing filtering/etc on sensitive fields could leak information.
 # Serializer fields are also manually specified so new private fields don't accidentally get leaked.
 
-bot_include_fields = 'id', 'user', 'name', 'created', 'plays_race', 'type', \
-                     'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_zip', \
-                     'bot_zip_md5hash', 'bot_data_publicly_downloadable', 'bot_data', 'bot_data_md5hash'
-
-bot_search_fields = 'id', 'user', 'name', 'created', 'plays_race', 'type', \
-                    'game_display_id', 'bot_zip_updated', 'bot_zip_publicly_downloadable', 'bot_data_publicly_downloadable'
-map_include_fields = 'id', 'name', 'file',
-map_filter_fields = 'id', 'name',
-matchtag_include_fields = 'user',
-match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round', 'requested_by', 'tags'
+bot_include_fields = 'id', 'user', 'name', 'created', 'bot_zip', 'bot_zip_updated', 'bot_zip_md5hash', \
+                     'bot_zip_publicly_downloadable', 'bot_data_enabled', 'bot_data', 'bot_data_md5hash', \
+                     'bot_data_publicly_downloadable', 'plays_race', 'type', 'game_display_id',
+bot_search_fields = 'id', 'user', 'name', 'created', 'bot_zip_updated', 'bot_zip_publicly_downloadable', \
+                    'bot_data_enabled', 'bot_data_publicly_downloadable', 'plays_race', 'type', 'game_display_id',
+competition_include_fields = 'id', 'name', 'type', 'game_mode', 'date_created', 'date_opened', 'date_closed', \
+                             'status', 'max_active_rounds', 'interest', 'target_n_divisions', 'n_divisions', \
+                             'target_division_size', 'rounds_per_cycle', 'rounds_this_cycle', 'n_placements',
+competition_bot_matchup_stats_include_fields = 'bot', 'opponent', 'match_count', 'win_count', 'win_perc', 'loss_count', \
+                                               'loss_perc', 'tie_count', 'tie_perc', 'crash_count', 'crash_perc', \
+                                               'updated',
+competition_participation_include_fields = 'id', 'competition', 'bot', 'elo', 'match_count', 'win_perc', 'win_count', \
+                                           'loss_perc', 'loss_count', 'tie_perc', 'tie_count', 'crash_perc', \
+                                           'crash_count', 'elo_graph', 'highest_elo', 'slug', 'active', \
+                                           'division_num', 'in_placements',
+game_include_fields = 'id', 'name',
+game_mode_include_fields = 'id', 'name', 'game',
+map_include_fields = 'id', 'name', 'file', 'game_mode', 'competitions', 'enabled',
+map_filter_fields = 'id', 'name', 'game_mode', 'competitions', 'enabled',
+map_pool_include_fields = 'id', 'name', 'maps', 'enabled',
+match_include_fields = 'id', 'map', 'created', 'started', 'assigned_to', 'round', 'requested_by', \
+                       'require_trusted_arenaclient', 'tags'
 matchparticipation_include_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
-                                    'elo_change', 'avg_step_time', 'match_log', 'result', 'result_cause',
+                                    'elo_change', 'match_log', 'avg_step_time', 'result', 'result_cause', \
+                                    'use_bot_data', 'update_bot_data', 'match_log_has_been_cleaned',
 matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', 'starting_elo', 'resultant_elo', \
-                                   'elo_change', 'avg_step_time', 'result', 'result_cause',
+                                   'elo_change', 'avg_step_time', 'result', 'result_cause', 'use_bot_data', \
+                                   'update_bot_data', 'match_log_has_been_cleaned',
+matchtag_include_fields = 'user'
+news_include_fields = 'id', 'created', 'title', 'text', 'yt_link',
 result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps', \
-                        'submitted_by', 'arenaclient_log', 'interest_rating', 'date_interest_rating_calculated',
-
+                        'submitted_by', 'arenaclient_log', 'interest_rating', 'date_interest_rating_calculated', \
+                        'replay_file_has_been_cleaned', 'arenaclient_log_has_been_cleaned',
 result_search_fields = 'id', 'match', 'winner', 'type', 'created', 'game_steps', \
-                       'submitted_by', 'interest_rating', 'date_interest_rating_calculated',
+                       'submitted_by', 'interest_rating', 'date_interest_rating_calculated', \
+                       'replay_file_has_been_cleaned', 'arenaclient_log_has_been_cleaned',
 round_include_fields = 'id', 'number', 'competition', 'started', 'finished', 'complete',
-competition_include_fields = 'id', 'date_created', 'date_opened', 'date_closed', 'status',
-competitionparticipation_include_fields = 'id', 'competition', 'bot', 'elo',
+trophy_include_fields = 'id', 'icon', 'bot', 'name',
+trophy_icon_include_fields = 'id', 'name', 'image',
+trophy_icon_filter_fields = 'id', 'name',
 user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', 'is_active', 'date_joined', \
-                      'type', 'patreon_level'
+                      'patreon_level', 'type',
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
