@@ -3,9 +3,24 @@ from django.test import TestCase, TransactionTestCase
 from aiarena.core.tests.tests import FullDataSetMixin
 
 
-class ApiReadTestCase(FullDataSetMixin, TransactionTestCase):
+class ApiReadPrivatePagesTestCase(FullDataSetMixin, TransactionTestCase):
     """
-    Tests to ensure API endpoint page renders don't break.
+    Tests to ensure private API endpoint pages don't break.
+    """
+
+    def test_get_api_discord_users_page(self):
+        self.client.login(username='regular_user', password='x')
+        response = self.client.get('/api/discord-users/')
+        self.assertEqual(response.status_code, 403)
+
+        self.client.login(username='staff_user', password='x')
+        response = self.client.get('/api/discord-users/')
+        self.assertEqual(response.status_code, 200)
+
+
+class ApiReadPublicPagesTestCase(FullDataSetMixin, TransactionTestCase):
+    """
+    Tests to ensure public API endpoint pages don't break.
     """
 
     def setUp(self):
