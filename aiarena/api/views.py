@@ -131,7 +131,6 @@ class BotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bot
         fields = bot_include_fields + ('trophies',)
-        ref_name = "website"
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -312,7 +311,6 @@ class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
         fields = map_include_fields
-        ref_name = 'website'
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
@@ -395,7 +393,6 @@ class MatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Match
         fields = match_include_fields + ('result', 'tags')
-        ref_name = 'website'
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS

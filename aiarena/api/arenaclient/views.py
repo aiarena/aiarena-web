@@ -31,7 +31,7 @@ class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
         fields = '__all__'
-        ref_name = 'arenaclient'
+        ref_name = 'ArenaClientMap'
 
 
 class BotSerializer(serializers.ModelSerializer):
@@ -62,7 +62,7 @@ class BotSerializer(serializers.ModelSerializer):
             'id', 'name', 'game_display_id', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race',
             'type')
 
-        ref_name = "arenaclient"
+        ref_name = "ArenaClientBot"
 
 
 class MatchSerializer(serializers.ModelSerializer):
@@ -73,7 +73,7 @@ class MatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Match
         fields = ('id', 'bot1', 'bot2', 'map')
-        ref_name = 'arenaclient'
+        ref_name = 'ArenaClientMatch'
 
 
 class MatchViewSet(viewsets.GenericViewSet):
