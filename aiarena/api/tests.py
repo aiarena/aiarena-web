@@ -20,8 +20,32 @@ class ApiReadTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/api/bots/')
         self.assertEqual(response.status_code, 200)
 
+    def test_get_api_competitions_page(self):
+        response = self.client.get('/api/competitions/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_api_competitionmatchupstatus_page(self):
+        response = self.client.get('/api/competition-bot-matchup-stats/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_api_competitionparticipations_page(self):
+        response = self.client.get('/api/competition-participations/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_api_games_page(self):
+        response = self.client.get('/api/games/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_api_gamemodes_page(self):
+        response = self.client.get('/api/game-modes/')
+        self.assertEqual(response.status_code, 200)
+
     def test_get_api_maps_page(self):
         response = self.client.get('/api/maps/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_api_mappools_page(self):
+        response = self.client.get('/api/map-pools/')
         self.assertEqual(response.status_code, 200)
 
     def test_get_api_matches_page(self):
@@ -32,8 +56,8 @@ class ApiReadTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/api/match-participations/')
         self.assertEqual(response.status_code, 200)
 
-    def test_get_api_competitionparticipations_page(self):
-        response = self.client.get('/api/competition-participations/')
+    def test_get_api_news_page(self):
+        response = self.client.get('/api/news/')
         self.assertEqual(response.status_code, 200)
 
     def test_get_api_results_page(self):
@@ -42,10 +66,6 @@ class ApiReadTestCase(FullDataSetMixin, TransactionTestCase):
 
     def test_get_api_rounds_page(self):
         response = self.client.get('/api/rounds/')
-        self.assertEqual(response.status_code, 200)
-
-    def test_get_api_competitions_page(self):
-        response = self.client.get('/api/competitions/')
         self.assertEqual(response.status_code, 200)
 
     def test_get_api_users_page(self):

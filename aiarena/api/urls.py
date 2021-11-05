@@ -7,13 +7,18 @@ from .arenaclient import views as arenaclient_views
 router = DefaultRouter()
 
 router.register(r'bots', publicapi_views.BotViewSet, basename='api_bot')
+router.register(r'competitions', publicapi_views.CompetitionViewSet, basename='api_competition')
+router.register(r'competition-bot-matchup-stats', publicapi_views.CompetitionBotMatchupStatsViewSet, basename='api_competitionbotmatchupstats')
+router.register(r'competition-participations', publicapi_views.CompetitionParticipationViewSet, basename='api_competitionparticipation')
+router.register(r'games', publicapi_views.GameViewSet, basename='api_game')
+router.register(r'game-modes', publicapi_views.GameModeViewSet, basename='api_gamemode')
 router.register(r'maps', publicapi_views.MapViewSet, basename='api_map')
+router.register(r'map-pools', publicapi_views.MapPoolViewSet, basename='api_mappool')
 router.register(r'matches', publicapi_views.MatchViewSet, basename='api_match')
 router.register(r'match-participations', publicapi_views.MatchParticipationViewSet, basename='api_matchparticipation')
-router.register(r'competition-participations', publicapi_views.CompetitionParticipationViewSet, basename='api_competitionparticipation')
+router.register(r'news', publicapi_views.NewsViewSet, basename='api_news')
 router.register(r'results', publicapi_views.ResultViewSet, basename='api_result')
 router.register(r'rounds', publicapi_views.RoundViewSet, basename='api_round')
-router.register(r'competitions', publicapi_views.CompetitionViewSet, basename='api_competition')
 router.register(r'users', publicapi_views.UserViewSet, basename='api_user')
 
 # arena client
