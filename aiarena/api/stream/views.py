@@ -33,6 +33,7 @@ class StreamNextReplayViewSet(viewsets.ReadOnlyModelViewSet):
     """
     serializer_class = StreamNextReplaySerializer
     permission_classes = [IsServiceOrAdminUser]
+    swagger_schema = None  # exclude this from swagger generation
 
     def get_queryset(self):
         # Only matches that featured a bot above the starting ELO

@@ -88,7 +88,7 @@ class TrophySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Trophy
-        fields = trophy_include_fields
+        fields = trophy_include_fields + ('trophy_icon_name', 'trophy_icon_image',)
 
 
 class BotSerializer(serializers.ModelSerializer):
