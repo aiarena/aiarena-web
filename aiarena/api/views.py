@@ -1,6 +1,7 @@
 import logging
 from wsgiref.util import FileWrapper
 
+from discord_bind.models import DiscordUser
 from django.db.models import Prefetch
 from django.http import HttpResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,6 +13,7 @@ from rest_framework.reverse import reverse
 from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, \
     Competition, MatchTag, Game, GameMode, MapPool, CompetitionBotMatchupStats, News, Trophy
+from aiarena.core.permissions import IsServiceOrAdminUser
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +40,10 @@ competition_participation_include_fields = 'id', 'competition', 'bot', 'elo', 'm
                                            'crash_count', 'elo_graph', 'highest_elo', 'slug', 'active', \
                                            'division_num', 'in_placements',
 competition_participation_filter_fields = 'id', 'competition', 'bot', 'elo', 'match_count', 'win_perc', 'win_count', \
-                                           'loss_perc', 'loss_count', 'tie_perc', 'tie_count', 'crash_perc', \
-                                           'crash_count', 'highest_elo', 'slug', 'active', \
-                                           'division_num', 'in_placements',
+                                          'loss_perc', 'loss_count', 'tie_perc', 'tie_count', 'crash_perc', \
+                                          'crash_count', 'highest_elo', 'slug', 'active', \
+                                          'division_num', 'in_placements',
+discord_user_include_fields = 'user', 'uid',
 game_include_fields = 'id', 'name',
 game_mode_include_fields = 'id', 'name', 'game',
 map_include_fields = 'id', 'name', 'file', 'game_mode', 'competitions', 'enabled',
@@ -71,6 +74,7 @@ user_include_fields = 'id', 'username', 'first_name', 'last_name', 'is_staff', '
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+# This is out of order, because it's used by the BotSerializer
 class TrophySerializer(serializers.ModelSerializer):
     trophy_icon_name = serializers.SerializerMethodField()
 
@@ -232,6 +236,28 @@ class CompetitionParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = competition_participation_filter_fields
     search_fields = competition_participation_filter_fields
     ordering_fields = competition_participation_filter_fields
+
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
+class DiscordUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DiscordUser
+        fields = discord_user_include_fields
+
+
+class DiscordUserViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    DiscordUser data view
+    """
+    queryset = DiscordUser.objects.all()
+    serializer_class = DiscordUserSerializer
+    permission_classes = [IsServiceOrAdminUser]  # Only allow privileged users to access this information
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = discord_user_include_fields
+    search_fields = discord_user_include_fields
+    ordering_fields = discord_user_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
