@@ -16,7 +16,7 @@ class Command(BaseCommand):
         parser.add_argument('--competitionid', type=int, help="The competition id to generate stats for. "
                                                        "If this isn't supplied all "
                                                        "open competitions will be used")
-        parser.add_argument('--allcompetitions', type=bool, help="Run this for all competition")
+        parser.add_argument('--allcompetitions', action='store_true', help="Run this for all competition")
 
     def handle(self, *args, **options):
         if options['allcompetitions']:
