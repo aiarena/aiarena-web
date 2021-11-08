@@ -445,3 +445,6 @@ ELO = Elo(ELO_K)
 MATCH_TAG_REGEX = r'[^a-z0-9 _]'
 MATCH_TAG_LENGTH_LIMIT = 32
 MATCH_TAG_PER_MATCH_LIMIT = 32
+
+# If a primary field isn't specified on models, add an auto ID field. This affects all loaded modules.
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
