@@ -62,7 +62,6 @@ DATABASES = {
 # Application definition
 
 INSTALLED_APPS = [
-    'sheets',
     'registration',
     'grappelli.dashboard',
     'grappelli',
