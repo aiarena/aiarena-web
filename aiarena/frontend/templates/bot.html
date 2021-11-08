@@ -42,7 +42,7 @@
                 <tr>
                     <td><strong>Bot Zip</strong></td>
                     <td>
-                        {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
+                        {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_superuser %}
                             <a href="{{ bot.bot_zip.url }}">Download</a>
                         {% else %}
                             --
@@ -53,7 +53,7 @@
                     <td><strong>Bot data</strong></td>
                     <td>
                         {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
-                            {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_staff %}
+                            {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_superuser %}
                                 <a href="{{ bot.bot_data.url }}">Download</a>
                             {% else %}
                                 --
