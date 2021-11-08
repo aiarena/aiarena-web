@@ -44,8 +44,13 @@ from aiarena.core.d_utils import filter_tags
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
+
 def project_finance(request):
-    return render(request, template_name='finance.html')
+    if config.PROJECT_FINANCE_LINK is not None and config.PROJECT_FINANCE_LINK:
+        # if the link is configured, redirect.
+        return redirect(to=config.PROJECT_FINANCE_LINK)
+    else:
+        raise Http404()
 
 class UserProfile(LoginRequiredMixin, DetailView):
     model = User
@@ -717,17 +722,10 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 
 class Index(ListView):
     def get_queryset(self):
-        try:
-            comp = Competition.objects.get(id=1)
-            if Round.objects.filter(competition=comp).count() > 0:
-                return Ladders.get_competition_ranked_participants(
-                    comp, amount=10).prefetch_related(
-                    Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
-                    Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
-            else:
-                return CompetitionParticipation.objects.none()
-        except NoCurrentlyAvailableCompetitions:
-            return CompetitionParticipation.objects.none()
+        """This was applicable before multiple competitions and has only been left here to avoid having to refactor
+        the code"""
+        # TODO: Clean this out
+        return CompetitionParticipation.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

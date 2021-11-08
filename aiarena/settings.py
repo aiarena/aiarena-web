@@ -62,7 +62,6 @@ DATABASES = {
 # Application definition
 
 INSTALLED_APPS = [
-    'sheets',
     'registration',
     'grappelli.dashboard',
     'grappelli',
@@ -246,6 +245,7 @@ CONSTANCE_CONFIG = {
     'YOUTUBE_LINK': ('', 'Link to YouTube.'),
     'ADMIN_CLUSTER_LINK': ('', 'Admin link to the cluster management.'),
     'ADMIN_WEBSTATS_LINK': ('', 'Admin link to view web stats.'),
+    'PROJECT_FINANCE_LINK': ('', 'Link to the project''s finance data.'),
     'PUBLIC_BANNER_MESSAGE': ('', 'Message displayed publicly at the top of the website.'),
     'LOGGED_IN_BANNER_MESSAGE': ('', 'Message displayed to logged in users at the top of the website.'),
 }
@@ -269,7 +269,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',),
     'Match interest analysis': ('ELO_DIFF_RATING_MODIFIER', 'COMBINED_ELO_RATING_DIVISOR',),
     'Website links': ('DISCORD_INVITE_LINK', 'PATREON_LINK', 'GITHUB_LINK', 'TWITCH_LINK', 'YOUTUBE_LINK',
-                      'ADMIN_CLUSTER_LINK', 'ADMIN_WEBSTATS_LINK', ),
+                      'ADMIN_CLUSTER_LINK', 'ADMIN_WEBSTATS_LINK', 'PROJECT_FINANCE_LINK',),
 }
 
 LOGGING = {
@@ -445,3 +445,6 @@ ELO = Elo(ELO_K)
 MATCH_TAG_REGEX = r'[^a-z0-9 _]'
 MATCH_TAG_LENGTH_LIMIT = 32
 MATCH_TAG_PER_MATCH_LIMIT = 32
+
+# If a primary field isn't specified on models, add an auto ID field. This affects all loaded modules.
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
