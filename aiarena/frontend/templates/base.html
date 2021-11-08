@@ -93,7 +93,9 @@
                         <li><a href="{% url 'match_queue' %}">{% trans "Match Queue" %}</a></li>
                         <li><a href="{% url 'results' %}">{% trans "Results" %}</a></li>
                         <li><a href="{% url 'stream' %}">{% trans "Live Stream" %}</a></li>
-                        <li><a href="{% url 'finance' %}">{% trans "Project Finance" %}</a></li>
+                        {% if config.PROJECT_FINANCE_LINK %}
+                        <li><a href="{{ config.PROJECT_FINANCE_LINK }}">{% trans "Project Finance" %}</a></li>
+                        {% endif %}
                         <li><a href="/swagger/">{% trans "API" %}</a></li>
                     </ul>
                 </li>
