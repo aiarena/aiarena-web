@@ -45,6 +45,13 @@ from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
 
+def project_finance(request):
+    if config.PROJECT_FINANCE_LINK is not None and config.PROJECT_FINANCE_LINK:
+        # if the link is configured, redirect.
+        return redirect(to=config.PROJECT_FINANCE_LINK)
+    else:
+        raise Http404()
+
 class UserProfile(LoginRequiredMixin, DetailView):
     model = User
     redirect_field_name = 'next'

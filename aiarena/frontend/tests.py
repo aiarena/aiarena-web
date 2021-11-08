@@ -142,6 +142,10 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/requestmatch/')
         self.assertEqual(response.status_code, 200)
 
+        # finance - won't be configured, so should 404
+        response = self.client.get('/finance/')
+        self.assertEqual(response.status_code, 404)
+
 
 class RequestMatchTestCase(FullDataSetMixin, TestCase):
 
