@@ -318,7 +318,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._check_hashes(bot1, bot2, match['id'], 1)
 
         # test that requested matches don't update bot_data
-        match5 = Matches.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get(id=1))
+        match5 = Matches.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get())
         self._post_to_results_bot_datas_set_1(match5.id, 'Player1Win')
 
         # check hashes - nothing should have changed
@@ -607,10 +607,10 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
 
         # check round data
         self.assertEqual(Round.objects.count(), 1)
-        round = Round.objects.get(id=1)
-        self.assertIsNotNone(round.started)
-        self.assertIsNone(round.finished)
-        self.assertFalse(round.complete)
+        round1 = Round.objects.get()  # get the only round
+        self.assertIsNotNone(round1.started)
+        self.assertIsNone(round1.finished)
+        self.assertFalse(round1.complete)
 
         # finish the initial match
         response = self._post_to_results(response.data['id'], 'Player1Win')
@@ -627,9 +627,9 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
 
         # check round is finished
         self.assertEqual(Round.objects.count(), 1)
-        round = Round.objects.get(id=1)
-        self.assertIsNotNone(round.finished)
-        self.assertTrue(round.complete)
+        round1.refresh_from_db()
+        self.assertIsNotNone(round1.finished)
+        self.assertTrue(round1.complete)
 
         # Repeat again but with quirks
 
@@ -641,10 +641,10 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
 
         # check round data
         self.assertEqual(Round.objects.count(), 2)
-        round = Round.objects.get(id=2)
-        self.assertIsNotNone(round.started)
-        self.assertIsNone(round.finished)
-        self.assertFalse(round.complete)
+        round2 = Round.objects.get(id=round1.id+1)
+        self.assertIsNotNone(round2.started)
+        self.assertIsNone(round2.finished)
+        self.assertFalse(round2.complete)
 
         # finish the initial match
         response = self._post_to_results(response.data['id'], 'Player1Win')
@@ -679,31 +679,31 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertEqual(Round.objects.count(), 3)
 
         # check 2nd round data is still the same
-        round = Round.objects.get(id=2)
-        self.assertIsNotNone(round.started)
-        self.assertIsNone(round.finished)
-        self.assertFalse(round.complete)
+        round2.refresh_from_db()
+        self.assertIsNotNone(round2.started)
+        self.assertIsNone(round2.finished)
+        self.assertFalse(round2.complete)
 
         # check 3rd round data
-        round = Round.objects.get(id=3)
-        self.assertIsNotNone(round.started)
-        self.assertIsNone(round.finished)
-        self.assertFalse(round.complete)
+        round3 = Round.objects.get(id=round2.id+1)
+        self.assertIsNotNone(round3.started)
+        self.assertIsNone(round3.finished)
+        self.assertFalse(round3.complete)
 
         # now finish the 2nd round
         response = self._post_to_results(response2ndRoundLastMatch.data['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
         # check round is finished
-        round = Round.objects.get(id=2)
-        self.assertIsNotNone(round.finished)
-        self.assertTrue(round.complete)
+        round2.refresh_from_db()
+        self.assertIsNotNone(round2.finished)
+        self.assertTrue(round2.complete)
 
         # check 3rd round data remains unmodified
-        round = Round.objects.get(id=3)
-        self.assertIsNotNone(round.started)
-        self.assertIsNone(round.finished)
-        self.assertFalse(round.complete)
+        round3.refresh_from_db()
+        self.assertIsNotNone(round3.started)
+        self.assertIsNone(round3.finished)
+        self.assertFalse(round3.complete)
 
         # check result count - should have 2 rounds worth of results
         self.assertEqual(Result.objects.count(), expectedMatchCountPerRound * 2)

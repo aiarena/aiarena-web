@@ -861,14 +861,16 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
     def test_generatestats_competition(self):
         self._generate_full_data_set()
         out = StringIO()
-        call_command('generatestats', '--competitionid', '1', stdout=out)
+        for competition in Competition.objects.all():
+            call_command('generatestats', '--competitionid', competition.id, stdout=out)
         self.assertIn('Done', out.getvalue())
 
 
     def test_generatestats_bot(self):
         self._generate_full_data_set()
         out = StringIO()
-        call_command('generatestats', '--botid', '1', stdout=out)
+        for bot in Bot.objects.all():
+            call_command('generatestats', '--botid', bot.id, stdout=out)
         self.assertIn('Done', out.getvalue())
 
 
