@@ -19,7 +19,6 @@ class Command(BaseCommand):
         parser.add_argument('--allcompetitions', type=bool, help="Run this for all competition")
 
     def handle(self, *args, **options):
-        bot_id = options['botid']
         if options['allcompetitions']:
             competitions = Competition.objects.all()
         elif options['competitionid']:
@@ -27,19 +26,17 @@ class Command(BaseCommand):
         else:
             competitions = Competition.objects.filter(status__in=['open', 'closing'])
 
+        bot_id = options['botid']
+        if bot_id is not None:
+            # only process competitions this bot was present for.
+            competitions = competitions.filter(participations__bot_id=bot_id)
+
         self.stdout.write(f'looping   {len(competitions)} Competitions')
         for competition in competitions:
-            if bot_id is not None:
-                sp = CompetitionParticipation.objects.get(competition_id=competition.id, bot_id=bot_id)
+            for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
                 with transaction.atomic():
                     sp.lock_me()
-                    self.stdout.write(f'Generating current competition stats for bot {bot_id}...')
+                    self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
                     StatsGenerator.update_stats(sp)
-            else:
-                for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
-                    with transaction.atomic():
-                        sp.lock_me()
-                        self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
-                        StatsGenerator.update_stats(sp)
 
         self.stdout.write('Done')
