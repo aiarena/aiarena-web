@@ -27,13 +27,14 @@ jobs:
         python-version: [3.7]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
     - uses: shogo82148/actions-setup-redis@v1
       with:
         redis-version: '6.x'
     - run: redis-cli ping
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@master
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
