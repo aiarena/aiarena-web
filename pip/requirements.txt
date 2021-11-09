@@ -5,7 +5,7 @@ django-appconf==1.0.4
 django-bootstrap-form==3.4
 django-filter==2.4.0
 django-private-storage==2.2.2
-django-registration-redux==2.8
+django-registration-redux==2.9
 django-avatar==5.0.0
 djangorestframework==3.11.1
 wheel==0.35.1
