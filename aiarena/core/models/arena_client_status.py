@@ -18,5 +18,5 @@ class ArenaClientStatus(models.Model):
     """The ArenaClient this status pertains to."""
     status = models.CharField(max_length=17, choices=STATUS_TYPES)
     """The running status of the ArenaClient."""
-    logged_at = models.DateTimeField(auto_now_add=True)
+    logged_at = models.DateTimeField(auto_now_add=True, db_index=True)
     """The datetime this status was logged at."""

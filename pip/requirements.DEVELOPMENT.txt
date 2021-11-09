@@ -1,6 +1,5 @@
 Werkzeug==1.0.1
 django-constance[database]==2.8.0
-django-sslserver
-django-debug-toolbar
-coverage
-django-fakeredis
+django-sslserver==0.22
+coverage==6.1.1
+django-fakeredis==0.1.2

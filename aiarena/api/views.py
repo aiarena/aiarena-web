@@ -84,7 +84,7 @@ class TrophySerializer(serializers.ModelSerializer):
     trophy_icon_image = serializers.SerializerMethodField()
 
     def get_trophy_icon_image(self, obj):
-        return obj.icon.image
+        return obj.icon.image.url
 
     class Meta:
         model = Trophy
