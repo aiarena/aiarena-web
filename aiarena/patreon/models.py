@@ -16,19 +16,30 @@ class PatreonAccountBind(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
     access_token = models.CharField(max_length=64)
     refresh_token = models.CharField(max_length=64)
+    last_token_refresh_attempt = models.DateTimeField(blank=True, null=True)
+    """The datetime when the patreon token refresh was last attempted"""
     last_token_refresh_success = models.DateTimeField(blank=True, null=True)
     """The datetime when the patreon token refresh last succeeded"""
+    last_token_refresh_failure = models.DateTimeField(blank=True, null=True)
+    """The datetime when the patreon token refresh last failed"""
+    last_token_refresh_failure_message = models.TextField(blank=True, null=True)
+    """The exception text provided with the latest refresh failure"""
 
     def update_refresh_token(self):
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
         tokens = oauth_client.refresh_token(self.refresh_token)
+        self.last_token_refresh_attempt = timezone.now()
         if 'access_token' in tokens and 'refresh_token' in tokens:
             self.access_token = tokens['access_token']
             self.refresh_token = tokens['refresh_token']
             self.last_token_refresh_success = timezone.now()
             self.save()
         else:
-            raise Exception(f"Failed to refresh patreon token for user {self.user.id}. Tokens dump:\n" + json.dumps(tokens))
+            exception_message = f"Failed to refresh patreon token for user {self.user.id}. Tokens dump:\n" + json.dumps(tokens)
+            self.last_token_refresh_failure = timezone.now()
+            self.last_token_refresh_failure_message = exception_message
+            self.save()
+            raise Exception(exception_message)
 
     def update_user_patreon_tier(self):
         api_client = PatreonApi(self.access_token)
