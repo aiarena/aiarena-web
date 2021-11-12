@@ -1,3 +1,4 @@
+from django.utils import timezone
 import json
 import logging
 
@@ -15,6 +16,8 @@ class PatreonAccountBind(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
     access_token = models.CharField(max_length=64)
     refresh_token = models.CharField(max_length=64)
+    last_token_refresh_success = models.DateTimeField(blank=True, null=True)
+    """The datetime when the patreon token refresh last succeeded"""
 
     def update_refresh_token(self):
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
@@ -22,6 +25,7 @@ class PatreonAccountBind(models.Model):
         if 'access_token' in tokens and 'refresh_token' in tokens:
             self.access_token = tokens['access_token']
             self.refresh_token = tokens['refresh_token']
+            self.last_token_refresh_success = timezone.now()
             self.save()
         else:
             raise Exception(f"Failed to refresh patreon token for user {self.user.id}. Tokens dump:\n" + json.dumps(tokens))
