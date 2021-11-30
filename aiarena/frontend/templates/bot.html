@@ -41,8 +41,14 @@
                 </tr>
                 <tr>
                     <td><strong>Bot Zip</strong></td>
+                    {# Highlight red to warn super users if it's not a public download #}
+                    {% if request.user.is_superuser and not request.user == bot.user and not bot.bot_zip_publicly_downloadable %}
+                    <td class="private-download-warning">
+                    Warning: Private download!
+                    {% else %}
                     <td>
-                        {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_staff %}
+                    {% endif %}
+                        {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_superuser %}
                             <a href="{{ bot.bot_zip.url }}">Download</a>
                         {% else %}
                             --
@@ -51,9 +57,15 @@
                 </tr>
                 <tr>
                     <td><strong>Bot data</strong></td>
+                    {# Highlight red to warn super users if it's not a public download #}
+                    {% if request.user.is_superuser and not request.user == bot.user and not bot.bot_data_publicly_downloadable %}
+                    <td class="private-download-warning">
+                    Warning: Private download!
+                    {% else %}
                     <td>
+                    {% endif %}
                         {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
-                            {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_staff %}
+                            {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_superuser %}
                                 <a href="{{ bot.bot_data.url }}">Download</a>
                             {% else %}
                                 --

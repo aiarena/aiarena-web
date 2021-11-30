@@ -1465,3 +1465,7 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
   overflow: hidden;
   transition: max-height 0.2s ease-out
 }
+
+.private-download-warning {
+  background-color: rgba(255, 0, 0, 0.6);
+}
