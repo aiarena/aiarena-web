@@ -6,7 +6,7 @@
     {% if user.is_authenticated %}
         You dont have permissions to do that!
     {% else %}
-        You need to be <a href="{% url 'login' %}">{% trans "logged in" %}</a> to do that!
+        You need to be <a href="{% url 'login' %}">"logged in"</a> to do that!
     {% endif %}
     </center></div>
 {% endblock %}

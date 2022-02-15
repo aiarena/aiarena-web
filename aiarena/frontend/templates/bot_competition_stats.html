@@ -79,7 +79,12 @@
         <br/>
     </div>
 
-    {% if competitionparticipation.elo_graph %}
+    {# If this user owns the bot, and is a supporter, display the private ELO graph #}
+    {% if competitionparticipation.bot.user == user and user.patreon_level != 'none' and competitionparticipation.elo_graph_update_plot %}
+        <div id="elo_graph">
+            <img src="{{ competitionparticipation.elo_graph_update_plot.url }}" alt="ELOGraph"/>
+        </div>
+    {% elif competitionparticipation.elo_graph %}
         <div id="elo_graph">
             <img src="{{ competitionparticipation.elo_graph.url }}" alt="ELOGraph"/>
         </div>
