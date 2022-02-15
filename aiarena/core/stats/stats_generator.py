@@ -1,12 +1,13 @@
 import io
+from datetime import datetime
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
-from django.db import connection, transaction
+from django.db import connection
 from django.db.models import Max
 
-from aiarena.core.models import MatchParticipation, CompetitionParticipation
+from aiarena.core.models import MatchParticipation, CompetitionParticipation, Bot
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
 
 
@@ -44,9 +45,12 @@ class StatsGenerator:
                                                                match__round__competition=sp.competition) \
                 .aggregate(Max('resultant_elo'))['resultant_elo__max']
 
-            graph = StatsGenerator._generate_elo_graph(sp.bot.id, sp.competition_id)
-            if graph is not None:
-                sp.elo_graph.save('elo.png', graph)
+            graph1, graph2 = StatsGenerator._generate_elo_graph(sp.bot.id, sp.competition_id)
+            if graph1 is not None:
+                sp.elo_graph.save('elo.png', graph1)
+
+            if graph2 is not None:
+                sp.elo_graph_update_plot.save('elo_update_plot.png', graph2)
         else:
             sp.win_count = 0
             sp.loss_count = 0
@@ -58,24 +62,28 @@ class StatsGenerator:
 
     @staticmethod
     def _update_matchup_stats(sp: CompetitionParticipation):
-        for competition_participation in CompetitionParticipation.objects.filter(competition=sp.competition).exclude(bot=sp.bot):
+        for competition_participation in CompetitionParticipation.objects.filter(competition=sp.competition).exclude(
+                bot=sp.bot):
             with connection.cursor() as cursor:
                 matchup_stats = CompetitionBotMatchupStats.objects.select_for_update() \
                     .get_or_create(bot=sp, opponent=competition_participation)[0]
 
-                matchup_stats.match_count = StatsGenerator._calculate_matchup_count(cursor, competition_participation, sp)
+                matchup_stats.match_count = StatsGenerator._calculate_matchup_count(cursor, competition_participation,
+                                                                                    sp)
 
                 if matchup_stats.match_count != 0:
                     matchup_stats.win_count = StatsGenerator._calculate_win_count(cursor, competition_participation, sp)
                     matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
 
-                    matchup_stats.loss_count = StatsGenerator._calculate_loss_count(cursor, competition_participation, sp)
+                    matchup_stats.loss_count = StatsGenerator._calculate_loss_count(cursor, competition_participation,
+                                                                                    sp)
                     matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
 
                     matchup_stats.tie_count = StatsGenerator._calculate_tie_count(cursor, competition_participation, sp)
                     matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
 
-                    matchup_stats.crash_count = StatsGenerator._calculate_crash_count(cursor, competition_participation, sp)
+                    matchup_stats.crash_count = StatsGenerator._calculate_crash_count(cursor, competition_participation,
+                                                                                      sp)
                     matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
                 else:
                     matchup_stats.win_count = 0
@@ -196,27 +204,43 @@ class StatsGenerator:
         return elo_over_time
 
     @staticmethod
-    def _generate_plot_image(df):
-        plot = io.BytesIO()
+    def _generate_plot_images(df, update_date: datetime):
+        plot1 = io.BytesIO()
+        plot2 = io.BytesIO()
 
-        fig, ax = plt.subplots(figsize=(12, 9))
-        ax.plot(df["Date"], df['ELO'], color='#86c232')
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_color('#86c232')
-        ax.spines["bottom"].set_color('#86c232')
-        ax.autoscale(enable=True, axis='x')
-        ax.get_xaxis().tick_bottom()
-        ax.get_yaxis().tick_left()
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%b-%d'))
-        ax.tick_params(axis='x', colors='#86c232', labelsize=16)
-        ax.tick_params(axis='y', colors='#86c232', labelsize=16)
+        legend = []
+
+        fig, ax1 = plt.subplots(1, 1, figsize=(12, 9), sharex='all', sharey='all')
+        ax1.plot(df["Date"], df['ELO'], color='#86c232')
+        # ax.plot(df["Date"], df['ELO'], color='#86c232')
+        ax1.spines["top"].set_visible(False)
+        ax1.spines["right"].set_visible(False)
+        ax1.spines["left"].set_color('#86c232')
+        ax1.spines["bottom"].set_color('#86c232')
+        ax1.autoscale(enable=True, axis='x')
+        ax1.get_xaxis().tick_bottom()
+        ax1.get_yaxis().tick_left()
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%b-%d'))
+        ax1.tick_params(axis='x', colors='#86c232', labelsize=16)
+        ax1.tick_params(axis='y', colors='#86c232', labelsize=16)
+        # if update_date:
+
+        legend.append('ELO')
+        ax1.legend(legend, loc='lower center', fontsize='xx-large')
+
         plt.title('ELO over time', fontsize=20, color=('#86c232'))
-
         plt.tight_layout()  # Avoids savefig cutting off x-label
-        plt.savefig(plot, format="png", transparent=True)
+        plt.savefig(plot1, format="png", transparent=True)
+
+        legend.append('Last update')
+        ax1.legend(legend, loc='lower center', fontsize='xx-large')
+        ax1.vlines([update_date],
+                   min(df['ELO']), max(df['ELO']), colors='r', linestyles='--')
+        legend.append('Last update')
+        ax1.legend(legend, loc='lower center', fontsize='xx-large')
+        plt.savefig(plot2, format="png", transparent=True)
         plt.cla()  # Clears axis in preparation for new graph
-        return plot
+        return plot1, plot2
 
     @staticmethod
     def _generate_elo_graph(bot_id: int, competition_id: int):
@@ -226,6 +250,6 @@ class StatsGenerator:
             df['2'] = pd.to_datetime(df['2'])
             df.columns = ['Name', 'ELO', 'Date']
 
-            return StatsGenerator._generate_plot_image(df)
+            return StatsGenerator._generate_plot_images(df, Bot.objects.get(id=bot_id).bot_zip_updated)
         else:
             return None
