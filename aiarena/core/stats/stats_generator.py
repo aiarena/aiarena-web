@@ -211,7 +211,6 @@ class StatsGenerator:
         legend = []
 
         fig, ax1 = plt.subplots(1, 1, figsize=(12, 9), sharex='all', sharey='all')
-        legend.append('ELO')
         ax1.plot(df["Date"], df['ELO'], color='#86c232')
         # ax.plot(df["Date"], df['ELO'], color='#86c232')
         ax1.spines["top"].set_visible(False)
@@ -226,10 +225,10 @@ class StatsGenerator:
         ax1.tick_params(axis='y', colors='#86c232', labelsize=16)
         # if update_date:
 
+        legend.append('ELO')
         ax1.legend(legend, loc='lower center', fontsize='xx-large')
 
         plt.title('ELO over time', fontsize=20, color=('#86c232'))
-
         plt.tight_layout()  # Avoids savefig cutting off x-label
         plt.savefig(plot1, format="png", transparent=True)
 
@@ -237,6 +236,8 @@ class StatsGenerator:
         ax1.legend(legend, loc='lower center', fontsize='xx-large')
         ax1.vlines([update_date],
                    min(df['ELO']), max(df['ELO']), colors='r', linestyles='--')
+        legend.append('Last update')
+        ax1.legend(legend, loc='lower center', fontsize='xx-large')
         plt.savefig(plot2, format="png", transparent=True)
         plt.cla()  # Clears axis in preparation for new graph
         return plot1, plot2

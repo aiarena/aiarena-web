@@ -20,7 +20,7 @@ def elo_graph_upload_to(instance, filename):
     return '/'.join(['graphs', f'{instance.competition_id}_{instance.bot.id}_{instance.bot.name}.png'])
 
 def elo_graph_update_plot_upload_to(instance, filename):
-    return '/'.join(['graphs', f'{instance.competition_id}_{instance.bot.id}_{instance.bot.name}_update_plot.png'])
+    return '/'.join(['competitions', 'stats', f'{instance.id}_elo_graph_update_plot.png'])
 
 
 class CompetitionParticipation(models.Model, LockableModelMixin):
