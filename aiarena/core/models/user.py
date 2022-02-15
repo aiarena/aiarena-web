@@ -2,21 +2,22 @@ import logging
 
 from constance import config
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from django.utils.functional import cached_property
-
 from django.utils.translation import gettext_lazy as _
+
+from aiarena.core.models.mixins import LockableModelMixin
+
 logger = logging.getLogger(__name__)
 
 
-class User(AbstractUser):
+class User(AbstractUser, LockableModelMixin):
     PATREON_LEVELS = (
         ('none', 'None'),
         ('bronze', 'Bronze'),
@@ -120,9 +121,16 @@ class User(AbstractUser):
         except ArenaClient.DoesNotExist:
             return False
 
+    @property
+    def is_websiteuser(self):
+        from .website_user import WebsiteUser  # avoid circular reference
+        try:
+            return (self.websiteuser is not None)
+        except WebsiteUser.DoesNotExist:
+            return False
 
-
+# Don't allow non WebsiteUsers to login to the website.
 @receiver(pre_save, sender=User)
 def pre_save_user(sender, instance, **kwargs):
-    if instance.type != 'WEBSITE_USER':
+    if not instance.is_websiteuser:
         instance.set_unusable_password()

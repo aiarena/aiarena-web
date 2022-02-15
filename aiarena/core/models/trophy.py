@@ -10,5 +10,5 @@ logger = logging.getLogger(__name__)
 
 class Trophy(models.Model):
     icon = models.ForeignKey(TrophyIcon, on_delete=models.SET_NULL, blank=True, null=True)
-    bot = models.ForeignKey(Bot, on_delete=models.CASCADE)
+    bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name="trophies")
     name = models.CharField(max_length=64)

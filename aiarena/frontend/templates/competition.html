@@ -66,77 +66,88 @@
             </div>
         </div>
         <br>
-        <div class="divider"><span></span><span><h2>Ranking</h2></span><span></span></div>
-        <table summary="Table containing rankings" id="competition_ranking_table">
-            <thead>
-            <tr>
-                <td style="text-align: center"><strong>Rank</strong></td>
-                <td></td>
-                <td><strong>Name</strong></td>
-                <td><strong>Race</strong></td>
-                <td><strong>Author</strong></td>
-                <td><strong>Type</strong></td>
-                <td><strong>Win %</strong></td>
-                <td><strong>ELO</strong></td>
-                <td></td>
-            </tr>
-            </thead>
-            <tbody>
-            {% if rankings.count > 0 %}
-                {% for participant in rankings %}
-                    <tr>
-                        <td style="padding-right: 0; text-align: center">{{ forloop.counter }}</td>
-                        <td style="padding-right: 0">
-                            {% if participant.bot.user.patreon_level != 'none' %}
-                                <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ participant.bot.as_html_link }}
-                        </td>
-                        <td>{{ participant.bot.get_plays_race_display }}</td>
-                        <td>{{ participant.bot.user.as_html_link }}</td>
-                        <td>{{ participant.bot.type }}</td>
-                        {% if participant.win_perc %}
-                            <td>{{ participant.win_perc|floatformat:2 }}</td>
-                        {% else %}
-                            <td>No stats</td>
-                        {% endif %}
-                        <td>
-                            {{ participant.elo }}
-                            {% bot_competition_trend participant.bot competition as trend %}
-                                {% if trend > 40 %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
-                                        trending_flat
-                                    </em>
-                                {% elif trend < -40 %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(90deg);" title="ELO changed {{trend}} in the last 30 games">
-                                        trending_flat
-                                    </em>
-                                {% elif trend > 15 %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO gained {{trend}} in the last 30 games">
-                                        trending_up
-                                    </em>
-                                {% elif trend < -15 %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
-                                        trending_down
-                                    </em>
-                                {% else %}
-                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
-                                        trending_flat
-                                    </em>
+        <div class="divider"><span></span><span><h2>Rankings</h2></span><span></span></div>
+        {% for div_title, division in divisions.items %}
+            <div class="divider" style='width:50%'><span></span><span><h2>{{div_title}}</h2></span><span></span></div>
+            <table summary="Table containing rankings" id="competition_ranking_table">
+                <thead>
+                <tr>
+                    <td style="text-align: center"><strong>Rank</strong></td>
+                    <td></td>
+                    <td><strong>Name</strong></td>
+                    <td><strong>Race</strong></td>
+                    <td><strong>Author</strong></td>
+                    <td><strong>Type</strong></td>
+                    <td><strong>Win %</strong></td>
+                    <td><strong>ELO</strong></td>
+                    <td></td>
+                </tr>
+                </thead>
+                <tbody>
+                {% if division|length > 0 %}
+                    {% for participant in division %}
+                        <tr>
+                            <td style="padding-right: 0; text-align: center">{{ forloop.counter }}</td>
+                            <td style="padding-right: 0">
+                                {% if participant.bot.user.patreon_level != 'none' %}
+                                    <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
                                 {% endif %}
                             </td>
-                        <td><a href="{% url 'bot_competition_stats' participant.id participant.slug %}">Stats</a></td>
+                            <td>
+                                {{ participant.bot.as_truncated_html_link }}
+                            </td>
+                            <td>{{ participant.bot.get_plays_race_display }}</td>
+                            <td>{{ participant.bot.user.as_html_link }}</td>
+                            <td>{{ participant.bot.type }}</td>
+                            {% if participant.win_perc %}
+                                <td>{{ participant.win_perc|floatformat:2 }}</td>
+                            {% else %}
+                                <td>No stats</td>
+                            {% endif %}
+                            <td>
+                                {% if participant.in_placements %}
+                                    Placements
+                                {% else %}
+                                    {{ participant.elo }}
+                                    {% bot_competition_trend participant.bot competition as trend %}
+                                        {% if trend > 40 %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
+                                                trending_flat
+                                            </em>
+                                        {% elif trend < -40 %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(90deg);" title="ELO changed {{trend}} in the last 30 games">
+                                                trending_flat
+                                            </em>
+                                        {% elif trend > 15 %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO gained {{trend}} in the last 30 games">
+                                                trending_up
+                                            </em>
+                                        {% elif trend < -15 %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
+                                                trending_down
+                                            </em>
+                                        {% else %}
+                                            <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;" title="ELO changed {{trend}} in the last 30 games">
+                                                trending_flat
+                                            </em>
+                                        {% endif %}
+                                {% endif %}
+                            </td>
+                            <td><a href="{% url 'bot_competition_stats' participant.id participant.slug %}">Stats</a></td>
 
-                    </tr>
-                {% endfor %}
-            {% else %}
-                <td colspan="8">No participants</td>
-            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <td colspan="8">No participants</td>
+                {% endif %}
 
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        {% endfor %}
+
+
+
+
         <br>
         <div class="divider"><span></span><span><h2>Rounds</h2></span><span></span></div>
         <table summary="Table containing information about the rounds" id="matches_table" style="min-width: 900px; margin: 0 auto;">
@@ -163,5 +174,31 @@
             {% endfor %}
             <tbody>
         </table>
+        <div class="pagination">
+            {% if round_list.has_other_pages %}
+                <ul class="pagination">
+                    {% if round_list.has_previous %}
+                        <li>
+                            <a href="?page={{ round_list.previous_page_number }}">&laquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled"><span>&laquo;</span></li>
+                    {% endif %}
+                    {% for page_num in round_page_range %}
+                        {% if round_list.number == page_num %}
+                            <li class="active"><span>{{ page_num }}</span></li>
+                        {% else %}
+                            <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if round_list.has_next %}
+                        <li><a href="?page={{ round_list.next_page_number }}">&raquo;</a>
+                        </li>
+                    {% else %}
+                        <li class="disabled"><span>&raquo;</span></li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

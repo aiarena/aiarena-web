@@ -97,6 +97,7 @@
                                 <td style="text-align: center"><strong>Rank</strong></td>
                                 <td></td>
                                 <td><strong>Name</strong></td>
+                                <td><strong>DIV</strong></td>
                                 <td><strong>ELO</strong></td>
                                 </thead>
                                 <tbody>
@@ -108,7 +109,8 @@
                                                     <div class="bot-icon-{{ participant.bot.user.patreon_level }}" style="padding-right: 0; float: right" title="{{ participant.bot.user.get_patreon_level_display }} supporter"></div>
                                                 {% endif %}
                                             </td>
-                                            <td>{{ participant.bot.as_html_link }}</td>
+                                            <td>{{ participant.bot.as_truncated_html_link }}</td>
+                                            <td style="text-align: center">{{ participant.division_num }}</td>
                                             <td>
                                                 {{ participant.elo }}
                                                 {% bot_competition_trend participant.bot item.competition as trend %}
@@ -161,10 +163,10 @@
                 {# newly created bots have same update time as its creation time #}
                 {% if event.is_created_event %}
                     <td nowrap>{{ event.bot_zip_updated|naturaltime|shorten_naturaltime }}</td>
-                    <td style="text-align: left">{{ event.user.as_html_link }} uploaded a new bot: {{ event.as_html_link }}.</td>
+                    <td style="text-align: left">{{ event.user.as_html_link }} uploaded a new bot: {{ event.as_truncated_html_link }}.</td>
                 {% else %}
                     <td nowrap>{{ event.bot_zip_updated|naturaltime|shorten_naturaltime }}</td>
-                    <td style="text-align: left">Bot {{ event.as_html_link }} was updated.</td>
+                    <td style="text-align: left">Bot {{ event.as_truncated_html_link }} was updated.</td>
                 {% endif %}
                 </tr>
             {% endfor %}

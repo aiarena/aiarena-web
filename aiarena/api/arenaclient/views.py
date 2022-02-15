@@ -31,7 +31,6 @@ class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
         fields = '__all__'
-        ref_name = 'arenaclient'
 
 
 class BotSerializer(serializers.ModelSerializer):
@@ -62,8 +61,6 @@ class BotSerializer(serializers.ModelSerializer):
             'id', 'name', 'game_display_id', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race',
             'type')
 
-        ref_name = "arenaclient"
-
 
 class MatchSerializer(serializers.ModelSerializer):
     bot1 = BotSerializer(read_only=True)
@@ -73,7 +70,6 @@ class MatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Match
         fields = ('id', 'bot1', 'bot2', 'map')
-        ref_name = 'arenaclient'
 
 
 class MatchViewSet(viewsets.GenericViewSet):
@@ -84,6 +80,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     serializer_class = MatchSerializer
     permission_classes = [IsArenaClientOrAdminUser]
     throttle_scope = 'arenaclient'
+    swagger_schema = None  # exclude this from swagger generation
 
     def load_participants(self, match: Match):
         match.bot1 = MatchParticipation.objects.select_related('bot').only('bot') \
@@ -172,6 +169,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     permission_classes = [IsArenaClientOrAdminUser]
     # Don't throttle result submissions - we can never have "too many" result submissions.
     # throttle_scope = 'arenaclient'
+    swagger_schema = None  # exclude this from swagger generation
 
     def create(self, request, *args, **kwargs):
         if config.LADDER_ENABLED:
@@ -406,6 +404,7 @@ class SetArenaClientStatusViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
     """
     serializer_class = SetArenaClientStatusSerializer
     permission_classes = [IsArenaClient]
+    swagger_schema = None  # exclude this from swagger generation
 
     def perform_create(self, serializer):
         serializer.save(arenaclient=self.request.user.arenaclient)

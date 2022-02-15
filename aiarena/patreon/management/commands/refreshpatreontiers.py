@@ -21,8 +21,8 @@ class Command(BaseCommand):
             user.patreon_level = 'none'
             user.save()
 
-        # Sync any users with patreon links
-        for patreon_bind in PatreonAccountBind.objects.all():
+        # Sync any users with patreon links that are set to sync
+        for patreon_bind in PatreonAccountBind.objects.filter(user__sync_patreon_status=True):
             try:
                 patreon_bind.update_refresh_token()
                 patreon_bind.update_user_patreon_tier()

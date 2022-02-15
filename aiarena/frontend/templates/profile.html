@@ -75,7 +75,7 @@
         </thead>
         {% for bot in bot_list %}
             <tr>
-                <td>{{ bot.as_html_link }}</td>
+                <td>{{ bot.as_truncated_html_link }}</td>
                 <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.type }}</td>
                 <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
@@ -117,12 +117,12 @@
                         {% endif %}
                         {% for p in match.participants %}
                             {% if p.participant_number == 1 %}
-                                <td>{{ p.bot.as_html_link }}</td>
+                                <td>{{ p.bot.as_truncated_html_link }}</td>
                             {% endif %}
                         {% endfor %}
                         {% for p in match.participants %}
                             {% if p.participant_number == 2 %}
-                                <td>{{ p.bot.as_html_link }}</td>
+                                <td>{{ p.bot.as_truncated_html_link }}</td>
                             {% endif %}
                         {% endfor %}
                         <td>{{ match.map }}</td>

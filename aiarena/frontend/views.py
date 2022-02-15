@@ -3,6 +3,7 @@ from datetime import timedelta
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
+from django.db.models.fields import IntegerField
 from django.http import Http404
 from django_select2.forms import Select2Widget, ModelSelect2Widget
 from django.contrib import messages
@@ -11,7 +12,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
-from django.db.models import F, Prefetch, Q, Count
+from django.db.models import F, Prefetch, Q, Count, Case, When, Sum, Value
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -35,7 +36,7 @@ from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
     Competition, Map, \
-    ArenaClient, News, MapPool, MatchTag, Tag
+    ArenaClient, News, MapPool, MatchTag, Tag, competition_participation
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
@@ -43,8 +44,13 @@ from aiarena.core.d_utils import filter_tags
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
+
 def project_finance(request):
-    return render(request, template_name='finance.html')
+    if config.PROJECT_FINANCE_LINK is not None and config.PROJECT_FINANCE_LINK:
+        # if the link is configured, redirect.
+        return redirect(to=config.PROJECT_FINANCE_LINK)
+    else:
+        raise Http404()
 
 class UserProfile(LoginRequiredMixin, DetailView):
     model = User
@@ -223,6 +229,23 @@ class BotList(ListView):
         return context
 
 
+class BotDownloadableList(ListView):
+    queryset = Bot.objects.filter(bot_zip_publicly_downloadable=True)\
+        .only('name', 'plays_race', 'type', 'user__username', 'user__type')\
+        .select_related('user').order_by('name')
+    template_name = 'bots_downloadable.html'
+    paginate_by = 50
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # add the page ranges
+        page_obj = context['page_obj']
+        context['page_range'] = restrict_page_range(page_obj.paginator.num_pages, page_obj.number)
+
+        return context
+
+
 class FileURLColumn(tables.URLColumn):
     """File URLs are incorrect without this"""
     def get_url(self, value):
@@ -233,7 +256,7 @@ class BotResultTable(tables.Table):
     # Settings for individual columns
     # match could be a LinkColumn, but used ".as_html_link" since that is being used elsewhere.
     match = tables.Column(verbose_name="ID")
-    created = tables.DateTimeColumn(format="d. N Y - H:i:s", verbose_name="Date")
+    created = tables.DateTimeColumn(format="d N y, H:i", verbose_name="Date")
     result_cause = tables.Column(verbose_name="Cause")
     elo_change = tables.Column(verbose_name="+/-")
     avg_step_time = tables.Column(
@@ -265,7 +288,7 @@ class BotResultTable(tables.Table):
         return value.as_html_link
 
     def render_opponent(self, value):
-        return value.bot.as_html_link
+        return value.bot.as_truncated_html_link
 
     def render_elo_change(self, record, value):
         return "--" if record.match.requested_by else format_elo_change(value)
@@ -558,6 +581,12 @@ class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, Up
     redirect_field_name = 'next'
     success_message = "Competition participation updated."
 
+    def form_valid(self, form):
+        self.object = form.save()
+        if not self.object.active:
+            self.object.division_num = CompetitionParticipation.DEFAULT_DIVISION
+        return super(UpdateView, self).form_valid(form)
+
     def get_login_url(self):
         return reverse('login')
 
@@ -710,17 +739,10 @@ class MatchLogDownloadView(PrivateStorageDetailView):
 
 class Index(ListView):
     def get_queryset(self):
-        try:
-            comp = Competition.objects.get(id=1)
-            if Round.objects.filter(competition=comp).count() > 0:
-                return Ladders.get_competition_ranked_participants(
-                    comp, amount=10).prefetch_related(
-                    Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
-                    Prefetch('bot__user', queryset=User.objects.all().only('patreon_level')))  # top 10 bots
-            else:
-                return CompetitionParticipation.objects.none()
-        except NoCurrentlyAvailableCompetitions:
-            return CompetitionParticipation.objects.none()
+        """This was applicable before multiple competitions and has only been left here to avoid having to refactor
+        the code"""
+        # TODO: Clean this out
+        return CompetitionParticipation.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -733,7 +755,17 @@ class Index(ListView):
         context['events'] = events
         context['news'] = News.objects.all().order_by('-created')
 
-        competitions = Competition.objects.filter(status='open').annotate(num_participants=Count('participations')).order_by('-num_participants')
+        competitions = Competition.objects.filter(status='open').annotate(num_participants=Count('participations'))
+        # Count active bots of the user in each competition
+        if self.request.user.is_authenticated:
+            competitions = (competitions.annotate(n_active_bots=Sum(Case(
+                When(participations__bot__user=self.request.user, participations__active=True, then=1),
+                default=0,
+                output_field=IntegerField()))))
+        else:
+            competitions = competitions.annotate(n_active_bots=Value(0, IntegerField()))
+        # Order competitions as they are to be shown on home page
+        competitions = competitions.order_by('-n_active_bots','-interest','-num_participants')
         context['competitions'] = []
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
@@ -845,8 +877,14 @@ class MatchDetail(View):
 
 
 class CompetitionList(ListView):
-    queryset = Competition.objects.all().order_by('-id')
+    queryset = Competition.objects.exclude(status='closed').order_by('-id')
     template_name = 'competitions.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['closed_competitions'] = Competition.objects.filter(status='closed').order_by('-id')
+
+        return context
 
 
 class CompetitionDetail(DetailView):
@@ -855,11 +893,32 @@ class CompetitionDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(CompetitionDetail, self).get_context_data(**kwargs)
-        context['round_list'] = Round.objects.filter(competition_id=self.object.id).order_by('-id')
-        context['rankings'] = Ladders.get_competition_ranked_participants(self.object).prefetch_related(
-            Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
-            Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type')))
-        context['rankings'].count = len(context['rankings'])
+
+        rounds = Round.objects.filter(competition_id=self.object.id).order_by('-id')
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(rounds, 30)
+        try:
+            rounds = paginator.page(page)
+        except PageNotAnInteger:
+            rounds = paginator.page(1)
+        except EmptyPage:
+            rounds = paginator.page(paginator.num_pages)
+        context['round_list'] = rounds
+        context['round_page_range'] = restrict_page_range(paginator.num_pages, rounds.number)
+
+        if self.object.status == 'closed':
+            all_participants = Ladders.get_competition_last_round_participants(self.object)
+        else:
+            all_participants = Ladders.get_competition_ranked_participants(self.object, include_placements=True)
+        all_participants = list(all_participants.prefetch_related(
+                Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
+                Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
+        context['divisions'] = dict()
+        to_title = lambda x: f"Awaiting Entry" if x==CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
+        for participant in all_participants:
+            if to_title(participant.division_num) not in context['divisions']:
+                context['divisions'][to_title(participant.division_num)] = []
+            context['divisions'][to_title(participant.division_num)].append(participant)
         return context
 
 
@@ -986,7 +1045,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         if config.ALLOW_REQUESTED_MATCHES:
             if form.cleaned_data['bot1'] != form.cleaned_data['bot2']:
-                if self.request.user.match_request_count_left >= form.cleaned_data['match_count']:
+                if self.request.user.websiteuser.match_request_count_left >= form.cleaned_data['match_count']:
 
                     with transaction.atomic():  # do this all in one commit
                         match_list = []

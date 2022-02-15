@@ -11,10 +11,10 @@ from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from aiarena.core.api import Matches
+from aiarena.core.api import Matches, Competitions
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
-    CompetitionParticipation, MapPool, MatchTag, Tag
+    CompetitionParticipation, MapPool, WebsiteUser, Tag
 from aiarena.core.models.game_mode import GameMode
 from aiarena.core.utils import calculate_md5
 
@@ -307,11 +307,11 @@ class BaseTestMixin(object):
 
 
     def _generate_extra_users(self):
-        self.regularUser2 = User.objects.create_user(username='regular_user2', password='x',
+        self.regularUser2 = WebsiteUser.objects.create_user(username='regular_user2', password='x',
                                                      email='regular_user2@dev.aiarena.net')
-        self.regularUser3 = User.objects.create_user(username='regular_user3', password='x',
+        self.regularUser3 = WebsiteUser.objects.create_user(username='regular_user3', password='x',
                                                      email='regular_user3@dev.aiarena.net')
-        self.regularUser4 = User.objects.create_user(username='regular_user4', password='x',
+        self.regularUser4 = WebsiteUser.objects.create_user(username='regular_user4', password='x',
                                                      email='regular_user4@dev.aiarena.net')
 
 
@@ -323,7 +323,7 @@ class LoggedInMixin(BaseTestMixin):
 
     def setUp(self):
         super().setUp()
-        self.staffUser1 = User.objects.create_user(username='staff_user', password='x',
+        self.staffUser1 = WebsiteUser.objects.create_user(username='staff_user', password='x',
                                                    email='staff_user@dev.aiarena.net',
                                                    is_staff=True,
                                                    is_superuser=True,
@@ -333,7 +333,7 @@ class LoggedInMixin(BaseTestMixin):
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
         Token.objects.create(user=self.arenaclientUser1)
 
-        self.regularUser1 = User.objects.create_user(username='regular_user1', password='x',
+        self.regularUser1 = WebsiteUser.objects.create_user(username='regular_user1', password='x',
                                                      email='regular_user1@dev.aiarena.net')
 
 
@@ -489,7 +489,7 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
     def test_results_with_tags(self):
         az_symbols = 'abcdefghijklmnopqrstuvwxyz'
         num_symbols = '0123456789'
-        extra_symbols = ' _ _ ' 
+        extra_symbols = ' _ _ '
         game_mode = GameMode.objects.first()
 
         self.client.force_login(self.arenaclientUser1)
@@ -505,14 +505,14 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
         self.assertTrue(match_tags.count()==1)
         for mt in match_tags:
-            self.assertEqual(mt.user, self.staffUser1)
+            self.assertEqual(mt.user.websiteuser, self.staffUser1)
 
         Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(None, ['abc'])
         match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
         self.assertTrue(match_tags.count()==1)
         for mt in match_tags:
-            self.assertEqual(mt.user, self.regularUser1)
+            self.assertEqual(mt.user.websiteuser, self.regularUser1)
 
         # Check that tags are correct, stripped and attributed to the correct user
         _temp_tag1 = 'tes1t_ test2'
@@ -562,7 +562,7 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         # This is to prevent tags from causing a result to fail submission
         Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(
-            bot1_tags=['!', '2', 'A', '', az_symbols+num_symbols+extra_symbols], 
+            bot1_tags=['!', '2', 'A', '', az_symbols+num_symbols+extra_symbols],
             bot2_tags=['123']
         )
         match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
@@ -572,13 +572,13 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         # Too many tags
         Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(
-            bot1_tags=[str(i) for i in range(50)], 
+            bot1_tags=[str(i) for i in range(50)],
             bot2_tags=[str(i) for i in range(50)]
         )
         match_tags = Match.objects.get(id=match_response.data['id']).tags.all()
         self.assertTrue(match_tags.count()==64)
 
-        
+
 
 
 class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
@@ -861,14 +861,16 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
     def test_generatestats_competition(self):
         self._generate_full_data_set()
         out = StringIO()
-        call_command('generatestats', '--competitionid', '1', stdout=out)
+        for competition in Competition.objects.all():
+            call_command('generatestats', '--competitionid', competition.id, stdout=out)
         self.assertIn('Done', out.getvalue())
 
 
     def test_generatestats_bot(self):
         self._generate_full_data_set()
         out = StringIO()
-        call_command('generatestats', '--botid', '1', stdout=out)
+        for bot in Bot.objects.all():
+            call_command('generatestats', '--botid', bot.id, stdout=out)
         self.assertIn('Done', out.getvalue())
 
 

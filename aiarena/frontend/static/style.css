@@ -1044,6 +1044,22 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
     padding-bottom: 30px;
 }
 
+.join-competitions-button {
+    text-align: center;
+    width: 220px;
+    height: 35px;
+    font-size: 18px;
+    background-color: #61892f;
+    color: white;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: bold;
+    border: 0;
+}
+
+.join-competitions-button:hover {
+    background-color: #86c232;
+}
+
 .join-competition-form {
     margin-left: 75px;
     margin-right: 75px;
@@ -1465,4 +1481,8 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
   width: 84.5%;
   overflow: hidden;
   transition: max-height 0.2s ease-out
+}
+
+.private-download-warning {
+  background-color: rgba(255, 0, 0, 0.6);
 }

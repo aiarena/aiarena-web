@@ -6,7 +6,7 @@ from wiki.models import ArticleRevision
 
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
     CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News, MapPool, MatchTag, Tag, \
-    ArenaClientStatus
+    ArenaClientStatus, WebsiteUser
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
 from aiarena.patreon.models import PatreonAccountBind
@@ -168,6 +168,7 @@ class CompetitionAdmin(admin.ModelAdmin):
         'date_closed',
         'status',
         'max_active_rounds',
+        'interest',
     )
     list_filter = (
         'date_created',
@@ -429,6 +430,41 @@ class UserAdmin(admin.ModelAdmin):
         'extra_periodic_match_requests',
         'receive_email_comms',
         'can_request_games_for_another_authors_bot',
+    )
+    list_filter = (
+        'last_login',
+        'is_superuser',
+        'is_staff',
+        'is_active',
+        'date_joined',
+        'receive_email_comms',
+        'can_request_games_for_another_authors_bot',
+    )
+    raw_id_fields = ('groups', 'user_permissions')
+
+
+@admin.register(WebsiteUser)
+class WebsiteUserAdmin(admin.ModelAdmin):
+    search_fields = ('username',)
+    list_display = (
+        'id',
+        'password',
+        'last_login',
+        'is_superuser',
+        'username',
+        'first_name',
+        'last_name',
+        'is_staff',
+        'is_active',
+        'date_joined',
+        'email',
+        'patreon_level',
+        'type',
+        'extra_active_competition_participations',
+        'extra_periodic_match_requests',
+        'receive_email_comms',
+        'can_request_games_for_another_authors_bot',
+        'single_use_match_requests'
     )
     list_filter = (
         'last_login',
