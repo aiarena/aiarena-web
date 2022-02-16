@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n core_filters %}
+{% load humanize %}
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Author</h2></span><span></span></div>
@@ -39,5 +40,100 @@
                 <td>{{ bot.get_plays_race_display }}</td>
             </tr>
         {% endfor %}
+    </table>
+    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+    <table summary="Table containing results" class="row-hover-highlight">
+        <thead>
+        <td><strong>ID</strong></td>
+        <td><strong>Date</strong></td>
+        {# Remove padding so the bot name and ELO change sit closer together #}
+        <td style="padding-right: 0"><strong>Bot 1</strong></td>
+        <td style="padding-left: 0"></td>
+        <td style="padding-right: 0"><strong>Bot 2</strong></td>
+        <td style="padding-left: 0"></td>
+        <td><strong>Result</strong></td>
+        <td><strong>Duration</strong></td>
+        <td><strong>Replay</strong></td>
+        </thead>
+        <tbody>
+        {% for result in result_list %}
+            <tr>
+                <td>{{ result.match.as_html_link }}</td>
+                <td>{{ result.created|naturaltime|shorten_naturaltime }}</td>
+
+                {% for p in result.match.participants %}
+                    {% if p.participant_number == 1 %}
+                        <td style="padding-right: 0">
+                            {% if result.winner == p.bot %}
+                                <strong>[{{ p.bot.as_truncated_html_link }}]</strong>
+                            {% else %}
+                                {{ p.bot.as_truncated_html_link }}
+                            {% endif %}
+                        </td>
+
+                        <td style="padding-left: 0">
+                            {% if result.match.requested_by %}
+                                --
+                            {% else %}
+
+                                {{ p.elo_change |format_elo_change }}
+                                {% if p.elo_change and p.elo_change != 0 %}
+                                    {% if p.elo_change > 0 %}
+                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
+                                    {% elif p.elo_change < 0 %}
+                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
+                                    {% endif %}
+                                {% else %}
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">trending_flat</em>
+                                {% endif %}
+
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                {% endfor %}
+
+                {% for p in result.match.participants %}
+                    {% if p.participant_number == 2 %}
+                        <td style="padding-right: 0">
+                            {% if result.winner == p.bot %}
+                                <strong>[{{ p.bot.as_truncated_html_link }}]</strong>
+                            {% else %}
+                                {{ p.bot.as_truncated_html_link }}
+                            {% endif %}
+                        </td>
+
+                        <td style="padding-left: 0">
+                            {% if result.match.requested_by %}
+                                --
+                            {% else %}
+
+                                {{ p.elo_change |format_elo_change }}
+                                {% if p.elo_change and p.elo_change != 0 %}
+                                    {% if p.elo_change > 0 %}
+                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_up</em>
+                                    {% elif p.elo_change < 0 %}
+                                        <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em;">trending_down</em>
+                                    {% endif %}
+                                {% else %}
+                                    <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; ">trending_flat</em>
+                                {% endif %}
+
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                {% endfor %}
+
+                <td>{{ result.type }}</td>
+
+                <td>{{ result.game_time_formatted }}</td>
+
+                {% if result.replay_file %}
+                    <td><a class="file-link" href="{{ result.replay_file.url }}">Download</a></td>
+                {% else %}
+                    <td>Unavailable</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
 {% endblock %}

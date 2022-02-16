@@ -1,11 +1,10 @@
 from datetime import timedelta
 
+import django_filters as filters
+import django_tables2 as tables
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
-from django.db.models.fields import IntegerField
-from django.http import Http404
-from django_select2.forms import Select2Widget, ModelSelect2Widget
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -13,34 +12,34 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
 from django.db.models import F, Prefetch, Q, Count, Case, When, Sum, Value
+from django.db.models.fields import IntegerField
+from django.http import Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import View
-from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView, TemplateView, DeleteView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
+from django_filters.widgets import RangeWidget
+from django_select2.forms import Select2Widget
+from django_tables2 import RequestConfig
 from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
-import django_tables2 as tables
-from django_tables2 import RequestConfig, SingleTableMixin
-import django_filters as filters
-from django_filters.widgets import RangeWidget
 
-from aiarena.core.api.maps import Maps
-from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
-from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
-from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
+from aiarena.core.api.ladders import Ladders
+from aiarena.core.api.maps import Maps
+from aiarena.core.d_utils import filter_tags
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
     Competition, Map, \
-    ArenaClient, News, MapPool, MatchTag, Tag, competition_participation
+    ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
-from aiarena.core.d_utils import filter_tags
+from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
@@ -604,8 +603,15 @@ class AuthorDetail(DetailView):
     context_object_name = 'author'  # change the context name to avoid overriding the current user oontext object
 
     def get_context_data(self, **kwargs):
+
         context = super(AuthorDetail, self).get_context_data(**kwargs)
         context['bot_list'] = Bot.objects.select_related('user').filter(user_id=self.object.id).order_by('-created')
+        context['result_list'] = Result.objects.filter(match__matchparticipation__bot__in=context['bot_list']) \
+            .order_by('-created').prefetch_related(
+            Prefetch('winner'),
+            Prefetch('match__requested_by'),
+            Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))[:50]
         return context
 
 
