@@ -602,16 +602,29 @@ class AuthorDetail(DetailView):
     template_name = 'author.html'
     context_object_name = 'author'  # change the context name to avoid overriding the current user oontext object
 
-    def get_context_data(self, **kwargs):
+    def _paginate_query(self, results_queryset):
+        page_size = 10
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(results_queryset, page_size)
+        try:
+            results = paginator.page(page)
+        except PageNotAnInteger:
+            results = paginator.page(1)
+        except EmptyPage:
+            results = paginator.page(paginator.num_pages)
 
+        return results, restrict_page_range(paginator.num_pages, results.number)
+
+    def get_context_data(self, **kwargs):
         context = super(AuthorDetail, self).get_context_data(**kwargs)
         context['bot_list'] = Bot.objects.select_related('user').filter(user_id=self.object.id).order_by('-created')
-        context['result_list'] = Result.objects.filter(match__matchparticipation__bot__in=context['bot_list']) \
+        results_queryset = Result.objects.filter(match__matchparticipation__bot__in=context['bot_list']) \
             .order_by('-created').prefetch_related(
             Prefetch('winner'),
             Prefetch('match__requested_by'),
             Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
-                     to_attr='participants'))[:50]
+                     to_attr='participants'))
+        context['result_list'], context['result_page_range'] = self._paginate_query(results_queryset)
         return context
 
 
