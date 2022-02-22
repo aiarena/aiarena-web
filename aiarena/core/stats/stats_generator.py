@@ -232,11 +232,9 @@ class StatsGenerator:
         plt.tight_layout()  # Avoids savefig cutting off x-label
         plt.savefig(plot1, format="png", transparent=True)
 
-        legend.append('Last update')
-        ax1.legend(legend, loc='lower center', fontsize='xx-large')
         ax1.vlines([update_date],
                    min(df['ELO']), max(df['ELO']), colors='r', linestyles='--')
-        legend.append('Last update')
+        legend.append('Last bot update')
         ax1.legend(legend, loc='lower center', fontsize='xx-large')
         plt.savefig(plot2, format="png", transparent=True)
         plt.cla()  # Clears axis in preparation for new graph

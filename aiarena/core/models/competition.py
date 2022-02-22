@@ -1,10 +1,13 @@
 import logging
 
 from django.db import models, transaction
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from wiki.models import Article, ArticleRevision
 from django.core.validators import MinValueValidator
 
 from .game_mode import GameMode
@@ -25,7 +28,8 @@ class Competition(models.Model, LockableModelMixin):
     COMPETITION_STATUSES = (
         ('created', 'Created'),  # The initial state for a competition. Functionally identical to paused.
         ('frozen', 'Frozen'),  # While a competition is frozen, no matches are played
-        ('paused', 'Paused'),  # While a competition is paused, existing rounds can be played, but no new ones are generated.
+        ('paused', 'Paused'),
+        # While a competition is paused, existing rounds can be played, but no new ones are generated.
         ('open', 'Open'),  # When a competition is open, new rounds can be generated and played.
         ('closing', 'Closing'),
         # When a competition is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
@@ -41,12 +45,13 @@ class Competition(models.Model, LockableModelMixin):
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=COMPETITION_STATUSES, default='created', blank=True)
     max_active_rounds = models.IntegerField(default=2, blank=True)
+    wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
     interest = models.IntegerField(default=0, blank=True)
 
     # Defines target number of divisions to create when a new cycle begins.
     target_n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
-    # Defines the minimum size of each division, also defines when divisions will split. 
+    # Defines the minimum size of each division, also defines when divisions will split.
     target_division_size = models.IntegerField(default=2, validators=[MinValueValidator(2)], blank=True)
     # Defines the number of rounds between division updates.
     rounds_per_cycle = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
@@ -146,3 +151,28 @@ class Competition(models.Model, LockableModelMixin):
     def is_accepting_new_participants(self):
         return self.status not in ['closing', 'closed']
 
+    def get_wiki_article(self):
+        try:
+            return self.wiki_article
+        except:
+            return None
+
+    def create_competition_wiki_article(self):
+        article_kwargs = {'owner': None,
+                          'group': None,
+                          'group_read': True,
+                          'group_write': False,
+                          'other_read': True,
+                          'other_write': False}
+        article = Article(**article_kwargs)
+        article.add_revision(ArticleRevision(title=self.name), save=True)
+        article.save()
+
+        self.wiki_article = article
+
+
+@receiver(pre_save, sender=Competition)
+def pre_save_competition(sender, instance, **kwargs):
+    # automatically create a wiki article for this competition if it doesn't exists
+    if instance.get_wiki_article() is None:
+        instance.create_competition_wiki_article()
