@@ -61,7 +61,7 @@
         <span></span><span><h2>Bots ({{ bot_list.count }}/{{ max_user_bot_count }})</h2></span><span></span></div>
     <h4 style="float:left; margin-left:65px;">You may have {{ max_active_active_competition_participations_count }} active competition participations.</h4>
     <h4 style="float: right; margin-right:65px;">
-        {% if user.has_donated %} Thank you for your donation :){% elif config.PATREON_LINK %}Want more? Consider <a href="{{ config.PATREON_LINK }}">supporting us</a>.{% endif %}
+        {% if user.is_supporter %} Thank you for your support :){% elif config.PATREON_LINK %}Want more? Consider <a href="{{ config.PATREON_LINK }}">supporting us</a>.{% endif %}
     </h4>
     <table summary="Table containing information about the authors bots" id="bot_table" class="row-hover-highlight">
         <thead>
