@@ -135,7 +135,9 @@ class CompetitionAdminForm(forms.ModelForm):
         # We can't assume that kwargs['initial'] exists!
         if 'initial' not in kwargs:
             kwargs['initial'] = {}
-        kwargs['initial'].update({'wiki_article_content': kwargs['instance'].wiki_article.current_revision.content})
+
+        if 'instance' in kwargs and kwargs['instance'] is not None:
+            kwargs['initial'].update({'wiki_article_content': kwargs['instance'].wiki_article.current_revision.content})
         super().__init__(*args, **kwargs)
 
     wiki_article_content = forms.CharField(label='Description article content', required=False,
@@ -143,7 +145,7 @@ class CompetitionAdminForm(forms.ModelForm):
 
     def clean_wiki_article_content(self):
         """If the article content changed, save it."""
-        if self.instance.wiki_article.current_revision.content != self.cleaned_data['wiki_article_content']:
+        if self.instance.wiki_article is not None and self.instance.wiki_article.current_revision.content != self.cleaned_data['wiki_article_content']:
             revision = ArticleRevision()
             revision.inherit_predecessor(self.instance.wiki_article)
             revision.title = self.instance.name
