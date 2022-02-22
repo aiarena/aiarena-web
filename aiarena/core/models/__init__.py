@@ -15,6 +15,7 @@ from .news import News
 from .relative_result import RelativeResult
 from .result import Result
 from .round import Round
+from .service_user import ServiceUser
 from .tag import Tag
 from .trophy import Trophy
 from .trophy import TrophyIcon
