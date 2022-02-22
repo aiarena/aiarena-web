@@ -1,11 +1,10 @@
 from datetime import timedelta
 
+import django_filters as filters
+import django_tables2 as tables
 from constance import config
 from discord_bind.models import DiscordUser
 from django import forms
-from django.db.models.fields import IntegerField
-from django.http import Http404
-from django_select2.forms import Select2Widget, ModelSelect2Widget
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -13,34 +12,34 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction, IntegrityError
 from django.db.models import F, Prefetch, Q, Count, Case, When, Sum, Value
+from django.db.models.fields import IntegerField
+from django.http import Http404
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.views import View
-from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView, TemplateView, DeleteView
+from django.views.generic import CreateView, ListView, UpdateView, DetailView, FormView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
+from django_filters.widgets import RangeWidget
+from django_select2.forms import Select2Widget
+from django_tables2 import RequestConfig
 from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
-import django_tables2 as tables
-from django_tables2 import RequestConfig, SingleTableMixin
-import django_filters as filters
-from django_filters.widgets import RangeWidget
 
-from aiarena.core.api.maps import Maps
-from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
-from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
-from aiarena.core.api.ladders import Ladders
 from aiarena.core.api import Matches
+from aiarena.core.api.ladders import Ladders
+from aiarena.core.api.maps import Maps
+from aiarena.core.d_utils import filter_tags
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
     Competition, Map, \
-    ArenaClient, News, MapPool, MatchTag, Tag, competition_participation
+    ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
-from aiarena.core.d_utils import filter_tags
+from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
@@ -459,6 +458,31 @@ class BotCompetitionStatsDetail(DetailView):
         return context
 
 
+class BotCompetitionStatsEloUpdatePlot(DetailView):
+    model = CompetitionParticipation
+    template_name = 'bot_competition_stats.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['competition_bot_matchups'] = self.object.competition_matchup_stats.filter(
+            opponent__competition=context['competitionparticipation'].competition).order_by('-win_perc').distinct()
+        context['updated'] = context['competition_bot_matchups'][0].updated if context['competition_bot_matchups'] else "Never"
+        return context
+
+
+class BotCompetitionStatsEloGraphUpdatePlot(PrivateStorageDetailView):
+    model = CompetitionParticipation
+    model_file_field = 'elo_graph_update_plot'
+
+    content_disposition = 'inline'
+
+    def get_content_disposition_filename(self, private_file):
+        return 'elo_graph_update_plot.png'
+
+    def can_access_file(self, private_file):
+        # Allow if the owner of the bot and a patreon supporter
+        return private_file.parent_object.bot.user == private_file.request.user and private_file.request.user.patreon_level != 'None'
+
 
 class BotUpdateForm(forms.ModelForm):
     """
@@ -603,9 +627,29 @@ class AuthorDetail(DetailView):
     template_name = 'author.html'
     context_object_name = 'author'  # change the context name to avoid overriding the current user oontext object
 
+    def _paginate_query(self, results_queryset):
+        page_size = 10
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(results_queryset, page_size)
+        try:
+            results = paginator.page(page)
+        except PageNotAnInteger:
+            results = paginator.page(1)
+        except EmptyPage:
+            results = paginator.page(paginator.num_pages)
+
+        return results, restrict_page_range(paginator.num_pages, results.number)
+
     def get_context_data(self, **kwargs):
         context = super(AuthorDetail, self).get_context_data(**kwargs)
         context['bot_list'] = Bot.objects.select_related('user').filter(user_id=self.object.id).order_by('-created')
+        results_queryset = Result.objects.filter(match__matchparticipation__bot__in=context['bot_list']) \
+            .order_by('-created').prefetch_related(
+            Prefetch('winner'),
+            Prefetch('match__requested_by'),
+            Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
+        context['result_list'], context['result_page_range'] = self._paginate_query(results_queryset)
         return context
 
 
