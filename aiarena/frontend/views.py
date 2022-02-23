@@ -35,7 +35,7 @@ from aiarena.core.api.maps import Maps
 from aiarena.core.d_utils import filter_tags
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
     Competition, Map, \
-    ArenaClient, News, MapPool, MatchTag, Tag
+    ArenaClient, News, MapPool, MatchTag, Tag, CompetitionBotMatchupStats
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
@@ -482,6 +482,32 @@ class BotCompetitionStatsEloGraphUpdatePlot(PrivateStorageDetailView):
     def can_access_file(self, private_file):
         # Allow if the owner of the bot and a patreon supporter
         return private_file.parent_object.bot.user == private_file.request.user and private_file.request.user.patreon_level != 'None'
+
+
+class CompetitionBotMatchupStatsDetail(DetailView):
+    model = CompetitionBotMatchupStats
+    template_name = 'bot_competition_matchup_stats.html'
+
+    def _paginate_query(self, results_queryset):
+        page_size = 30
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(results_queryset, page_size)
+        try:
+            results = paginator.page(page)
+        except PageNotAnInteger:
+            results = paginator.page(1)
+        except EmptyPage:
+            results = paginator.page(paginator.num_pages)
+
+        return results, restrict_page_range(paginator.num_pages, results.number)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        results_queryset = RelativeResult.objects.filter(me__bot=self.object.bot.bot,
+                                                         opponent__bot=self.object.opponent.bot)
+        context['result_list'], context['result_page_range'] = self._paginate_query(results_queryset)
+        return context
 
 
 class BotUpdateForm(forms.ModelForm):

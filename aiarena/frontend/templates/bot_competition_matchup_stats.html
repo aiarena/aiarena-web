@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load i18n core_filters wiki_tags humanize %}
+
+
+{% block content %}
+    <div class="divider">
+        <span></span><span><h2>{{ competitionbotmatchupstats.bot.competition.as_html_link }} - {{ competitionbotmatchupstats.bot.bot.as_html_link }} vs {{ competitionbotmatchupstats.opponent.bot.as_html_link }}</h2></span><span></span>
+    </div>
+    <div id="bot_competition_stats">
+        <table summary="Table containing competition participation information" style="text-align: right">
+            <thead>
+            <tr style="text-align: center">
+                <td colspan="3"><strong>Stats</strong></td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="mono">
+                <td>Generated</td>
+                <td colspan="2">{{ competitionbotmatchupstats.updated|naturaltime|shorten_naturaltime }}</td>
+            </tr>
+            <tr class="mono">
+                <td>Matches</td>
+                <td>{{ competitionbotmatchupstats.match_count }}</td>
+                <td></td>
+            </tr>
+            <tr class="mono">
+                <td>Wins</td>
+                {% if competitionbotmatchupstats.win_perc != None %}
+                    <td>{{ competitionbotmatchupstats.win_count }}</td>
+                    <td>{{ competitionbotmatchupstats.win_perc|floatformat:2 }}%</td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+            <tr class="mono">
+                <td>Losses</td>
+                {% if competitionbotmatchupstats.loss_perc != None %}
+                    <td>{{ competitionbotmatchupstats.loss_count }}</td>
+                    <td>{{ competitionbotmatchupstats.loss_perc|floatformat:2 }}%</td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+            <tr class="mono">
+                <td>Ties</td>
+                {% if competitionbotmatchupstats.tie_perc != None %}
+                    <td>{{ competitionbotmatchupstats.tie_count }}</td>
+                    <td>{{ competitionbotmatchupstats.tie_perc|floatformat:2 }}%</td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+            <tr class="mono">
+                <td>Crashes</td>
+                {% if competitionbotmatchupstats.crash_perc != None %}
+                    <td>{{ competitionbotmatchupstats.crash_count }}</td>
+                    <td>{{ competitionbotmatchupstats.crash_perc|floatformat:2 }}%</td>
+                {% else %}
+                    <td colspan="2">No stats</td>
+                {% endif %}
+            </tr>
+
+            </tbody>
+        </table>
+        <br/>
+    </div>
+
+    <div id="elo_graph">
+        <img src="" alt="ELOGraph"/>
+    </div>
+
+    <div class="divider"><span></span><span><h2>Recent Matches</h2></span><span></span></div>
+    <table summary="Table containing results" class="row-hover-highlight">
+        <thead>
+        <td><strong>ID</strong></td>
+        <td><strong>Date</strong></td>
+        <td><strong>Result</strong></td>
+        <td><strong>Cause</strong></td>
+        <td><strong>+/-</strong></td>
+        <td><strong>Avg Step(ms)</strong></td>
+        <td><strong>Duration</strong></td>
+        <td><strong>Replay</strong></td>
+        {% if request.user == bot.user or request.user.is_staff %}
+            <td><strong>Log</strong></td>
+        {% endif %}
+        <td><strong>Tags</strong></td>
+        </thead>
+        <tbody>
+        {% for result in result_list %}
+            <tr>
+                <td>{{ result.match.as_html_link }}</td>
+                <td>{{ result.created|naturaltime|shorten_naturaltime }}</td>
+                <td>{{ result.result }}</td>
+                <td>{{ result.result_cause }}</td>
+                <td>{{ result.elo_change }}</td>
+                <td>{{ result.avg_step_time }}</td>
+                <td>{{ result.game_time_formatted }}</td>
+                {% if result.replay_file %}
+                    <td><a href="{{ result.replay_file.url }}">Download</a></td>
+                {% else %}
+                    <td>Unavailable</td>
+                {% endif %}
+                {% if request.user == bot.user or request.user.is_staff %}
+                    {% if result.me.match_log %}
+                        <td><a class="file-link" href="{{ result.me.match_log.url }}">Download</a></td>
+                    {% else %}
+                        <td>None</td>
+                    {% endif %}
+                {% endif %}
+                <td>{{ result.match.tags }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination">
+        {% if result_list.has_other_pages %}
+            <ul class="pagination">
+                {% if result_list.has_previous %}
+                    <li>
+                        <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
+                    </li>
+                {% else %}
+                    <li class="disabled"><span>&laquo;</span></li>
+                {% endif %}
+                {% for page_num in result_page_range %}
+                    {% if result_list.number == page_num %}
+                        <li class="active"><span>{{ page_num }}</span></li>
+                    {% else %}
+                        <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if result_list.has_next %}
+                    <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
+                    </li>
+                {% else %}
+                    <li class="disabled"><span>&raquo;</span></li>
+                {% endif %}
+            </ul>
+        {% endif %}
+    </div>
+
+
+{% endblock %}
+

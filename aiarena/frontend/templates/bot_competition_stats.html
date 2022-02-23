@@ -107,6 +107,7 @@
                 <td><strong>%</strong></td>
                 <td><strong>Crash</strong></td>
                 <td><strong>%</strong></td>
+                <td></td>
             </tr>
             </thead>
             <tbody>
@@ -141,6 +142,7 @@
                         {% else %}
                             <td class="mono">N/A</td>
                         {% endif %}
+                        <td><a href="{% url 'competition_bot_matchup_stats' bot_matchup.id bot_matchup.slug %}">View</a></td>
                     </tr>
                 {% endfor %}
 

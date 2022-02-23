@@ -83,8 +83,11 @@ urlpatterns = [  # todo: replace usage of url with path for all these
                   path('competitions/<int:pk>/', core_views.CompetitionDetail.as_view(), name='competition'),
 
                   path('competitions/stats/<int:pk>/', core_views.BotCompetitionStatsDetail.as_view()),
-                  path('competitions/stats/<int:pk>/<slug:slug>', core_views.BotCompetitionStatsDetail.as_view(), name='bot_competition_stats'),
+                  path('competitions/stats/<int:pk>/<slug:slug>', core_views.BotCompetitionStatsDetail.as_view(),
+                       name='bot_competition_stats'),
                   path('competitions/stats/<int:pk>_elo_graph_update_plot.png', core_views.BotCompetitionStatsEloGraphUpdatePlot.as_view()),
+                  path('competitions/stats/matchup/<int:pk>/<slug:slug>', core_views.CompetitionBotMatchupStatsDetail.as_view(),
+                       name='competition_bot_matchup_stats'),
 
                   path('botupload/', core_views.BotUpload.as_view(), name='botupload'),
                   path('requestmatch/', core_views.RequestMatch.as_view(), name='requestmatch'),
