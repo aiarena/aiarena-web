@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n core_filters wiki_tags humanize %}
+{% load render_table from django_tables2 %}
 
 
 {% block content %}
@@ -70,73 +71,53 @@
     </div>
 
     <div class="divider"><span></span><span><h2>Recent Matches</h2></span><span></span></div>
-    <table summary="Table containing results" class="row-hover-highlight">
-        <thead>
-        <td><strong>ID</strong></td>
-        <td><strong>Date</strong></td>
-        <td><strong>Result</strong></td>
-        <td><strong>Cause</strong></td>
-        <td><strong>+/-</strong></td>
-        <td><strong>Avg Step(ms)</strong></td>
-        <td><strong>Duration</strong></td>
-        <td><strong>Replay</strong></td>
-        {% if request.user == bot.user or request.user.is_staff %}
-            <td><strong>Log</strong></td>
-        {% endif %}
-        <td><strong>Tags</strong></td>
-        </thead>
-        <tbody>
-        {% for result in result_list %}
-            <tr>
-                <td>{{ result.match.as_html_link }}</td>
-                <td>{{ result.created|naturaltime|shorten_naturaltime }}</td>
-                <td>{{ result.result }}</td>
-                <td>{{ result.result_cause }}</td>
-                <td>{{ result.elo_change }}</td>
-                <td>{{ result.avg_step_time }}</td>
-                <td>{{ result.game_time_formatted }}</td>
-                {% if result.replay_file %}
-                    <td><a href="{{ result.replay_file.url }}">Download</a></td>
-                {% else %}
-                    <td>Unavailable</td>
-                {% endif %}
-                {% if request.user == bot.user or request.user.is_staff %}
-                    {% if result.me.match_log %}
-                        <td><a class="file-link" href="{{ result.me.match_log.url }}">Download</a></td>
-                    {% else %}
-                        <td>None</td>
-                    {% endif %}
-                {% endif %}
-                <td>{{ result.match.tags }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <div class="pagination">
-        {% if result_list.has_other_pages %}
-            <ul class="pagination">
-                {% if result_list.has_previous %}
-                    <li>
-                        <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
-                    </li>
-                {% else %}
-                    <li class="disabled"><span>&laquo;</span></li>
-                {% endif %}
-                {% for page_num in result_page_range %}
-                    {% if result_list.number == page_num %}
-                        <li class="active"><span>{{ page_num }}</span></li>
-                    {% else %}
-                        <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
-                    {% endif %}
-                {% endfor %}
-                {% if result_list.has_next %}
-                    <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
-                    </li>
-                {% else %}
-                    <li class="disabled"><span>&raquo;</span></li>
-                {% endif %}
-            </ul>
-        {% endif %}
+    <div id="bot_results">
+        <button class="collapsible filter-form">Filters</button>
+        <div class="collapsible-content filter-form" style="margin-bottom: 30px">
+            <form method="get" class="flex-container" style="justify-content: left">
+                {{ filter.form.non_field_errors }}
+                <div class="flex-row-short" style="width: 13%">
+                    {{ filter.form.race.errors }}
+                    <label for="{{ filter.form.race.id_for_label }}">Race</label>
+                    {{ filter.form.race }}
+                </div>
+                <div class="flex-row-short" style="width: 13%">
+                    {{ filter.form.result.errors }}
+                    <label for="{{ filter.form.result.id_for_label }}">Result</label>
+                    {{ filter.form.result }}
+                </div>
+                <div class="flex-row-short" style="width: 22%">
+                    {{ filter.form.result_cause.errors }}
+                    <label for="{{ filter.form.result_cause.id_for_label }}">Cause</label>
+                    {{ filter.form.result_cause }}
+                </div>
+                <div class="flex-row-short" style="width: 20%">
+                    {{ filter.form.avg_step_time.errors }}
+                    <label for="{{ filter.form.avg_step_time.id_for_label }}">Avg Step (ms)</label>
+                    {{ filter.form.avg_step_time }}
+                </div>
+                <div class="flex-row-short" style="width: 24%">
+                    {{ filter.form.map.errors }}
+                    <label for="{{ filter.form.map.id_for_label }}">Map</label>
+                    {{ filter.form.map }}
+                </div>
+                {% include "tagsinput/tagsinput.html" with form=filter.form %}
+                <div class="flex-row-short" style="width: 35%">
+                    <label for="{{ filter.form.tags_by_all.id_for_label }}">
+                        {{ filter.form.tags_by_all }} Show and Search Everyone's Tags
+                    </label>
+                </div>
+                <div class="flex-row-short">
+                    <label for="{{ filter.form.tags_partial_match.id_for_label }}">
+                        {{ filter.form.tags_partial_match }} Partially Match Tags
+                    </label>
+                </div>
+                <div class="flex-row-half" style="width: 100%; padding-bottom: 25px">
+                    <input id=submit-button type="submit" value="Filter"/>
+                </div>
+            </form>
+        </div>
+        {% render_table results_table %}
     </div>
 
 

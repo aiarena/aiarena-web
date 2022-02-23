@@ -53,6 +53,7 @@ def project_finance(request):
     else:
         raise Http404()
 
+
 class UserProfile(LoginRequiredMixin, DetailView):
     model = User
     redirect_field_name = 'next'
@@ -72,7 +73,8 @@ class UserProfile(LoginRequiredMixin, DetailView):
         # Add in the user's bots
         context['bot_list'] = self.request.user.bots.all()
         context['max_user_bot_count'] = config.MAX_USER_BOT_COUNT
-        context['max_active_active_competition_participations_count'] = self.request.user.get_active_competition_participations_limit_display()
+        context[
+            'max_active_active_competition_participations_count'] = self.request.user.get_active_competition_participations_limit_display()
         context['requested_matches'] = Match.objects.filter(requested_by=self.object, result__isnull=True).order_by(
             F('started').asc(nulls_last=True), F('id').asc()).prefetch_related(
             Prefetch('map'),
@@ -84,9 +86,10 @@ class UserProfile(LoginRequiredMixin, DetailView):
     def post(self, request, *args, **kwargs):
         match_ids = request.POST.getlist('match_selection')
         # Get and cancel requested matches
-        matches = Match.objects.filter(pk__in=match_ids, requested_by=self.request.user, result__isnull=True, assigned_to__isnull=True)
+        matches = Match.objects.filter(pk__in=match_ids, requested_by=self.request.user, result__isnull=True,
+                                       assigned_to__isnull=True)
         if matches:
-            message = "Matches " if len(matches)>1 else "Match "
+            message = "Matches " if len(matches) > 1 else "Match "
             for match in matches:
                 result = match.cancel(request.user)
                 if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
@@ -231,8 +234,8 @@ class BotList(ListView):
 
 
 class BotDownloadableList(ListView):
-    queryset = Bot.objects.filter(bot_zip_publicly_downloadable=True)\
-        .only('name', 'plays_race', 'type', 'user__username', 'user__type')\
+    queryset = Bot.objects.filter(bot_zip_publicly_downloadable=True) \
+        .only('name', 'plays_race', 'type', 'user__username', 'user__type') \
         .select_related('user').order_by('name')
     template_name = 'bots_downloadable.html'
     paginate_by = 50
@@ -249,6 +252,7 @@ class BotDownloadableList(ListView):
 
 class FileURLColumn(tables.URLColumn):
     """File URLs are incorrect without this"""
+
     def get_url(self, value):
         return value.url
 
@@ -272,7 +276,7 @@ class BotResultTable(tables.Table):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.tags_by_all_value = kwargs.pop('tags_by_all_value', False)
-        super().__init__(*args, **kwargs)    
+        super().__init__(*args, **kwargs)
 
     # Settings for the Table
     class Meta:
@@ -318,12 +322,12 @@ class BotResultTable(tables.Table):
         if self.tags_by_all_value:
             # Distinct Tag Names
             others_tags = value.exclude(user=self.user) if self.user.is_authenticated else value.all()
-            others_tags_dict = { str(mt.tag):None for mt in others_tags.order_by('tag__name') }
+            others_tags_dict = {str(mt.tag): None for mt in others_tags.order_by('tag__name')}
             if len(others_tags) > 0:
-                tag_str += ("\n\n" if len(tag_str)>0 else "") + "Other's Tags:\n"
+                tag_str += ("\n\n" if len(tag_str) > 0 else "") + "Other's Tags:\n"
                 tag_str += ", ".join(t for t in others_tags_dict)
 
-        if len(tag_str) > 0: 
+        if len(tag_str) > 0:
             return mark_safe(f"<abbr title=\"{tag_str}\">Hover<{len(user_tags) + len(others_tags_dict)}></abbr>")
         else:
             return "—"
@@ -361,7 +365,8 @@ class RelativeResultFilter(filters.FilterSet):
     )
     # Just need the widget, value is passed on init to be used in tag filter
     tags_by_all = filters.BooleanFilter(label='Search Everyones Tags', method="no_filter", widget=forms.CheckboxInput)
-    tags_partial_match = filters.BooleanFilter(label='Partially Match Tags', method="no_filter", widget=forms.CheckboxInput)
+    tags_partial_match = filters.BooleanFilter(label='Partially Match Tags', method="no_filter",
+                                               widget=forms.CheckboxInput)
 
     class Meta:
         model = RelativeResult
@@ -380,11 +385,11 @@ class RelativeResultFilter(filters.FilterSet):
     def filter_avg_step_time(self, queryset, name, value):
         if value:
             if value.start is not None and value.stop is not None:
-                return queryset.filter(avg_step_time__range=[value.start/1000, value.stop/1000])
+                return queryset.filter(avg_step_time__range=[value.start / 1000, value.stop / 1000])
             elif value.start is not None:
-                return queryset.filter(avg_step_time__gte=value.start/1000)
+                return queryset.filter(avg_step_time__gte=value.start / 1000)
             elif value.stop is not None:
-                return queryset.filter(avg_step_time__lte=value.stop/1000)
+                return queryset.filter(avg_step_time__lte=value.stop / 1000)
         return queryset
 
     def filter_match_types(self, queryset, name, value):
@@ -396,7 +401,65 @@ class RelativeResultFilter(filters.FilterSet):
 
     def filter_tags(self, qs, name, value):
         # An unauthenticated user will have no tags
-        if not self.user.is_authenticated and not self.tags_by_all_value: 
+        if not self.user.is_authenticated and not self.tags_by_all_value:
+            return qs.none()
+
+        if not self.tags_by_all_value:
+            value = str(self.user.id) + "|" + value
+
+        if self.tags_partial_match_value:
+            return filter_tags(qs, value, "match__tags__tag__name", "icontains", "match__tags__user")
+        else:
+            return filter_tags(qs, value, "match__tags__tag__name", "iexact", "match__tags__user")
+
+    def no_filter(self, queryset, name, value):
+        return queryset
+
+
+class RelativeResultMatchupStatsFilter(filters.FilterSet):
+    race = filters.ChoiceFilter(label="Race", choices=Bot.RACES, field_name='opponent__bot__plays_race')
+    result = filters.ChoiceFilter(label='Result', choices=MatchParticipation.RESULT_TYPES[1:])
+    result_cause = filters.ChoiceFilter(label='Cause', choices=MatchParticipation.CAUSE_TYPES)
+    avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time",
+                                        widget=RangeWidget(attrs={"size": 4}))
+    map = filters.CharFilter(label='Map', field_name='match__map__name', lookup_expr='icontains')
+    tags = filters.CharFilter(
+        label='Tags',
+        method="filter_tags",
+        widget=forms.TextInput(attrs={"data-role": "tagsinput", "style": "width: 100%"})
+    )
+    # Just need the widget, value is passed on init to be used in tag filter
+    tags_by_all = filters.BooleanFilter(label='Search Everyones Tags', method="no_filter", widget=forms.CheckboxInput)
+    tags_partial_match = filters.BooleanFilter(label='Partially Match Tags', method="no_filter",
+                                               widget=forms.CheckboxInput)
+
+    class Meta:
+        model = RelativeResult
+        fields = ['opponent__bot__plays_race', 'result', 'result_cause', 'avg_step_time', 'tags']
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        self.tags_by_all_value = kwargs.pop('tags_by_all_value', False)
+        self.tags_partial_match_value = kwargs.pop('tags_partial_match_value', False)
+        super().__init__(*args, **kwargs)
+        # Set Widget initial value based on passed value
+        self.form.fields['tags_by_all'].widget.attrs = {'checked': self.tags_by_all_value}
+        self.form.fields['tags_partial_match'].widget.attrs = {'checked': self.tags_partial_match_value}
+
+    # Custom filter to match scale
+    def filter_avg_step_time(self, queryset, name, value):
+        if value:
+            if value.start is not None and value.stop is not None:
+                return queryset.filter(avg_step_time__range=[value.start / 1000, value.stop / 1000])
+            elif value.start is not None:
+                return queryset.filter(avg_step_time__gte=value.start / 1000)
+            elif value.stop is not None:
+                return queryset.filter(avg_step_time__lte=value.stop / 1000)
+        return queryset
+
+    def filter_tags(self, qs, name, value):
+        # An unauthenticated user will have no tags
+        if not self.user.is_authenticated and not self.tags_by_all_value:
             return qs.none()
 
         if not self.tags_by_all_value:
@@ -427,8 +490,8 @@ class BotDetail(DetailView):
 
         # Get tags_by_all and remove it from params to prevent errors
         params = self.request.GET.copy()
-        tags_by_all = params.pop('tags_by_all')[0]=='on' if 'tags_by_all' in params else False
-        tags_partial_match = params.pop('tags_partial_match')[0]=='on' if 'tags_partial_match' in params else False
+        tags_by_all = params.pop('tags_by_all')[0] == 'on' if 'tags_by_all' in params else False
+        tags_partial_match = params.pop('tags_partial_match')[0] == 'on' if 'tags_partial_match' in params else False
         # Run filters, create table
         result_filter = RelativeResultFilter(params, queryset=results_qs, 
             user=self.request.user, tags_by_all_value=tags_by_all, tags_partial_match_value=tags_partial_match)
@@ -448,8 +511,9 @@ class BotDetail(DetailView):
             .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
             .prefetch_related(
-                Prefetch('match__map'),
-                Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'), to_attr='participants'))
+            Prefetch('match__map'),
+            Prefetch('match__matchparticipation_set', MatchParticipation.objects.all().prefetch_related('bot'),
+                     to_attr='participants'))
 
         return context
 
@@ -475,7 +539,8 @@ class BotCompetitionStatsEloUpdatePlot(DetailView):
         context = super().get_context_data(**kwargs)
         context['competition_bot_matchups'] = self.object.competition_matchup_stats.filter(
             opponent__competition=context['competitionparticipation'].competition).order_by('-win_perc').distinct()
-        context['updated'] = context['competition_bot_matchups'][0].updated if context['competition_bot_matchups'] else "Never"
+        context['updated'] = context['competition_bot_matchups'][0].updated if context[
+            'competition_bot_matchups'] else "Never"
         return context
 
 
@@ -497,25 +562,34 @@ class CompetitionBotMatchupStatsDetail(DetailView):
     model = CompetitionBotMatchupStats
     template_name = 'bot_competition_matchup_stats.html'
 
-    def _paginate_query(self, results_queryset):
-        page_size = 30
-        page = self.request.GET.get('page', 1)
-        paginator = Paginator(results_queryset, page_size)
-        try:
-            results = paginator.page(page)
-        except PageNotAnInteger:
-            results = paginator.page(1)
-        except EmptyPage:
-            results = paginator.page(paginator.num_pages)
-
-        return results, restrict_page_range(paginator.num_pages, results.number)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        results_queryset = RelativeResult.objects.filter(me__bot=self.object.bot.bot,
-                                                         opponent__bot=self.object.opponent.bot)
-        context['result_list'], context['result_page_range'] = self._paginate_query(results_queryset)
+        # Create Table
+        results_qs = (RelativeResult.objects
+                      .select_related('match', 'me__bot', 'opponent__bot')
+                      .defer("me__bot__bot_data")
+                      .filter(me__bot=self.object.bot.bot, opponent__bot=self.object.opponent.bot)
+                      .order_by('-created'))
+
+        # Get tags_by_all and remove it from params to prevent errors
+        params = self.request.GET.copy()
+        tags_by_all = params.pop('tags_by_all')[0] == 'on' if 'tags_by_all' in params else False
+        tags_partial_match = params.pop('tags_partial_match')[0] == 'on' if 'tags_partial_match' in params else False
+        # Run filters, create table
+        result_filter = RelativeResultFilter(params, queryset=results_qs,
+                                             user=self.request.user, tags_by_all_value=tags_by_all,
+                                             tags_partial_match_value=tags_partial_match)
+        result_table = BotResultTable(data=result_filter.qs, user=self.request.user, tags_by_all_value=tags_by_all)
+        result_table.exclude = []
+        # Exclude log column if not staff or user
+        if not (self.request.user == self.object.bot.bot.user or self.request.user.is_staff):
+            result_table.exclude.append("match_log")
+        # Update table based on request information
+        RequestConfig(self.request, paginate={"per_page": 30}).configure(result_table)
+        context['results_table'] = result_table
+        context['filter'] = result_filter
+
         return context
 
 
@@ -532,7 +606,6 @@ class BotUpdateForm(forms.ModelForm):
         # and whether there's a current competition
         if self.instance.bot_data_is_currently_frozen():
             self.fields['bot_data'].disabled = True
-
 
     class Meta:
         model = Bot
@@ -635,7 +708,7 @@ class CompetitionParticipationList(SuccessMessageMixin, LoginRequiredMixin, Crea
 class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
     template_name = 'bot_competitionparticipation_edit.html'
     model = CompetitionParticipation
-    fields = ['active',]
+    fields = ['active', ]
 
     redirect_field_name = 'next'
     success_message = "Competition participation updated."
@@ -651,6 +724,7 @@ class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, Up
 
     def get_success_url(self):
         return reverse('bot_competitions', kwargs={'pk': self.kwargs['bot_id']})
+
 
 class AuthorList(ListView):
     queryset = User.objects.filter(is_active=1, type='WEBSITE_USER').order_by('username')
@@ -870,9 +944,9 @@ class Index(ListView):
         else:
             competitions = competitions.annotate(n_active_bots=Value(0, IntegerField()))
         # Order competitions as they are to be shown on home page
-        competitions = competitions.order_by('-n_active_bots','-interest','-num_participants')
+        competitions = competitions.order_by('-n_active_bots', '-interest', '-num_participants')
         context['competitions'] = []
-        
+
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
@@ -880,12 +954,12 @@ class Index(ListView):
                     comp, amount=10).prefetch_related(
                     Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level'))
-                )            
+                )
                 # top 10 bots
 
                 relative_result = RelativeResult.with_row_number([x.bot.id for x in top10], comp)
-                
-                
+
+
                 sql, params = relative_result.query.sql_with_params()
 
                 with connection.cursor() as cursor:
@@ -898,7 +972,7 @@ class Index(ListView):
                     rows = cursor.fetchall()
                     for participant in top10:
                       participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
-                
+
                 context['competitions'].append({
                     'competition': comp,
                     'top10': top10,
@@ -980,7 +1054,7 @@ class MatchDisplay(DetailView):
             others_tags = self.object.tags.exclude(user=self.request.user).all()
         else:
             others_tags = self.object.tags.all()
-        
+
         others_tags_dict = {}
         for mt in others_tags:
             if mt.user.as_html_link not in others_tags_dict:
@@ -1024,9 +1098,9 @@ class CompetitionDetail(DetailView):
         for map in maps:
             map_names.append(map.name)
         context['map_names'] = map_names
-        
+
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
-        
+
         rounds = Round.objects.filter(competition_id=self.object.id).order_by('-id')
         page = self.request.GET.get('page', 1)
         paginator = Paginator(rounds, 30)
@@ -1048,7 +1122,7 @@ class CompetitionDetail(DetailView):
                 Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
 
         relative_result = RelativeResult.with_row_number([x.bot.id for x in all_participants], self.object)
-        
+
         sql, params = relative_result.query.sql_with_params()
 
         with connection.cursor() as cursor:
@@ -1063,7 +1137,7 @@ class CompetitionDetail(DetailView):
                 participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
 
         context['divisions'] = dict()
-        to_title = lambda x: f"Awaiting Entry" if x==CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
+        to_title = lambda x: f"Awaiting Entry" if x == CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
         for participant in all_participants:
             if to_title(participant.division_num) not in context['divisions']:
                 context['divisions'][to_title(participant.division_num)] = []
@@ -1073,7 +1147,7 @@ class CompetitionDetail(DetailView):
 
 class BotWidget(Select2Widget):
     search_fields = [
-            "name__icontains"
+        "name__icontains"
     ]
 
 
@@ -1093,7 +1167,7 @@ class BotChoiceField(forms.ModelChoiceField):
             race = 'Zerg'
         elif race.label == 'R':
             race = 'Random'
-        return str_fmt.format(active, race, bot_object.name,  bot_object.user.username)
+        return str_fmt.format(active, race, bot_object.name, bot_object.user.username)
 
 
 class RequestMatchForm(forms.Form):
@@ -1124,7 +1198,7 @@ class RequestMatchForm(forms.Form):
                                      required=True, initial='specific_matchup',
                                      )
     bot1 = BotChoiceField(queryset=Bot.objects.all(), required=True,
-                                  widget=BotWidget)
+                          widget=BotWidget)
     # hidden when matchup_type != random_ladder_bot
     matchup_race = forms.ChoiceField(choices=MATCHUP_RACE_CHOICES,
                                      widget=Select2Widget,
@@ -1132,17 +1206,18 @@ class RequestMatchForm(forms.Form):
     show_active_only = forms.BooleanField(label='Active Bots Only', required=False)
     # hidden when matchup_type != specific_matchup
     bot2 = BotChoiceField(queryset=Bot.objects.all(),
-                                  widget=BotWidget,  # default this to required initially
-                                  required=False, help_text="Author or Bot name")
+                          widget=BotWidget,  # default this to required initially
+                          required=False, help_text="Author or Bot name")
     map_selection_type = forms.ChoiceField(choices=MAP_SELECTION_TYPE,
-                                     widget=Select2Widget,
-                                     required=True, initial='map_pool')
+                                           widget=Select2Widget,
+                                           required=True, initial='map_pool')
     map = forms.ModelChoiceField(queryset=Map.objects.filter(enabled=True).only('name').order_by('name'),
                                  widget=Select2Widget,
                                  required=False)
-    map_pool = forms.ModelChoiceField(queryset=MapPool.objects.filter(maps__isnull=False, enabled=True).distinct().only('name').order_by('name'),
-                                 widget=Select2Widget,
-                                 required=False)
+    map_pool = forms.ModelChoiceField(
+        queryset=MapPool.objects.filter(maps__isnull=False, enabled=True).distinct().only('name').order_by('name'),
+        widget=Select2Widget,
+        required=False)
 
     match_count = forms.IntegerField(min_value=1, initial=1)
 
@@ -1209,8 +1284,10 @@ class RequestMatch(LoginRequiredMixin, FormView):
                             bot1 = form.cleaned_data['bot1']
 
                             for _ in range(0, form.cleaned_data['match_count']):
-                                bot2 = bot1.get_random_active_excluding_self() if form.cleaned_data['matchup_race'] == 'any' \
-                                    else bot1.get_active_excluding_self.filter(plays_race=form.cleaned_data['matchup_race'])
+                                bot2 = bot1.get_random_active_excluding_self() \
+                                    if form.cleaned_data['matchup_race'] == 'any' \
+                                    else bot1.get_active_excluding_self.filter(
+                                    plays_race=form.cleaned_data['matchup_race'])
 
                                 if bot2 is None:
                                     messages.error(self.request, "No opponents of that type could be found.")
