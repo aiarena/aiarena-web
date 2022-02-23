@@ -2,10 +2,13 @@ import logging
 
 from django.db import models
 from django.utils import timezone
+
 from aiarena.core.validators import validate_not_nan, validate_not_inf
 from .competition_participation import CompetitionParticipation
 
 logger = logging.getLogger(__name__)
+
+from django.utils.text import slugify
 
 
 class CompetitionBotMatchupStats(models.Model):
@@ -21,12 +24,15 @@ class CompetitionBotMatchupStats(models.Model):
     crash_count = models.IntegerField(default=0, blank=True)
     crash_perc = models.FloatField(default=0, blank=True, validators=[validate_not_nan, validate_not_inf])
     updated = models.DateTimeField(default=timezone.now)  # populate fields before first save
+    slug = models.SlugField(max_length=255, blank=True)
 
     def save(self, *args, **kwargs):
         # update time pre save
         self.updated = timezone.now()
+        # generate slug
+        self.slug = slugify(f'{self.bot.competition.name} {self.bot.bot.name} vs {self.opponent.bot.name}')
         # now we call django's save protocol
-        super(CompetitionBotMatchupStats, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.bot) + ' VS ' + str(self.opponent)
