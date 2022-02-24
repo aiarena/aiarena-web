@@ -1,47 +1,28 @@
 <mat-sidenav-container class="">
   <mat-sidenav mode="side" opened>
     <mat-nav-list>
-<!--      <a mat-list-item routerLink="." *ngFor="let nav of fillerNav">{{nav}}</a>-->
+      <div class="navigation-header">
+        <em class="material-icons">pages</em>
+        <h3>pages</h3>
+      </div>
+      <div>
+        <a mat-list-item routerLink="Home">Home</a>
+        <a mat-list-item routerLink="Wiki">Wiki</a>
+        <a mat-list-item routerLink="Authors">Authors</a>
+        <a mat-list-item routerLink="Bots">Bots</a>
+        <a mat-list-item routerLink="Competitions">Competitions</a>
+        <a mat-list-item routerLink="Match Queue">Match Queue</a>
+        <a mat-list-item routerLink="Results">Results</a>
+        <a mat-list-item routerLink="Live Stream">Live Stream</a>
+        <a mat-list-item routerLink="Project Finance">Project Finance</a>
+        <a mat-list-item routerLink="API">API</a>
+      </div>
     </mat-nav-list>
   </mat-sidenav>
-  <mat-sidenav-content>Main content</mat-sidenav-content>
+  <main>
+    <router-outlet></router-outlet>
+  </main>
 </mat-sidenav-container>
 
-<img src="/static/img/ai-arena-logo.png" alt="AI Arena Logo" class="center">
-<br>
-<h1 class="site-title">SC2 AI Arena</h1>
 
-<mat-sidenav-container>
-  <mat-sidenav #sidenav role="navigation">
-
-    <div id="sidebar">
-      <ul id="sidebar-items">
-        <li>
-          <div id="sidebar-header">
-            <em class="material-icons">pages</em>
-            <h3> pages</h3>
-          </div>
-          <ul class="links">
-            <li>Home</li>
-            <li>Wiki</li>
-            <li>Authors</li>
-            <li>Bots</li>
-            <li>Competitions</li>
-            <li>Match Queue</li>
-            <li>Results</li>
-            <li>Live Stream</li>
-            <li>Project Finance</li>
-            <li>API</li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-  </mat-sidenav>
-  <mat-sidenav-content>
-    <!--in here all the content must reside. We will add a navigation header as well-->
-    <main>
-      <router-outlet></router-outlet>
-    </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
 

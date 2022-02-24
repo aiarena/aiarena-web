@@ -9,3 +9,26 @@ mat-sidenav {
 main {
   padding: 10px;
 }
+
+#div h3 {
+  margin-top: 15px;
+  font-size: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.navigation-header {
+}
+
+.navigation-header h3 {
+  margin-top: 15px;
+  font-size: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.material-icons {
+  padding-bottom: 10px;
+  padding-top: 0;
+  float: left;
+}
