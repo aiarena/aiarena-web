@@ -49,6 +49,20 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
     def is_requested(self):
         return self.requested_by is not None
 
+    @property
+    def status(self):
+        from .result import Result # avoid circular import
+        try:
+            finished = self.result is not None
+        except Result.DoesNotExist:
+            finished = False
+        if finished:
+            return 'Finished'
+        elif self.started:
+            return 'Started'
+        else:
+            return 'Queued'
+
     @staticmethod
     def create(round, map, bot1, bot2, requested_by=None,
                bot1_use_data=None, bot1_update_data=None,
