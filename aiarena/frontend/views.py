@@ -799,7 +799,9 @@ class Index(ListView):
         context['events'] = events
         context['news'] = News.objects.all().order_by('-created')
 
-        competitions = Competition.objects.filter(status='open').annotate(num_participants=Count('participations'))
+        competitions = Competition.objects.filter(
+            status__in=['frozen','paused','open','closing'])\
+            .annotate(num_participants=Count('participations'))
         # Count active bots of the user in each competition
         if self.request.user.is_authenticated:
             competitions = (competitions.annotate(n_active_bots=Sum(Case(
