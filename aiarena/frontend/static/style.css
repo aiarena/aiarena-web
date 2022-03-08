@@ -241,6 +241,14 @@ a:hover {
     text-align: left;
 }
 
+#bot_bio tr:hover a {
+    color: #86c232;
+}
+
+#bot_bio tr:hover a:hover {
+    color: #ffffff;
+}
+
 #bot_wiki_article {
     padding: 0 10px 0 10px;
 }
