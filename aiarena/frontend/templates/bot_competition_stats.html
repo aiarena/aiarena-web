@@ -90,9 +90,65 @@
         </div>
     {% endif %}
 
+    <div class="divider"><span></span><span><h2>Maps</h2></span><span></span></div>
+    <div id="bot_competition_stats_list">
+        <table summary="Table containing matchup information" class="row-hover-highlight">
+            <thead>
+            <tr>
+                <td><strong>Map</strong></td>
+                <td><strong>Matches</strong></td>
+                <td><strong>Win</strong></td>
+                <td><strong>%</strong></td>
+                <td><strong>Loss</strong></td>
+                <td><strong>%</strong></td>
+                <td><strong>Tie</strong></td>
+                <td><strong>%</strong></td>
+                <td><strong>Crash</strong></td>
+                <td><strong>%</strong></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% if competition_map_stats.count > 0 %}
+                {% for map_stat in competition_map_stats %}
+                    <tr style="text-align: right">
+                        <td class="mono">{{map_stat.map.name}}</td>
+                        <td class="mono">{{map_stat.match_count}}</td>
+                        <td class="mono">{{ map_stat.win_count }}</td>
+                        {% if map_stat.match_count > 0 %}
+                            <td class="mono">{{ map_stat.win_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td class="mono">N/A</td>
+                        {% endif %}
+                        <td class="mono">{{ map_stat.loss_count }}</td>
+                        {% if map_stat.match_count > 0 %}
+                            <td class="mono">{{ map_stat.loss_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td class="mono">N/A</td>
+                        {% endif %}
+                        <td class="mono">{{ map_stat.tie_count }}</td>
+                        {% if map_stat.match_count > 0 %}
+                            <td class="mono">{{ map_stat.tie_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td class="mono">N/A</td>
+                        {% endif %}
+                        <td class="mono">{{ map_stat.crash_count }}</td>
+                        {% if map_stat.match_count > 0 %}
+                            <td class="mono">{{ map_stat.crash_perc|floatformat:2 }}</td>
+                        {% else %}
+                            <td class="mono">N/A</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="11">No stats</td>
+                </tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
     <div class="divider"><span></span><span><h2>Matchups</h2></span><span></span></div>
-
-    <div id="bot_competition_stats_matchups">
+    <div id="bot_competition_stats_list">
         <table summary="Table containing matchup information" class="row-hover-highlight">
             <thead>
             <tr>
