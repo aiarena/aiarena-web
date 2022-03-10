@@ -216,6 +216,8 @@ CONSTANCE_CONFIG = {
     'MATCH_REQUEST_LIMIT_PLATINUM_TIER': (
     2000, 'The periodic limit of match requests for a platinum patreon tier user.'),
     'MATCH_REQUEST_LIMIT_DIAMOND_TIER': (8000, 'The periodic limit of match requests for a diamond patreon tier user.'),
+    'MATCH_REQUESTS_PREFILL_MAP_POOL_ID': (0, 'The ID of the map pool that should be selected by default '
+                                              'when requesting matches.'),
     'REQUESTED_MATCHES_LIMIT_PERIOD': (
         timedelta(days=30), 'The period length for which a user''s match request limit applies.', timedelta),
     'BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER': (
@@ -260,7 +262,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
     'Match Requests': ('MATCH_REQUEST_LIMIT_FREE_TIER', 'MATCH_REQUEST_LIMIT_BRONZE_TIER',
                        'MATCH_REQUEST_LIMIT_SILVER_TIER', 'MATCH_REQUEST_LIMIT_GOLD_TIER',
                        'MATCH_REQUEST_LIMIT_PLATINUM_TIER', 'MATCH_REQUEST_LIMIT_DIAMOND_TIER',
-                       'REQUESTED_MATCHES_LIMIT_PERIOD',),
+                       'REQUESTED_MATCHES_LIMIT_PERIOD', 'MATCH_REQUESTS_PREFILL_MAP_POOL_ID',),
     'File size limits': ('BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER',
                          'BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER',
                          'BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER',),
