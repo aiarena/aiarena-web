@@ -996,6 +996,13 @@ class BotChoiceField(forms.ModelChoiceField):
 
 class RequestMatchForm(forms.Form):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Pre fill the map pool selection, for user convenience
+        self.initial['map_pool'] = MapPool.objects.filter(id=config.MATCH_REQUESTS_PREFILL_MAP_POOL_ID).first()
+
+
     MATCHUP_TYPE_CHOICES = (
         ('specific_matchup', 'Specific Matchup'),
         ('random_ladder_bot', 'Random Ladder Bot'),
