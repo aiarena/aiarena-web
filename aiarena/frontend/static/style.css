@@ -268,11 +268,11 @@ a:hover {
     padding: 0;
 }
 
-#bot_competition_stats_matchups {
+#bot_competition_stats_list {
     margin: 0 0 0 73px;
 }
 
-#bot_competition_stats_matchups table {
+#bot_competition_stats_list table {
     margin: 0;
     padding: 0;
 }
