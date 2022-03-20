@@ -24,23 +24,37 @@ class ACCoordinator:
     """Coordinates all the Arena Clients and which matches they play."""
 
     @staticmethod
-    def next_competition_match(arenaclient: ArenaClient):
+    def next_requested_match(arenaclient: ArenaClient):
         # REQUESTED MATCHES
         with transaction.atomic():
             match = Matches.attempt_to_start_a_requested_match(arenaclient)
             if match is not None:
                 return match  # a match was found - we're done
+        return None
 
-        competition_ids = ACCoordinator._get_competition_priority_order()
-        for id in competition_ids:
-            competition = Competition.objects.get(id=id)
-            # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
-            with transaction.atomic():
-                # this call will apply a select for update, so we do it inside an atomic block
-                if Competitions.check_has_matches_to_play_and_apply_locks(competition):
-                    return Matches.start_next_match_for_competition(arenaclient, competition)
+    @staticmethod
+    def next_competition_match(arenaclient: ArenaClient):
+        if arenaclient.trusted:
+            # TODO: Check for trusted competitions
+            competition_ids = ACCoordinator._get_competition_priority_order()
+            for id in competition_ids:
+                competition = Competition.objects.get(id=id)
+                # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
+                with transaction.atomic():
+                    # this call will apply a select for update, so we do it inside an atomic block
+                    if Competitions.check_has_matches_to_play_and_apply_locks(competition):
+                        return Matches.start_next_match_for_competition(arenaclient, competition)
 
-        raise NoCurrentlyAvailableCompetitions()
+            # TODO: Maybe remove exception when we have testing
+            raise NoCurrentlyAvailableCompetitions()
+        return None
+
+    @staticmethod
+    def next_new_match(arenaclient: ArenaClient):
+        requested_match = ACCoordinator.next_requested_match(arenaclient)
+        if requested_match is not None:
+            return requested_match
+        return ACCoordinator.next_competition_match(arenaclient)
 
     @staticmethod
     def next_match(arenaclient: ArenaClient) -> Match:
@@ -53,10 +67,8 @@ class ACCoordinator:
                                 result__isnull=True).order_by(F('round_id').asc())
                     if unfinished_matches.count() > 0:
                         return unfinished_matches[0]  # todo: re-set started time?
-                    else:
-                        return ACCoordinator.next_competition_match(arenaclient)
-                else:
-                    return ACCoordinator.next_competition_match(arenaclient)
+                # Trying a new match
+                return ACCoordinator.next_new_match(arenaclient)
             except Exception as e:
                 logger.exception("Exception while processing request for match.")
                 raise
