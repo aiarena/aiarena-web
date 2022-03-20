@@ -454,6 +454,7 @@ class BotCompetitionStatsDetail(DetailView):
         context = super().get_context_data(**kwargs)
         context['competition_bot_matchups'] = self.object.competition_matchup_stats.filter(
             opponent__competition=context['competitionparticipation'].competition).order_by('-win_perc').distinct()
+        context['competition_map_stats'] = self.object.competition_map_stats.order_by('map__name')
         context['updated'] = context['competition_bot_matchups'][0].updated if context['competition_bot_matchups'] else "Never"
         return context
 

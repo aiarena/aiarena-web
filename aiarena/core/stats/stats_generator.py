@@ -1,4 +1,5 @@
 import io
+
 from datetime import datetime
 
 import matplotlib.dates as mdates
@@ -9,7 +10,8 @@ from django.db.models import Max
 
 from aiarena.core.models import MatchParticipation, CompetitionParticipation, Bot
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
-
+from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
+from aiarena.core.models.competition import Competition
 
 class StatsGenerator:
 
@@ -59,6 +61,7 @@ class StatsGenerator:
         sp.save()
 
         StatsGenerator._update_matchup_stats(sp)
+        StatsGenerator._update_map_stats(sp)
 
     @staticmethod
     def _update_matchup_stats(sp: CompetitionParticipation):
@@ -72,17 +75,17 @@ class StatsGenerator:
                                                                                     sp)
 
                 if matchup_stats.match_count != 0:
-                    matchup_stats.win_count = StatsGenerator._calculate_win_count(cursor, competition_participation, sp)
+                    matchup_stats.win_count = StatsGenerator._calculate_matchup_win_count(cursor, competition_participation, sp)
                     matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
 
-                    matchup_stats.loss_count = StatsGenerator._calculate_loss_count(cursor, competition_participation,
+                    matchup_stats.loss_count = StatsGenerator._calculate_matchup_loss_count(cursor, competition_participation,
                                                                                     sp)
                     matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
 
-                    matchup_stats.tie_count = StatsGenerator._calculate_tie_count(cursor, competition_participation, sp)
+                    matchup_stats.tie_count = StatsGenerator._calculate_matchup_tie_count(cursor, competition_participation, sp)
                     matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
 
-                    matchup_stats.crash_count = StatsGenerator._calculate_crash_count(cursor, competition_participation,
+                    matchup_stats.crash_count = StatsGenerator._calculate_matchup_crash_count(cursor, competition_participation,
                                                                                       sp)
                     matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
                 else:
@@ -94,86 +97,122 @@ class StatsGenerator:
                 matchup_stats.save()
 
     @staticmethod
+    def _update_map_stats(sp: CompetitionParticipation):
+        competition = Competition.objects.get(id=sp.competition.id)
+        for map in competition.maps.all():
+            with connection.cursor() as cursor:
+                map_stats = CompetitionBotMapStats.objects.select_for_update() \
+                    .get_or_create(bot=sp, map=map)[0]
+
+                map_stats.match_count = StatsGenerator._calculate_map_count(cursor, map, sp)
+
+                if map_stats.match_count != 0:
+                    map_stats.win_count = StatsGenerator._calculate_map_win_count(cursor, map, sp)
+                    map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
+
+                    map_stats.loss_count = StatsGenerator._calculate_map_loss_count(cursor, map, sp)
+                    map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
+
+                    map_stats.tie_count = StatsGenerator._calculate_map_tie_count(cursor, map, sp)
+                    map_stats.tie_perc = map_stats.tie_count / map_stats.match_count * 100
+
+                    map_stats.crash_count = StatsGenerator._calculate_map_crash_count(cursor, map, sp)
+                    map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
+                else:
+                    map_stats.win_count = 0
+                    map_stats.loss_count = 0
+                    map_stats.tie_count = 0
+                    map_stats.crash_count = 0
+
+                map_stats.save()
+
+    @staticmethod
     def _run_single_column_query(cursor, query, params):
         cursor.execute(query, params)
         row = cursor.fetchone()
         return row[0]
 
     @staticmethod
+    def _calculate_matchup_data(cursor, competition_participation, sp, query):
+        return StatsGenerator._run_single_column_query(cursor, """
+                    select count(cm.id) as count
+                    from core_match cm
+                    inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
+                    inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
+                    inner join core_round cr on cm.round_id = cr.id
+                    inner join core_competition cs on cr.competition_id = cs.id
+                    where cs.id = %s -- make sure it's part of the current competition
+                    and bot_p.bot_id = %s
+                    and opponent_p.bot_id = %s
+                    and """ + query, 
+                    [sp.competition_id, sp.bot_id, competition_participation.bot_id])
+
+    @staticmethod
     def _calculate_matchup_count(cursor, competition_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor, """
-                select count(cm.id) as count
-                from core_match cm
-                inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
-                inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
-                inner join core_round cr on cm.round_id = cr.id
-                inner join core_competition cs on cr.competition_id = cs.id
-                where cs.id = %s -- make sure it's part of the current competition
-                and bot_p.bot_id = %s
-                and opponent_p.bot_id = %s
-                and bot_p.result is not null and bot_p.result != 'none' -- make sure it's a finished match wih a result
-                """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
+        return StatsGenerator._calculate_matchup_data(cursor, competition_participation, sp,
+                    "bot_p.result is not null and bot_p.result != 'none'")
 
     @staticmethod
-    def _calculate_win_count(cursor, competition_participation, sp):
+    def _calculate_matchup_win_count(cursor, competition_participation, sp):
+        return StatsGenerator._calculate_matchup_data(cursor, competition_participation, sp,
+                    "bot_p.result = 'win'")
+
+    @staticmethod
+    def _calculate_matchup_loss_count(cursor, competition_participation, sp):
+        return StatsGenerator._calculate_matchup_data(cursor, competition_participation, sp,
+                    "bot_p.result = 'loss'")
+
+    @staticmethod
+    def _calculate_matchup_tie_count(cursor, competition_participation, sp):
+        return StatsGenerator._calculate_matchup_data(cursor, competition_participation, sp,
+                    "bot_p.result = 'tie'")
+
+    @staticmethod
+    def _calculate_matchup_crash_count(cursor, competition_participation, sp):
+        return StatsGenerator._calculate_matchup_data(cursor, competition_participation, sp,
+                    """bot_p.result = 'loss'
+                    and bot_p.result_cause in ('crash', 'timeout', 'initialization_failure')""")
+
+    @staticmethod
+    def _calculate_map_data(cursor, map, sp, query):
         return StatsGenerator._run_single_column_query(cursor, """
                     select count(cm.id) as count
                     from core_match cm
                     inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
-                    inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
+                    inner join core_map map on cm.map_id = map.id
                     inner join core_round cr on cm.round_id = cr.id
                     inner join core_competition cs on cr.competition_id = cs.id
                     where cs.id = %s -- make sure it's part of the current competition
+                    and map.id = %s
                     and bot_p.bot_id = %s
-                    and opponent_p.bot_id = %s
-                    and bot_p.result = 'win'
-                    """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
+                    and """ + query, 
+                    [sp.competition_id, map.id, sp.bot_id])
 
     @staticmethod
-    def _calculate_loss_count(cursor, competition_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor, """
-                    select count(cm.id) as count
-                    from core_match cm
-                    inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
-                    inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
-                    inner join core_round cr on cm.round_id = cr.id
-                    inner join core_competition cs on cr.competition_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current competition
-                    and bot_p.bot_id = %s
-                    and opponent_p.bot_id = %s
-                    and bot_p.result = 'loss'
-                    """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
+    def _calculate_map_count(cursor, map, sp):
+        return StatsGenerator._calculate_map_data(cursor, map, sp, 
+                    "bot_p.result is not null and bot_p.result != 'none'")
 
     @staticmethod
-    def _calculate_tie_count(cursor, competition_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor, """
-                    select count(cm.id) as count
-                    from core_match cm
-                    inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
-                    inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
-                    inner join core_round cr on cm.round_id = cr.id
-                    inner join core_competition cs on cr.competition_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current competition
-                    and bot_p.bot_id = %s
-                    and opponent_p.bot_id = %s
-                    and bot_p.result = 'tie'
-                    """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
+    def _calculate_map_win_count(cursor, map, sp):
+        return StatsGenerator._calculate_map_data(cursor,map, sp, 
+                    "bot_p.result = 'win'")
 
     @staticmethod
-    def _calculate_crash_count(cursor, competition_participation, sp):
-        return StatsGenerator._run_single_column_query(cursor, """
-                    select count(cm.id) as count
-                    from core_match cm
-                    inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
-                    inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
-                    inner join core_round cr on cm.round_id = cr.id
-                    inner join core_competition cs on cr.competition_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current competition
-                    and bot_p.bot_id = %s
-                    and opponent_p.bot_id = %s
-                    and bot_p.result = 'loss'
-                    and bot_p.result_cause in ('crash', 'timeout', 'initialization_failure')
-                    """, [sp.competition_id, sp.bot_id, competition_participation.bot_id])
+    def _calculate_map_loss_count(cursor, map, sp):
+        return StatsGenerator._calculate_map_data(cursor,map, sp,
+                    "bot_p.result = 'loss'")
+
+    @staticmethod
+    def _calculate_map_tie_count(cursor, map, sp):
+        return StatsGenerator._calculate_map_data(cursor,map, sp,
+                    "bot_p.result = 'tie'")
+
+    @staticmethod
+    def _calculate_map_crash_count(cursor, map, sp):
+        return StatsGenerator._calculate_map_data(cursor,map, sp,
+                    """bot_p.result = 'loss'
+                    and bot_p.result_cause in ('crash', 'timeout', 'initialization_failure')""")
 
     @staticmethod
     def _get_data(bot_id, competition_id):
@@ -237,7 +276,7 @@ class StatsGenerator:
         legend.append('Last bot update')
         ax1.legend(legend, loc='lower center', fontsize='xx-large')
         plt.savefig(plot2, format="png", transparent=True)
-        plt.cla()  # Clears axis in preparation for new graph
+        plt.close(fig)
         return plot1, plot2
 
     @staticmethod

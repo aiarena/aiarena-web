@@ -12,7 +12,7 @@ from rest_framework.reverse import reverse
 
 from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, \
-    Competition, MatchTag, Game, GameMode, MapPool, CompetitionBotMatchupStats, News, Trophy
+    Competition, MatchTag, Game, GameMode, MapPool, CompetitionBotMatchupStats, CompetitionBotMapStats, News, Trophy
 from aiarena.core.permissions import IsServiceOrAdminUser
 
 logger = logging.getLogger(__name__)
@@ -33,6 +33,9 @@ competition_include_fields = 'id', 'name', 'type', 'game_mode', 'date_created', 
                              'status', 'max_active_rounds', 'interest', 'target_n_divisions', 'n_divisions', \
                              'target_division_size', 'rounds_per_cycle', 'rounds_this_cycle', 'n_placements',
 competition_bot_matchup_stats_include_fields = 'bot', 'opponent', 'match_count', 'win_count', 'win_perc', 'loss_count', \
+                                               'loss_perc', 'tie_count', 'tie_perc', 'crash_count', 'crash_perc', \
+                                               'updated',
+competition_bot_map_stats_include_fields = 'bot', 'map', 'match_count', 'win_count', 'win_perc', 'loss_count', \
                                                'loss_perc', 'tie_count', 'tie_perc', 'crash_count', 'crash_perc', \
                                                'updated',
 competition_participation_include_fields = 'id', 'competition', 'bot', 'elo', 'match_count', 'win_perc', 'win_count', \
@@ -212,6 +215,27 @@ class CompetitionBotMatchupStatsViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = competition_bot_matchup_stats_include_fields
     search_fields = competition_bot_matchup_stats_include_fields
     ordering_fields = competition_bot_matchup_stats_include_fields
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
+class CompetitionBotMapStatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompetitionBotMapStats
+        fields = competition_bot_map_stats_include_fields
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
+class CompetitionBotMapStatsViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    CompetitionBotMapStats data view
+    """
+    queryset = CompetitionBotMapStats.objects.all()
+    serializer_class = CompetitionBotMapStatsSerializer
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = competition_bot_map_stats_include_fields
+    search_fields = competition_bot_map_stats_include_fields
+    ordering_fields = competition_bot_map_stats_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
