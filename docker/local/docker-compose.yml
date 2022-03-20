@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+
+  aiarena-redis:
+    image: redis:latest
+    container_name: aiarena-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - aiarena-network
+    volumes:
+      - aiarena-redis-data:/data
+
+  aiarena-mysql:
+    image: mysql:5.7
+    container_name: aiarena-mysql
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    networks:
+      - aiarena-network
+    volumes:
+      - ./mysql/custom_init.sql:/docker-entrypoint-initdb.d/1.sql
+      - aiarena-mysql-data:/var/lib/mysql
+
+  aiarena-web:
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ../../
+    container_name: aiarena-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    networks:
+      - aiarena-network
+    volumes:
+      - aiarena-web-data:/data
+      - ../.:/app
+    depends_on:
+      - aiarena-redis
+      - aiarena-mysql
+    command: >
+      sh -c "python /app/manage.py collectstatic --noinput &&
+             python /app/manage.py migrate &&
+             python /app/manage.py runserver 0.0.0.0:8000"
+
+
+volumes:
+  aiarena-redis-data:
+    name: aiarena-redis-data
+  aiarena-mysql-data:
+    name: aiarena-mysql-data
+  aiarena-web-data:
+    name: aiarena-web-data
+
+networks:
+  aiarena-network:
