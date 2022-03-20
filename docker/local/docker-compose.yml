@@ -28,7 +28,9 @@ services:
       - aiarena-mysql-data:/var/lib/mysql
 
   aiarena-web:
-    build: ../.
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ../../
     container_name: aiarena-web
     restart: unless-stopped
     env_file:
