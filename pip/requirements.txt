@@ -5,13 +5,13 @@ django-appconf==1.0.4
 django-bootstrap-form==3.4
 django-filter==2.4.0
 django-private-storage==2.2.2
-django-registration-redux==2.8
+django-registration-redux==2.10
 django-avatar==5.0.0
 djangorestframework==3.11.1
 wheel==0.35.1
 mysqlclient==2.0.1
 pinax-theme-bootstrap==8.0.1
-pytz==2020.1
+pytz==2022.1
 six==1.16.0
 Markdown==3.1
 wiki==0.7.5
