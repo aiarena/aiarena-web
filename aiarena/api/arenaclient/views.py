@@ -14,7 +14,7 @@ from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
-from aiarena.api.arenaclient.exceptions import LadderDisabled
+from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
 from aiarena.core.utils import parse_tags
 from aiarena.core.api import Bots, Matches
 from aiarena.core.events import EVENT_MANAGER
@@ -90,6 +90,8 @@ class MatchViewSet(viewsets.GenericViewSet):
 
     def create(self, request, *args, **kwargs):
         match = ACCoordinator.next_match(request.user)
+        if match is None:
+            raise NoGameForClient()
         self.load_participants(match)
 
         serializer = self.get_serializer(match)

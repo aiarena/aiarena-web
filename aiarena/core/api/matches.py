@@ -14,7 +14,7 @@ from aiarena.core.api import Bots
 from aiarena.core.api.competitions import Competitions
 from aiarena.core.api.maps import Maps
 from aiarena.core.models import Result, Map, Match, Round, Bot, User, MatchParticipation, Competition, \
-    CompetitionParticipation
+    CompetitionParticipation, ArenaClient
 from aiarena.core.models.game_mode import GameMode
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class Matches:
                 map = Map.objects.first() # maybe improve this logic,  perhaps a random map and not just the first one
         return Match.create(None, map, bot,
                             opponent,
-                            user, bot1_update_data=False, bot2_update_data=False)
+                            user, bot1_update_data=False, bot2_update_data=False, require_trusted_arenaclient=False)
 
     # todo: have arena client check in with web service in order to delay this
     @staticmethod
@@ -86,19 +86,20 @@ class Matches:
             return False
 
     @staticmethod
-    def attempt_to_start_a_requested_match(requesting_user: User):
+    def attempt_to_start_a_requested_match(requesting_client: ArenaClient):
         # Try get a requested match
+        # Do we want trusted clients to run games not requiring trusted clients?
         matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round') \
-            .filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
+            .filter(started__isnull=True, requested_by__isnull=False, require_trusted_arenaclient=requesting_client.trusted).select_for_update().order_by('created')
         if matches.count() > 0:
-            return Matches._start_and_return_a_match(requesting_user, matches)
+            return Matches._start_and_return_a_match(requesting_client, matches)
         else:
             return None
 
     @staticmethod
-    def _start_and_return_a_match(requesting_user: User, matches):
+    def _start_and_return_a_match(requesting_client: ArenaClient, matches):
         for match in matches:
-            if Matches.start_match(match, requesting_user):
+            if Matches.start_match(match, requesting_client):
                 return match
         return None  # No match was able to start
 
@@ -242,7 +243,7 @@ class Matches:
                 .filter(competition=competition, active=True, division_num=participant1.division_num)
                 .exclude(id__in=already_processed_participants))
             for participant2 in active_participants_in_div:
-                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot)
+                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=True)
 
         return new_round
 
