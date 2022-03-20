@@ -799,7 +799,9 @@ class Index(ListView):
         context['events'] = events
         context['news'] = News.objects.all().order_by('-created')
 
-        competitions = Competition.objects.filter(status='open').annotate(num_participants=Count('participations'))
+        competitions = Competition.objects.filter(
+            status__in=['frozen','paused','open','closing'])\
+            .annotate(num_participants=Count('participations'))
         # Count active bots of the user in each competition
         if self.request.user.is_authenticated:
             competitions = (competitions.annotate(n_active_bots=Sum(Case(
@@ -992,6 +994,13 @@ class BotChoiceField(forms.ModelChoiceField):
 
 
 class RequestMatchForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Pre fill the map pool selection, for user convenience
+        self.initial['map_pool'] = MapPool.objects.filter(id=config.MATCH_REQUESTS_PREFILL_MAP_POOL_ID).first()
+
 
     MATCHUP_TYPE_CHOICES = (
         ('specific_matchup', 'Specific Matchup'),
