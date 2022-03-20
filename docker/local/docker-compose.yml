@@ -41,7 +41,7 @@ services:
       - aiarena-network
     volumes:
       - aiarena-web-data:/data
-      - ../.:/app
+      - ../../.:/app
     depends_on:
       - aiarena-redis
       - aiarena-mysql
