@@ -48,11 +48,11 @@ INTERNAL_IPS = ['127.0.0.1']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'aiarena',
-        'USER': 'aiarena',
-        'PASSWORD': 'aiarena',
-        'HOST': '127.0.0.1',  # Or an IP Address that your DB is hosted on
-        'PORT': '3306',
+        'NAME': os.getenv('MYSQL_DATABASE', 'aiarena'),
+        'USER': os.getenv('MYSQL_USER', 'aiarena'),
+        'PASSWORD': os.getenv('MYSQL_PASSWORD', 'aiarena'),
+        'HOST': os.getenv('MYSQL_HOST', 'localhost'),
+        'PORT': os.getenv('MYSQL_PORT', '3306'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
