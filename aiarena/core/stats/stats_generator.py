@@ -276,7 +276,7 @@ class StatsGenerator:
         legend.append('Last bot update')
         ax1.legend(legend, loc='lower center', fontsize='xx-large')
         plt.savefig(plot2, format="png", transparent=True)
-        plt.cla()  # Clears axis in preparation for new graph
+        plt.close(fig)
         return plot1, plot2
 
     @staticmethod
