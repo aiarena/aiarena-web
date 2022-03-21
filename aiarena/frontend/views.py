@@ -39,7 +39,7 @@ from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipat
 from aiarena.core.models import Trophy
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
-from aiarena.frontend.templatetags.core_filters import step_time_color, format_elo_change
+from aiarena.frontend.templatetags.core_filters import result_color, step_time_color, format_elo_change
 from aiarena.frontend.utils import restrict_page_range
 from aiarena.patreon.models import PatreonAccountBind
 
@@ -256,6 +256,7 @@ class BotResultTable(tables.Table):
     # match could be a LinkColumn, but used ".as_html_link" since that is being used elsewhere.
     match = tables.Column(verbose_name="ID")
     created = tables.DateTimeColumn(format="d N y, H:i", verbose_name="Date")
+    result = tables.Column(attrs={"td": {"class": lambda value: result_color(value)}})
     result_cause = tables.Column(verbose_name="Cause")
     elo_change = tables.Column(verbose_name="+/-")
     avg_step_time = tables.Column(

@@ -1494,3 +1494,15 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
 .private-download-warning {
   background-color: rgba(255, 0, 0, 0.6);
 }
+
+.result-loss {
+    color: #f90707;
+}
+
+.result-win {
+    color: #00c600;
+}
+
+.result-tie {
+    color: #ddd307;
+}
