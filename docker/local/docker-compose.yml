@@ -8,8 +8,6 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    networks:
-      - aiarena-network
     volumes:
       - aiarena-redis-data:/data
 
@@ -21,8 +19,6 @@ services:
       - .env
     ports:
       - "3306:3306"
-    networks:
-      - aiarena-network
     volumes:
       - ./mysql/custom_init.sql:/docker-entrypoint-initdb.d/1.sql
       - aiarena-mysql-data:/var/lib/mysql
@@ -37,8 +33,6 @@ services:
       - .env
     ports:
       - "8000:8000"
-    networks:
-      - aiarena-network
     volumes:
       - aiarena-web-data:/data
       - ../../.:/app
@@ -53,11 +47,9 @@ services:
 
 volumes:
   aiarena-redis-data:
-    name: aiarena-redis-data
   aiarena-mysql-data:
-    name: aiarena-mysql-data
   aiarena-web-data:
-    name: aiarena-web-data
 
 networks:
-  aiarena-network:
+  default:
+    name: aiarena-network
