@@ -1,5 +1,5 @@
 confusable-homoglyphs==3.2.0
-Django==3.2.9
+Django==4.0.3
 numpy==1.19.2
 django-appconf==1.0.4
 django-bootstrap-form==3.4
