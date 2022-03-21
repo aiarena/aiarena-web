@@ -64,7 +64,7 @@ def smooth_timedelta(timedeltaobj):
         timetot += " {} seconds".format(int(secs))
     return timetot
 
-def result_color(value):
+def result_color_class(value):
     return f"result-{str(value).lower()}"
 
 def step_time_color(value):
