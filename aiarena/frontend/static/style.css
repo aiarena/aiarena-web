@@ -733,6 +733,7 @@ table {
     overflow: hiden;
     background-color: rgba(0, 0, 0, 0.1);
     width: 90%;
+    max-width: 946px;
     text-align: center;
     border-collapse: collapse;
     margin-left: 60px;
