@@ -45,6 +45,8 @@ class Matches:
 
     @staticmethod
     def start_match(match, assign_to) -> bool:
+        if match.require_trusted_arenaclient and not assign_to.trusted:
+            return False
         match.lock_me()  # lock self to avoid race conditions
         if match.started is None:
             # Avoid starting a match when a participant is not available
@@ -90,7 +92,7 @@ class Matches:
         # Try get a requested match
         # Do we want trusted clients to run games not requiring trusted clients?
         matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round') \
-            .filter(started__isnull=True, requested_by__isnull=False, require_trusted_arenaclient=requesting_client.trusted).select_for_update().order_by('created')
+            .filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
         if matches.count() > 0:
             return Matches._start_and_return_a_match(requesting_client, matches)
         else:

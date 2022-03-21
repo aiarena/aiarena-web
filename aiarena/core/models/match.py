@@ -63,6 +63,8 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
                 bot2_use_data = bot2.bot_data_enabled
             if bot2_update_data is None:
                 bot2_update_data = bot2.bot_data_enabled
+            # NOTE: This could be done when getting a match to play.
+            # Allowing the match to be played on a untrusted client if the user allows the download after requesting a match.
             if not require_trusted_arenaclient:
                 require_trusted_arenaclient = not bot1.zip_publicly_downloadable or not bot2.zip_publicly_downloadable
 

@@ -89,7 +89,7 @@ class MatchViewSet(viewsets.GenericViewSet):
             .get(match_id=match.id, participant_number=2).bot
 
     def create(self, request, *args, **kwargs):
-        match = ACCoordinator.next_match(request.user)
+        match = ACCoordinator.next_match(request.user.arenaclient)
         if match is None:
             raise NoGameForClient()
         self.load_participants(match)
