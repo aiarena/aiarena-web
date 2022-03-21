@@ -20,10 +20,10 @@ matplotlib==3.3.2
 pandas==1.0.5
 django-robots==4.0
 django-random-queryset==0.1.3
-django-extensions==3.1.0
+django-extensions==3.1.5
 django-grappelli==2.15.3
 docutils==0.18.1
-drf-yasg==1.17.1
+drf-yasg==1.20.0
 django-redis==4.12.1
 django-select2==7.5.0
 django-tables2==2.3.4
