@@ -222,6 +222,7 @@ class BaseTestMixin(object):
 
     def _generate_full_data_set(self):
         self.test_client.login(User.objects.get(username='staff_user'))
+        self.test_client.set_api_token(Token.objects.get(username='arenaclient1'))
 
         self._generate_extra_users()
         self._generate_extra_bots()
