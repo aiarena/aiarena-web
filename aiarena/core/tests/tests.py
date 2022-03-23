@@ -108,7 +108,7 @@ class BaseTestMixin(object):
 
 
     def _post_to_matches(self):
-        return self.client.post('/api/arenaclient/matches/')
+        return self.test_client.post('/api/arenaclient/matches/')
 
 
     def _post_to_results_custom(self, match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log,
@@ -129,7 +129,7 @@ class BaseTestMixin(object):
         if bot1_tags: payload['bot1_tags'] = bot1_tags
         if bot2_tags: payload['bot2_tags'] = bot2_tags
 
-        return self.client.post('/api/arenaclient/results/', payload)
+        return self.test_client.post('/api/arenaclient/results/', payload)
 
 
     def _post_to_results(self, match_id, result_type, bot1_tags=None, bot2_tags=None):
@@ -171,7 +171,7 @@ class BaseTestMixin(object):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile:
-            return self.client.post('/api/arenaclient/results/',
+            return self.test_client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
                                      'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
@@ -193,7 +193,7 @@ class BaseTestMixin(object):
 
 
     def _post_to_results_no_replay(self, match_id, result_type):
-        return self.client.post('/api/arenaclient/results/',
+        return self.test_client.post('/api/arenaclient/results/',
                                 {'match': match_id,
                                  'type': result_type,
                                  'replay_file': '',
@@ -208,7 +208,7 @@ class BaseTestMixin(object):
                                                                     'rb') as bot1_log, open(
             self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
                                                                    'rb') as arenaclient_log:
-            return self.client.post('/api/arenaclient/results/',
+            return self.test_client.post('/api/arenaclient/results/',
                                     {'match': match_id,
                                      'type': result_type,
                                      'replay_file': '',
