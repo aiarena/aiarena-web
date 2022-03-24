@@ -20,6 +20,13 @@ def run_seed(matches, token):
     client.create_arenaclient('aiarenaclient-002', 'aiarenaclient-002@dev.aiarena.net', devadmin.id)
     client.create_user('service_user', 'x', 'service_user@dev.aiarena.net', 'SERVICE', devadmin.id)
 
+    # if token is None it will generate a new one, otherwise it will use the one specified
+    if token is None:
+        api_token = Token.objects.create(user=arenaclient1)
+    else:
+        api_token = Token.objects.create(user=arenaclient1, key=token)
+    client.set_api_token(api_token)
+
     game = client.create_game('StarCraft II')
     gamemode = client.create_gamemode('Melee', game.id)
 
@@ -110,10 +117,6 @@ def run_seed(matches, token):
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
         CompetitionParticipation.objects.create(competition=competition2, bot=bot)
-
-        # if token is None it will generate a new one, otherwise it will use the one specified
-        api_token = Token.objects.create(user=arenaclient1, key=token)
-        client.set_api_token(api_token)
 
         # TODO: TEST MULTIPLE ACs
         for x in range(matches - 1):

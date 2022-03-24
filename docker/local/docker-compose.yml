@@ -44,10 +44,39 @@ services:
              python /app/manage.py migrate &&
              python /app/manage.py runserver 0.0.0.0:8000"
 
+  aiarena-mysql-test:
+    image: mysql:5.7
+    container_name: aiarena-mysql-test
+    restart: unless-stopped
+    env_file:
+      - .env.test
+    expose:
+      - "3306"
+    volumes:
+      - ./mysql/custom_test_init.sql:/docker-entrypoint-initdb.d/1.sql
+      - aiarena-mysql-test-data:/var/lib/mysql
+
+  aiarena-web-test:
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ../../
+    container_name: aiarena-web-test
+    env_file:
+      - .env.test
+    environment:
+      - MYSQL_DATABASE=aiarena
+    volumes:
+      - ../../.:/app
+    depends_on:
+      - aiarena-mysql-test
+    command: >
+      sh -c "python /app/manage.py test"
+
 
 volumes:
   aiarena-redis-data:
   aiarena-mysql-data:
+  aiarena-mysql-test-data:
   aiarena-web-data:
 
 networks:

@@ -390,7 +390,6 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot1')
         bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', 'Z')
 
-        self.test_client.set_api_token(Token.objects.get(user=self.arenaclientUser1))
 
         # log more crashes than should be allowed
         for count in range(config.BOT_CONSECUTIVE_CRASH_LIMIT):

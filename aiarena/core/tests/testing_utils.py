@@ -2,6 +2,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
 
+from rest_framework.authtoken.models import Token
+
 from typing import List
 
 from aiarena.core.models import User, Match, Result, ArenaClient, \
@@ -172,8 +174,7 @@ class TestingClient:
         return Match.objects.filter(requested_by=response.wsgi_request.user).order_by('-created').first()
 
     def next_match(self) -> Match:
-        url = reverse('ac_next_match-list')
-        response = self.django_client.post(url, self.get_api_headers())
+        response = self.post_to_matches()
 
         assert response.status_code == 201
         return Match.objects.get(id=response.data['id'])
@@ -188,6 +189,14 @@ class TestingClient:
 
         # we should be redirected back to the same page
         assert response.status_code == 302 and response.url == url
+
+    def post_to_matches(self):
+        url = reverse('ac_next_match-list')
+        return self.django_client.post(url, **self.get_api_headers())
+
+    def submit_result(self, data) -> Result:
+        url = reverse('ac_submit_result-list')
+        return self.django_client.post(url, data, **self.get_api_headers())
 
     def submit_result(self, match_id: int, type: str) -> Result:
         with open(BaseTestMixin.test_replay_path, 'rb') as replay_file, \
@@ -213,10 +222,8 @@ class TestingClient:
                                                    bot2_log.read()),
                     'bot1_avg_step_time': '0.111',
                     'bot2_avg_step_time': '0.222', }
-            url = reverse('ac_submit_result-list')
-            response = self.django_client.post(url,
-                                               data,
-                                               **self.get_api_headers())
+                    
+            response = self.submit_result(data)
 
             assert response.status_code == 201
             return Result.objects.get(id=response.data['result_id'])
