@@ -733,6 +733,7 @@ table {
     overflow: hiden;
     background-color: rgba(0, 0, 0, 0.1);
     width: 90%;
+    max-width: 946px;
     text-align: center;
     border-collapse: collapse;
     margin-left: 60px;
@@ -905,11 +906,12 @@ tr:hover a:focus {
     padding-top: 10px;
     padding-left: 30px;
     padding-bottom: 20px;
-    height: 210px;
+    overflow: auto;
 }
 
 .form-box {
     float: left;
+    max-width: 400px;
 }
 
 #pw-reset {
@@ -1493,4 +1495,16 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
 
 .private-download-warning {
   background-color: rgba(255, 0, 0, 0.6);
+}
+
+.result-loss {
+    color: #f90707;
+}
+
+.result-win {
+    color: #00c600;
+}
+
+.result-tie {
+    color: #ddd307;
 }
