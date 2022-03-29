@@ -26,12 +26,6 @@ class TestingClient:
     def logout(self):
         self.django_client.logout()
 
-    def set_api_token(self, api_token: str):
-        self.api_token = api_token
-
-    def get_api_headers(self) -> dict:
-        return {"Authorization": f"Token {self.api_token}"}
-
     def create_user(self,
                     username: str,
                     password: str,
@@ -75,7 +69,7 @@ class TestingClient:
         response = self.django_client.post(url, {'name': name, })
 
         # we should be redirected back to the changelist
-        assert response.status_code == 302 and response.url == reverse('admin:core_game_changelist')
+        assert response.status_code == 302 and response.url == reverse('admin:core_game_changelist'), f"{response.status_code}|{302} {response.url}|{reverse('admin:core_game_changelist')}"
         return Game.objects.get(name=name)
 
     def create_gamemode(self, name: str, game_id: int) -> GameMode:
@@ -173,10 +167,15 @@ class TestingClient:
         assert response.status_code == 302 and response.url == url
         return Match.objects.filter(requested_by=response.wsgi_request.user).order_by('-created').first()
 
+    def post_to_matches(self) -> Match:
+        url = reverse('ac_next_match-list')
+        response = self.django_client.post(url)
+        return response
+
     def next_match(self) -> Match:
         response = self.post_to_matches()
 
-        assert response.status_code == 201
+        assert response.status_code == 201, f"{response.status_code} {response.data}"
         return Match.objects.get(id=response.data['id'])
 
     def cancel_matches(self, match_ids: List[int]):
@@ -190,13 +189,29 @@ class TestingClient:
         # we should be redirected back to the same page
         assert response.status_code == 302 and response.url == url
 
-    def post_to_matches(self):
-        url = reverse('ac_next_match-list')
-        return self.django_client.post(url, **self.get_api_headers())
+    def submit_custom_result(self, match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log,
+                                arenaclient_log, bot1_tags=None, bot2_tags=None):
+        data = {
+            'match': match_id,
+            'type': result_type,
+            'replay_file': replay_file,
+            'game_steps': 500,
+            'bot1_data': bot1_data,
+            'bot2_data': bot2_data,
+            'bot1_log': bot1_log,
+            'bot2_log': bot2_log,
+            'bot1_avg_step_time': 0.2,
+            'bot2_avg_step_time': 0.1,
+            'arenaclient_log': arenaclient_log,
+        }
+        if bot1_tags: data['bot1_tags'] = bot1_tags
+        if bot2_tags: data['bot2_tags'] = bot2_tags
+        return self.publish_result(data)
 
-    def submit_result(self, data) -> Result:
+    def publish_result(self, data):
         url = reverse('ac_submit_result-list')
-        return self.django_client.post(url, data, **self.get_api_headers())
+        return self.django_client.post(url,
+                                        data=data)
 
     def submit_result(self, match_id: int, type: str) -> Result:
         with open(BaseTestMixin.test_replay_path, 'rb') as replay_file, \
@@ -209,7 +224,7 @@ class TestingClient:
                     'type': type,
                     'replay_file': SimpleUploadedFile("replay_file.SC2Replay",
                                                       replay_file.read()),
-                    'game_steps': '1234',
+                    'game_steps': 1234,
                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.log",
                                                           arenaclient_log.read()),
                     'bot1_data': SimpleUploadedFile("bot1_data.log",
@@ -222,8 +237,7 @@ class TestingClient:
                                                    bot2_log.read()),
                     'bot1_avg_step_time': '0.111',
                     'bot2_avg_step_time': '0.222', }
-                    
-            response = self.submit_result(data)
+            response = self.publish_result(data)
 
-            assert response.status_code == 201
+            assert response.status_code == 201, f"{response.status_code} {response.data} {data}"
             return Result.objects.get(id=response.data['result_id'])
