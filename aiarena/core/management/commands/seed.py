@@ -25,7 +25,6 @@ def run_seed(matches, token):
         api_token = Token.objects.create(user=arenaclient1)
     else:
         api_token = Token.objects.create(user=arenaclient1, key=token)
-    client.set_api_token(api_token)
 
     game = client.create_game('StarCraft II')
     gamemode = client.create_gamemode('Melee', game.id)
@@ -118,12 +117,14 @@ def run_seed(matches, token):
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
         CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
+        arena_client = TestingClient()
+        arena_client.login(arenaclient1)
         # TODO: TEST MULTIPLE ACs
         for x in range(matches - 1):
-            match = client.next_match()
+            match = arena_client.next_match()
 
             # todo: submit different types of results.
-            client.submit_result(match.id, 'Player1Win')
+            arena_client.submit_result(match.id, 'Player1Win')
 
             if x == 0:  # make it so a bot that once was active, is now inactive
                 bot1 = CompetitionParticipation.objects.filter(active=True).first()
@@ -132,7 +133,7 @@ def run_seed(matches, token):
 
         # so we have a match in progress
         if matches != 0:
-            client.next_match()
+            arena_client.next_match()
 
         # bot still in placement
         bot = Bot.objects.create(user=devadmin, name='devadmin_bot100', plays_race='T', type='python',

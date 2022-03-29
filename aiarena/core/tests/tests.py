@@ -110,27 +110,6 @@ class BaseTestMixin(object):
     def _post_to_matches(self):
         return self.test_client.post_to_matches()
 
-    def _post_to_results_custom(self, match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log,
-                                arenaclient_log, bot1_tags=None, bot2_tags=None):
-        payload = {
-            'match': match_id,
-            'type': result_type,
-            'replay_file': replay_file,
-            'game_steps': 500,
-            'bot1_data': bot1_data,
-            'bot2_data': bot2_data,
-            'bot1_log': bot1_log,
-            'bot2_log': bot2_log,
-            'bot1_avg_step_time': 0.2,
-            'bot2_avg_step_time': 0.1,
-            'arenaclient_log': arenaclient_log,
-        }
-        if bot1_tags: payload['bot1_tags'] = bot1_tags
-        if bot2_tags: payload['bot2_tags'] = bot2_tags
-
-        return self.test_client.submit_result(payload)
-
-
     def _post_to_results(self, match_id, result_type, bot1_tags=None, bot2_tags=None):
         """
         Posts a generic result.
@@ -146,7 +125,7 @@ class BaseTestMixin(object):
                 self.test_bot1_match_log_path, 'rb') as bot1_log, open(
                 self.test_bot2_match_log_path, 'rb') as bot2_log, open(
                 self.test_arenaclient_log_path, 'rb') as arenaclient_log:
-            return self._post_to_results_custom(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log, bot1_tags, bot2_tags)
+            return self.test_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log, bot1_tags, bot2_tags)
 
 
     def _post_to_results_bot_datas_set_1(self, match_id, result_type):
@@ -163,14 +142,14 @@ class BaseTestMixin(object):
                                                                     'rb') as bot1_log, open(
             self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
                                                                    'rb') as arenaclient_log:
-            return self._post_to_results_custom(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log)
+            return self.test_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log)
 
 
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile:
-            return self.test_client.submit_result({'match': match_id,
+            return self.test_client.publish_result({'match': match_id,
                                      'type': result_type,
                                      'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500})
@@ -180,18 +159,18 @@ class BaseTestMixin(object):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replay_file, open(self.test_bot_datas['bot2'][bot_data_set]['path'], 'rb') as bot2_data:
-            return self._post_to_results_custom(match_id, result_type, replay_file, '', bot2_data, '', '', '')
+            return self.test_client.submit_custom_result(match_id, result_type, replay_file, '', bot2_data, '', '', '')
 
 
     def _post_to_results_no_bot2_data(self, match_id, result_type, bot_data_set):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replay_file, open(self.test_bot_datas['bot1'][bot_data_set]['path'], 'rb') as bot1_data:
-            return self._post_to_results_custom(match_id, result_type, replay_file, bot1_data, '', '', '', '')
+            return self.test_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, '', '', '', '')
 
 
     def _post_to_results_no_replay(self, match_id, result_type):
-        return self.test_client.submit_result({'match': match_id,
+        return self.test_client.publish_result({'match': match_id,
                                  'type': result_type,
                                  'replay_file': '',
                                  'game_steps': 500})
@@ -205,7 +184,8 @@ class BaseTestMixin(object):
                                                                     'rb') as bot1_log, open(
             self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
                                                                    'rb') as arenaclient_log:
-            return self.test_client.submit_result({'match': match_id,
+                                                                   
+            return self.test_client.publish_result({'match': match_id,
                                      'type': result_type,
                                      'replay_file': '',
                                      'game_steps': 500,
@@ -217,12 +197,10 @@ class BaseTestMixin(object):
 
 
     def _generate_full_data_set(self):
-        self.test_client.login(User.objects.get(username='staff_user'))
+        self.test_client.login(ArenaClient.objects.get(username='arenaclient1'))
 
         self._generate_extra_users()
         self._generate_extra_bots()
-
-        self.test_client.set_api_token(Token.objects.get(user=User.objects.get(username='arenaclient1')))
 
         self._generate_match_activity()
 
@@ -329,7 +307,7 @@ class LoggedInMixin(BaseTestMixin):
 
         self.arenaclientUser1 = ArenaClient.objects.create(username='arenaclient1', email='arenaclient@dev.aiarena.net',
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
-        Token.objects.create(user=self.arenaclientUser1)
+        self.api_token = Token.objects.create(user=self.arenaclientUser1)
 
         self.regularUser1 = WebsiteUser.objects.create_user(username='regular_user1', password='x',
                                                      email='regular_user1@dev.aiarena.net')
@@ -728,6 +706,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
         # test match successfully cancelled
         self.client.login(username='staff_user', password='x')
+        self.test_client.login(self.arenaclientUser1)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         match_id = response.data['id']
@@ -770,6 +749,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
     def test_cleanup_replays_and_logs(self):
         NUM_MATCHES = 12
         self.client.login(username='staff_user', password='x')
+        self.test_client.login(self.arenaclientUser1)
 
         # freeze competition2, so we can get anticipatable results
         competition1 = Competition.objects.filter(status='open').first()
@@ -779,7 +759,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         # generate some matches so we have replays to delete...
         for x in range(NUM_MATCHES):  # 12 = two rounds
             response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201)
+            self.assertEqual(response.status_code, 201, f"{response.status_code} {response.data}")
             match_id = response.data['id']
             self._post_to_results(match_id, 'Player1Win')
 

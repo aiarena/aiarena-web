@@ -78,7 +78,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     No reading of models is implemented.
     """
     serializer_class = MatchSerializer
-    permission_classes = [IsArenaClientOrAdminUser]
+    permission_classes = [IsArenaClient]
     throttle_scope = 'arenaclient'
     swagger_schema = None  # exclude this from swagger generation
 
