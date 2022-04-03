@@ -468,7 +468,7 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         extra_symbols = ' _ _ '
         game_mode = GameMode.objects.first()
 
-        self.client.force_login(self.arenaclientUser1)
+        self.test_client.login(self.arenaclientUser1)
 
         # No tags
         Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
@@ -573,7 +573,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
 
     def test_competition_states(self):
-        self.client.force_login(self.arenaclientUser1)
+        self.test_client.login(self.arenaclientUser1)
 
         # freeze competition2, so we can get anticipatable results
         competition1 = Competition.objects.filter(status='open').first()
@@ -867,7 +867,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
 
     def test_timeout_overtime_matches(self):
-        self.client.force_login(User.objects.get(username='arenaclient1'))
+        self.test_client.login(User.objects.get(username='arenaclient1'))
 
         response = self.client.post('/api/arenaclient/matches/')
         self.assertEqual(response.status_code, 201)
