@@ -26,6 +26,12 @@ class TestingClient:
     def logout(self):
         self.django_client.logout()
 
+    def set_api_token(self, api_token: str):
+        self.api_token = api_token
+
+    def get_api_headers(self) -> dict:
+        return {"Authorization": f"Token {self.api_token}"}
+
     def create_user(self,
                     username: str,
                     password: str,
@@ -169,7 +175,8 @@ class TestingClient:
 
     def post_to_matches(self) -> Match:
         url = reverse('ac_next_match-list')
-        response = self.django_client.post(url)
+        headers = self.get_api_headers()
+        response = self.django_client.post(url, **headers)
         return response
 
     def next_match(self) -> Match:
@@ -210,8 +217,8 @@ class TestingClient:
 
     def publish_result(self, data):
         url = reverse('ac_submit_result-list')
-        return self.django_client.post(url,
-                                        data=data)
+        headers = self.get_api_headers()
+        return self.django_client.post(url, data=data, **headers)
 
     def submit_result(self, match_id: int, type: str) -> Result:
         with open(BaseTestMixin.test_replay_path, 'rb') as replay_file, \
