@@ -2,8 +2,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
 
-from rest_framework.authtoken.models import Token
-
 from typing import List
 
 from aiarena.core.models import User, Match, Result, ArenaClient, \
@@ -75,7 +73,7 @@ class TestingClient:
         response = self.django_client.post(url, {'name': name, })
 
         # we should be redirected back to the changelist
-        assert response.status_code == 302 and response.url == reverse('admin:core_game_changelist'), f"{response.status_code}|{302} {response.url}|{reverse('admin:core_game_changelist')}"
+        assert response.status_code == 302 and response.url == reverse('admin:core_game_changelist')
         return Game.objects.get(name=name)
 
     def create_gamemode(self, name: str, game_id: int) -> GameMode:
