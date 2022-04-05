@@ -78,7 +78,7 @@ class MatchViewSet(viewsets.GenericViewSet):
     No reading of models is implemented.
     """
     serializer_class = MatchSerializer
-    permission_classes = [IsArenaClient]
+    permission_classes = [IsArenaClientOrAdminUser]
     throttle_scope = 'arenaclient'
     swagger_schema = None  # exclude this from swagger generation
 
@@ -89,7 +89,7 @@ class MatchViewSet(viewsets.GenericViewSet):
             .get(match_id=match.id, participant_number=2).bot
 
     def create(self, request, *args, **kwargs):
-        match = ACCoordinator.next_match(request.user.arenaclient)
+        match = ACCoordinator.next_match(request.user)
         if match is None:
             raise NoGameForClient()
         self.load_participants(match)
