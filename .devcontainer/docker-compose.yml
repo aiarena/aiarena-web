@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+
+  devcontainer-aiarena-redis:
+    image: redis:latest
+    container_name: devcontainer-aiarena-redis
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+
+  devcontainer-aiarena-mysql:
+    image: mysql:5.7
+    container_name: devcontainer-aiarena-mysql
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - 3306:3306
+    volumes:
+      - ./mysql:/docker-entrypoint-initdb.d
+      - devcontainer-aiarena-mysql-volume:/var/lib/mysql
+
+  devcontainer-aiarena-app:
+    build:
+      dockerfile: .devcontainer/Dockerfile
+      context: ../
+    container_name: devcontainer-aiarena-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    depends_on:
+      - devcontainer-aiarena-redis
+      - devcontainer-aiarena-mysql
+    volumes:
+      - ..:/workspace
+    command: sleep infinity
+
+volumes:
+  devcontainer-aiarena-mysql-volume:
