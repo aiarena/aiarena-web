@@ -24,17 +24,17 @@ class ACCoordinator:
     """Coordinates all the Arena Clients and which matches they play."""
 
     @staticmethod
-    def next_requested_match(arenaclient: ArenaClient):
+    def next_requested_match(user: User):
         # REQUESTED MATCHES
         with transaction.atomic():
-            match = Matches.attempt_to_start_a_requested_match(arenaclient)
+            match = Matches.attempt_to_start_a_requested_match(user)
             if match is not None:
                 return match  # a match was found - we're done
         return None
 
     @staticmethod
-    def next_competition_match(arenaclient: ArenaClient):
-        if arenaclient.trusted:
+    def next_competition_match(user: User):
+        if user.is_trusted_arenaclient:
             # TODO: Check for trusted competitions
             competition_ids = ACCoordinator._get_competition_priority_order()
             for id in competition_ids:
@@ -43,32 +43,32 @@ class ACCoordinator:
                 with transaction.atomic():
                     # this call will apply a select for update, so we do it inside an atomic block
                     if Competitions.check_has_matches_to_play_and_apply_locks(competition):
-                        return Matches.start_next_match_for_competition(arenaclient, competition)
+                        return Matches.start_next_match_for_competition(user, competition)
 
             # TODO: Maybe remove exception when we have testing
             raise NoCurrentlyAvailableCompetitions()
         return None
 
     @staticmethod
-    def next_new_match(arenaclient: ArenaClient):
-        requested_match = ACCoordinator.next_requested_match(arenaclient)
+    def next_new_match(user: User):
+        requested_match = ACCoordinator.next_requested_match(user)
         if requested_match is not None:
             return requested_match
-        return ACCoordinator.next_competition_match(arenaclient)
+        return ACCoordinator.next_competition_match(user)
 
     @staticmethod
-    def next_match(arenaclient: ArenaClient) -> Match:
+    def next_match(user: User) -> Match:
         if config.LADDER_ENABLED:
             try:
                 if config.REISSUE_UNFINISHED_MATCHES:
                     # Check for any unfinished matches assigned to this user. If any are present, return that.
                     unfinished_matches = Match.objects.only('id', 'map') \
-                        .filter(started__isnull=False, assigned_to=arenaclient,
+                        .filter(started__isnull=False, assigned_to=user,
                                 result__isnull=True).order_by(F('round_id').asc())
                     if unfinished_matches.count() > 0:
                         return unfinished_matches[0]  # todo: re-set started time?
                 # Trying a new match
-                return ACCoordinator.next_new_match(arenaclient)
+                return ACCoordinator.next_new_match(user)
             except Exception as e:
                 logger.exception("Exception while processing request for match.")
                 raise
