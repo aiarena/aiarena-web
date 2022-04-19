@@ -116,13 +116,13 @@
                         None
                     {% else %}
                         {% if match.result.replay_file %}
-                            <a class="file-link" href="{{ match.result.replay_file.url }}">Replay</a>
+                            <a class="file-link" href="{{ match.result.replay_file.url }}" download>Replay</a>
                         {% endif %}
                         {% if match.result.replay_file and match.result.arenaclient_log %}
                             |
                         {% endif %}
                         {% if match.result.arenaclient_log %}
-                            <a class="file-link" href="{{ match.result.arenaclient_log.url }}">AC Log</a>
+                            <a class="file-link" href="{{ match.result.arenaclient_log.url }}" download>AC Log</a>
                         {% endif %}
                     {% endif %}
                 </td>

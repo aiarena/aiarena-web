@@ -78,9 +78,9 @@
                 <td>{{ bot.as_truncated_html_link }}</td>
                 <td>{{ bot.get_plays_race_display }}</td>
                 <td>{{ bot.type }}</td>
-                <td><a href="{{ bot.bot_zip.url }}">Download</a></td>
+                <td><a href="{{ bot.bot_zip.url }}" download>Download</a></td>
                 {% if bot.bot_data %}
-                    <td><a href="{{ bot.bot_data.url }}">Download</a></td>
+                    <td><a href="{{ bot.bot_data.url }}" download>Download</a></td>
                 {% else %}
                     <td>No bot data</td>
                 {% endif %}
