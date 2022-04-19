@@ -49,7 +49,7 @@
                     <td>
                     {% endif %}
                         {% if request.user == bot.user or bot.bot_zip_publicly_downloadable or request.user.is_superuser %}
-                            <a href="{{ bot.bot_zip.url }}">Download</a>
+                            <a href="{{ bot.bot_zip.url }}" download>Download</a>
                         {% else %}
                             --
                         {% endif %}
@@ -66,7 +66,7 @@
                     {% endif %}
                         {% if bot.bot_data %} {# Done with two if statements because templates don't allow parentheses #}
                             {% if request.user == bot.user or bot.bot_data_publicly_downloadable or request.user.is_superuser %}
-                                <a href="{{ bot.bot_data.url }}">Download</a>
+                                <a href="{{ bot.bot_data.url }}" download>Download</a>
                             {% else %}
                                 --
                             {% endif %}

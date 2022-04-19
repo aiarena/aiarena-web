@@ -128,7 +128,7 @@
                 <td>{{ result.game_time_formatted }}</td>
 
                 {% if result.replay_file %}
-                    <td><a class="file-link" href="{{ result.replay_file.url }}">Download</a></td>
+                    <td><a class="file-link" href="{{ result.replay_file.url }}" download>Download</a></td>
                 {% else %}
                     <td>Unavailable</td>
                 {% endif %}
