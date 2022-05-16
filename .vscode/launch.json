@@ -33,8 +33,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
-                "test",
-                "aiarena.core.tests.tests.ManagementCommandTests.test_seed"
+                "test"
             ],
             "django": true,
             "justMyCode": true
