@@ -8,8 +8,6 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    networks:
-      - aiarena-network
     volumes:
       - aiarena-redis-data:/data
 
@@ -21,8 +19,6 @@ services:
       - .env
     ports:
       - "3306:3306"
-    networks:
-      - aiarena-network
     volumes:
       - ./mysql/custom_init.sql:/docker-entrypoint-initdb.d/1.sql
       - aiarena-mysql-data:/var/lib/mysql
@@ -37,8 +33,6 @@ services:
       - .env
     ports:
       - "8000:8000"
-    networks:
-      - aiarena-network
     volumes:
       - aiarena-web-data:/data
       - ../../.:/app
@@ -50,14 +44,41 @@ services:
              python /app/manage.py migrate &&
              python /app/manage.py runserver 0.0.0.0:8000"
 
+  aiarena-mysql-test:
+    image: mysql:5.7
+    container_name: aiarena-mysql-test
+    restart: unless-stopped
+    env_file:
+      - .env.test
+    expose:
+      - "3306"
+    volumes:
+      - ./mysql/custom_test_init.sql:/docker-entrypoint-initdb.d/1.sql
+      - aiarena-mysql-test-data:/var/lib/mysql
+
+  aiarena-web-test:
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ../../
+    container_name: aiarena-web-test
+    env_file:
+      - .env.test
+    environment:
+      - MYSQL_DATABASE=aiarena
+    volumes:
+      - ../../.:/app
+    depends_on:
+      - aiarena-mysql-test
+    command: >
+      sh -c "python /app/manage.py test"
+
 
 volumes:
   aiarena-redis-data:
-    name: aiarena-redis-data
   aiarena-mysql-data:
-    name: aiarena-mysql-data
+  aiarena-mysql-test-data:
   aiarena-web-data:
-    name: aiarena-web-data
 
 networks:
-  aiarena-network:
+  default:
+    name: aiarena-network
