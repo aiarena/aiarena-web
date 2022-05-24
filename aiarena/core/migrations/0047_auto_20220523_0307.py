@@ -3,18 +3,20 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+from aiarena.core.models import Bot
 from aiarena.core.models.bot_race import BotRace
 
 
 def link_bot_races(apps, schema_editor):
-    BotRace.create_all_races()
+    if Bot.objects.count() > 0:
+        BotRace.create_all_races()
 
-    BotModel = apps.get_model('core', 'Bot')
+        BotModel = apps.get_model('core', 'Bot')
 
-    for bot in BotModel.objects.all():
-        br = BotRace.objects.filter(label=bot.plays_race_model).first()
-        bot.plays_race_model = br
-        bot.save()
+        for bot in BotModel.objects.all():
+            br = BotRace.objects.filter(label=bot.plays_race_model).first()
+            bot.plays_race_model = br
+            bot.save()
 
 class Migration(migrations.Migration):
 

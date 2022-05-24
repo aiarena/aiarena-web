@@ -18,3 +18,22 @@ class BotRace(models.Model):
     def create_all_races():
         for race in BotRace.RACES:
             BotRace.objects.create(label=race[0])
+
+    @staticmethod
+    def terran():
+        return BotRace.objects.get(label='T')
+
+    @staticmethod
+    def zerg():
+        return BotRace.objects.get(label='Z')
+
+    @staticmethod
+    def protoss():
+        return BotRace.objects.get(label='P')
+
+    @staticmethod
+    def random():
+        return BotRace.objects.get(label='R')
+
+    def __str__(self):
+        return self.get_label_display()
