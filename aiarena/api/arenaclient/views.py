@@ -58,7 +58,7 @@ class BotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bot
         fields = (
-            'id', 'name', 'game_display_id', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race',
+            'id', 'name', 'game_display_id', 'bot_zip', 'bot_zip_md5hash', 'bot_data', 'bot_data_md5hash', 'plays_race_model',
             'type')
 
 

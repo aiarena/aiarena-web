@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from aiarena import settings
 from aiarena.core.models import User, Map, Bot, News, \
     CompetitionParticipation, MapPool, WebsiteUser
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import BaseTestMixin
 from aiarena.core.utils import EnvironmentType
@@ -50,6 +51,11 @@ def run_seed(matches, token):
     map_pool.maps.add(m1)
     map_pool.maps.add(m2)
 
+    BotRace.create_all_races()
+    terran = BotRace.objects.get(label='T')
+    zerg = BotRace.objects.get(label='Z')
+    protoss = BotRace.objects.get(label='P')
+
     # assume the frontend is working by this point and create these the easiest way
     devuser1 = WebsiteUser.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
                                         patreon_level='bronze')
@@ -63,50 +69,50 @@ def run_seed(matches, token):
                                         patreon_level='diamond')
 
     with open(BaseTestMixin.test_bot_zip_path, 'rb') as bot_zip:
-        bot = Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race='T', type='python',
+        bot = Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race_model=terran, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
         CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
-        bot = Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race='Z', type='python',
+        bot = Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race_model=zerg, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
-        Bot.objects.create(user=devadmin, name='devadmin_bot3', plays_race='P', type='python',
+        Bot.objects.create(user=devadmin, name='devadmin_bot3', plays_race_model=protoss, type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        bot = Bot.objects.create(user=devuser1, name='devuser1_bot1', plays_race='P', type='python',
+        bot = Bot.objects.create(user=devuser1, name='devuser1_bot1', plays_race_model=protoss, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
         CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
-        bot = Bot.objects.create(user=devuser1, name='devuser1_bot2', plays_race='Z', type='python',
+        bot = Bot.objects.create(user=devuser1, name='devuser1_bot2', plays_race_model=zerg, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
-        Bot.objects.create(user=devuser1, name='devuser1_bot3', plays_race='T', type='python',
+        Bot.objects.create(user=devuser1, name='devuser1_bot3', plays_race_model=terran, type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        bot = Bot.objects.create(user=devuser2, name='devuser2_bot1', plays_race='P', type='python',
+        bot = Bot.objects.create(user=devuser2, name='devuser2_bot1', plays_race_model=protoss, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
-        bot = Bot.objects.create(user=devuser2, name='devuser2_bot2', plays_race='T', type='python',
+        bot = Bot.objects.create(user=devuser2, name='devuser2_bot2', plays_race_model=terran, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
-        Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race='Z', type='python',
+        Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race_model=zerg, type='python',
                            bot_zip=File(bot_zip))  # inactive bot
 
-        bot = Bot.objects.create(user=devuser3, name='devuser3_bot1', plays_race='T', type='python',
+        bot = Bot.objects.create(user=devuser3, name='devuser3_bot1', plays_race_model=terran, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
-        bot = Bot.objects.create(user=devuser4, name='devuser4_bot1', plays_race='Z', type='python',
+        bot = Bot.objects.create(user=devuser4, name='devuser4_bot1', plays_race_model=zerg, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
-        bot = Bot.objects.create(user=devuser5, name='devuser5_bot1', plays_race='P', type='python',
+        bot = Bot.objects.create(user=devuser5, name='devuser5_bot1', plays_race_model=protoss, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
         CompetitionParticipation.objects.create(competition=competition2, bot=bot)
@@ -132,7 +138,7 @@ def run_seed(matches, token):
             client.next_match()
 
         # bot still in placement
-        bot = Bot.objects.create(user=devadmin, name='devadmin_bot100', plays_race='T', type='python',
+        bot = Bot.objects.create(user=devadmin, name='devadmin_bot100', plays_race_model=terran, type='python',
                                  bot_zip=File(bot_zip))
         cp = CompetitionParticipation.objects.create(competition=competition1, bot=bot)
         competition1.refresh_from_db()
@@ -140,7 +146,7 @@ def run_seed(matches, token):
         cp.save()
 
         # bot that just joined the competition
-        bot = Bot.objects.create(user=devadmin, name='devadmin_bot101', plays_race='T', type='python',
+        bot = Bot.objects.create(user=devadmin, name='devadmin_bot101', plays_race_model=terran, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 

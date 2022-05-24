@@ -19,6 +19,7 @@ from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
+from .bot_race import BotRace
 from .match import Match
 from .mixins import LockableModelMixin
 from .competition import Competition
@@ -74,7 +75,9 @@ class Bot(models.Model, LockableModelMixin):
                                 blank=True, null=True)
     bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
     bot_data_publicly_downloadable = models.BooleanField(default=False)
-    plays_race = models.CharField(max_length=1, choices=RACES)
+    # todo: rename back to plays_race
+    # todo: remove null
+    plays_race_model = models.ForeignKey(BotRace, on_delete=models.PROTECT, null=True)
     type = models.CharField(max_length=32, choices=TYPES)
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
@@ -189,7 +192,7 @@ class Bot(models.Model, LockableModelMixin):
 
     @cached_property
     def as_html_link_with_race(self):
-        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())} ({self.plays_race})</a>')
+        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())} ({self.plays_race_model})</a>')
 
     @cached_property
     def expected_executable_filename(self):

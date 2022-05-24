@@ -19,7 +19,7 @@ class BotFilter(filters.FilterSet):
             'id',
             'name',
             'created',
-            'plays_race',
+            'plays_race_model',
             'type',
             'game_display_id',
             'bot_zip_updated',
