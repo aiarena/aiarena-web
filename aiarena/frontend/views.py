@@ -37,6 +37,7 @@ from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipat
     Competition, Map, \
     ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
 from aiarena.frontend.templatetags.core_filters import result_color_class, step_time_color, format_elo_change
@@ -984,13 +985,13 @@ class BotChoiceField(forms.ModelChoiceField):
         else:
             active = '✘'
         race = bot_object.plays_race_model
-        if race == 'T':
+        if race.label == 'T':
             race = 'Terran'
-        elif race == 'P':
+        elif race.label == 'P':
             race = 'Protoss'
-        elif race == 'Z':
+        elif race.label == 'Z':
             race = 'Zerg'
-        elif race == 'R':
+        elif race.label == 'R':
             race = 'Random'
         return str_fmt.format(active, race, bot_object.name,  bot_object.user.username)
 
