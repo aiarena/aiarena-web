@@ -37,12 +37,6 @@ def bot_data_upload_to(instance, filename):
 
 
 class Bot(models.Model, LockableModelMixin):
-    RACES = (
-        ('T', 'Terran'),
-        ('Z', 'Zerg'),
-        ('P', 'Protoss'),
-        ('R', 'Random'),
-    )
     TYPES = (  # todo: update display names. capitalize etc
         ('cppwin32', 'cppwin32'),
         ('cpplinux', 'cpplinux'),

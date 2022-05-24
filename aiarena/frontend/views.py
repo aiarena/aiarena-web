@@ -334,7 +334,7 @@ class RelativeResultFilter(filters.FilterSet):
     )
 
     opponent = filters.CharFilter(label='Opponent', field_name='opponent__bot__name', lookup_expr='icontains')
-    race = filters.ChoiceFilter(label="Race", choices=Bot.RACES, field_name='opponent__bot__plays_race_model')
+    race = filters.ChoiceFilter(label="Race", choices=BotRace.RACES, field_name='opponent__bot__plays_race_model')
     result = filters.ChoiceFilter(label='Result', choices=MatchParticipation.RESULT_TYPES[1:])
     result_cause = filters.ChoiceFilter(label='Cause', choices=MatchParticipation.CAUSE_TYPES)
     avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time",
