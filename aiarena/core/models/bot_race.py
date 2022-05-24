@@ -12,7 +12,7 @@ class BotRace(models.Model):
         ('P', 'Protoss'),
         ('R', 'Random'),
     )
-    label = models.CharField(max_length=1, choices=RACES)
+    label = models.CharField(max_length=1, choices=RACES, unique=True)
 
     @staticmethod
     def create_all_races():

@@ -175,13 +175,12 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # competitions will default to max 2 active rounds
         comp = self._create_game_mode_and_open_competition()
-        BotRace.create_all_races()
         self._create_map_for_competition('test_map', comp.id)
 
-        bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot1', 'T')
-        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', 'Z')
-        bot3 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot3', 'P')
-        bot4 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot4', 'R')
+        bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot1', BotRace.terran())
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', BotRace.zerg())
+        bot3 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot3', BotRace.protoss())
+        bot4 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot4', BotRace.random())
 
         # Round 1
         self.test_client.login(self.arenaclientUser1)
@@ -216,11 +215,10 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         self.test_client.login(self.staffUser1)
         comp = self._create_game_mode_and_open_competition()
-        BotRace.create_all_races()
         self._create_map_for_competition('test_map', comp.id)
 
-        bot1 = self._create_active_bot_for_competition(comp.id,  self.regularUser1, 'testbot1', 'T')
-        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', 'Z')
+        bot1 = self._create_active_bot_for_competition(comp.id,  self.regularUser1, 'testbot1', BotRace.terran())
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', BotRace.zerg())
 
         self.test_client.login(self.arenaclientUser1)
         # this should tie up both bots
@@ -254,10 +252,9 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
-        BotRace.create_all_races()
 
         bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', 'Z')
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', BotRace.zerg())
 
         # post a standard result
         response = self._post_to_matches()
@@ -357,12 +354,11 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
-        BotRace.create_all_races()
 
         # Create 3 bots, so after a round is generated, we'll have some unstarted matches
         bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', 'Z')
-        bot3 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot3', 'P')
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', BotRace.zerg())
+        bot3 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot3', BotRace.protoss())
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         match = response.data
@@ -392,10 +388,9 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         comp = self._create_game_mode_and_open_competition()
         self._create_map_for_competition('test_map', comp.id)
-        BotRace.create_all_races()
 
         bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot1')
-        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', 'Z')
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'bot2', BotRace.zerg())
 
         self.test_client.set_api_token(Token.objects.get(user=self.arenaclientUser1))
 
@@ -462,11 +457,11 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
 
         self.test_client.login(self.staffUser1)
 
+        comp = self._create_game_mode_and_open_competition()
+        self._create_map_for_competition('test_map', comp.id)
+
         self.regularUserBot1 = self._create_bot(self.regularUser1, 'regularUserBot1')
         self.regularUserBot2 = self._create_bot(self.regularUser1, 'regularUserBot2')
-        comp = self._create_game_mode_and_open_competition()
-        BotRace.create_all_races()
-        self._create_map_for_competition('test_map', comp.id)
 
         self.test_client.login(self.arenaclientUser1)
 
