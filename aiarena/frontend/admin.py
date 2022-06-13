@@ -114,7 +114,7 @@ class BotAdmin(admin.ModelAdmin):
         'bot_data',
         'bot_data_md5hash',
         'bot_data_publicly_downloadable',
-        'plays_race_model',
+        'plays_race',
         'type',
         'game_display_id',
         'wiki_article',

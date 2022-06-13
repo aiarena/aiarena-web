@@ -103,7 +103,7 @@ class BaseTestMixin(object):
         if plays_race is None:
             plays_race = BotRace.terran()
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race_model=plays_race,
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race,
                       type='python')
             bot.full_clean()
             bot.save()
@@ -114,7 +114,7 @@ class BaseTestMixin(object):
         if plays_race is None:
             plays_race = BotRace.terran()
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race_model=plays_race, type='python')
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
             bot.full_clean()
             bot.save()
             CompetitionParticipation.objects.create(bot_id=bot.id, competition_id=competition_id)
@@ -739,12 +739,12 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
         with self.assertRaisesMessage(ValidationError,
                                       'This competition is restricted to the following bot races: Terran'):
-            a_zerg_bot = Bot.objects.filter(plays_race_model=zerg).first()
+            a_zerg_bot = Bot.objects.filter(plays_race=zerg).first()
             cp = CompetitionParticipation.objects.create(bot=a_zerg_bot,
                                                          competition=competition)
             cp.full_clean()  # causes validation to run
 
-        a_terran_bot = Bot.objects.filter(plays_race_model=terran).first()
+        a_terran_bot = Bot.objects.filter(plays_race=terran).first()
         cp = CompetitionParticipation.objects.create(bot=a_terran_bot, competition=competition)
         cp.full_clean()  # causes validation to run
 

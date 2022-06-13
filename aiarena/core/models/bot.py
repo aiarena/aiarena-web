@@ -76,7 +76,7 @@ class Bot(models.Model, LockableModelMixin):
     bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
     bot_data_publicly_downloadable = models.BooleanField(default=False)
     # todo: rename back to plays_race
-    plays_race_model = models.ForeignKey(BotRace, on_delete=models.PROTECT)
+    plays_race = models.ForeignKey(BotRace, on_delete=models.PROTECT)
     type = models.CharField(max_length=32, choices=TYPES)
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)
@@ -191,7 +191,7 @@ class Bot(models.Model, LockableModelMixin):
 
     @cached_property
     def as_html_link_with_race(self):
-        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())} ({self.plays_race_model})</a>')
+        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())} ({self.plays_race})</a>')
 
     @cached_property
     def expected_executable_filename(self):
