@@ -37,6 +37,12 @@ def bot_data_upload_to(instance, filename):
 
 
 class Bot(models.Model, LockableModelMixin):
+    RACES = (
+        ('T', 'Terran'),
+        ('Z', 'Zerg'),
+        ('P', 'Protoss'),
+        ('R', 'Random'),
+    )
     TYPES = (  # todo: update display names. capitalize etc
         ('cppwin32', 'cppwin32'),
         ('cpplinux', 'cpplinux'),
@@ -69,8 +75,9 @@ class Bot(models.Model, LockableModelMixin):
                                 blank=True, null=True)
     bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
     bot_data_publicly_downloadable = models.BooleanField(default=False)
+    plays_race = models.CharField(max_length=1, choices=RACES)
     # todo: rename back to plays_race
-    plays_race_model = models.ForeignKey(BotRace, on_delete=models.PROTECT)
+    plays_race_model = models.ForeignKey(BotRace, on_delete=models.PROTECT, null=True)
     type = models.CharField(max_length=32, choices=TYPES)
     # the ID displayed to other bots during a game so they can recognize their opponent
     game_display_id = models.UUIDField(default=uuid.uuid4)

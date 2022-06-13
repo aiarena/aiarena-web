@@ -11,9 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='bot',
-            name='plays_race_model',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.botrace'),
-        ),
+        # migrations.AlterField(
+        #     model_name='bot',
+        #     name='plays_race_model',
+        #     field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.botrace'),
+        # ),
     ]

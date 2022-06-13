@@ -3,23 +3,8 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
-from aiarena.core.models import Bot
-from aiarena.core.models.bot_race import BotRace
-
-
-def link_bot_races(apps, schema_editor):
-    if Bot.objects.count() > 0:
-        BotRace.create_all_races()
-
-        BotModel = apps.get_model('core', 'Bot')
-
-        for bot in BotModel.objects.all():
-            br = BotRace.objects.filter(label=bot.plays_race_model).first()
-            bot.plays_race_model = br
-            bot.save()
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('core', '0046_competitionbotmapstats'),
     ]
@@ -37,5 +22,4 @@ class Migration(migrations.Migration):
             name='plays_race_model',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='core.botrace'),
         ),
-        migrations.RunPython(link_bot_races),
     ]
