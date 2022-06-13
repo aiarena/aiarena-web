@@ -7,6 +7,7 @@ from wiki.models import ArticleRevision
 from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation, Result, Round, Competition, \
     CompetitionBotMatchupStats, CompetitionParticipation, Trophy, TrophyIcon, User, News, MapPool, MatchTag, Tag, \
     ArenaClientStatus, WebsiteUser
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
 from aiarena.patreon.models import PatreonAccountBind
@@ -113,7 +114,7 @@ class BotAdmin(admin.ModelAdmin):
         'bot_data',
         'bot_data_md5hash',
         'bot_data_publicly_downloadable',
-        'plays_race',
+        'plays_race_model',
         'type',
         'game_display_id',
         'wiki_article',
@@ -126,6 +127,17 @@ class BotAdmin(admin.ModelAdmin):
         'bot_data_enabled',
         'bot_data_publicly_downloadable',
         'wiki_article',
+    )
+
+@admin.register(BotRace)
+class BotRaceAdmin(admin.ModelAdmin):
+    search_fields = ('label',)
+    list_display = (
+        'id',
+        'label',
+    )
+    list_filter = (
+        'label',
     )
 
 
@@ -176,6 +188,7 @@ class CompetitionAdmin(admin.ModelAdmin):
         'date_created',
         'date_opened',
         'date_closed',
+        'playable_races',
     )
     # Add the close competition button
     change_form_template = "admin/change_form_competition.html"

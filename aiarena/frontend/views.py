@@ -37,6 +37,7 @@ from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipat
     Competition, Map, \
     ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
 from aiarena.frontend.templatetags.core_filters import result_color_class, step_time_color, format_elo_change
@@ -181,7 +182,7 @@ class UserProfileUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 class BotUploadForm(forms.ModelForm):
     class Meta:
         model = Bot
-        fields = ['name', 'bot_zip', 'bot_data_enabled', 'plays_race', 'type', ]
+        fields = ['name', 'bot_zip', 'bot_data_enabled', 'plays_race_model', 'type', ]
 
 
 class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
@@ -213,7 +214,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 
 class BotList(ListView):
-    queryset = Bot.objects.all().only('name', 'plays_race', 'type', 'user__username', 'user__type')\
+    queryset = Bot.objects.all().only('name', 'plays_race_model', 'type', 'user__username', 'user__type')\
         .select_related('user').order_by('name')
     template_name = 'bots.html'
     paginate_by = 50
@@ -230,7 +231,7 @@ class BotList(ListView):
 
 class BotDownloadableList(ListView):
     queryset = Bot.objects.filter(bot_zip_publicly_downloadable=True)\
-        .only('name', 'plays_race', 'type', 'user__username', 'user__type')\
+        .only('name', 'plays_race_model', 'type', 'user__username', 'user__type')\
         .select_related('user').order_by('name')
     template_name = 'bots_downloadable.html'
     paginate_by = 50
@@ -334,7 +335,7 @@ class RelativeResultFilter(filters.FilterSet):
     )
 
     opponent = filters.CharFilter(label='Opponent', field_name='opponent__bot__name', lookup_expr='icontains')
-    race = filters.ChoiceFilter(label="Race", choices=Bot.RACES, field_name='opponent__bot__plays_race')
+    race = filters.ChoiceFilter(label="Race", choices=BotRace.RACES, field_name='opponent__bot__plays_race_model')
     result = filters.ChoiceFilter(label='Result', choices=MatchParticipation.RESULT_TYPES[1:])
     result_cause = filters.ChoiceFilter(label='Cause', choices=MatchParticipation.CAUSE_TYPES)
     avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time",
@@ -358,7 +359,7 @@ class RelativeResultFilter(filters.FilterSet):
 
     class Meta:
         model = RelativeResult
-        fields = ['opponent__bot__name', 'opponent__bot__plays_race', 'result', 'result_cause', 'avg_step_time', 'tags']
+        fields = ['opponent__bot__name', 'opponent__bot__plays_race_model', 'result', 'result_cause', 'avg_step_time', 'tags']
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
@@ -959,7 +960,7 @@ class CompetitionDetail(DetailView):
         else:
             all_participants = Ladders.get_competition_ranked_participants(self.object, include_placements=True)
         all_participants = list(all_participants.prefetch_related(
-                Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
+                Prefetch('bot', queryset=Bot.objects.all().only('plays_race_model', 'user_id', 'name', 'type')),
                 Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
         context['divisions'] = dict()
         to_title = lambda x: f"Awaiting Entry" if x==CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
@@ -983,14 +984,14 @@ class BotChoiceField(forms.ModelChoiceField):
             active = '✔'
         else:
             active = '✘'
-        race = bot_object.plays_race
-        if race == 'T':
+        race = bot_object.plays_race_model
+        if race.label == 'T':
             race = 'Terran'
-        elif race == 'P':
+        elif race.label == 'P':
             race = 'Protoss'
-        elif race == 'Z':
+        elif race.label == 'Z':
             race = 'Zerg'
-        elif race == 'R':
+        elif race.label == 'R':
             race = 'Random'
         return str_fmt.format(active, race, bot_object.name,  bot_object.user.username)
 
@@ -1109,7 +1110,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
                             for _ in range(0, form.cleaned_data['match_count']):
                                 bot2 = bot1.get_random_active_excluding_self() if form.cleaned_data['matchup_race'] == 'any' \
-                                    else bot1.get_active_excluding_self.filter(plays_race=form.cleaned_data['matchup_race'])
+                                    else bot1.get_active_excluding_self.filter(plays_race_model=form.cleaned_data['matchup_race'])
 
                                 if bot2 is None:
                                     messages.error(self.request, "No opponents of that type could be found.")
