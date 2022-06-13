@@ -1,8 +1,8 @@
 from django.test import TransactionTestCase, TestCase
-from django.urls.base import reverse
+
 from aiarena.core.models import Match, Round, Bot, User, Result, Competition, Map, MapPool
 from aiarena.core.tests.tests import FullDataSetMixin
-from aiarena.core.tests.testing_utils import TestingClient
+
 
 class AdminMethodsTestCase(FullDataSetMixin, TestCase):
 
@@ -134,7 +134,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/profile/token/')
         self.assertEqual(response.status_code, 200)
 
-        # recreate - will redirect
+        # recreRequestate - will redirect
         response = self.client.post('/profile/token/')
         self.assertEqual(response.status_code, 302)
 

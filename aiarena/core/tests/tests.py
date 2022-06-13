@@ -11,10 +11,11 @@ from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from aiarena.core.api import Matches, Competitions
+from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
-    CompetitionParticipation, MapPool, WebsiteUser, Tag
+    CompetitionParticipation, MapPool, WebsiteUser
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
 from aiarena.core.utils import calculate_md5
 
@@ -75,8 +76,16 @@ class BaseTestMixin(object):
         return map
 
 
-    def _create_open_competition(self, gamemode_id: int, name='Competition 1'):
+    def _create_competition(self, gamemode_id: int, name='Competition 1', playable_race_ids=None):
         competition = Competition.objects.create(name=name, type='L', game_mode_id=gamemode_id)
+        if playable_race_ids:
+            for race_id in playable_race_ids:
+                competition.playable_races.add(race_id)
+        return competition
+
+
+    def _create_open_competition(self, gamemode_id: int, name='Competition 1', playable_race_ids=None):
+        competition = self._create_competition(gamemode_id, name, playable_race_ids)
         competition.open()
         return competition
 
@@ -84,23 +93,28 @@ class BaseTestMixin(object):
     def _create_game_mode_and_open_competition(self):
         game = self.test_client.create_game("StarCraft II")
         gamde_mode = self.test_client.create_gamemode('Melee', game.id)
+        BotRace.create_all_races()
         competition = self.test_client.create_competition('Competition 1', 'L', gamde_mode.id)
         self.test_client.open_competition(competition.id)
         return competition
 
 
-    def _create_bot(self, user, name, plays_race='T'):
+    def _create_bot(self, user, name, plays_race=None):
+        if plays_race is None:
+            plays_race = BotRace.terran()
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race,
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race_model=plays_race,
                       type='python')
             bot.full_clean()
             bot.save()
             return bot
 
 
-    def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race='T'):
+    def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race=None):
+        if plays_race is None:
+            plays_race = BotRace.terran()
         with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race_model=plays_race, type='python')
             bot.full_clean()
             bot.save()
             CompetitionParticipation.objects.create(bot_id=bot.id, competition_id=competition_id)
@@ -298,10 +312,11 @@ class BaseTestMixin(object):
 
     def _generate_extra_bots(self):
         competition = Competition.objects.order_by('id').first()
+        zerg = BotRace.objects.get(label='Z')
         self.regularUser2Bot1 = self._create_bot(self.regularUser2, 'regularUser2Bot1')
         self.regularUser2Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser2, 'regularUser2Bot2')
         self.regularUser3Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser3, 'regularUser3Bot1')
-        self.regularUser3Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser3, 'regularUser3Bot2', 'Z')
+        self.regularUser3Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser3, 'regularUser3Bot2', zerg)
         self.regularUser4Bot1 = self._create_bot(self.regularUser4, 'regularUser4Bot1')
         self.regularUser4Bot2 = self._create_bot(self.regularUser4, 'regularUser4Bot2')
 
@@ -354,11 +369,15 @@ class MatchReadyMixin(LoggedInMixin):
         competition = self._create_game_mode_and_open_competition()
         m1 = self._create_map_for_competition('testmap1', competition.id)
 
-        self.regularUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot1', 'T')
-        self.regularUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot2', 'Z')
-        self.regularUser1Bot3 = self._create_bot(self.regularUser1, 'regularUser1Bot3', 'P')  # inactive bot for realism
-        self.staffUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot1', 'T')
-        self.staffUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot2', 'Z')
+        terran = BotRace.terran()
+        zerg = BotRace.zerg()
+        protoss = BotRace.protoss()
+
+        self.regularUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot1', terran)
+        self.regularUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot2', zerg)
+        self.regularUser1Bot3 = self._create_bot(self.regularUser1, 'regularUser1Bot3', protoss)  # inactive bot for realism
+        self.staffUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot1', terran)
+        self.staffUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot2', zerg)
 
         # add another competition
         game_mode = GameMode.objects.first()
@@ -375,8 +394,8 @@ class MatchReadyMixin(LoggedInMixin):
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot1.id, competition_id=competition2.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot1.id, competition_id=competition2.id)
         # and also create some new bots
-        self.regularUser1Bot4 = self._create_active_bot_for_competition(competition2.id, self.regularUser1, 'regularUser1Bot4', 'P')
-        self.staffUser1Bot3 = self._create_active_bot_for_competition(competition2.id, self.staffUser1, 'staffUser1Bot3', 'P')
+        self.regularUser1Bot4 = self._create_active_bot_for_competition(competition2.id, self.regularUser1, 'regularUser1Bot4', protoss)
+        self.staffUser1Bot3 = self._create_active_bot_for_competition(competition2.id, self.staffUser1, 'staffUser1Bot3', protoss)
 
 
 # Use this to pre-build a fuller dataset for testing
@@ -707,6 +726,28 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         # New round should be number 1 for the new competition
         round = Round.objects.get(competition=competition2)
         self.assertEqual(round.number, 1)
+
+    def test_competition_race_restriction(self):
+        self.client.force_login(self.arenaclientUser1)
+
+        User.objects.update(extra_active_competition_participations=99)  # avoid this restriction
+
+        terran = BotRace.terran()
+        zerg = BotRace.zerg()
+        competition = self._create_open_competition(GameMode.objects.first().id, 'Race Restricted Competition',
+                                                    {terran.id})
+
+        with self.assertRaisesMessage(ValidationError,
+                                      'This competition is restricted to the following bot races: Terran'):
+            a_zerg_bot = Bot.objects.filter(plays_race_model=zerg).first()
+            cp = CompetitionParticipation.objects.create(bot=a_zerg_bot,
+                                                         competition=competition)
+            cp.full_clean()  # causes validation to run
+
+        a_terran_bot = Bot.objects.filter(plays_race_model=terran).first()
+        cp = CompetitionParticipation.objects.create(bot=a_terran_bot, competition=competition)
+        cp.full_clean()  # causes validation to run
+
 
 
 class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
