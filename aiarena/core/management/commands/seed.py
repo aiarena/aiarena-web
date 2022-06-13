@@ -24,6 +24,11 @@ def run_seed(matches, token):
     game = client.create_game('StarCraft II')
     gamemode = client.create_gamemode('Melee', game.id)
 
+    BotRace.create_all_races()
+    terran = BotRace.objects.get(label='T')
+    zerg = BotRace.objects.get(label='Z')
+    protoss = BotRace.objects.get(label='P')
+
     competition1 = client.create_competition('Competition 1', 'L', gamemode.id)
     competition1.target_n_divisions = 2
     competition1.target_division_size = 2
@@ -35,13 +40,17 @@ def run_seed(matches, token):
     competition2 = client.create_competition('Competition 2', 'L', gamemode.id)
     client.open_competition(competition2.id)
 
+    competition3 = client.create_competition('Competition 3 - Terran Only', 'L', gamemode.id, {terran.id})
+    client.open_competition(competition3.id)
+
     with open(BaseTestMixin.test_map_path, 'rb') as map:
         m1 = Map.objects.create(name='test_map1', file=File(map), game_mode=gamemode)
         m1.competitions.add(competition1)
+        m1.competitions.add(competition2)
         m1.save()
 
-        m2 = Map.objects.create(name='test_map2', file=File(map), game_mode=gamemode)
-        m2.competitions.add(competition2)
+        m2 = Map.objects.create(name='test_map2_terran_only', file=File(map), game_mode=gamemode)
+        m2.competitions.add(competition3)
         m2.save()
 
         # unused map
@@ -50,11 +59,6 @@ def run_seed(matches, token):
     map_pool = MapPool.objects.create(name='test_map_pool')
     map_pool.maps.add(m1)
     map_pool.maps.add(m2)
-
-    BotRace.create_all_races()
-    terran = BotRace.objects.get(label='T')
-    zerg = BotRace.objects.get(label='Z')
-    protoss = BotRace.objects.get(label='P')
 
     # assume the frontend is working by this point and create these the easiest way
     devuser1 = WebsiteUser.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
@@ -73,6 +77,7 @@ def run_seed(matches, token):
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
         CompetitionParticipation.objects.create(competition=competition2, bot=bot)
+        CompetitionParticipation.objects.create(competition=competition3, bot=bot)
 
         bot = Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race_model=zerg, type='python',
                                  bot_zip=File(bot_zip))
@@ -100,6 +105,7 @@ def run_seed(matches, token):
         bot = Bot.objects.create(user=devuser2, name='devuser2_bot2', plays_race_model=terran, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+        CompetitionParticipation.objects.create(competition=competition3, bot=bot)
 
         Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race_model=zerg, type='python',
                            bot_zip=File(bot_zip))  # inactive bot

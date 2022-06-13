@@ -63,6 +63,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
 
     def clean(self):
         self.validate_competition_accepting_new_participants()
+        self.validate_race_restrictions()
         super().clean()
         
     def __str__(self):
@@ -75,5 +76,15 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     def validate_competition_accepting_new_participants(self):
         if self.id is None and not self.competition.is_accepting_new_participants:
             raise ValidationError('That competition is not accepting new participants.')
+
+    def validate_race_restrictions(self):
+        if self.competition.playable_races.count() != 0 \
+                and not self.bot_race_is_permitted(self.bot.plays_race_model):
+            allowed_races_string = ' '.join([race.get_label_display() for race in self.competition.playable_races.all()])
+            raise ValidationError(f'This competition is restricted to the following bot races: '
+                                  f'{allowed_races_string}')
+
+    def bot_race_is_permitted(self, bot_race):
+        return self.competition.playable_races.filter(id=bot_race.id).exists()
 
 

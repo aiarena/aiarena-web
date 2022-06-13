@@ -76,8 +76,16 @@ class BaseTestMixin(object):
         return map
 
 
-    def _create_open_competition(self, gamemode_id: int, name='Competition 1'):
+    def _create_competition(self, gamemode_id: int, name='Competition 1', playable_race_ids=None):
         competition = Competition.objects.create(name=name, type='L', game_mode_id=gamemode_id)
+        if playable_race_ids:
+            for race_id in playable_race_ids:
+                competition.playable_races.add(race_id)
+        return competition
+
+
+    def _create_open_competition(self, gamemode_id: int, name='Competition 1', playable_race_ids=None):
+        competition = self._create_competition(gamemode_id, name, playable_race_ids)
         competition.open()
         return competition
 
@@ -718,6 +726,28 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         # New round should be number 1 for the new competition
         round = Round.objects.get(competition=competition2)
         self.assertEqual(round.number, 1)
+
+    def test_competition_race_restriction(self):
+        self.client.force_login(self.arenaclientUser1)
+
+        User.objects.update(extra_active_competition_participations=99)  # avoid this restriction
+
+        terran = BotRace.terran()
+        zerg = BotRace.zerg()
+        competition = self._create_open_competition(GameMode.objects.first().id, 'Race Restricted Competition',
+                                                    {terran.id})
+
+        with self.assertRaisesMessage(ValidationError,
+                                      'This competition is restricted to the following bot races: Terran'):
+            a_zerg_bot = Bot.objects.filter(plays_race_model=zerg).first()
+            cp = CompetitionParticipation.objects.create(bot=a_zerg_bot,
+                                                         competition=competition)
+            cp.full_clean()  # causes validation to run
+
+        a_terran_bot = Bot.objects.filter(plays_race_model=terran).first()
+        cp = CompetitionParticipation.objects.create(bot=a_terran_bot, competition=competition)
+        cp.full_clean()  # causes validation to run
+
 
 
 class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
