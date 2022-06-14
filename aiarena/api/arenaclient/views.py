@@ -39,6 +39,7 @@ class BotSerializer(serializers.ModelSerializer):
     # be authenticated for.
     bot_zip = serializers.SerializerMethodField()
     bot_data = serializers.SerializerMethodField()
+    plays_race = serializers.CharField(source='plays_race.label')
 
     def get_bot_zip(self, obj):
         p = MatchParticipation.objects.only('participant_number').get(bot=obj, match_id=self.root.instance.id)
