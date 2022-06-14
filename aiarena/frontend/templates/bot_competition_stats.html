@@ -171,7 +171,7 @@
                     <tr style="text-align: right">
                         <td style="text-align: right">{{ bot_matchup.opponent.bot.as_truncated_html_link }}</td>
                         <td class="mono"
-                            style="text-align: left">{{ bot_matchup.opponent.bot.plays_race_model.get_label_display }}</td>
+                            style="text-align: left">{{ bot_matchup.opponent.bot.plays_race.get_label_display }}</td>
                         <td class="mono">{{ bot_matchup.match_count }}</td>
                         <td class="mono">{{ bot_matchup.win_count }}</td>
                         {% if bot_matchup.match_count > 0 %}

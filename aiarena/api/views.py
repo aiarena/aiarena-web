@@ -26,9 +26,9 @@ logger = logging.getLogger(__name__)
 
 bot_include_fields = 'id', 'user', 'name', 'created', 'bot_zip', 'bot_zip_updated', 'bot_zip_md5hash', \
                      'bot_zip_publicly_downloadable', 'bot_data_enabled', 'bot_data', 'bot_data_md5hash', \
-                     'bot_data_publicly_downloadable', 'plays_race_model', 'type', 'game_display_id',
+                     'bot_data_publicly_downloadable', 'plays_race', 'type', 'game_display_id',
 bot_search_fields = 'id', 'user', 'name', 'created', 'bot_zip_updated', 'bot_zip_publicly_downloadable', \
-                    'bot_data_enabled', 'bot_data_publicly_downloadable', 'plays_race_model', 'type', 'game_display_id',
+                    'bot_data_enabled', 'bot_data_publicly_downloadable', 'plays_race', 'type', 'game_display_id',
 competition_include_fields = 'id', 'name', 'type', 'game_mode', 'date_created', 'date_opened', 'date_closed', \
                              'status', 'max_active_rounds', 'interest', 'target_n_divisions', 'n_divisions', \
                              'target_division_size', 'rounds_per_cycle', 'rounds_this_cycle', 'n_placements',

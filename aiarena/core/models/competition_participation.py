@@ -79,7 +79,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
 
     def validate_race_restrictions(self):
         if self.competition.playable_races.count() != 0 \
-                and not self.bot_race_is_permitted(self.bot.plays_race_model):
+                and not self.bot_race_is_permitted(self.bot.plays_race):
             allowed_races_string = ' '.join([race.get_label_display() for race in self.competition.playable_races.all()])
             raise ValidationError(f'This competition is restricted to the following bot races: '
                                   f'{allowed_races_string}')
