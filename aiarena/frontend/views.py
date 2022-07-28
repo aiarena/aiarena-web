@@ -35,7 +35,7 @@ from aiarena.core.api.maps import Maps
 from aiarena.core.d_utils import filter_tags
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
     Competition, Map, \
-    ArenaClient, News, MapPool, MatchTag, Tag, competition
+    ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.relative_result import RelativeResult
