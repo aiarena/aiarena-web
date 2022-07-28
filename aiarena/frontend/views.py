@@ -35,7 +35,7 @@ from aiarena.core.api.maps import Maps
 from aiarena.core.d_utils import filter_tags
 from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipation, CompetitionParticipation, \
     Competition, Map, \
-    ArenaClient, News, MapPool, MatchTag, Tag
+    ArenaClient, News, MapPool, MatchTag, Tag, competition
 from aiarena.core.models import Trophy
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.relative_result import RelativeResult
@@ -947,6 +947,12 @@ class CompetitionDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(CompetitionDetail, self).get_context_data(**kwargs)
+
+        maps = self.object.maps.all()
+        map_names = []
+        for map in maps:
+            map_names.append(map.name)
+        context['map_names'] = map_names
 
         rounds = Round.objects.filter(competition_id=self.object.id).order_by('-id')
         page = self.request.GET.get('page', 1)
