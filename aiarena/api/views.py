@@ -13,6 +13,7 @@ from rest_framework.reverse import reverse
 from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, \
     Competition, MatchTag, Game, GameMode, MapPool, CompetitionBotMatchupStats, CompetitionBotMapStats, News, Trophy
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.permissions import IsServiceOrAdminUser
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,7 @@ bot_include_fields = 'id', 'user', 'name', 'created', 'bot_zip', 'bot_zip_update
                      'bot_data_publicly_downloadable', 'plays_race', 'type', 'game_display_id',
 bot_search_fields = 'id', 'user', 'name', 'created', 'bot_zip_updated', 'bot_zip_publicly_downloadable', \
                     'bot_data_enabled', 'bot_data_publicly_downloadable', 'plays_race', 'type', 'game_display_id',
+bot_race_include_fields = 'id', 'label'
 competition_include_fields = 'id', 'name', 'type', 'game_mode', 'date_created', 'date_opened', 'date_closed', \
                              'status', 'max_active_rounds', 'interest', 'target_n_divisions', 'n_divisions', \
                              'target_division_size', 'rounds_per_cycle', 'rounds_this_cycle', 'n_placements',
@@ -94,12 +96,20 @@ class TrophySerializer(serializers.ModelSerializer):
         fields = trophy_include_fields + ('trophy_icon_name', 'trophy_icon_image',)
 
 
+# Defined out of order for use in BotSerializer
+class BotRaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BotRace
+        fields = bot_race_include_fields
+
+
 class BotSerializer(serializers.ModelSerializer):
     bot_zip = serializers.SerializerMethodField()
     bot_zip_md5hash = serializers.SerializerMethodField()
     bot_data = serializers.SerializerMethodField()
     bot_data_md5hash = serializers.SerializerMethodField()
     trophies = TrophySerializer(many=True)
+    plays_race = BotRaceSerializer()
 
     def get_bot_zip(self, obj):
         # only display if the user can download the file
@@ -170,6 +180,19 @@ class BotViewSet(viewsets.ReadOnlyModelViewSet):
         else:
             raise Http404()
 
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+class BotRaceViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Bot race data view
+    """
+    queryset = BotRace.objects.all()
+    serializer_class = BotRaceSerializer
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = bot_race_include_fields
+    search_fields = bot_race_include_fields
+    ordering_fields = bot_race_include_fields
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 

@@ -10,6 +10,7 @@ from django.utils.safestring import mark_safe
 from wiki.models import Article, ArticleRevision
 from django.core.validators import MinValueValidator
 
+from .bot_race import BotRace
 from .game_mode import GameMode
 from .mixins import LockableModelMixin
 
@@ -59,6 +60,8 @@ class Competition(models.Model, LockableModelMixin):
     rounds_this_cycle = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
     # Defines the number of matches that need to be played before promotions are allowed for a player.
     n_placements = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
+    # List of which bot races are playable in this competition. When left blank, all races are playable.
+    playable_races = models.ManyToManyField(BotRace, blank=True)
 
     def __str__(self):
         return self.name

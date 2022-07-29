@@ -37,6 +37,7 @@ from aiarena.core.models import Bot, Result, User, Round, Match, MatchParticipat
     Competition, Map, \
     ArenaClient, News, MapPool, MatchTag, Tag
 from aiarena.core.models import Trophy
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.utils import parse_tags
 from aiarena.frontend.templatetags.core_filters import result_color_class, step_time_color, format_elo_change
@@ -334,7 +335,12 @@ class RelativeResultFilter(filters.FilterSet):
     )
 
     opponent = filters.CharFilter(label='Opponent', field_name='opponent__bot__name', lookup_expr='icontains')
-    race = filters.ChoiceFilter(label="Race", choices=Bot.RACES, field_name='opponent__bot__plays_race')
+    race = filters.ModelChoiceFilter(
+        label="Race",
+        queryset=BotRace.objects.all(),
+        field_name='opponent__bot__plays_race',
+        widget=forms.Select(attrs={"style": "width: 100%"})
+    )
     result = filters.ChoiceFilter(label='Result', choices=MatchParticipation.RESULT_TYPES[1:])
     result_cause = filters.ChoiceFilter(label='Cause', choices=MatchParticipation.CAUSE_TYPES)
     avg_step_time = filters.RangeFilter(label="Average Step Time", method="filter_avg_step_time",
@@ -942,6 +948,12 @@ class CompetitionDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(CompetitionDetail, self).get_context_data(**kwargs)
 
+        maps = self.object.maps.all()
+        map_names = []
+        for map in maps:
+            map_names.append(map.name)
+        context['map_names'] = map_names
+
         rounds = Round.objects.filter(competition_id=self.object.id).order_by('-id')
         page = self.request.GET.get('page', 1)
         paginator = Paginator(rounds, 30)
@@ -984,13 +996,13 @@ class BotChoiceField(forms.ModelChoiceField):
         else:
             active = '✘'
         race = bot_object.plays_race
-        if race == 'T':
+        if race.label == 'T':
             race = 'Terran'
-        elif race == 'P':
+        elif race.label == 'P':
             race = 'Protoss'
-        elif race == 'Z':
+        elif race.label == 'Z':
             race = 'Zerg'
-        elif race == 'R':
+        elif race.label == 'R':
             race = 'Random'
         return str_fmt.format(active, race, bot_object.name,  bot_object.user.username)
 
