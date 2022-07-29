@@ -45,6 +45,21 @@
                     </tr>
                     </tbody>
                 </table>
+                <br />
+                <table summary="Table containing associated maps">
+                    <thead>
+                    <tr>
+                        <td><strong>Maps</strong></td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for map_name in map_names %}
+                            <tr>
+                                <td>{{ map_name }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="competition_description">
                 <table summary="Table containing the competition description">
