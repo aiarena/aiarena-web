@@ -11,12 +11,14 @@ from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
+from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
 from aiarena.core.api import Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, ArenaClient, \
     CompetitionParticipation, MapPool, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
+from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5
 
 
@@ -24,44 +26,13 @@ class BaseTestMixin(object):
     """
     Base test case for testing. Contains references to all the test files such as test bot zips etc.
     """
-    # For some reason using an absolute file path here will cause it to mangle the save directory and fail
-    # later whilst handling the bot_zip file save
-    test_bot_zip_path = 'aiarena/core/tests/test-media/test_bot.zip'
-    test_bot_zip_hash = 'c96bcfc79318a8b50b0b2c8696400d06'
-    test_bot_zip_updated_path = 'aiarena/core/tests/test-media/test_bot_updated.zip'
-    test_bot_zip_updated_hash = '685dba7a89511157a6594c20c50397d3'
-    test_bot_datas = {
-        'bot1': [
-            {
-                'path': 'aiarena/core/tests/test-media/test_bot1_data0.zip',
-                'hash': '8a2ed68ea1d98f699d7f03bd98c6530d'
-            },
-            {
-                'path': 'aiarena/core/tests/test-media/test_bot1_data1.zip',
-                'hash': 'c174816d0730c76cc649cf35b097d61e'
-            }
-        ],
-        'bot2': [
-            {
-                'path': 'aiarena/core/tests/test-media/test_bot2_data0.zip',
-                'hash': 'de998ff5944d17eb40e37429b162b651'
-            },
-            {
-                'path': 'aiarena/core/tests/test-media/test_bot2_data1.zip',
-                'hash': '2d7ecb911b1da870a503acf4173be642'
-            }
-        ]
-    }
-    test_bot1_match_log_path = 'aiarena/core/tests/test-media/test_bot1_match_log.zip'
-    test_bot2_match_log_path = 'aiarena/core/tests/test-media/test_bot2_match_log.zip'
-    test_arenaclient_log_path = 'aiarena/core/tests/test-media/test_arenaclient_log.zip'
-    test_replay_path = 'aiarena/core/tests/test-media/testReplay.SC2Replay'
-    test_map_path = 'aiarena/core/tests/test-media/AutomatonLE.SC2Map'
+
 
 
     def setUp(self):
         from aiarena.core.tests.testing_utils import TestingClient  # avoid circular import
         self.test_client = TestingClient(self.client)
+        self.test_ac_api_client = AcApiTestingClient()
 
 
     def _create_map_for_competition(self, name, competition_id):
@@ -102,7 +73,7 @@ class BaseTestMixin(object):
     def _create_bot(self, user, name, plays_race=None):
         if plays_race is None:
             plays_race = BotRace.terran()
-        with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
+        with open(TestAssetPaths.test_bot_zip_path, 'rb') as bot_zip, open(TestAssetPaths.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
             bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race,
                       type='python')
             bot.full_clean()
@@ -113,7 +84,7 @@ class BaseTestMixin(object):
     def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race=None):
         if plays_race is None:
             plays_race = BotRace.terran()
-        with open(self.test_bot_zip_path, 'rb') as bot_zip, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
+        with open(TestAssetPaths.test_bot_zip_path, 'rb') as bot_zip, open(TestAssetPaths.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
             bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
             bot.full_clean()
             bot.save()
@@ -122,7 +93,7 @@ class BaseTestMixin(object):
 
 
     def _post_to_matches(self):
-        return self.test_client.post_to_matches()
+        return self.test_ac_api_client.post_to_matches()
 
     def _post_to_results(self, match_id, result_type, bot1_tags=None, bot2_tags=None):
         """
@@ -134,12 +105,12 @@ class BaseTestMixin(object):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replay_file, open(
-                self.test_bot_datas['bot1'][0]['path'], 'rb') as bot1_data, open(
-                self.test_bot_datas['bot2'][0]['path'], 'rb') as bot2_data, open(
-                self.test_bot1_match_log_path, 'rb') as bot1_log, open(
-                self.test_bot2_match_log_path, 'rb') as bot2_log, open(
-                self.test_arenaclient_log_path, 'rb') as arenaclient_log:
-            return self.test_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log, bot1_tags, bot2_tags)
+                TestAssetPaths.test_bot_datas['bot1'][0]['path'], 'rb') as bot1_data, open(
+                TestAssetPaths.test_bot_datas['bot2'][0]['path'], 'rb') as bot2_data, open(
+                TestAssetPaths.test_bot1_match_log_path, 'rb') as bot1_log, open(
+                TestAssetPaths.test_bot2_match_log_path, 'rb') as bot2_log, open(
+                TestAssetPaths.test_arenaclient_log_path, 'rb') as arenaclient_log:
+            return self.test_ac_api_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log, bot1_tags, bot2_tags)
 
 
     def _post_to_results_bot_datas_set_1(self, match_id, result_type):
@@ -151,19 +122,19 @@ class BaseTestMixin(object):
         """
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
-        with open(filename, 'rb') as replay_file, open(self.test_bot_datas['bot1'][1]['path'], 'rb') as bot1_data, open(
-                self.test_bot_datas['bot2'][1]['path'], 'rb') as bot2_data, open(self.test_bot1_match_log_path,
+        with open(filename, 'rb') as replay_file, open(TestAssetPaths.test_bot_datas['bot1'][1]['path'], 'rb') as bot1_data, open(
+                TestAssetPaths.test_bot_datas['bot2'][1]['path'], 'rb') as bot2_data, open(TestAssetPaths.test_bot1_match_log_path,
                                                                     'rb') as bot1_log, open(
-            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
+            TestAssetPaths.test_bot2_match_log_path, 'rb') as bot2_log, open(TestAssetPaths.test_arenaclient_log_path,
                                                                    'rb') as arenaclient_log:
-            return self.test_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log)
+            return self.test_ac_api_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log)
 
 
     def _post_to_results_no_bot_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
         with open(filename, 'rb') as replayFile:
-            return self.test_client.publish_result({'match': match_id,
+            return self.test_ac_api_client.publish_result({'match': match_id,
                                      'type': result_type,
                                      'replay_file': SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                                      'game_steps': 500})
@@ -172,19 +143,19 @@ class BaseTestMixin(object):
     def _post_to_results_no_bot1_data(self, match_id, result_type, bot_data_set):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
-        with open(filename, 'rb') as replay_file, open(self.test_bot_datas['bot2'][bot_data_set]['path'], 'rb') as bot2_data:
-            return self.test_client.submit_custom_result(match_id, result_type, replay_file, '', bot2_data, '', '', '')
+        with open(filename, 'rb') as replay_file, open(TestAssetPaths.test_bot_datas['bot2'][bot_data_set]['path'], 'rb') as bot2_data:
+            return self.test_ac_api_client.submit_custom_result(match_id, result_type, replay_file, '', bot2_data, '', '', '')
 
 
     def _post_to_results_no_bot2_data(self, match_id, result_type, bot_data_set):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
-        with open(filename, 'rb') as replay_file, open(self.test_bot_datas['bot1'][bot_data_set]['path'], 'rb') as bot1_data:
-            return self.test_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, '', '', '', '')
+        with open(filename, 'rb') as replay_file, open(TestAssetPaths.test_bot_datas['bot1'][bot_data_set]['path'], 'rb') as bot1_data:
+            return self.test_ac_api_client.submit_custom_result(match_id, result_type, replay_file, bot1_data, '', '', '', '')
 
 
     def _post_to_results_no_replay(self, match_id, result_type):
-        return self.test_client.publish_result({'match': match_id,
+        return self.test_ac_api_client.publish_result({'match': match_id,
                                  'type': result_type,
                                  'replay_file': '',
                                  'game_steps': 500})
@@ -193,13 +164,13 @@ class BaseTestMixin(object):
     def _post_to_results_no_replay_updated_datas(self, match_id, result_type):
         filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                 'test-media/../test-media/testReplay.SC2Replay')
-        with open(filename, 'rb') as replayFile, open(self.test_bot_datas['bot1'][0]['path'], 'rb') as bot2_data, open(
-                self.test_bot_datas['bot2'][0]['path'], 'rb') as bot1_data, open(self.test_bot1_match_log_path,
+        with open(filename, 'rb') as replayFile, open(TestAssetPaths.test_bot_datas['bot1'][0]['path'], 'rb') as bot2_data, open(
+                TestAssetPaths.test_bot_datas['bot2'][0]['path'], 'rb') as bot1_data, open(TestAssetPaths.test_bot1_match_log_path,
                                                                     'rb') as bot1_log, open(
-            self.test_bot2_match_log_path, 'rb') as bot2_log, open(self.test_arenaclient_log_path,
+            TestAssetPaths.test_bot2_match_log_path, 'rb') as bot2_log, open(TestAssetPaths.test_arenaclient_log_path,
                                                                    'rb') as arenaclient_log:
                                                                    
-            return self.test_client.publish_result({'match': match_id,
+            return self.test_ac_api_client.publish_result({'match': match_id,
                                      'type': result_type,
                                      'replay_file': '',
                                      'game_steps': 500,
@@ -322,8 +293,7 @@ class LoggedInMixin(BaseTestMixin):
 
         self.arenaclientUser1 = ArenaClient.objects.create(username='arenaclient1', email='arenaclient@dev.aiarena.net',
                                                          type='ARENA_CLIENT', trusted=True, owner=self.staffUser1)
-        self.api_token = Token.objects.create(user=self.arenaclientUser1)
-
+        self.test_ac_api_client.set_api_token(Token.objects.create(user=self.arenaclientUser1).key)
         self.regularUser1 = WebsiteUser.objects.create_user(username='regular_user1', password='x',
                                                      email='regular_user1@dev.aiarena.net')
 
@@ -423,13 +393,13 @@ class BotTestCase(LoggedInMixin, TestCase):
 
         bot1.refresh_from_db()
         # check hashes
-        self.assertEqual(self.test_bot_zip_hash, bot1.bot_zip_md5hash)
-        self.assertEqual(self.test_bot_datas['bot1'][0]['hash'], bot1.bot_data_md5hash)
+        self.assertEqual(TestAssetPaths.test_bot_zip_hash, bot1.bot_zip_md5hash)
+        self.assertEqual(TestAssetPaths.test_bot_datas['bot1'][0]['hash'], bot1.bot_data_md5hash)
 
         # check the bot file now exists
         self.assertTrue(os.path.isfile('./private-media/bots/{0}/bot_zip'.format(bot1.id)))
 
-        with open(self.test_bot_zip_path, 'rb') as bot_zip:
+        with open(TestAssetPaths.test_bot_zip_path, 'rb') as bot_zip:
             bot1.bot_zip = File(bot_zip)
             bot1.save()
 
@@ -452,21 +422,21 @@ class BotTestCase(LoggedInMixin, TestCase):
             cp.full_clean()
 
         # test updating bot_zip
-        with open(self.test_bot_zip_updated_path, 'rb') as bot_zip_updated:
+        with open(TestAssetPaths.test_bot_zip_updated_path, 'rb') as bot_zip_updated:
             bot1.bot_zip = File(bot_zip_updated)
             bot1.save()
 
         bot1.refresh_from_db()
-        self.assertEqual(self.test_bot_zip_updated_hash, bot1.bot_zip_md5hash)
+        self.assertEqual(TestAssetPaths.test_bot_zip_updated_hash, bot1.bot_zip_md5hash)
 
         # test updating bot_data
         # using bot2's data instead here so it's different
-        with open(self.test_bot_datas['bot2'][0]['path'], 'rb') as bot_data_updated:
+        with open(TestAssetPaths.test_bot_datas['bot2'][0]['path'], 'rb') as bot_data_updated:
             bot1.bot_data = File(bot_data_updated)
             bot1.save()
 
         bot1.refresh_from_db()
-        self.assertEqual(self.test_bot_datas['bot2'][0]['hash'], bot1.bot_data_md5hash)
+        self.assertEqual(TestAssetPaths.test_bot_datas['bot2'][0]['hash'], bot1.bot_data_md5hash)
 
 
 class MatchTagsTestCase(MatchReadyMixin, TestCase):
@@ -486,8 +456,6 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         num_symbols = '0123456789'
         extra_symbols = ' _ _ '
         game_mode = GameMode.objects.first()
-
-        self.test_client.login(self.arenaclientUser1)
 
         # No tags
         Matches.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
@@ -592,7 +560,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
 
     def test_competition_states(self):
-        self.test_client.login(self.arenaclientUser1)
+        # self.test_client.login(self.arenaclientUser1)
 
         # freeze competition2, so we can get anticipatable results
         competition1 = Competition.objects.filter(status='open').first()
@@ -704,7 +672,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         self.assertEqual(round.number, 1)
 
     def test_competition_race_restriction(self):
-        self.client.force_login(self.arenaclientUser1)
+        # self.client.force_login(self.arenaclientUser1)
 
         User.objects.update(extra_active_competition_participations=99)  # avoid this restriction
 

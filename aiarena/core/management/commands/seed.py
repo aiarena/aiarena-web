@@ -4,11 +4,12 @@ from django.core.management.base import BaseCommand
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
-from aiarena.core.models import User, Map, Bot, News, \
+from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
+from aiarena.core.models import Map, Bot, News, \
     CompetitionParticipation, MapPool, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.testing_utils import TestingClient
-from aiarena.core.tests.tests import BaseTestMixin
+from aiarena.core.tests.tests import BaseTestMixin, TestAssetPaths
 from aiarena.core.utils import EnvironmentType
 
 def run_seed(matches, token):
@@ -23,7 +24,8 @@ def run_seed(matches, token):
 
     # if token is None it will generate a new one, otherwise it will use the one specified
     api_token = Token.objects.create(user=arenaclient1, key=token)
-    client.set_api_token(api_token)
+    ac_client = AcApiTestingClient()
+    ac_client.set_api_token(api_token.key)
 
     game = client.create_game('StarCraft II')
     gamemode = client.create_gamemode('Melee', game.id)
@@ -47,7 +49,7 @@ def run_seed(matches, token):
     competition3 = client.create_competition('Competition 3 - Terran Only', 'L', gamemode.id, {terran.id})
     client.open_competition(competition3.id)
 
-    with open(BaseTestMixin.test_map_path, 'rb') as map:
+    with open(TestAssetPaths.test_map_path, 'rb') as map:
         m1 = Map.objects.create(name='test_map1', file=File(map), game_mode=gamemode)
         m1.competitions.add(competition1)
         m1.competitions.add(competition2)
@@ -76,7 +78,7 @@ def run_seed(matches, token):
     devuser5 = WebsiteUser.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net',
                                         patreon_level='diamond')
 
-    with open(BaseTestMixin.test_bot_zip_path, 'rb') as bot_zip:
+    with open(TestAssetPaths.test_bot_zip_path, 'rb') as bot_zip:
         bot = Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race=terran, type='python',
                                  bot_zip=File(bot_zip))
         CompetitionParticipation.objects.create(competition=competition1, bot=bot)
@@ -129,10 +131,10 @@ def run_seed(matches, token):
 
         # TODO: TEST MULTIPLE ACs
         for x in range(matches - 1):
-            match = client.next_match()
+            match = ac_client.next_match()
 
             # todo: submit different types of results.
-            client.submit_result(match.id, 'Player1Win')
+            ac_client.submit_result(match.id, 'Player1Win')
 
             if x == 0:  # make it so a bot that once was active, is now inactive
                 bot1 = CompetitionParticipation.objects.filter(active=True).first()
@@ -141,7 +143,7 @@ def run_seed(matches, token):
 
         # so we have a match in progress
         if matches != 0:
-            client.next_match()
+            ac_client.next_match()
 
         # bot still in placement
         bot = Bot.objects.create(user=devadmin, name='devadmin_bot100', plays_race=terran, type='python',
