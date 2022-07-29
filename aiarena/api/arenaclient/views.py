@@ -90,13 +90,15 @@ class MatchViewSet(viewsets.GenericViewSet):
             .get(match_id=match.id, participant_number=2).bot
 
     def create(self, request, *args, **kwargs):
-        match = ACCoordinator.next_match(request.user)
-        if match is None:
-            raise NoGameForClient()
-        self.load_participants(match)
+        if request.user.is_arenaclient:
+            match = ACCoordinator.next_match(request.user.arenaclient)
+            if match:
+                self.load_participants(match)
 
-        serializer = self.get_serializer(match)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                serializer = self.get_serializer(match)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        raise NoGameForClient()
 
 
     # todo: check match is in progress/bot is in this match

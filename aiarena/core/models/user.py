@@ -130,14 +130,6 @@ class User(AbstractUser, LockableModelMixin):
             return (self.arenaclient is not None)
         except ArenaClient.DoesNotExist:
             return False
-            
-    @property
-    def is_trusted_arenaclient(self):
-        from .arena_client import ArenaClient  # avoid circular reference
-        try:
-            return (self.is_staff or self.arenaclient is not None and self.arenaclient.trusted)
-        except ArenaClient.DoesNotExist:
-            return False
 
     @property
     def is_websiteuser(self):
