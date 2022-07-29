@@ -211,7 +211,7 @@ class BaseTestMixin(object):
 
 
     def _generate_full_data_set(self):
-        self.test_client.login(ArenaClient.objects.get(username='arenaclient1'))
+        self.test_client.login(User.objects.get(username='staff_user'))
 
         self._generate_extra_users()
         self._generate_extra_bots()
@@ -747,7 +747,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
         # test match successfully cancelled
         self.client.login(username='staff_user', password='x')
-        self.test_client.login(self.arenaclientUser1)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         match_id = response.data['id']
@@ -789,8 +788,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
     def test_cleanup_replays_and_logs(self):
         NUM_MATCHES = 12
-        self.client.login(username='staff_user', password='x')
-        self.test_client.login(self.arenaclientUser1)
+        self.test_client.login(self.staffUser1)
 
         # freeze competition2, so we can get anticipatable results
         competition1 = Competition.objects.filter(status='open').first()
