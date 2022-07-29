@@ -427,6 +427,13 @@ SITE_ID = 1
 
 SITE_PROTOCOL = 'https'
 
+# override any of these settings with an env.py file
+try:
+    from aiarena.env import *
+except ImportError as e:
+    if e.name != 'aiarena.env':
+        raise
+
 if ENVIRONMENT_TYPE != EnvironmentType.DEVELOPMENT:
     # not required in staging or production
     INSTALLED_APPS.remove('debug_toolbar')
