@@ -9,7 +9,7 @@ from aiarena.core.models import Map, Bot, News, \
     CompetitionParticipation, MapPool, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.testing_utils import TestingClient
-from aiarena.core.tests.tests import BaseTestMixin, TestAssetPaths
+from aiarena.core.tests.tests import TestAssetPaths
 from aiarena.core.utils import EnvironmentType
 
 def run_seed(matches, token):

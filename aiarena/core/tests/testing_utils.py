@@ -77,7 +77,7 @@ class TestingClient:
         assert response.status_code == 302 and response.url == reverse('admin:core_user_changelist')
         return User.objects.get(username=username)
 
-    def create_arenaclient(self, username: str, email: str, owner_id: int) -> ArenaClient:
+    def create_arenaclient(self, username: str, email: str, owner_id: int, trusted=True) -> ArenaClient:
         if ArenaClient.objects.filter(username=username).exists():
             raise Exception('That already exists!')
 
@@ -86,7 +86,9 @@ class TestingClient:
                                                  'email': email,
                                                  'password': self.TEST_PASSWORD,
                                                  'type': 'ARENA_CLIENT',
-                                                 'owner': owner_id, })
+                                                 'owner': owner_id,
+                                                 'trusted': trusted,
+                                                 'is_active': True, })
 
         # we should be redirected back to the changelist
         assert response.status_code == 302 and response.url == reverse('admin:core_arenaclient_changelist')

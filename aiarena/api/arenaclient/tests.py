@@ -23,11 +23,12 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
                                                      email='regular_user2@aiarena.net')
 
     def test_get_next_match_not_authorized(self):
-        self.test_ac_api_client.set_api_token(None)
+        self.test_ac_api_client.set_api_token('')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 403)
 
-        self.test_ac_api_client.set_api_token(Token.objects.get(user=self.regularUser1).key)
+        # create and use a regular user's api token
+        self.test_ac_api_client.set_api_token(Token.objects.create(user=self.regularUser1).key)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 403)
 
@@ -127,12 +128,12 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot1', BotRace.terran())
         self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', BotRace.zerg())
 
-        # self.test_client.login(self.arenaclientUser1)
-        response_m1 = self.client.post('/api/arenaclient/matches/')
+        # currently we should be using arenaclientUser1's token
+        response_m1 = self.test_ac_api_client.post_to_matches()
         self.assertEqual(response_m1.status_code, 201)
 
         # should be the same match reissued
-        response_m2 = self.client.post('/api/arenaclient/matches/')
+        response_m2 = self.test_ac_api_client.post_to_matches()
         self.assertEqual(response_m2.status_code, 201)
 
         self.assertEqual(response_m1.data['id'], response_m2.data['id'])
@@ -163,7 +164,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
                               game_mode=game_mode)
 
         # now we should be able to get a match - the requested one
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
 
 
@@ -194,13 +195,13 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         # Match 1 has started, Match 2 is finished.
 
         # Round 2
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         response = self._post_to_results(response.data['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
         # Round 3 - should fail due to active round limit
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
         self.assertTrue('detail' in response.data)
         self.assertEqual(u'There are available bots, but the ladder has reached the maximum active rounds allowed and ' \
@@ -220,14 +221,14 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         bot1 = self._create_active_bot_for_competition(comp.id,  self.regularUser1, 'testbot1', BotRace.terran())
         bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', BotRace.zerg())
 
-        # self.test_client.login(self.arenaclientUser1)
+        # at this point we are using arenaclientUser1's token
         # this should tie up both bots
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self.test_ac_api_client.post_to_matches()
         self.assertEqual(response.status_code, 201)
 
         # we shouldn't be able to get a new match
-        self.test_client.login(self.arenaclientUser2)
-        response = self.client.post('/api/arenaclient/matches/')
+        self.test_ac_api_client.set_api_token(Token.objects.create(user=self.arenaclientUser2).key)
+        response = self.test_ac_api_client.post_to_matches()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(u"Not enough available bots for a match. Wait until more bots become available.", response.data['detail'])
 
@@ -235,7 +236,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
                               game_mode=GameMode.objects.first())
 
         # now we should be able to get a match - the requested one
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self.test_ac_api_client.post_to_matches()
         self.assertEqual(response.status_code, 201)
 
 
@@ -515,7 +516,7 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         ]
 
     def CreateMatch(self):
-        response = self.client.post('/api/arenaclient/matches/')
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         return response.data
 
