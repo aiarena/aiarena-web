@@ -948,6 +948,12 @@ class CompetitionDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super(CompetitionDetail, self).get_context_data(**kwargs)
 
+        maps = self.object.maps.all()
+        map_names = []
+        for map in maps:
+            map_names.append(map.name)
+        context['map_names'] = map_names
+
         rounds = Round.objects.filter(competition_id=self.object.id).order_by('-id')
         page = self.request.GET.get('page', 1)
         paginator = Paginator(rounds, 30)
