@@ -17,6 +17,10 @@ from enum import Enum
 
 from aiarena.core.utils import Elo, EnvironmentType
 
+# Temp workaround for discord-bind error: Warning: Scope has changed from "identify" to "guilds.join identify email".
+# https://stackoverflow.com/a/51643134
+os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
