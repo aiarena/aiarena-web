@@ -75,6 +75,6 @@ class PatreonAccountBind(models.Model):
         raise Exception('Unable to locate reward.')
 
 
-class PatreonUnlinkedDiscordUIDs(models.Model):
+class PatreonUnlinkedDiscordUID(models.Model):
     patreon_user_id = models.CharField(max_length=64, unique=True)
     discord_uid = models.CharField(max_length=64, unique=True)

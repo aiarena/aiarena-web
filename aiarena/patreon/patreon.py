@@ -90,7 +90,7 @@ class PatreonApi:
 
 def update_unlinked_discord_users():
     # avoid circular import
-    from aiarena.patreon.models import PatreonUnlinkedDiscordUIDs, PatreonAccountBind
+    from aiarena.patreon.models import PatreonUnlinkedDiscordUID, PatreonAccountBind
 
     access_token, _ = refresh_creator_tokens()
     api = PatreonApi(access_token)
@@ -99,12 +99,12 @@ def update_unlinked_discord_users():
     campaign = api.campaign_pledges(campaign_id)
     discord_uids = get_pledge_user_discord_uids(campaign)
 
-    PatreonUnlinkedDiscordUIDs.objects.all().delete()
+    PatreonUnlinkedDiscordUID.objects.all().delete()
 
     for discord_uid in discord_uids:
         if not PatreonAccountBind.objects.filter(patreon_user_id=discord_uid['patreon_user_id']).exists():
-            PatreonUnlinkedDiscordUIDs.objects.create(patreon_user_id=discord_uid['patreon_user_id'],
-                                                      discord_uid=discord_uid['discord_uid'])
+            PatreonUnlinkedDiscordUID.objects.create(patreon_user_id=discord_uid['patreon_user_id'],
+                                                     discord_uid=discord_uid['discord_uid'])
 
 
 def refresh_creator_tokens() -> (str, str):
