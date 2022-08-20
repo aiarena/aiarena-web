@@ -1,13 +1,17 @@
+import io
+import json
 import os
 
+import jsonschema
 from constance import config
 from django.db.models import Sum
 from django.test import TransactionTestCase
 from rest_framework.authtoken.models import Token
 
 from aiarena.core.api import Matches
-from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, Competition, Map, \
-    ArenaClient, competition_participation
+from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, \
+    Competition, Map, \
+    ArenaClient
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
 from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
@@ -815,7 +819,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
 
     def _complete_round(self, competition, exp_round, exp_div_participant_count, exp_n_matches):
         # this should trigger a new round
-        response = self._post_to_matches()  
+        response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
         # check round data
         round = Round.objects.filter(competition=competition).order_by('-number').first()
@@ -854,7 +858,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
             self._complete_round(competition, exp_rounds[i], exp_div_participant_count, exp_n_matches)
             self.assertEqual(competition.rounds_this_cycle, i+1)
 
-    def _set_up_competition(self, target_divs, div_size, rpc=1, n_placements=0): 
+    def _set_up_competition(self, target_divs, div_size, rpc=1, n_placements=0):
         # avoid old tests breaking that were pre-this feature
         config.REISSUE_UNFINISHED_MATCHES = False
 
@@ -927,7 +931,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
         self._complete_round(competition, 3, {1:_exp_par(2,0)}, {1:1})
         self._complete_round(competition, 4, {1:_exp_par(4,0)}, {1:6})
-    
+
     def test_division_matchmaking(self):
         competition = self._set_up_competition(3, 3, 3)
 
@@ -994,7 +998,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
                 self._create_active_bot_for_competition(competition.id, u, f'{u.username}Bot{i+1}')
         self._complete_cycle(competition, [40,41,42], {1:_exp_par(7), 2:_exp_par(8), 3:_exp_par(8)}, {1:21, 2:28, 3:28})
 
-        
+
 class SetStatusTestCase(LoggedInMixin, TransactionTestCase):
     def setUp(self):
         super().setUp()
@@ -1003,3 +1007,115 @@ class SetStatusTestCase(LoggedInMixin, TransactionTestCase):
     def test_set_status(self):
         return self.client.post('/api/arenaclient/set-status/',
                                 {'status': 'idle'})
+
+
+class ArenaClientCompatabilityTestCase(MatchReadyMixin, TransactionTestCase):
+    """
+    This test ensures that the Arena Client endpoint doesn't inadvertently change.
+
+    IF THIS TEST FAILS, YOU MIGHT HAVE BROKEN COMPATABILITY WITH THE ARENA CLIENT
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(User.objects.get(username='arenaclient1'))
+
+    def validateJson_bySchema(self, jsonData, json_schema) -> (bool, jsonschema.exceptions.ValidationError):
+        try:
+            jsonschema.validate(instance=jsonData, schema=json_schema)
+        except jsonschema.exceptions.ValidationError as error:
+            return False, error
+        return True, None
+
+    def test_endpoint_contract(self):
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        json_schema = {
+            "type": "object",
+            "additionalProperties": False,
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {"type": "number"},
+                "bot1": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": [
+                        "id",
+                        "name",
+                        "game_display_id",
+                        "bot_zip",
+                        "bot_zip_md5hash",
+                        "bot_data",
+                        "bot_data_md5hash",
+                        "plays_race",
+                        "type",
+                    ],
+                    "properties": {
+                        "id": {"type": "number"},
+                        "name": {"type": "string"},
+                        "game_display_id": {"type": "string"},
+                        "bot_zip": {"type": "string"},
+                        "bot_zip_md5hash": {"type": "string"},
+                        "bot_data": {"type": "string"},
+                        "bot_data_md5hash": {"type": "string"},
+                        "plays_race": {"type": "string"},
+                        "type": {"type": "string"},
+                    }
+                },
+                "bot2": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": [
+                        "id",
+                        "name",
+                        "game_display_id",
+                        "bot_zip",
+                        "bot_zip_md5hash",
+                        "bot_data",
+                        "bot_data_md5hash",
+                        "plays_race",
+                        "type",
+                    ],
+                    "properties": {
+                        "id": {"type": "number"},
+                        "name": {"type": "string"},
+                        "game_display_id": {"type": "string"},
+                        "bot_zip": {"type": "string"},
+                        "bot_zip_md5hash": {"type": "string"},
+                        "bot_data": {"type": "string"},
+                        "bot_data_md5hash": {"type": "string"},
+                        "plays_race": {"type": "string"},
+                        "type": {"type": "string"},
+                    }
+                },
+                "map": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": [
+                        "id",
+                        "name",
+                        "file",
+                        "enabled",
+                        "game_mode",
+                        "competitions"
+                    ],
+                    "properties": {
+                        "id": {"type": "number"},
+                        "name": {"type": "string"},
+                        "file": {"type": "string"},
+                        "enabled": {"type": "boolean"},
+                        "game_mode": {"type": "number"},
+                        "competitions": {"type": "array"},
+                    }
+                },
+            }
+        }
+
+        validation_successful, error = self.validateJson_bySchema(json.load(io.BytesIO(response.content)), json_schema)
+        if not validation_successful:
+            raise Exception('The AC API next match endpoint json schema has changed! '
+                  'If you intentionally changed it, update this test and the arenaclient.\n'
+                            'ValidationError:\n' + str(error))
+
