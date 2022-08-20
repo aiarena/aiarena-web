@@ -1,8 +1,8 @@
-from django.utils import timezone
 import json
 import logging
 
 from constance import config
+from django.utils import timezone
 
 from aiarena.core.models import User
 from aiarena.patreon.patreon import PatreonOAuth, PatreonApi
@@ -24,6 +24,7 @@ class PatreonAccountBind(models.Model):
     """The datetime when the patreon token refresh last failed"""
     last_token_refresh_failure_message = models.TextField(blank=True, null=True)
     """The exception text provided with the latest refresh failure"""
+    patreon_user_id = models.CharField(max_length=64, blank=True, null=True)
 
     def update_refresh_token(self):
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
@@ -51,6 +52,9 @@ class PatreonAccountBind(models.Model):
         self.user.patreon_level = patreon_level
         self.user.save()
 
+        self.patreon_user_id = self.get_patreon_user_id(user)
+        self.save()
+
     def has_pledge(self, user) -> bool:
         if 'included' in user:
             for entry in user['included']:
@@ -63,6 +67,12 @@ class PatreonAccountBind(models.Model):
             if entry['type'] == 'pledge':
                 return entry['relationships']['reward']['data']['id']
         raise Exception('Unable to locate reward for pledge.')
+
+    def get_patreon_user_id(self, user) -> str:
+        if 'data' in user:
+            for entry in user['data']:
+                return entry['id']
+        return None
 
     def get_pledge_reward_name(self, user, id: str) -> str:
         for entry in user['included']:
