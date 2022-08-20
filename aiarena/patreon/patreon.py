@@ -89,22 +89,23 @@ class PatreonApi:
 
 
 def update_unlinked_discord_users():
-    # avoid circular import
-    from aiarena.patreon.models import PatreonUnlinkedDiscordUID, PatreonAccountBind
+    if config.PATREON_CLIENT_ID and config.PATREON_CLIENT_SECRET:
+        # avoid circular import
+        from aiarena.patreon.models import PatreonUnlinkedDiscordUID, PatreonAccountBind
 
-    access_token, _ = refresh_creator_tokens()
-    api = PatreonApi(access_token)
-    campaigns = api.current_user_campaigns()
-    campaign_id = get_campaign_id(campaigns)
-    campaign = api.campaign_pledges(campaign_id)
-    discord_uids = get_pledge_user_discord_uids(campaign)
+        access_token, _ = refresh_creator_tokens()
+        api = PatreonApi(access_token)
+        campaigns = api.current_user_campaigns()
+        campaign_id = get_campaign_id(campaigns)
+        campaign = api.campaign_pledges(campaign_id)
+        discord_uids = get_pledge_user_discord_uids(campaign)
 
-    PatreonUnlinkedDiscordUID.objects.all().delete()
+        PatreonUnlinkedDiscordUID.objects.all().delete()
 
-    for discord_uid in discord_uids:
-        if not PatreonAccountBind.objects.filter(patreon_user_id=discord_uid['patreon_user_id']).exists():
-            PatreonUnlinkedDiscordUID.objects.create(patreon_user_id=discord_uid['patreon_user_id'],
-                                                     discord_uid=discord_uid['discord_uid'])
+        for discord_uid in discord_uids:
+            if not PatreonAccountBind.objects.filter(patreon_user_id=discord_uid['patreon_user_id']).exists():
+                PatreonUnlinkedDiscordUID.objects.create(patreon_user_id=discord_uid['patreon_user_id'],
+                                                         discord_uid=discord_uid['discord_uid'])
 
 
 def refresh_creator_tokens() -> (str, str):
