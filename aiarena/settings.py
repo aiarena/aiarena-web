@@ -42,7 +42,7 @@ TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'testserver']  # testserver is the django testing client
+ALLOWED_HOSTS = ['127.0.0.1', 'testserver', 'aiarena-web']  # testserver is the django testing client
 
 INTERNAL_IPS = ['127.0.0.1']
 

@@ -1,14 +1,48 @@
-from django.core.files.uploadedfile import SimpleUploadedFile
+from typing import List
+
 from django.test import Client
 from django.urls import reverse
 
-from typing import List
-
-from aiarena.core.models import User, Match, Result, ArenaClient, \
-    Competition, Bot, Map, MapPool
+from aiarena.core.models import User, ArenaClient, \
+    Competition, Bot, Map, MapPool, Match
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
-from aiarena.core.tests.tests import BaseTestMixin
+
+
+class TestAssetPaths:
+    # For some reason using an absolute file path here will cause it to mangle the save directory and fail
+    # later whilst handling the bot_zip file save
+    test_bot_zip_path = 'aiarena/core/tests/test-media/test_bot.zip'
+    test_bot_zip_hash = 'c96bcfc79318a8b50b0b2c8696400d06'
+    test_bot_zip_updated_path = 'aiarena/core/tests/test-media/test_bot_updated.zip'
+    test_bot_zip_updated_hash = '685dba7a89511157a6594c20c50397d3'
+    test_bot_datas = {
+        'bot1': [
+            {
+                'path': 'aiarena/core/tests/test-media/test_bot1_data0.zip',
+                'hash': '8a2ed68ea1d98f699d7f03bd98c6530d'
+            },
+            {
+                'path': 'aiarena/core/tests/test-media/test_bot1_data1.zip',
+                'hash': 'c174816d0730c76cc649cf35b097d61e'
+            }
+        ],
+        'bot2': [
+            {
+                'path': 'aiarena/core/tests/test-media/test_bot2_data0.zip',
+                'hash': 'de998ff5944d17eb40e37429b162b651'
+            },
+            {
+                'path': 'aiarena/core/tests/test-media/test_bot2_data1.zip',
+                'hash': '2d7ecb911b1da870a503acf4173be642'
+            }
+        ]
+    }
+    test_bot1_match_log_path = 'aiarena/core/tests/test-media/test_bot1_match_log.zip'
+    test_bot2_match_log_path = 'aiarena/core/tests/test-media/test_bot2_match_log.zip'
+    test_arenaclient_log_path = 'aiarena/core/tests/test-media/test_arenaclient_log.zip'
+    test_replay_path = 'aiarena/core/tests/test-media/testReplay.SC2Replay'
+    test_map_path = 'aiarena/core/tests/test-media/AutomatonLE.SC2Map'
 
 
 class TestingClient:
@@ -16,19 +50,12 @@ class TestingClient:
 
     def __init__(self, django_client=Client()):
         self.django_client = django_client
-        self.api_token: str = None
 
     def login(self, user: User):
         self.django_client.force_login(user)
 
     def logout(self):
         self.django_client.logout()
-
-    def set_api_token(self, api_token: str):
-        self.api_token = api_token
-
-    def get_api_headers(self) -> dict:
-        return {"Authorization": f"Token {self.api_token}"}
 
     def create_user(self,
                     username: str,
@@ -50,7 +77,7 @@ class TestingClient:
         assert response.status_code == 302 and response.url == reverse('admin:core_user_changelist')
         return User.objects.get(username=username)
 
-    def create_arenaclient(self, username: str, email: str, owner_id: int) -> ArenaClient:
+    def create_arenaclient(self, username: str, email: str, owner_id: int, trusted=True) -> ArenaClient:
         if ArenaClient.objects.filter(username=username).exists():
             raise Exception('That already exists!')
 
@@ -59,7 +86,9 @@ class TestingClient:
                                                  'email': email,
                                                  'password': self.TEST_PASSWORD,
                                                  'type': 'ARENA_CLIENT',
-                                                 'owner': owner_id, })
+                                                 'owner': owner_id,
+                                                 'trusted': trusted,
+                                                 'is_active': True, })
 
         # we should be redirected back to the changelist
         assert response.status_code == 302 and response.url == reverse('admin:core_arenaclient_changelist')
@@ -149,38 +178,6 @@ class TestingClient:
         # we should be redirected back to the same page
         assert response.status_code == 302 and response.url == '.'
 
-    def request_match(self,
-                      matchup_type: str,
-                      bot1: Bot,
-                      bot2: Bot,
-                      matchup_race: str,
-                      map_selection_type: str,
-                      map: Map,
-                      map_pool: MapPool,
-                      match_count: int) -> Match:
-        url = reverse('requestmatch')
-        data = {
-                'matchup_type': matchup_type,
-                'bot1'        : bot1.id,
-                'bot2'        : bot2.id,
-                'matchup_race': matchup_race,
-                'map_selection_type': map_selection_type,
-                'map'         : map.id if map is not None else '',
-                'map_pool'    : map_pool.id if map_pool is not None else '',
-                'match_count' : match_count,
-        }
-        response = self.django_client.post(url, data)
-
-        assert response.status_code == 302 and response.url == url
-        return Match.objects.filter(requested_by=response.wsgi_request.user).order_by('-created').first()
-
-    def next_match(self) -> Match:
-        url = reverse('ac_next_match-list')
-        response = self.django_client.post(url, self.get_api_headers())
-
-        assert response.status_code == 201
-        return Match.objects.get(id=response.data['id'])
-
     def cancel_matches(self, match_ids: List[int]):
         url = reverse('admin:core_match_changelist')
         data = {
@@ -192,34 +189,27 @@ class TestingClient:
         # we should be redirected back to the same page
         assert response.status_code == 302 and response.url == url
 
-    def submit_result(self, match_id: int, type: str) -> Result:
-        with open(BaseTestMixin.test_replay_path, 'rb') as replay_file, \
-                open(BaseTestMixin.test_arenaclient_log_path, 'rb') as arenaclient_log, \
-                open(BaseTestMixin.test_bot_datas['bot1'][0]['path'], 'rb') as bot1_data, \
-                open(BaseTestMixin.test_bot_datas['bot2'][0]['path'], 'rb') as bot2_data, \
-                open(BaseTestMixin.test_bot1_match_log_path, 'rb') as bot1_log, \
-                open(BaseTestMixin.test_bot2_match_log_path, 'rb') as bot2_log:
-            data = {'match': match_id,
-                    'type': type,
-                    'replay_file': SimpleUploadedFile("replay_file.SC2Replay",
-                                                      replay_file.read()),
-                    'game_steps': '1234',
-                    'arenaclient_log': SimpleUploadedFile("arenaclient_log.log",
-                                                          arenaclient_log.read()),
-                    'bot1_data': SimpleUploadedFile("bot1_data.log",
-                                                    bot1_data.read()),
-                    'bot2_data': SimpleUploadedFile("bot2_data.log",
-                                                    bot2_data.read()),
-                    'bot1_log': SimpleUploadedFile("bot1_log.log",
-                                                   bot1_log.read()),
-                    'bot2_log': SimpleUploadedFile("bot2_log.log",
-                                                   bot2_log.read()),
-                    'bot1_avg_step_time': '0.111',
-                    'bot2_avg_step_time': '0.222', }
-            url = reverse('ac_submit_result-list')
-            response = self.django_client.post(url,
-                                               data,
-                                               **self.get_api_headers())
+    def request_match(self,
+                      matchup_type: str,
+                      bot1: Bot,
+                      bot2: Bot,
+                      matchup_race: str,
+                      map_selection_type: str,
+                      map: Map,
+                      map_pool: MapPool,
+                      match_count: int) -> Match:
+        url = reverse('requestmatch')
+        data = {
+            'matchup_type': matchup_type,
+            'bot1': bot1.id,
+            'bot2': bot2.id,
+            'matchup_race': matchup_race,
+            'map_selection_type': map_selection_type,
+            'map': map.id if map is not None else '',
+            'map_pool': map_pool.id if map_pool is not None else '',
+            'match_count': match_count,
+        }
+        response = self.django_client.post(url, data)
 
-            assert response.status_code == 201
-            return Result.objects.get(id=response.data['result_id'])
+        assert response.status_code == 302 and response.url == url
+        return Match.objects.filter(requested_by=response.wsgi_request.user).order_by('-created').first()
