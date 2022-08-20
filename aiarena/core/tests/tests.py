@@ -36,7 +36,7 @@ class BaseTestMixin(object):
 
 
     def _create_map_for_competition(self, name, competition_id):
-        with open(BaseTestMixin.test_map_path, 'rb') as map_file:
+        with open(TestAssetPaths.test_map_path, 'rb') as map_file:
             competition = Competition.objects.get(id=competition_id)
             map = Map.objects.create(name=name, game_mode=competition.game_mode, file=File(map_file))
             map.competitions.add(competition)
