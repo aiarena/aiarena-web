@@ -10,7 +10,7 @@ from aiarena.core.models import ArenaClient, Bot, Map, Match, MatchParticipation
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
-from aiarena.patreon.models import PatreonAccountBind
+from aiarena.patreon.models import PatreonAccountBind, PatreonUnlinkedDiscordUIDs
 
 
 class StackedItemInline(admin.StackedInline):
@@ -361,6 +361,11 @@ class NewsAdmin(admin.ModelAdmin):
 @admin.register(PatreonAccountBind)
 class PatreonAccountBindAdmin(admin.ModelAdmin):
     list_display = [field.name for field in PatreonAccountBind._meta.fields]
+
+
+@admin.register(PatreonUnlinkedDiscordUIDs)
+class PatreonUnlinkedDiscordUIDsAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in PatreonUnlinkedDiscordUIDs._meta.fields]
 
 
 @admin.register(Result)

@@ -1,4 +1,3 @@
-import json
 import logging
 
 from constance import config
@@ -26,21 +25,17 @@ class PatreonAccountBind(models.Model):
     """The exception text provided with the latest refresh failure"""
     patreon_user_id = models.CharField(max_length=64, blank=True, null=True)
 
-    def update_refresh_token(self):
+    def update_tokens(self):
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
-        tokens = oauth_client.refresh_token(self.refresh_token)
-        self.last_token_refresh_attempt = timezone.now()
-        if 'access_token' in tokens and 'refresh_token' in tokens:
-            self.access_token = tokens['access_token']
-            self.refresh_token = tokens['refresh_token']
+        try:
+            self.access_token, self.refresh_token = oauth_client.update_tokens(self.refresh_token)
             self.last_token_refresh_success = timezone.now()
             self.save()
-        else:
-            exception_message = f"Failed to refresh patreon token for user {self.user.id}. Tokens dump:\n" + json.dumps(tokens)
+        except Exception as e:
             self.last_token_refresh_failure = timezone.now()
-            self.last_token_refresh_failure_message = exception_message
+            self.last_token_refresh_failure_message = str(e)
             self.save()
-            raise Exception(exception_message)
+            raise Exception(f"Failed to refresh patreon token for user {self.user.id}.") from e
 
     def update_user_patreon_tier(self):
         api_client = PatreonApi(self.access_token)
@@ -69,9 +64,8 @@ class PatreonAccountBind(models.Model):
         raise Exception('Unable to locate reward for pledge.')
 
     def get_patreon_user_id(self, user) -> str:
-        if 'data' in user:
-            for entry in user['data']:
-                return entry['id']
+        if 'data' in user and 'id' in user['data']:
+            return user['data']['id']
         return None
 
     def get_pledge_reward_name(self, user, id: str) -> str:
@@ -81,3 +75,6 @@ class PatreonAccountBind(models.Model):
         raise Exception('Unable to locate reward.')
 
 
+class PatreonUnlinkedDiscordUIDs(models.Model):
+    patreon_user_id = models.CharField(max_length=64, unique=True)
+    discord_uid = models.CharField(max_length=64, unique=True)
