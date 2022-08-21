@@ -14,7 +14,7 @@ from rest_framework.reverse import reverse
 
 from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
-from aiarena.api.arenaclient.exceptions import LadderDisabled
+from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
 from aiarena.core.utils import parse_tags
 from aiarena.core.api import Bots, Matches
 from aiarena.core.events import EVENT_MANAGER
@@ -90,11 +90,15 @@ class MatchViewSet(viewsets.GenericViewSet):
             .get(match_id=match.id, participant_number=2).bot
 
     def create(self, request, *args, **kwargs):
-        match = ACCoordinator.next_match(request.user)
-        self.load_participants(match)
+        if request.user.is_arenaclient:
+            match = ACCoordinator.next_match(request.user.arenaclient)
+            if match:
+                self.load_participants(match)
 
-        serializer = self.get_serializer(match)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                serializer = self.get_serializer(match)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        raise NoGameForClient()
 
 
     # todo: check match is in progress/bot is in this match
