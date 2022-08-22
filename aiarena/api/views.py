@@ -15,6 +15,7 @@ from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParti
     Competition, MatchTag, Game, GameMode, MapPool, CompetitionBotMatchupStats, CompetitionBotMapStats, News, Trophy
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.permissions import IsServiceOrAdminUser
+from aiarena.patreon.models import PatreonUnlinkedDiscordUID
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +65,7 @@ matchparticipation_filter_fields = 'id', 'match', 'participant_number', 'bot', '
                                    'update_bot_data', 'match_log_has_been_cleaned',
 matchtag_include_fields = 'user', 'tag_name'
 news_include_fields = 'id', 'created', 'title', 'text', 'yt_link',
+patreon_unlinked_uid_include_fields = 'discord_uid',
 result_include_fields = 'id', 'match', 'winner', 'type', 'created', 'replay_file', 'game_steps', \
                         'submitted_by', 'arenaclient_log', 'interest_rating', 'date_interest_rating_calculated', \
                         'replay_file_has_been_cleaned', 'arenaclient_log_has_been_cleaned',
@@ -527,6 +529,27 @@ class NewsViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = news_include_fields
     search_fields = news_include_fields
     ordering_fields = news_include_fields
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
+class PatreonUnlinkedDiscordUIDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PatreonUnlinkedDiscordUID
+        fields = patreon_unlinked_uid_include_fields
+
+
+class PatreonUnlinkedDiscordUIDViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    PatreonUnlinkedDiscordUID data view
+    """
+    queryset = PatreonUnlinkedDiscordUID.objects.all()
+    serializer_class = PatreonUnlinkedDiscordUIDSerializer
+    permission_classes = [IsServiceOrAdminUser]  # Only allow privileged users to access this information
+
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = patreon_unlinked_uid_include_fields
+    search_fields = patreon_unlinked_uid_include_fields
+    ordering_fields = patreon_unlinked_uid_include_fields
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS

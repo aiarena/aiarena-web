@@ -20,6 +20,7 @@ router.register(r'map-pools', publicapi_views.MapPoolViewSet, basename='api_mapp
 router.register(r'matches', publicapi_views.MatchViewSet, basename='api_match')
 router.register(r'match-participations', publicapi_views.MatchParticipationViewSet, basename='api_matchparticipation')
 router.register(r'news', publicapi_views.NewsViewSet, basename='api_news')
+router.register(r'patreon-unlinked-discord-uids', publicapi_views.PatreonUnlinkedDiscordUIDViewSet, basename='api_patreon_unlinked_discord_uids')
 router.register(r'results', publicapi_views.ResultViewSet, basename='api_result')
 router.register(r'rounds', publicapi_views.RoundViewSet, basename='api_round')
 router.register(r'users', publicapi_views.UserViewSet, basename='api_user')
