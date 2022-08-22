@@ -214,10 +214,26 @@ class Bot(models.Model, LockableModelMixin):
             return 'run.py'
 
     def can_download_bot_zip(self, user):
-        return self.user == user or self.bot_zip_publicly_downloadable or user.is_staff
+        """
+        Only allow download of bot_zip if any of:
+        - This user owns the bot
+        - The bot_zip is publicly downloadable
+        - This user is a staff user
+        - This user is a trusted arenaclient
+        """
+        return self.user == user or self.bot_zip_publicly_downloadable or user.is_staff \
+               or (user.is_arenaclient and user.arenaclient.trusted)
 
     def can_download_bot_data(self, user):
-        return self.user == user or self.bot_data_publicly_downloadable or user.is_staff
+        """
+        Only allow download of bot_data if any of:
+        - This user owns the bot
+        - The bot_data is publicly downloadable
+        - This user is a staff user
+        - This user is a trusted arenaclient
+        """
+        return self.user == user or self.bot_data_publicly_downloadable or user.is_staff \
+               or (user.is_arenaclient and user.arenaclient.trusted)
 
     # for purpose of distinquish news in activity feed
     def get_model_name(self):
