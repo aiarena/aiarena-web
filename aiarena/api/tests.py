@@ -1,4 +1,4 @@
-from django.test import TestCase, TransactionTestCase
+from django.test import TransactionTestCase
 
 from aiarena.core.tests.tests import FullDataSetMixin
 
@@ -9,12 +9,18 @@ class ApiReadPrivatePagesTestCase(FullDataSetMixin, TransactionTestCase):
     """
 
     def test_get_api_discord_users_page(self):
-        self.client.login(username='regular_user', password='x')
+        self.client.login(username='regular_user1', password='x')
         response = self.client.get('/api/discord-users/')
+        self.assertEqual(response.status_code, 403)
+
+        response = self.client.get('/api/stream/next-replay/')
         self.assertEqual(response.status_code, 403)
 
         self.client.login(username='staff_user', password='x')
         response = self.client.get('/api/discord-users/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get('/api/stream/next-replay/')
         self.assertEqual(response.status_code, 200)
 
 
@@ -25,7 +31,7 @@ class ApiReadPublicPagesTestCase(FullDataSetMixin, TransactionTestCase):
 
     def setUp(self):
         super().setUp()
-        self.client.login(username='staff_user', password='x')
+        self.client.login(username='regular_user1', password='x')
 
     def test_get_api_index_page(self):
         response = self.client.get('/api/')
@@ -35,12 +41,20 @@ class ApiReadPublicPagesTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/api/bots/')
         self.assertEqual(response.status_code, 200)
 
+    def test_get_api_bot_races_page(self):
+        response = self.client.get('/api/bot-races/')
+        self.assertEqual(response.status_code, 200)
+
     def test_get_api_competitions_page(self):
         response = self.client.get('/api/competitions/')
         self.assertEqual(response.status_code, 200)
 
-    def test_get_api_competitionmatchupstatus_page(self):
+    def test_get_api_competitionmatchupstat_page(self):
         response = self.client.get('/api/competition-bot-matchup-stats/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_api_competitionmapstats_page(self):
+        response = self.client.get('/api/competition-bot-map-stats/')
         self.assertEqual(response.status_code, 200)
 
     def test_get_api_competitionparticipations_page(self):
