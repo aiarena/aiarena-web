@@ -89,7 +89,7 @@ class PatreonApi:
 
 
 def update_unlinked_discord_users():
-    if config.PATREON_CLIENT_ID and config.PATREON_CLIENT_SECRET:
+    if config.PATREON_CLIENT_ID and config.PATREON_CLIENT_SECRET and config.PATREON_CREATOR_REFRESH_TOKEN:
         # avoid circular import
         from aiarena.patreon.models import PatreonUnlinkedDiscordUID, PatreonAccountBind
 
