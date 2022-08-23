@@ -7,7 +7,7 @@ from django.db.models import Sum, F, Prefetch
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.fields import FileField, FloatField
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
@@ -105,17 +105,23 @@ class MatchViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['GET'], name='Download a participant\'s zip file', url_path='(?P<p_num>\d+)/zip')
     def download_zip(self, request, *args, **kwargs):
         p = MatchParticipation.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
-        response = HttpResponse(FileWrapper(p.bot.bot_zip), content_type='application/zip')
-        response['Content-Disposition'] = 'inline; filename="{0}.zip"'.format(p.bot.name)
-        return response
+        if p.bot.can_download_bot_zip(request.user):
+            response = HttpResponse(FileWrapper(p.bot.bot_zip), content_type='application/zip')
+            response['Content-Disposition'] = 'inline; filename="{0}.zip"'.format(p.bot.name)
+            return response
+        else:
+            raise PermissionDenied("You cannot download that bot zip.")
 
     # todo: check match is in progress/bot is in this match
     @action(detail=True, methods=['GET'], name='Download a participant\'s data file', url_path='(?P<p_num>\d+)/data')
     def download_data(self, request, *args, **kwargs):
         p = MatchParticipation.objects.get(match=kwargs['pk'], participant_number=kwargs['p_num'])
-        response = HttpResponse(FileWrapper(p.bot.bot_data), content_type='application/zip')
-        response['Content-Disposition'] = 'inline; filename="{0}_data.zip"'.format(p.bot.name)
-        return response
+        if p.bot.can_download_bot_data(request.user):
+            response = HttpResponse(FileWrapper(p.bot.bot_data), content_type='application/zip')
+            response['Content-Disposition'] = 'inline; filename="{0}_data.zip"'.format(p.bot.name)
+            return response
+        else:
+            raise PermissionDenied("You cannot download that bot data.")
 
 
 class SubmitResultResultSerializer(serializers.ModelSerializer):

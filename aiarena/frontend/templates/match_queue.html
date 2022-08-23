@@ -51,7 +51,7 @@
                     <span></span><span><h2><input class="form-control" id="roundFilter" type="text" placeholder="Filter"></h2></span><span></span></div>
             {% for round in round_list %}
                 <div class="divider">
-                    <span></span><span><h2>{{ round.name }} [{{ round.competition }}]</h2></span><span></span></div>
+                    <span></span><span><h2>{{ round.name }} [{{ round.competition.as_html_link }}]</h2></span><span></span></div>
                 <table summary="Table containing information for each round" class="row-hover-highlight">
 
                     <thead>
