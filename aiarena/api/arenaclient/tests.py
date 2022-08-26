@@ -243,7 +243,29 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         response = self.test_ac_api_client.post_to_matches()
         self.assertEqual(response.status_code, 201)
 
+    def test_untrusted_competition(self):
+        untrustedClient = ArenaClient.objects.create(username='untrustedclient', email='untrustedclient@dev.aiarena.net',
+                                                           type='ARENA_CLIENT', trusted=False, owner=self.staffUser1)
+        # we don't want to have to create lots of arenaclients for multiple matches
+        config.REISSUE_UNFINISHED_MATCHES = False
 
+        # competitions will default to max 2 active rounds
+        comp = self._create_game_mode_and_open_competition(trusted=False)
+        self._create_map_for_competition('test_map', comp.id)
+
+        bot1 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot1', BotRace.terran(), downloadable=True)
+        bot2 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot2', BotRace.zerg(), downloadable=True)
+        bot3 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot3', BotRace.protoss(), downloadable=True)
+        bot4 = self._create_active_bot_for_competition(comp.id, self.regularUser1, 'testbot4', BotRace.random(), downloadable=True)
+
+        # Round 1
+        self.test_ac_api_client.set_api_token(Token.objects.create(user=untrustedClient).key)
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        response = self._post_to_results(response.data['id'], 'Player1Win')
+        self.assertEqual(response.status_code, 201)
 
 class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data')

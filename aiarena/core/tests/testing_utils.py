@@ -117,7 +117,7 @@ class TestingClient:
         assert response.status_code == 302 and response.url == reverse('admin:core_gamemode_changelist')
         return GameMode.objects.get(name=name, game_id=game_id)
 
-    def create_competition(self, name: str, type: str, game_mode_id: int, playable_race_ids=None) -> Competition:
+    def create_competition(self, name: str, type: str, game_mode_id: int, playable_race_ids=None, trusted=True) -> Competition:
         if playable_race_ids is None:
             playable_race_ids = {}
         if Competition.objects.filter(name=name).exists():
@@ -127,7 +127,8 @@ class TestingClient:
         response = self.django_client.post(url, {'name': name,
                                                  'type': type,
                                                  'game_mode': game_mode_id,
-                                                 'playable_races': playable_race_ids})
+                                                 'playable_races': playable_race_ids,
+                                                 'trusted': trusted})
 
         # we should be redirected back to the changelist
         assert response.status_code == 302 and response.url == reverse('admin:core_competition_changelist')

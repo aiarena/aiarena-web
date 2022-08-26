@@ -245,7 +245,7 @@ class Matches:
                 .filter(competition=competition, active=True, division_num=participant1.division_num)
                 .exclude(id__in=already_processed_participants))
             for participant2 in active_participants_in_div:
-                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=True)
+                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=competition.trusted)
 
         return new_round
 
