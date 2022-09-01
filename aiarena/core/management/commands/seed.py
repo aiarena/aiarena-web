@@ -205,7 +205,6 @@ class Command(BaseCommand):
                     bot1.save()
 
                 count += 1
-                self.stdout.write(f"{match.id}")
             self.stdout.write(f"Running matches...100%")
 
             # so we have a match in progress
