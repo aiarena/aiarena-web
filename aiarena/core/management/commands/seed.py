@@ -1,3 +1,5 @@
+import random
+
 from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
@@ -175,16 +177,16 @@ class Command(BaseCommand):
                                  " Useful to avoid having to reconfigure arena clients in testing")
         parser.add_argument('--flush', action='store_true', help="Whether to flush the existing database data.")
         parser.add_argument('--migrate', action='store_true', help="Whether to migrate the database first.")
-        parser.add_argument('--norandom', action='store_true', help="Turn off random aspects of seeding for consistent testing results.")
+        parser.add_argument('--randomseed', type=int,
+                            help="Set the random seed. Useful for consistent test results.")
 
     def handle(self, *args, **options):
 
         if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT \
                 or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING:
-            if options['norandom'] is not None:
-                self.stdout.write('Setting RANDOMIZE_MATCH_PLAY_ORDER to FALSE')
-                settings.RANDOMIZE_MATCH_PLAY_ORDER = False
-
+            if options['randomseed'] is not None:
+                self.stdout.write('Setting random seed to {randomseed}')
+                random.seed(options['randomseed'])
             if options['migrate'] is not None:
                 self.stdout.write('Migrating database...')
                 call_command('migrate', '--noinput')
