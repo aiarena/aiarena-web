@@ -14,154 +14,6 @@ from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import TestAssetPaths
 from aiarena.core.utils import EnvironmentType
 
-def run_seed(matches, token):
-    devadmin = WebsiteUser.objects.create_superuser(username='devadmin', password='x', email='devadmin@dev.aiarena.net')
-
-    client = TestingClient()
-    client.login(devadmin)
-
-    arenaclient1 = client.create_arenaclient('aiarenaclient-001', 'aiarenaclient-001@dev.aiarena.net', devadmin.id)
-    client.create_arenaclient('aiarenaclient-002', 'aiarenaclient-002@dev.aiarena.net', devadmin.id)
-    client.create_user('service_user', 'x', 'service_user@dev.aiarena.net', 'SERVICE', devadmin.id)
-
-    # if token is None it will generate a new one, otherwise it will use the one specified
-    api_token = Token.objects.create(user=arenaclient1, key=token)
-    ac_client = AcApiTestingClient()
-    ac_client.set_api_token(api_token.key)
-
-    game = client.create_game('StarCraft II')
-    gamemode = client.create_gamemode('Melee', game.id)
-
-    BotRace.create_all_races()
-    terran = BotRace.objects.get(label='T')
-    zerg = BotRace.objects.get(label='Z')
-    protoss = BotRace.objects.get(label='P')
-
-    competition1 = client.create_competition('Competition 1', 'L', gamemode.id)
-    competition1.target_n_divisions = 2
-    competition1.target_division_size = 2
-    competition1.n_placements = 2
-    competition1.rounds_per_cycle = 1
-    competition1.save()
-    client.open_competition(competition1.id)
-
-    competition2 = client.create_competition('Competition 2', 'L', gamemode.id)
-    client.open_competition(competition2.id)
-
-    competition3 = client.create_competition('Competition 3 - Terran Only', 'L', gamemode.id, {terran.id})
-    client.open_competition(competition3.id)
-
-    with open(TestAssetPaths.test_map_path, 'rb') as map:
-        m1 = Map.objects.create(name='test_map1', file=File(map), game_mode=gamemode)
-        m1.competitions.add(competition1)
-        m1.competitions.add(competition2)
-        m1.save()
-
-        m2 = Map.objects.create(name='test_map2_terran_only', file=File(map), game_mode=gamemode)
-        m2.competitions.add(competition3)
-        m2.save()
-
-        # unused map
-        Map.objects.create(name='test_map3', file=File(map), game_mode=gamemode)
-
-    map_pool = MapPool.objects.create(name='test_map_pool')
-    map_pool.maps.add(m1)
-    map_pool.maps.add(m2)
-
-    # assume the frontend is working by this point and create these the easiest way
-    devuser1 = WebsiteUser.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
-                                        patreon_level='bronze')
-    devuser2 = WebsiteUser.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net',
-                                        patreon_level='silver')
-    devuser3 = WebsiteUser.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net',
-                                        patreon_level='gold')
-    devuser4 = WebsiteUser.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net',
-                                        patreon_level='platinum')
-    devuser5 = WebsiteUser.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net',
-                                        patreon_level='diamond')
-
-    with open(TestAssetPaths.test_bot_zip_path, 'rb') as bot_zip:
-        bot = Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race=terran, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
-        CompetitionParticipation.objects.create(competition=competition3, bot=bot)
-
-        bot = Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race=zerg, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
-
-        Bot.objects.create(user=devadmin, name='devadmin_bot3', plays_race=protoss, type='python',
-                           bot_zip=File(bot_zip))  # inactive bot
-
-        bot = Bot.objects.create(user=devuser1, name='devuser1_bot1', plays_race=protoss, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
-
-        bot = Bot.objects.create(user=devuser1, name='devuser1_bot2', plays_race=zerg, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-
-        Bot.objects.create(user=devuser1, name='devuser1_bot3', plays_race=terran, type='python',
-                           bot_zip=File(bot_zip))  # inactive bot
-
-        bot = Bot.objects.create(user=devuser2, name='devuser2_bot1', plays_race=protoss, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-
-        bot = Bot.objects.create(user=devuser2, name='devuser2_bot2', plays_race=terran, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-        CompetitionParticipation.objects.create(competition=competition3, bot=bot)
-
-        Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race=zerg, type='python',
-                           bot_zip=File(bot_zip))  # inactive bot
-
-        bot = Bot.objects.create(user=devuser3, name='devuser3_bot1', plays_race=terran, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-
-        bot = Bot.objects.create(user=devuser4, name='devuser4_bot1', plays_race=zerg, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
-
-        bot = Bot.objects.create(user=devuser5, name='devuser5_bot1', plays_race=protoss, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-        CompetitionParticipation.objects.create(competition=competition2, bot=bot)
-
-        # TODO: TEST MULTIPLE ACs
-        for x in range(matches - 1):
-            match = ac_client.next_match()
-
-            # todo: submit different types of results.
-            ac_client.submit_result(match.id, 'Player1Win')
-
-            if x == 0:  # make it so a bot that once was active, is now inactive
-                bot1 = CompetitionParticipation.objects.filter(active=True).first()
-                bot1.active = False
-                bot1.save()
-
-        # so we have a match in progress
-        if matches != 0:
-            ac_client.next_match()
-
-        # bot still in placement
-        bot = Bot.objects.create(user=devadmin, name='devadmin_bot100', plays_race=terran, type='python',
-                                 bot_zip=File(bot_zip))
-        cp = CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-        competition1.refresh_from_db()
-        cp.division_num = competition1.n_divisions
-        cp.save()
-
-        # bot that just joined the competition
-        bot = Bot.objects.create(user=devadmin, name='devadmin_bot101', plays_race=terran, type='python',
-                                 bot_zip=File(bot_zip))
-        CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-
-        return api_token
-
 
 class Command(BaseCommand):
     help = "Seed database for testing and development."
@@ -198,7 +50,7 @@ class Command(BaseCommand):
             self.stdout.write('Seeding data...')
 
             self.stdout.write('Generating {0} match(es)...'.format(options['matches']))
-            api_token = run_seed(options['matches'], options['token'])
+            api_token = self.run_seed(options['matches'], options['token'])
 
             self.stdout.write('Creating news items...')
             News.objects.create(title="News item 1",
@@ -216,3 +68,161 @@ class Command(BaseCommand):
             self.stdout.write('API Token is {0}.'.format(api_token))
         else:
             self.stdout.write('Seeding failed: This is not a development or staging environment!')
+
+    def run_seed(self, matches, token):
+        self.stdout.write(f"Seeding initial website data...")
+
+        devadmin = WebsiteUser.objects.create_superuser(username='devadmin', password='x',
+                                                        email='devadmin@dev.aiarena.net')
+
+        client = TestingClient()
+        client.login(devadmin)
+
+        arenaclient1 = client.create_arenaclient('aiarenaclient-001', 'aiarenaclient-001@dev.aiarena.net', devadmin.id)
+        client.create_arenaclient('aiarenaclient-002', 'aiarenaclient-002@dev.aiarena.net', devadmin.id)
+        client.create_user('service_user', 'x', 'service_user@dev.aiarena.net', 'SERVICE', devadmin.id)
+
+        # if token is None it will generate a new one, otherwise it will use the one specified
+        api_token = Token.objects.create(user=arenaclient1, key=token)
+        ac_client = AcApiTestingClient()
+        ac_client.set_api_token(api_token.key)
+
+        game = client.create_game('StarCraft II')
+        gamemode = client.create_gamemode('Melee', game.id)
+
+        BotRace.create_all_races()
+        terran = BotRace.objects.get(label='T')
+        zerg = BotRace.objects.get(label='Z')
+        protoss = BotRace.objects.get(label='P')
+
+        competition1 = client.create_competition('Competition 1', 'L', gamemode.id)
+        competition1.target_n_divisions = 2
+        competition1.target_division_size = 2
+        competition1.n_placements = 2
+        competition1.rounds_per_cycle = 1
+        competition1.save()
+        client.open_competition(competition1.id)
+
+        competition2 = client.create_competition('Competition 2', 'L', gamemode.id)
+        client.open_competition(competition2.id)
+
+        competition3 = client.create_competition('Competition 3 - Terran Only', 'L', gamemode.id, {terran.id})
+        client.open_competition(competition3.id)
+
+        with open(TestAssetPaths.test_map_path, 'rb') as map:
+            m1 = Map.objects.create(name='test_map1', file=File(map), game_mode=gamemode)
+            m1.competitions.add(competition1)
+            m1.competitions.add(competition2)
+            m1.save()
+
+            m2 = Map.objects.create(name='test_map2_terran_only', file=File(map), game_mode=gamemode)
+            m2.competitions.add(competition3)
+            m2.save()
+
+            # unused map
+            Map.objects.create(name='test_map3', file=File(map), game_mode=gamemode)
+
+        map_pool = MapPool.objects.create(name='test_map_pool')
+        map_pool.maps.add(m1)
+        map_pool.maps.add(m2)
+
+        # assume the frontend is working by this point and create these the easiest way
+        devuser1 = WebsiteUser.objects.create_user(username='devuser1', password='x', email='devuser1@dev.aiarena.net',
+                                                   patreon_level='bronze')
+        devuser2 = WebsiteUser.objects.create_user(username='devuser2', password='x', email='devuser2@dev.aiarena.net',
+                                                   patreon_level='silver')
+        devuser3 = WebsiteUser.objects.create_user(username='devuser3', password='x', email='devuser3@dev.aiarena.net',
+                                                   patreon_level='gold')
+        devuser4 = WebsiteUser.objects.create_user(username='devuser4', password='x', email='devuser4@dev.aiarena.net',
+                                                   patreon_level='platinum')
+        devuser5 = WebsiteUser.objects.create_user(username='devuser5', password='x', email='devuser5@dev.aiarena.net',
+                                                   patreon_level='diamond')
+
+        with open(TestAssetPaths.test_bot_zip_path, 'rb') as bot_zip:
+            bot = Bot.objects.create(user=devadmin, name='devadmin_bot1', plays_race=terran, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+            CompetitionParticipation.objects.create(competition=competition2, bot=bot)
+            CompetitionParticipation.objects.create(competition=competition3, bot=bot)
+
+            bot = Bot.objects.create(user=devadmin, name='devadmin_bot2', plays_race=zerg, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition2, bot=bot)
+
+            Bot.objects.create(user=devadmin, name='devadmin_bot3', plays_race=protoss, type='python',
+                               bot_zip=File(bot_zip))  # inactive bot
+
+            bot = Bot.objects.create(user=devuser1, name='devuser1_bot1', plays_race=protoss, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+            CompetitionParticipation.objects.create(competition=competition2, bot=bot)
+
+            bot = Bot.objects.create(user=devuser1, name='devuser1_bot2', plays_race=zerg, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
+            Bot.objects.create(user=devuser1, name='devuser1_bot3', plays_race=terran, type='python',
+                               bot_zip=File(bot_zip))  # inactive bot
+
+            bot = Bot.objects.create(user=devuser2, name='devuser2_bot1', plays_race=protoss, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
+            bot = Bot.objects.create(user=devuser2, name='devuser2_bot2', plays_race=terran, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+            CompetitionParticipation.objects.create(competition=competition3, bot=bot)
+
+            Bot.objects.create(user=devuser2, name='devuser2_bot3', plays_race=zerg, type='python',
+                               bot_zip=File(bot_zip))  # inactive bot
+
+            bot = Bot.objects.create(user=devuser3, name='devuser3_bot1', plays_race=terran, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
+            bot = Bot.objects.create(user=devuser4, name='devuser4_bot1', plays_race=zerg, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition2, bot=bot)
+
+            bot = Bot.objects.create(user=devuser5, name='devuser5_bot1', plays_race=protoss, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+            CompetitionParticipation.objects.create(competition=competition2, bot=bot)
+
+            # TODO: TEST MULTIPLE ACs
+
+            count = 0
+            for x in range(matches - 1):
+                self.stdout.write(f"Running matches...{count / matches * 100}%", ending='\r')
+                match = ac_client.next_match()
+
+                # todo: submit different types of results.
+                ac_client.submit_result(match.id, 'Player1Win')
+
+                if x == 0:  # make it so a bot that once was active, is now inactive
+                    bot1 = CompetitionParticipation.objects.filter(active=True).first()
+                    bot1.active = False
+                    bot1.save()
+
+                count += 1
+                self.stdout.write(f"{match.id}")
+            self.stdout.write(f"Running matches...100%")
+
+            # so we have a match in progress
+            if matches != 0:
+                ac_client.next_match()
+
+            # bot still in placement
+            bot = Bot.objects.create(user=devadmin, name='devadmin_bot100', plays_race=terran, type='python',
+                                     bot_zip=File(bot_zip))
+            cp = CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+            competition1.refresh_from_db()
+            cp.division_num = competition1.n_divisions
+            cp.save()
+
+            # bot that just joined the competition
+            bot = Bot.objects.create(user=devadmin, name='devadmin_bot101', plays_race=terran, type='python',
+                                     bot_zip=File(bot_zip))
+            CompetitionParticipation.objects.create(competition=competition1, bot=bot)
+
+            return api_token
