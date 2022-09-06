@@ -6,7 +6,8 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 from django.db import connection
-from django.db.models import Max
+from django.db.models import Max, Min
+from pytz import utc
 
 from aiarena.core.models import MatchParticipation, CompetitionParticipation, Bot
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
@@ -236,11 +237,29 @@ class StatsGenerator:
                 """)
             cursor.execute(query)
             elo_over_time = pd.DataFrame(cursor.fetchall())
-            # HACK - saving to a csv and loading it back normalizes the time format
-            elo_over_time.to_csv('./tmp/tmp.csv')
-            elo_over_time = pd.read_csv('./tmp/tmp.csv')
-            elo_over_time = elo_over_time.drop('Unnamed: 0', axis=1)
-        return elo_over_time
+
+        earliest_result_datetime = StatsGenerator.get_earliest_result_datetime(bot_id, competition_id)
+        return elo_over_time, earliest_result_datetime
+
+    @staticmethod
+    def get_earliest_result_datetime(bot_id, competition_id):
+        with connection.cursor() as cursor:
+            query = (f"""
+                select 
+                    MIN(cr.created) as date
+                from core_matchparticipation cp
+                    inner join core_result cr on cp.match_id = cr.match_id
+                    left join core_bot cb on cp.bot_id = cb.id
+                    left join core_match cm on cp.match_id = cm.id
+                    left join core_round crnd on cm.round_id = crnd.id
+                    left join core_competition cc on crnd.competition_id = cc.id
+                where resultant_elo is not null 
+                    and bot_id = {bot_id} 
+                    and competition_id = {competition_id}
+                order by cr.created
+                """)
+            cursor.execute(query)
+            return cursor.fetchall()
 
     @staticmethod
     def _generate_plot_images(df, update_date: datetime):
@@ -281,12 +300,16 @@ class StatsGenerator:
 
     @staticmethod
     def _generate_elo_graph(bot_id: int, competition_id: int):
-        df = StatsGenerator._get_data(bot_id, competition_id)
+        df, update_date = StatsGenerator._get_data(bot_id, competition_id)
         if not df.empty:
-            df['1'] = pd.to_numeric(df['1'])
-            df['2'] = pd.to_datetime(df['2'])
             df.columns = ['Name', 'ELO', 'Date']
 
-            return StatsGenerator._generate_plot_images(df, Bot.objects.get(id=bot_id).bot_zip_updated)
+            # if the bot was updated more recently than the first result datetime, then use the bot updated date
+            update_date = utc.localize(update_date[0][0])  # convert from a tuple
+            bot_updated_datetime = Bot.objects.get(id=bot_id).bot_zip_updated
+            if bot_updated_datetime > update_date:
+                update_date = bot_updated_datetime
+
+            return StatsGenerator._generate_plot_images(df, update_date)
         else:
             return None
