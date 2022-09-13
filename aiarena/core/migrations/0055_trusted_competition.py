@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='competition',
-            name='trusted',
+            name='require_trusted_infrastructure',
             field=models.BooleanField(default=True),
         ),
     ]

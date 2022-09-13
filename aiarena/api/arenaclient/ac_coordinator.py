@@ -37,8 +37,8 @@ class ACCoordinator:
         competition_ids = ACCoordinator._get_competition_priority_order()
         for id in competition_ids:
             competition = Competition.objects.get(id=id)
-            # Filter by trusted
-            if competition.trusted == arenaclient.trusted:
+            # This excludes non-trusted clients from competitions requiring trusted infrastructure
+            if arenaclient.trusted or competition.require_trusted_infrastructure == arenaclient.trusted:
                 # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
                 with transaction.atomic():
                     # this call will apply a select for update, so we do it inside an atomic block

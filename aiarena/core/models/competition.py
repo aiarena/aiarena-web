@@ -62,7 +62,7 @@ class Competition(models.Model, LockableModelMixin):
     n_placements = models.IntegerField(default=0, validators=[MinValueValidator(0)], blank=True)
     # List of which bot races are playable in this competition. When left blank, all races are playable.
     playable_races = models.ManyToManyField(BotRace, blank=True)
-    trusted = models.BooleanField(default=True)
+    require_trusted_infrastructure = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

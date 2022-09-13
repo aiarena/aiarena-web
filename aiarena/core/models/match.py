@@ -69,22 +69,6 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
                bot2_use_data=None, bot2_update_data=None,
                require_trusted_arenaclient=True):
         with transaction.atomic():
-            if bot1_use_data is None:
-                bot1_use_data = bot1.bot_data_enabled
-            if bot1_update_data is None:
-                bot1_update_data = bot1.bot_data_enabled
-            if bot2_use_data is None:
-                bot2_use_data = bot2.bot_data_enabled
-            if bot2_update_data is None:
-                bot2_update_data = bot2.bot_data_enabled
-            # NOTE: This could be done when getting a match to play.
-            # Allowing the match to be played on a untrusted client if the user allows the download after requesting a match.
-            if not require_trusted_arenaclient:
-                require_trusted_arenaclient = not bot1.bot_zip_publicly_downloadable \
-                                              or not bot2.bot_zip_publicly_downloadable \
-                                              or not bot1.bot_data_publicly_downloadable \
-                                              or not bot2.bot_data_publicly_downloadable
-
             match = Match.objects.create(map=map, round=round, requested_by=requested_by, require_trusted_arenaclient=require_trusted_arenaclient)
             # create match participations
             from .match_participation import MatchParticipation  # avoid circular reference

@@ -44,8 +44,16 @@ class Matches:
                 match.round.update_if_completed()
 
     @staticmethod
-    def start_match(match, arenaclient: ArenaClient) -> bool:
-        if match.require_trusted_arenaclient and not arenaclient.trusted:
+    def start_match(match: Match, arenaclient: ArenaClient) -> bool:
+        # Allowing the match to be played on a untrusted client if the user allows the download after requesting a match.
+        require_trusted_arenaclient = match.require_trusted_arenaclient
+        if not require_trusted_arenaclient:
+            bot1 = match.participant1.bot
+            bot2 = match.participant2.bot
+            require_trusted_arenaclient = not bot1.bot_zip_publicly_downloadable or not bot2.\
+                bot_zip_publicly_downloadable or not bot1.bot_data_publicly_downloadable or not bot2.\
+                bot_data_publicly_downloadable
+        if require_trusted_arenaclient and not arenaclient.trusted:
             return False
         match.lock_me()  # lock self to avoid race conditions
         if match.started is None:
@@ -245,7 +253,7 @@ class Matches:
                 .filter(competition=competition, active=True, division_num=participant1.division_num)
                 .exclude(id__in=already_processed_participants))
             for participant2 in active_participants_in_div:
-                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=competition.trusted)
+                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=competition.require_trusted_infrastructure)
 
         return new_round
 
