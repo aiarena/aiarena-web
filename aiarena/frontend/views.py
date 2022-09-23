@@ -256,7 +256,7 @@ class BotResultTable(tables.Table):
     # Settings for individual columns
     # match could be a LinkColumn, but used ".as_html_link" since that is being used elsewhere.
     match = tables.Column(verbose_name="ID")
-    created = tables.DateTimeColumn(format="d N y, H:i", verbose_name="Date")
+    started = tables.DateTimeColumn(format="d N y, H:i", verbose_name="Date")
     result = tables.Column(attrs={"td": {"class": lambda value: result_color_class(value)}})
     result_cause = tables.Column(verbose_name="Cause")
     elo_change = tables.Column(verbose_name="+/-")
@@ -281,7 +281,7 @@ class BotResultTable(tables.Table):
             "thead": {"style": "height: 35px;"},
         }
         model = RelativeResult
-        fields = ('match', 'created', 'opponent', 'result', 'result_cause', 'elo_change', 'avg_step_time',
+        fields = ('match', 'started', 'opponent', 'result', 'result_cause', 'elo_change', 'avg_step_time',
                   'game_time_formatted', 'replay_file', 'match_log', 'match__tags')
 
     # Custom Column Rendering
@@ -422,7 +422,7 @@ class BotDetail(DetailView):
                 .select_related('match', 'me__bot', 'opponent__bot')
                 .defer("me__bot__bot_data")
                 .filter(me__bot=self.object)
-                .order_by('-created'))
+                .order_by('-started'))
 
         # Get tags_by_all and remove it from params to prevent errors
         params = self.request.GET.copy()
