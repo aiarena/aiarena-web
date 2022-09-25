@@ -884,7 +884,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         match1 = Match.objects.get(id=response.data['id'])
 
         # set the created time back into the past long enough for it to cause a time out
-        match1.started = timezone.now() - (config.TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
+        match1.first_started = timezone.now() - (config.TIMEOUT_MATCHES_AFTER + timedelta(hours=1))
         match1.save()
 
         # this should trigger the bots to be forced out of the match

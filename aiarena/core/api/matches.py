@@ -37,7 +37,7 @@ class Matches:
     @staticmethod
     def timeout_overtime_bot_games():
         matches_without_result = Match.objects.only('round').select_related('round').select_for_update().filter(
-            started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
+            first_started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
         for match in matches_without_result:
             Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
             if match.round is not None:  # if the match is part of a round, check for round completion
