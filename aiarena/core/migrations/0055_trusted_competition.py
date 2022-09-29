@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0051_competition_playable_races'),
+        ('core', '0054_rename_plays_race_model_bot_plays_race'),
     ]
 
     operations = [
