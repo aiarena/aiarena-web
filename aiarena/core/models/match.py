@@ -25,6 +25,8 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     started = models.DateTimeField(blank=True, null=True, editable=False, db_index=True)
+    first_started = models.DateTimeField(blank=True, null=True, editable=False, db_index=True)
+    """The first time this match started. Different from the started field when multiple runs are attempted."""
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True,
                                      related_name='assigned_matches')
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
@@ -100,7 +102,9 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
             Result.objects.create(match=match, type='MatchCancelled', game_steps=0, submitted_by=requesting_user)
 
             if not match.started:
-                match.started = timezone.now()
+                now = timezone.now()
+                match.started = now
+                match.first_started = now
                 match.save()
 
             if match.round is not None:

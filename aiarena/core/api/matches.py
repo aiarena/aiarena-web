@@ -37,7 +37,7 @@ class Matches:
     @staticmethod
     def timeout_overtime_bot_games():
         matches_without_result = Match.objects.only('round').select_related('round').select_for_update().filter(
-            started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
+            first_started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
         for match in matches_without_result:
             Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
             if match.round is not None:  # if the match is part of a round, check for round completion
@@ -168,6 +168,7 @@ class Matches:
             """, (tuple(match_ids), tuple(bot_ids), tuple(bot_ids)))) if bot_ids else []
 
             random.shuffle(available_ladder_matches_to_play)  # ensure the match selection is random
+
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
             if len(Bots.get_available(bots_with_a_ladder_match_to_play)) >= 2:
                 return Matches._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)

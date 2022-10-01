@@ -18,7 +18,7 @@ class RelativeResult(models.Model):
     """
     me = models.ForeignKey(MatchParticipation, on_delete=models.PROTECT, related_name='relative_result_me')
     match = models.ForeignKey(Match, on_delete=models.PROTECT, related_name='relative_result_match')
-    created = models.DateTimeField()
+    started = models.DateTimeField()
     opponent = models.ForeignKey(MatchParticipation, on_delete=models.PROTECT, related_name='relative_result_opponent')
     result = models.CharField(max_length=32, choices=MatchParticipation.RESULT_TYPES)
     result_cause = models.CharField(max_length=32, choices=MatchParticipation.CAUSE_TYPES)

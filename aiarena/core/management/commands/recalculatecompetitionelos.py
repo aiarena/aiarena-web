@@ -21,7 +21,7 @@ class Command(BaseCommand):
             competition_participants = CompetitionParticipation.objects.select_for_update().filter(competition=target_competition)
             self.stdout.write(f"{competition_participants.count()} competition participants locked.")
             matches = Match.objects.select_for_update().filter(round__competition=target_competition, result__isnull=False)\
-                .prefetch_related('matchparticipation_set', 'result').order_by('id')
+                .prefetch_related('matchparticipation_set', 'result').order_by('result__created')
 
             self.stdout.write(f"{matches.count()} matches locked.")
 
