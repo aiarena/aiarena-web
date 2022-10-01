@@ -587,7 +587,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
+        self.assertEqual(u'No game available for client.', response.data['detail'])
 
         # Pause the competition and finish the round
         competition1.pause()
@@ -637,7 +637,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         # no currently available competitions
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'There are no currently available competitions.',
+        self.assertEqual(u'No game available for client.',
                          response.data['detail'])
 
         # active bots
@@ -647,7 +647,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         # current competition is paused
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
+        self.assertEqual(u'No game available for client.', response.data['detail'])
 
         competition2.open()
 
