@@ -71,6 +71,14 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
                bot2_use_data=None, bot2_update_data=None,
                require_trusted_arenaclient=True):
         with transaction.atomic():
+            if bot1_use_data is None:
+                bot1_use_data = bot1.bot_data_enabled
+            if bot1_update_data is None:
+                bot1_update_data = bot1.bot_data_enabled
+            if bot2_use_data is None:
+                bot2_use_data = bot2.bot_data_enabled
+            if bot2_update_data is None:
+                bot2_update_data = bot2.bot_data_enabled
             match = Match.objects.create(map=map, round=round, requested_by=requested_by, require_trusted_arenaclient=require_trusted_arenaclient)
             # create match participations
             from .match_participation import MatchParticipation  # avoid circular reference
