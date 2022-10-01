@@ -13,7 +13,7 @@ from constance import config
 from django.db import transaction, connection
 from django.db.models import F
 
-from aiarena.api.arenaclient.exceptions import LadderDisabled, NoCurrentlyAvailableCompetitions
+from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Competition
 

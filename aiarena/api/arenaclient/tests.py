@@ -52,31 +52,31 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         # no maps
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
+        self.assertEqual(u'no_game_available', response.data['detail'].code)
 
         # not enough active bots
         self._create_map_for_competition('test_map', comp.id)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
+        self.assertEqual(u'no_game_available', response.data['detail'].code)
 
         # not enough active bots
         bot1 = self._create_bot(self.regularUser1, 'testbot1')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
+        self.assertEqual(u'no_game_available', response.data['detail'].code)
 
         # not enough active bots
         bot2 = self._create_bot(self.regularUser1, 'testbot2')
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
+        self.assertEqual(u'no_game_available', response.data['detail'].code)
 
         # not enough active bots
         bot1.competition_participations.create(competition=comp)
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
+        self.assertEqual(u'no_game_available', response.data['detail'].code)
 
         # success
         bot2.competition_participations.create(competition=comp)
@@ -162,7 +162,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         # we shouldn't be able to get a new match
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u"no_current_competitions", response.data['detail'].code)
+        self.assertEqual(u"no_game_available", response.data['detail'].code)
 
         Matches.request_match(self.regularUser2, bot1, bot1.get_random_excluding_self(),
                               game_mode=game_mode)
@@ -436,7 +436,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         # not enough active bots
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
+        self.assertEqual(u'no_game_available', response.data['detail'].code)
 
         # Post a successful match, then retry the crashes to make sure the previous ones don't affect the check
         cp = bot1.competition_participations.first()
@@ -467,7 +467,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         # not enough active bots
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'no_current_competitions', response.data['detail'].code)
+        self.assertEqual(u'no_game_available', response.data['detail'].code)
 
 
 class EloTestCase(LoggedInMixin, TransactionTestCase):
