@@ -66,7 +66,7 @@ class BaseTestMixin(object):
         game = self.test_client.create_game("StarCraft II")
         gamde_mode = self.test_client.create_gamemode('Melee', game.id)
         BotRace.create_all_races()
-        competition = self.test_client.create_competition('Competition 1', 'L', gamde_mode.id, trusted=trusted)
+        competition = self.test_client.create_competition('Competition 1', 'L', gamde_mode.id, require_trusted_infrastructure=trusted)
         self.test_client.open_competition(competition.id)
         return competition
 
