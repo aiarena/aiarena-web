@@ -22,6 +22,9 @@ def elo_graph_upload_to(instance, filename):
 def elo_graph_update_plot_upload_to(instance, filename):
     return '/'.join(['competitions', 'stats', f'{instance.id}_elo_graph_update_plot.png'])
 
+def winrate_vs_duration_graph_upload_to(instance, filename):
+    return '/'.join(['graphs', f'{instance.competition_id}_{instance.bot.id}_{instance.bot.name}_winrate.png'])
+
 
 class CompetitionParticipation(models.Model, LockableModelMixin):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name='participations')
@@ -38,6 +41,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     crash_count = models.IntegerField(default=0)
     elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True)
     elo_graph_update_plot = PrivateFileField(upload_to=elo_graph_update_plot_upload_to, storage=OverwritePrivateStorage(base_url='/'), blank=True, null=True)
+    winrate_vs_duration_graph = models.FileField(upload_to=winrate_vs_duration_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True)
     highest_elo = models.IntegerField(blank=True, null=True)
     slug = models.SlugField(max_length=255, blank=True)
     active = models.BooleanField(default=True)

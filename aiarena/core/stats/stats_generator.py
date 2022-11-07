@@ -2,6 +2,7 @@ import io
 
 from datetime import datetime
 
+import matplotlib.ticker as mtick
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -54,6 +55,11 @@ class StatsGenerator:
 
             if graph2 is not None:
                 sp.elo_graph_update_plot.save('elo_update_plot.png', graph2)
+
+            graph3 = StatsGenerator._generate_winrate_graph(sp.bot.id, sp.competition_id)
+
+            if graph3 is not None:
+                sp.winrate_vs_duration_graph.save('winrate_vs_duration.png', graph3)
         else:
             sp.win_count = 0
             sp.loss_count = 0
@@ -216,7 +222,7 @@ class StatsGenerator:
                     and bot_p.result_cause in ('crash', 'timeout', 'initialization_failure')""")
 
     @staticmethod
-    def _get_data(bot_id, competition_id):
+    def _get_elo_data(bot_id, competition_id):
         # this does not distinct between competitions
         with connection.cursor() as cursor:
             query = (f"""
@@ -262,7 +268,7 @@ class StatsGenerator:
             return cursor.fetchall()
 
     @staticmethod
-    def _generate_plot_images(df, update_date: datetime):
+    def _generate_elo_plot_images(df, update_date: datetime):
         plot1 = io.BytesIO()
         plot2 = io.BytesIO()
 
@@ -300,7 +306,7 @@ class StatsGenerator:
 
     @staticmethod
     def _generate_elo_graph(bot_id: int, competition_id: int):
-        df, update_date = StatsGenerator._get_data(bot_id, competition_id)
+        df, update_date = StatsGenerator._get_elo_data(bot_id, competition_id)
         if not df.empty:
             df.columns = ['Name', 'ELO', 'Date']
 
@@ -310,6 +316,70 @@ class StatsGenerator:
             if bot_updated_datetime > update_date:
                 update_date = bot_updated_datetime
 
-            return StatsGenerator._generate_plot_images(df, update_date)
+            return StatsGenerator._generate_elo_plot_images(df, update_date)
+        else:
+            return None
+
+    @staticmethod
+    def _get_winrate_data(bot_id, competition_id):
+        # this does not distinct between competitions
+        with connection.cursor() as cursor:
+            query = (f"""
+                    select duration_minutes,(sum(is_winner) / count(*) * 100.0) as winrate_pct from
+                    (select
+                        (cr.winner_id = cp.bot_id) as is_winner,
+                        ceil(cr.game_steps/(22.4*60)) as duration_minutes
+                    from core_matchparticipation cp
+                        inner join core_result cr on cp.match_id = cr.match_id
+                        left join core_bot cb on cp.bot_id = cb.id
+                        left join core_match cm on cp.match_id = cm.id
+                        left join core_round crnd on cm.round_id = crnd.id
+                        left join core_competition cc on crnd.competition_id = cc.id
+                    where bot_id = {bot_id}
+                        and competition_id = {competition_id}) matches
+                    group by duration_minutes
+                    order by duration_minutes
+                """)
+            cursor.execute(query)
+            elo_over_time = pd.DataFrame(cursor.fetchall())
+
+        return elo_over_time
+
+    @staticmethod
+    def _generate_winrate_plot_images(df):
+        plot1 = io.BytesIO()
+
+        legend = []
+
+        fig, ax1 = plt.subplots(1, 1, figsize=(12, 9), sharex='all', sharey='all')
+        ax1.plot(df["Duration (Minutes)"], df["Win Rate"], color='#86c232')
+        ax1.spines["top"].set_visible(False)
+        ax1.spines["right"].set_visible(False)
+        ax1.spines["left"].set_color('#86c232')
+        ax1.spines["bottom"].set_color('#86c232')
+        ax1.autoscale(enable=True, axis='x')
+        ax1.get_xaxis().tick_bottom()
+        ax1.get_yaxis().tick_left()
+        ax1.yaxis.set_major_formatter(mtick.PercentFormatter())
+        ax1.tick_params(axis='x', colors='#86c232', labelsize=16)
+        ax1.tick_params(axis='y', colors='#86c232', labelsize=16)
+
+        legend.append('Win Rate')
+        ax1.legend(legend, loc='lower center', fontsize='xx-large')
+
+        plt.title('Winrate vs Match Duration (Minutes)', fontsize=20, color=('#86c232'))
+        plt.tight_layout()  # Avoids savefig cutti
+        plt.savefig(plot1, format="png", transparent=True)
+
+        plt.close(fig)
+        return plot1
+
+    @staticmethod
+    def _generate_winrate_graph(bot_id: int, competition_id: int):
+        df = StatsGenerator._get_winrate_data(bot_id, competition_id)
+        if not df.empty:
+            
+            df.columns = ['Duration (Minutes)', 'Win Rate']
+            return StatsGenerator._generate_winrate_plot_images(df)
         else:
             return None
