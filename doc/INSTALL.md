@@ -51,8 +51,10 @@
 8. Seed the database with data users and match data
     ```
     python manage.py seed
+    # Optional
+    python manage.py generatestats
     ```
-    
+
 9. (Optional) Configure redis cache.  
    _For most development purposes you can skip this step but note that any components that rely on redis may not work properly._
    

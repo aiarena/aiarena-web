@@ -43,7 +43,7 @@ competition_bot_map_stats_include_fields = 'bot', 'map', 'match_count', 'win_cou
                                                'updated',
 competition_participation_include_fields = 'id', 'competition', 'bot', 'elo', 'match_count', 'win_perc', 'win_count', \
                                            'loss_perc', 'loss_count', 'tie_perc', 'tie_count', 'crash_perc', \
-                                           'crash_count', 'elo_graph', 'highest_elo', 'slug', 'active', \
+                                           'crash_count', 'elo_graph', 'winrate_vs_duration_graph', 'highest_elo', 'slug', 'active', \
                                            'division_num', 'in_placements',
 competition_participation_filter_fields = 'id', 'competition', 'bot', 'elo', 'match_count', 'win_perc', 'win_count', \
                                           'loss_perc', 'loss_count', 'tie_perc', 'tie_count', 'crash_perc', \

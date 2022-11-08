@@ -196,8 +196,18 @@ class Command(BaseCommand):
                 self.stdout.write(f"Running matches...{count / matches * 100}%", ending='\r')
                 match = ac_client.next_match()
 
-                # todo: submit different types of results.
-                ac_client.submit_result(match.id, 'Player1Win')
+                # Every 20 games, player 1 or 2 crashes.
+                if x % 20 == 0:
+                    result_type = 'Player1Crash'
+                elif x % 20 == 0:
+                    result_type = 'Player2Crash'
+                elif x % 50 == 0:
+                    # Every 50 games, a tie occurs.
+                    result_type = 'Tie'
+                else:
+                    # Alternate wins between player 1 and 2.
+                    result_type = 'Player1Win' if x % 2 == 0 else 'Player2Win'
+                ac_client.submit_result(match.id, result_type)
 
                 if x == 0:  # make it so a bot that once was active, is now inactive
                     bot1 = CompetitionParticipation.objects.filter(active=True).first()

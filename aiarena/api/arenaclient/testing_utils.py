@@ -63,7 +63,7 @@ class AcApiTestingClient(APIClient):
                     'type': type,
                     'replay_file': SimpleUploadedFile("replay_file.SC2Replay",
                                                       replay_file.read()),
-                    'game_steps': 1234,
+                    'game_steps': 1344 + (match_id * 5437) % 59400, # 60 seconds + up to 45 minutes
                     'arenaclient_log': SimpleUploadedFile("arenaclient_log.log",
                                                           arenaclient_log.read()),
                     'bot1_data': SimpleUploadedFile("bot1_data.log",
