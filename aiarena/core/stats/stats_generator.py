@@ -325,10 +325,18 @@ class StatsGenerator:
         # this does not distinct between competitions
         with connection.cursor() as cursor:
             query = (f"""
-                    select duration_minutes,(sum(is_winner) / count(*) * 100.0) as winrate_pct from
+                select duration_minutes,
+                    sum(is_winner) as wins,
+                    sum(is_loser) as losses,
+                    sum(is_crasher) as crashes,
+                    sum(is_tied) as ties
+                from
                     (select
-                        (cr.winner_id = cp.bot_id) as is_winner,
-                        ceil(cr.game_steps/(22.4*60)) as duration_minutes
+                        (cp.result = 'win') as is_winner,
+                        (cp.result = 'loss' and cp.result_cause != 'crash') as is_loser,
+                        (cp.result_cause = 'crash') as is_crasher,
+                        (cp.result = 'tie') as is_tied,
+                        floor(cr.game_steps/((22.4*60)*5))*5 as duration_minutes
                     from core_matchparticipation cp
                         inner join core_result cr on cp.match_id = cr.match_id
                         left join core_bot cb on cp.bot_id = cb.id
@@ -341,9 +349,9 @@ class StatsGenerator:
                     order by duration_minutes
                 """)
             cursor.execute(query)
-            elo_over_time = pd.DataFrame(cursor.fetchall())
+            stats_vs_duration = pd.DataFrame(cursor.fetchall())
 
-        return elo_over_time
+        return stats_vs_duration
 
     @staticmethod
     def _generate_winrate_plot_images(df):
@@ -351,8 +359,19 @@ class StatsGenerator:
 
         legend = []
 
+        durations = df["Duration (Minutes)"].map(lambda x: str(x) + " - " + str(x + 5))
+        wins = df["Wins"]
+        losses = df["Losses"]
+        crashes = df["Crashes"]
+        ties = df["Ties"]
+
+        width = 0.35
+
         fig, ax1 = plt.subplots(1, 1, figsize=(12, 9), sharex='all', sharey='all')
-        ax1.plot(df["Duration (Minutes)"], df["Win Rate"], color='#86c232')
+        ax1.bar(durations, wins, width, color='#86C232', label='Wins')
+        ax1.bar(durations, ties, width, color='#DFCE00', bottom=wins, label='Ties')
+        ax1.bar(durations, losses, width, color='#D20044', bottom=wins+ties, label='Losses')
+        ax1.bar(durations, crashes, width, color='#AAAAAA', bottom=wins+ties+losses, label='Crashes')
         ax1.spines["top"].set_visible(False)
         ax1.spines["right"].set_visible(False)
         ax1.spines["left"].set_color('#86c232')
@@ -360,16 +379,15 @@ class StatsGenerator:
         ax1.autoscale(enable=True, axis='x')
         ax1.get_xaxis().tick_bottom()
         ax1.get_yaxis().tick_left()
-        ax1.yaxis.set_major_formatter(mtick.PercentFormatter())
+        ax1.yaxis.get_major_locator().set_params(integer=True)
         ax1.tick_params(axis='x', colors='#86c232', labelsize=16)
         ax1.tick_params(axis='y', colors='#86c232', labelsize=16)
+        ax1.legend(loc='upper right', fontsize='xx-large')
 
-        legend.append('Win Rate')
-        ax1.legend(legend, loc='lower center', fontsize='xx-large')
-
-        plt.title('Winrate vs Match Duration (Minutes)', fontsize=20, color=('#86c232'))
+        plt.title('Result vs Match Duration', fontsize=20, color=('#86c232'))
         plt.tight_layout()  # Avoids savefig cutti
         plt.savefig(plot1, format="png", transparent=True)
+        plt.xticks(durations)
 
         plt.close(fig)
         return plot1
@@ -379,7 +397,7 @@ class StatsGenerator:
         df = StatsGenerator._get_winrate_data(bot_id, competition_id)
         if not df.empty:
             
-            df.columns = ['Duration (Minutes)', 'Win Rate']
+            df.columns = ['Duration (Minutes)', 'Wins', 'Losses', 'Crashes', 'Ties']
             return StatsGenerator._generate_winrate_plot_images(df)
         else:
             return None
