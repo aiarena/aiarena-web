@@ -4,6 +4,7 @@ from datetime import datetime
 
 import matplotlib.ticker as mtick
 import matplotlib.dates as mdates
+import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import pandas as pd
 from django.db import connection
@@ -364,8 +365,9 @@ class StatsGenerator:
         losses = df["Losses"]
         crashes = df["Crashes"]
         ties = df["Ties"]
+        totals = [w + l + c + t for w, l, c, t in zip(wins, losses, crashes, ties)]
 
-        width = 0.35
+        width = 0.65
 
         fig, ax1 = plt.subplots(1, 1, figsize=(12, 9), sharex='all', sharey='all')
         ax1.bar(durations, wins, width, color='#86C232', label='Wins')
@@ -384,8 +386,31 @@ class StatsGenerator:
         ax1.tick_params(axis='y', colors='#86c232', labelsize=16)
         ax1.legend(loc='upper right', fontsize='xx-large')
 
+        effect = [path_effects.Stroke(linewidth=3, foreground='black'), path_effects.Normal()]
+
+        for i, val in enumerate(zip(wins, losses, crashes, ties, totals)):
+            c_totals = val[4]
+            if c_totals == 0:
+                continue
+            c_wins = val[0]
+            c_losses = val[1]
+            c_crashes = val[2]
+            c_ties = val[3]
+            if c_wins > 0:
+                plt.text(i, c_wins / 2, str(round(c_wins / c_totals * 100)) + '%', 
+                        va = 'center', ha = 'center', color='#FFFFFF', size=20).set_path_effects(effect)
+            if c_ties > 0:
+                plt.text(i, c_wins + c_ties / 2, str(round(c_ties / c_totals * 100)) + '%', 
+                        va = 'center', ha = 'center', color='#FFFFFF', size=20).set_path_effects(effect)
+            if c_losses > 0:
+                plt.text(i, c_wins + c_ties + c_losses / 2, str(round(c_losses / c_totals * 100)) + '%', 
+                        va = 'center', ha = 'center', color='#FFFFFF', size=20).set_path_effects(effect)
+            if c_crashes > 0:
+                plt.text(i, c_wins + c_ties + c_losses + c_crashes / 2, str(round(c_crashes / c_totals * 100)) + '%', 
+                        va = 'center', ha = 'center', color='#FFFFFF', size=20).set_path_effects(effect)
+
         plt.title('Result vs Match Duration', fontsize=20, color=('#86c232'))
-        plt.tight_layout()  # Avoids savefig cutti
+        plt.tight_layout()  # Avoids savefig cutting off x-label
         plt.savefig(plot1, format="png", transparent=True)
         plt.xticks(durations)
 
