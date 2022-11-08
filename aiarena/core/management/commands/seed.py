@@ -196,8 +196,8 @@ class Command(BaseCommand):
                 self.stdout.write(f"Running matches...{count / matches * 100}%", ending='\r')
                 match = ac_client.next_match()
 
-                # Every 20 games, player 1 or 2 crashes.
-                if x % 20 == 0:
+                # Every 20 games, player 1 and 2 alternate crashes
+                if x % 40 == 0:
                     result_type = 'Player1Crash'
                 elif x % 20 == 0:
                     result_type = 'Player2Crash'
