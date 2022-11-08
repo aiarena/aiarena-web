@@ -6,7 +6,7 @@ from aiarena.core.models import Competition
 
 
 def create_competition_wiki_articles(apps, schema_editor):
-    for competition in Competition.objects.all():
+    for competition in Competition.objects.only('id').all(): # .only('id') avoids future conflicts
         competition.save()  # trigger the presave hook that creates the article
 
 class Migration(migrations.Migration):

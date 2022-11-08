@@ -62,11 +62,11 @@ class BaseTestMixin(object):
         return competition
 
 
-    def _create_game_mode_and_open_competition(self):
+    def _create_game_mode_and_open_competition(self, trusted=True):
         game = self.test_client.create_game("StarCraft II")
         gamde_mode = self.test_client.create_gamemode('Melee', game.id)
         BotRace.create_all_races()
-        competition = self.test_client.create_competition('Competition 1', 'L', gamde_mode.id)
+        competition = self.test_client.create_competition('Competition 1', 'L', gamde_mode.id, require_trusted_infrastructure=trusted)
         self.test_client.open_competition(competition.id)
         return competition
 
@@ -82,11 +82,12 @@ class BaseTestMixin(object):
             return bot
 
 
-    def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race=None):
+    def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race=None, downloadable=False):
         if plays_race is None:
             plays_race = BotRace.terran()
         with open(TestAssetPaths.test_bot_zip_path, 'rb') as bot_zip, open(TestAssetPaths.test_bot_datas['bot1'][0]['path'], 'rb') as bot_data:
-            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python')
+            bot = Bot(user=user, name=name, bot_zip=File(bot_zip), bot_data=File(bot_data), plays_race=plays_race, type='python',
+                      bot_zip_publicly_downloadable=downloadable, bot_data_publicly_downloadable=downloadable)
             bot.full_clean()
             bot.save()
             CompetitionParticipation.objects.create(bot_id=bot.id, competition_id=competition_id)
@@ -586,7 +587,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
+        self.assertEqual(u'No game available for client.', response.data['detail'])
 
         # Pause the competition and finish the round
         competition1.pause()
@@ -636,7 +637,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         # no currently available competitions
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'There are no currently available competitions.',
+        self.assertEqual(u'No game available for client.',
                          response.data['detail'])
 
         # active bots
@@ -646,7 +647,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         # current competition is paused
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(u'There are no currently available competitions.', response.data['detail'])
+        self.assertEqual(u'No game available for client.', response.data['detail'])
 
         competition2.open()
 
