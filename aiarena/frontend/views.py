@@ -189,13 +189,13 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
     form_class = BotUploadForm
     redirect_field_name = 'next'
     template_name = 'botupload.html'
-    success_message = "Bot was uploaded successfully"
+    success_message = "Congratulations on creating your bot. Make sure to sign up to a competition to start playing games."
 
     def get_login_url(self):
         return reverse('login')
 
     def get_success_url(self):
-        return reverse('botupload')
+        return reverse('profile')
 
     def get_form_kwargs(self):
         # set the bot's user
