@@ -1,0 +1,7 @@
+resources:
+- ../../base
+namespace: website
+
+images:
+- name: aiarena/arenaclient
+  newTag: prod

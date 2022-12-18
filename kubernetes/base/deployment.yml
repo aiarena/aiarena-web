@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiarena-web
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    spec:
+      affinity: {}
+      containers:
+      - command:
+        - gunicorn
+        - -b
+        - :3000
+        - aiarena.wsgi
+        env:
+        - name: REDIS_HOST
+          value: 127.0.0.1
+        - name: MYSQL_HOST
+          value: mysql-cluster
+        image: aiarena/aiarena-web
+        imagePullPolicy: Always
+        name: aiarena-web
+        ports:
+        - containerPort: 3000
+          name: 3000tcp
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /app/aiarena/env.py
+          name: env-py
+          subPath: env.py
+        - mountPath: /logs
+          name: logs
+      - command:
+        - redis-server
+        - --requirepass
+        - $(REDIS_PASS)
+        image: redis:5.0.3
+        imagePullPolicy: Always
+        name: redis
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        envFrom:
+          - prefix: ''
+            secretRef:
+              name: redis-secret
+              optional: false
+      - image: nginx:latest
+        imagePullPolicy: Always
+        name: app-nginx
+        ports:
+        - containerPort: 80
+          name: 80tcp
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/www/html/static/
+          name: static
+        - mountPath: /etc/nginx/conf.d
+          name: nginx-conf
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      initContainers:
+      - command:
+        - ./init.sh
+        env:
+        - name: MYSQL_HOST
+          value: mysql-cluster
+        image: aiarena/aiarena-web
+        imagePullPolicy: Always
+        name: django-init
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/www/html/static/
+          name: static
+        - mountPath: /app/aiarena/env.py
+          name: temp-env-py
+          subPath: env.py
+        - mountPath: /app/init.sh
+          name: init-script
+          subPath: init.sh
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: static
+      - emptyDir: {}
+        name: logs-temp
+      - name: env-py
+        secret:
+          defaultMode: 429
+          optional: false
+          secretName: aiarena-web-env-py
+      - name: logs
+        persistentVolumeClaim:
+          claimName: logs
+      - configMap:
+          defaultMode: 511
+          name: aiarena-web-init-script
+          optional: false
+        name: init-script
+      - configMap:
+          defaultMode: 420
+          name: backend-api-nginx
+        name: nginx-conf
+      - name: temp-env-py
+        secret:
+          defaultMode: 420
+          optional: false
+          secretName: init-env-py
+

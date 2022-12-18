@@ -1,0 +1,7 @@
+resources:
+- ../../base
+namespace: website-staging
+
+images:
+- name: aiarena/arenaclient
+  newTag: staging
