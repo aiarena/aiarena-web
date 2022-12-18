@@ -1,7 +1,13 @@
 resources:
 - ../../base
-namespace: website-staging
+namespace: website
 
 images:
 - name: aiarena/arenaclient
   newTag: staging
+
+nameSuffix:
+  -staging
+
+commonLabels:
+  app: aiarena-web-staging
