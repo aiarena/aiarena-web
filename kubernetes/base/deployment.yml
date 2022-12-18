@@ -125,6 +125,14 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
+      - name: env-py
+        secret:
+          defaultMode: 429
+          optional: false
+          secretName: aiarena-web-env-py
+      - name: logs
+        persistentVolumeClaim:
+          claimName: logs
       - emptyDir: {}
         name: static
       - emptyDir: {}
@@ -134,9 +142,7 @@ spec:
           defaultMode: 429
           optional: false
           secretName: aiarena-web-env-py
-      - name: logs
-        persistentVolumeClaim:
-          claimName: logs
+
       - configMap:
           defaultMode: 511
           name: aiarena-web-init-script

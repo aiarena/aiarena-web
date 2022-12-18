@@ -11,3 +11,24 @@ nameSuffix:
 
 commonLabels:
   app: aiarena-web-staging
+
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/template/spec/volumes/0/secret/secretName
+      value:
+          aiarena-web-env-py-staging
+    - op: replace
+      path: /spec/template/spec/volumes/1/persistentVolumeClaim/claimName
+      value: logs-staging
+
+  target:
+    kind: Deployment
+
+#patchesJson6902:
+#  - target:
+#      kind: Deployment
+#      name: aiarena-web
+#      version: v1beta1
+#    path:
+#      patch.json
