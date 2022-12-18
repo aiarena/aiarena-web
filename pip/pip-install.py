@@ -30,7 +30,7 @@ def verify_python_version():
 
 
 def run_install(pip_binary_name, python_binary_name):
-    print('RUNNING INSTALL PROCEDURE')
+    print(f'RUNNING INSTALL PROCEDURE WITH ENVIRONMENT TYPE={ENVIRONMENT_TYPE.name}')
     # requirements - standard across all environments
     run(pip_binary_name + " install -r " + _STANDARD_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
@@ -40,7 +40,7 @@ def run_install(pip_binary_name, python_binary_name):
     # Run django-discord-bind setup
     run(python_binary_name + " " + os.path.join(_PROJECT_ROOT_DIRECTORY, "django-discord-bind/setup.py")
         + " install --force", shell=True, check=True)
-    print('INSTALL PROCEDURE COMPLETE')
+    print(f'INSTALL PROCEDURE COMPLETE WITH ENVIRONMENT TYPE={ENVIRONMENT_TYPE.name}')
 
 
 if __name__ == "__main__":
