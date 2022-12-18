@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: aiarena-web
 spec:
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: apps.deployment-website-aiarena-web
   progressDeadlineSeconds: 600
   replicas: 1
   strategy:
