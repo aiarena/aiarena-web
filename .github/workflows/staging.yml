@@ -36,7 +36,7 @@ jobs:
 
     - uses: imranismail/setup-kustomize@v2
     - run: |
-        (cd kubernetes/overlays/staging/ && kustomize edit set image aiarena/aiarena-web=${{ steps.version.outputs.version }})
+        (cd kubernetes/overlays/staging/ && kustomize edit set image aiarena/aiarena-web=:${{ steps.version.outputs.version }})
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
