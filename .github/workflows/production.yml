@@ -18,17 +18,6 @@ jobs:
       id: version
       uses: codacy/git-version@2.7.1
 
-    - name: Update Image Version in the related Kustomization kustomization.yaml
-      uses: fjogeleit/yaml-update-action@main
-      with:
-        valueFile: 'kubernetes/overlays/prod/kustomization.yaml'
-        propertyPath: 'images.newTag'
-        value: ${{ steps.version.outputs.version }}
-        branch: build/${{ steps.version.outputs.version }}
-        targetBranch: master
-        createPR: true
-        message: 'Update Image Version to ${{ steps.gitversion.outputs.SemVer }}'
-
     - uses: imranismail/setup-kustomize@v2
     - run: |
         (cd kubernetes/overlays/prod/ && kustomize edit set image aiarena/aiarena-web=:${{ steps.version.outputs.version }})
