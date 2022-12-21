@@ -45,9 +45,7 @@ spec:
             - mountPath: /prod_private_media
               name: private-media
       containers:
-        - command:
-            - ./init.sh
-          envFrom:
+        - envFrom:
             - secretRef:
                 name: mysqlpwds-staging
                 optional: false
