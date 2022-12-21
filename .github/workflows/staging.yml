@@ -45,6 +45,7 @@ jobs:
         name: aiarena/aiarena-web
         # The new tag for the named image
         newTag: ${{ steps.version.outputs.version }}
+        newName: aiarena/aiarena-web
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v4
