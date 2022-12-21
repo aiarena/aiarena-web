@@ -63,7 +63,7 @@ services:
       - ./mysql/custom_test_init.sql:/docker-entrypoint-initdb.d/1.sql
       - aiarena-mysql-test-data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uaiarena", "-paiarena" ]
       timeout: 10s
       retries: 10
       start_period: 10s

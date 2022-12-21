@@ -10,53 +10,10 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    services:
-      mariadb:
-        image: mariadb:10.1
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_USER: aiarena
-          MYSQL_PASSWORD: aiarena
-          MYSQL_DATABASE: test_aiarena
-          MYSQL_ROOT_PASSWORD: aiarena
-        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.7]
-
     steps:
     - name: Checkout repository and submodules
       uses: actions/checkout@v2
       with:
         submodules: recursive
-    - uses: shogo82148/actions-setup-redis@v1
-      with:
-        redis-version: '6.x'
-    - run: redis-cli ping
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python ./pip/pip-install.py --python=python --pip=pip
-    - name: Verify MariaDB connection
-      env:
-          PORT: ${{ job.services.mariadb.ports[3306] }}
-      run: |
-          while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
-            sleep 1
-          done
-    - name: Grant aiarena user full access
-      env:
-          PORT: ${{ job.services.mariadb.ports[3306] }}
-      run: | 
-        mysql --host="127.0.0.1" --port "$PORT" -uroot -paiarena -e "GRANT ALL PRIVILEGES ON test_aiarena.* to aiarena WITH GRANT OPTION;";
-    - name: Run Tests
-      env:
-          NOFAKE_REDIS: 1
-      run: |
-        python manage.py test --noinput
+    - run: |
+        docker-compose -f docker/local/docker-compose.yml up aiarena-web-test --exit-code-from=aiarena-web-test --force-recreate --build
