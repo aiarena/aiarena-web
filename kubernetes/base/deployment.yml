@@ -30,8 +30,11 @@ spec:
         env:
         - name: REDIS_HOST
           value: 127.0.0.1
-        - name: MYSQL_HOST
-          value: mysql-cluster
+        envFrom:
+          - prefix: ''
+            secretRef:
+              name: mysql-host
+              optional: false
         image: aiarena/aiarena-web
         imagePullPolicy: Always
         name: aiarena-web
@@ -57,6 +60,12 @@ spec:
           subPath: env.py
         - mountPath: /logs
           name: logs
+        - mountPath: /private_media
+          name: private-media
+          readOnly: true
+        - mountPath: /media
+          name: media
+          readOnly: true
       - command:
         - redis-server
         - --requirepass
@@ -102,9 +111,11 @@ spec:
       initContainers:
       - command:
         - ./init.sh
-        env:
-        - name: MYSQL_HOST
-          value: mysql-cluster
+        envFrom:
+          - prefix: ''
+            secretRef:
+              name: mysql-host
+              optional: false
         image: aiarena/aiarena-web
         imagePullPolicy: Always
         name: django-init
@@ -152,4 +163,10 @@ spec:
           defaultMode: 420
           optional: false
           secretName: init-env-py
+      - name: media
+        persistentVolumeClaim:
+          claimName: media
+      - name: private-media
+        persistentVolumeClaim:
+          claimName: private-media
 

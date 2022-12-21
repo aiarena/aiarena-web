@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiarena-web
+spec:
+  template:
+    spec:
+      volumes:
+        - name: env-py
+          secret:
+            secretName: aiarena-web-env-py-staging
+        - name: logs
+          persistentVolumeClaim:
+            $patch: delete
+          emptyDir:
+            {}
+        - configMap:
+            defaultMode: 511
+            name: db-init-staging
+            optional: false
+          name: db-init-script
+        - emptyDir: { }
+          name: media-staging
+          persistentVolumeClaim:
+            $patch: delete
+        - emptyDir: { }
+          name: private-media-staging
+          persistentVolumeClaim:
+            $patch: delete
+        - name: mysql-init-script
+          secret:
+            defaultMode: 420
+            optional: false
+            secretName: mysql-init-script-staging
+        - name: media
+          nfs:
+            path: /data/media
+            server: cs.aiarena.net
+        - name: private-media
+          nfs:
+            path: /data/private_media
+            server: cs.aiarena.net
+      initContainers:
+        - name: django-init
+          volumeMounts:
+            - mountPath: /prod_media
+              name: media
+            - mountPath: /private_media
+              name: private-media-staging
+            - mountPath: /media
+              name: media-staging
+            - mountPath: /prod_private_media
+              name: private-media
+      containers:
+        - command:
+            - ./init.sh
+          envFrom:
+            - secretRef:
+                name: mysqlpwds-staging
+                optional: false
+          image: mysql/mysql-server:8.0.31
+          imagePullPolicy: Always
+          name: mysql
+          ports:
+            - containerPort: 3306
+              name: 3306tcp
+              protocol: TCP
+          resources: { }
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d/init.sh
+              name: db-init-script
+              subPath: init.sh
+            - mountPath: /docker-entrypoint-initdb.d/1.sql
+              name: mysql-init-script
+              subPath: 1.sql
+        - name: aiarena-web
+          args:
+            - 'python manage.py migrate && gunicorn -b :3000 aiarena.wsgi'
+          command:
+            - /bin/sh
+            - '-c'
+          volumeMounts:
+            - mountPath: /prod_private_media
+              name: private-media
+              readOnly: true
+            - mountPath: /prod_media
+              name: media
+              readOnly: true
+            - mountPath: /private_media
+              name: private-media-staging
+              readOnly: true
+            - mountPath: /media
+              name: media-staging
+              readOnly: true
+
+
+
+
+

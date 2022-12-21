@@ -3,5 +3,10 @@ resources:
 namespace: website
 
 images:
-- name: aiarena/arenaclient
+- name: aiarena/aiarena-web
   newTag: prod
+
+secretGenerator:
+  - name: mysql-host
+    literals:
+      - MYSQL_HOST=mysql-cluster
