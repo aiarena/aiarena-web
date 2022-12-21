@@ -4,8 +4,7 @@ namespace: website
 
 images:
 - name: aiarena/aiarena-web
-  newName: aiarena/aiarena-web
-  newTag: 0.0.1-featurecontainerization.2082.2a91024
+  newName: 0.0.1-featurecontainerization.2086.2e60e11
 
 nameSuffix: -staging
 
