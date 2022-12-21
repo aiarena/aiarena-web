@@ -16,4 +16,4 @@ jobs:
       with:
         submodules: recursive
     - run: |
-        docker-compose -f docker/local/docker-compose.yml up aiarena-web-test --exit-code-from=aiarena-web-test --force-recreate --build
+        docker compose -f docker/local/docker-compose.yml up aiarena-web-test --exit-code-from=aiarena-web-test --force-recreate --build
