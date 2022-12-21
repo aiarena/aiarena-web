@@ -94,7 +94,7 @@ spec:
               name: mysql
         - name: aiarena-web
           args:
-            - 'python manage.py migrate && gunicorn -b :3000 aiarena.wsgi'
+            - 'python manage.py migrate && python manage.py purgesensitivedata && gunicorn -b :3000 aiarena.wsgi'
           command:
             - /bin/sh
             - '-c'
