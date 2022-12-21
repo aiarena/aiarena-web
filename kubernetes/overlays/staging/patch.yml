@@ -32,7 +32,14 @@ spec:
             defaultMode: 420
             optional: false
             secretName: mysql-init-script-staging
-
+        - name: media
+          nfs:
+            path: /data/media
+            server: cs.aiarena.net
+        - name: private-media
+          nfs:
+            path: /data/private_media
+            server: cs.aiarena.net
       initContainers:
         - name: django-init
           volumeMounts:

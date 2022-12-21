@@ -164,11 +164,9 @@ spec:
           optional: false
           secretName: init-env-py
       - name: media
-        nfs:
-          path: /data/media
-          server: cs.aiarena.net
+        persistentVolumeClaim:
+          claimName: media
       - name: private-media
-        nfs:
-          path: /data/private_media
-          server: cs.aiarena.net
+        persistentVolumeClaim:
+          claimName: private-media
 
