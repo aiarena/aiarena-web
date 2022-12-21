@@ -2,7 +2,7 @@ name: Staging Deploy CI
 
 on:
   push:
-    branches: [ "staging" ]
+    branches: [ "feature/containerization" ]
 
 jobs:
   build:
@@ -46,7 +46,7 @@ jobs:
         propertyPath: 'images.newTag'
         value: ${{ steps.gitversion.outputs.SemVer }}
         branch: build/${{ steps.gitversion.outputs.SemVer }}
-        targetBranch: staging
+        targetBranch: feature/containerization
         createPR: true
         message: 'Update Image Version to ${{ steps.gitversion.outputs.SemVer }}'
 
