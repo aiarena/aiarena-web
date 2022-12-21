@@ -4,19 +4,21 @@ namespace: website
 
 images:
 - name: aiarena/aiarena-web
-  newTag: staging
+  newName: aiarena/aiarena-web
+  newTag: 0.0.1-featurecontainerization.2082.2a91024
 
-nameSuffix:
-  -staging
+nameSuffix: -staging
 
 commonLabels:
   app: aiarena-web-staging
 
 
 secretGenerator:
-  - name: mysql-host
-    literals:
-      - MYSQL_HOST=127.0.0.1
+- literals:
+  - MYSQL_HOST=127.0.0.1
+  name: mysql-host
 
 patchesStrategicMerge:
-  - patch.yml
+- patch.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
