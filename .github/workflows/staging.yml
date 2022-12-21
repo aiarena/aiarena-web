@@ -2,21 +2,54 @@ name: Staging Deploy CI
 
 on:
   push:
-    branches: [ staging ]
+    branches: [ "staging" ]
+
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - name: Deploy Staging
-      uses: garygrossgarten/github-action-ssh@release
+    - uses: actions/checkout@v3
+
+    - name: GitHub Action to Setup GitVersion
+      # You may pin to the exact commit or the version.
+      # uses: StanleyGoldman/setup-gitversion@a374f5e1b8c33fb6efd03c402cb511f02eafa245
+      uses: StanleyGoldman/setup-gitversion@v1.0.1
       with:
-        command: cd /home/aiarena/ai-arena/ && git checkout staging && git pull origin staging && git submodule update --init --recursive && source venv/bin/activate && python3 ./pip/pip-install.py && python3 manage.py collectstatic --noinput && /home/aiarena/cleardb.sh && python3 manage.py migrate && python3 manage.py purgesensitivedata && sudo apachectl graceful && pw=`cat ~/.redis` && redis-cli -a "$pw" -n 1 FLUSHDB && exit
-        host: ${{ secrets.STAGING_HOST }}
-        port: ${{ secrets.STAGING_PORT }}
-        username: ${{ secrets.STAGING_USERNAME }}
-        privateKey: ${{ secrets.STAGING_KEY }}
+        # Version range or exact version of GitVersion to use
+        gitversion-version: 5.*
+
+    - name: GitVersion action
+      # You may pin to the exact commit or the version.
+      # uses: nmcc/actions-gitversion@4ab384d333506ede37c82ca3e03f4005b18b7573
+      uses: nmcc/actions-gitversion@v1
+      with:
+        # Path to the gitversion executable
+        path-to-gitversion: GitVersion
+
+    - name: Build the Docker image
+      run: docker build . --file docker/Dockerfile --tag aiarena/aiarena-web:${{ steps.gitversion.outputs.SemVer }}
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Upload image
+      run: |
+        docker push aiarena/aiarena-web:${{ steps.gitversion.outputs.SemVer }}
+
+    - name: Update Image Version in the related Kustomization kustomization.yaml
+      uses: fjogeleit/yaml-update-action@main
+      with:
+        valueFile: 'kubernetes/overlays/staging/kustomization.yaml'
+        propertyPath: 'images.newTag'
+        value: ${{ steps.gitversion.outputs.SemVer }}
+        branch: build/${{ steps.gitversion.outputs.SemVer }}
+        targetBranch: staging
+        createPR: true
+        message: 'Update Image Version to ${{ steps.gitversion.outputs.SemVer }}'
+
 
 
 
