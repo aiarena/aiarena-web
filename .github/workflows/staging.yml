@@ -35,15 +35,15 @@ jobs:
         docker push aiarena/aiarena-web:${{ steps.version.outputs.version }}
 
     - name: Update Image Version in the related Kustomization kustomization.yaml
-      uses: fjogeleit/yaml-update-action@main
-      with:
-        valueFile: 'kubernetes/overlays/staging/kustomization.yaml'
-        propertyPath: 'images.newTag'
-        value: ${{ steps.version.outputs.version }}
-        branch: build/${{ steps.version.outputs.version }}
-        targetBranch: feature/containerization
-        createPR: true
-        message: 'Update Image Version to ${{ steps.gitversion.outputs.SemVer }}'
+      run: |
+        (cd kubernetes/overlays/staging/ && ../../../kustomize edit set image aiarena/aiarena-web=${{ steps.version.outputs.version }})
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v4
+      add_paths: kubernetes/overlays/staging/kustomization.yml
+      commit-message: "[auto] Bump image tag to ${{ steps.version.outputs.version }}"
+      delete-branch: true
+      branch: auto/${{ steps.version.outputs.version }}
 
 
 
