@@ -14,6 +14,8 @@ spec:
             $patch: delete
           emptyDir:
             {}
+        - emptyDir: { }
+          name: mysql
         - configMap:
             defaultMode: 511
             name: db-init-staging
@@ -44,8 +46,36 @@ spec:
               name: media-staging
             - mountPath: /prod_private_media
               name: private-media
+        - env:
+            - name: MYSQL_INITIALIZE_ONLY
+              value: "1"
+          envFrom:
+            - secretRef:
+                name: mysql-host
+                optional: false
+            - secretRef:
+                name: mysqlpwds-staging
+                optional: false
+          image: mysql/mysql-server:8.0.31
+          imagePullPolicy: Always
+          name: initmysql
+          resources: { }
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d/init.sh
+              name: db-init-script
+              subPath: init.sh
+            - mountPath: /docker-entrypoint-initdb.d/1.sql
+              name: mysql-init-script
+              subPath: 1.sql
+            - mountPath: /var/lib/mysql
+              name: mysql
       containers:
-        - envFrom:
+        - env:
+            - name: MYSQL_ROOT_HOST
+              value: '%'
+          envFrom:
             - secretRef:
                 name: mysqlpwds-staging
                 optional: false
@@ -60,12 +90,8 @@ spec:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
-            - mountPath: /docker-entrypoint-initdb.d/init.sh
-              name: db-init-script
-              subPath: init.sh
-            - mountPath: /docker-entrypoint-initdb.d/1.sql
-              name: mysql-init-script
-              subPath: 1.sql
+            - mountPath: /var/lib/mysql
+              name: mysql
         - name: aiarena-web
           args:
             - 'python manage.py migrate && gunicorn -b :3000 aiarena.wsgi'
