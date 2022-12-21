@@ -3,7 +3,7 @@ resources:
 namespace: website
 images:
 - name: aiarena/aiarena-web
-  newTag: staging
+  newTag: 0.0.1-featurecontainerization.2089.a659210
 nameSuffix: -staging
 commonLabels:
   app: aiarena-web-staging
