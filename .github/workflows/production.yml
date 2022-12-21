@@ -29,28 +29,12 @@ jobs:
         createPR: true
         message: 'Update Image Version to ${{ steps.gitversion.outputs.SemVer }}'
 
-    - name: Kustomize Edit image
-      # You may pin to the exact commit or the version.
-      # uses: williamhogman/kustomize-set-image-hook@c9f7c8ae7aa5ea6224bc39376e8d300d04757068
-      uses: williamhogman/kustomize-set-image-hook@v1.5
-      with:
-        # The path to the folder containing the kustomization
-        kustomizePath: kubernetes/overlays/prod/
-        # Name of the image to replace the image
-        name: aiarena/aiarena-web
-        # The new tag for the named image
-        newTag: ${{ steps.version.outputs.version }}
-        newName: aiarena/aiarena-web
-
-    - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
-      with:
-        # The arguments for the `git add` command (see the paragraph below for more info)
-        # Default: '.'
-        add: 'kubernetes/overlays/prod/kustomization.yml'
-
-        # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
-        # Default: true
-        push: true
+    - uses: imranismail/setup-kustomize@v2
+    - run: |
+        (cd kubernetes/overlays/prod/ && kustomize edit set image aiarena/aiarena-web=${{ steps.version.outputs.version }})
+        git add .
+        git commit -m "[automatic] Set `aiarena/aiarena-web` image tag to `${{ steps.version.outputs.version }}`"
+        git push
 
     - name: Create Release
       id: create_release

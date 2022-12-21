@@ -42,12 +42,10 @@ spec:
           protocol: TCP
         readinessProbe:
           failureThreshold: 3
-          httpGet:
-            path: /
-            port: 3000
-            scheme: HTTP
           periodSeconds: 10
           successThreshold: 1
+          tcpSocket:
+            port: 3000
           timeoutSeconds: 30
         resources: {}
         terminationMessagePath: /dev/termination-log
