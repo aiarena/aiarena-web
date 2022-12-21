@@ -9,25 +9,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-
-    - name: GitHub Action to Setup GitVersion
-      # You may pin to the exact commit or the version.
-      # uses: StanleyGoldman/setup-gitversion@a374f5e1b8c33fb6efd03c402cb511f02eafa245
-      uses: StanleyGoldman/setup-gitversion@v1.0.1
       with:
-        # Version range or exact version of GitVersion to use
-        gitversion-version: 5.*
+        ref: ${{ github.head_ref }}   # checkout the correct branch name
+        fetch-depth: 0                # fetch the whole repo history
 
-    - name: GitVersion action
-      # You may pin to the exact commit or the version.
-      # uses: nmcc/actions-gitversion@4ab384d333506ede37c82ca3e03f4005b18b7573
-      uses: nmcc/actions-gitversion@v1
-      with:
-        # Path to the gitversion executable
-        path-to-gitversion: GitVersion
+    - name: Git Version
+      id: version
+      uses: codacy/git-version@2.7.1
 
+    - name: Use the version
+      run: |
+        echo ${{ steps.version.outputs.version }}
     - name: Build the Docker image
-      run: docker build . --file docker/Dockerfile --tag aiarena/aiarena-web:${{ steps.gitversion.outputs.SemVer }}
+      run: docker build . --build-arg=ENVIRONMENT_TYPE=PRODUCTION --file docker/Dockerfile --tag aiarena/aiarena-web:${{ steps.version.outputs.version }}
 
     - name: Login to DockerHub
       uses: docker/login-action@v2
@@ -37,15 +31,15 @@ jobs:
 
     - name: Upload image
       run: |
-        docker push aiarena/aiarena-web:${{ steps.gitversion.outputs.SemVer }}
+        docker push aiarena/aiarena-web:${{ steps.version.outputs.version }}
 
     - name: Update Image Version in the related Kustomization kustomization.yaml
       uses: fjogeleit/yaml-update-action@main
       with:
         valueFile: 'kubernetes/overlays/staging/kustomization.yaml'
         propertyPath: 'images.newTag'
-        value: ${{ steps.gitversion.outputs.SemVer }}
-        branch: build/${{ steps.gitversion.outputs.SemVer }}
+        value: ${{ steps.version.outputs.version }}
+        branch: build/${{ steps.version.outputs.version }}
         targetBranch: feature/containerization
         createPR: true
         message: 'Update Image Version to ${{ steps.gitversion.outputs.SemVer }}'
