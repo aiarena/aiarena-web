@@ -9,4 +9,4 @@ images:
 secretGenerator:
   - name: mysql-host
     literals:
-      - MYSQL_HOST=mysql-cluster
+      - MYSQL_HOST=mariadb.website.svc.cluster.local
