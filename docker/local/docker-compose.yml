@@ -12,7 +12,7 @@ services:
       - aiarena-redis-data:/data
 
   aiarena-mysql:
-    image: mysql:8.0.31
+    image: 	mariadb:10.9.4
     container_name: aiarena-mysql
     restart: unless-stopped
     env_file:
@@ -23,7 +23,7 @@ services:
       - ./mysql/custom_init.sql:/docker-entrypoint-initdb.d/1.sql
       - aiarena-mysql-data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin" ,"ping", "-uroot", "-p$$MARIADB_ROOT_PASSWORD"  ]
       timeout: 20s
       retries: 10
       start_period: 10s
@@ -52,7 +52,7 @@ services:
              python /app/manage.py runserver 0.0.0.0:8000"
 
   aiarena-mysql-test:
-    image: mysql:8.0.31
+    image: 	mariadb:10.9.4
     container_name: aiarena-mysql-test
     restart: unless-stopped
     env_file:
@@ -77,6 +77,7 @@ services:
       - .env.test
     environment:
       - MYSQL_DATABASE=aiarena
+      - MYSQL_HOST=aiarena-mysql-test
     volumes:
       - ../../.:/app
     depends_on:
