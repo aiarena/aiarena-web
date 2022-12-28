@@ -2,7 +2,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: aiarena-web
+  labels:
+    app: aiarena-web
 spec:
+  selector:
+    app: aiarena-web
   ports:
   - name: 3000tcp
     port: 3000
