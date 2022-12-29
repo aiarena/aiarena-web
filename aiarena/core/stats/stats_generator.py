@@ -107,11 +107,14 @@ class StatsGenerator:
     @staticmethod
     def _update_map_stats(sp: CompetitionParticipation):
         competition_matches = Match.objects.filter(round__competition_id=sp.competition.id)
-        for map in Map.objects.filter(id__in=competition_matches.values_list('map_id', flat=True)):
-            with connection.cursor() as cursor:
-                map_stats = CompetitionBotMapStats.objects.select_for_update() \
-                    .get_or_create(bot=sp, map=map)[0]
+        maps = Map.objects.filter(id__in=competition_matches.values_list('map_id', flat=True))
 
+        # purge existing stats entries for all maps
+        CompetitionBotMapStats.objects.filter(bot=sp).delete()
+
+        for map in maps:
+            with connection.cursor() as cursor:
+                map_stats = CompetitionBotMapStats.objects.create(bot=sp, map=map)
                 map_stats.match_count = StatsGenerator._calculate_map_count(cursor, map, sp)
 
                 if map_stats.match_count != 0:
