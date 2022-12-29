@@ -63,6 +63,8 @@ class Competition(models.Model, LockableModelMixin):
     # List of which bot races are playable in this competition. When left blank, all races are playable.
     playable_races = models.ManyToManyField(BotRace, blank=True)
     require_trusted_infrastructure = models.BooleanField(default=True)
+    statistics_finalized = models.BooleanField(default=False)
+    """Marks that this competition's statistics have been finalized and therefore cannot be modified."""
 
     def __str__(self):
         return self.name

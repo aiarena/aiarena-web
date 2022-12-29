@@ -853,6 +853,36 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIn('Done', out.getvalue())
 
 
+    def test_generatestats_competition_finalize(self):
+        self._generate_full_data_set()
+        for competition in Competition.objects.all():
+            out = StringIO()
+            call_command('generatestats', '--competitionid', competition.id, '--finalize', stdout=out)
+            self.assertIn('Done', out.getvalue())
+
+        # these should all fail
+        for competition in Competition.objects.all():
+            out = StringIO()
+            call_command('generatestats', '--competitionid', competition.id, stdout=out)
+            self.assertIn('WARNING: Skipping competition', out.getvalue())
+
+
+        for competition in Competition.objects.all():
+            out = StringIO()
+            call_command('generatestats', '--competitionid', competition.id, '--finalize', stdout=out)
+            self.assertIn('WARNING: Skipping competition', out.getvalue())
+
+    def test_generatestats_finalize_invalid(self):
+
+        with self.assertRaisesMessage(CommandError,
+                                      '--finalize is only valid with --competitionid'):
+            call_command('generatestats', '--finalize')
+
+        with self.assertRaisesMessage(CommandError,
+                                      '--finalize is only valid with --competitionid'):
+            call_command('generatestats', '--allcompetitions', '--finalize')
+
+
     def test_generatestats_bot(self):
         self._generate_full_data_set()
         out = StringIO()
