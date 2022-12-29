@@ -844,6 +844,29 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         call_command('generatestats', stdout=out)
         self.assertIn('Done', out.getvalue())
 
+    def test_finalizecompetition(self):
+        self._generate_full_data_set()
+
+        for competition in Competition.objects.all():
+            call_command('generatestats', '--competitionid', competition.id, '--finalize')
+
+        for competition in Competition.objects.all():
+            with self.assertRaisesMessage(CommandError,
+                                          f'Competition {competition.id} is not closed! It must be closed before it can be finalized.'):
+                out = StringIO()
+                call_command('finalizecompetition', '--competitionid', competition.id, stdout=out)
+
+            # fake competition closure
+            competition.status = 'closed'
+            competition.save()
+
+            out = StringIO()
+            call_command('finalizecompetition', '--competitionid', competition.id, stdout=out)
+            self.assertIn(f"Competition {competition.id} has been finalized.", out.getvalue())
+
+            out = StringIO()
+            call_command('finalizecompetition', '--competitionid', competition.id, stdout=out)
+            self.assertIn(f'WARNING: Competition {competition.id} is already finalized. Skipping...', out.getvalue())
 
     def test_generatestats_competition(self):
         self._generate_full_data_set()

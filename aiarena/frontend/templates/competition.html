@@ -161,8 +161,7 @@
         {% endfor %}
 
 
-
-
+        {% if not competition.competition_finalized %}
         <br>
         <div class="divider"><span></span><span><h2>Rounds</h2></span><span></span></div>
         <table summary="Table containing information about the rounds" id="matches_table" style="min-width: 900px; margin: 0 auto;">
@@ -215,5 +214,6 @@
                 </ul>
             {% endif %}
         </div>
+        {% endif %}
     </div>
 {% endblock %}
