@@ -11,7 +11,7 @@ from django.db import connection
 from django.db.models import Max, Min
 from pytz import utc
 
-from aiarena.core.models import MatchParticipation, CompetitionParticipation, Bot
+from aiarena.core.models import MatchParticipation, CompetitionParticipation, Bot, Map, Match
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
 from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
 from aiarena.core.models.competition import Competition
@@ -106,12 +106,15 @@ class StatsGenerator:
 
     @staticmethod
     def _update_map_stats(sp: CompetitionParticipation):
-        competition = Competition.objects.get(id=sp.competition.id)
-        for map in competition.maps.all():
-            with connection.cursor() as cursor:
-                map_stats = CompetitionBotMapStats.objects.select_for_update() \
-                    .get_or_create(bot=sp, map=map)[0]
+        competition_matches = Match.objects.filter(round__competition_id=sp.competition.id)
+        maps = Map.objects.filter(id__in=competition_matches.values_list('map_id', flat=True))
 
+        # purge existing stats entries for all maps
+        CompetitionBotMapStats.objects.filter(bot=sp).delete()
+
+        for map in maps:
+            with connection.cursor() as cursor:
+                map_stats = CompetitionBotMapStats.objects.create(bot=sp, map=map)
                 map_stats.match_count = StatsGenerator._calculate_map_count(cursor, map, sp)
 
                 if map_stats.match_count != 0:
