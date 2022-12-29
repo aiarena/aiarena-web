@@ -26,6 +26,7 @@ class PatreonAccountBind(models.Model):
     patreon_user_id = models.CharField(max_length=64, blank=True, null=True)
 
     def update_tokens(self):
+        self.last_token_refresh_attempt = timezone.now()
         oauth_client = PatreonOAuth(config.PATREON_CLIENT_ID, config.PATREON_CLIENT_SECRET)
         try:
             self.access_token, self.refresh_token = oauth_client.update_tokens(self.refresh_token)

@@ -2,14 +2,18 @@ import logging
 from wsgiref.util import FileWrapper
 
 from discord_bind.models import DiscordUser
+from django.contrib.auth import login, logout
 from django.db.models import Prefetch
 from django.http import HttpResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, serializers
+from rest_framework import viewsets, serializers, permissions, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.viewsets import ViewSet
 
+from aiarena.api import serializers as api_serializers
 from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
 from aiarena.core.models import Match, Result, Bot, Map, User, Round, MatchParticipation, CompetitionParticipation, \
     Competition, MatchTag, Game, GameMode, MapPool, CompetitionBotMatchupStats, CompetitionBotMapStats, News, Trophy
@@ -18,6 +22,36 @@ from aiarena.core.permissions import IsServiceOrAdminUser
 from aiarena.patreon.models import PatreonUnlinkedDiscordUID
 
 logger = logging.getLogger(__name__)
+
+
+class AuthViewSet(ViewSet):
+    # This view should be accessible also for unauthenticated users.
+    permission_classes = (permissions.AllowAny,)
+
+    def list(self, request):
+        current_user = {
+                'id': request.user.id,
+                'username': request.user.username
+            } if request.user.id else None
+
+        return Response({
+            'current_user': current_user
+        }, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        serializer = api_serializers.LoginSerializer(data=self.request.data,
+                                                     context={'request': self.request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        login(request, user)
+        return Response(None, status=status.HTTP_202_ACCEPTED)
+
+    @action(detail=False, methods=['post'])
+    def logout(self, request):
+        logout(request)
+        return Response(None, status=status.HTTP_204_NO_CONTENT)
+
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
@@ -43,7 +77,7 @@ competition_bot_map_stats_include_fields = 'bot', 'map', 'match_count', 'win_cou
                                                'updated',
 competition_participation_include_fields = 'id', 'competition', 'bot', 'elo', 'match_count', 'win_perc', 'win_count', \
                                            'loss_perc', 'loss_count', 'tie_perc', 'tie_count', 'crash_perc', \
-                                           'crash_count', 'elo_graph', 'highest_elo', 'slug', 'active', \
+                                           'crash_count', 'elo_graph', 'winrate_vs_duration_graph', 'highest_elo', 'slug', 'active', \
                                            'division_num', 'in_placements',
 competition_participation_filter_fields = 'id', 'competition', 'bot', 'elo', 'match_count', 'win_perc', 'win_count', \
                                           'loss_perc', 'loss_count', 'tie_perc', 'tie_count', 'crash_perc', \

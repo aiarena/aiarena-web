@@ -3,26 +3,24 @@ import uuid
 
 from constance import config
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import models
 from django.db.models import Sum
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
-from aiarena.api.arenaclient.exceptions import NoCurrentlyAvailableCompetitions
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
 from .bot_race import BotRace
 from .match import Match
 from .mixins import LockableModelMixin
-from .competition import Competition
 from .user import User
 
 logger = logging.getLogger(__name__)
@@ -86,7 +84,7 @@ class Bot(models.Model, LockableModelMixin):
         from .relative_result import RelativeResult
         return (RelativeResult.objects
             .filter(me__bot=self, match__requested_by__isnull=True, match__round__competition=competition)
-            .order_by('-created')[:config.ELO_TREND_N_MATCHES]
+            .order_by('-started')[:config.ELO_TREND_N_MATCHES]
             .aggregate(Sum('elo_change'))['elo_change__sum'])
 
     @property

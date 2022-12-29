@@ -13,7 +13,7 @@ from constance import config
 from django.db import transaction, connection
 from django.db.models import F
 
-from aiarena.api.arenaclient.exceptions import LadderDisabled, NoCurrentlyAvailableCompetitions
+from aiarena.api.arenaclient.exceptions import LadderDisabled
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Competition
 
@@ -34,19 +34,17 @@ class ACCoordinator:
 
     @staticmethod
     def next_competition_match(arenaclient: ArenaClient):
-        if arenaclient.trusted:
-            # TODO: Check for trusted competitions
-            competition_ids = ACCoordinator._get_competition_priority_order()
-            for id in competition_ids:
-                competition = Competition.objects.get(id=id)
+        competition_ids = ACCoordinator._get_competition_priority_order()
+        for id in competition_ids:
+            competition = Competition.objects.get(id=id)
+            # This excludes non-trusted clients from competitions requiring trusted infrastructure
+            if arenaclient.trusted or competition.require_trusted_infrastructure == arenaclient.trusted:
                 # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
                 with transaction.atomic():
                     # this call will apply a select for update, so we do it inside an atomic block
                     if Competitions.check_has_matches_to_play_and_apply_locks(competition):
                         return Matches.start_next_match_for_competition(arenaclient, competition)
 
-            # TODO: Maybe remove exception when we have testing
-            raise NoCurrentlyAvailableCompetitions()
         return None
 
     @staticmethod

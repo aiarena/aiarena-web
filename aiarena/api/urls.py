@@ -6,6 +6,8 @@ from .arenaclient import views as arenaclient_views
 
 router = DefaultRouter()
 
+router.register(r'auth', publicapi_views.AuthViewSet, basename='api_auth')
+
 router.register(r'bots', publicapi_views.BotViewSet, basename='api_bot')
 router.register(r'bot-races', publicapi_views.BotRaceViewSet, basename='api_bot_race')
 router.register(r'competitions', publicapi_views.CompetitionViewSet, basename='api_competition')

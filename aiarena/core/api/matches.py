@@ -37,15 +37,23 @@ class Matches:
     @staticmethod
     def timeout_overtime_bot_games():
         matches_without_result = Match.objects.only('round').select_related('round').select_for_update().filter(
-            started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
+            first_started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
         for match in matches_without_result:
             Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
             if match.round is not None:  # if the match is part of a round, check for round completion
                 match.round.update_if_completed()
 
     @staticmethod
-    def start_match(match, arenaclient: ArenaClient) -> bool:
-        if match.require_trusted_arenaclient and not arenaclient.trusted:
+    def start_match(match: Match, arenaclient: ArenaClient) -> bool:
+        # Allowing the match to be played on a untrusted client if the user allows the download after requesting a match.
+        require_trusted_arenaclient = match.require_trusted_arenaclient
+        if not require_trusted_arenaclient:
+            bot1 = match.participant1.bot
+            bot2 = match.participant2.bot
+            require_trusted_arenaclient = not bot1.bot_zip_publicly_downloadable or not bot2.\
+                bot_zip_publicly_downloadable or not bot1.bot_data_publicly_downloadable or not bot2.\
+                bot_data_publicly_downloadable
+        if require_trusted_arenaclient and not arenaclient.trusted:
             return False
         match.lock_me()  # lock self to avoid race conditions
         if match.started is None:
@@ -160,6 +168,7 @@ class Matches:
             """, (tuple(match_ids), tuple(bot_ids), tuple(bot_ids)))) if bot_ids else []
 
             random.shuffle(available_ladder_matches_to_play)  # ensure the match selection is random
+
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
             if len(Bots.get_available(bots_with_a_ladder_match_to_play)) >= 2:
                 return Matches._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
@@ -245,7 +254,7 @@ class Matches:
                 .filter(competition=competition, active=True, division_num=participant1.division_num)
                 .exclude(id__in=already_processed_participants))
             for participant2 in active_participants_in_div:
-                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=True)
+                Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=competition.require_trusted_infrastructure)
 
         return new_round
 

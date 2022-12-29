@@ -25,6 +25,8 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     started = models.DateTimeField(blank=True, null=True, editable=False, db_index=True)
+    first_started = models.DateTimeField(blank=True, null=True, editable=False, db_index=True)
+    """The first time this match started. Different from the started field when multiple runs are attempted."""
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True,
                                      related_name='assigned_matches')
     round = models.ForeignKey(Round, on_delete=models.CASCADE, blank=True, null=True)
@@ -77,14 +79,6 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
                 bot2_use_data = bot2.bot_data_enabled
             if bot2_update_data is None:
                 bot2_update_data = bot2.bot_data_enabled
-            # NOTE: This could be done when getting a match to play.
-            # Allowing the match to be played on a untrusted client if the user allows the download after requesting a match.
-            if not require_trusted_arenaclient:
-                require_trusted_arenaclient = not bot1.bot_zip_publicly_downloadable \
-                                              or not bot2.bot_zip_publicly_downloadable \
-                                              or not bot1.bot_data_publicly_downloadable \
-                                              or not bot2.bot_data_publicly_downloadable
-
             match = Match.objects.create(map=map, round=round, requested_by=requested_by, require_trusted_arenaclient=require_trusted_arenaclient)
             # create match participations
             from .match_participation import MatchParticipation  # avoid circular reference
@@ -116,7 +110,9 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
             Result.objects.create(match=match, type='MatchCancelled', game_steps=0, submitted_by=requesting_user)
 
             if not match.started:
-                match.started = timezone.now()
+                now = timezone.now()
+                match.started = now
+                match.first_started = now
                 match.save()
 
             if match.round is not None:

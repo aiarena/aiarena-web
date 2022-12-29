@@ -78,17 +78,31 @@
         </table>
         <br/>
     </div>
-
-    {# If this user owns the bot, and is a supporter, display the private ELO graph #}
-    {% if competitionparticipation.bot.user == user and user.patreon_level != 'none' and competitionparticipation.elo_graph_update_plot %}
-        <div id="elo_graph">
-            <img src="{{ competitionparticipation.elo_graph_update_plot.url }}" alt="ELOGraph"/>
+    <div id="bot_competition_stats_graphs">
+        <div class="statSlides">
+            {# If this user owns the bot, and is a supporter, display the private ELO graph #}
+            {% if competitionparticipation.bot.user == user and user.patreon_level != 'none' and competitionparticipation.elo_graph_update_plot %}
+            <div id="elo_graph">
+                <img src="{{ competitionparticipation.elo_graph_update_plot.url }}" alt="ELOGraph"/>
+            </div>
+            {% elif competitionparticipation.elo_graph %}
+                <div id="elo_graph">
+                    <img src="{{ competitionparticipation.elo_graph.url }}" alt="ELOGraph"/>
+                </div>
+            {% endif %}
         </div>
-    {% elif competitionparticipation.elo_graph %}
-        <div id="elo_graph">
-            <img src="{{ competitionparticipation.elo_graph.url }}" alt="ELOGraph"/>
+        <div class="statSlides">
+            {% if competitionparticipation.winrate_vs_duration_graph %}
+            <div id="elo_graph">
+                <img src="{{ competitionparticipation.winrate_vs_duration_graph.url }}" alt="WinrateGraph"/>
+            </div>
+            {% endif %}
         </div>
-    {% endif %}
+        <div class="slide-selector">
+                <span class="slide-select" id="statSlideSelect" onclick="selectSlide(1)"></span>
+                <span class="slide-select" id="statSlideSelect" onclick="selectSlide(2)"></span>
+        </div>
+    </div>
 
     <div class="divider"><span></span><span><h2>Maps</h2></span><span></span></div>
     <div id="bot_competition_stats_list">
@@ -209,5 +223,29 @@
         </table>
         <br/>
     </div>
+    <script>
+        var slideIndex = 1;
+        showSlides(slideIndex);
+
+        function selectSlide(n) {
+            showSlides(slideIndex = n);
+        }
+
+        function showSlides(n) {
+            var i;
+            var slides = document.getElementsByClassName("statSlides");
+            var dots = document.querySelectorAll('[id=statSlideSelect]');
+            if (n > slides.length) {slideIndex = 1}
+            if (n < 1) {slideIndex = slides.length}
+            for (i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+            for (i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+            slides[slideIndex-1].style.display = "block";
+            dots[slideIndex-1].className += " active";
+        }
+    </script>
 {% endblock %}
 
