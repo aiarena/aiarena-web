@@ -3,4 +3,4 @@ django-constance[database]==2.8.0
 django-sslserver==0.22
 coverage==6.1.1
 django-fakeredis==0.1.2
-jsonschema==4.6.0
+jsonschema==4.17.3
