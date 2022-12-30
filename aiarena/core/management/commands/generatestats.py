@@ -30,7 +30,7 @@ class Command(BaseCommand):
             competitions = Competition.objects.filter(status__in=['open', 'closing'])
 
         finalize = options['finalize']
-        if finalize and options['allcompetitions'] or not options['competitionid']:
+        if finalize and (options['allcompetitions'] or not options['competitionid']):
             raise CommandError("--finalize is only valid with --competitionid")
 
         bot_id = options['botid']
