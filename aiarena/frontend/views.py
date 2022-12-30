@@ -824,7 +824,7 @@ class Index(ListView):
         context = super().get_context_data(**kwargs)
 
         # newly created bots have almost the same update time as its creation time
-        events = Bot.objects.select_related('user').only('user', 'name', 'created').order_by('-bot_zip_updated')[:10]
+        events = Bot.objects.select_related('user').only('user', 'name', 'created', 'bot_zip_updated').order_by('-bot_zip_updated')[:10]
         for event in events:
             # if these are within a second, then the bot was created, not updated
             event.is_created_event = (event.bot_zip_updated - event.created).seconds <= 1
