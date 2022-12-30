@@ -25,6 +25,6 @@ django-grappelli==2.15.3
 docutils==0.18.1
 drf-yasg==1.17.1
 django-redis==4.12.1
-django-select2==7.5.0
+django-select2==8.0.0
 django-tables2==2.3.4
 django-debug-toolbar==3.2.2
