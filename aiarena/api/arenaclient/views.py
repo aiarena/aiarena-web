@@ -3,7 +3,7 @@ from wsgiref.util import FileWrapper
 
 from constance import config
 from django.db import transaction
-from django.db.models import Sum, F, Prefetch
+from django.db.models import Sum, Prefetch
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
@@ -16,7 +16,7 @@ from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
 from aiarena.core.utils import parse_tags
-from aiarena.core.api import Bots, Matches
+from aiarena.core.api import Bots
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation, MatchTag, Tag
 from aiarena.core.models.arena_client_status import ArenaClientStatus
 from aiarena.core.permissions import IsArenaClientOrAdminUser, IsArenaClient
