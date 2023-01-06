@@ -18,7 +18,7 @@ class Command(BaseCommand):
                                                        "open competitions will be used")
         parser.add_argument('--allcompetitions', action='store_true', help="Run this for all competition")
         parser.add_argument('--finalize', action='store_true',
-                            help="Mark all processed competitions' stats as finalized. "
+                            help="Mark the processed competition's stats as finalized. "
                                  "Only valid when specifying --competitionid.")
 
     def handle(self, *args, **options):
