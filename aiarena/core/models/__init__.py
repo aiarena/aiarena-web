@@ -1,6 +1,7 @@
 from .arena_client import ArenaClient
 from .arena_client_status import ArenaClientStatus
 from .bot import Bot
+from .bot_crash_limit_alert import BotCrashLimitAlert
 from .competition import Competition
 from .competition_bot_matchup_stats import CompetitionBotMatchupStats
 from .competition_bot_map_stats import CompetitionBotMapStats

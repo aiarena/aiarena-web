@@ -17,6 +17,10 @@ from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
 from aiarena.core.models.competition import Competition
 
 class StatsGenerator:
+    @staticmethod
+    def update_stats_add_result(bot: CompetitionParticipation, won: bool, opoonent):
+        """This method updates a bot's existing stats based on a single result.
+           This can be done much quicker that regenerating a bot's entire set of stats"""
 
     @staticmethod
     def update_stats(sp: CompetitionParticipation):
