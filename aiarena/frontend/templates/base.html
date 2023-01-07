@@ -1,7 +1,7 @@
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
-
+{% with public_banner_message=config.PUBLIC_BANNER_MESSAGE discord_invite_link=config.DISCORD_INVITE_LINK patreon_link=config.PATREON_LINK logged_in_banner_message=config.LOGGED_IN_BANNER_MESSAGE    project_finance_link=config.PROJECT_FINANCE_LINK    admin_cluster_link=config.ADMIN_CLUSTER_LINK    admin_webstats_link=config.ADMIN_WEBSTATS_LINK    github_link=config.GITHUB_LINK    twitch_link=config.TWITCH_LINK     youtube_link=config.YOUTUBE_LINK    %}
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static "style.css" %}?v={{ style_md5 }}">
@@ -50,19 +50,20 @@
 
 <body>
 <div id="page">
-
+    
     <div id="header">
-        {% if config.PUBLIC_BANNER_MESSAGE or config.LOGGED_IN_BANNER_MESSAGE and user.is_authenticated %}
+        
+        {% if public_banner_message or logged_in_banner_message and user.is_authenticated %}
             <div id="banner-message">
                 <div id="banner-message-content">
-                    {% if config.PUBLIC_BANNER_MESSAGE %}
+                    {% if public_banner_message %}
                         <h3>
-                            {{ config.PUBLIC_BANNER_MESSAGE }}
+                            {{ public_banner_message }}
                         </h3>
                     {% endif %}
-                    {% if config.LOGGED_IN_BANNER_MESSAGE and user.is_authenticated %}
+                    {% if logged_in_banner_message and user.is_authenticated %}
                         <h3>
-                            {{ config.LOGGED_IN_BANNER_MESSAGE }}
+                            {{ logged_in_banner_message }}
                         </h3>
                     {% endif %}
                 </div>
@@ -93,8 +94,8 @@
                         <li><a href="{% url 'match_queue' %}">{% trans "Match Queue" %}</a></li>
                         <li><a href="{% url 'results' %}">{% trans "Results" %}</a></li>
                         <li><a href="{% url 'stream' %}">{% trans "Live Stream" %}</a></li>
-                        {% if config.PROJECT_FINANCE_LINK %}
-                        <li><a href="{{ config.PROJECT_FINANCE_LINK }}">{% trans "Project Finance" %}</a></li>
+                        {% if project_finance_link %}
+                        <li><a href="{{ project_finance_link }}">{% trans "Project Finance" %}</a></li>
                         {% endif %}
                         <li><a href="/swagger/">{% trans "API" %}</a></li>
                     </ul>
@@ -128,11 +129,11 @@
                         </div>
                         <ul class="links">
                             <li><a href="{% url 'admin:index' %}">{% trans "Admin" %}</a></li>
-                            {% if config.ADMIN_CLUSTER_LINK %}
-                                <li><a href="{{ config.ADMIN_CLUSTER_LINK }}">{% trans "Cluster" %}</a></li>
+                            {% if admin_cluster_link %}
+                                <li><a href="{{ admin_cluster_link }}">{% trans "Cluster" %}</a></li>
                             {% endif %}
-                            {% if config.ADMIN_WEBSTATS_LINK %}
-                                <li><a href="{{ config.ADMIN_WEBSTATS_LINK }}">{% trans "Web Stats" %}</a></li>
+                            {% if admin_webstats_link %}
+                                <li><a href="{{ admin_webstats_link }}">{% trans "Web Stats" %}</a></li>
                             {% endif %}
                         </ul>
                     </li>
@@ -158,28 +159,28 @@
                         <h3>links</h3>
                     </div>
                     <ul class="links">
-                        {% if config.DISCORD_INVITE_LINK %}
-                            <li><a href="{{ config.DISCORD_INVITE_LINK }}"> Discord <em class="material-icons md-18"
+                        {% if discord_invite_link %}
+                            <li><a href="{{ discord_invite_link }}"> Discord <em class="material-icons md-18"
                                                                                         style="font-size: 18px; padding: 0px; padding-right:5px;">launch</em></a>
                             </li>
                         {% endif %}
-                        {% if config.PATREON_LINK %}
-                            <li><a href="{{ config.PATREON_LINK }}"> Patreon <em class="material-icons md-18"
+                        {% if patreon_link %}
+                            <li><a href="{{ patreon_link }}"> Patreon <em class="material-icons md-18"
                                                                                  style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a>
                             </li>
                         {% endif %}
-                        {% if config.GITHUB_LINK %}
-                            <li><a href="{{ config.GITHUB_LINK }}"> GitHub <em class="material-icons md-18"
+                        {% if github_link %}
+                            <li><a href="{{ github_link }}"> GitHub <em class="material-icons md-18"
                                                                                style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a>
                             </li>
                         {% endif %}
-                        {% if config.TWITCH_LINK %}
-                            <li><a href="{{ config.TWITCH_LINK }}"> Twitch <em class="material-icons md-18"
+                        {% if twitch_link %}
+                            <li><a href="{{ twitch_link }}"> Twitch <em class="material-icons md-18"
                                                                                style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a>
                             </li>
                         {% endif %}
-                        {% if config.YOUTUBE_LINK %}
-                            <li><a href="{{ config.YOUTUBE_LINK }}"> YouTube <em class="material-icons md-18"
+                        {% if youtube_link %}
+                            <li><a href="{{ youtube_link }}"> YouTube <em class="material-icons md-18"
                                                                                  style="font-size: 18px; padding: 0px;padding-right:5px;">launch</em></a>
                             </li>
                         {% endif %}
@@ -236,3 +237,4 @@
     });
 </script>
 </html>
+{% endwith %}

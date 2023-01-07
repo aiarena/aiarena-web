@@ -28,8 +28,8 @@
         <div class="divider"><span></span><span><h2>Problems?</h2></span><span></span></div>
         <div id="problems">
             Any problems with the website can be reported in our
-            {% if config.DISCORD_INVITE_LINK %}
-                <a href="{{ config.DISCORD_INVITE_LINK }}">Discord</a>.
+            {% if discord_invite_link %}
+                <a href="{{ discord_invite_link }}">Discord</a>.
             {% else %}
                 Discord.
             {% endif %}
@@ -59,7 +59,11 @@
                                 {% if new.yt_link %}
                                     <tr style="background-color: rgba(0, 0, 0, 0.1);">
                                         <td>
-                                            <iframe id="yt-video" width="420" height="215" src="{{ new.yt_link }}"></iframe>
+                                            <div class="yt-wrapper"  >
+                                                <div class="youtube" data-embed="{{ new.yt_link }}">
+                                                    <div class="play-button"></div>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endif %}
@@ -88,6 +92,7 @@
         {% if competitions %}
             <div id="competition_feed">
                 <div class="divider"><span></span><span><h2>Competitions</h2></span><span></span></div>
+                {% with n_matches=config.ELO_TREND_N_MATCHES %}
                 {% for item in competitions %}
                     <div class="compSlides">
                         <div>
@@ -100,7 +105,7 @@
                                 <td><strong>DIV</strong></td>
                                 <td><strong>ELO</strong></td>
                                 </thead>
-                                <tbody>
+                                <tbody>                                    
                                     {% for participant in item.top10 %}
                                         <tr>
                                             <td style="text-align: center">{{ forloop.counter }}</td>
@@ -112,8 +117,8 @@
                                             <td>{{ participant.bot.as_truncated_html_link }}</td>
                                             <td style="text-align: center">{{ participant.division_num }}</td>
                                             <td>
-                                                {{ participant.elo }}
-                                                {% bot_competition_trend participant.bot item.competition as trend %}
+                                                {{ participant.elo }}                                                
+                                                {% bot_competition_trend participant.bot item.competition  n_matches as trend %}
                                                     {% if trend > 40 %}
                                                         <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
                                                             trending_flat
@@ -137,12 +142,13 @@
                                                     {% endif %}
                                             </td>
                                         </tr>
-                                    {% endfor %}
+                                    {% endfor %}                                    
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 {% endfor %}
+                {% endwith %}
                 <br> <!-- extra space -->
                 <div class="slide-selector">
                     {% for item in competitions %}
@@ -182,6 +188,36 @@
             showSlides(slideIndex = n);
         }
 
+        ( function() {
+
+            var youtube = document.querySelectorAll( ".youtube" );
+
+            for (var i = 0; i < youtube.length; i++) {
+                var embed = youtube[i].dataset.embed.match(/[\w\-]{11,}/)[0];
+                var source = "https://img.youtube.com/vi/"+ embed+"/sddefault.jpg";
+                
+                var image = new Image();
+                        image.src = source;
+                        image.width=420;
+                        image.height=215;
+                        image.addEventListener( "load", function() {
+                            youtube[ i ].appendChild( image );
+                        }( i ) );
+                
+                        youtube[i].addEventListener( "click", function() {
+
+                            var iframe = document.createElement( "iframe" );
+
+                                    iframe.setAttribute( "frameborder", "0" );
+                                    iframe.setAttribute( "allowfullscreen", "" );
+                                    iframe.setAttribute( "src", "https://www.youtube.com/embed/"+ embed +"?rel=0&showinfo=0&autoplay=1" );
+
+                                    this.innerHTML = "";
+                                    this.appendChild( iframe );
+                        } );	
+            };
+
+            } )();
         function showSlides(n) {
             var i;
             var slides = document.getElementsByClassName("newSlides");
