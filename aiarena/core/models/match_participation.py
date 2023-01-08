@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.functional import cached_property
 from private_storage.fields import PrivateFileField
@@ -65,6 +66,15 @@ class MatchParticipation(models.Model, LockableModelMixin):
     @property
     def crashed(self):
         return self.result == 'loss' and self.result_cause in ['crash', 'timeout', 'initialization_failure']
+
+    @property
+    def triggered_a_crash_limit_alert(self):
+        try:
+            self.botcrashlimitalert  # force load from database
+            return True
+        except ObjectDoesNotExist:
+            return False
+
 
     @cached_property
     def competition_participant(self):
