@@ -112,6 +112,8 @@ class BotStatistics:
             # This is easier than changing the way the full recalc determines this figure
             if sp.highest_elo is None:
                 sp.highest_elo = sp.elo
+        else:
+            raise Exception(f"Unexpected result type: %s", result.type)
 
         sp.win_perc = sp.win_count / sp.match_count * 100
         sp.loss_perc = sp.loss_count / sp.match_count * 100
@@ -124,16 +126,18 @@ class BotStatistics:
 
     @staticmethod
     def _recalculate_matchup_stats(sp: CompetitionParticipation):
+
+        CompetitionBotMatchupStats.objects.filter(bot=sp).delete()
+
         for competition_participation in CompetitionParticipation.objects.filter(competition=sp.competition).exclude(
                 bot=sp.bot):
             with connection.cursor() as cursor:
-                matchup_stats = CompetitionBotMatchupStats.objects.select_for_update() \
-                    .get_or_create(bot=sp, opponent=competition_participation)[0]
+                match_count = BotStatistics._calculate_matchup_count(cursor, competition_participation,sp)
+                if match_count > 0:
+                    matchup_stats = CompetitionBotMatchupStats.objects.select_for_update() \
+                        .get_or_create(bot=sp, opponent=competition_participation)[0]
 
-                matchup_stats.match_count = BotStatistics._calculate_matchup_count(cursor, competition_participation,
-                                                                                   sp)
-
-                if matchup_stats.match_count != 0:
+                    matchup_stats.match_count = match_count
                     matchup_stats.win_count = BotStatistics._calculate_matchup_win_count(cursor,
                                                                                          competition_participation, sp)
                     matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
@@ -151,13 +155,8 @@ class BotStatistics:
                                                                                              competition_participation,
                                                                                              sp)
                     matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
-                else:
-                    matchup_stats.win_count = 0
-                    matchup_stats.loss_count = 0
-                    matchup_stats.tie_count = 0
-                    matchup_stats.crash_count = 0
 
-                matchup_stats.save()
+                    matchup_stats.save()
 
     @staticmethod
     def _update_matchup_stats(bot: CompetitionParticipation, opponent: CompetitionParticipation, result: Result):
@@ -171,10 +170,13 @@ class BotStatistics:
                     matchup_stats.win_count += 1
                 else:
                     matchup_stats.loss_count += 1
+
+                    if MatchParticipation.objects.get(match=result.match, bot=bot.bot).crashed:
+                        matchup_stats.crash_count += 1
             elif result.is_tie:
-                matchup_stats.tie_count += 0
-            elif MatchParticipation.objects.get(match=result.match, bot=bot.bot).crashed:
-                matchup_stats.crash_count += 1
+                matchup_stats.tie_count += 1
+            else:
+                raise Exception(f"Unexpected result type: %s", result.type)
 
             matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
             matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
@@ -226,10 +228,13 @@ class BotStatistics:
                 map_stats.win_count += 1
             else:
                 map_stats.loss_count += 1
+
+                if MatchParticipation.objects.get(match=result.match, bot=bot.bot).crashed:
+                    map_stats.crash_count += 1
         elif result.is_tie:
-            map_stats.tie_count += 0
-        elif MatchParticipation.objects.get(match=result.match, bot=bot.bot).crashed:
-            map_stats.crash_count += 1
+            map_stats.tie_count += 1
+        else:
+            raise Exception(f"Unexpected result type: %s", result.type)
 
         map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
         map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
@@ -257,7 +262,7 @@ class BotStatistics:
                     and bot_p.bot_id = %s
                     and opponent_p.bot_id = %s
                     and """ + query,
-                                                      [sp.competition_id, sp.bot_id, competition_participation.bot_id])
+                    [sp.competition_id, sp.bot_id, competition_participation.bot_id])
 
     @staticmethod
     def _calculate_matchup_count(cursor, competition_participation, sp):
