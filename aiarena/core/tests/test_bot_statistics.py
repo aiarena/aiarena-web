@@ -5,7 +5,7 @@ from django.core import serializers
 from django.core.management import call_command
 from django.test import TransactionTestCase
 
-from aiarena.core.models import CompetitionParticipation, CompetitionBotMatchupStats
+from aiarena.core.models import CompetitionParticipation, CompetitionBotMatchupStats, CompetitionBotMapStats
 from aiarena.core.tests.test_mixins import FullDataSetMixin
 
 
@@ -24,7 +24,12 @@ class BotStatisticsTestCase(FullDataSetMixin, TransactionTestCase):
             del matchup_stat['updated']
         update_stats_json['matchup_stats'] = json.dumps(matchup_stats)
 
-        # update_stats_json['map_stats'] = serializers.serialize('json', CompetitionBotMapStats.objects.order_by('id'))
+        map_stats = list(CompetitionBotMapStats.objects.order_by('bot', 'map').values())
+        for map_stat in map_stats:
+            # these won't match, so remove them
+            del map_stat['id']
+            del map_stat['updated']
+        update_stats_json['map_stats'] = json.dumps(map_stats)
 
         out = StringIO()
         call_command('generatestats', '--allcompetitions', stdout=out)
@@ -39,6 +44,13 @@ class BotStatisticsTestCase(FullDataSetMixin, TransactionTestCase):
             del matchup_stat['id']
             del matchup_stat['updated']
         recalc_stats_json['matchup_stats'] = json.dumps(matchup_stats)
+
+        map_stats = list(CompetitionBotMapStats.objects.order_by('bot', 'map').values())
+        for map_stat in map_stats:
+            # these won't match, so remove them
+            del map_stat['id']
+            del map_stat['updated']
+        recalc_stats_json['map_stats'] = json.dumps(map_stats)
 
         self.maxDiff = None  # required to print out large diffs
         self.assertEqual(update_stats_json, recalc_stats_json)

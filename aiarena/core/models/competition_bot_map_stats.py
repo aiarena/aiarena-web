@@ -31,3 +31,6 @@ class CompetitionBotMapStats(models.Model):
 
     def __str__(self):
         return str(self.bot) + ' on ' + str(self.map)
+
+    class Meta:
+        unique_together = (('bot', 'map'),)

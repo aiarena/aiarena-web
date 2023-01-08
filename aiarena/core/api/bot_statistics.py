@@ -195,10 +195,11 @@ class BotStatistics:
 
         for map in maps:
             with connection.cursor() as cursor:
-                map_stats = CompetitionBotMapStats.objects.create(bot=sp, map=map)
-                map_stats.match_count = BotStatistics._calculate_map_count(cursor, map, sp)
+                match_count = BotStatistics._calculate_map_count(cursor, map, sp)
+                if match_count > 0:
+                    map_stats = CompetitionBotMapStats.objects.create(bot=sp, map=map)
+                    map_stats.match_count = match_count
 
-                if map_stats.match_count != 0:
                     map_stats.win_count = BotStatistics._calculate_map_win_count(cursor, map, sp)
                     map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
 
@@ -210,17 +211,11 @@ class BotStatistics:
 
                     map_stats.crash_count = BotStatistics._calculate_map_crash_count(cursor, map, sp)
                     map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
-                else:
-                    map_stats.win_count = 0
-                    map_stats.loss_count = 0
-                    map_stats.tie_count = 0
-                    map_stats.crash_count = 0
 
-                map_stats.save()
+                    map_stats.save()
     @staticmethod
     def _update_map_stats(bot: CompetitionParticipation, result: Result):
-        map = result.match.map
-        map_stats = CompetitionBotMapStats.objects.create(bot=bot, map=map)
+        map_stats = CompetitionBotMapStats.objects.get_or_create(bot=bot, map=result.match.map)[0]
         map_stats.match_count += 1
 
         if result.has_winner:

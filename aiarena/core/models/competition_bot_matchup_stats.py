@@ -30,3 +30,6 @@ class CompetitionBotMatchupStats(models.Model):
 
     def __str__(self):
         return str(self.bot) + ' VS ' + str(self.opponent)
+
+    class Meta:
+        unique_together = (('bot', 'opponent'),)
