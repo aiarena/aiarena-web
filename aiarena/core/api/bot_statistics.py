@@ -73,11 +73,6 @@ class BotStatistics:
 
             if graph3 is not None:
                 sp.winrate_vs_duration_graph.save('winrate_vs_duration.png', graph3)
-        else:
-            sp.win_count = 0
-            sp.loss_count = 0
-            sp.tie_count = 0
-            sp.crash_count = 0
         sp.save()
 
     @staticmethod
