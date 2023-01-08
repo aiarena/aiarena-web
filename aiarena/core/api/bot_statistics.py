@@ -235,7 +235,6 @@ class BotStatistics:
 
     @staticmethod
     def _get_elo_data(bot_id, competition_id):
-        # this does not distinct between competitions
         with connection.cursor() as cursor:
             query = (f"""
                 select 
