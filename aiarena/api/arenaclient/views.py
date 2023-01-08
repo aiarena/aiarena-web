@@ -16,7 +16,7 @@ from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
 from aiarena.core.utils import parse_tags
-from aiarena.core.api import Bots, Matches
+from aiarena.core.api import Bots, BotStatistics
 from aiarena.core.events import EVENT_MANAGER
 from aiarena.core.events import MatchResultReceivedEvent
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation, MatchTag, Tag
@@ -384,6 +384,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                         elif config.DEBUG_LOGGING_ENABLED:
                             logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
+
+                        BotStatistics.update_stats_based_on_result(sp1, result, sp2)
+                        BotStatistics.update_stats_based_on_result(sp2, result, sp1)
 
                         if result.is_crash_or_timeout:
                             run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)

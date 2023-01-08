@@ -19,10 +19,12 @@ class BotStatistics:
     def update_stats_based_on_result(bot: CompetitionParticipation, result: Result, opponent: CompetitionParticipation):
         """This method updates a bot's existing stats based on a single result.
            This can be done much quicker that regenerating a bot's entire set of stats"""
-        bot.lock_me()
-        BotStatistics._update_global_statistics(bot, result)
-        BotStatistics._update_matchup_stats(bot, opponent, result)
-        BotStatistics._update_map_stats(bot, result)
+
+        if result.type not in BotStatistics._ignored_result_types:
+            bot.lock_me()
+            BotStatistics._update_global_statistics(bot, result)
+            BotStatistics._update_matchup_stats(bot, opponent, result)
+            BotStatistics._update_map_stats(bot, result)
 
     @staticmethod
     def recalculate_stats(sp: CompetitionParticipation):
@@ -31,12 +33,15 @@ class BotStatistics:
         BotStatistics._recalculate_matchup_stats(sp)
         BotStatistics._recalculate_map_stats(sp)
 
+    # ignore these result types for the purpose of statistics generation
+    _ignored_result_types = ['MatchCancelled', 'InitializationError', 'Error']
+
     @staticmethod
     def _recalculate_global_statistics(sp: CompetitionParticipation):
         sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
                                                            match__result__isnull=False,
                                                            match__round__competition=sp.competition) \
-            .exclude(match__result__type__in=['MatchCancelled', 'InitializationError', 'Error']) \
+            .exclude(match__result__type__in=BotStatistics._ignored_result_types) \
             .count()
         if sp.match_count != 0:
             sp.win_count = MatchParticipation.objects.filter(bot=sp.bot, result='win',
@@ -61,6 +66,7 @@ class BotStatistics:
             sp.highest_elo = MatchParticipation.objects.filter(bot=sp.bot,
                                                                match__result__isnull=False,
                                                                match__round__competition=sp.competition) \
+                .exclude(match__result__type__in=BotStatistics._ignored_result_types) \
                 .aggregate(Max('resultant_elo'))['resultant_elo__max']
 
             BotStatistics._generate_graphs(sp)
@@ -84,19 +90,33 @@ class BotStatistics:
         if result.has_winner:
             if sp.bot == result.winner:
                 sp.win_count += 1
-                sp.highest_elo = sp.elo
+                if sp.highest_elo is None or sp.highest_elo < sp.elo:
+                    sp.highest_elo = sp.elo
             else:
                 sp.loss_count += 1
-        elif result.is_tie:
-            sp.tie_count += 0
-        elif MatchParticipation.objects.get(match=result.match, bot=sp.bot).crashed:
-            sp.crash_count += 1
 
-        divisor = sp.match_count * 100
-        sp.win_perc = sp.win_count / divisor
-        sp.loss_perc = sp.loss_count / divisor
-        sp.tie_perc = sp.tie_count / divisor
-        sp.crash_perc = sp.crash_count / divisor
+                if MatchParticipation.objects.get(match=result.match, bot=sp.bot).crashed:
+                    sp.crash_count += 1
+
+                # Special case to match a full recalc:
+                # Set highest_elo isn't already - this will only trigger on a loss or tie
+                # This is easier than changing the way the full recalc determines this figure
+                if sp.highest_elo is None:
+                    sp.highest_elo = sp.elo
+
+        elif result.is_tie:
+            sp.tie_count += 1
+
+            # Special case to match a full recalc:
+            # Set highest_elo isn't already - this will only trigger on a loss or tie
+            # This is easier than changing the way the full recalc determines this figure
+            if sp.highest_elo is None:
+                sp.highest_elo = sp.elo
+
+        sp.win_perc = sp.win_count / sp.match_count * 100
+        sp.loss_perc = sp.loss_count / sp.match_count * 100
+        sp.tie_perc = sp.tie_count / sp.match_count * 100
+        sp.crash_perc = sp.crash_count / sp.match_count * 100
 
         BotStatistics._generate_graphs(sp)
 
@@ -156,11 +176,10 @@ class BotStatistics:
             elif MatchParticipation.objects.get(match=result.match, bot=bot.bot).crashed:
                 matchup_stats.crash_count += 1
 
-            divisor = matchup_stats.match_count * 100
-            matchup_stats.win_perc = matchup_stats.win_count / divisor
-            matchup_stats.loss_perc = matchup_stats.loss_count / divisor
-            matchup_stats.tie_perc = matchup_stats.tie_count / divisor
-            matchup_stats.crash_perc = matchup_stats.crash_count / divisor
+            matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
+            matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
+            matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
+            matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
 
             matchup_stats.save()
 
@@ -212,11 +231,10 @@ class BotStatistics:
         elif MatchParticipation.objects.get(match=result.match, bot=bot.bot).crashed:
             map_stats.crash_count += 1
 
-        divisor = map_stats.match_count * 100
-        map_stats.win_perc = map_stats.win_count / divisor
-        map_stats.loss_perc = map_stats.loss_count / divisor
-        map_stats.tie_perc = map_stats.tie_count / divisor
-        map_stats.crash_perc = map_stats.crash_count / divisor
+        map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
+        map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
+        map_stats.tie_perc = map_stats.tie_count / map_stats.match_count * 100
+        map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
 
         map_stats.save()
 
