@@ -22,9 +22,7 @@ class BotStatistics:
         bot.lock_me()
         BotStatistics._update_global_statistics(bot, result)
         BotStatistics._update_matchup_stats(bot, opponent, result)
-
-        # Update matchup stats
-        # Update map stats
+        BotStatistics._update_map_stats(bot, result)
 
     @staticmethod
     def recalculate_stats(sp: CompetitionParticipation):
