@@ -21,6 +21,7 @@ class BotStatistics:
            This can be done much quicker that regenerating a bot's entire set of stats"""
         bot.lock_me()
         BotStatistics._update_global_statistics(bot, result)
+        BotStatistics._update_matchup_stats(bot, opponent, result)
 
         # Update matchup stats
         # Update map stats
@@ -90,7 +91,7 @@ class BotStatistics:
                 sp.loss_count += 1
         elif result.is_tie:
             sp.tie_count += 0
-        elif result.is_crash_or_timeout_or_init_error:
+        elif MatchParticipation.objects.get(match=result.match, bot=sp.bot).crashed:
             sp.crash_count += 1
 
         divisor = sp.match_count * 100
@@ -141,6 +142,31 @@ class BotStatistics:
                 matchup_stats.save()
 
     @staticmethod
+    def _update_matchup_stats(bot: CompetitionParticipation, opponent: CompetitionParticipation, result: Result):
+            matchup_stats = CompetitionBotMatchupStats.objects.select_for_update() \
+                .get_or_create(bot=bot, opponent=opponent)[0]
+
+            matchup_stats.match_count += 1
+
+            if result.has_winner:
+                if bot.bot == result.winner:
+                    matchup_stats.win_count += 1
+                else:
+                    matchup_stats.loss_count += 1
+            elif result.is_tie:
+                matchup_stats.tie_count += 0
+            elif MatchParticipation.objects.get(match=result.match, bot=bot.bot).crashed:
+                matchup_stats.crash_count += 1
+
+            divisor = matchup_stats.match_count * 100
+            matchup_stats.win_perc = matchup_stats.win_count / divisor
+            matchup_stats.loss_perc = matchup_stats.loss_count / divisor
+            matchup_stats.tie_perc = matchup_stats.tie_count / divisor
+            matchup_stats.crash_perc = matchup_stats.crash_count / divisor
+
+            matchup_stats.save()
+
+    @staticmethod
     def _recalculate_map_stats(sp: CompetitionParticipation):
         competition_matches = Match.objects.filter(round__competition_id=sp.competition.id)
         maps = Map.objects.filter(id__in=competition_matches.values_list('map_id', flat=True))
@@ -172,6 +198,29 @@ class BotStatistics:
                     map_stats.crash_count = 0
 
                 map_stats.save()
+    @staticmethod
+    def _update_map_stats(bot: CompetitionParticipation, result: Result):
+        map = result.match.map
+        map_stats = CompetitionBotMapStats.objects.create(bot=bot, map=map)
+        map_stats.match_count += 1
+
+        if result.has_winner:
+            if bot.bot == result.winner:
+                map_stats.win_count += 1
+            else:
+                map_stats.loss_count += 1
+        elif result.is_tie:
+            map_stats.tie_count += 0
+        elif MatchParticipation.objects.get(match=result.match, bot=bot.bot).crashed:
+            map_stats.crash_count += 1
+
+        divisor = map_stats.match_count * 100
+        map_stats.win_perc = map_stats.win_count / divisor
+        map_stats.loss_perc = map_stats.loss_count / divisor
+        map_stats.tie_perc = map_stats.tie_count / divisor
+        map_stats.crash_perc = map_stats.crash_count / divisor
+
+        map_stats.save()
 
     @staticmethod
     def _run_single_column_query(cursor, query, params):
