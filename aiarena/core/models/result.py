@@ -137,8 +137,16 @@ class Result(models.Model, LockableModelMixin):
         return self.type == 'Player1Crash' or self.type == 'Player2Crash'
 
     @cached_property
+    def is_init_error(self):
+        return self.type == 'InitializationError'
+
+    @cached_property
     def is_crash_or_timeout(self):
         return self.is_crash or self.is_timeout
+
+    @cached_property
+    def is_crash_or_timeout_or_init_error(self):
+        return self.is_crash_or_timeout or self.is_init_error
 
     @cached_property
     def get_causing_participant_of_crash_or_timeout_result(self):

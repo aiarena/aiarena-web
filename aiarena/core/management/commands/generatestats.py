@@ -61,6 +61,6 @@ class Command(BaseCommand):
                     with transaction.atomic():
                         sp.lock_me()
                         self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
-                        BotStatistics.calculate_stats(sp)
+                        BotStatistics.recalculate_stats(sp)
 
         self.stdout.write('Done')

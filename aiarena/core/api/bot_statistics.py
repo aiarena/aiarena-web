@@ -9,29 +9,31 @@ from django.db import connection
 from django.db.models import Max
 from pytz import utc
 
-from aiarena.core.models import MatchParticipation, CompetitionParticipation, Bot, Map, Match
+from aiarena.core.models import MatchParticipation, CompetitionParticipation, Bot, Map, Match, Result
 from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
 
 
 class BotStatistics:
     @staticmethod
-    def update_stats_add_result(bot: CompetitionParticipation, won: bool, opoonent):
+    def update_stats_based_on_result(bot: CompetitionParticipation, result: Result, opponent: CompetitionParticipation):
         """This method updates a bot's existing stats based on a single result.
            This can be done much quicker that regenerating a bot's entire set of stats"""
+        bot.lock_me()
+        BotStatistics._update_global_statistics(bot, result)
 
-        # Update global stats
         # Update matchup stats
         # Update map stats
 
     @staticmethod
-    def calculate_stats(sp: CompetitionParticipation):
-        BotStatistics._calc_global_statistics(sp)
-        BotStatistics._calc_matchup_stats(sp)
-        BotStatistics._calc_map_stats(sp)
+    def recalculate_stats(sp: CompetitionParticipation):
+        """This method entirely recalculates a bot's set of stats."""
+        BotStatistics._recalculate_global_statistics(sp)
+        BotStatistics._recalculate_matchup_stats(sp)
+        BotStatistics._recalculate_map_stats(sp)
 
     @staticmethod
-    def _calc_global_statistics(sp):
+    def _recalculate_global_statistics(sp: CompetitionParticipation):
         sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
                                                            match__result__isnull=False,
                                                            match__round__competition=sp.competition) \
@@ -62,21 +64,47 @@ class BotStatistics:
                                                                match__round__competition=sp.competition) \
                 .aggregate(Max('resultant_elo'))['resultant_elo__max']
 
-            graph1, graph2 = BotStatistics._generate_elo_graph(sp.bot.id, sp.competition_id)
-            if graph1 is not None:
-                sp.elo_graph.save('elo.png', graph1)
-
-            if graph2 is not None:
-                sp.elo_graph_update_plot.save('elo_update_plot.png', graph2)
-
-            graph3 = BotStatistics._generate_winrate_graph(sp.bot.id, sp.competition_id)
-
-            if graph3 is not None:
-                sp.winrate_vs_duration_graph.save('winrate_vs_duration.png', graph3)
+            BotStatistics._generate_graphs(sp)
         sp.save()
 
     @staticmethod
-    def _calc_matchup_stats(sp: CompetitionParticipation):
+    def _generate_graphs(sp):
+        graph1, graph2 = BotStatistics._generate_elo_graph(sp.bot.id, sp.competition_id)
+        if graph1 is not None:
+            sp.elo_graph.save('elo.png', graph1)
+        if graph2 is not None:
+            sp.elo_graph_update_plot.save('elo_update_plot.png', graph2)
+        graph3 = BotStatistics._generate_winrate_graph(sp.bot.id, sp.competition_id)
+        if graph3 is not None:
+            sp.winrate_vs_duration_graph.save('winrate_vs_duration.png', graph3)
+
+    @staticmethod
+    def _update_global_statistics(sp: CompetitionParticipation, result: Result):
+        sp.match_count += 1
+
+        if result.has_winner:
+            if sp.bot == result.winner:
+                sp.win_count += 1
+                sp.highest_elo = sp.elo
+            else:
+                sp.loss_count += 1
+        elif result.is_tie:
+            sp.tie_count += 0
+        elif result.is_crash_or_timeout_or_init_error:
+            sp.crash_count += 1
+
+        divisor = sp.match_count * 100
+        sp.win_perc = sp.win_count / divisor
+        sp.loss_perc = sp.loss_count / divisor
+        sp.tie_perc = sp.tie_count / divisor
+        sp.crash_perc = sp.crash_count / divisor
+
+        BotStatistics._generate_graphs(sp)
+
+        sp.save()
+
+    @staticmethod
+    def _recalculate_matchup_stats(sp: CompetitionParticipation):
         for competition_participation in CompetitionParticipation.objects.filter(competition=sp.competition).exclude(
                 bot=sp.bot):
             with connection.cursor() as cursor:
@@ -113,7 +141,7 @@ class BotStatistics:
                 matchup_stats.save()
 
     @staticmethod
-    def _calc_map_stats(sp: CompetitionParticipation):
+    def _recalculate_map_stats(sp: CompetitionParticipation):
         competition_matches = Match.objects.filter(round__competition_id=sp.competition.id)
         maps = Map.objects.filter(id__in=competition_matches.values_list('map_id', flat=True))
 
