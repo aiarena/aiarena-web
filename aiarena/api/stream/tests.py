@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from aiarena.core.tests.tests import LoggedInMixin
+from aiarena.core.tests.test_mixins import LoggedInMixin
 
 
 class StreamTestCase(LoggedInMixin, TestCase):

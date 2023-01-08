@@ -1,6 +1,7 @@
 from django.test import TransactionTestCase
 
-from aiarena.core.tests.tests import FullDataSetMixin
+from aiarena.core.tests.test_mixins import FullDataSetMixin
+
 
 class SessionBasedAuthTestCase(FullDataSetMixin, TransactionTestCase):
     def test_session_based_auth(self):

@@ -15,7 +15,7 @@ from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Res
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
 from aiarena.core.tests.testing_utils import TestAssetPaths
-from aiarena.core.tests.tests import LoggedInMixin, MatchReadyMixin
+from aiarena.core.tests.test_mixins import LoggedInMixin, MatchReadyMixin
 from aiarena.core.utils import calculate_md5
 from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
 
