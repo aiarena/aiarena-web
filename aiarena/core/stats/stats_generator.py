@@ -17,7 +17,6 @@ from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
 from aiarena.core.models.competition import Competition
 
 class StatsGenerator:
-
     @staticmethod
     def update_stats(sp: CompetitionParticipation):
         sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
