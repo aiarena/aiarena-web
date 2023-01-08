@@ -19,7 +19,13 @@ from aiarena.core.models.competition import Competition
 class StatsGenerator:
 
     @staticmethod
-    def update_stats(sp: CompetitionParticipation):
+    def calculate_stats(sp: CompetitionParticipation):
+        StatsGenerator._calc_global_statistics(sp)
+        StatsGenerator._calc_matchup_stats(sp)
+        StatsGenerator._calc_map_stats(sp)
+
+    @staticmethod
+    def _calc_global_statistics(sp):
         sp.match_count = MatchParticipation.objects.filter(bot=sp.bot,
                                                            match__result__isnull=False,
                                                            match__round__competition=sp.competition) \
@@ -68,11 +74,8 @@ class StatsGenerator:
             sp.crash_count = 0
         sp.save()
 
-        StatsGenerator._update_matchup_stats(sp)
-        StatsGenerator._update_map_stats(sp)
-
     @staticmethod
-    def _update_matchup_stats(sp: CompetitionParticipation):
+    def _calc_matchup_stats(sp: CompetitionParticipation):
         for competition_participation in CompetitionParticipation.objects.filter(competition=sp.competition).exclude(
                 bot=sp.bot):
             with connection.cursor() as cursor:
@@ -105,7 +108,7 @@ class StatsGenerator:
                 matchup_stats.save()
 
     @staticmethod
-    def _update_map_stats(sp: CompetitionParticipation):
+    def _calc_map_stats(sp: CompetitionParticipation):
         competition_matches = Match.objects.filter(round__competition_id=sp.competition.id)
         maps = Map.objects.filter(id__in=competition_matches.values_list('map_id', flat=True))
 
