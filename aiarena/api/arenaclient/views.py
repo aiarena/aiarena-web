@@ -3,7 +3,7 @@ from wsgiref.util import FileWrapper
 
 from constance import config
 from django.db import transaction
-from django.db.models import Sum, F, Prefetch
+from django.db.models import Sum, Prefetch
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
@@ -16,9 +16,7 @@ from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
 from aiarena.core.utils import parse_tags
-from aiarena.core.api import Bots, Matches
-from aiarena.core.events import EVENT_MANAGER
-from aiarena.core.events import MatchResultReceivedEvent
+from aiarena.core.api import Bots
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation, MatchTag, Tag, \
     BotCrashLimitAlert
 from aiarena.core.models.arena_client_status import ArenaClientStatus
@@ -389,9 +387,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         if result.is_crash_or_timeout:
                             run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
 
-
-
-                EVENT_MANAGER.broadcast_event(MatchResultReceivedEvent(result))
 
                 headers = self.get_success_headers(serializer.data)
                 return Response({'result_id': result.id}, status=status.HTTP_201_CREATED, headers=headers)
