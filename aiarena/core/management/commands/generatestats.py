@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from aiarena.core.models import CompetitionParticipation, Competition
-from aiarena.core.api.stats_generator import BotStatistics
+from aiarena.core.api.bot_statistics import BotStatistics
 
 
 class Command(BaseCommand):
