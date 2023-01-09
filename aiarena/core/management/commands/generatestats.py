@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from aiarena.core.models import Bot, CompetitionParticipation, Competition
-from aiarena.core.stats.stats_generator import StatsGenerator
+from aiarena.core.models import CompetitionParticipation, Competition
+from aiarena.core.api.bot_statistics import BotStatistics
 
 
 class Command(BaseCommand):
@@ -61,6 +61,6 @@ class Command(BaseCommand):
                     with transaction.atomic():
                         sp.lock_me()
                         self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
-                        StatsGenerator.update_stats(sp)
+                        BotStatistics.recalculate_stats(sp)
 
         self.stdout.write('Done')
