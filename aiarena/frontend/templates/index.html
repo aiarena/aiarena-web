@@ -78,7 +78,7 @@
                     <span class="slide-select" id="newsSlideSelect" onclick="selectSlide({{ forloop.counter }})"></span>
                 {% endfor %}
             </div>
-        </div>
+        </div>        
         <div class="divider-full div-transparent-full "></div>
     </div>
 
@@ -92,7 +92,6 @@
         {% if competitions %}
             <div id="competition_feed">
                 <div class="divider"><span></span><span><h2>Competitions</h2></span><span></span></div>
-                {% with n_matches=config.ELO_TREND_N_MATCHES %}
                 {% for item in competitions %}
                     <div class="compSlides">
                         <div>
@@ -117,8 +116,8 @@
                                             <td>{{ participant.bot.as_truncated_html_link }}</td>
                                             <td style="text-align: center">{{ participant.division_num }}</td>
                                             <td>
-                                                {{ participant.elo }}                                                
-                                                {% bot_competition_trend participant.bot item.competition  n_matches as trend %}
+                                                {{ participant.elo }}                                          
+                                                {% with trend=participant.trend %}
                                                     {% if trend > 40 %}
                                                         <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
                                                             trending_flat
@@ -140,6 +139,7 @@
                                                             trending_flat
                                                         </em>
                                                     {% endif %}
+                                                    {% endwith %}
                                             </td>
                                         </tr>
                                     {% endfor %}                                    
@@ -148,7 +148,6 @@
                         </div>
                     </div>
                 {% endfor %}
-                {% endwith %}
                 <br> <!-- extra space -->
                 <div class="slide-selector">
                     {% for item in competitions %}

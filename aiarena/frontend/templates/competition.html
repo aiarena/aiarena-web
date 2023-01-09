@@ -124,7 +124,7 @@
                                     Placements
                                 {% else %}
                                     {{ participant.elo }}
-                                    {% bot_competition_trend participant.bot competition as trend %}
+                                    {% with trend=participant.trend %}
                                         {% if trend > 40 %}
                                             <em class="material-icons" style="padding: 0; margin:0; vertical-align: -0.3em; transform: rotate(-90deg);" title="ELO gained {{trend}} in the last 30 games">
                                                 trending_flat
@@ -146,6 +146,7 @@
                                                 trending_flat
                                             </em>
                                         {% endif %}
+                                        {% endwith %}
                                 {% endif %}
                             </td>
                             <td><a href="{% url 'bot_competition_stats' participant.id participant.slug %}">Stats</a></td>

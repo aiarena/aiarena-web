@@ -570,7 +570,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         competition2.freeze()
 
         self.assertEqual(Match.objects.exclude(round__competition_id=competition2.id).filter(result__isnull=True)
-                         .count(), 19, msg='This test expects 19 unplayed matches in order to work.')
+                          .count(), 16, msg='This test expects 16 unplayed matches in order to work.')
 
         # cache the bots - list forces the queryset to be evaluated
         bots = list(Bot.objects.all())

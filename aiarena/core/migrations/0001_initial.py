@@ -308,7 +308,7 @@ class Migration(migrations.Migration):
                        me_mp.result_cause as result_cause,
                        me_mp.elo_change as elo_change,
                        me_mp.avg_step_time as avg_step_time,
-                       DATE_FORMAT(SEC_TO_TIME(cr.game_steps/22.4), '%H:%i:%S') as game_time_formatted,
+                       to_char( (cr.game_steps/22.4 ||' seconds')::interval, 'HH24:MM:SS' ) as game_time_formatted,
                        cr.game_steps as game_steps,
                               cr.replay_file as replay_file,
                               me_mp.match_log as match_log

@@ -9,17 +9,17 @@ services:
     ports:
       - 6379:6379
 
-  devcontainer-aiarena-mysql:
-    image: mysql:5.7
-    container_name: devcontainer-aiarena-mysql
+  devcontainer-aiarena-postgres:
+    image: postgres:12.13
+    container_name: devcontainer-aiarena-postgres
     restart: unless-stopped
     env_file:
       - .env
     ports:
-      - 3306:3306
+      - 5432:5432
     volumes:
-      - ./mysql:/docker-entrypoint-initdb.d
-      - devcontainer-aiarena-mysql-volume:/var/lib/mysql
+      - devcontainer-aiarena-postgres-volume:/var/lib/postgresql/data/
+      - ./postgres:/docker-entrypoint-initdb.d
 
   devcontainer-aiarena-app:
     build:
@@ -39,4 +39,4 @@ services:
     command: sleep infinity
 
 volumes:
-  devcontainer-aiarena-mysql-volume:
+  devcontainer-aiarena-postgres-volume:

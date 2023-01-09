@@ -90,15 +90,15 @@ class ACCoordinator:
                       from (select cp.competition_id, count(cp.competition_id) competition_participations_cnt
                             from core_competitionparticipation cp
                                      join core_competition cc on cp.competition_id = cc.id
-                            where cp.active = 1
+                            where cp.active
                               and cc.status in ('open', 'closing', 'paused')
                             group by cp.competition_id) as competition_participations
                                join
                            (select count(*) total_active_cnt
                             from core_competitionparticipation cp
                                      join core_competition cc on cp.competition_id = cc.id
-                            where cp.active = 1
-                              and cc.status in ('open', 'closing', 'paused')) as competition_participations_total) as perc_active
+                            where cp.active
+                              and cc.status in ('open', 'closing', 'paused')) as competition_participations_total on 1=1) as perc_active
                          left join
                      (select competition_id, perc_recent_matches_cnt / recent_matches_total_cnt as perc_recent_matches
                       from (select competition_id,
