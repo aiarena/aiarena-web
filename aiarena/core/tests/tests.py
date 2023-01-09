@@ -3,13 +3,14 @@ from datetime import timedelta
 from io import StringIO
 
 from constance import config
+from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.management import call_command, CommandError
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
-from aiarena.core.api import Matches
+from aiarena.core.api import Matches, Ladders
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import User, Bot, Map, Match, Result, MatchParticipation, Competition, Round, \
     CompetitionParticipation
@@ -521,6 +522,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
                 out = StringIO()
                 call_command('finalizecompetition', '--competitionid', competition.id, stdout=out)
 
+            # The front end uses get_competition_last_round_participants for displaying a closed competition's rankings
+            # so here we test that the displayed ranks don't change after finalization
+            pre_finalization_ranks = serializers.serialize('json', Ladders.get_competition_last_round_participants(competition))
+
             # fake competition closure
             competition.status = 'closed'
             competition.save()
@@ -528,6 +533,9 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
             out = StringIO()
             call_command('finalizecompetition', '--competitionid', competition.id, stdout=out)
             self.assertIn(f"Competition {competition.id} has been finalized.", out.getvalue())
+
+            post_finalization_ranks = serializers.serialize('json', Ladders.get_competition_last_round_participants(competition))
+            self.assertEqual(pre_finalization_ranks, post_finalization_ranks)
 
             out = StringIO()
             call_command('finalizecompetition', '--competitionid', competition.id, stdout=out)
