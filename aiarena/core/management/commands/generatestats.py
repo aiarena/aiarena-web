@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from aiarena.core.models import Bot, CompetitionParticipation, Competition
-from aiarena.core.stats.stats_generator import StatsGenerator
+from aiarena.core.models import CompetitionParticipation, Competition
+from aiarena.core.api.bot_statistics import BotStatistics
 
 
 class Command(BaseCommand):
@@ -18,7 +18,7 @@ class Command(BaseCommand):
                                                        "open competitions will be used")
         parser.add_argument('--allcompetitions', action='store_true', help="Run this for all competition")
         parser.add_argument('--finalize', action='store_true',
-                            help="Mark all processed competitions' stats as finalized. "
+                            help="Mark the processed competition's stats as finalized. "
                                  "Only valid when specifying --competitionid.")
 
     def handle(self, *args, **options):
@@ -61,6 +61,6 @@ class Command(BaseCommand):
                     with transaction.atomic():
                         sp.lock_me()
                         self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
-                        StatsGenerator.update_stats(sp)
+                        BotStatistics.recalculate_stats(sp)
 
         self.stdout.write('Done')

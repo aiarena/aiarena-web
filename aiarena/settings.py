@@ -185,8 +185,8 @@ CONSTANCE_CONFIG = {
         'How long to wait before the website should time out a running match.', timedelta),
     'REISSUE_UNFINISHED_MATCHES': (True, 'Whether to reissue previously assigned unfinished matches '
                                          'when an arena client requests a match.'),
-    'BOT_CONSECUTIVE_CRASH_LIMIT': (0, 'The number of consecutive crashes after which a bot is deactivated. '
-                                       'Any value below 1 will disable the check for this feature. Default: 0'),
+    'BOT_CONSECUTIVE_CRASH_LIMIT': (0, 'The number of consecutive crashes after which a bot crash alert is triggered. '
+                                       'Any value below 1 will disable this check. Default: 0'),
     'MAX_USER_BOT_COUNT': (20, 'Maximum bots a user can have uploaded.'),
     'MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER': (4, 'Maximum active competition participations a free tier'
                                                         ' user can have at one time.'),
