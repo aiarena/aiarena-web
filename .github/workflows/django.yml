@@ -55,7 +55,7 @@ jobs:
       env:
           PORT: ${{ job.services.postgres.ports[5432] }}
       run: | 
-        PGPASSWORD="aiarena" psql --host="127.0.0.1" --port "$PORT" -c "GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
+        PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
     - name: Run Tests
       env:
           NOFAKE_REDIS: 1
