@@ -55,7 +55,7 @@ DATABASES = {
         "NAME": os.getenv('POSTGRES_DATABASE', 'aiarena'),
         "USER": os.getenv('POSTGRES_USER', 'aiarena'),
         "PASSWORD": os.getenv('POSTGRES_PASSWORD', 'aiarena'),
-        "HOST": os.getenv('POSTGRES_HOST','devcontainer-aiarena-postgres'),  # set in docker-compose.yml
+        "HOST": os.getenv('POSTGRES_HOST','127.0.0.1'),  # set in docker-compose.yml
         "PORT": os.getenv('POSTGRES_PORT', '5432'),  # default postgres port
     },
 }
