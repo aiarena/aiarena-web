@@ -52,15 +52,11 @@ class Command(BaseCommand):
                     if finalize:
                         competition.statistics_finalized = True
                         competition.save()
-                else:
-                    proceed_with_stats_gen = False
-                    self.stdout.write(f'WARNING: Skipping competition {competition.id} - stats already finalized.')
-
-            if proceed_with_stats_gen:
-                for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
-                    with transaction.atomic():
+                    for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
                         sp.lock_me()
                         self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
                         BotStatistics.recalculate_stats(sp)
+                else:
+                    self.stdout.write(f'WARNING: Skipping competition {competition.id} - stats already finalized.')
 
         self.stdout.write('Done')
