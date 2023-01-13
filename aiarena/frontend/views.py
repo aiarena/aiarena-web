@@ -28,6 +28,7 @@ from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
+from django.db import connection
 
 from aiarena.core.api import Matches
 from aiarena.core.api.ladders import Ladders
@@ -215,7 +216,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
 class BotList(ListView):
     queryset = Bot.objects.all().only('name', 'plays_race', 'type', 'user__username', 'user__type')\
-        .select_related('user').order_by('name')
+        .select_related('user', "plays_race").order_by('name')
     template_name = 'bots.html'
     paginate_by = 50
 
@@ -271,7 +272,7 @@ class BotResultTable(tables.Table):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.tags_by_all_value = kwargs.pop('tags_by_all_value', False)
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)    
 
     # Settings for the Table
     class Meta:
@@ -431,7 +432,7 @@ class BotDetail(DetailView):
         # Run filters, create table
         result_filter = RelativeResultFilter(params, queryset=results_qs, 
             user=self.request.user, tags_by_all_value=tags_by_all, tags_partial_match_value=tags_partial_match)
-        result_table = BotResultTable(data=result_filter.qs, user=self.request.user, tags_by_all_value=tags_by_all)
+        result_table = BotResultTable(data=result_filter.qs.prefetch_related(Prefetch("match__tags")), user=self.request.user, tags_by_all_value=tags_by_all)
         result_table.exclude = []
         # Exclude log column if not staff or user
         if not (self.request.user == self.object.user or self.request.user.is_staff):
@@ -442,7 +443,7 @@ class BotDetail(DetailView):
         context['filter'] = result_filter
 
         context['bot_trophies'] = Trophy.objects.filter(bot=self.object)
-        context['rankings'] = self.object.competition_participations.all().order_by('-id')
+        context['rankings'] = self.object.competition_participations.all().select_related("competition").order_by('-id')
         context['match_participations'] = MatchParticipation.objects.only("match")\
             .filter(Q(match__requested_by__isnull=False)|Q(match__assigned_to__isnull=False), bot=self.object, match__result__isnull=True)\
             .order_by(F('match__started').asc(nulls_last=True), F('match__id').asc())\
@@ -650,7 +651,7 @@ class AuthorDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(AuthorDetail, self).get_context_data(**kwargs)
-        context['bot_list'] = Bot.objects.select_related('user').filter(user_id=self.object.id).order_by('-created')
+        context['bot_list'] = Bot.objects.select_related('user', "plays_race").filter(user_id=self.object.id).order_by('-created')
         results_queryset = Result.objects.filter(match__matchparticipation__bot__in=context['bot_list']) \
             .order_by('-created').prefetch_related(
             Prefetch('winner'),
@@ -681,7 +682,7 @@ class Results(ListView):
 
 
 class ArenaClients(ListView):
-    queryset = ArenaClient.objects.filter(is_active=True)
+    queryset = ArenaClient.objects.select_related("owner").filter(is_active=True)
     # todo: why doesn't this work?
     # queryset = User.objects.filter(type='ARENA_CLIENT').annotate(
     #     matches_1hr=Count('submitted_results', filter=Q(submitted_results__created__gte=timezone.now() - timedelta(hours=1))),
@@ -691,10 +692,10 @@ class ArenaClients(ListView):
 
     def get_context_data(self, **kwargs):
         for arenaclient in self.object_list:
-            arenaclient.matches_1hr = Result.objects.filter(match__assigned_to=arenaclient,
+            arenaclient.matches_1hr = Result.objects.all().only("id", "match__assigned_to", "created").select_related("match").filter(match__assigned_to=arenaclient,
                                                             created__gte=timezone.now() - timedelta(
                                                                 hours=1)).count()
-            arenaclient.matches_24hr = Result.objects.filter(match__assigned_to=arenaclient,
+            arenaclient.matches_24hr = Result.objects.all().only("id", "match__assigned_to", "created").select_related("match").filter(match__assigned_to=arenaclient,
                                                              created__gte=timezone.now() - timedelta(
                                                                  hours=24)).count()
         return super().get_context_data(**kwargs)
@@ -824,7 +825,7 @@ class Index(ListView):
         context = super().get_context_data(**kwargs)
 
         # newly created bots have almost the same update time as its creation time
-        events = Bot.objects.select_related('user').only('user', 'name', 'created').order_by('-bot_zip_updated')[:10]
+        events = Bot.objects.select_related('user').only('user', 'name', 'created', 'bot_zip_updated').order_by('-bot_zip_updated')[:10]
         for event in events:
             # if these are within a second, then the bot was created, not updated
             event.is_created_event = (event.bot_zip_updated - event.created).seconds <= 1
@@ -845,13 +846,33 @@ class Index(ListView):
         # Order competitions as they are to be shown on home page
         competitions = competitions.order_by('-n_active_bots','-interest','-num_participants')
         context['competitions'] = []
+        
+        elo_trend_n_matches = config.ELO_TREND_N_MATCHES
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
                 top10 = Ladders.get_competition_ranked_participants(
                     comp, amount=10).prefetch_related(
                     Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level'))
-                )  # top 10 bots
+                )            
+                # top 10 bots
+
+                relative_result = RelativeResult.with_row_number([x.bot.id for x in top10], comp)
+                
+                
+                sql, params = relative_result.query.sql_with_params()
+
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
+                        WHERE "row_number" <= %s
+                        GROUP BY bot_id
+                    """.format(sql),
+                    [*params, elo_trend_n_matches],)
+                    rows = cursor.fetchall()
+                    for participant in top10:
+                      participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
+                
                 context['competitions'].append({
                     'competition': comp,
                     'top10': top10,
@@ -977,7 +998,9 @@ class CompetitionDetail(DetailView):
         for map in maps:
             map_names.append(map.name)
         context['map_names'] = map_names
-
+        
+        elo_trend_n_matches = config.ELO_TREND_N_MATCHES
+        
         rounds = Round.objects.filter(competition_id=self.object.id).order_by('-id')
         page = self.request.GET.get('page', 1)
         paginator = Paginator(rounds, 30)
@@ -995,8 +1018,24 @@ class CompetitionDetail(DetailView):
         else:
             all_participants = Ladders.get_competition_ranked_participants(self.object, include_placements=True)
         all_participants = list(all_participants.prefetch_related(
-                Prefetch('bot', queryset=Bot.objects.all().only('plays_race', 'user_id', 'name', 'type')),
+                Prefetch('bot', queryset=Bot.objects.all().select_related("plays_race").only('plays_race', 'user_id', 'name', 'type', 'plays_race')),
                 Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
+
+        relative_result = RelativeResult.with_row_number([x.bot.id for x in all_participants], self.object)
+        
+        sql, params = relative_result.query.sql_with_params()
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
+                WHERE "row_number" <= %s
+                GROUP BY bot_id
+            """.format(sql),
+            [*params, elo_trend_n_matches],)
+            rows = cursor.fetchall()
+            for participant in all_participants:
+                participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
+
         context['divisions'] = dict()
         to_title = lambda x: f"Awaiting Entry" if x==CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
         for participant in all_participants:
