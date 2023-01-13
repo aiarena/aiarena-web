@@ -86,7 +86,7 @@ class ACCoordinator:
             cursor.execute("""
                 select perc_active.competition_id
                 from (select competition_id, 
-                competition_participations.competition_participations_cnt / total_active_cnt as perc_active
+                competition_participations.competition_participations_cnt / cast(total_active_cnt as float) as perc_active
                       from (select cp.competition_id, count(cp.competition_id) competition_participations_cnt
                             from core_competitionparticipation cp
                                      join core_competition cc on cp.competition_id = cc.id
@@ -100,7 +100,7 @@ class ACCoordinator:
                             where cp.active
                               and cc.status in ('open', 'closing', 'paused')) as competition_participations_total on 1=1) as perc_active
                          left join
-                     (select competition_id, perc_recent_matches_cnt / recent_matches_total_cnt as perc_recent_matches
+                     (select competition_id, perc_recent_matches_cnt / cast(recent_matches_total_cnt as float) as perc_recent_matches
                       from (select competition_id,
                                    count(competition_id)       perc_recent_matches_cnt,
                                    (select count(*)
