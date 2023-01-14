@@ -268,6 +268,12 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         response = self._post_to_results(response.data['id'], 'Player1Win')
         self.assertEqual(response.status_code, 201)
 
+
+    def test_participated_in_most_recent_round(self):
+        """
+        Tests that the CompetitionParticipation.participated_in_most_recent_round field matches reality.
+        """
+
 class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data')
     uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, 'bots', '{0}', 'bot_data_backup')
@@ -1074,11 +1080,11 @@ class SetStatusTestCase(LoggedInMixin, TransactionTestCase):
                                 {'status': 'idle'})
 
 
-class ArenaClientCompatabilityTestCase(MatchReadyMixin, TransactionTestCase):
+class ArenaClientCompatibilityTestCase(MatchReadyMixin, TransactionTestCase):
     """
     This test ensures that the Arena Client endpoint doesn't inadvertently change.
 
-    IF THIS TEST FAILS, YOU MIGHT HAVE BROKEN COMPATABILITY WITH THE ARENA CLIENT
+    IF THIS TEST FAILS, YOU MIGHT HAVE BROKEN COMPATIBILITY WITH THE ARENA CLIENT
     """
 
     def setUp(self):
