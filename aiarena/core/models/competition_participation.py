@@ -45,6 +45,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     highest_elo = models.IntegerField(blank=True, null=True)
     slug = models.SlugField(max_length=255, blank=True)
     active = models.BooleanField(default=True)
+    participated_in_most_recent_round = models.BooleanField(default=False)
 
     # Tracks the division the player is in in the Competition. 
     # Highest division will be 1 and lowest will be competition.target_n_divisions

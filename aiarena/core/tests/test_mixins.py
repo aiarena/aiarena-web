@@ -314,7 +314,7 @@ class MatchReadyMixin(LoggedInMixin):
 
         self.regularUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot1', terran)
         self.regularUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.regularUser1, 'regularUser1Bot2', zerg)
-        self.regularUser1Bot3 = self._create_bot(self.regularUser1, 'regularUser1Bot3', protoss)  # inactive bot for realism
+        self.regularUser1Bot3_Inactive = self._create_bot(self.regularUser1, 'regularUser1Bot3', protoss)  # inactive bot for realism
         self.staffUser1Bot1 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot1', terran)
         self.staffUser1Bot2 = self._create_active_bot_for_competition(competition.id, self.staffUser1, 'staffUser1Bot2', zerg)
 

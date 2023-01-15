@@ -666,18 +666,37 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         active_comp = Competition.objects.filter(status='open').first()
         Competition.objects.exclude(id=active_comp.id).update(status='frozen')
 
-        botCount = CompetitionParticipation.objects.filter(active=True, competition=active_comp).count()
-        expectedMatchCountPerRound = int(botCount / 2 * (botCount - 1))
-        self.assertGreater(botCount, 1)  # check we have more than 1 bot
+        # we need to deactivate a bot midway through the test, so we'll activate this one for now
+        bot_to_deactivate = CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3_Inactive.id,
+                                                                    competition_id=active_comp.id)
+        bot_to_deactivate.active = True
+        bot_to_deactivate.save()
+
+        bot_count = CompetitionParticipation.objects.filter(active=True, competition=active_comp).count()
+        bot_count_after_deactivation = bot_count - 1
+        expected_matches = lambda bc: int(bc / 2 * (bc - 1))
+        expected_match_count_per_round = expected_matches(bot_count)
+        expected_match_count_per_round_after_bot_deactivated = expected_matches(bot_count_after_deactivation)
+        self.assertGreater(bot_count, 1)  # check we have more than 1 bot
 
         self.assertEqual(Match.objects.count(), 0)  # starting with 0 matches
         self.assertEqual(Round.objects.count(), 0)  # starting with 0 rounds
 
+        # Validate that participated_in_most_recent_round flags have not been set yet
+        self.assertTrue(CompetitionParticipation.objects.filter(competition=active_comp,
+                                                                participated_in_most_recent_round=True)
+                        .count() == 0)
+
         response = self._post_to_matches()  # this should trigger a new round robin generation
         self.assertEqual(response.status_code, 201)
 
+        # Validate that participated_in_most_recent_round flags have now been set
+        self.assertTrue(CompetitionParticipation.objects.filter(competition=active_comp,
+                                                                participated_in_most_recent_round=True)
+                        .count() == bot_count)
+
         # check match count
-        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound)
+        self.assertEqual(Match.objects.count(), expected_match_count_per_round)
 
         # check round data
         self.assertEqual(Round.objects.count(), 1)
@@ -691,13 +710,13 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 201)
 
         # start and finish all the rest of the generated matches
-        for x in range(1, expectedMatchCountPerRound):
+        for x in range(1, expected_match_count_per_round):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
             response = self._post_to_results(response.data['id'], 'Player1Win')
             self.assertEqual(response.status_code, 201)
             # double check the match count
-            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound - x - 1)
+            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expected_match_count_per_round - x - 1)
 
         # check round is finished
         self.assertEqual(Round.objects.count(), 1)
@@ -710,8 +729,13 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         response = self._post_to_matches()  # this should trigger another new round robin generation
         self.assertEqual(response.status_code, 201)
 
+        # Validate that participated_in_most_recent_round flags are still set properly
+        self.assertTrue(CompetitionParticipation.objects.filter(competition=active_comp,
+                                                                participated_in_most_recent_round=True)
+                        .count() == bot_count)
+
         # check match count
-        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound * 2)
+        self.assertEqual(Match.objects.count(), expected_match_count_per_round * 2)
 
         # check round data
         self.assertEqual(Round.objects.count(), 2)
@@ -725,13 +749,13 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 201)
 
         # start and finish all except one the rest of the generated matches
-        for x in range(1, expectedMatchCountPerRound - 1):
+        for x in range(1, expected_match_count_per_round - 1):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
             response = self._post_to_results(response.data['id'], 'Player1Win')
             self.assertEqual(response.status_code, 201)
             # double check the match count
-            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound - x - 1)
+            self.assertEqual(Match.objects.filter(started__isnull=True).count(), expected_match_count_per_round - x - 1)
 
         # at this stage there should be one unstarted match left
         self.assertEqual(Match.objects.filter(started__isnull=True).count(), 1)
@@ -741,13 +765,25 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertEqual(response2ndRoundLastMatch.status_code, 201)
         self.assertEqual(Match.objects.filter(started__isnull=True).count(), 0)
 
-        # the following part ensures round generation is properly handled when an old round in not yet finished
+        # deactivate a bot so that we can check it's participated_in_most_recent_round field is updated appropriately
+        bot_to_deactivate.active = False
+        bot_to_deactivate.save()
+
+        # the following part ensures round generation is properly handled when an old round is not yet finished
         response = self._post_to_matches()
         self.assertEqual(response.status_code, 201)
 
-        # check match count
-        self.assertEqual(Match.objects.filter(started__isnull=True).count(), expectedMatchCountPerRound - 1)
-        self.assertEqual(Match.objects.count(), expectedMatchCountPerRound * 3)
+        # Validate that participated_in_most_recent_round flags reflect the deactivated bot
+        self.assertTrue(CompetitionParticipation.objects.filter(competition=active_comp,
+                                                                participated_in_most_recent_round=True)
+                        .count() == bot_count-1)
+        bot_to_deactivate.refresh_from_db()
+        self.assertFalse(bot_to_deactivate.participated_in_most_recent_round)
+
+
+        self.assertEqual(Match.objects.filter(started__isnull=True).count(), expected_match_count_per_round_after_bot_deactivated - 1)
+        total_expected_match_count = (expected_match_count_per_round * 2) + expected_match_count_per_round_after_bot_deactivated
+        self.assertEqual(Match.objects.count(), total_expected_match_count)
 
         # check round data
         self.assertEqual(Round.objects.count(), 3)
@@ -780,7 +816,7 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertFalse(round3.complete)
 
         # check result count - should have 2 rounds worth of results
-        self.assertEqual(Result.objects.count(), expectedMatchCountPerRound * 2)
+        self.assertEqual(Result.objects.count(), expected_match_count_per_round * 2)
 
 
 class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
@@ -957,7 +993,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         self._complete_cycle(competition, [3,4], {1:_exp_par(3,3)}, {1:3})
         self._complete_cycle(competition, [5,6], {1:_exp_par(3,1)}, {1:3})
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
-        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3_Inactive.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot1.id, competition_id=competition.id)
@@ -977,7 +1013,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         competition = self._set_up_competition(2, 2, 5)
         _exp_par = lambda x, y: {'n':x,'p':y}
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
-        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3_Inactive.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
         CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot1.id, competition_id=competition.id)
@@ -995,7 +1031,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         _exp_par = lambda x, y: {'n':x,'p':y}
 
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
-        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
+        CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3_Inactive.id, competition_id=competition.id)
         self._complete_round(competition, 1, {1:_exp_par(2,0)}, {1:1})
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
         self._complete_round(competition, 2, {1:_exp_par(2,0)}, {1:1})
@@ -1015,7 +1051,7 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot2.id, competition_id=competition.id)
         self._complete_cycle(competition, [4,5,6], {1:_exp_par(4)}, {1:6})
         # Split to 2 divs
-        self.ru1b3_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3.id, competition_id=competition.id)
+        self.ru1b3_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot3_Inactive.id, competition_id=competition.id)
         self.su1b3_cp = CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
         self._complete_cycle(competition, [7,8,9], {1:_exp_par(3), 2:_exp_par(3)}, {1:3, 2:3})
         # Bot inactive dont merge yet

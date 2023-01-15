@@ -256,6 +256,10 @@ class Matches:
             for participant2 in active_participants_in_div:
                 Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=competition.require_trusted_infrastructure)
 
+        CompetitionParticipation.objects.filter(competition=competition).exclude(id__in=active_participants).update(
+            participated_in_most_recent_round=False)
+        active_participants.update(participated_in_most_recent_round=True)
+
         return new_round
 
     @staticmethod
