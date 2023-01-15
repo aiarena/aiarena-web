@@ -26,10 +26,7 @@ class Command(BaseCommand):
                     competition.competition_finalized = True
                     competition.save()
 
-                    # we need to retain the most recent round because it's used to determine which bots
-                    # to display in the rankings.
-                    most_recent_round = Ladders.get_most_recent_round(competition)
-                    rounds = Round.objects.filter(competition_id=competition.id).exclude(id=most_recent_round.id)
+                    rounds = Round.objects.filter(competition_id=competition.id)
                     self.stdout.write(f"Deleting {rounds.count()} rounds...")
                     rounds.delete()
                     self.stdout.write(f"Competition {competition.id} has been finalized.")
