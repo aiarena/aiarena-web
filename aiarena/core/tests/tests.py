@@ -526,6 +526,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
             # so here we test that the displayed ranks don't change after finalization
             pre_finalization_ranks = serializers.serialize('json', Ladders.get_competition_last_round_participants(competition))
 
+            # make sure it matches the known working method
+            pre_finalization_ranks_legacy = serializers.serialize('json', Ladders.get_competition_last_round_participants_legacy(competition))
+            self.assertEqual(pre_finalization_ranks, pre_finalization_ranks_legacy)
+
             # fake competition closure
             competition.status = 'closed'
             competition.save()
@@ -536,6 +540,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
             post_finalization_ranks = serializers.serialize('json', Ladders.get_competition_last_round_participants(competition))
             self.assertEqual(pre_finalization_ranks, post_finalization_ranks)
+
+            # make sure it matches the known working method
+            post_finalization_ranks_legacy = serializers.serialize('json', Ladders.get_competition_last_round_participants_legacy(competition))
+            self.assertEqual(post_finalization_ranks, post_finalization_ranks_legacy)
 
             out = StringIO()
             call_command('finalizecompetition', '--competitionid', competition.id, stdout=out)
