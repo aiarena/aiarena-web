@@ -16,10 +16,10 @@ class RelativeResult(models.Model):
     Result type is displayed as Win or Loss with the reason appended.
     e.g. Loss - Crash
     """
-    me = models.ForeignKey(MatchParticipation, on_delete=models.PROTECT, related_name='relative_result_me')
-    match = models.ForeignKey(Match, on_delete=models.PROTECT, related_name='relative_result_match')
+    me = models.ForeignKey(MatchParticipation, on_delete=models.DO_NOTHING, related_name='relative_result_me')
+    match = models.ForeignKey(Match, on_delete=models.DO_NOTHING, related_name='relative_result_match')
     started = models.DateTimeField()
-    opponent = models.ForeignKey(MatchParticipation, on_delete=models.PROTECT, related_name='relative_result_opponent')
+    opponent = models.ForeignKey(MatchParticipation, on_delete=models.DO_NOTHING, related_name='relative_result_opponent')
     result = models.CharField(max_length=32, choices=MatchParticipation.RESULT_TYPES)
     result_cause = models.CharField(max_length=32, choices=MatchParticipation.CAUSE_TYPES)
     elo_change = models.SmallIntegerField()

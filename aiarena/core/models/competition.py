@@ -34,7 +34,7 @@ class Competition(models.Model, LockableModelMixin):
         ('open', 'Open'),  # When a competition is open, new rounds can be generated and played.
         ('closing', 'Closing'),
         # When a competition is closing, it's the same as paused except it will automatically move to closed when all rounds are finished.
-        ('closed', 'Closed'),  # Functionally identical to paused, except not intended to change after this status.
+        ('closed', 'Closed'),  # Functionally identical to paused, except not intended to change after this status, other than to be finalized.
     )
     name = models.CharField(max_length=50, unique=True)
     type = models.CharField(max_length=32,
@@ -63,6 +63,10 @@ class Competition(models.Model, LockableModelMixin):
     # List of which bot races are playable in this competition. When left blank, all races are playable.
     playable_races = models.ManyToManyField(BotRace, blank=True)
     require_trusted_infrastructure = models.BooleanField(default=True)
+    statistics_finalized = models.BooleanField(default=False)
+    """Marks that this competition's statistics have been finalized and therefore cannot be modified."""
+    competition_finalized = models.BooleanField(default=False)
+    """Marks that this competition has been finalized, and it's round and match data purged."""
 
     def __str__(self):
         return self.name

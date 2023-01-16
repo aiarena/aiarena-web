@@ -1,7 +1,7 @@
 from django.test import TransactionTestCase, TestCase
 
 from aiarena.core.models import Match, Round, Bot, User, Result, Competition, Map, MapPool
-from aiarena.core.tests.tests import FullDataSetMixin
+from aiarena.core.tests.test_mixins import FullDataSetMixin
 
 
 class AdminMethodsTestCase(FullDataSetMixin, TestCase):
