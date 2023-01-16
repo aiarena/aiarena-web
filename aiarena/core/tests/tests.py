@@ -1,4 +1,4 @@
- import json
+import json
 import os
 from datetime import timedelta
 from io import StringIO
@@ -548,7 +548,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
             # make sure it matches the known working method
             post_finalization_ranks_legacy = serializers.serialize('json', Ladders.get_competition_last_round_participants_legacy(competition))
-            self.maxDiff = None
             self.assertEqual(_sort_json(post_finalization_ranks), _sort_json(post_finalization_ranks_legacy))
 
             out = StringIO()

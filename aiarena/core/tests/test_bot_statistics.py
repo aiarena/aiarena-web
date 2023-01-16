@@ -52,5 +52,4 @@ class BotStatisticsTestCase(FullDataSetMixin, TransactionTestCase):
             del map_stat['updated']
         recalc_stats_json['map_stats'] = json.dumps(map_stats)
 
-        self.maxDiff = None  # required to print out large diffs
         self.assertEqual(update_stats_json, recalc_stats_json)
