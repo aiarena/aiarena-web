@@ -256,6 +256,12 @@ class Matches:
             for participant2 in active_participants_in_div:
                 Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=competition.require_trusted_infrastructure)
 
+        # Pre-list the IDs to get around this while on mariadb: https://code.djangoproject.com/ticket/28787
+        p_ids = [p.id for p in active_participants]
+        CompetitionParticipation.objects.filter(competition=competition).exclude(id__in=p_ids).update(
+            participated_in_most_recent_round=False)
+        active_participants.update(participated_in_most_recent_round=True)
+
         return new_round
 
     @staticmethod

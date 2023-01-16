@@ -10,6 +10,10 @@ from aiarena.core.tests.test_mixins import FullDataSetMixin
 
 
 class BotStatisticsTestCase(FullDataSetMixin, TransactionTestCase):
+    def setUp(self):
+        super().setUp()
+        call_command('generatestats')
+
     def test_bot_stats_update_verses_recalculation(self):
         # At this point, the stats should have already been updated with
         # the match activity generated in FullDataSetMixin
@@ -52,5 +56,4 @@ class BotStatisticsTestCase(FullDataSetMixin, TransactionTestCase):
             del map_stat['updated']
         recalc_stats_json['map_stats'] = json.dumps(map_stats)
 
-        self.maxDiff = None  # required to print out large diffs
         self.assertEqual(update_stats_json, recalc_stats_json)

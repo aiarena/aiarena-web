@@ -40,12 +40,6 @@ class Command(BaseCommand):
 
         self.stdout.write(f'looping   {len(competitions)} Competitions')
         for competition in competitions:
-            # this is to avoid locking the competition for the whole job
-            # if we did lock the competition, it would freeze the arena client API the entire time the stats gen ran
-            # Technically this means this job can fail and the stats still be marked as final.
-            # This is deemed as acceptable at this time.
-            proceed_with_stats_gen = True
-
             with transaction.atomic():
                 competition.lock_me()
                 if not competition.statistics_finalized:

@@ -120,7 +120,8 @@ class BotStatistics:
         sp.tie_perc = sp.tie_count / sp.match_count * 100
         sp.crash_perc = sp.crash_count / sp.match_count * 100
 
-        BotStatistics._generate_graphs(sp)
+        # TODO: implement caching so that this runs quick enough to include in this job
+        # BotStatistics._generate_graphs(sp)
 
         sp.save()
 
