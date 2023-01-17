@@ -50,17 +50,14 @@ INTERNAL_IPS = ['127.0.0.1']
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQL_DATABASE', 'aiarena'),
-        'USER': os.getenv('MYSQL_USER', 'aiarena'),
-        'PASSWORD': os.getenv('MYSQL_PASSWORD', 'aiarena'),
-        'HOST': os.getenv('MYSQL_HOST', '127.0.0.1'),
-        'PORT': os.getenv('MYSQL_PORT', '3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
-    }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv('POSTGRES_DATABASE', 'aiarena'),
+        "USER": os.getenv('POSTGRES_USER', 'aiarena'),
+        "PASSWORD": os.getenv('POSTGRES_PASSWORD', 'aiarena'),
+        "HOST": os.getenv('POSTGRES_HOST','127.0.0.1'),  # set in docker-compose.yml
+        "PORT": os.getenv('POSTGRES_PORT', '5432'),  # default postgres port
+    },
 }
 
 

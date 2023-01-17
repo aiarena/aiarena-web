@@ -367,7 +367,6 @@ class BotStatistics:
                 where resultant_elo is not null 
                     and bot_id = {bot_id} 
                     and competition_id = {competition_id}
-                order by cr.created
                 """)
             cursor.execute(query)
             return cursor.fetchall()
@@ -416,7 +415,12 @@ class BotStatistics:
             df.columns = ['Name', 'ELO', 'Date']
 
             # if the bot was updated more recently than the first result datetime, then use the bot updated date
-            update_date = utc.localize(update_date[0][0])  # convert from a tuple
+            update_date = update_date[0][0]
+            if update_date.tzinfo:
+                update_date = utc.normalize(update_date)  # convert from a tuple
+            else:
+                update_date = utc.localize(update_date)
+
             bot_updated_datetime = Bot.objects.get(id=bot_id).bot_zip_updated
             if bot_updated_datetime > update_date:
                 update_date = bot_updated_datetime
@@ -431,10 +435,10 @@ class BotStatistics:
         with connection.cursor() as cursor:
             query = (f"""
                 select duration_minutes,
-                    sum(is_winner) as wins,
-                    sum(is_loser) as losses,
-                    sum(is_crasher) as crashes,
-                    sum(is_tied) as ties
+                    count(CASE WHEN is_winner THEN 1 END) as wins,
+                    count(CASE WHEN is_loser THEN 1 END) as losses,
+                    count(CASE WHEN is_crasher THEN 1 END) as crashes,
+                    count(CASE WHEN is_tied THEN 1 END) as ties
                 from
                     (select
                         (cp.result = 'win') as is_winner,

@@ -1,0 +1,3 @@
+CREATE USER aiarena;
+CREATE DATABASE aiarena;
+GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;

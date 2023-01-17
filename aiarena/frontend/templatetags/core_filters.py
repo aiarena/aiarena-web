@@ -107,8 +107,8 @@ def shorten_naturaltime(naturaltime):
             .replace(' years', 'y').replace(' year', 'y'))
 
 
-def bot_competition_trend(bot, competition):
-    return bot.current_elo_trend(competition)
+def bot_competition_trend(bot, competition, n_matches):
+    return bot.current_elo_trend(competition, n_matches)
 
 
 register = template.Library()
