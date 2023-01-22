@@ -31,13 +31,13 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name='competition_participations')
     elo = models.SmallIntegerField(default=ELO_START_VALUE)
     match_count = models.IntegerField(default=0)
-    win_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
+    win_perc = models.FloatField(default=0, blank=True, validators=[validate_not_nan, validate_not_inf])
     win_count = models.IntegerField(default=0)
-    loss_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
+    loss_perc = models.FloatField(default=0, blank=True, validators=[validate_not_nan, validate_not_inf])
     loss_count = models.IntegerField(default=0)
-    tie_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
+    tie_perc = models.FloatField(default=0, blank=True, validators=[validate_not_nan, validate_not_inf])
     tie_count = models.IntegerField(default=0)
-    crash_perc = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
+    crash_perc = models.FloatField(default=0, blank=True, validators=[validate_not_nan, validate_not_inf])
     crash_count = models.IntegerField(default=0)
     elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True)
     elo_graph_update_plot = PrivateFileField(upload_to=elo_graph_update_plot_upload_to, storage=OverwritePrivateStorage(base_url='/'), blank=True, null=True)
@@ -45,6 +45,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     highest_elo = models.IntegerField(blank=True, null=True)
     slug = models.SlugField(max_length=255, blank=True)
     active = models.BooleanField(default=True)
+    participated_in_most_recent_round = models.BooleanField(default=False)
 
     # Tracks the division the player is in in the Competition. 
     # Highest division will be 1 and lowest will be competition.target_n_divisions

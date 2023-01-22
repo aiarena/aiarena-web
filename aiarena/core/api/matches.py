@@ -36,7 +36,7 @@ class Matches:
     # todo: have arena client check in with web service in order to delay this
     @staticmethod
     def timeout_overtime_bot_games():
-        matches_without_result = Match.objects.only('round').select_related('round').select_for_update().filter(
+        matches_without_result = Match.objects.only('round').select_for_update(of=('self',)).select_related('round').filter(
             first_started__lt=timezone.now() - config.TIMEOUT_MATCHES_AFTER, result__isnull=True)
         for match in matches_without_result:
             Result.objects.create(match=match, type='MatchCancelled', game_steps=0)
@@ -60,14 +60,14 @@ class Matches:
             # Avoid starting a match when a participant is not available
             participations = MatchParticipation.objects.raw("""
                 SELECT cm.id FROM core_matchparticipation cm
-                where ((cm.use_bot_data =0 or cm.update_bot_data =0) or cm.bot_id not in (
+                where ((cm.use_bot_data or cm.update_bot_data) or cm.bot_id not in (
                         select bot_id
                         from core_matchparticipation
                         inner join core_match m on core_matchparticipation.match_id = m.id
                         left join core_result cr on m.id = cr.match_id
                         where m.started is not null
                         and cr.type is null
-                        and (core_matchparticipation.use_bot_data = 1 or core_matchparticipation.update_bot_data =1)       
+                        and (core_matchparticipation.use_bot_data  or core_matchparticipation.update_bot_data)       
                         and m.id != %s 
                     )) and match_id = %s
 
@@ -100,7 +100,7 @@ class Matches:
         # Try get a requested match
         # Do we want trusted clients to run games not requiring trusted clients?
         matches = Match.objects.select_related('round').only('started', 'assigned_to', 'round') \
-            .filter(started__isnull=True, requested_by__isnull=False).select_for_update().order_by('created')
+            .filter(started__isnull=True, requested_by__isnull=False).select_for_update(of=('self',)).order_by('created')
         if matches.count() > 0:
             return Matches._start_and_return_a_match(requesting_ac, matches)
         else:
@@ -135,7 +135,7 @@ class Matches:
 
         if len(ladder_matches_to_play) > 0:
             bots_with_a_ladder_match_to_play = Bot.objects.raw("""
-            select distinct cb.id
+            select cb.id
               from core_match cm
              inner join core_matchparticipation c
                 on cm.id = c.match_id
@@ -152,8 +152,8 @@ class Matches:
                     inner join core_bot cb on core_matchparticipation.bot_id = cb.id
                      where m.started is not null
                        and cr.id is null
-                       and core_matchparticipation.use_bot_data = 1
-                       and core_matchparticipation.update_bot_data =1    )               
+                       and core_matchparticipation.use_bot_data
+                       and core_matchparticipation.update_bot_data    )               
                 for update         
             """)
             match_ids = [match.id for match in ladder_matches_to_play]
@@ -256,6 +256,12 @@ class Matches:
             for participant2 in active_participants_in_div:
                 Match.create(new_round, random.choice(active_maps), participant1.bot, participant2.bot, require_trusted_arenaclient=competition.require_trusted_infrastructure)
 
+        # Pre-list the IDs to get around this while on mariadb: https://code.djangoproject.com/ticket/28787
+        p_ids = [p.id for p in active_participants]
+        CompetitionParticipation.objects.filter(competition=competition).exclude(id__in=p_ids).update(
+            participated_in_most_recent_round=False)
+        active_participants.update(participated_in_most_recent_round=True)
+
         return new_round
 
     @staticmethod
@@ -263,7 +269,7 @@ class Matches:
         # LADDER MATCHES
         # Get rounds with un-started matches
         rounds = Round.objects.raw("""
-            SELECT distinct cr.id from core_round cr 
+            SELECT cr.id from core_round cr 
             inner join core_match cm on cr.id = cm.round_id
             where competition_id=%s
             and finished is null

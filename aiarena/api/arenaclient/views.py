@@ -3,7 +3,7 @@ from wsgiref.util import FileWrapper
 
 from constance import config
 from django.db import transaction
-from django.db.models import Sum, F, Prefetch
+from django.db.models import Sum, Prefetch
 from django.http import HttpResponse
 from rest_framework import viewsets, serializers, mixins, status
 from rest_framework.decorators import action
@@ -16,10 +16,9 @@ from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
 from aiarena.core.utils import parse_tags
-from aiarena.core.api import Bots, Matches
-from aiarena.core.events import EVENT_MANAGER
-from aiarena.core.events import MatchResultReceivedEvent
-from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation, MatchTag, Tag
+from aiarena.core.api import BotStatistics
+from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation, MatchTag, Tag, \
+    BotCrashLimitAlert
 from aiarena.core.models.arena_client_status import ArenaClientStatus
 from aiarena.core.permissions import IsArenaClientOrAdminUser, IsArenaClient
 from aiarena.core.validators import validate_not_inf, validate_not_nan
@@ -385,10 +384,12 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         elif config.DEBUG_LOGGING_ENABLED:
                             logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
+                        BotStatistics.update_stats_based_on_result(sp1, result, sp2)
+                        BotStatistics.update_stats_based_on_result(sp2, result, sp1)
+
                         if result.is_crash_or_timeout:
                             run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
 
-                EVENT_MANAGER.broadcast_event(MatchResultReceivedEvent(result))
 
                 headers = self.get_success_headers(serializer.data)
                 return Response({'result_id': result.id}, status=status.HTTP_201_CREATED, headers=headers)
@@ -444,10 +445,16 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
     if recent_participations.count() < config.BOT_CONSECUTIVE_CRASH_LIMIT:
         return
 
-    # if any of the previous results weren't a crash, then exit without action
+    # if any of the previous results weren't a crash or already triggered a crash limit alert, then exit without action
     for recent_participation in recent_participations:
         if not recent_participation.crashed:
             return
+        elif recent_participation.triggered_a_crash_limit_alert:
+            return
+
+    # Log a crash alert
+    BotCrashLimitAlert.objects.create(triggering_match_participation=triggering_participant)
 
     # If we get to here, all the results were crashes, so take action
-    Bots.disable_and_send_crash_alert(triggering_participant.bot)
+    # REMOVED UNTIL WE DECIDE TO USE THIS
+    # Bots.disable_and_send_crash_alert(triggering_participant.bot)
