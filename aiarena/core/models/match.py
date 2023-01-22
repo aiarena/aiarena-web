@@ -100,7 +100,7 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
             try:
                 # do this to lock the record
                 # select_related() for the round data
-                match = Match.objects.select_related('round').select_for_update().get(pk=self.id)
+                match = Match.objects.select_related('round').select_for_update(of=('self',)).get(pk=self.id)
             except Match.DoesNotExist:
                 return Match.CancelResult.MATCH_DOES_NOT_EXIST  # should basically not happen, but just in case
 

@@ -1,7 +1,13 @@
 import logging
+from typing import List
 
 from django.db import models
 from private_storage.fields import PrivateFileField
+from django.db.models.expressions import Window
+from django.db.models.functions import RowNumber
+from django.db.models import F
+
+from aiarena.core.models.competition import Competition
 
 from .match import Match
 from .match_participation import MatchParticipation
@@ -31,3 +37,13 @@ class RelativeResult(models.Model):
 
     class Meta:
         managed = False
+    
+    @classmethod
+    def with_row_number(cls, bot_ids: List[int], competition: Competition):
+        return (cls.objects.all()
+                .filter(me__bot__id__in=bot_ids, match__requested_by__isnull=True, match__round__competition=competition)
+                .annotate(
+                        row_number=Window(
+                            expression=RowNumber(), partition_by=[F("me__bot__id")], order_by=[F("started").desc()]
+                    )
+                ).values("me__bot__id", "row_number", "elo_change"))
