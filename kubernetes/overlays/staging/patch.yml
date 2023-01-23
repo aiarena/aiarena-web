@@ -15,7 +15,7 @@ spec:
           emptyDir:
             {}
         - emptyDir: { }
-          name: mysql
+          name: postgres
         - configMap:
             defaultMode: 511
             name: db-init-staging
@@ -29,11 +29,11 @@ spec:
           name: private-media-staging
           persistentVolumeClaim:
             $patch: delete
-        - name: mysql-init-script
+        - name: postgresql-init-script
           secret:
             defaultMode: 420
             optional: false
-            secretName: mysql-init-script-staging
+            secretName: postgresql-init-script-staging
 
       initContainers:
         - name: django-init
@@ -47,32 +47,6 @@ spec:
             - mountPath: /prod_private_media
               name: private-media
       containers:
-        - env:
-            - name: MYSQL_ROOT_HOST
-              value: '%'
-          envFrom:
-            - secretRef:
-                name: mysqlpwds-staging
-                optional: false
-          image: mariadb:10.9.4
-          imagePullPolicy: Always
-          name: mariadb
-          ports:
-            - containerPort: 3306
-              name: 3306tcp
-              protocol: TCP
-          resources: { }
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          volumeMounts:
-            - mountPath: /var/lib/mysql
-              name: mysql
-            - mountPath: /docker-entrypoint-initdb.d/init.sh
-              name: db-init-script
-              subPath: init.sh
-            - mountPath: /docker-entrypoint-initdb.d/1.sql
-              name: mysql-init-script
-              subPath: 1.sql
         - name: aiarena-web
           args:
             - 'python manage.py migrate && python manage.py purgesensitivedata && gunicorn -b :3000 aiarena.wsgi'
@@ -92,6 +66,29 @@ spec:
             - mountPath: /media
               name: media-staging
               readOnly: true
+        - envFrom:
+            - secretRef:
+                name: postgres-pwds-staging
+                optional: false
+          image: postgres:12.13
+          imagePullPolicy: Always
+          name: postgres
+          ports:
+            - containerPort: 5432
+              name: 5432tcp
+              protocol: TCP
+          resources: { }
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data/
+              name: postgres
+            - mountPath: /docker-entrypoint-initdb.d/init.sh
+              name: db-init-script
+              subPath: init.sh
+            - mountPath: /docker-entrypoint-initdb.d/1.sql
+              name: postgresql-init-script
+              subPath: 1.sql
 
 
 

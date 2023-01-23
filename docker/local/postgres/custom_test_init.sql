@@ -1,0 +1,1 @@
+CREATE USER aiarena WITH PASSWORD 'aiarena' CREATEDB;

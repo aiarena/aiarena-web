@@ -7,6 +7,6 @@ images:
   newTag: prod
 
 secretGenerator:
-  - name: mysql-host
+  - name: postgres-host
     literals:
-      - MYSQL_HOST=mariadb.website.svc.cluster.local
+      - POSTGRES_HOST=postgres-sts.database.svc.cluster.local

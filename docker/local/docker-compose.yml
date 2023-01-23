@@ -11,19 +11,19 @@ services:
     volumes:
       - aiarena-redis-data:/data
 
-  aiarena-mysql:
-    image: 	mariadb:10.9.4
-    container_name: aiarena-mysql
+  aiarena-postgres:
+    image: 	postgres:12.13
+    container_name: aiarena-postgres
     restart: unless-stopped
     env_file:
       - .env
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - ./mysql/custom_init.sql:/docker-entrypoint-initdb.d/1.sql
-      - aiarena-mysql-data:/var/lib/mysql
+      - ./postgres/custom_init.sql:/docker-entrypoint-initdb.d/1.sql
+      - aiarena-postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-uroot", "-p$$MARIADB_ROOT_PASSWORD"  ]
+      test:  ["CMD-SHELL", "pg_isready"]
       timeout: 20s
       retries: 10
       start_period: 10s
@@ -41,30 +41,30 @@ services:
     volumes:
       - aiarena-web-data:/data
       - ../../.:/app
+    environment:
+      - POSTGRES_HOST=aiarena-postgres
     depends_on:
       aiarena-redis:
         condition: service_started
-      aiarena-mysql:
+      aiarena-postgres:
         condition: service_healthy
     command: >
       sh -c "python /app/manage.py collectstatic --noinput &&
              python /app/manage.py migrate &&
              python /app/manage.py runserver 0.0.0.0:8000"
 
-  aiarena-mysql-test:
-    image: 	mariadb:10.9.4
-    container_name: aiarena-mysql-test
+  aiarena-postgres-test:
+    image: 	postgres:12.13
+    container_name: aiarena-postgres-test
     restart: unless-stopped
     env_file:
       - .env.test
-    expose:
-      - "3306"
     volumes:
-      - ./mysql/custom_test_init.sql:/docker-entrypoint-initdb.d/1.sql
-      - aiarena-mysql-test-data:/var/lib/mysql
+      - ./postgres/custom_test_init.sql:/docker-entrypoint-initdb.d/1.sql
+      - aiarena-postgres-test-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uaiarena", "-paiarena" ]
-      timeout: 10s
+      test:  ["CMD-SHELL", "pg_isready"]
+      timeout: 20s
       retries: 10
       start_period: 10s
 
@@ -76,12 +76,11 @@ services:
     env_file:
       - .env.test
     environment:
-      - MYSQL_DATABASE=aiarena
-      - MYSQL_HOST=aiarena-mysql-test
+      - POSTGRES_HOST=aiarena-postgres-test
     volumes:
       - ../../.:/app
     depends_on:
-      aiarena-mysql-test:
+      aiarena-postgres-test:
         condition: service_healthy
     command: >
       sh -c "python /app/manage.py test --noinput"
@@ -89,8 +88,8 @@ services:
 
 volumes:
   aiarena-redis-data:
-  aiarena-mysql-data:
-  aiarena-mysql-test-data:
+  aiarena-postgres-data:
+  aiarena-postgres-test-data:
   aiarena-web-data:
 
 networks:

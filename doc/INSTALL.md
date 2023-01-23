@@ -11,12 +11,12 @@
 
 2. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
 
-3. Install MySQL and create a Database and a User who can access it  
+3. Install PostgreSQL and create a Database and a User who can access it  
     Using SQL:
     ```
     CREATE DATABASE aiarena;
-    CREATE USER aiarena IDENTIFIED BY 'aiarena';
-    GRANT ALL PRIVILEGES ON aiarena.* TO aiarena WITH GRANT OPTION;
+    CREATE USER aiarena WITH PASSWORD 'aiarena';
+    GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;
     ```
 
 4. Install python modules
@@ -33,7 +33,7 @@
    
 
 5. Modify the Website config to use your Database.  
-    If you are using a standard mysql setup at localhost:3306 and step 3's SQL script, then you can skip this step -
+    If you are using a standard postgres setup at localhost:5432 and step 3's SQL script, then you can skip this step -
     the credentials will already be configured.  
     If you need to configure different credentials, make a copy of the `/aiarena/example-dev-env.py` file as 
     `/aiarena/env.py` and update the relevant details

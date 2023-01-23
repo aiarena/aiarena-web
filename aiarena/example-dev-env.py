@@ -2,7 +2,7 @@
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgres',
         'NAME': 'aiarena',
         'USER': 'aiarena',
         'PASSWORD': 'aiarena',
