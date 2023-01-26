@@ -13,7 +13,7 @@ from constance import config
 from django.db import transaction, connection
 from django.db.models import F
 
-from aiarena.api.arenaclient.exceptions import LadderDisabled
+from aiarena.api.arenaclient.exceptions import LadderDisabled, NotEnoughAvailableBots, MaxActiveRounds
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Competition
 
@@ -43,7 +43,10 @@ class ACCoordinator:
                 with transaction.atomic():
                     # this call will apply a select for update, so we do it inside an atomic block
                     if Competitions.check_has_matches_to_play_and_apply_locks(competition):
-                        return Matches.start_next_match_for_competition(arenaclient, competition)
+                        try:
+                            return Matches.start_next_match_for_competition(arenaclient, competition)
+                        except (NotEnoughAvailableBots, MaxActiveRounds):
+                            continue     
 
         return None
 
