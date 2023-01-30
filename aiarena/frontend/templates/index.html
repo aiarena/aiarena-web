@@ -204,7 +204,7 @@
                         }( i ) );
                 
                         youtube[i].addEventListener( "click", function() {
-
+                            var embed = this.dataset.embed.match(/[\w\-]{11,}/)[0];
                             var iframe = document.createElement( "iframe" );
 
                                     iframe.setAttribute( "frameborder", "0" );
