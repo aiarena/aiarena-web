@@ -45,8 +45,9 @@ class ACCoordinator:
                     if Competitions.check_has_matches_to_play_and_apply_locks(competition):
                         try:
                             return Matches.start_next_match_for_competition(arenaclient, competition)
-                        except (NotEnoughAvailableBots, MaxActiveRounds):
-                            continue     
+                        except (NotEnoughAvailableBots, MaxActiveRounds) as e:
+                            logger.debug(f"Skipping competition {id}: {e}")
+                            continue
 
         return None
 

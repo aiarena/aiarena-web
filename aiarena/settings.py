@@ -289,13 +289,13 @@ LOGGING = {
     },
     'handlers': {
         'django-file': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': './logs/django.log',
             'formatter': 'verbose',
         },
         'aiarena-file': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': './logs/aiarena.log',
             'formatter': 'verbose',
@@ -304,12 +304,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['django-file', ],
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'aiarena': {
             'handlers': ['aiarena-file', ],
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'propagate': True,
         },
     },

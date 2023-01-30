@@ -205,13 +205,15 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 201)
 
         # Round 3 - should fail due to active round limit
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue('detail' in response.data)
-        self.assertEqual(u'There are available bots, but the ladder has reached the maximum active rounds allowed and ' \
-                         'serving a new match would require generating a new one. Please wait until matches from current ' \
-                         'rounds become available.',
-                         response.data['detail'])
+        with self.assertLogs(logger='aiarena.api.arenaclient.ac_coordinator', level='DEBUG') as log:
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue('detail' in response.data)
+            self.assertEqual(u'No game available for client.',
+                             response.data['detail'])
+            self.assertIn('DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition 1: '
+                          'This competition has reached it\'s maximum active rounds.',
+                          log.output)
 
     def test_match_blocking(self):
         # create an extra arena client for this test
@@ -232,9 +234,14 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # we shouldn't be able to get a new match
         self.test_ac_api_client.set_api_token(Token.objects.create(user=self.arenaclientUser2).key)
-        response = self.test_ac_api_client.post_to_matches()
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(u"Not enough available bots for a match. Wait until more bots become available.", response.data['detail'])
+
+        with self.assertLogs(logger='aiarena.api.arenaclient.ac_coordinator', level='DEBUG') as log:
+            response = self.test_ac_api_client.post_to_matches()
+            self.assertIn('DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition 1: Not enough available bots for a match. Wait until more bots become available.',
+                          log.output)
+
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(u"No game available for client.", response.data['detail'])
 
         Matches.request_match(self.regularUser2, bot1, bot1.get_random_active_excluding_self(),
                               game_mode=GameMode.objects.first())
