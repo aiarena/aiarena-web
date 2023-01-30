@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 RUN apt-get update \
-    && apt-get install -y gcc libmariadb-dev
+    && apt-get install -y gcc
 
 COPY . workspace
 

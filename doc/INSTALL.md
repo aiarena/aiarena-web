@@ -11,12 +11,13 @@
 
 2. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
 
-3. Install MySQL and create a Database and a User who can access it  
+3. Install PostgreSQL and create a Database and a User who can access it  
     Using SQL:
     ```
-    CREATE DATABASE aiarena;
-    CREATE USER aiarena IDENTIFIED BY 'aiarena';
-    GRANT ALL PRIVILEGES ON aiarena.* TO aiarena WITH GRANT OPTION;
+    create database aiarena;
+    create user aiarena with encrypted password 'aiarena';
+    grant all privileges on database aiarena to aiarena;
+    alter user aiarena createdb; -- if you want to be able to run tests
     ```
 
 4. Install python modules
