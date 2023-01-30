@@ -9,7 +9,6 @@ from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from aiarena.api.arenaclient.exceptions import NoMaps, NotEnoughActiveBots, CompetitionPaused, CompetitionClosing
 from .map import Map
 from .mixins import LockableModelMixin
 from .competition import Competition

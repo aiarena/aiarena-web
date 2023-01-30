@@ -13,7 +13,8 @@ from constance import config
 from django.db import transaction, connection
 from django.db.models import F
 
-from aiarena.api.arenaclient.exceptions import LadderDisabled, NotEnoughAvailableBots, MaxActiveRounds
+from aiarena.api.arenaclient.exceptions import LadderDisabled, NotEnoughAvailableBots, MaxActiveRounds, NoMaps, \
+    CompetitionPaused, CompetitionClosing
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Competition
 
@@ -45,7 +46,7 @@ class ACCoordinator:
                     if Competitions.check_has_matches_to_play_and_apply_locks(competition):
                         try:
                             return Matches.start_next_match_for_competition(arenaclient, competition)
-                        except (NotEnoughAvailableBots, MaxActiveRounds) as e:
+                        except (NoMaps, NotEnoughAvailableBots, MaxActiveRounds, CompetitionPaused, CompetitionClosing) as e:
                             logger.debug(f"Skipping competition {id}: {e}")
                             continue
 
