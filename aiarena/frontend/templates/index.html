@@ -187,36 +187,36 @@
             showSlides(slideIndex = n);
         }
 
-        ( function() {
+        (function() {
 
-            var youtube = document.querySelectorAll( ".youtube" );
+            var youtube = document.querySelectorAll(".youtube");
 
             for (var i = 0; i < youtube.length; i++) {
                 var embed = youtube[i].dataset.embed.match(/[\w\-]{11,}/)[0];
-                var source = "https://img.youtube.com/vi/"+ embed+"/sddefault.jpg";
-                
+                var source = "https://img.youtube.com/vi/" + embed + "/sddefault.jpg";
+
                 var image = new Image();
-                        image.src = source;
-                        image.width=420;
-                        image.height=215;
-                        image.addEventListener( "load", function() {
-                            youtube[ i ].appendChild( image );
-                        }( i ) );
-                
-                        youtube[i].addEventListener( "click", function() {
+                image.src = source;
+                image.width = 420;
+                image.height = 215;
+                image.addEventListener("load", function() {
+                    youtube[i].appendChild(image);
+                }(i));
 
-                            var iframe = document.createElement( "iframe" );
+                youtube[i].addEventListener("click", function() {
+                    var embed = this.dataset.embed.match(/[\w\-]{11,}/)[0];
+                    var iframe = document.createElement("iframe");
 
-                                    iframe.setAttribute( "frameborder", "0" );
-                                    iframe.setAttribute( "allowfullscreen", "" );
-                                    iframe.setAttribute( "src", "https://www.youtube.com/embed/"+ embed +"?rel=0&showinfo=0&autoplay=1" );
+                    iframe.setAttribute("frameborder", "0");
+                    iframe.setAttribute("allowfullscreen", "");
+                    iframe.setAttribute("src", "https://www.youtube.com/embed/" + embed + "?rel=0&showinfo=0&autoplay=1");
 
-                                    this.innerHTML = "";
-                                    this.appendChild( iframe );
-                        } );	
+                    this.innerHTML = "";
+                    this.appendChild(iframe);
+                });
             };
 
-            } )();
+            })();
         function showSlides(n) {
             var i;
             var slides = document.getElementsByClassName("newSlides");
