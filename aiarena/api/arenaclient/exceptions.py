@@ -25,9 +25,7 @@ class NotEnoughAvailableBots(APIException):
 
 class MaxActiveRounds(APIException):
     status_code = 200
-    default_detail = 'There are available bots, but the ladder has reached the maximum active rounds allowed and ' \
-                     'serving a new match would require generating a new one. Please wait until matches from current ' \
-                     'rounds become available.'
+    default_detail = 'This competition has reached it\'s maximum active rounds.'
     default_code = 'max_active_rounds'
 
 
