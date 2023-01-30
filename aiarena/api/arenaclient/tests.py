@@ -211,7 +211,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
             self.assertTrue('detail' in response.data)
             self.assertEqual(u'No game available for client.',
                              response.data['detail'])
-            self.assertIn('DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition 1: '
+            self.assertIn(f'DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition {comp.id}: '
                           'This competition has reached it\'s maximum active rounds.',
                           log.output)
 
@@ -237,7 +237,8 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         with self.assertLogs(logger='aiarena.api.arenaclient.ac_coordinator', level='DEBUG') as log:
             response = self.test_ac_api_client.post_to_matches()
-            self.assertIn('DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition 1: Not enough available bots for a match. Wait until more bots become available.',
+            self.assertIn(f'DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition {comp.id}: '
+                          f'Not enough available bots for a match. Wait until more bots become available.',
                           log.output)
 
             self.assertEqual(response.status_code, 200)
