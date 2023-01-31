@@ -1,9 +1,5 @@
 name: Staging Deploy CI
 
-on:
-  push:
-    branches: [ "staging" ]
-
 jobs:
   build:
     runs-on: ubuntu-latest
