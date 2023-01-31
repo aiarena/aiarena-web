@@ -2,6 +2,7 @@ import logging
 from django.db.models.fields import CharField, TextField
 from django.db.models import Q, Aggregate
 from rest_framework.exceptions import ValidationError
+from django.contrib.postgres.aggregates import StringAgg
 
 # File for housing utils that require 'django' or would break CI if placed in utils.py
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ def filter_tags(qs, value, tags_field_name, tags_lookup_expr="iexact", user_fiel
         if tags_lookup_expr == 'icontains':
             qs = method(qs)(user_query).distinct()
             # Create string with all tag names and run icontains on the string
-            qs = qs.annotate(all_tags=GroupConcat(tags_field_name))
+            qs = qs.annotate(all_tags=StringAgg(tags_field_name, delimiter=","))
             tags_lookup = '%s__%s' % ('all_tags', tags_lookup_expr)
             for v in tags:
                 tag_query &= Q(**{tags_lookup: v})

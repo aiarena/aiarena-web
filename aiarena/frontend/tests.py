@@ -146,6 +146,10 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get('/finance/')
         self.assertEqual(response.status_code, 404)
 
+        # because this gets broken sometimes
+        response = self.client.get('/sitemap.xml/')
+        self.assertEqual(response.status_code, 200)
+
 
 class RequestMatchTestCase(FullDataSetMixin, TestCase):
 

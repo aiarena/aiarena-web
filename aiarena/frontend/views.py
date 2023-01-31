@@ -272,7 +272,7 @@ class BotResultTable(tables.Table):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.tags_by_all_value = kwargs.pop('tags_by_all_value', False)
-        super().__init__(*args, **kwargs)    
+        super().__init__(*args, **kwargs)
 
     # Settings for the Table
     class Meta:
@@ -463,18 +463,6 @@ class BotCompetitionStatsDetail(DetailView):
         context['competition_bot_matchups'] = self.object.competition_matchup_stats.filter(
             opponent__competition=context['competitionparticipation'].competition).order_by('-win_perc').distinct()
         context['competition_map_stats'] = self.object.competition_map_stats.order_by('map__name')
-        context['updated'] = context['competition_bot_matchups'][0].updated if context['competition_bot_matchups'] else "Never"
-        return context
-
-
-class BotCompetitionStatsEloUpdatePlot(DetailView):
-    model = CompetitionParticipation
-    template_name = 'bot_competition_stats.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['competition_bot_matchups'] = self.object.competition_matchup_stats.filter(
-            opponent__competition=context['competitionparticipation'].competition).order_by('-win_perc').distinct()
         context['updated'] = context['competition_bot_matchups'][0].updated if context['competition_bot_matchups'] else "Never"
         return context
 
@@ -846,7 +834,7 @@ class Index(ListView):
         # Order competitions as they are to be shown on home page
         competitions = competitions.order_by('-n_active_bots','-interest','-num_participants')
         context['competitions'] = []
-        
+
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
@@ -854,25 +842,28 @@ class Index(ListView):
                     comp, amount=10).prefetch_related(
                     Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level'))
-                )            
+                )
                 # top 10 bots
 
                 relative_result = RelativeResult.with_row_number([x.bot.id for x in top10], comp)
-                
-                
-                sql, params = relative_result.query.sql_with_params()
 
-                with connection.cursor() as cursor:
-                    cursor.execute("""
-                        SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
-                        WHERE "row_number" <= %s
-                        GROUP BY bot_id
-                    """.format(sql),
-                    [*params, elo_trend_n_matches],)
-                    rows = cursor.fetchall()
-                    for participant in top10:
-                      participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
-                
+
+                # This check avoids a potential EmptyResultSet exception.
+                # See https://code.djangoproject.com/ticket/26061
+                if relative_result.count() > 0:
+                    sql, params = relative_result.query.sql_with_params()
+
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
+                            WHERE "row_number" <= %s
+                            GROUP BY bot_id
+                        """.format(sql),
+                                       [*params, elo_trend_n_matches], )
+                        rows = cursor.fetchall()
+                        for participant in top10:
+                            participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
+
                 context['competitions'].append({
                     'competition': comp,
                     'top10': top10,
@@ -998,9 +989,9 @@ class CompetitionDetail(DetailView):
         for map in maps:
             map_names.append(map.name)
         context['map_names'] = map_names
-        
+
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
-        
+
         rounds = Round.objects.filter(competition_id=self.object.id).order_by('-id')
         page = self.request.GET.get('page', 1)
         paginator = Paginator(rounds, 30)
@@ -1022,19 +1013,22 @@ class CompetitionDetail(DetailView):
                 Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
 
         relative_result = RelativeResult.with_row_number([x.bot.id for x in all_participants], self.object)
-        
-        sql, params = relative_result.query.sql_with_params()
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
-                WHERE "row_number" <= %s
-                GROUP BY bot_id
-            """.format(sql),
-            [*params, elo_trend_n_matches],)
-            rows = cursor.fetchall()
-            for participant in all_participants:
-                participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
+        # This check avoids a potential EmptyResultSet exception.
+        # See https://code.djangoproject.com/ticket/26061
+        if relative_result.count() > 0:
+            sql, params = relative_result.query.sql_with_params()
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
+                    WHERE "row_number" <= %s
+                    GROUP BY bot_id
+                """.format(sql),
+                [*params, elo_trend_n_matches],)
+                rows = cursor.fetchall()
+                for participant in all_participants:
+                    participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
 
         context['divisions'] = dict()
         to_title = lambda x: f"Awaiting Entry" if x==CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
