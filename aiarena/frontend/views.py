@@ -272,7 +272,7 @@ class BotResultTable(tables.Table):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         self.tags_by_all_value = kwargs.pop('tags_by_all_value', False)
-        super().__init__(*args, **kwargs)    
+        super().__init__(*args, **kwargs)
 
     # Settings for the Table
     class Meta:
@@ -834,7 +834,7 @@ class Index(ListView):
         # Order competitions as they are to be shown on home page
         competitions = competitions.order_by('-n_active_bots','-interest','-num_participants')
         context['competitions'] = []
-        
+
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
@@ -842,7 +842,7 @@ class Index(ListView):
                     comp, amount=10).prefetch_related(
                     Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
                     Prefetch('bot__user', queryset=User.objects.all().only('patreon_level'))
-                )            
+                )
                 # top 10 bots
 
                 relative_result = RelativeResult.with_row_number([x.bot.id for x in top10], comp)
@@ -859,11 +859,11 @@ class Index(ListView):
                             WHERE "row_number" <= %s
                             GROUP BY bot_id
                         """.format(sql),
-                        [*params, elo_trend_n_matches],)
+                                       [*params, elo_trend_n_matches], )
                         rows = cursor.fetchall()
                         for participant in top10:
-                          participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
-                
+                            participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
+
                 context['competitions'].append({
                     'competition': comp,
                     'top10': top10,
@@ -989,9 +989,9 @@ class CompetitionDetail(DetailView):
         for map in maps:
             map_names.append(map.name)
         context['map_names'] = map_names
-        
+
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
-        
+
         rounds = Round.objects.filter(competition_id=self.object.id).order_by('-id')
         page = self.request.GET.get('page', 1)
         paginator = Paginator(rounds, 30)
