@@ -1,12 +1,9 @@
 resources:
 - ../../base
 namespace: website
-
-images:
-- name: aiarena/aiarena-web
-  newTag: prod
-
 secretGenerator:
-  - name: postgres-host
-    literals:
-      - POSTGRES_HOST=postgres-sts.database.svc.cluster.local
+- literals:
+  - POSTGRES_HOST=postgres-sts.database.svc.cluster.local
+  name: postgres-host
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization

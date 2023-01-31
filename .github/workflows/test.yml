@@ -1,0 +1,19 @@
+name: Django CI
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - run: |
+        docker compose -f docker/local/docker-compose.yml up aiarena-web-test --exit-code-from=aiarena-web-test --force-recreate --build

@@ -1,0 +1,55 @@
+name: Build Docker Container & Push to DO Registry
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test_django_job:
+    uses: aiarena/aiarena-web/.github/workflows/test.yml
+  build:
+    runs-on: ubuntu-latest
+    needs: [ test_django_job ]
+    env:
+      CLUSTER_NAME: django-k8s
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build container image
+        working-directory: ./web
+        run: |
+          docker build . \
+            --build-arg=ENVIRONMENT_TYPE=PRODUCTION \ 
+            --file docker/Dockerfile \ 
+            --tag aiarena/aiarena-web:latest \
+            --tag aiarena/aiarena-web:${GITHUB_SHA::7}-${GITHUB_RUN_ID::5}
+      
+      - name: Push image
+        run: |
+          docker push aiarena/aiarena-web --all-tags
+        
+      - uses: imranismail/setup-kustomize@v2
+      
+      - run: |
+          (cd kubernetes/base && kustomize edit set image aiarena/aiarena-web=:${GITHUB_SHA::7}-${GITHUB_RUN_ID::5}
+      
+      - uses: EndBug/add-and-commit@v9 # You can change this to use a specific version.
+        with:
+          # The arguments for the `git add` command (see the paragraph below for more info)
+          # Default: '.'
+          add: '.'
+
+          # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
+          # Default: true
+          push: true

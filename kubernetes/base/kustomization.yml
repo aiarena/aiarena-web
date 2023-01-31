@@ -1,4 +1,9 @@
 resources:
-  - deployment.yml
-  - configmap.yml
-  - service.yml
+- deployment.yml
+- configmap.yml
+- service.yml
+images:
+- name: aiarena/aiarena-web
+  newTag: tempTag
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
