@@ -570,7 +570,7 @@ class CompetitionBotMatchupStatsDetail(DetailView):
                       .select_related('match', 'me__bot', 'opponent__bot')
                       .defer("me__bot__bot_data")
                       .filter(me__bot=self.object.bot.bot, opponent__bot=self.object.opponent.bot)
-                      .order_by('-created'))
+                      .order_by('-started'))
 
         # Get tags_by_all and remove it from params to prevent errors
         params = self.request.GET.copy()
