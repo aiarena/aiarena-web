@@ -341,7 +341,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                             if actual_elo_sum["elo__sum"] != expected_elo_sum:
                                 logger.critical(
-                                    f"ELO sum of {actual_elo_sum['elo__sum']} did not match expected value "
+                                    f"ELO SANITY CHECK FAILURE: ELO sum of {actual_elo_sum['elo__sum']} did not match expected value "
                                     f"of {expected_elo_sum} upon submission of result {result.id}"
                                 )
                             elif config.DEBUG_LOGGING_ENABLED:
