@@ -846,20 +846,23 @@ class Index(ListView):
                 # top 10 bots
 
                 relative_result = RelativeResult.with_row_number([x.bot.id for x in top10], comp)
-                
-                
-                sql, params = relative_result.query.sql_with_params()
 
-                with connection.cursor() as cursor:
-                    cursor.execute("""
-                        SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
-                        WHERE "row_number" <= %s
-                        GROUP BY bot_id
-                    """.format(sql),
-                    [*params, elo_trend_n_matches],)
-                    rows = cursor.fetchall()
-                    for participant in top10:
-                      participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
+
+                # This check avoids a potential EmptyResultSet exception.
+                # See https://code.djangoproject.com/ticket/26061
+                if relative_result.count() > 0:
+                    sql, params = relative_result.query.sql_with_params()
+
+                    with connection.cursor() as cursor:
+                        cursor.execute("""
+                            SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
+                            WHERE "row_number" <= %s
+                            GROUP BY bot_id
+                        """.format(sql),
+                        [*params, elo_trend_n_matches],)
+                        rows = cursor.fetchall()
+                        for participant in top10:
+                          participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
                 
                 context['competitions'].append({
                     'competition': comp,
@@ -1010,19 +1013,22 @@ class CompetitionDetail(DetailView):
                 Prefetch('bot__user', queryset=User.objects.all().only('patreon_level', 'username','type'))))
 
         relative_result = RelativeResult.with_row_number([x.bot.id for x in all_participants], self.object)
-        
-        sql, params = relative_result.query.sql_with_params()
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
-                WHERE "row_number" <= %s
-                GROUP BY bot_id
-            """.format(sql),
-            [*params, elo_trend_n_matches],)
-            rows = cursor.fetchall()
-            for participant in all_participants:
-                participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
+        # This check avoids a potential EmptyResultSet exception.
+        # See https://code.djangoproject.com/ticket/26061
+        if relative_result.count() > 0:
+            sql, params = relative_result.query.sql_with_params()
+
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
+                    WHERE "row_number" <= %s
+                    GROUP BY bot_id
+                """.format(sql),
+                [*params, elo_trend_n_matches],)
+                rows = cursor.fetchall()
+                for participant in all_participants:
+                    participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
 
         context['divisions'] = dict()
         to_title = lambda x: f"Awaiting Entry" if x==CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
