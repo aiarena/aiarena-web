@@ -2,7 +2,7 @@ name: Django CI
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ feature/containerization ]
   workflow_call:
   workflow_dispatch:
 
