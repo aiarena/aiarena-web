@@ -3,7 +3,7 @@ resources:
 namespace: website
 secretGenerator:
 - literals:
-  - POSTGRES_HOST=postgres-sts.database.svc.cluster.local
+  - POSTGRES_HOST=postgres-sts-0.postgres-headless-svc.database.svc.cluster.local
   name: postgres-host
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
