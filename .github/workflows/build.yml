@@ -25,11 +25,11 @@ jobs:
 
       - name: Build container image
         run: |
-          docker build . \
+          docker build \
             --build-arg=ENVIRONMENT_TYPE=PRODUCTION \ 
             --file docker/Dockerfile \ 
             --tag aiarena/aiarena-web:latest \
-            --tag aiarena/aiarena-web:${GITHUB_SHA::7}-${GITHUB_RUN_ID::5}
+            --tag aiarena/aiarena-web:${GITHUB_SHA::7}-${GITHUB_RUN_ID::5} .
       
       - name: Push image
         run: |
