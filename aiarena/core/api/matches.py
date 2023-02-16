@@ -153,8 +153,7 @@ class Matches:
                      where m.started is not null
                        and cr.id is null
                        and core_matchparticipation.use_bot_data
-                       and core_matchparticipation.update_bot_data    )               
-                for update         
+                       and core_matchparticipation.update_bot_data    )                    
             """)
             match_ids = [match.id for match in ladder_matches_to_play]
             bot_ids = [bot.id for bot in bots_with_a_ladder_match_to_play]
