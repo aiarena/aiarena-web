@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.core.cache import cache
+from django.dispatch import receiver
+
 from aiarena.core.api.competitions import Competitions
 
 if TYPE_CHECKING:
@@ -17,6 +20,7 @@ from aiarena.api.arenaclient.exceptions import LadderDisabled, NotEnoughAvailabl
     CompetitionPaused, CompetitionClosing
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Competition
+from django.db.models.signals import pre_save
 
 logger = logging.getLogger(__name__)
 
@@ -86,47 +90,63 @@ class ACCoordinator:
          In otherwords, campetitions with higher active participant counts should play more matches overall.
         :return:
         """
-        with connection.cursor() as cursor:
-            # I don't know why but for some reason CTEs didn't work so here; have a massive query.
-            cursor.execute("""
-                select perc_active.competition_id
-                from (select competition_id, 
-                competition_participations.competition_participations_cnt / cast(total_active_cnt as float) as perc_active
-                      from (select cp.competition_id, count(cp.competition_id) competition_participations_cnt
-                            from core_competitionparticipation cp
-                                     join core_competition cc on cp.competition_id = cc.id
-                            where cp.active
-                              and cc.status in ('open', 'closing', 'paused')
-                            group by cp.competition_id) as competition_participations
-                               join
-                           (select count(*) total_active_cnt
-                            from core_competitionparticipation cp
-                                     join core_competition cc on cp.competition_id = cc.id
-                            where cp.active
-                              and cc.status in ('open', 'closing', 'paused')) as competition_participations_total on 1=1) as perc_active
-                         left join
-                     (select competition_id, perc_recent_matches_cnt / cast(recent_matches_total_cnt as float) as perc_recent_matches
-                      from (select competition_id,
-                                   count(competition_id)       perc_recent_matches_cnt,
-                                   (select count(*)
-                                    from (select competition_id
-                                          from core_match cm
-                                                   join core_round cr on cm.round_id = cr.id
-                                                   join core_competition cc on cr.competition_id = cc.id
-                                          where cm.started is not null
-                                            and cc.status in ('open', 'closing', 'paused')
-                                          order by cm.started desc
-                                          limit 100) matches2) recent_matches_total_cnt
-                            from (select competition_id
-                                  from core_match cm
-                                           join core_round cr on cm.round_id = cr.id
-                                           join core_competition cc on cr.competition_id = cc.id
-                                  where cm.started is not null
-                                    and cc.status in ('open', 'closing', 'paused')
-                                  order by cm.started desc
-                                  limit 100) matches
-                            group by competition_id) as recent_matches) as perc_recent_matches
-                     on perc_recent_matches.competition_id = perc_active.competition_id
-                order by COALESCE(perc_recent_matches, 0) - perc_active
-            """)
-            return [row[0] for row in cursor.fetchall()]  # return competition ids
+
+        competition_priority_order = cache.get('competition_priority_order')
+        if not competition_priority_order:
+            with connection.cursor() as cursor:
+                # I don't know why but for some reason CTEs didn't work so here; have a massive query.
+                cursor.execute("""
+                    select perc_active.competition_id
+                    from (select competition_id, 
+                    competition_participations.competition_participations_cnt / cast(total_active_cnt as float) as perc_active
+                          from (select cp.competition_id, count(cp.competition_id) competition_participations_cnt
+                                from core_competitionparticipation cp
+                                         join core_competition cc on cp.competition_id = cc.id
+                                where cp.active
+                                  and cc.status in ('open', 'closing', 'paused')
+                                group by cp.competition_id) as competition_participations
+                                   join
+                               (select count(*) total_active_cnt
+                                from core_competitionparticipation cp
+                                         join core_competition cc on cp.competition_id = cc.id
+                                where cp.active
+                                  and cc.status in ('open', 'closing', 'paused')) as competition_participations_total on 1=1) as perc_active
+                             left join
+                         (select competition_id, perc_recent_matches_cnt / cast(recent_matches_total_cnt as float) as perc_recent_matches
+                          from (select competition_id,
+                                       count(competition_id)       perc_recent_matches_cnt,
+                                       (select count(*)
+                                        from (select competition_id
+                                              from core_match cm
+                                                       join core_round cr on cm.round_id = cr.id
+                                                       join core_competition cc on cr.competition_id = cc.id
+                                              where cm.started is not null
+                                                and cc.status in ('open', 'closing', 'paused')
+                                              order by cm.started desc
+                                              limit 100) matches2) recent_matches_total_cnt
+                                from (select competition_id
+                                      from core_match cm
+                                               join core_round cr on cm.round_id = cr.id
+                                               join core_competition cc on cr.competition_id = cc.id
+                                      where cm.started is not null
+                                        and cc.status in ('open', 'closing', 'paused')
+                                      order by cm.started desc
+                                      limit 100) matches
+                                group by competition_id) as recent_matches) as perc_recent_matches
+                         on perc_recent_matches.competition_id = perc_active.competition_id
+                    order by COALESCE(perc_recent_matches, 0) - perc_active
+                """)
+                competition_priority_order = [row[0] for row in cursor.fetchall()]  # return competition ids
+                cache.set('competition_priority_order', competition_priority_order,
+                          config.COMPETITION_PRIORITY_ORDER_CACHE_TIME)
+
+        return competition_priority_order
+
+
+@receiver(pre_save, sender=Competition)
+def post_save_competition(sender, instance, **kwargs):
+    # if it's not a new instance...
+    if instance.id is not None:
+        previous = Competition.objects.get(id=instance.id)
+        if previous.status != instance.status and cache.has_key('competition_priority_order'):
+            cache.delete('competition_priority_order')  # if the status changed, bust our competition_priority_order cache
