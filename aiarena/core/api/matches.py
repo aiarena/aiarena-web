@@ -170,7 +170,7 @@ class Matches:
             random.shuffle(available_ladder_matches_to_play)  # ensure the match selection is random
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
-            if len(Bots.get_available(bots_with_a_ladder_match_to_play)) >= 2:
+            if Bots.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
                 return Matches._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
         return None
 
