@@ -147,6 +147,9 @@ class Bot(models.Model, LockableModelMixin):
                 if p.use_bot_data and p.update_bot_data:
                     data_frozen = True  # todo: maybe we can cache this flag
                     break
+            if data_frozen:
+                break
+
         return self.bot_data and data_frozen
 
     @staticmethod
