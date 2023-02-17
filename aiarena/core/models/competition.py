@@ -135,9 +135,12 @@ class Competition(models.Model, LockableModelMixin):
 
     @transaction.atomic
     def try_to_close(self):
+        self.lock_me()
         from .round import Round
         if self.is_closing and Round.objects.filter(competition=self, complete=False).count() == 0:
-            Competition.objects.filter(id=self.id, status='closing').update(status='closed', date_closed=timezone.now())
+            self.status = 'closed'
+            self.date_closed = timezone.now()
+            self.save()
 
             # deactivate bots in this competition
             from . import CompetitionParticipation  # avoid circular reference

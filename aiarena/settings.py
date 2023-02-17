@@ -253,6 +253,8 @@ CONSTANCE_CONFIG = {
     'PROJECT_FINANCE_LINK': ('', 'Link to the project''s finance data.'),
     'PUBLIC_BANNER_MESSAGE': ('', 'Message displayed publicly at the top of the website.'),
     'LOGGED_IN_BANNER_MESSAGE': ('', 'Message displayed to logged in users at the top of the website.'),
+    'COMPETITION_PRIORITY_ORDER_CACHE_TIME': (3600, 'In seconds, how long to cache the result of the AC API competition'
+                                                    ' priority order calculation.'),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
@@ -270,7 +272,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
                          'BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER',
                          'BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER', 'BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER',),
     'Ladders': ('LADDER_ENABLED', 'TIMEOUT_MATCHES_AFTER',
-                'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES',),
+                'BOT_CONSECUTIVE_CRASH_LIMIT', 'REISSUE_UNFINISHED_MATCHES', 'COMPETITION_PRIORITY_ORDER_CACHE_TIME'),
     'Integrations': ('DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET', 'PATREON_CLIENT_ID', 'PATREON_CLIENT_SECRET',
                      'PATREON_CREATOR_REFRESH_TOKEN'),
     'Match interest analysis': ('ELO_DIFF_RATING_MODIFIER', 'COMBINED_ELO_RATING_DIVISOR',),
