@@ -135,25 +135,28 @@ class Matches:
 
         if len(ladder_matches_to_play) > 0:
             bots_with_a_ladder_match_to_play = Bot.objects.raw("""
-            select cb.id
-              from core_match cm
-             inner join core_matchparticipation c
-                on cm.id = c.match_id
-            inner join core_bot cb on c.bot_id = cb.id
-             where cm.started is null
-               and requested_by_id is null
-               and c.bot_id not in 
-                    (select cb.id
-                      from core_matchparticipation
-                     inner join core_match m
-                        on core_matchparticipation.match_id = m.id
-                      left join core_result cr
-                        on m.id = cr.match_id
-                    inner join core_bot cb on core_matchparticipation.bot_id = cb.id
-                     where m.started is not null
-                       and cr.id is null
-                       and core_matchparticipation.use_bot_data
-                       and core_matchparticipation.update_bot_data    )                    
+                SELECT CB.ID
+                FROM CORE_BOT CB
+                WHERE CB.ID in
+                        (SELECT DISTINCT CB.ID
+                            FROM CORE_MATCH CM
+                            INNER JOIN CORE_MATCHPARTICIPATION C ON CM.ID = C.MATCH_ID
+                            INNER JOIN CORE_BOT CB ON C.BOT_ID = CB.ID
+                            WHERE CM.STARTED IS NULL
+                                AND REQUESTED_BY_ID IS NULL
+                                AND C.BOT_ID not in
+                                    (SELECT CB.ID
+                                        FROM CORE_MATCHPARTICIPATION
+                                        INNER JOIN CORE_MATCH M ON CORE_MATCHPARTICIPATION.MATCH_ID = M.ID
+                                        LEFT JOIN CORE_RESULT CR ON M.ID = CR.MATCH_ID
+                                        INNER JOIN CORE_BOT CB ON CORE_MATCHPARTICIPATION.BOT_ID = CB.ID
+                                        WHERE M.STARTED IS NOT NULL
+                                            AND CR.ID IS NULL
+                                            AND CORE_MATCHPARTICIPATION.USE_BOT_DATA
+                                            AND CORE_MATCHPARTICIPATION.UPDATE_BOT_DATA ) )
+                    FOR
+                    UPDATE       
+
             """)
             match_ids = [match.id for match in ladder_matches_to_play]
             bot_ids = [bot.id for bot in bots_with_a_ladder_match_to_play]
@@ -169,7 +172,7 @@ class Matches:
             random.shuffle(available_ladder_matches_to_play)  # ensure the match selection is random
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
-            if len(Bots.get_available(bots_with_a_ladder_match_to_play)) >= 2:
+            if Bots.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
                 return Matches._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
         return None
 
@@ -267,14 +270,25 @@ class Matches:
     def start_next_match_for_competition(requesting_ac: ArenaClient, competition: Competition):
         # LADDER MATCHES
         # Get rounds with un-started matches
+        # The "IN" is a workaround due to postgresql not allowing "FOR UPDATE" with a DISTINCT clause
         rounds = Round.objects.raw("""
-            SELECT cr.id from core_round cr 
-            inner join core_match cm on cr.id = cm.round_id
-            where competition_id=%s
-            and finished is null
-            and cm.started is null
-            order by number
-            for update""", (competition.id,))
+            SELECT 
+                cr.id 
+            FROM 
+                core_round cr 
+            WHERE 
+                cr.id IN (
+                    SELECT 
+                        cr.id 
+                    FROM 
+                        core_round cr 
+                        INNER JOIN core_match cm ON cr.id = cm.round_id 
+                    WHERE 
+                        competition_id=%s 
+                    AND finished IS NULL 
+                    AND cm.started IS NULL 
+                    ORDER BY NUMBER
+                ) for update""", (competition.id,))
 
         for round in rounds:
             match = Matches._attempt_to_start_a_ladder_match(requesting_ac, round)
