@@ -135,27 +135,22 @@ class Matches:
 
         if len(ladder_matches_to_play) > 0:
             bots_with_a_ladder_match_to_play = Bot.objects.raw("""
-                SELECT CB.ID
-                FROM CORE_BOT CB
-                WHERE CB.ID in
-                        (SELECT DISTINCT CB.ID
-                            FROM CORE_MATCH CM
-                            INNER JOIN CORE_MATCHPARTICIPATION C ON CM.ID = C.MATCH_ID
-                            INNER JOIN CORE_BOT CB ON C.BOT_ID = CB.ID
-                            WHERE CM.STARTED IS NULL
-                                AND REQUESTED_BY_ID IS NULL
-                                AND C.BOT_ID not in
-                                    (SELECT CB.ID
-                                        FROM CORE_MATCHPARTICIPATION
-                                        INNER JOIN CORE_MATCH M ON CORE_MATCHPARTICIPATION.MATCH_ID = M.ID
-                                        LEFT JOIN CORE_RESULT CR ON M.ID = CR.MATCH_ID
-                                        INNER JOIN CORE_BOT CB ON CORE_MATCHPARTICIPATION.BOT_ID = CB.ID
-                                        WHERE M.STARTED IS NOT NULL
-                                            AND CR.ID IS NULL
-                                            AND CORE_MATCHPARTICIPATION.USE_BOT_DATA
-                                            AND CORE_MATCHPARTICIPATION.UPDATE_BOT_DATA ) )
-                    FOR
-                    UPDATE       
+                SELECT DISTINCT CB.ID
+                    FROM CORE_MATCH CM
+                    INNER JOIN CORE_MATCHPARTICIPATION C ON CM.ID = C.MATCH_ID
+                    INNER JOIN CORE_BOT CB ON C.BOT_ID = CB.ID
+                WHERE CM.STARTED IS NULL
+                        AND REQUESTED_BY_ID IS NULL
+                        AND C.BOT_ID not in
+                            (SELECT CB.ID
+                                FROM CORE_MATCHPARTICIPATION
+                                INNER JOIN CORE_MATCH M ON CORE_MATCHPARTICIPATION.MATCH_ID = M.ID
+                                LEFT JOIN CORE_RESULT CR ON M.ID = CR.MATCH_ID
+                                INNER JOIN CORE_BOT CB ON CORE_MATCHPARTICIPATION.BOT_ID = CB.ID
+                            WHERE M.STARTED IS NOT NULL
+                                    AND CR.ID IS NULL
+                                    AND CORE_MATCHPARTICIPATION.USE_BOT_DATA
+                                    AND CORE_MATCHPARTICIPATION.UPDATE_BOT_DATA )  
 
             """)
             match_ids = [match.id for match in ladder_matches_to_play]
