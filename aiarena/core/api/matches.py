@@ -268,14 +268,25 @@ class Matches:
     def start_next_match_for_competition(requesting_ac: ArenaClient, competition: Competition):
         # LADDER MATCHES
         # Get rounds with un-started matches
+        # The "IN" is a workaround due to postgresql not allowing "FOR UPDATE" with a DISTINCT clause
         rounds = Round.objects.raw("""
-            SELECT cr.id from core_round cr 
-            inner join core_match cm on cr.id = cm.round_id
-            where competition_id=%s
-            and finished is null
-            and cm.started is null
-            order by number
-            for update""", (competition.id,))
+            SELECT 
+                cr.id 
+            FROM 
+                core_round cr 
+            WHERE 
+                cr.id IN (
+                    SELECT 
+                        cr.id 
+                    FROM 
+                        core_round cr 
+                        INNER JOIN core_match cm ON cr.id = cm.round_id 
+                    WHERE 
+                        competition_id=%s 
+                    AND finished IS NULL 
+                    AND cm.started IS NULL 
+                    ORDER BY NUMBER
+                ) for update""", (competition.id,))
 
         for round in rounds:
             match = Matches._attempt_to_start_a_ladder_match(requesting_ac, round)
