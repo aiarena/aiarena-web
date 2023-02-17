@@ -156,6 +156,7 @@ class Matches:
                                             AND CORE_MATCHPARTICIPATION.UPDATE_BOT_DATA ) )
                     FOR
                     UPDATE       
+
             """)
             match_ids = [match.id for match in ladder_matches_to_play]
             bot_ids = [bot.id for bot in bots_with_a_ladder_match_to_play]
