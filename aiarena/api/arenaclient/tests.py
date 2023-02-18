@@ -9,8 +9,7 @@ from django.test import TransactionTestCase
 from rest_framework.authtoken.models import Token
 
 from aiarena.core.api import Matches
-from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, \
-    Competition, Map, \
+from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, Competition, Map, \
     ArenaClient, BotCrashLimitAlert
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
@@ -775,7 +774,7 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
 
         # deactivate a bot so that we can check it's participated_in_most_recent_round field is updated appropriately
         bot_to_deactivate.active = False
-        bot_to_deactivate.save()
+        bot_to_deactivate.save(update_fields=["active"])
 
         # the following part ensures round generation is properly handled when an old round is not yet finished
         response = self._post_to_matches()
@@ -921,11 +920,16 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
                 div_participants[cp.division_num] = { 'n':1, 'p':1 if cp.in_placements else 0}
         return div_participants
 
+    @staticmethod
+    def competition_participant(match_participation):
+        obj = match_participation.__class__.objects.select_related('match', 'match__round', 'match__round__competition').get(id=match_participation.id)
+        return obj.match.round.competition.participations.get(bot_id=match_participation.bot_id)
+
     def _get_expected_matches_per_div(self, round):
         matches_per_div = dict()
         for m in Match.objects.filter(round=round):
-            div = m.participant1.competition_participant.division_num
-            self.assertEqual(div, m.participant2.competition_participant.division_num)
+            div = self.competition_participant(m.participant1).division_num
+            self.assertEqual(div, self.competition_participant(m.participant2).division_num)
             if div in matches_per_div:
                 matches_per_div[div] += 1
             else:
@@ -1063,18 +1067,14 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         self.su1b3_cp = CompetitionParticipation.objects.create(bot_id=self.staffUser1Bot3.id, competition_id=competition.id)
         self._complete_cycle(competition, [7,8,9], {1:_exp_par(3), 2:_exp_par(3)}, {1:3, 2:3})
         # Bot inactive dont merge yet
-        self.ru1b3_cp.active = False
-        self.ru1b3_cp.save()
+        self._set_active(self.ru1b3_cp, False)
         self._complete_cycle(competition, [10,11,12], {1:_exp_par(2), 2:_exp_par(3)}, {1:1, 2:3})
         # Merge threshold reached
-        self.su1b3_cp.active = False
-        self.su1b3_cp.save()
+        self._set_active(self.su1b3_cp, False)
         self._complete_cycle(competition, [13,14,15], {1:_exp_par(4)}, {1:6})
         # Non equal divisions
-        self.ru1b3_cp.active = True
-        self.ru1b3_cp.save()
-        self.su1b3_cp.active = True
-        self.su1b3_cp.save()
+        self._set_active(self.ru1b3_cp, True)
+        self._set_active(self.su1b3_cp, True)
         self.ru1b4_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser1Bot4.id, competition_id=competition.id)
         self._complete_cycle(competition, [16,17,18], {1:_exp_par(3), 2:_exp_par(4)}, {1:3, 2:6})
         # Split to 3 divs
@@ -1082,21 +1082,15 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         self.ru2b2_cp = CompetitionParticipation.objects.create(bot_id=self.regularUser2Bot2.id, competition_id=competition.id)
         self._complete_cycle(competition, [19,20,21], {1:_exp_par(3), 2:_exp_par(3), 3:_exp_par(3)}, {1:3, 2:3, 3:3})
         # Merge again
-        self.ru1b3_cp.active = False
-        self.ru1b3_cp.save()
+        self._set_active(self.ru1b3_cp, False)
         self._complete_cycle(competition, [22,23,24], {1:_exp_par(2), 2:_exp_par(3), 3:_exp_par(3)}, {1:1, 2:3, 3:3})
-        self.su1b3_cp.active = False
-        self.su1b3_cp.save()
+        self._set_active(self.su1b3_cp, False)
         self._complete_cycle(competition, [25,26,27], {1:_exp_par(3), 2:_exp_par(4)}, {1:3, 2:6})
-        self.ru2b1_cp.active = False
-        self.ru2b1_cp.save()
+        self._set_active(self.ru2b1_cp, False)
         self._complete_cycle(competition, [28,29,30],{1:_exp_par(3), 2:_exp_par(3)}, {1:3, 2:3})
-        self.ru1b3_cp.active = True
-        self.ru1b3_cp.save()
-        self.su1b3_cp.active = True
-        self.su1b3_cp.save()
-        self.ru2b1_cp.active = True
-        self.ru2b1_cp.save()
+        self._set_active(self.ru1b3_cp, True)
+        self._set_active(self.su1b3_cp, True)
+        self._set_active(self.ru2b1_cp, True)
         self._complete_cycle(competition, [31,32,33], {1:_exp_par(3), 2:_exp_par(3), 3:_exp_par(3)}, {1:3, 2:3, 3:3})
         # Grow equally
         CompetitionParticipation.objects.create(bot_id=self.regularUser3Bot1.id, competition_id=competition.id)
@@ -1112,6 +1106,10 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
             for i in range(3):
                 self._create_active_bot_for_competition(competition.id, u, f'{u.username}Bot{i+1}')
         self._complete_cycle(competition, [40,41,42], {1:_exp_par(7), 2:_exp_par(8), 3:_exp_par(8)}, {1:21, 2:28, 3:28})
+
+    def _set_active(self, cp: CompetitionParticipation, active: bool):
+        cp.active = active
+        cp.save(update_fields=["active"])
 
 
 class SetStatusTestCase(LoggedInMixin, TransactionTestCase):
