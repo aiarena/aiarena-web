@@ -24,6 +24,9 @@ class PatreonAccountBind(models.Model):
     last_token_refresh_failure_message = models.TextField(blank=True, null=True)
     """The exception text provided with the latest refresh failure"""
     patreon_user_id = models.CharField(max_length=64, blank=True, null=True)
+    """The user id of the patreon user"""
+    last_refresh_attempt_current_user_json = models.TextField(blank=True, null=True)
+    """The JSON returned from Patreon's current_user endpoint on the last refresh attempt."""
 
     def update_tokens(self):
         self.last_token_refresh_attempt = timezone.now()
@@ -40,7 +43,10 @@ class PatreonAccountBind(models.Model):
 
     def update_user_patreon_tier(self):
         api_client = PatreonApi(self.access_token)
+
         user = api_client.current_user()
+        self.last_refresh_attempt_current_user_json = str(user)
+
         patreon_level = 'none'
         if self.has_pledge(user):
             patreon_level = self.get_pledge_reward_name(user, self.get_pledge_reward_id(user)).lower()
