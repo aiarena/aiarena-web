@@ -7,14 +7,23 @@ A website for running the aiarena.net infrastructure.
 
 ## Module structure:
 ### aiarena/core
-Core ladder/project functionality
+Core project functionality
 
 ### aiarena/api
-Web API endpoints and functionality
+Web API endpoints and functionality.  
+This root api folder contains views for public use.
+
+#### aiarena/api/arenaclient
+API endpoints specifically for use by the arenaclients to obtain new matches and report results.
+
+#### aiarena/api/stream
+API endpoints specifically for use by the livestream player to obtain a curated list of match replays to feature.
 
 ### aiarena/frontend
 Django template website frontend
 
+### aiarena/patreon
+A module for linking website users to their patreon counterparts.
 
 ## License
 
