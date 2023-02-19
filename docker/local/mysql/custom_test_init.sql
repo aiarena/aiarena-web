@@ -1,3 +1,0 @@
-CREATE DATABASE test_aiarena;
-CREATE USER aiarena IDENTIFIED BY 'aiarena';
-GRANT ALL PRIVILEGES ON test_aiarena.* TO aiarena WITH GRANT OPTION;
