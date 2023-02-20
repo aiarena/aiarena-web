@@ -22,6 +22,19 @@ logger = logging.getLogger(__name__)
 
 class Matches:
     @staticmethod
+    def cancel(match_id):
+        try:
+            with transaction.atomic():
+                match = Match.objects.select_for_update().get(pk=match_id)
+                result = match.cancel(None)
+                if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
+                    raise Exception('Match "%s" does not exist' % match_id)
+                elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
+                    raise Exception('A result already exists for match "%s"' % match_id)
+        except Match.DoesNotExist:
+            raise Exception('Match "%s" does not exist' % match_id)
+
+    @staticmethod
     def request_match(user, bot, opponent, map: Map=None, game_mode: GameMode=None):
         # if map is none, a game mode must be supplied and a random map gets chosen
         if map is None:

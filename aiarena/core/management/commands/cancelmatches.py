@@ -1,26 +1,33 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
 
+from aiarena.core.api import Matches
 from aiarena.core.models import Match
 
 
 class Command(BaseCommand):
-    help = 'Registers a MatchCancelled result for all current matches.'
+    help = 'Registers a MatchCancelled result for all specified matches.'
 
     def add_arguments(self, parser):
-        parser.add_argument('match_ids', nargs='+', type=int, help="A space separated list of match ids to cancel.")
+        parser.add_argument('match_ids', nargs='?', type=int, help="A space separated list of match ids to cancel.")
+        parser.add_argument('--active', action='store_true', help="Indicates that all active matches should be cancelled")
 
     def handle(self, *args, **options):
-        for match_id in options['match_ids']:
-            try:
-                with transaction.atomic():
-                    match = Match.objects.select_for_update().get(pk=match_id)
-                    result = match.cancel(None)
-                    if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
-                        raise CommandError('Match "%s" does not exist' % match_id)
-                    elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
-                        raise CommandError('A result already exists for match "%s"' % match_id)
+        match_ids = options['match_ids']
 
-                self.stdout.write(self.style.SUCCESS('Successfully marked match "%s" with MatchCancelled' % match_id))
-            except Match.DoesNotExist:
-                raise CommandError('Match "%s" does not exist' % match_id)
+        if isinstance(match_ids, list):
+            for match_id in match_ids:
+                self.cancel(match_id)
+        elif match_ids is not None:
+            self.cancel(match_ids)
+
+        if options['active']:
+            for match_id in Match.objects.filter(result__isnull=True, started__isnull=False)\
+                    .values_list('id', flat=True):
+                self.cancel(match_id)
+
+    def cancel(self, match_id):
+        try:
+            Matches.cancel(match_id)
+        except Exception as e:
+            raise CommandError(e)
+        self.stdout.write(self.style.SUCCESS('Successfully marked match "%s" with MatchCancelled' % match_id))
