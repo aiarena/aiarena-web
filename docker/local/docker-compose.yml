@@ -43,31 +43,20 @@ services:
              python /app/manage.py migrate &&
              python /app/manage.py runserver 0.0.0.0:8000"
 
-  aiarena-db-test:
-    image: postgres:11.18-bullseye
-    container_name: aiarena-db-test
-    restart: unless-stopped
-    env_file:
-      - .env.test
-    expose:
-      - "5432"
-    volumes:
-      - ./db/custom_test_init.sql:/docker-entrypoint-initdb.d/1.sql
-      - aiarena-db-test-data:/var/lib/postgresql/data
-
   aiarena-web-test:
     build:
       dockerfile: ./docker/Dockerfile
       context: ../../
     container_name: aiarena-web-test
     env_file:
-      - .env.test
+      - .env
     environment:
-      - POSTGRES_DATABASE=aiarena
+      - POSTGRES_HOST=aiarena-postgres
     volumes:
       - ../../.:/app
     depends_on:
-      - aiarena-db-test
+      aiarena-db:
+        condition: service_healthy
     command: >
       sh -c "python /app/manage.py test"
 
@@ -75,7 +64,6 @@ services:
 volumes:
   aiarena-redis-data:
   aiarena-db-data:
-  aiarena-db-test-data:
   aiarena-web-data:
 
 networks:
