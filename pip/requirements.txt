@@ -11,7 +11,7 @@ djangorestframework==3.11.1
 wheel==0.38.4
 psycopg2-binary==2.9.5
 pinax-theme-bootstrap==8.0.1
-pytz==2022.6
+pytz==2022.7.1
 six==1.16.0
 Markdown==3.1
 wiki==0.7.5
