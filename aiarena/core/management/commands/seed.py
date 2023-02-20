@@ -86,7 +86,7 @@ class Command(BaseCommand):
         client.login(devadmin)
 
         ac_count = 0
-        for x in range(num_acs - 1):
+        for x in range(num_acs):
             self.stdout.write(f"Creating ACs...{ac_count / num_acs * 100}%", ending='\r')
             ac = client.create_arenaclient('aiarenaclient-' + str(x),
                                       'aiarenaclient-'+str(x)+'@dev.aiarena.net',
