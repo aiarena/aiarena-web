@@ -37,35 +37,18 @@ class ArenaClientAdmin(admin.ModelAdmin):
     list_display = (
         'username',
         'id',
-        'password',
-        'last_login',
-        'is_superuser',
-        'first_name',
-        'last_name',
-        'is_staff',
         'is_active',
         'date_joined',
-        'email',
-        'patreon_level',
         'type',
         'owner',
-        'extra_active_competition_participations',
-        'extra_periodic_match_requests',
-        'receive_email_comms',
-        'can_request_games_for_another_authors_bot',
         'trusted',
     )
     list_filter = (
-        'last_login',
-        'is_superuser',
-        'is_staff',
-        'is_active',
         'date_joined',
         'owner',
-        'receive_email_comms',
-        'can_request_games_for_another_authors_bot',
         'trusted',
     )
+    list_select_related = ['owner', ]
     actions = ['activate', 'deactivate']
 
     def activate(self, request, queryset):
@@ -117,7 +100,6 @@ class BotAdmin(admin.ModelAdmin):
         'plays_race',
         'type',
         'game_display_id',
-        'wiki_article',
     )
     list_filter = (
         'user',
@@ -128,6 +110,7 @@ class BotAdmin(admin.ModelAdmin):
         'bot_data_publicly_downloadable',
         'wiki_article',
     )
+    list_select_related = ['user', 'plays_race']
 
 @admin.register(BotRace)
 class BotRaceAdmin(admin.ModelAdmin):
@@ -190,6 +173,7 @@ class CompetitionAdmin(admin.ModelAdmin):
         'date_closed',
         'playable_races',
     )
+    list_select_related = ['game_mode']
     # Add the close competition button
     change_form_template = "admin/change_form_competition.html"
     form = CompetitionAdminForm
@@ -236,6 +220,9 @@ class CompetitionBotMatchupStatsAdmin(admin.ModelAdmin):
         'crash_perc',
     )
     list_filter = ('bot', 'opponent')
+    # select related bot.competition and bot.bot because they are used to make up the display string
+    list_select_related = ['bot', 'bot__competition', 'bot__bot',
+                           'opponent', 'opponent__competition', 'opponent__bot']
 
 
 @admin.register(CompetitionParticipation)
@@ -260,6 +247,7 @@ class CompetitionParticipationAdmin(admin.ModelAdmin):
     )
     list_filter = ('competition', 'bot')
     search_fields = ('slug',)
+    list_select_related = ['competition', 'bot']
 
 
 @admin.register(Game)
@@ -303,6 +291,7 @@ class MatchAdmin(admin.ModelAdmin):
     list_filter = ('created', 'started', 'require_trusted_arenaclient')
     search_fields = ['id']
     actions = ['cancel_matches']
+    list_select_related = ['round', 'map', 'assigned_to']
 
     def cancel_matches(self, request, queryset):
         """
@@ -337,6 +326,7 @@ class MatchParticipationAdmin(admin.ModelAdmin):
         'update_bot_data',
     )
     list_filter = ('use_bot_data', 'update_bot_data')
+    list_select_related = ['match', 'bot']
 
 
 @admin.register(MatchTag)
@@ -350,6 +340,7 @@ class MatchTagAdmin(admin.ModelAdmin):
         'user',
     )
     search_fields = ('tag__name',)
+    list_select_related = ['user']
 
 
 @admin.register(News)
@@ -361,6 +352,7 @@ class NewsAdmin(admin.ModelAdmin):
 @admin.register(PatreonAccountBind)
 class PatreonAccountBindAdmin(admin.ModelAdmin):
     list_display = [field.name for field in PatreonAccountBind._meta.fields]
+    list_select_related = ['user']
 
 
 @admin.register(PatreonUnlinkedDiscordUID)
@@ -392,6 +384,7 @@ class ResultAdmin(admin.ModelAdmin):
         'date_interest_rating_calculated',
         'replay_file_has_been_cleaned',
     )
+    list_select_related = ['match', 'winner', 'submitted_by']
 
 
 @admin.register(Round)
@@ -405,6 +398,7 @@ class RoundAdmin(admin.ModelAdmin):
         'complete',
     )
     list_filter = ('competition', 'started', 'finished', 'complete')
+    list_select_related = ['competition']
 
 
 @admin.register(Tag)

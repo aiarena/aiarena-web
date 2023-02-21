@@ -1,3 +1,4 @@
+import datetime
 import random
 
 from django.core.files import File
@@ -19,14 +20,15 @@ class Command(BaseCommand):
     help = "Seed database for testing and development."
 
     _DEFAULT_MATCHES_TO_GENERATE = 50
+    _DEFAULT_ARENACLIENTS_TO_GENERATE = 2
 
     def add_arguments(self, parser):
         parser.add_argument('--matches', type=int, default=self._DEFAULT_MATCHES_TO_GENERATE,
                             help="Number of matches to generate. Default is {0}.".format(
                                 self._DEFAULT_MATCHES_TO_GENERATE))
-        parser.add_argument('--token', type=str, default=None,
-                            help="Specify the token to use for the arena client."
-                                 " Useful to avoid having to reconfigure arena clients in testing")
+        parser.add_argument('--numacs', type=int, default=self._DEFAULT_ARENACLIENTS_TO_GENERATE,
+                            help="Number of Arena Clients to generate. Default is {0}. MUST be at least 1.".format(
+                                self._DEFAULT_ARENACLIENTS_TO_GENERATE))
         parser.add_argument('--flush', action='store_true', help="Whether to flush the existing database data.")
         parser.add_argument('--migrate', action='store_true', help="Whether to migrate the database first.")
         parser.add_argument('--randomseed', type=int,
@@ -36,6 +38,8 @@ class Command(BaseCommand):
 
         if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT \
                 or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING:
+            started_at = datetime.datetime.now()
+            self.stdout.write(f"Started at: {started_at}")
             if options['randomseed'] is not None:
                 self.stdout.write('Setting random seed to {randomseed}')
                 random.seed(options['randomseed'])
@@ -50,7 +54,7 @@ class Command(BaseCommand):
             self.stdout.write('Seeding data...')
 
             self.stdout.write('Generating {0} match(es)...'.format(options['matches']))
-            api_token = self.run_seed(options['matches'], options['token'])
+            self.run_seed(options['numacs'], options['matches'])
 
             self.stdout.write('Creating news items...')
             News.objects.create(title="News item 1",
@@ -65,11 +69,14 @@ class Command(BaseCommand):
                                      "in our testing. Maybe formatting errors, or something like that. ")
 
             self.stdout.write('Done. User logins have a password of "x".')
-            self.stdout.write('API Token is {0}.'.format(api_token))
+            self.stdout.write('AC API Tokens have been set to their AC number e.g. arenaclient-1\'s token is "1"')
+            finished_at = datetime.datetime.now()
+            self.stdout.write(f"Finished at: {finished_at}")
+            self.stdout.write(f"Elapsed seconds: {(finished_at - started_at).total_seconds()}")
         else:
             self.stdout.write('Seeding failed: This is not a development or staging environment!')
 
-    def run_seed(self, matches, token):
+    def run_seed(self, num_acs: int, matches):
         self.stdout.write(f"Seeding initial website data...")
 
         devadmin = WebsiteUser.objects.create_superuser(username='devadmin', password='x',
@@ -78,13 +85,22 @@ class Command(BaseCommand):
         client = TestingClient()
         client.login(devadmin)
 
-        arenaclient1 = client.create_arenaclient('aiarenaclient-001', 'aiarenaclient-001@dev.aiarena.net', devadmin.id)
-        client.create_arenaclient('aiarenaclient-002', 'aiarenaclient-002@dev.aiarena.net', devadmin.id)
+        ac_count = 0
+        for x in range(num_acs):
+            self.stdout.write(f"Creating ACs...{ac_count / num_acs * 100}%", ending='\r')
+            ac = client.create_arenaclient('aiarenaclient-' + str(x),
+                                      'aiarenaclient-'+str(x)+'@dev.aiarena.net',
+                                      devadmin.id)
+            # if token is None it will generate a new one, otherwise it will use the one specified
+            Token.objects.create(user=ac, key=str(x))
+
+        self.stdout.write(f"Creating ACs...100%")
+
         client.create_user('service_user', 'x', 'service_user@dev.aiarena.net', 'SERVICE', devadmin.id)
 
-        # if token is None it will generate a new one, otherwise it will use the one specified
-        api_token = Token.objects.create(user=arenaclient1, key=token)
         ac_client = AcApiTestingClient()
+
+        api_token = Token.objects.first()
         ac_client.set_api_token(api_token.key)
 
         game = client.create_game('StarCraft II')
@@ -233,5 +249,3 @@ class Command(BaseCommand):
             bot = Bot.objects.create(user=devadmin, name='devadmin_bot101', plays_race=terran, type='python',
                                      bot_zip=File(bot_zip))
             CompetitionParticipation.objects.create(competition=competition1, bot=bot)
-
-            return api_token

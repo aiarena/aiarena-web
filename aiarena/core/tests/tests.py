@@ -376,7 +376,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
     Tests for management commands
     """
 
-
     def test_cancel_matches(self):
         # freeze competition2, so we can get anticipatable results
         competition1 = Competition.objects.filter(status='open').first()
@@ -407,8 +406,18 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         # test that cancelling the match marks it as started.
         self.assertIsNotNone(Match.objects.get(id=match_id).started)
 
+        response = self._post_to_matches()
+        self.assertEqual(response.status_code, 201)
+        active_match_id = response.data['id']
+        out = StringIO()
+        call_command('cancelmatches', '--active', stdout=out)
+        self.assertIn('Successfully marked match "{0}" with MatchCancelled'.format(active_match_id),
+                      out.getvalue())
+
+
         # cancel the rest of the matches.
-        for x in range(1, expectedMatchCountPerRound):
+        # start at 2 because we already cancelled some above
+        for x in range(2, expectedMatchCountPerRound):
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 201)
             match_id = response.data['id']

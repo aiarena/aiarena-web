@@ -11,18 +11,17 @@ services:
     volumes:
       - aiarena-redis-data:/data
 
-  aiarena-mysql:
-    image: mysql:5.7
-    container_name: aiarena-mysql
+  aiarena-db:
+    image: postgres:11.18-bullseye
+    container_name: aiarena-db
     restart: unless-stopped
     env_file:
       - .env
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - ./mysql/custom_init.sql:/docker-entrypoint-initdb.d/1.sql
-      - aiarena-mysql-data:/var/lib/mysql
-
+      - ./db/custom_init.sql:/docker-entrypoint-initdb.d/1.sql
+      - aiarena-db-data:/var/lib/postgresql/data
   aiarena-web:
     build:
       dockerfile: ./docker/Dockerfile
@@ -38,23 +37,11 @@ services:
       - ../../.:/app
     depends_on:
       - aiarena-redis
-      - aiarena-mysql
+      - aiarena-db
     command: >
       sh -c "python /app/manage.py collectstatic --noinput &&
              python /app/manage.py migrate &&
              python /app/manage.py runserver 0.0.0.0:8000"
-
-  aiarena-mysql-test:
-    image: mysql:5.7
-    container_name: aiarena-mysql-test
-    restart: unless-stopped
-    env_file:
-      - .env.test
-    expose:
-      - "3306"
-    volumes:
-      - ./mysql/custom_test_init.sql:/docker-entrypoint-initdb.d/1.sql
-      - aiarena-mysql-test-data:/var/lib/mysql
 
   aiarena-web-test:
     build:
@@ -62,21 +49,21 @@ services:
       context: ../../
     container_name: aiarena-web-test
     env_file:
-      - .env.test
+      - .env
     environment:
-      - MYSQL_DATABASE=aiarena
+      - POSTGRES_HOST=aiarena-postgres
     volumes:
       - ../../.:/app
     depends_on:
-      - aiarena-mysql-test
+      aiarena-db:
+        condition: service_healthy
     command: >
       sh -c "python /app/manage.py test"
 
 
 volumes:
   aiarena-redis-data:
-  aiarena-mysql-data:
-  aiarena-mysql-test-data:
+  aiarena-db-data:
   aiarena-web-data:
 
 networks:
