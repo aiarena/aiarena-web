@@ -15,7 +15,6 @@ from rest_framework.reverse import reverse
 from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
-from aiarena.api.arenaclient.util import get_winner_loser, select_competition_participant_for_update, apply_elo_delta
 from aiarena.core.utils import parse_tags
 from aiarena.core.api import BotStatistics
 from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, CompetitionParticipation, MatchTag, Tag, \
@@ -23,7 +22,6 @@ from aiarena.core.models import Bot, Map, Match, MatchParticipation, Result, Com
 from aiarena.core.models.arena_client_status import ArenaClientStatus
 from aiarena.core.permissions import IsArenaClientOrAdminUser, IsArenaClient
 from aiarena.core.validators import validate_not_inf, validate_not_nan
-from aiarena.settings import ELO
 
 logger = logging.getLogger(__name__)
 
@@ -340,27 +338,16 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     if result.match.round is not None:
                         result.match.round.update_if_completed()
 
-                        match_id = result.match_id
-                        sp1 = select_competition_participant_for_update(match_id=match_id, participant_number=1)
-                        sp2 = select_competition_participant_for_update(match_id=match_id, participant_number=2)
-
                         # Update and record ELO figures
-                        p1_initial_elo = sp1.elo
-                        p2_initial_elo = sp2.elo
+                        p1_initial_elo, p2_initial_elo = result.get_initial_elos
+                        result.adjust_elo()
+
                         initial_elo_sum = p1_initial_elo + p2_initial_elo
 
-                        if result.has_winner:
-                            sp_winner, sp_loser = get_winner_loser(result.type, sp1, sp2)
-                            apply_elo_delta(ELO.calculate_elo_delta(sp_winner.elo, sp_loser.elo, 1.0), sp_winner,
-                                             sp_loser)
-                        elif result.type == 'Tie':
-                            apply_elo_delta(ELO.calculate_elo_delta(sp1.elo, sp2.elo, 0.5), sp1,
-                                             sp2)
-
-                        sp1.save()
-                        sp2.save()
-
                         # Calculate the change in ELO
+                        # the bot elos have changed so refresh them
+                        # todo: instead of having to refresh, return data from adjust_elo and apply it here
+                        sp1, sp2 = result.get_competition_participants
                         participant1.resultant_elo = sp1.elo
                         participant2.resultant_elo = sp2.elo
                         participant1.elo_change = participant1.resultant_elo - p1_initial_elo
@@ -389,7 +376,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                             if actual_elo_sum['elo__sum'] != expected_elo_sum:
                                 logger.critical(
-                                    "ENABLE_ELO_SANITY_CHECK FAILURE: ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
+                                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
                                         actual_elo_sum['elo__sum'], expected_elo_sum, result.id))
                             elif config.DEBUG_LOGGING_ENABLED:
                                 logger.info("ENABLE_ELO_SANITY_CHECK passed!")
