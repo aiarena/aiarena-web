@@ -25,15 +25,18 @@ def run_ac(ac_id, num_matches, lock):
     ac_id = str(ac_id)
     ac_token = ac_id
 
-    logger.info(f"Creating AC {ac_id}")
-    ac = MockArenaClient(ac_id=ac_id, webserver_url=API_URL, api_token=ac_token, working_dir=f"./{ac_id}/")
+    logger.info(f"AC {ac_id} - Starting")
+    ac = MockArenaClient(ac_id=ac_id, webserver_url=API_URL, api_token=ac_token, working_dir=f"./tmp/{ac_id}/")
 
     while True:
-        with lock: # reserve a match for this AC if there are any left to play
+        with lock:  # reserve a match for this AC if there are any left to play
             if num_matches.value >= NUM_MATCHES_TO_RUN:
+                logger.info(f"AC {ac_id} - Exiting: no more matches to run.")
                 break
+
             num_matches.value += 1
-            logger.info(f"Starting match {num_matches.value} using AC {ac_id}")
+            logger.info(f"AC {ac_id} - Starting match {num_matches.value}")
+            logger.info(f"AC {ac_id} - {NUM_MATCHES_TO_RUN-num_matches.value} matches left to run")
 
         # don't quit until this match is run
         while not ac.run_a_match():

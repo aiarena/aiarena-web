@@ -18,7 +18,8 @@ class AiArenaWebACApi:
     API_MATCHES_ENDPOINT = "/api/arenaclient/matches/"
     API_RESULTS_ENDPOINT = "/api/arenaclient/results/"
 
-    def __init__(self, api_url, api_token):
+    def __init__(self, ac_id, api_url, api_token):
+        self._ac_id = ac_id
         self.API_URL = api_url
         self.API_TOKEN = api_token
         self.API_MATCHES_URL = parse.urljoin(self.API_URL, AiArenaWebACApi.API_MATCHES_ENDPOINT)
@@ -34,11 +35,15 @@ class AiArenaWebACApi:
                 headers={"Authorization": "Token " + self.API_TOKEN},
             )
         except ConnectionError:
-            logger.error("Failed to retrieve game. Connection to website failed.")
+            logger.error(f"AC {self._ac_id}: Failed to retrieve game. Connection to website failed.")
             return None
 
         if next_match_response.status_code >= 400:
-            logger.error(f"Failed to retrieve game. Status code: {next_match_response.status_code}.")
+            if next_match_response.status_code >= 500:
+                # scheduling related functionality
+                logger.info(f"AC {self._ac_id}: Failed to retrieve game. Status code: {next_match_response.status_code}.")
+            else:
+                logger.error(f"AC {self._ac_id}: Failed to retrieve game. Status code: {next_match_response.status_code}.")
             return None
 
         return json.loads(next_match_response.text)
@@ -80,7 +85,7 @@ class AiArenaWebACApi:
 
             success = True
         except Exception as download_exception:
-            logger.error(f"Failed to download map at URL {map_url}. Error {download_exception}.")
+            logger.error(f"AC {self._ac_id}:Failed to download map at URL {map_url}. Error {download_exception}.")
 
         return success
 
@@ -103,12 +108,12 @@ class MockArenaClient:
     def __init__(self, ac_id: str, webserver_url: str, api_token: str, working_dir: str):
         self._ac_id = ac_id
         self._webserver_url = webserver_url
-        self._api = AiArenaWebACApi(webserver_url, api_token)
+        self._api = AiArenaWebACApi(self._ac_id, webserver_url, api_token)
         self._working_dir = working_dir
 
     def run_matches(self, num_matches: int):
         for x in range(num_matches):
-            logger.info(f"Running match {x+1} of {num_matches}")
+            logger.info(f"AC {self._ac_id}: Running match {x+1} of {num_matches}")
             self.run_a_match()
 
     def run_a_match(self) -> bool:
@@ -118,34 +123,32 @@ class MockArenaClient:
         match = self._api.get_match()
 
         if match is None:
-            logger.error("New match was none!")
+            logger.info(f"AC {self._ac_id}: New match was none!")
             return False
 
         if "id" not in match:
-            logger.error("New match ID was missing!")
+            logger.info(f"AC {self._ac_id}: New match ID was missing!")
             return False
 
-        logger.info(f"Cleaning working directory {self._working_dir}")
+        logger.info(f"AC {self._ac_id}: Cleaning working directory {self._working_dir}")
         self._clean_working_dir()
 
         next_match_id = match["id"]
-        logger.info(f"Next match: {next_match_id}")
+        logger.info(f"AC {self._ac_id}: Next match: {next_match_id}")
 
         # Download map
-        logger.info(f"Downloading map {match['map']['name']}")
+        logger.info(f"AC {self._ac_id}: Downloading map {match['map']['name']}")
         map_path = os.path.join(self._working_dir, f"map.SC2Map")
         if not self._api.download_map(match["map"]["file"], map_path):
-            logger.error("Map download failed.")
+            logger.error(f"AC {self._ac_id}: Map download failed.")
             return False
 
         if not self._download_bots_files(match):
-            logger.error("Failed to download bot files.")
+            logger.error(f"AC {self._ac_id}: Failed to download bot files.")
             return False
 
         result = self._mock_match_activity()
-        self._submit_result(match, result, random.randint(1, 80640))
-
-        return True
+        return self._submit_result(match, result, random.randint(1, 80640))
 
     def _clean_working_dir(self):
         # Iterate over the files in the folder and delete them
@@ -158,7 +161,7 @@ class MockArenaClient:
                     # Use shutil.rmtree to remove subdirectories and their contents
                     shutil.rmtree(file_path)
             except Exception as e:
-                logger.error(f"Failed to delete {file_path}. Reason: {e}")
+                logger.error(f"AC {self._ac_id}: Failed to delete {file_path}. Reason: {e}")
 
     def _download_bots_files(self, match: dict):
         return self._download_bot_files(match["bot1"], "1") \
@@ -175,6 +178,8 @@ class MockArenaClient:
         return "Tie"
 
     def _submit_result(self, match, result_type, game_steps):
+        success = True
+
         bot1_data = self._open_if_present("bot1-data.zip")
         bot1_log = self._open_if_present("bot1-log.zip")
 
@@ -204,11 +209,13 @@ class MockArenaClient:
                                        arenaclient_log, replay_file_stream)
 
         if post is None:
-            logger.error(f"Result submission failed. 'post' was None.")
+            success = False
+            logger.error(f"AC {self._ac_id}: Result submission failed. 'post' was None.")
         elif post.status_code >= 400:
-            logger.error(f"Result submission failed. Status code: {post.status_code}.")
+            success = False
+            logger.error(f"AC {self._ac_id}: Result submission failed. Status code: {post.status_code}.")
         else:
-            logger.info(result_type + " - Result transferred")
+            logger.info(f"AC {self._ac_id}: {result_type} - Result transferred")
 
         def close(f):
             if f:
@@ -220,6 +227,8 @@ class MockArenaClient:
         close(bot2_log)
         close(arenaclient_log)
         close(replay_file_stream)
+
+        return success
 
     def _open_if_present(self, file_name):
         path = os.path.join(self._working_dir, file_name)
@@ -252,7 +261,7 @@ class MockArenaClient:
             calculated_md5 = hashlib.md5(self.file_as_bytes(bot_data_zip)).hexdigest()
 
             if not bot["bot_data_md5hash"] == calculated_md5:
-                logger.error(f"MD5 hash ({bot['bot_zip_md5hash']}) does not match transferred file ({calculated_md5})")
+                logger.error(f"AC {self._ac_id}: MD5 hash ({bot['bot_zip_md5hash']}) does not match transferred file ({calculated_md5})")
                 return False
         return True
 
