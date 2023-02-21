@@ -6,7 +6,7 @@ django-bootstrap-form==3.4
 django-filter==22.1
 django-private-storage==3.0
 django-registration-redux==2.10
-django-avatar==5.0.0
+django-avatar==7.0.1
 djangorestframework==3.11.1
 wheel==0.38.4
 psycopg2-binary==2.9.5
