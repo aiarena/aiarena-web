@@ -9,7 +9,8 @@ from django.test import TransactionTestCase
 from rest_framework.authtoken.models import Token
 
 from aiarena.core.api import Matches
-from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, Competition, Map, \
+from aiarena.core.models import Match, Bot, MatchParticipation, User, Round, Result, CompetitionParticipation, \
+    Competition, Map, \
     ArenaClient, BotCrashLimitAlert
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
@@ -920,16 +921,11 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
                 div_participants[cp.division_num] = { 'n':1, 'p':1 if cp.in_placements else 0}
         return div_participants
 
-    @staticmethod
-    def competition_participant(match_participation):
-        obj = match_participation.__class__.objects.select_related('match', 'match__round', 'match__round__competition').get(id=match_participation.id)
-        return obj.match.round.competition.participations.get(bot_id=match_participation.bot_id)
-
     def _get_expected_matches_per_div(self, round):
         matches_per_div = dict()
         for m in Match.objects.filter(round=round):
-            div = self.competition_participant(m.participant1).division_num
-            self.assertEqual(div, self.competition_participant(m.participant2).division_num)
+            div = m.participant1.competition_participant.division_num
+            self.assertEqual(div, m.participant2.competition_participant.division_num)
             if div in matches_per_div:
                 matches_per_div[div] += 1
             else:
