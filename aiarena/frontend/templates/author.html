@@ -36,7 +36,7 @@
         {% for bot in bot_list %}
             <tr>
                 <td>{{ bot.as_html_link }}</td>
-                <td>{{ bot.type }}</td>
+                <td>{{ bot.get_type_display }}</td>
                 <td>{{ bot.plays_race.get_label_display }}</td>
             </tr>
         {% endfor %}
