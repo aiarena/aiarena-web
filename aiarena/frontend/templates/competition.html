@@ -113,7 +113,7 @@
                             </td>
                             <td>{{ participant.bot.plays_race.get_label_display }}</td>
                             <td>{{ participant.bot.user.as_html_link }}</td>
-                            <td>{{ participant.bot.get_type_display }}</td>
+                            <td>{{ participant.bot.type }}</td>
                             {% if participant.win_perc %}
                                 <td>{{ participant.win_perc|floatformat:2 }}</td>
                             {% else %}
