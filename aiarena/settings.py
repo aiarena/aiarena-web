@@ -107,7 +107,6 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_tables2',
 ]
-SHEETS_CACHE_DISABLED = True
 
 MIDDLEWARE = [
     # This will be removed automatically in non-development environments

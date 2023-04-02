@@ -1,12 +1,11 @@
 import os
 import traceback
 
-from constance import config
 from django.core.management.base import BaseCommand, CommandError
 
 from aiarena.core.models import User
 from aiarena.patreon.models import PatreonAccountBind
-from aiarena.patreon.patreon import PatreonOAuth, update_unlinked_discord_users
+from aiarena.patreon.patreon import update_unlinked_discord_users
 
 
 class Command(BaseCommand):
@@ -31,7 +30,10 @@ class Command(BaseCommand):
             except Exception as e:
                 errors = errors + os.linesep + traceback.format_exc()
 
-        update_unlinked_discord_users()
+        try:
+            update_unlinked_discord_users()
+        except Exception as e:
+            errors = errors + os.linesep + traceback.format_exc()
 
         if len(errors) > 0:
             raise CommandError('The following errors occurred:' + errors)
