@@ -41,13 +41,13 @@ class Bot(models.Model, LockableModelMixin):
         ('P', 'Protoss'),
         ('R', 'Random'),
     )
-    TYPES = (
-        ('cppwin32', 'CppWin32'),
-        ('cpplinux', 'CppLinux'),
-        ('dotnetcore', 'DotNetCore'),
-        ('java', 'Java'),
-        ('nodejs', 'NodeJS'),
-        ('python', 'Python'),
+    TYPES = (  # todo: update display names. capitalize etc
+        ('cppwin32', 'cppwin32'),
+        ('cpplinux', 'cpplinux'),
+        ('dotnetcore', 'dotnetcore'),
+        ('java', 'java'),
+        ('nodejs', 'nodejs'),
+        ('python', 'python'),
     )
     BOT_ZIP_LIMIT_MAP = {
         "none": config.BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER,
