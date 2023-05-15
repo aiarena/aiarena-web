@@ -57,6 +57,12 @@ class User(AbstractUser, LockableModelMixin):
     def as_html_link(self):
         return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url, escape(self.__str__())))
 
+    @cached_property
+    def as_truncated_html_link(self):
+        name = escape(self.__str__())
+        limit = 20
+        return mark_safe(f'<a href="{self.get_absolute_url}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>')
+
     BOTS_LIMIT_MAP = {
         "none": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
         "bronze": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
