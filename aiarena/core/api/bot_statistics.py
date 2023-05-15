@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from django.db import connection
 from django.db.models import Max
+from django_pglocks import advisory_lock
 from pytz import utc
 
 from aiarena.core.models import MatchParticipation, CompetitionParticipation, Bot, Map, Match, Result
@@ -21,19 +22,28 @@ class BotStatistics:
            This can be done much quicker that regenerating a bot's entire set of stats"""
 
         if result.type not in BotStatistics._ignored_result_types and bot.competition.indepth_bot_statistics_enabled:
-            bot.lock_me()
-            BotStatistics._update_global_statistics(bot, result)
-            BotStatistics._update_matchup_stats(bot, opponent, result)
-            BotStatistics._update_map_stats(bot, result)
+            with advisory_lock(f'stats_lock_{bot.id}') as acquired:
+                if not acquired:
+                    raise Exception('Could not acquire lock on bot statistics for competition participation '
+                                    + str(bot.id))
+                BotStatistics._update_global_statistics(bot, result)
+                BotStatistics._update_matchup_stats(bot, opponent, result)
+                BotStatistics._update_map_stats(bot, result)
 
     @staticmethod
     def recalculate_stats(sp: CompetitionParticipation):
         """This method entirely recalculates a bot's set of stats."""
-        BotStatistics._recalculate_global_statistics(sp)
 
-        if sp.competition.indepth_bot_statistics_enabled:
-            BotStatistics._recalculate_matchup_stats(sp)
-            BotStatistics._recalculate_map_stats(sp)
+        with advisory_lock(f'stats_lock_{sp.id}') as acquired:
+            if not acquired:
+                raise Exception('Could not acquire lock on bot statistics for competition participation '
+                                + str(sp.id))
+
+            BotStatistics._recalculate_global_statistics(sp)
+
+            if sp.competition.indepth_bot_statistics_enabled:
+                BotStatistics._recalculate_matchup_stats(sp)
+                BotStatistics._recalculate_map_stats(sp)
 
     # ignore these result types for the purpose of statistics generation
     _ignored_result_types = ['MatchCancelled', 'InitializationError', 'Error']

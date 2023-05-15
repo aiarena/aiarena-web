@@ -47,7 +47,6 @@ class Command(BaseCommand):
                         competition.statistics_finalized = True
                         competition.save()
                     for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
-                        sp.lock_me()
                         self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
                         BotStatistics.recalculate_stats(sp)
                 else:
