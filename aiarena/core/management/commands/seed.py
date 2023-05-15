@@ -116,10 +116,13 @@ class Command(BaseCommand):
         competition1.target_division_size = 2
         competition1.n_placements = 2
         competition1.rounds_per_cycle = 1
+        competition1.indepth_bot_statistics_enabled = True
         competition1.save()
         client.open_competition(competition1.id)
 
         competition2 = client.create_competition('Competition 2', 'L', gamemode.id)
+        competition2.indepth_bot_statistics_enabled = True
+        competition2.save()
         client.open_competition(competition2.id)
 
         competition3 = client.create_competition('Competition 3 - Terran Only', 'L', gamemode.id, {terran.id})
