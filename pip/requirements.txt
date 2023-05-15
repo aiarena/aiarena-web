@@ -27,3 +27,4 @@ django-redis==4.12.1
 django-select2==7.5.0
 django-tables2==2.3.4
 django-debug-toolbar==3.2.2
+django-pglocks==1.16.0

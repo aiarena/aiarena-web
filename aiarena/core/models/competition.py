@@ -67,6 +67,8 @@ class Competition(models.Model, LockableModelMixin):
     """Marks that this competition's statistics have been finalized and therefore cannot be modified."""
     competition_finalized = models.BooleanField(default=False)
     """Marks that this competition has been finalized, and it's round and match data purged."""
+    indepth_bot_statistics_enabled = models.BooleanField(default=True)
+    """Whether to generate and display indepth bot statistics for this competition."""
 
     def __str__(self):
         return self.name
