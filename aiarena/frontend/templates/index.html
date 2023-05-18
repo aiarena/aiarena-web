@@ -168,7 +168,7 @@
                 {# newly created bots have same update time as its creation time #}
                 {% if event.is_created_event %}
                     <td nowrap>{{ event.bot_zip_updated|naturaltime|shorten_naturaltime }}</td>
-                    <td style="text-align: left">{{ event.user.as_html_link }} uploaded a new bot: {{ event.as_truncated_html_link }}.</td>
+                    <td style="text-align: left">{{ event.user.as_truncated_html_link }} uploaded a new bot: {{ event.as_truncated_html_link }}.</td>
                 {% else %}
                     <td nowrap>{{ event.bot_zip_updated|naturaltime|shorten_naturaltime }}</td>
                     <td style="text-align: left">Bot {{ event.as_truncated_html_link }} was updated.</td>

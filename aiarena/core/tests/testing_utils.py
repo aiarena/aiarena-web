@@ -143,6 +143,8 @@ class TestingClient:
             'name': competition.name,  # required by the form
             'type': competition.type,  # required by the form
             'game_mode': competition.game_mode_id,  # required by the form
+            # if this isn't set here, it reverts to false - I don't understand why :(
+            'indepth_bot_statistics_enabled': competition.indepth_bot_statistics_enabled,
         }
         response = self.django_client.post(url, data)
 

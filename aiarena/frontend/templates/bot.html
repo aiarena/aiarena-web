@@ -173,7 +173,11 @@
                             <td>--</td>
                         {% endif %}
                         <td>{{ competition_participation.elo }}</td>
+                        {% if competition_participation.competition.indepth_bot_statistics_enabled %}
                         <td><a href="{% url 'bot_competition_stats' competition_participation.id competition_participation.slug %}">Stats</a></td>
+                        {% else %}
+                        <td>--</td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             {% else %}

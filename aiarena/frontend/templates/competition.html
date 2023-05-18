@@ -95,7 +95,9 @@
                     <td><strong>Type</strong></td>
                     <td><strong>Win %</strong></td>
                     <td><strong>ELO</strong></td>
+                    {% if competition.indepth_bot_statistics_enabled %}
                     <td></td>
+                    {% endif %}
                 </tr>
                 </thead>
                 <tbody>
@@ -112,7 +114,7 @@
                                 {{ participant.bot.as_truncated_html_link }}
                             </td>
                             <td>{{ participant.bot.plays_race.get_label_display }}</td>
-                            <td>{{ participant.bot.user.as_html_link }}</td>
+                            <td>{{ participant.bot.user.as_truncated_html_link }}</td>
                             <td>{{ participant.bot.type }}</td>
                             {% if participant.win_perc %}
                                 <td>{{ participant.win_perc|floatformat:2 }}</td>
@@ -153,8 +155,9 @@
                                     {% endif %}
                                 {% endif %}
                             </td>
+                            {% if competition.indepth_bot_statistics_enabled %}
                             <td><a href="{% url 'bot_competition_stats' participant.id participant.slug %}">Stats</a></td>
-
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 {% else %}

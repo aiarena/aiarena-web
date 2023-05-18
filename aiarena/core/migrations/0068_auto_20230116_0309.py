@@ -7,7 +7,7 @@ from aiarena.core.models import Competition, CompetitionParticipation, Match
 
 
 def mark_participated_in_most_recent_round(apps, schema_editor):
-    for competition in Competition.objects.all():
+    for competition in Competition.objects.all().only('id'):
         last_round = Ladders.get_most_recent_round(competition)
         if last_round is not None:
             bot_ids = Match.objects.select_related('match_participation').filter(round=last_round).values('matchparticipation__bot__id').distinct()
