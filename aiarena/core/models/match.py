@@ -24,6 +24,7 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
     """ Represents a match between 2 bots. Usually this is within the context of a round, but doesn't have to be. """
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
+    # todo: the functionality of the started and first_started fields does not appear to be fully implemented
     started = models.DateTimeField(blank=True, null=True, editable=False, db_index=True)
     first_started = models.DateTimeField(blank=True, null=True, editable=False, db_index=True)
     """The first time this match started. Different from the started field when multiple runs are attempted."""

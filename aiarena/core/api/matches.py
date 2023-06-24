@@ -100,7 +100,9 @@ class Matches:
                         .get(competition=match.round.competition).elo
                     p.save()
 
-            match.started = timezone.now()
+            now = timezone.now()
+            match.started = now
+            match.first_started = now
             match.assigned_to = arenaclient
             match.save()
             return True
