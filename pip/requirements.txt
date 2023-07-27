@@ -13,7 +13,7 @@ psycopg2-binary==2.9.5
 pinax-theme-bootstrap==8.0.1
 pytz==2022.7.1
 six==1.16.0
-Markdown==3.1
+Markdown==3.4.4
 wiki==0.7.5
 matplotlib==3.7.2
 pandas==2.0.3
