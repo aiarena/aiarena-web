@@ -125,6 +125,19 @@ class Bot(models.Model, LockableModelMixin):
 
         self.wiki_article = article
 
+    def update_bot_wiki_article(self, new_content, request):
+        if self.wiki_article.current_revision.content == new_content:
+            return
+
+        # If the article content is different, add a new revision
+        revision = ArticleRevision()
+        revision.inherit_predecessor(self.wiki_article)
+        revision.title = self.name
+        revision.content = new_content
+        revision.deleted = False
+        revision.set_from_request(request)
+        self.wiki_article.add_revision(revision)
+
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
             raise ValidationError(
