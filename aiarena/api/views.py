@@ -214,6 +214,9 @@ class BotAccessPermission(BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
+        if obj.bot_data_is_currently_frozen():
+            return False
+
         if obj.user != request.user:
             return False
 
