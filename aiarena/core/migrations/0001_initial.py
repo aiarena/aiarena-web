@@ -86,7 +86,7 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=50, unique=True, validators=[django.core.validators.RegexValidator('^[0-9a-zA-Z\\._\\-]*$', 'Only alphanumeric (A-Z, a-z, 0-9), period (.), underscore (_) and hyphen (-) characters are allowed.')])),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('active', models.BooleanField(default=False)),
-                ('bot_zip', private_storage.fields.PrivateFileField(storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.bot_zip_upload_to, validators=[aiarena.core.validators.validate_bot_zip_file])),
+                ('bot_zip', private_storage.fields.PrivateFileField(storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.bot_zip_upload_to, validators=[])),
                 ('bot_zip_updated', models.DateTimeField(editable=False)),
                 ('bot_zip_md5hash', models.CharField(editable=False, max_length=32)),
                 ('bot_zip_publicly_downloadable', models.BooleanField(default=False)),
