@@ -50,14 +50,6 @@ class Bot(models.Model, LockableModelMixin):
         ('nodejs', 'nodejs'),
         ('python', 'python'),
     )
-    BOT_ZIP_LIMIT_MAP = {
-        "none": config.BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER,
-        "bronze": config.BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER,
-        "silver": config.BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER,
-        "gold": config.BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER,
-        "platinum": config.BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER,
-        "diamond": config.BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER,
-    }
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
@@ -100,7 +92,14 @@ class Bot(models.Model, LockableModelMixin):
         return matches.count() > 0
 
     def get_bot_zip_limit_in_mb(self):
-        limit = self.BOT_ZIP_LIMIT_MAP[self.user.patreon_level]
+        limit = {
+            "none": config.BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER,
+            "bronze": config.BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER,
+            "silver": config.BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER,
+            "gold": config.BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER,
+            "platinum": config.BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER,
+            "diamond": config.BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER,
+        }[self.user.patreon_level]
         return limit if limit is not None else None
 
     def regen_game_display_id(self):
