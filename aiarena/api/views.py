@@ -3,6 +3,7 @@ from wsgiref.util import FileWrapper
 
 from discord_bind.models import DiscordUser
 from django.contrib.auth import login, logout
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Prefetch
 from django.http import HttpResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -182,19 +183,58 @@ class BotSerializer(serializers.ModelSerializer):
         fields = bot_include_fields + ('trophies',)
 
 
+class BotUpdateSerializer(serializers.ModelSerializer):
+    wiki_article_content = serializers.CharField(write_only=True)
+    bot_zip = serializers.FileField(write_only=True)
+    bot_data = serializers.FileField(write_only=True)
+
+    class Meta:
+        model = Bot
+        fields = [
+            'bot_zip',
+            'bot_zip_publicly_downloadable',
+            'bot_data',
+            'bot_data_publicly_downloadable',
+            'bot_data_enabled',
+            'wiki_article_content',
+        ]
+
+    def validate_bot_zip(self, value):
+        try:
+            self.instance.validate_bot_zip_file(value)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError(e)
+
+
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
-class BotViewSet(viewsets.ReadOnlyModelViewSet):
+
+class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet):
     """
     Bot data view
     """
     queryset = Bot.objects.all().select_related('user')
     serializer_class = BotSerializer
+    serializer_class_patch = BotUpdateSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = BotFilter
     search_fields = bot_search_fields
     ordering_fields = bot_search_fields
+    http_method_names = ["get", "options", "head", "trace", "patch"]
+
+    def get_serializer_class(self):
+        if self.request.method == 'PATCH':
+            return self.serializer_class_patch
+        return self.serializer_class
+
+    def perform_update(self, serializer):
+        if 'wiki_article_content' in serializer.validated_data:
+            serializer.instance.update_bot_wiki_article(
+                new_content=serializer.validated_data['wiki_article_content'],
+                request=self.request,
+            )
+        serializer.save()
 
     @action(detail=True, methods=['GET'], name='Download a bot\'s zip file', url_path='zip')
     def download_zip(self, request, *args, **kwargs):
