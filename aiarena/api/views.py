@@ -205,6 +205,7 @@ class BotUpdateSerializer(serializers.ModelSerializer):
             self.instance.validate_bot_zip_file(value)
         except DjangoValidationError as e:
             raise serializers.ValidationError(e)
+        return value
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
