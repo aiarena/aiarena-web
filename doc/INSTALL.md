@@ -34,7 +34,7 @@
    
 
 5. Modify the Website config to use your Database.  
-    If you are using a standard mysql setup at localhost:3306 and step 3's SQL script, then you can skip this step -
+    If you are using a standard postgres setup at localhost:5432 and step 3's SQL script, then you can skip this step -
     the credentials will already be configured.  
     If you need to configure different credentials, make a copy of the `/aiarena/example-dev-env.py` file as 
     `/aiarena/env.py` and update the relevant details
