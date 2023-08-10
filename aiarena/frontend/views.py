@@ -495,6 +495,10 @@ class BotUpdateForm(forms.ModelForm):
         if self.instance.bot_data_is_currently_frozen():
             self.fields['bot_data'].disabled = True
 
+    def clean_bot_zip(self):
+        zip_file = self.cleaned_data['bot_zip']
+        self.instance.validate_bot_zip_file(zip_file)
+        return zip_file
 
     class Meta:
         model = Bot
