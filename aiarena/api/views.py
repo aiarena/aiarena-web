@@ -10,6 +10,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, serializers, permissions, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ViewSet
@@ -208,6 +209,16 @@ class BotUpdateSerializer(serializers.ModelSerializer):
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
+class BotAccessPermission(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        if obj.user != request.user:
+            return False
+
+        return True
+
 
 class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet):
     """
@@ -222,6 +233,12 @@ class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet
     search_fields = bot_search_fields
     ordering_fields = bot_search_fields
     http_method_names = ["get", "options", "head", "trace", "patch"]
+
+    def get_permissions(self):
+        return [
+            permission() for permission in
+            self.permission_classes + [BotAccessPermission]
+        ]
 
     def get_serializer_class(self):
         if self.request.method == 'PATCH':
