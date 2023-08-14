@@ -216,6 +216,8 @@ class BotUpdateSerializer(serializers.ModelSerializer):
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 class BotAccessPermission(BasePermission):
+    message = "You cannot edit a bot that belongs to someone else"
+
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True

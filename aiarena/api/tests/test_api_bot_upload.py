@@ -110,11 +110,12 @@ class ApiBotUploadTestCase(FullDataSetMixin, TransactionTestCase):
         self.client.logout()
         self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
 
-        self.update_bot(
+        response = self.update_bot(
             path=self.url,
             data={'bot_zip_publicly_downloadable': True},
             expected_code=403,
         )
+        self.assertApiError(response, "Authentication credentials were not provided")
 
         self.regularUser1Bot1.refresh_from_db()
         self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
@@ -123,11 +124,12 @@ class ApiBotUploadTestCase(FullDataSetMixin, TransactionTestCase):
         self.client.login(username='regular_user2', password='x')
         self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
 
-        self.update_bot(
+        response = self.update_bot(
             path=self.url,
             data={'bot_zip_publicly_downloadable': True},
             expected_code=403,
         )
+        self.assertApiError(response, "You cannot edit a bot that belongs to someone else")
 
         self.regularUser1Bot1.refresh_from_db()
         self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
