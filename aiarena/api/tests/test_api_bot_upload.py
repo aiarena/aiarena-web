@@ -32,6 +32,10 @@ class ApiBotUploadTestCase(FullDataSetMixin, TransactionTestCase):
         self.assertEqual(response.status_code, expected_code)
         return response
 
+    def assertApiError(self, response, error_text):
+        response_text = response.content.decode()
+        self.assertIn(error_text, response_text)
+
     def test_update_fields(self):
         self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
         self.assertEqual(self.regularUser1Bot1.bot_data_publicly_downloadable, False)
@@ -71,9 +75,9 @@ class ApiBotUploadTestCase(FullDataSetMixin, TransactionTestCase):
                 data={'bot_zip': bot_zip},
                 expected_code=400,
             )
-        self.assertIn(
+        self.assertApiError(
+            response,
             'Incorrect bot zip file structure.',
-            str(response.content)
         )
 
     @override_config(BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER=1)
@@ -84,9 +88,9 @@ class ApiBotUploadTestCase(FullDataSetMixin, TransactionTestCase):
                 data={'bot_zip': bot_zip},
                 expected_code=400,
             )
-        self.assertIn(
+        self.assertApiError(
+            response,
             'File too large. Size should not exceed 1 MB.',
-            str(response.content)
         )
 
     def test_cannot_update_non_editable_field(self):
@@ -131,12 +135,26 @@ class ApiBotUploadTestCase(FullDataSetMixin, TransactionTestCase):
     @patch("aiarena.core.models.bot.Bot.bot_data_is_currently_frozen", lambda x: True)
     def test_data_not_updated_while_frozen(self):
         self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
+        self.assertNotEqual(self.regularUser1Bot1.bot_data_md5hash, self.hashes['bot_data.zip'])
 
         self.update_bot(
             path=self.url,
             data={'bot_zip_publicly_downloadable': True},
-            expected_code=403,
+            expected_code=200,
+        )
+        with open(self.data_dir / 'bot_data.zip', 'rb') as bot_data:
+            response = self.update_bot(
+                path=self.url,
+                data={'bot_data': bot_data},
+                expected_code=400,
+            )
+
+        self.assertApiError(
+            response,
+            "Cannot edit bot_data when it's frozen",
         )
 
+        # bot_zip_publicly_downloadable got updated, but bot_data didn't get updated
         self.regularUser1Bot1.refresh_from_db()
-        self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
+        self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, True)
+        self.assertNotEqual(self.regularUser1Bot1.bot_data_md5hash, self.hashes['bot_data.zip'])

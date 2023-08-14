@@ -207,6 +207,11 @@ class BotUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(e)
         return value
 
+    def validate_bot_data(self, value):
+        if self.instance.bot_data_is_currently_frozen():
+            raise serializers.ValidationError("Cannot edit bot_data when it's frozen")
+        return value
+
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
@@ -214,9 +219,6 @@ class BotAccessPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-
-        if obj.bot_data_is_currently_frozen():
-            return False
 
         if obj.user != request.user:
             return False
