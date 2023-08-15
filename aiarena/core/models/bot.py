@@ -1,5 +1,6 @@
 import logging
 import uuid
+from zipfile import ZipFile, BadZipFile
 
 from constance import config
 from django.core.exceptions import ValidationError
@@ -17,7 +18,7 @@ from wiki.models import Article, ArticleRevision
 
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
-from aiarena.core.validators import validate_bot_name, validate_bot_zip_file
+from aiarena.core.validators import validate_bot_name
 from .bot_race import BotRace
 from .match import Match
 from .mixins import LockableModelMixin
@@ -49,19 +50,10 @@ class Bot(models.Model, LockableModelMixin):
         ('nodejs', 'nodejs'),
         ('python', 'python'),
     )
-    BOT_ZIP_LIMIT_MAP = {
-        "none": config.BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER,
-        "bronze": config.BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER,
-        "silver": config.BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER,
-        "gold": config.BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER,
-        "platinum": config.BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER,
-        "diamond": config.BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER,
-    }
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bots')
     name = models.CharField(max_length=50, unique=True, validators=[validate_bot_name, ])
     created = models.DateTimeField(auto_now_add=True)
-    bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'),
-                               validators=[validate_bot_zip_file, ])
+    bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url='/'))
     bot_zip_updated = models.DateTimeField(editable=False)
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     bot_zip_publicly_downloadable = models.BooleanField(default=False)
@@ -100,7 +92,14 @@ class Bot(models.Model, LockableModelMixin):
         return matches.count() > 0
 
     def get_bot_zip_limit_in_mb(self):
-        limit = self.BOT_ZIP_LIMIT_MAP[self.user.patreon_level]
+        limit = {
+            "none": config.BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER,
+            "bronze": config.BOT_ZIP_SIZE_LIMIT_IN_MB_BRONZE_TIER,
+            "silver": config.BOT_ZIP_SIZE_LIMIT_IN_MB_SILVER_TIER,
+            "gold": config.BOT_ZIP_SIZE_LIMIT_IN_MB_GOLD_TIER,
+            "platinum": config.BOT_ZIP_SIZE_LIMIT_IN_MB_PLATINUM_TIER,
+            "diamond": config.BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER,
+        }[self.user.patreon_level]
         return limit if limit is not None else None
 
     def regen_game_display_id(self):
@@ -125,14 +124,46 @@ class Bot(models.Model, LockableModelMixin):
 
         self.wiki_article = article
 
+    def update_bot_wiki_article(self, new_content, request):
+        if self.wiki_article.current_revision.content == new_content:
+            return
+
+        # If the article content is different, add a new revision
+        revision = ArticleRevision()
+        revision.inherit_predecessor(self.wiki_article)
+        revision.title = self.name
+        revision.content = new_content
+        revision.deleted = False
+        revision.set_from_request(request)
+        self.wiki_article.add_revision(revision)
+
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
             raise ValidationError(
                 'Maximum bot count of {0} already reached. No more bots may be added for this user.'.format(
                     config.MAX_USER_BOT_COUNT))
 
+    def validate_bot_zip_file(self, value=None):
+        if not value:
+            value = self.bot_zip
+
+        limit = self.get_bot_zip_limit_in_mb()
+        if value.size > limit * 1024 * 1024:  # convert limit to bytes
+            raise ValidationError(f'File too large. Size should not exceed {limit} MB. '
+                                  f'You can donate to the ladder to increase this limit.')
+
+        try:
+            with ZipFile(value.open()) as zip_file:
+                expected_name = self.expected_executable_filename
+                if expected_name not in zip_file.namelist():
+                    raise ValidationError(f"Incorrect bot zip file structure. A bot of type {self.type} "
+                                          f"would need to have a file in the zip file root named {expected_name}")
+        except BadZipFile:
+            raise ValidationError("Bot zip must be a valid zip file")
+
     def clean(self):
         self.validate_max_bot_count()
+        self.validate_bot_zip_file()
 
     def __str__(self):
         return self.name

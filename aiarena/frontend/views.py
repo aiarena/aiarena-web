@@ -495,6 +495,10 @@ class BotUpdateForm(forms.ModelForm):
         if self.instance.bot_data_is_currently_frozen():
             self.fields['bot_data'].disabled = True
 
+    def clean_bot_zip(self):
+        zip_file = self.cleaned_data['bot_zip']
+        self.instance.validate_bot_zip_file(zip_file)
+        return zip_file
 
     class Meta:
         model = Bot
@@ -532,17 +536,10 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
 
     def form_valid(self, form):
         """Create a new article revision for the bot wiki page when the form is valid"""
-
-        # If the article content is different, add a new revision
-        if form.instance.wiki_article.current_revision.content != form.cleaned_data['wiki_article_content']:
-            revision = ArticleRevision()
-            revision.inherit_predecessor(form.instance.wiki_article)
-            revision.title = form.instance.name
-            revision.content = form.cleaned_data['wiki_article_content']
-            # revision.user_message = form.cleaned_data['summary']
-            revision.deleted = False
-            revision.set_from_request(self.request)
-            form.instance.wiki_article.add_revision(revision)
+        form.instance.update_bot_wiki_article(
+            new_content=form.cleaned_data['wiki_article_content'],
+            request=self.request,
+        )
         return super(BotUpdate, self).form_valid(form)
 
 
