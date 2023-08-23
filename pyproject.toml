@@ -13,16 +13,10 @@ extend-exclude = '''
 [tool.ruff]
 line-length = 120
 target-version = "py310"
-select = [
-    "E",
-    "F",
-    "I",
-]
+select = ["E", "F", "I"]
 fixable = ["I", "F541", "E712"]
-ignore = ["E501"]
-exclude = [
-    "django-discord-bind"
-]
+ignore = ["E501", "E741", "E731"]
+exclude = ["django-discord-bind"]
 
 [tool.ruff.isort]
 lines-after-imports = 2
