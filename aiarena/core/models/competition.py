@@ -165,12 +165,6 @@ class Competition(models.Model, LockableModelMixin):
     def as_html_link(self):
         return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
 
-    def get_absolute_url(self):
-        return reverse("competition", kwargs={"pk": self.pk})
-
-    def as_html_link(self):
-        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
-
     @property
     def is_accepting_new_participants(self):
         return self.status not in ["closing", "closed"]
