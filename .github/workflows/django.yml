@@ -20,7 +20,7 @@ jobs:
           python ./pip/pip-install.py --python=python --pip=pip
       - uses: pre-commit/action@v3.0.0
 
-  build:
+  test:
     runs-on: ubuntu-latest
     services:
       postgres:
