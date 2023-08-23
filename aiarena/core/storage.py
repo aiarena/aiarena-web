@@ -30,11 +30,7 @@ class OverwritePrivateStorage(PrivateFileSystemStorage):
     """
 
     def __init__(self, location=None, base_url=None, **kwargs):
-        super(OverwritePrivateStorage, self).__init__(
-            location=location,
-            base_url=base_url,
-            **kwargs
-        )
+        super(OverwritePrivateStorage, self).__init__(location=location, base_url=base_url, **kwargs)
 
     def get_available_name(self, name, max_length=None):
         overwrite_file(self, name)
@@ -50,14 +46,11 @@ class HardcodedURLFilenamePrivateStorage(PrivateFileSystemStorage):
     """
 
     def __init__(self, url_filename=None, location=None, base_url=None, **kwargs):
-        super().__init__(
-            location=location,
-            base_url=base_url,
-            **kwargs
-        )
+        super().__init__(location=location, base_url=base_url, **kwargs)
         self._url_filename = url_filename
 
     def url(self, name):
-        transformed_name = ('/'.join(name.split('/')[:-1]) + '/' + self._url_filename) \
-            if self._url_filename is not None else name
+        transformed_name = (
+            ("/".join(name.split("/")[:-1]) + "/" + self._url_filename) if self._url_filename is not None else name
+        )
         return super().url(transformed_name)

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0021_mappool'),
+        ("core", "0021_mappool"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='map',
-            name='competitions',
-            field=models.ManyToManyField(blank=True, related_name='maps', to='core.Competition'),
+            model_name="map",
+            name="competitions",
+            field=models.ManyToManyField(blank=True, related_name="maps", to="core.Competition"),
         ),
     ]

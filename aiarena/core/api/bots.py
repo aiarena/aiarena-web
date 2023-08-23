@@ -53,4 +53,3 @@ class Bots:
             if available >= amount:
                 return True
         return False
-

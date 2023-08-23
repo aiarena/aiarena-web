@@ -4,13 +4,12 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0024_auto_20210217_0927'),
+        ("core", "0024_auto_20210217_0927"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='WebsiteNotice',
+            name="WebsiteNotice",
         ),
     ]

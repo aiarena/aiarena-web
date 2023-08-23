@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0051_competition_playable_races'),
+        ("core", "0051_competition_playable_races"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='bot',
-            name='plays_race',
-            field=models.CharField(blank=True, choices=[('T', 'Terran'), ('Z', 'Zerg'), ('P', 'Protoss'), ('R', 'Random')], max_length=1, null=True),
+            model_name="bot",
+            name="plays_race",
+            field=models.CharField(
+                blank=True,
+                choices=[("T", "Terran"), ("Z", "Zerg"), ("P", "Protoss"), ("R", "Random")],
+                max_length=1,
+                null=True,
+            ),
         ),
     ]

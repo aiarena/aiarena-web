@@ -9,4 +9,4 @@ class ServiceUser(User):
     """Represents a service user"""
 
     class Meta:
-        verbose_name = 'ServiceUser'
+        verbose_name = "ServiceUser"

@@ -7,15 +7,17 @@ import private_storage.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0070_competition_indepth_bot_statistics_enabled'),
+        ("core", "0070_competition_indepth_bot_statistics_enabled"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='bot',
-            name='bot_zip',
-            field=private_storage.fields.PrivateFileField(storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.bot.bot_zip_upload_to),
+            model_name="bot",
+            name="bot_zip",
+            field=private_storage.fields.PrivateFileField(
+                storage=aiarena.core.storage.OverwritePrivateStorage(base_url="/"),
+                upload_to=aiarena.core.models.bot.bot_zip_upload_to,
+            ),
         ),
     ]

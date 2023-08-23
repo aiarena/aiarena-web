@@ -63,9 +63,9 @@ class PatreonAccountBind(models.Model):
             self.last_had_pledge = timezone.now()
         # If the user has an existing patreon level but no pledge,
         # then if we're past the grace period, remove the level.
-        elif self.user.patreon_level != 'none' and self._is_past_the_grace_period():
+        elif self.user.patreon_level != "none" and self._is_past_the_grace_period():
             logger.info(f"Pledge not found: setting to none")
-            self.user.patreon_level = 'none'
+            self.user.patreon_level = "none"
             self.user.save()
 
         self.patreon_user_id = self._get_patreon_user_id(user)
@@ -76,28 +76,28 @@ class PatreonAccountBind(models.Model):
         return self.last_had_pledge is None or (timezone.now() - self.last_had_pledge).days > self.DAYS_GRACE_PERIOD
 
     def _has_pledge(self, user) -> bool:
-        if 'included' in user:
-            for entry in user['included']:
-                if entry['type'] == 'pledge':
+        if "included" in user:
+            for entry in user["included"]:
+                if entry["type"] == "pledge":
                     return True
         return False
 
     def _get_pledge_reward_id(self, user) -> str:
-        for entry in user['included']:
-            if entry['type'] == 'pledge':
-                return entry['relationships']['reward']['data']['id']
-        raise Exception('Unable to locate reward for pledge.')
+        for entry in user["included"]:
+            if entry["type"] == "pledge":
+                return entry["relationships"]["reward"]["data"]["id"]
+        raise Exception("Unable to locate reward for pledge.")
 
     def _get_patreon_user_id(self, user) -> str:
-        if 'data' in user and 'id' in user['data']:
-            return user['data']['id']
+        if "data" in user and "id" in user["data"]:
+            return user["data"]["id"]
         return None
 
     def _get_pledge_reward_name(self, user, id: str) -> str:
-        for entry in user['included']:
-            if entry['type'] == 'reward' and entry['id'] == id:
-                return entry['attributes']['title']
-        raise Exception('Unable to locate reward.')
+        for entry in user["included"]:
+            if entry["type"] == "reward" and entry["id"] == id:
+                return entry["attributes"]["title"]
+        raise Exception("Unable to locate reward.")
 
 
 class PatreonUnlinkedDiscordUID(models.Model):

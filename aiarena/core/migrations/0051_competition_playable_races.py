@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0050_alter_botrace_label'),
+        ("core", "0050_alter_botrace_label"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='competition',
-            name='playable_races',
-            field=models.ManyToManyField(blank=True, to='core.BotRace'),
+            model_name="competition",
+            name="playable_races",
+            field=models.ManyToManyField(blank=True, to="core.BotRace"),
         ),
     ]

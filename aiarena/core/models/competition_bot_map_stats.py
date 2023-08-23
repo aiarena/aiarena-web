@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class CompetitionBotMapStats(models.Model):
-    bot = models.ForeignKey(CompetitionParticipation, on_delete=models.CASCADE, related_name='competition_map_stats')
+    bot = models.ForeignKey(CompetitionParticipation, on_delete=models.CASCADE, related_name="competition_map_stats")
     map = models.ForeignKey(Map, on_delete=models.CASCADE)
     match_count = models.IntegerField(default=0, blank=True)
     win_count = models.IntegerField(default=0, blank=True)
@@ -30,7 +30,7 @@ class CompetitionBotMapStats(models.Model):
         super(CompetitionBotMapStats, self).save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.bot) + ' on ' + str(self.map)
+        return str(self.bot) + " on " + str(self.map)
 
     class Meta:
-        unique_together = (('bot', 'map'),)
+        unique_together = (("bot", "map"),)

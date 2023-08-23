@@ -6,7 +6,7 @@ from aiarena.core.models import User, WebsiteUser
 
 
 def migrate_website_users(apps, schema_editor):
-    website_users = User.objects.filter(type='WEBSITE_USER')
+    website_users = User.objects.filter(type="WEBSITE_USER")
 
     for website_user in website_users:
         # find parent class fields:
@@ -21,7 +21,7 @@ def migrate_website_users(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0029_websiteuser'),
+        ("core", "0029_websiteuser"),
     ]
 
     operations = [

@@ -5,16 +5,17 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0012_remove_bot_active'),
+        ("core", "0012_remove_bot_active"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='map',
-            name='game_mode',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='maps', to='core.GameMode'),
+            model_name="map",
+            name="game_mode",
+            field=models.ForeignKey(
+                default=1, on_delete=django.db.models.deletion.CASCADE, related_name="maps", to="core.GameMode"
+            ),
             preserve_default=False,
         ),
     ]

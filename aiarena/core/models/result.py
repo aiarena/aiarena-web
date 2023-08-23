@@ -1,4 +1,3 @@
-
 import logging
 import time
 
@@ -20,45 +19,53 @@ logger = logging.getLogger(__name__)
 
 
 def replay_file_upload_to(instance, filename):
-    match = Match.objects.only('map__name', 'id')\
-        .prefetch_related('matchparticipation_set','matchparticipation_set__bot')\
-        .select_related('map').get(id=instance.match_id)
-    return '/'.join(['replays',
-                     f'{match.id}'
-                     f'_{match.matchparticipation_set.get(participant_number=1).bot.name}'
-                     f'_{match.matchparticipation_set.get(participant_number=2).bot.name}'
-                     f'_{match.map.name}.SC2Replay'])
+    match = (
+        Match.objects.only("map__name", "id")
+        .prefetch_related("matchparticipation_set", "matchparticipation_set__bot")
+        .select_related("map")
+        .get(id=instance.match_id)
+    )
+    return "/".join(
+        [
+            "replays",
+            f"{match.id}"
+            f"_{match.matchparticipation_set.get(participant_number=1).bot.name}"
+            f"_{match.matchparticipation_set.get(participant_number=2).bot.name}"
+            f"_{match.map.name}.SC2Replay",
+        ]
+    )
 
 
 def arenaclient_log_upload_to(instance, filename):
-    return '/'.join(['arenaclient-logs', '{0}_arenaclientlog.zip'.format(instance.match_id)])
+    return "/".join(["arenaclient-logs", "{0}_arenaclientlog.zip".format(instance.match_id)])
 
 
 class Result(models.Model, LockableModelMixin):
     TYPES = (
-        ('MatchCancelled', 'MatchCancelled'),
-        ('InitializationError', 'InitializationError'),
-        ('Error', 'Error'),
-        ('Player1Win', 'Player1Win'),
-        ('Player1Crash', 'Player1Crash'),
-        ('Player1TimeOut', 'Player1TimeOut'),
-        ('Player1RaceMismatch', 'Player1RaceMismatch'),
-        ('Player1Surrender', 'Player1Surrender'),
-        ('Player2Win', 'Player2Win'),
-        ('Player2Crash', 'Player2Crash'),
-        ('Player2TimeOut', 'Player2TimeOut'),
-        ('Player2RaceMismatch', 'Player2RaceMismatch'),
-        ('Player2Surrender', 'Player2Surrender'),
-        ('Tie', 'Tie'),
+        ("MatchCancelled", "MatchCancelled"),
+        ("InitializationError", "InitializationError"),
+        ("Error", "Error"),
+        ("Player1Win", "Player1Win"),
+        ("Player1Crash", "Player1Crash"),
+        ("Player1TimeOut", "Player1TimeOut"),
+        ("Player1RaceMismatch", "Player1RaceMismatch"),
+        ("Player1Surrender", "Player1Surrender"),
+        ("Player2Win", "Player2Win"),
+        ("Player2Crash", "Player2Crash"),
+        ("Player2TimeOut", "Player2TimeOut"),
+        ("Player2RaceMismatch", "Player2RaceMismatch"),
+        ("Player2Surrender", "Player2Surrender"),
+        ("Tie", "Tie"),
     )
-    match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name='result')
-    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name='matches_won', blank=True, null=True)
+    match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name="result")
+    winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name="matches_won", blank=True, null=True)
     type = models.CharField(max_length=32, choices=TYPES, db_index=True)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     replay_file = models.FileField(upload_to=replay_file_upload_to, blank=True, null=True)
     game_steps = models.IntegerField(db_index=True)
-    submitted_by = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True,
-                                     related_name='submitted_results')
+    submitted_by = models.ForeignKey(
+        User, on_delete=models.PROTECT, blank=True, null=True, related_name="submitted_results"
+    )
     arenaclient_log = models.FileField(upload_to=arenaclient_log_upload_to, blank=True, null=True)
     interest_rating = models.FloatField(blank=True, null=True, db_index=True)
     date_interest_rating_calculated = models.DateTimeField(blank=True, null=True)
@@ -89,7 +96,7 @@ class Result(models.Model, LockableModelMixin):
     def validate_replay_file_requirement(self):
         if (self.has_winner or self.is_tie) and not self.replay_file and not self.replay_file_has_been_cleaned:
             logger.warning(f"Result for match {self.match_id} failed validation due to a missing replay file.")
-            raise ValidationError('A win/loss or tie result must be accompanied by a replay file.')
+            raise ValidationError("A win/loss or tie result must be accompanied by a replay file.")
 
     def clean(self, *args, **kwargs):
         self.validate_replay_file_requirement()
@@ -98,47 +105,40 @@ class Result(models.Model, LockableModelMixin):
     @cached_property
     def has_winner(self):
         return self.type in (
-            'Player1Win',
-            'Player1Crash',
-            'Player1TimeOut',
-            'Player1Surrender',
-            'Player2Win',
-            'Player2Crash',
-            'Player2TimeOut',
-            'Player2Surrender')
+            "Player1Win",
+            "Player1Crash",
+            "Player1TimeOut",
+            "Player1Surrender",
+            "Player2Win",
+            "Player2Crash",
+            "Player2TimeOut",
+            "Player2Surrender",
+        )
 
     @cached_property
     def winner_participant_number(self):
-        if self.type in (
-                'Player1Win',
-                'Player2Crash',
-                'Player2TimeOut',
-                'Player2Surrender'):
+        if self.type in ("Player1Win", "Player2Crash", "Player2TimeOut", "Player2Surrender"):
             return 1
-        elif self.type in (
-                'Player1Crash',
-                'Player1TimeOut',
-                'Player1Surrender',
-                'Player2Win'):
+        elif self.type in ("Player1Crash", "Player1TimeOut", "Player1Surrender", "Player2Win"):
             return 2
         else:
             return 0
 
     @cached_property
     def is_tie(self):
-        return self.type == 'Tie'
+        return self.type == "Tie"
 
     @cached_property
     def is_timeout(self):
-        return self.type == 'Player1TimeOut' or self.type == 'Player2TimeOut'
+        return self.type == "Player1TimeOut" or self.type == "Player2TimeOut"
 
     @cached_property
     def is_crash(self):
-        return self.type == 'Player1Crash' or self.type == 'Player2Crash'
+        return self.type == "Player1Crash" or self.type == "Player2Crash"
 
     @cached_property
     def is_init_error(self):
-        return self.type == 'InitializationError'
+        return self.type == "InitializationError"
 
     @cached_property
     def is_crash_or_timeout(self):
@@ -150,9 +150,9 @@ class Result(models.Model, LockableModelMixin):
 
     @cached_property
     def get_causing_participant_of_crash_or_timeout_result(self):
-        if self.type == 'Player1TimeOut' or self.type == 'Player1Crash':
+        if self.type == "Player1TimeOut" or self.type == "Player1Crash":
             return self.participant1
-        elif self.type == 'Player2TimeOut' or self.type == 'Player2Crash':
+        elif self.type == "Player2TimeOut" or self.type == "Player2Crash":
             return self.participant2
         else:
             return None
@@ -160,27 +160,28 @@ class Result(models.Model, LockableModelMixin):
     @cached_property
     def get_winner_loser_competition_participants(self):
         bot1, bot2 = self.get_competition_participants
-        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
+        if self.type in ("Player1Win", "Player2Crash", "Player2TimeOut", "Player2Surrender"):
             return bot1, bot2
-        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
+        elif self.type in ("Player2Win", "Player1Crash", "Player1TimeOut", "Player1Surrender"):
             return bot2, bot1
         else:
-            raise Exception('There was no winner or loser for this match.')
+            raise Exception("There was no winner or loser for this match.")
 
     @cached_property
     def get_winner_loser_bots(self):
         bot1, bot2 = self.get_match_participant_bots
-        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
+        if self.type in ("Player1Win", "Player2Crash", "Player2TimeOut", "Player2Surrender"):
             return bot1, bot2
-        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
+        elif self.type in ("Player2Win", "Player1Crash", "Player1TimeOut", "Player1Surrender"):
             return bot2, bot1
         else:
-            raise Exception('There was no winner or loser for this match.')
+            raise Exception("There was no winner or loser for this match.")
 
     @cached_property
     def get_competition_participants(self):
         """Returns the SeasonParticipant models for the MatchParticipants"""
         from .match_participation import MatchParticipation
+
         match_id = self.match_id
         first = MatchParticipation.objects.get(match_id=match_id, participant_number=1)
         second = MatchParticipation.objects.get(match_id=match_id, participant_number=2)
@@ -189,6 +190,7 @@ class Result(models.Model, LockableModelMixin):
     @cached_property
     def get_match_participants(self):
         from .match_participation import MatchParticipation
+
         first = MatchParticipation.objects.get(match=self.match, participant_number=1)
         second = MatchParticipation.objects.get(match=self.match, participant_number=2)
         return first, second
@@ -200,10 +202,14 @@ class Result(models.Model, LockableModelMixin):
 
     def save(self, *args, **kwargs):
         from .match_participation import MatchParticipation
+
         # set winner
         if self.has_winner:
-            self.winner = MatchParticipation.objects.select_related('bot').get(match=self.match,
-                                                         participant_number=self.winner_participant_number).bot
+            self.winner = (
+                MatchParticipation.objects.select_related("bot")
+                .get(match=self.match, participant_number=self.winner_participant_number)
+                .bot
+            )
 
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)
@@ -212,7 +218,7 @@ class Result(models.Model, LockableModelMixin):
         if self.has_winner:
             sp_winner, sp_loser = self.get_winner_loser_competition_participants
             self._apply_elo_delta(ELO.calculate_elo_delta(sp_winner.elo, sp_loser.elo, 1.0), sp_winner, sp_loser)
-        elif self.type == 'Tie':
+        elif self.type == "Tie":
             sp_first, sp_second = self.get_competition_participants
             self._apply_elo_delta(ELO.calculate_elo_delta(sp_first.elo, sp_second.elo, 0.5), sp_first, sp_second)
 

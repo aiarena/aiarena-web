@@ -5,30 +5,45 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0060_alter_competition_status'),
+        ("core", "0060_alter_competition_status"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='competitionparticipation',
-            name='crash_perc',
-            field=models.FloatField(blank=True, default=0, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf]),
+            model_name="competitionparticipation",
+            name="crash_perc",
+            field=models.FloatField(
+                blank=True,
+                default=0,
+                validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf],
+            ),
         ),
         migrations.AlterField(
-            model_name='competitionparticipation',
-            name='loss_perc',
-            field=models.FloatField(blank=True, default=0, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf]),
+            model_name="competitionparticipation",
+            name="loss_perc",
+            field=models.FloatField(
+                blank=True,
+                default=0,
+                validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf],
+            ),
         ),
         migrations.AlterField(
-            model_name='competitionparticipation',
-            name='tie_perc',
-            field=models.FloatField(blank=True, default=0, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf]),
+            model_name="competitionparticipation",
+            name="tie_perc",
+            field=models.FloatField(
+                blank=True,
+                default=0,
+                validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf],
+            ),
         ),
         migrations.AlterField(
-            model_name='competitionparticipation',
-            name='win_perc',
-            field=models.FloatField(blank=True, default=0, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf]),
+            model_name="competitionparticipation",
+            name="win_perc",
+            field=models.FloatField(
+                blank=True,
+                default=0,
+                validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf],
+            ),
         ),
     ]

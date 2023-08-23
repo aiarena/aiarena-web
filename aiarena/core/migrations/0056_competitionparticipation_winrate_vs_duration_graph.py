@@ -6,15 +6,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0055_match_first_started'),
+        ("core", "0055_match_first_started"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='competitionparticipation',
-            name='winrate_vs_duration_graph',
-            field=models.FileField(blank=True, null=True, storage=aiarena.core.storage.OverwriteStorage(), upload_to=aiarena.core.models.competition_participation.winrate_vs_duration_graph_upload_to),
+            model_name="competitionparticipation",
+            name="winrate_vs_duration_graph",
+            field=models.FileField(
+                blank=True,
+                null=True,
+                storage=aiarena.core.storage.OverwriteStorage(),
+                upload_to=aiarena.core.models.competition_participation.winrate_vs_duration_graph_upload_to,
+            ),
         ),
     ]

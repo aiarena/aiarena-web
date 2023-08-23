@@ -5,9 +5,8 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0048_auto_20220523_0329'),
+        ("core", "0048_auto_20220523_0329"),
     ]
 
     operations = [

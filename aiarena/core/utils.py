@@ -17,20 +17,23 @@ def parse_tags(tags):
     if tags:
         if isinstance(tags, str):
             tags = tags.split(",")
-        tags = [re.sub(settings.MATCH_TAG_REGEX, '', tag.lower().strip())[:settings.MATCH_TAG_LENGTH_LIMIT] for tag in tags if tag]
+        tags = [
+            re.sub(settings.MATCH_TAG_REGEX, "", tag.lower().strip())[: settings.MATCH_TAG_LENGTH_LIMIT]
+            for tag in tags
+            if tag
+        ]
         # Remove empty strings that resulted from processing
-        return [tag for tag in tags if tag][:settings.MATCH_TAG_PER_MATCH_LIMIT]
+        return [tag for tag in tags if tag][: settings.MATCH_TAG_PER_MATCH_LIMIT]
     return []
 
 
-def calculate_md5(file, block_size=2 ** 20):
-    """Returns MD% checksum for given file.
-    """
+def calculate_md5(file, block_size=2**20):
+    """Returns MD% checksum for given file."""
     import hashlib
 
     md5 = hashlib.md5()
 
-    with open(file, 'rb') as file_data:
+    with open(file, "rb") as file_data:
         while True:
             data = file_data.read(block_size)
             if not data:
@@ -40,9 +43,8 @@ def calculate_md5(file, block_size=2 ** 20):
     return md5.hexdigest()
 
 
-def calculate_md5_django_filefield(file, block_size=2 ** 20):
-    """Returns MD% checksum for given file.
-    """
+def calculate_md5_django_filefield(file, block_size=2**20):
+    """Returns MD% checksum for given file."""
     import hashlib
 
     md5 = hashlib.md5()
@@ -67,38 +69,44 @@ def post_result_to_discord_bot(result):
         else:
             wl_bots = None
 
-        json = { # todo: nested json
-            'match_id': result.match_id,
-            'round_id': result.match.round_id,
-            'bot1': bots[0].name,
-            'bot1_id': bots[0].id,
-            'bot1_resultant_elo': participants[0].resultant_elo,
-            'bot1_elo_change': participants[0].elo_change,
-            'bot1_avg_step_time': participants[0].avg_step_time,
-            'bot2': bots[1].name,
-            'bot2_id': bots[1].id,
-            'bot2_resultant_elo': participants[1].resultant_elo,
-            'bot2_elo_change': participants[1].elo_change,
-            'bot2_avg_step_time': participants[1].avg_step_time,
-            'winner': wl_bots[0].name if wl_bots is not None else None,
-            'loser': wl_bots[1].name if wl_bots is not None else None,
-            'result_type': result.type,
-            'game_steps': result.game_steps,
-            'replay_file_download_url': result.replay_file.url if result.replay_file else None}
+        json = {  # todo: nested json
+            "match_id": result.match_id,
+            "round_id": result.match.round_id,
+            "bot1": bots[0].name,
+            "bot1_id": bots[0].id,
+            "bot1_resultant_elo": participants[0].resultant_elo,
+            "bot1_elo_change": participants[0].elo_change,
+            "bot1_avg_step_time": participants[0].avg_step_time,
+            "bot2": bots[1].name,
+            "bot2_id": bots[1].id,
+            "bot2_resultant_elo": participants[1].resultant_elo,
+            "bot2_elo_change": participants[1].elo_change,
+            "bot2_avg_step_time": participants[1].avg_step_time,
+            "winner": wl_bots[0].name if wl_bots is not None else None,
+            "loser": wl_bots[1].name if wl_bots is not None else None,
+            "result_type": result.type,
+            "game_steps": result.game_steps,
+            "replay_file_download_url": result.replay_file.url if result.replay_file else None,
+        }
         post_json_content_to_address(json, settings.POST_SUBMITTED_RESULTS_TO_ADDRESS)
     except Exception as e:
-        logger.warning(f"Attempt to post result for match_id {result.match_id} to discord failed with error:"
-                       + os.linesep + traceback.format_exc())
+        logger.warning(
+            f"Attempt to post result for match_id {result.match_id} to discord failed with error:"
+            + os.linesep
+            + traceback.format_exc()
+        )
+
 
 def post_json_content_to_address(json_content, address):
     req = request.Request(address)
-    req.add_header('Content-Type', 'application/json; charset=utf-8')
+    req.add_header("Content-Type", "application/json; charset=utf-8")
     jsondata = json.dumps(json_content)
-    jsondataasbytes = jsondata.encode('utf-8')  # needs to be bytes
-    req.add_header('Content-Length', len(jsondataasbytes))
+    jsondataasbytes = jsondata.encode("utf-8")  # needs to be bytes
+    req.add_header("Content-Length", len(jsondataasbytes))
     print(jsondataasbytes)
     response = request.urlopen(req, jsondataasbytes)
     # todo: check response
+
 
 # ELO Implementation:
 # http://satirist.org/ai/starcraft/blog/archives/117-Elo-ratings-are-easy-to-calculate.html

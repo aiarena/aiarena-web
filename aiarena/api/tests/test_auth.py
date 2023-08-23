@@ -8,23 +8,23 @@ class SessionBasedAuthTestCase(FullDataSetMixin, TransactionTestCase):
         self.client.logout()  # ensure we're not already logged in
 
         # Should be no current user
-        response = self.client.get('/api/auth/')
+        response = self.client.get("/api/auth/")
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(response.data['current_user'])
+        self.assertIsNone(response.data["current_user"])
 
         # Login
-        response = self.client.post('/api/auth/login/', {'username': 'staff_user', 'password': 'x'})
+        response = self.client.post("/api/auth/login/", {"username": "staff_user", "password": "x"})
         self.assertEqual(response.status_code, 202)
 
         # Current user should be staff_user
-        response = self.client.get('/api/auth/')
-        self.assertEqual(response.data['current_user']['username'], 'staff_user')
+        response = self.client.get("/api/auth/")
+        self.assertEqual(response.data["current_user"]["username"], "staff_user")
 
         # Logout
-        response = self.client.post('/api/auth/logout/')
+        response = self.client.post("/api/auth/logout/")
         self.assertEqual(response.status_code, 204)
 
         # Should be no current user
-        response = self.client.get('/api/auth/')
+        response = self.client.get("/api/auth/")
         self.assertEqual(response.status_code, 200)
-        self.assertIsNone(response.data['current_user'])
+        self.assertIsNone(response.data["current_user"])

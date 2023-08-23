@@ -9,17 +9,19 @@ from aiarena.patreon.patreon import update_unlinked_discord_users
 
 
 class Command(BaseCommand):
-    help = 'Refreshes all user patreon tiers.'
+    help = "Refreshes all user patreon tiers."
 
     def add_arguments(self, parser):
         pass
 
     def handle(self, *args, **options):
-        errors = ''
+        errors = ""
 
         # Wipe existing patreon levels that are set to sync but aren't linked to patreon
-        for user in User.objects.filter(patreonaccountbind__isnull=True, sync_patreon_status=True).exclude(patreon_level='none'):
-            user.patreon_level = 'none'
+        for user in User.objects.filter(patreonaccountbind__isnull=True, sync_patreon_status=True).exclude(
+            patreon_level="none"
+        ):
+            user.patreon_level = "none"
             user.save()
 
         # Sync any users with patreon links that are set to sync
@@ -36,4 +38,4 @@ class Command(BaseCommand):
             errors = errors + os.linesep + traceback.format_exc()
 
         if len(errors) > 0:
-            raise CommandError('The following errors occurred:' + errors)
+            raise CommandError("The following errors occurred:" + errors)

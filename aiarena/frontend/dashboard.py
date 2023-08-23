@@ -26,7 +26,6 @@ class CustomIndexDashboard(Dashboard):
                         collapsible=False,
                         models=("django.contrib.*",),
                     ),
-
                 ],
             )
         )
@@ -45,9 +44,10 @@ class CustomIndexDashboard(Dashboard):
                 ],
             )
         )
-        self.children.append(modules.RecentActions(
-            title='Recent actions',
-            column=3,
-            limit=5,
-        ))
-
+        self.children.append(
+            modules.RecentActions(
+                title="Recent actions",
+                column=3,
+                limit=5,
+            )
+        )

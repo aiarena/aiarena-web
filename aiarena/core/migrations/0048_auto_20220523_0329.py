@@ -20,7 +20,7 @@ def link_bot_races(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0047_auto_20220523_0307'),
+        ("core", "0047_auto_20220523_0307"),
     ]
 
     operations = [

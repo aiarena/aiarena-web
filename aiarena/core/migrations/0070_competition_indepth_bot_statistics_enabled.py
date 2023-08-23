@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0069_auto_20230122_1819'),
+        ("core", "0069_auto_20230122_1819"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='competition',
-            name='indepth_bot_statistics_enabled',
+            model_name="competition",
+            name="indepth_bot_statistics_enabled",
             field=models.BooleanField(default=True),
         ),
     ]

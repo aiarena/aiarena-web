@@ -6,14 +6,14 @@ from aiarena.core.storage import OverwriteStorage
 
 
 def map_file_upload_to(instance, filename):
-    return '/'.join(['maps', instance.name])
+    return "/".join(["maps", instance.name])
 
 
 class Map(models.Model):
     name = models.CharField(max_length=50, unique=True)
     file = models.FileField(upload_to=map_file_upload_to, storage=OverwriteStorage())
-    game_mode = models.ForeignKey(GameMode, on_delete=models.CASCADE, related_name='maps')
-    competitions = models.ManyToManyField(Competition, related_name='maps', blank=True)
+    game_mode = models.ForeignKey(GameMode, on_delete=models.CASCADE, related_name="maps")
+    competitions = models.ManyToManyField(Competition, related_name="maps", blank=True)
     """The competitions this map is used in."""
     enabled = models.BooleanField(default=True)
     """Whether this map is enabled for play.

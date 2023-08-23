@@ -7,15 +7,19 @@ import private_storage.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0040_alter_arenaclientstatus_logged_at'),
+        ("core", "0040_alter_arenaclientstatus_logged_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='competitionparticipation',
-            name='elo_graph_update_plot',
-            field=private_storage.fields.PrivateFileField(blank=True, null=True, storage=aiarena.core.storage.OverwritePrivateStorage(base_url='/'), upload_to=aiarena.core.models.competition_participation.elo_graph_update_plot_upload_to),
+            model_name="competitionparticipation",
+            name="elo_graph_update_plot",
+            field=private_storage.fields.PrivateFileField(
+                blank=True,
+                null=True,
+                storage=aiarena.core.storage.OverwritePrivateStorage(base_url="/"),
+                upload_to=aiarena.core.models.competition_participation.elo_graph_update_plot_upload_to,
+            ),
         ),
     ]

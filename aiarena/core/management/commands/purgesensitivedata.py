@@ -9,7 +9,7 @@ from aiarena.patreon.models import PatreonAccountBind
 
 def purge_user_data():
     for user in User.objects.all():
-        user.email = user.username + '@staging.aiarena.net'
+        user.email = user.username + "@staging.aiarena.net"
         user.save()
 
     # discord integration
@@ -27,9 +27,10 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-
-        if settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT \
-                or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING:
+        if (
+            settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT
+            or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING
+        ):
             purge_user_data()
         else:
-            self.stdout.write('Command failed: This is not a development or staging environment!')
+            self.stdout.write("Command failed: This is not a development or staging environment!")

@@ -4,20 +4,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0034_competitionparticipation_in_placements'),
+        ("core", "0034_competitionparticipation_in_placements"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='competition',
-            old_name='rounds_per_cyle',
-            new_name='rounds_per_cycle',
+            model_name="competition",
+            old_name="rounds_per_cyle",
+            new_name="rounds_per_cycle",
         ),
         migrations.RenameField(
-            model_name='competition',
-            old_name='rounds_this_cyle',
-            new_name='rounds_this_cycle',
+            model_name="competition",
+            old_name="rounds_this_cyle",
+            new_name="rounds_this_cycle",
         ),
     ]

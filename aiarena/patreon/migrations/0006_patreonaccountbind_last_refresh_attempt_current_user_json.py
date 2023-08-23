@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('patreon', '0005_patreonunlinkeddiscorduid'),
+        ("patreon", "0005_patreonunlinkeddiscorduid"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='patreonaccountbind',
-            name='last_refresh_attempt_current_user_json',
+            model_name="patreonaccountbind",
+            name="last_refresh_attempt_current_user_json",
             field=models.TextField(blank=True, null=True),
         ),
     ]

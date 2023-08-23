@@ -5,55 +5,70 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0062_auto_20230108_1113'),
+        ("core", "0062_auto_20230108_1113"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='crash_count',
+            model_name="competitionbotmapstats",
+            name="crash_count",
             field=models.IntegerField(blank=True, default=0),
         ),
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='crash_perc',
-            field=models.FloatField(blank=True, default=0, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf]),
+            model_name="competitionbotmapstats",
+            name="crash_perc",
+            field=models.FloatField(
+                blank=True,
+                default=0,
+                validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf],
+            ),
         ),
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='loss_count',
+            model_name="competitionbotmapstats",
+            name="loss_count",
             field=models.IntegerField(blank=True, default=0),
         ),
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='loss_perc',
-            field=models.FloatField(blank=True, default=0, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf]),
+            model_name="competitionbotmapstats",
+            name="loss_perc",
+            field=models.FloatField(
+                blank=True,
+                default=0,
+                validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf],
+            ),
         ),
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='match_count',
+            model_name="competitionbotmapstats",
+            name="match_count",
             field=models.IntegerField(blank=True, default=0),
         ),
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='tie_count',
+            model_name="competitionbotmapstats",
+            name="tie_count",
             field=models.IntegerField(blank=True, default=0),
         ),
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='tie_perc',
-            field=models.FloatField(blank=True, default=0, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf]),
+            model_name="competitionbotmapstats",
+            name="tie_perc",
+            field=models.FloatField(
+                blank=True,
+                default=0,
+                validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf],
+            ),
         ),
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='win_count',
+            model_name="competitionbotmapstats",
+            name="win_count",
             field=models.IntegerField(blank=True, default=0),
         ),
         migrations.AlterField(
-            model_name='competitionbotmapstats',
-            name='win_perc',
-            field=models.FloatField(blank=True, default=0, validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf]),
+            model_name="competitionbotmapstats",
+            name="win_perc",
+            field=models.FloatField(
+                blank=True,
+                default=0,
+                validators=[aiarena.core.validators.validate_not_nan, aiarena.core.validators.validate_not_inf],
+            ),
         ),
     ]

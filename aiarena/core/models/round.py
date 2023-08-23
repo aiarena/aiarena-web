@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class Round(models.Model, LockableModelMixin):
-    """ Represents a round of play within a competition """
+    """Represents a round of play within a competition"""
+
     number = models.IntegerField(blank=True, editable=False)
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
     started = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -26,7 +27,7 @@ class Round(models.Model, LockableModelMixin):
 
     @property
     def name(self):
-        return 'Round ' + str(self.number)
+        return "Round " + str(self.number)
 
     def __str__(self):
         return self.name
@@ -34,15 +35,18 @@ class Round(models.Model, LockableModelMixin):
     # if all the matches have been run, mark this as complete
     def update_if_completed(self):
         from .match import Match
+
         with transaction.atomic():
             # if there are no matches without results, this round is complete
             # if this round close attempt results in a row update, try to close the competition
-            if Match.objects.filter(round=self, result__isnull=True).count() == 0 and \
-                    Round.objects.filter(id=self.id, complete=False).update(complete=True, finished=timezone.now()) > 0:
+            if (
+                Match.objects.filter(round=self, result__isnull=True).count() == 0
+                and Round.objects.filter(id=self.id, complete=False).update(complete=True, finished=timezone.now()) > 0
+            ):
                 self.competition.try_to_close()
 
     def get_absolute_url(self):
-        return reverse('round', kwargs={'pk': self.pk})
+        return reverse("round", kwargs={"pk": self.pk})
 
     def as_html_link(self):
         return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')

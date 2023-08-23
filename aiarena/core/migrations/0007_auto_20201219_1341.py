@@ -5,25 +5,28 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0006_auto_20201219_0841'),
+        ("core", "0006_auto_20201219_0841"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='competitionparticipation',
-            old_name='season',
-            new_name='competition',
+            model_name="competitionparticipation",
+            old_name="season",
+            new_name="competition",
         ),
         migrations.RenameField(
-            model_name='round',
-            old_name='season',
-            new_name='competition',
+            model_name="round",
+            old_name="season",
+            new_name="competition",
         ),
         migrations.AlterField(
-            model_name='competitionbotmatchupstats',
-            name='bot',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='competition_matchup_stats', to='core.CompetitionParticipation'),
+            model_name="competitionbotmatchupstats",
+            name="bot",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="competition_matchup_stats",
+                to="core.CompetitionParticipation",
+            ),
         ),
     ]

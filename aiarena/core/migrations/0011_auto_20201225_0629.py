@@ -5,15 +5,16 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0010_auto_20201225_0553'),
+        ("core", "0010_auto_20201225_0553"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='competitionparticipation',
-            name='bot',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='competition_participations', to='core.Bot'),
+            model_name="competitionparticipation",
+            name="bot",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="competition_participations", to="core.Bot"
+            ),
         ),
     ]

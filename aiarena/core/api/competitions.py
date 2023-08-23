@@ -13,13 +13,13 @@ from aiarena.core.models import Bot
 class Competitions:
     @staticmethod
     def get_active_bots(competition: Competition) -> QuerySet:
-        return Bot.objects.only("id").filter(competition_participations__competition=competition,
-                                             competition_participations__active=True)
+        return Bot.objects.only("id").filter(
+            competition_participations__competition=competition, competition_participations__active=True
+        )
 
     @staticmethod
     def get_active_participants(competition: Competition) -> QuerySet:
-        return CompetitionParticipation.objects.only("id").filter(competition=competition,
-                                                                  active=True)
+        return CompetitionParticipation.objects.only("id").filter(competition=competition, active=True)
 
     @staticmethod
     def check_has_matches_to_play_and_apply_locks(competition: Competition) -> bool:

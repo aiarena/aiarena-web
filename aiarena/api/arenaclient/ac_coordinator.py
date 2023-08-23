@@ -16,8 +16,14 @@ from constance import config
 from django.db import transaction, connection
 from django.db.models import F
 
-from aiarena.api.arenaclient.exceptions import LadderDisabled, NotEnoughAvailableBots, MaxActiveRounds, NoMaps, \
-    CompetitionPaused, CompetitionClosing
+from aiarena.api.arenaclient.exceptions import (
+    LadderDisabled,
+    NotEnoughAvailableBots,
+    MaxActiveRounds,
+    NoMaps,
+    CompetitionPaused,
+    CompetitionClosing,
+)
 from aiarena.core.api import Matches
 from aiarena.core.models import Match, Competition
 from django.db.models.signals import pre_save
@@ -50,7 +56,13 @@ class ACCoordinator:
                     if Competitions.check_has_matches_to_play_and_apply_locks(competition):
                         try:
                             return Matches.start_next_match_for_competition(arenaclient, competition)
-                        except (NoMaps, NotEnoughAvailableBots, MaxActiveRounds, CompetitionPaused, CompetitionClosing) as e:
+                        except (
+                            NoMaps,
+                            NotEnoughAvailableBots,
+                            MaxActiveRounds,
+                            CompetitionPaused,
+                            CompetitionClosing,
+                        ) as e:
                             logger.debug(f"Skipping competition {id}: {e}")
                             continue
 
@@ -69,9 +81,11 @@ class ACCoordinator:
             try:
                 if config.REISSUE_UNFINISHED_MATCHES:
                     # Check for any unfinished matches assigned to this user. If any are present, return that.
-                    unfinished_matches = Match.objects.only('id', 'map') \
-                        .filter(started__isnull=False, assigned_to=arenaclient,
-                                result__isnull=True).order_by(F('round_id').asc())
+                    unfinished_matches = (
+                        Match.objects.only("id", "map")
+                        .filter(started__isnull=False, assigned_to=arenaclient, result__isnull=True)
+                        .order_by(F("round_id").asc())
+                    )
                     if unfinished_matches.count() > 0:
                         return unfinished_matches[0]  # todo: re-set started time?
                 # Trying a new match
@@ -91,11 +105,12 @@ class ACCoordinator:
         :return:
         """
 
-        competition_priority_order = cache.get('competition_priority_order')
+        competition_priority_order = cache.get("competition_priority_order")
         if not competition_priority_order:
             with connection.cursor() as cursor:
                 # I don't know why but for some reason CTEs didn't work so here; have a massive query.
-                cursor.execute("""
+                cursor.execute(
+                    """
                     select perc_active.competition_id
                     from (select competition_id, 
                     competition_participations.competition_participations_cnt / cast(total_active_cnt as float) as perc_active
@@ -135,10 +150,14 @@ class ACCoordinator:
                                 group by competition_id) as recent_matches) as perc_recent_matches
                          on perc_recent_matches.competition_id = perc_active.competition_id
                     order by COALESCE(perc_recent_matches, 0) - perc_active
-                """)
+                """
+                )
                 competition_priority_order = [row[0] for row in cursor.fetchall()]  # return competition ids
-                cache.set('competition_priority_order', competition_priority_order,
-                          config.COMPETITION_PRIORITY_ORDER_CACHE_TIME)
+                cache.set(
+                    "competition_priority_order",
+                    competition_priority_order,
+                    config.COMPETITION_PRIORITY_ORDER_CACHE_TIME,
+                )
 
         return competition_priority_order
 
@@ -148,5 +167,7 @@ def post_save_competition(sender, instance, **kwargs):
     # if it's not a new instance...
     if instance.id is not None:
         previous = Competition.objects.get(id=instance.id)
-        if previous.status != instance.status and cache.has_key('competition_priority_order'):
-            cache.delete('competition_priority_order')  # if the status changed, bust our competition_priority_order cache
+        if previous.status != instance.status and cache.has_key("competition_priority_order"):
+            cache.delete(
+                "competition_priority_order"
+            )  # if the status changed, bust our competition_priority_order cache

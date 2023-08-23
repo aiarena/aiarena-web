@@ -5,7 +5,7 @@ from aiarena.core.api import Matches
 
 
 class Command(BaseCommand):
-    help = 'Time out any matches that have run overtime.'
+    help = "Time out any matches that have run overtime."
 
     def handle(self, *args, **options):
         with transaction.atomic():

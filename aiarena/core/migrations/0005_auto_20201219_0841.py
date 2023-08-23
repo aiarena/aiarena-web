@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0004_auto_20201219_0840'),
+        ("core", "0004_auto_20201219_0840"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='SeasonParticipation',
-            new_name='CompetitionParticipation',
+            old_name="SeasonParticipation",
+            new_name="CompetitionParticipation",
         ),
     ]

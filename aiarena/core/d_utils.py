@@ -9,21 +9,21 @@ logger = logging.getLogger(__name__)
 
 
 class GroupConcat(Aggregate):
-    function = 'GROUP_CONCAT'
-    template = '%(function)s(%(distinct)s%(expressions)s%(ordering)s%(separator)s)'
+    function = "GROUP_CONCAT"
+    template = "%(function)s(%(distinct)s%(expressions)s%(ordering)s%(separator)s)"
 
-    def __init__(self, expression, ordering=None, separator=',', **extra):
+    def __init__(self, expression, ordering=None, separator=",", **extra):
         super(GroupConcat, self).__init__(
             expression,
-            ordering=' ORDER BY %s' % ordering if ordering is not None else '',
+            ordering=" ORDER BY %s" % ordering if ordering is not None else "",
             separator=' SEPARATOR "%s"' % separator,
             output_field=TextField(),
-            **extra
+            **extra,
         )
 
 
 def filter_tags(qs, value, tags_field_name, tags_lookup_expr="iexact", user_field_name="", exclude=False):
-    """ 
+    """
     Given a string value, filter the queryset for tags found in it.
     qs: queryset
     value: the string to be parsed. If it contains a "|", the LHS of the pipe is treated as users list, RHS as tags, else all are tags.
@@ -32,8 +32,8 @@ def filter_tags(qs, value, tags_field_name, tags_lookup_expr="iexact", user_fiel
         return qs
 
     # Check for pipe separator
-    if '|' in value:
-        users_str, tags_str = [s.strip() for s in value.split('|')]
+    if "|" in value:
+        users_str, tags_str = [s.strip() for s in value.split("|")]
     else:
         users_str = ""
         tags_str = value
@@ -42,37 +42,43 @@ def filter_tags(qs, value, tags_field_name, tags_lookup_expr="iexact", user_fiel
 
     if user_field_name and users_str:
         try:
-            users = [int(s) for s in users_str.split(',')]
+            users = [int(s) for s in users_str.split(",")]
         except ValueError:
-            raise ValidationError({"tags":["When using pipe separator (|), Expecting user_id (int) on LHS and tag_name on RHS of separator."]})
+            raise ValidationError(
+                {
+                    "tags": [
+                        "When using pipe separator (|), Expecting user_id (int) on LHS and tag_name on RHS of separator."
+                    ]
+                }
+            )
     else:
         users = []
 
     # Build query for users
     user_query = Q()
-    user_lookup = '%s__%s' % (user_field_name, 'exact')
+    user_lookup = "%s__%s" % (user_field_name, "exact")
     for v in users:
         user_query |= Q(**{user_lookup: v})
 
     # Build query for tags
     tag_query = Q()
     if tags_str:
-        tags = [s.strip() for s in tags_str.split(',')]
+        tags = [s.strip() for s in tags_str.split(",")]
         tags = [s for s in tags if s]
-        if tags_lookup_expr == 'icontains':
+        if tags_lookup_expr == "icontains":
             qs = method(qs)(user_query).distinct()
             # Create string with all tag names and run icontains on the string
             qs = qs.annotate(all_tags=StringAgg(tags_field_name, delimiter=","))
-            tags_lookup = '%s__%s' % ('all_tags', tags_lookup_expr)
+            tags_lookup = "%s__%s" % ("all_tags", tags_lookup_expr)
             for v in tags:
                 tag_query &= Q(**{tags_lookup: v})
             return method(qs)(tag_query)
         else:
-            user_lookup = '%s__%s' % (user_field_name, "in")
-            tags_lookup = '%s__%s' % (tags_field_name, tags_lookup_expr)
+            user_lookup = "%s__%s" % (user_field_name, "in")
+            tags_lookup = "%s__%s" % (tags_field_name, tags_lookup_expr)
             for v in tags:
                 if users:
-                    qs = qs.filter(**{tags_lookup: v, user_lookup:users})
+                    qs = qs.filter(**{tags_lookup: v, user_lookup: users})
                 else:
                     qs = qs.filter(**{tags_lookup: v})
             return qs.distinct()

@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class WebsiteUser(User):
     """Represents a website user/bot author"""
+
     single_use_match_requests = models.IntegerField(default=0, blank=True)
     """UNUSED AS OF YET"""
     """Single-use match requests that go on top of any periodic match requests a user might have.
@@ -24,12 +25,20 @@ class WebsiteUser(User):
     def match_request_count_left(self):
         from .match import Match
         from .result import Result
-        return self.requested_matches_limit \
-               - Match.objects.only('id').filter(requested_by=self,
-                                      created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD).count() \
-               + Result.objects.only('id').filter(submitted_by=self, type='MatchCancelled',
-                                      created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD).count()
 
+        return (
+            self.requested_matches_limit
+            - Match.objects.only("id")
+            .filter(requested_by=self, created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD)
+            .count()
+            + Result.objects.only("id")
+            .filter(
+                submitted_by=self,
+                type="MatchCancelled",
+                created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD,
+            )
+            .count()
+        )
 
     class Meta:
-        verbose_name = 'WebsiteUser'
+        verbose_name = "WebsiteUser"

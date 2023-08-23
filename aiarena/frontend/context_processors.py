@@ -16,21 +16,23 @@ from aiarena.settings import BASE_DIR
 
 def stats(request):
     return {
-        'match_count_1h': Result.objects.only('id').filter(created__gte=timezone.now() - timedelta(hours=1)).count(),
-        'match_count_24h': Result.objects.only('id').filter(created__gte=timezone.now() - timedelta(hours=24)).count(),
-        'arenaclients': User.objects.only('id').filter(type='ARENA_CLIENT', is_active=True).count(),
-        'aiarena_settings': settings,
-        'random_supporter': User.random_supporter(),
-        'config': config,
-        "style_md5": style_md5()
+        "match_count_1h": Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=1)).count(),
+        "match_count_24h": Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=24)).count(),
+        "arenaclients": User.objects.only("id").filter(type="ARENA_CLIENT", is_active=True).count(),
+        "aiarena_settings": settings,
+        "random_supporter": User.random_supporter(),
+        "config": config,
+        "style_md5": style_md5(),
     }
+
 
 def style_md5() -> str:
     md5_value = cache.get("style_md5")
     if md5_value is None:
         md5_value = md5(os.path.join(BASE_DIR, "aiarena/frontend/static/style.css"))[0:8]
-        cache.set('style_md5', md5_value, 3600)
+        cache.set("style_md5", md5_value, 3600)
     return md5_value
+
 
 def md5(fname):
     hash_md5 = hashlib.md5()

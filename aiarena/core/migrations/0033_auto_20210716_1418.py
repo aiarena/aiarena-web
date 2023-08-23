@@ -11,7 +11,7 @@ def migrate_service_users(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0032_auto_20210714_2351'),
+        ("core", "0032_auto_20210714_2351"),
     ]
 
     operations = [

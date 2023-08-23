@@ -4,13 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0068_auto_20230116_0309'),
+        ("core", "0068_auto_20230116_0309"),
     ]
 
     operations = [
-        migrations.RunSQL("""
+        migrations.RunSQL(
+            """
         drop view if exists core_relativeresult;
         create view core_relativeresult as
                         select cr.id as id,
@@ -30,5 +30,6 @@ class Migration(migrations.Migration):
                         join core_match cm on cr.match_id = cm.id
                         join core_matchparticipation me_mp on cm.id = me_mp.match_id
                         join core_matchparticipation opponent_mp on cm.id = opponent_mp.match_id and me_mp.participant_number!=opponent_mp.participant_number
-        """),
+        """
+        ),
     ]

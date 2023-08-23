@@ -7,24 +7,33 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0028_auto_20210419_2336'),
+        ("core", "0028_auto_20210419_2336"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WebsiteUser',
+            name="WebsiteUser",
             fields=[
-                ('user_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
-                ('single_use_match_requests', models.IntegerField(blank=True, default=0)),
+                (
+                    "user_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                ("single_use_match_requests", models.IntegerField(blank=True, default=0)),
             ],
             options={
-                'verbose_name': 'WebsiteUser',
+                "verbose_name": "WebsiteUser",
             },
-            bases=('core.user',),
+            bases=("core.user",),
             managers=[
-                ('objects', django.contrib.auth.models.UserManager()),
+                ("objects", django.contrib.auth.models.UserManager()),
             ],
         ),
     ]

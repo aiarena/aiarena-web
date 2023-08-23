@@ -25,12 +25,15 @@ _PYTHON_REQUIRED_VERSION_MINOR = 10
 
 def verify_python_version():
     if sys.version_info[0] != _PYTHON_REQUIRED_VERSION_MAJOR or sys.version_info[1] != _PYTHON_REQUIRED_VERSION_MINOR:
-        raise Exception("This install procedure requires Python {0}.{1}".format(_PYTHON_REQUIRED_VERSION_MAJOR,
-                                                                                _PYTHON_REQUIRED_VERSION_MINOR))
+        raise Exception(
+            "This install procedure requires Python {0}.{1}".format(
+                _PYTHON_REQUIRED_VERSION_MAJOR, _PYTHON_REQUIRED_VERSION_MINOR
+            )
+        )
 
 
 def run_install(pip_binary_name, python_binary_name):
-    print('RUNNING INSTALL PROCEDURE')
+    print("RUNNING INSTALL PROCEDURE")
     # requirements - standard across all environments
     run(pip_binary_name + " install -r " + _STANDARD_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
@@ -38,9 +41,15 @@ def run_install(pip_binary_name, python_binary_name):
     run(pip_binary_name + " install -r " + _ENVIRONMENT_REQUIREMENTS_FILE + " --no-input", shell=True, check=True)
 
     # Run django-discord-bind setup
-    run(python_binary_name + " " + os.path.join(_PROJECT_ROOT_DIRECTORY, "django-discord-bind/setup.py")
-        + " install --force", shell=True, check=True)
-    print('INSTALL PROCEDURE COMPLETE')
+    run(
+        python_binary_name
+        + " "
+        + os.path.join(_PROJECT_ROOT_DIRECTORY, "django-discord-bind/setup.py")
+        + " install --force",
+        shell=True,
+        check=True,
+    )
+    print("INSTALL PROCEDURE COMPLETE")
 
 
 if __name__ == "__main__":
@@ -48,8 +57,8 @@ if __name__ == "__main__":
 
     parser = optparse.OptionParser()
     parser.set_defaults(pip=_DEFAULT_PIP_BINARY, python=_DEFAULT_PYTHON_BINARY)
-    parser.add_option('--pip', dest='pip')
-    parser.add_option('--python', dest='python')
+    parser.add_option("--pip", dest="pip")
+    parser.add_option("--python", dest="python")
     (options, args) = parser.parse_args()
 
     run_install(options.pip, options.python)
