@@ -209,11 +209,9 @@ class BaseTestMixin(object):
         filename = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "test-media/../test-media/testReplay.SC2Replay"
         )
-        with open(filename, "rb"), open(
-            TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb"
-        ) as bot2_data, open(TestAssetPaths.test_bot_datas["bot2"][0]["path"], "rb") as bot1_data, open(
-            TestAssetPaths.test_bot1_match_log_path, "rb"
-        ) as bot1_log, open(
+        with open(filename, "rb"), open(TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb") as bot2_data, open(
+            TestAssetPaths.test_bot_datas["bot2"][0]["path"], "rb"
+        ) as bot1_data, open(TestAssetPaths.test_bot1_match_log_path, "rb") as bot1_log, open(
             TestAssetPaths.test_bot2_match_log_path, "rb"
         ) as bot2_log, open(
             TestAssetPaths.test_arenaclient_log_path, "rb"
