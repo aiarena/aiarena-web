@@ -10,7 +10,7 @@ from subprocess import run
 # Add the parent dir to the PYTHONPATH so we can more easily import aiarena.settings
 # Is this a good idea?
 sys.path.append(sys.path[0] + "/..")
-from aiarena.settings import ENVIRONMENT_TYPE
+from aiarena.settings import ENVIRONMENT_TYPE  # noqa E402
 
 
 _LOCAL_DIRECTORY = os.path.dirname(__file__)
