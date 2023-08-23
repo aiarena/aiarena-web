@@ -540,7 +540,7 @@ SITE_PROTOCOL = "https"
 
 # override any of these settings with an env.py file
 try:
-    from aiarena.env import *
+    from aiarena.env import *  # noqa F403
 except ImportError as e:
     if e.name != "aiarena.env":
         raise
