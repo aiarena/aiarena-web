@@ -9,3 +9,23 @@ extend-exclude = '''
     django-discord-bind/
 )
 '''
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+select = [
+    "E",
+    "F",
+    "I",
+]
+fixable = ["I", "F541", "E712"]
+exclude = [
+    "django-discord-bind"
+]
+
+[tool.ruff.isort]
+lines-after-imports = 2
+section-order = ["future", "standard-library", "django", "third-party", "first-party", "local-folder"]
+
+[tool.ruff.isort.sections]
+"django" = ["django"]
