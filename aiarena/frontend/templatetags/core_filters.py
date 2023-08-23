@@ -12,10 +12,10 @@ def pretty_bool(value):
     :raises: AttributeError, KeyError
 
     """
-    if value == True:
+    if value is True:
         value = "✔"
         return value
-    if value == False:
+    if value is False:
         value = "✘"
         return value
     if str(value).lower() == "yes":
