@@ -120,7 +120,7 @@ class Bot(models.Model, LockableModelMixin):
     def get_wiki_article(self):
         try:
             return self.wiki_article
-        except:
+        except Exception:
             return None
 
     def create_bot_wiki_article(self):
