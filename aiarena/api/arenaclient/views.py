@@ -459,7 +459,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                 headers = self.get_success_headers(serializer.data)
                 return Response({"result_id": result.id}, status=status.HTTP_201_CREATED, headers=headers)
-            except Exception as e:
+            except Exception:
                 logger.exception("Exception while processing result submission")
                 raise
         else:

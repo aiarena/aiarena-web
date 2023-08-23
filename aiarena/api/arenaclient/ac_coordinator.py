@@ -93,7 +93,7 @@ class ACCoordinator:
                         return unfinished_matches[0]  # todo: re-set started time?
                 # Trying a new match
                 return ACCoordinator.next_new_match(arenaclient)
-            except Exception as e:
+            except Exception:
                 logger.exception("Exception while processing request for match.")
                 raise
         else:

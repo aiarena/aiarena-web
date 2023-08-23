@@ -29,12 +29,12 @@ class Command(BaseCommand):
             try:
                 patreon_bind.update_tokens()
                 patreon_bind.update_user_patreon_tier()
-            except Exception as e:
+            except Exception:
                 errors = errors + os.linesep + traceback.format_exc()
 
         try:
             update_unlinked_discord_users()
-        except Exception as e:
+        except Exception:
             errors = errors + os.linesep + traceback.format_exc()
 
         if len(errors) > 0:

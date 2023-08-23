@@ -212,7 +212,6 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
             bot1_tags=["!", "2", "A", "", az_symbols + num_symbols + extra_symbols], bot2_tags=["123"]
         )
         match_tags = Match.objects.get(id=match_response.data["id"]).tags.all()
-        tags_matched = ["2", "a", "abcdefghijklmnopqrstuvwxyz012345", "123"]
         self.assertTrue(match_tags.count() == 4)
 
         # Too many tags

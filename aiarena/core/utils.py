@@ -89,7 +89,7 @@ def post_result_to_discord_bot(result):
             "replay_file_download_url": result.replay_file.url if result.replay_file else None,
         }
         post_json_content_to_address(json, settings.POST_SUBMITTED_RESULTS_TO_ADDRESS)
-    except Exception as e:
+    except Exception:
         logger.warning(
             f"Attempt to post result for match_id {result.match_id} to discord failed with error:"
             + os.linesep
@@ -104,7 +104,7 @@ def post_json_content_to_address(json_content, address):
     jsondataasbytes = jsondata.encode("utf-8")  # needs to be bytes
     req.add_header("Content-Length", len(jsondataasbytes))
     print(jsondataasbytes)
-    response = request.urlopen(req, jsondataasbytes)
+    request.urlopen(req, jsondataasbytes)
     # todo: check response
 
 

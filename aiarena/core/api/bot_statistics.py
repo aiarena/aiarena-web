@@ -499,7 +499,6 @@ class BotStatistics:
     def _generate_winrate_plot_images(df):
         plot1 = io.BytesIO()
 
-        legend = []
 
         durations = df["Duration (Minutes)"].map(lambda x: str(x) + " - " + str(x + 5))
         wins = df["Wins"]

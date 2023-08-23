@@ -10,7 +10,7 @@ class CustomIndexDashboard(Dashboard):
     """
 
     def init_with_context(self, context):
-        site_name = get_admin_site_name(context)
+        get_admin_site_name(context)
 
         # append a group for "Administration" & "Applications"
         self.children.append(
