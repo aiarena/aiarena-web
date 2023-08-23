@@ -3,14 +3,9 @@ from django_filters import rest_framework as filters
 from aiarena.core.d_utils import filter_tags
 from aiarena.core.models import (
     Bot,
-    Competition,
-    CompetitionParticipation,
-    Map,
     Match,
     MatchParticipation,
     Result,
-    Round,
-    User,
 )
 
 

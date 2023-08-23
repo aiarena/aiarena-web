@@ -5,7 +5,6 @@ import re
 import traceback
 from enum import Enum
 from urllib import request
-from zipfile import ZipFile
 
 from aiarena import settings
 

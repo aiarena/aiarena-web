@@ -28,7 +28,6 @@ from django_tables2 import RequestConfig
 from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
-from wiki.models import ArticleRevision
 
 from aiarena.core.api import Matches
 from aiarena.core.api.ladders import Ladders

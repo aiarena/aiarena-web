@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from aiarena.core.api import Ladders
 from aiarena.core.models import Competition, Round
 
 

@@ -8,7 +8,7 @@ from django.utils import timezone
 from constance import config
 
 from aiarena import settings
-from aiarena.core.models import Bot, Result, User
+from aiarena.core.models import Result, User
 
 # these are available globally in the django templates
 from aiarena.settings import BASE_DIR

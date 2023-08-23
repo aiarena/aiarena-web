@@ -8,10 +8,7 @@ from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-from constance import config
-
 from .competition import Competition
-from .map import Map
 from .mixins import LockableModelMixin
 
 

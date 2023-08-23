@@ -2,8 +2,6 @@ import logging
 
 from django.db import models
 
-from .bot import Bot
-
 
 logger = logging.getLogger(__name__)
 

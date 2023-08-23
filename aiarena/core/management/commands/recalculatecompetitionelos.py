@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
-from django.db import connection, transaction
+from django.db import transaction
 
-from aiarena.core.models import Competition, CompetitionParticipation, Match, MatchParticipation, Result, Round
+from aiarena.core.models import Competition, CompetitionParticipation, Match, MatchParticipation
 from aiarena.settings import ELO_START_VALUE
 
 

@@ -1,6 +1,5 @@
 import logging
 import random
-from enum import Enum
 
 from django.db import transaction
 from django.db.models import Count

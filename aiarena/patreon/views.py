@@ -11,7 +11,7 @@ from django.views import View
 from constance import config
 
 from aiarena.patreon.models import PatreonAccountBind
-from aiarena.patreon.patreon import PatreonApi, PatreonOAuth
+from aiarena.patreon.patreon import PatreonOAuth
 
 
 logger = logging.getLogger(__name__)

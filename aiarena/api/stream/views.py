@@ -3,7 +3,7 @@ import logging
 from constance import config
 from rest_framework import serializers, viewsets
 
-from aiarena.core.models import Bot, CompetitionParticipation, Match, Result, User
+from aiarena.core.models import Bot, CompetitionParticipation, Match, Result
 from aiarena.core.permissions import IsServiceOrAdminUser
 from aiarena.settings import ELO_START_VALUE
 

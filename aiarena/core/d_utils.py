@@ -2,7 +2,7 @@ import logging
 
 from django.contrib.postgres.aggregates import StringAgg
 from django.db.models import Aggregate, Q
-from django.db.models.fields import CharField, TextField
+from django.db.models.fields import TextField
 
 from rest_framework.exceptions import ValidationError
 
