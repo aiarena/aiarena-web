@@ -78,3 +78,13 @@
     You can log into the website using the accounts below:      
     Admin user: username - devadmin, password - x.  
     Regular user: username - devuser, password - x.
+
+
+## Configure dev environment
+
+### Install pre-commit hooks
+
+Assuming you have run `python ./pip/pip-install.py`, you only need to run this to set up pre-commit linter checking.
+```
+pre-commit install
+```
