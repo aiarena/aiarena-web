@@ -1,11 +1,13 @@
 import logging
 
-from constance import config
 from django.db import models
 from django.utils import timezone
 
+from constance import config
+
 from aiarena.core.models import User
-from aiarena.patreon.patreon import PatreonOAuth, PatreonApi
+from aiarena.patreon.patreon import PatreonApi, PatreonOAuth
+
 
 logger = logging.getLogger(__name__)
 

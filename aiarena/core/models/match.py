@@ -9,12 +9,12 @@ from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
-
 from .map import Map
+from .match_tag import MatchTag
 from .mixins import LockableModelMixin, RandomManagerMixin
 from .round import Round
 from .user import User
-from .match_tag import MatchTag
+
 
 logger = logging.getLogger(__name__)
 

@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-import debug_toolbar
 from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
@@ -22,12 +21,14 @@ from django.contrib.sitemaps.views import sitemap
 from django.urls import path, re_path
 from django.views.generic.base import TemplateView
 
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
+import debug_toolbar
 from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
 
 from aiarena.frontend import views as core_views
 from aiarena.sitemaps import StaticViewSitemap
+
 
 sitemaps = {
     "static": StaticViewSitemap,

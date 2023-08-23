@@ -1,9 +1,10 @@
-from constance import config
-from django.utils import timezone
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
-from aiarena.core.models import Match
+from constance import config
+
 from aiarena.core.match_interest_analyzer import MatchInterestAnalyzer
+from aiarena.core.models import Match
 
 
 class Command(BaseCommand):

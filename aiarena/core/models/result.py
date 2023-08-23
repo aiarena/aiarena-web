@@ -6,10 +6,12 @@ from django.db import models
 from django.utils.functional import cached_property
 
 from aiarena.settings import ELO
+
+from .bot import Bot
 from .match import Match
 from .mixins import LockableModelMixin
 from .user import User
-from .bot import Bot
+
 
 logger = logging.getLogger(__name__)
 

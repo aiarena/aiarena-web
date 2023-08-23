@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate
 
 from rest_framework import serializers
 
+
 # From: https://www.guguweb.com/2022/01/23/django-rest-framework-authentication-the-easy-way/
 
 

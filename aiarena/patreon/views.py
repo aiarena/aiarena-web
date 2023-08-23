@@ -3,14 +3,16 @@ import logging
 import traceback
 import urllib.parse
 
-from constance import config
 from django.contrib import messages
 from django.contrib.sites.models import Site
 from django.shortcuts import redirect
 from django.views import View
 
+from constance import config
+
 from aiarena.patreon.models import PatreonAccountBind
-from aiarena.patreon.patreon import PatreonOAuth, PatreonApi
+from aiarena.patreon.patreon import PatreonApi, PatreonOAuth
+
 
 logger = logging.getLogger(__name__)
 

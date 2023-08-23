@@ -1,7 +1,8 @@
 import os
 
-from aiarena.settings import SCRIPTS_ROOT
 from django.db import connection
+
+from aiarena.settings import SCRIPTS_ROOT
 
 
 def run_usp_generate_stats_sql():

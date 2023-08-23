@@ -1,8 +1,7 @@
 import logging
 import uuid
-from zipfile import ZipFile, BadZipFile
+from zipfile import BadZipFile, ZipFile
 
-from constance import config
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Sum
@@ -13,16 +12,20 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+
+from constance import config
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
 from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name
+
 from .bot_race import BotRace
 from .match import Match
 from .mixins import LockableModelMixin
 from .user import User
+
 
 logger = logging.getLogger(__name__)
 

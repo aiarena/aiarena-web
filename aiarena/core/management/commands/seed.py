@@ -4,11 +4,12 @@ import random
 from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
+
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
-from aiarena.core.models import Map, Bot, News, CompetitionParticipation, MapPool, WebsiteUser
+from aiarena.core.models import Bot, CompetitionParticipation, Map, MapPool, News, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import TestAssetPaths

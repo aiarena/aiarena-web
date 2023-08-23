@@ -6,10 +6,12 @@ import os
 import sys
 from subprocess import run
 
+
 # Add the parent dir to the PYTHONPATH so we can more easily import aiarena.settings
 # Is this a good idea?
 sys.path.append(sys.path[0] + "/..")
 from aiarena.settings import ENVIRONMENT_TYPE
+
 
 _LOCAL_DIRECTORY = os.path.dirname(__file__)
 _STANDARD_REQUIREMENTS_FILE = os.path.join(_LOCAL_DIRECTORY, "requirements.txt")

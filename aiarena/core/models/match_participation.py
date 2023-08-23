@@ -1,10 +1,12 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils.functional import cached_property
+
 from private_storage.fields import PrivateFileField
 
 from aiarena.core.storage import OverwritePrivateStorage
-from aiarena.core.validators import validate_not_nan, validate_not_inf
+from aiarena.core.validators import validate_not_inf, validate_not_nan
+
 from .bot import Bot
 from .match import Match
 from .mixins import LockableModelMixin

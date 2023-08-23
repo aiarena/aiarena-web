@@ -1,11 +1,11 @@
 import logging
 import multiprocessing
 import sys
+from multiprocessing import Process
 from time import sleep
 
 from aiarena.api.arenaclient.integration_tests.mock_ac import MockArenaClient
 
-from multiprocessing import Process
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

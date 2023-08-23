@@ -2,32 +2,33 @@ import io
 import json
 import os
 
-import jsonschema
-from constance import config
 from django.db.models import Sum
 from django.test import TransactionTestCase
+
+import jsonschema
+from constance import config
 from rest_framework.authtoken.models import Token
 
 from aiarena.core.api import Matches
 from aiarena.core.models import (
-    Match,
-    Bot,
-    MatchParticipation,
-    User,
-    Round,
-    Result,
-    CompetitionParticipation,
-    Competition,
-    Map,
     ArenaClient,
+    Bot,
     BotCrashLimitAlert,
+    Competition,
+    CompetitionParticipation,
+    Map,
+    Match,
+    MatchParticipation,
+    Result,
+    Round,
+    User,
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
-from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.tests.test_mixins import LoggedInMixin, MatchReadyMixin
+from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import ELO_START_VALUE, BASE_DIR, PRIVATE_STORAGE_ROOT, MEDIA_ROOT
+from aiarena.settings import BASE_DIR, ELO_START_VALUE, MEDIA_ROOT, PRIVATE_STORAGE_ROOT
 
 
 class MatchesTestCase(LoggedInMixin, TransactionTestCase):

@@ -1,8 +1,11 @@
 import logging
-from django.db.models.fields import CharField, TextField
-from django.db.models import Q, Aggregate
-from rest_framework.exceptions import ValidationError
+
 from django.contrib.postgres.aggregates import StringAgg
+from django.db.models import Aggregate, Q
+from django.db.models.fields import CharField, TextField
+
+from rest_framework.exceptions import ValidationError
+
 
 # File for housing utils that require 'django' or would break CI if placed in utils.py
 logger = logging.getLogger(__name__)

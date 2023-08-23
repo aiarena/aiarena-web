@@ -1,6 +1,5 @@
 import logging
 
-from constance import config
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import pre_save
@@ -12,7 +11,10 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from constance import config
+
 from aiarena.core.models.mixins import LockableModelMixin
+
 
 logger = logging.getLogger(__name__)
 

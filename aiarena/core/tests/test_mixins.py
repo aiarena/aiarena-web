@@ -1,22 +1,23 @@
 import os
 
-from constance import config
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
+
+from constance import config
 from rest_framework.authtoken.models import Token
 
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
 from aiarena.core.api import Matches
 from aiarena.core.models import (
-    Competition,
-    Map,
-    Bot,
-    CompetitionParticipation,
-    User,
-    GameMode,
-    WebsiteUser,
     ArenaClient,
+    Bot,
+    Competition,
+    CompetitionParticipation,
+    GameMode,
+    Map,
     MapPool,
+    User,
+    WebsiteUser,
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.testing_utils import TestAssetPaths

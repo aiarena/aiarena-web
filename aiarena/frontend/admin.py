@@ -1,28 +1,29 @@
 from django import forms
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
+
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
 from aiarena.core.models import (
     ArenaClient,
+    ArenaClientStatus,
     Bot,
-    Map,
-    Match,
-    MatchParticipation,
-    Result,
-    Round,
     Competition,
     CompetitionBotMatchupStats,
     CompetitionParticipation,
+    Map,
+    MapPool,
+    Match,
+    MatchParticipation,
+    MatchTag,
+    News,
+    Result,
+    Round,
+    Tag,
     Trophy,
     TrophyIcon,
     User,
-    News,
-    MapPool,
-    MatchTag,
-    Tag,
-    ArenaClientStatus,
     WebsiteUser,
 )
 from aiarena.core.models.bot_race import BotRace

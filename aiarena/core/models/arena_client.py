@@ -4,6 +4,7 @@ from django.db import models
 
 from .user import User
 
+
 logger = logging.getLogger(__name__)
 
 

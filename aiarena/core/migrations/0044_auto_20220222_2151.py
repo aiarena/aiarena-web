@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from aiarena.core.models import User, ServiceUser
+from aiarena.core.models import ServiceUser, User
 
 
 def migrate_service_users(apps, schema_editor):

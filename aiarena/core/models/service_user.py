@@ -2,6 +2,7 @@ import logging
 
 from .user import User
 
+
 logger = logging.getLogger(__name__)
 
 

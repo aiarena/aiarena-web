@@ -1,6 +1,7 @@
 from django.conf.urls import url
 
-from aiarena.patreon.views import PatreonCallbackView, PatreonBindView
+from aiarena.patreon.views import PatreonBindView, PatreonCallbackView
+
 
 urlpatterns = [
     url(r"^$", PatreonBindView.as_view(), name="patreon_bind_index"),

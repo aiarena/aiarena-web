@@ -1,11 +1,12 @@
 import logging
 from wsgiref.util import FileWrapper
 
-from constance import config
 from django.db import transaction
-from django.db.models import Sum, Prefetch
+from django.db.models import Prefetch, Sum
 from django.http import HttpResponse
-from rest_framework import viewsets, serializers, mixins, status
+
+from constance import config
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.fields import FileField, FloatField
@@ -15,22 +16,23 @@ from rest_framework.reverse import reverse
 from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
-from aiarena.core.utils import parse_tags
 from aiarena.core.api import BotStatistics
 from aiarena.core.models import (
     Bot,
+    BotCrashLimitAlert,
+    CompetitionParticipation,
     Map,
     Match,
     MatchParticipation,
-    Result,
-    CompetitionParticipation,
     MatchTag,
+    Result,
     Tag,
-    BotCrashLimitAlert,
 )
 from aiarena.core.models.arena_client_status import ArenaClientStatus
-from aiarena.core.permissions import IsArenaClientOrAdminUser, IsArenaClient
+from aiarena.core.permissions import IsArenaClient, IsArenaClientOrAdminUser
+from aiarena.core.utils import parse_tags
 from aiarena.core.validators import validate_not_inf, validate_not_nan
+
 
 logger = logging.getLogger(__name__)
 

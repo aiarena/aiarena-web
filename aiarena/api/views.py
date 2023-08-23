@@ -1,44 +1,46 @@
 import logging
 from wsgiref.util import FileWrapper
 
-from discord_bind.models import DiscordUser
 from django.contrib.auth import login, logout
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Prefetch
-from django.http import HttpResponse, Http404
+from django.http import Http404, HttpResponse
+
+from discord_bind.models import DiscordUser
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, serializers, permissions, status
+from rest_framework import permissions, serializers, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ViewSet
 
 from aiarena.api import serializers as api_serializers
-from aiarena.api.view_filters import BotFilter, MatchParticipationFilter, ResultFilter, MatchFilter
+from aiarena.api.view_filters import BotFilter, MatchFilter, MatchParticipationFilter, ResultFilter
 from aiarena.core.models import (
-    Match,
-    Result,
     Bot,
-    Map,
-    User,
-    Round,
-    MatchParticipation,
-    CompetitionParticipation,
     Competition,
-    MatchTag,
+    CompetitionBotMapStats,
+    CompetitionBotMatchupStats,
+    CompetitionParticipation,
     Game,
     GameMode,
+    Map,
     MapPool,
-    CompetitionBotMatchupStats,
-    CompetitionBotMapStats,
+    Match,
+    MatchParticipation,
+    MatchTag,
     News,
+    Result,
+    Round,
     Trophy,
+    User,
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.permissions import IsServiceOrAdminUser
 from aiarena.patreon.models import PatreonUnlinkedDiscordUID
+
 
 logger = logging.getLogger(__name__)
 

@@ -7,26 +7,29 @@ from django.dispatch import receiver
 
 from aiarena.core.api.competitions import Competitions
 
+
 if TYPE_CHECKING:
     from aiarena.core.models import ArenaClient
 
 import logging
 
-from constance import config
-from django.db import transaction, connection
+from django.db import connection, transaction
 from django.db.models import F
+from django.db.models.signals import pre_save
+
+from constance import config
 
 from aiarena.api.arenaclient.exceptions import (
+    CompetitionClosing,
+    CompetitionPaused,
     LadderDisabled,
-    NotEnoughAvailableBots,
     MaxActiveRounds,
     NoMaps,
-    CompetitionPaused,
-    CompetitionClosing,
+    NotEnoughAvailableBots,
 )
 from aiarena.core.api import Matches
-from aiarena.core.models import Match, Competition
-from django.db.models.signals import pre_save
+from aiarena.core.models import Competition, Match
+
 
 logger = logging.getLogger(__name__)
 

@@ -2,8 +2,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from django.test import TransactionTestCase
-from django.urls import reverse
 from django.test.client import MULTIPART_CONTENT
+from django.urls import reverse
+
 from constance.test import override_config
 
 from aiarena.core.tests.test_mixins import FullDataSetMixin

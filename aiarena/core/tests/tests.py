@@ -3,30 +3,31 @@ import os
 from datetime import timedelta
 from io import StringIO
 
-from constance import config
 from django.core import serializers
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.core.management import call_command, CommandError
+from django.core.management import CommandError, call_command
 from django.test import TestCase, TransactionTestCase
 from django.utils import timezone
 
-from aiarena.core.api import Matches, Ladders
+from constance import config
+
+from aiarena.core.api import Ladders, Matches
 from aiarena.core.management.commands import cleanupreplays
 from aiarena.core.models import (
-    User,
     Bot,
+    Competition,
+    CompetitionParticipation,
     Map,
     Match,
-    Result,
     MatchParticipation,
-    Competition,
+    Result,
     Round,
-    CompetitionParticipation,
+    User,
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
-from aiarena.core.tests.test_mixins import BaseTestMixin, LoggedInMixin, MatchReadyMixin, FullDataSetMixin
+from aiarena.core.tests.test_mixins import BaseTestMixin, FullDataSetMixin, LoggedInMixin, MatchReadyMixin
 from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5
 

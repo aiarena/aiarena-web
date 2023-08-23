@@ -5,7 +5,7 @@ from django.core import serializers
 from django.core.management import call_command
 from django.test import TransactionTestCase
 
-from aiarena.core.models import CompetitionParticipation, CompetitionBotMatchupStats, CompetitionBotMapStats
+from aiarena.core.models import CompetitionBotMapStats, CompetitionBotMatchupStats, CompetitionParticipation
 from aiarena.core.tests.test_mixins import FullDataSetMixin
 
 

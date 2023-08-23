@@ -17,6 +17,7 @@ from enum import Enum
 
 from aiarena.core.utils import Elo, EnvironmentType
 
+
 # Temp workaround for discord-bind error: Warning: Scope has changed from "identify" to "guilds.join identify email".
 # https://stackoverflow.com/a/51643134
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"

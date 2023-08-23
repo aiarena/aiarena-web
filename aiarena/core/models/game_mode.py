@@ -4,6 +4,7 @@ from django.db import models
 
 from .game import Game
 
+
 logger = logging.getLogger(__name__)
 
 

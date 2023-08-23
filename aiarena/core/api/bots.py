@@ -1,7 +1,9 @@
 import logging
 
 from django.db.models import QuerySet
+
 from aiarena.core.models import Bot
+
 
 logger = logging.getLogger(__name__)
 

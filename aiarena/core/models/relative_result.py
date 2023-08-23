@@ -2,16 +2,18 @@ import logging
 from typing import List
 
 from django.db import models
-from private_storage.fields import PrivateFileField
+from django.db.models import F
 from django.db.models.expressions import Window
 from django.db.models.functions import RowNumber
-from django.db.models import F
+
+from private_storage.fields import PrivateFileField
 
 from aiarena.core.models.competition import Competition
 
+from ..storage import OverwritePrivateStorage
 from .match import Match
 from .match_participation import MatchParticipation
-from ..storage import OverwritePrivateStorage
+
 
 logger = logging.getLogger(__name__)
 

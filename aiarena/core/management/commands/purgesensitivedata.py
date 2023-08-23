@@ -1,5 +1,6 @@
-from discord_bind.models import DiscordUser, DiscordInvite
 from django.core.management.base import BaseCommand
+
+from discord_bind.models import DiscordInvite, DiscordUser
 
 from aiarena import settings
 from aiarena.core.models import User

@@ -2,9 +2,12 @@ import logging
 
 from django.db import models
 from django.utils import timezone
-from aiarena.core.validators import validate_not_nan, validate_not_inf
+
+from aiarena.core.validators import validate_not_inf, validate_not_nan
+
 from .competition_participation import CompetitionParticipation
 from .map import Map
+
 
 logger = logging.getLogger(__name__)
 

@@ -1,13 +1,14 @@
-import re
 import json
 import logging
 import os
+import re
 import traceback
-from urllib import request
 from enum import Enum
+from urllib import request
 from zipfile import ZipFile
 
 from aiarena import settings
+
 
 logger = logging.getLogger(__name__)
 

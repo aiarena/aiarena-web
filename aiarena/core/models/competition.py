@@ -1,5 +1,6 @@
 import logging
 
+from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
@@ -7,12 +8,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+
 from wiki.models import Article, ArticleRevision
-from django.core.validators import MinValueValidator
 
 from .bot_race import BotRace
 from .game_mode import GameMode
 from .mixins import LockableModelMixin
+
 
 logger = logging.getLogger(__name__)
 

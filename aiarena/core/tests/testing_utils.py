@@ -3,7 +3,7 @@ from typing import List
 from django.test import Client
 from django.urls import reverse
 
-from aiarena.core.models import User, ArenaClient, Competition, Bot, Map, MapPool, Match
+from aiarena.core.models import ArenaClient, Bot, Competition, Map, MapPool, Match, User
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
 

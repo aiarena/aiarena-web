@@ -2,7 +2,9 @@ from rest_framework.routers import DefaultRouter
 
 from aiarena.api import views as publicapi_views
 from aiarena.api.stream import views as stream_views
+
 from .arenaclient import views as arenaclient_views
+
 
 router = DefaultRouter()
 

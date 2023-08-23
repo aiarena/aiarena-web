@@ -1,6 +1,7 @@
 import os
 
 from django.core.files.storage import FileSystemStorage
+
 from private_storage.storage.files import PrivateFileSystemStorage
 
 

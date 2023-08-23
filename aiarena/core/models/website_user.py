@@ -1,10 +1,12 @@
 import logging
 
-from constance import config
 from django.db import models
 from django.utils import timezone
 
+from constance import config
+
 from .user import User
+
 
 logger = logging.getLogger(__name__)
 

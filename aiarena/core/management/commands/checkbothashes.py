@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
-from aiarena.core.models import Result, Bot
+from aiarena.core.models import Bot, Result
 from aiarena.core.utils import calculate_md5_django_filefield
 
 

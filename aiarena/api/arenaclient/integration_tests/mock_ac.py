@@ -8,6 +8,7 @@ from urllib import parse
 
 import requests
 
+
 logger = logging.getLogger(__name__)
 
 

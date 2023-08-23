@@ -1,5 +1,6 @@
 import requests
 
+
 bot_id = 1  # insert bot id
 token = "<token here>"  # insert token you received from admin
 auth = {"Authorization": f"Token {token}"}

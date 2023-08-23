@@ -4,6 +4,7 @@ from django.db import models
 
 from . import ArenaClient
 
+
 logger = logging.getLogger(__name__)
 
 

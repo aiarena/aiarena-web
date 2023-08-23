@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from aiarena.core.models import CompetitionParticipation, Competition
 from aiarena.core.api.bot_statistics import BotStatistics
+from aiarena.core.models import Competition, CompetitionParticipation
 
 
 class Command(BaseCommand):

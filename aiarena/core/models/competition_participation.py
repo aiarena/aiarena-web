@@ -1,17 +1,20 @@
 import logging
 
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.text import slugify
-from django.core.validators import MinValueValidator
+
 from private_storage.fields import PrivateFileField
 
 from aiarena.settings import ELO_START_VALUE
+
+from ..storage import OverwritePrivateStorage, OverwriteStorage
+from ..validators import validate_not_inf, validate_not_nan
 from .bot import Bot
-from .mixins import LockableModelMixin
 from .competition import Competition
-from ..storage import OverwriteStorage, OverwritePrivateStorage
-from ..validators import validate_not_nan, validate_not_inf
+from .mixins import LockableModelMixin
+
 
 logger = logging.getLogger(__name__)
 

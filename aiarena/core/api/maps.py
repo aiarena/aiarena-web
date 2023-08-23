@@ -1,5 +1,4 @@
-from aiarena.core.models import Competition, Map
-from aiarena.core.models import MapPool
+from aiarena.core.models import Competition, Map, MapPool
 from aiarena.core.models.game_mode import GameMode
 
 

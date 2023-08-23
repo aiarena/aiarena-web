@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from django.db.models import QuerySet
+
     from aiarena.core.models import Competition
 
-from aiarena.core.models import CompetitionParticipation
-from aiarena.core.models import Bot
+from aiarena.core.models import Bot, CompetitionParticipation
 
 
 class Competitions:

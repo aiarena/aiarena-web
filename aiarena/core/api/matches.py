@@ -2,34 +2,36 @@ import logging
 import random
 from enum import Enum
 
-from constance import config
 from django.db import transaction
-from django.utils import timezone
 from django.db.models import Count
+from django.utils import timezone
+
+from constance import config
 from rest_framework.exceptions import APIException
 
 from aiarena.api.arenaclient.exceptions import (
-    NotEnoughAvailableBots,
+    CompetitionClosing,
+    CompetitionPaused,
     MaxActiveRounds,
     NoMaps,
-    CompetitionPaused,
-    CompetitionClosing,
+    NotEnoughAvailableBots,
 )
 from aiarena.core.api import Bots
 from aiarena.core.api.competitions import Competitions
 from aiarena.core.api.maps import Maps
 from aiarena.core.models import (
-    Result,
-    Map,
-    Match,
-    Round,
+    ArenaClient,
     Bot,
-    MatchParticipation,
     Competition,
     CompetitionParticipation,
-    ArenaClient,
+    Map,
+    Match,
+    MatchParticipation,
+    Result,
+    Round,
 )
 from aiarena.core.models.game_mode import GameMode
+
 
 logger = logging.getLogger(__name__)
 

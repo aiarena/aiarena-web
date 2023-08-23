@@ -1,6 +1,6 @@
-from django.test import TransactionTestCase, TestCase
+from django.test import TestCase, TransactionTestCase
 
-from aiarena.core.models import Match, Round, Bot, User, Result, Competition, Map, MapPool
+from aiarena.core.models import Bot, Competition, Map, MapPool, Match, Result, Round, User
 from aiarena.core.tests.test_mixins import FullDataSetMixin
 
 
