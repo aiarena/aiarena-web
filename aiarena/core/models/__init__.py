@@ -1,3 +1,4 @@
+# ruff: noqa: F401
 from .arena_client import ArenaClient
 from .arena_client_status import ArenaClientStatus
 from .bot import Bot
