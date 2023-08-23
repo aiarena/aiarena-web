@@ -146,7 +146,7 @@ class MockArenaClient:
 
         # Download map
         logger.info(f"AC {self._ac_id}: Downloading map {match['map']['name']}")
-        map_path = os.path.join(self._working_dir, f"map.SC2Map")
+        map_path = os.path.join(self._working_dir, "map.SC2Map")
         if not self._api.download_map(match["map"]["file"], map_path):
             logger.error(f"AC {self._ac_id}: Map download failed.")
             return False

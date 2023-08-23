@@ -31,7 +31,7 @@ class Command(BaseCommand):
         self.stdout.write("Cleaned up {0} replays.".format(self.cleanup_replays(days, options["verbose"])))
 
     def cleanup_replays(self, days, verbose):
-        self.stdout.write(f"Gathering records to clean...")
+        self.stdout.write("Gathering records to clean...")
         results = Result.objects.exclude(replay_file="").filter(created__lt=timezone.now() - timedelta(days=days))
         self.stdout.write(f"{results.count()} records gathered.")
         for result in results:

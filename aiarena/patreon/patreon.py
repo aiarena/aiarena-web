@@ -120,7 +120,7 @@ def refresh_creator_tokens() -> (str, str):
         config.PATREON_CREATOR_REFRESH_TOKEN = refresh_token
         return access_token, refresh_token
     except Exception as e:
-        raise Exception(f"Failed to refresh Patreon creator tokens.") from e
+        raise Exception("Failed to refresh Patreon creator tokens.") from e
 
 
 def get_campaign_id(campaigns) -> str:

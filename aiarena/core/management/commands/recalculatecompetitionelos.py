@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(f"Starting ELO re-calculation for competition id {options['competition_id']}...")
         with transaction.atomic():
-            self.stdout.write(f"Locking records...")
+            self.stdout.write("Locking records...")
             target_competition = Competition.objects.select_for_update().get(id=options["competition_id"])
             self.stdout.write(f"Competition id {target_competition.id} locked.")
             competition_participants = CompetitionParticipation.objects.select_for_update().filter(
@@ -33,13 +33,13 @@ class Command(BaseCommand):
 
             self.stdout.write(f"{matches.count()} matches locked.")
 
-            self.stdout.write(f"Resetting all ELOs to starting ELO...", ending="\r")
+            self.stdout.write("Resetting all ELOs to starting ELO...", ending="\r")
             for participant in competition_participants:
                 participant.elo = ELO_START_VALUE
                 participant.save()
-            self.stdout.write(f"Resetting all ELOs to starting ELO...done")
+            self.stdout.write("Resetting all ELOs to starting ELO...done")
 
-            self.stdout.write(f"Recalculating all match ELOs...0%", ending="\r")
+            self.stdout.write("Recalculating all match ELOs...0%", ending="\r")
             count: int = 0
             for match in matches:
                 count += 1
@@ -79,5 +79,5 @@ class Command(BaseCommand):
 
                 self.stdout.write(f"Recalculating all match ELOs...{count/matches.count()*100}%", ending="\r")
 
-            self.stdout.write(f"Recalculating all match ELOs...done")
-            self.stdout.write(f"Job finished!")
+            self.stdout.write("Recalculating all match ELOs...done")
+            self.stdout.write("Job finished!")

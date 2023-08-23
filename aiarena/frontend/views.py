@@ -1214,7 +1214,7 @@ class CompetitionDetail(DetailView):
                     participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
 
         context["divisions"] = dict()
-        to_title = lambda x: f"Awaiting Entry" if x == CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
+        to_title = lambda x: "Awaiting Entry" if x == CompetitionParticipation.DEFAULT_DIVISION else f"Division {x}"
         for participant in all_participants:
             if to_title(participant.division_num) not in context["divisions"]:
                 context["divisions"][to_title(participant.division_num)] = []

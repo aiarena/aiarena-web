@@ -31,7 +31,7 @@ class Command(BaseCommand):
         self.stdout.write("Cleaned up {0} logfiles.".format(self.cleanup_logfiles(days, options["verbose"])))
 
     def cleanup_logfiles(self, days, verbose):
-        self.stdout.write(f"Gathering records to clean...")
+        self.stdout.write("Gathering records to clean...")
         participants = MatchParticipation.objects.exclude(match_log="").filter(
             match__result__created__lt=timezone.now() - timedelta(days=days)
         )

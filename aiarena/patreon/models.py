@@ -66,7 +66,7 @@ class PatreonAccountBind(models.Model):
         # If the user has an existing patreon level but no pledge,
         # then if we're past the grace period, remove the level.
         elif self.user.patreon_level != "none" and self._is_past_the_grace_period():
-            logger.info(f"Pledge not found: setting to none")
+            logger.info("Pledge not found: setting to none")
             self.user.patreon_level = "none"
             self.user.save()
 

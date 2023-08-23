@@ -86,7 +86,7 @@ class Command(BaseCommand):
             self.stdout.write("Seeding failed: This is not a development or staging environment!")
 
     def run_seed(self, num_acs: int, matches):
-        self.stdout.write(f"Seeding initial website data...")
+        self.stdout.write("Seeding initial website data...")
 
         devadmin = WebsiteUser.objects.create_superuser(
             username="devadmin", password="x", email="devadmin@dev.aiarena.net"
@@ -104,7 +104,7 @@ class Command(BaseCommand):
             # if token is None it will generate a new one, otherwise it will use the one specified
             Token.objects.create(user=ac, key=str(x))
 
-        self.stdout.write(f"Creating ACs...100%")
+        self.stdout.write("Creating ACs...100%")
 
         client.create_user("service_user", "x", "service_user@dev.aiarena.net", "SERVICE", devadmin.id)
 
@@ -261,7 +261,7 @@ class Command(BaseCommand):
                     bot1.save()
 
                 count += 1
-            self.stdout.write(f"Running matches...100%")
+            self.stdout.write("Running matches...100%")
 
             # so we have a match in progress
             if matches != 0:

@@ -23,7 +23,7 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
 
     def test_admin_competition_statuses(self):
         competition = Competition.objects.first()
-        self.assertEqual(competition.status, "open", msg=f"first competition in the test database is not open!")
+        self.assertEqual(competition.status, "open", msg="first competition in the test database is not open!")
 
         self.test_client.pause_competition(competition.id)
         competition = Competition.objects.first()

@@ -132,7 +132,7 @@ class BotStatistics:
             if sp.highest_elo is None:
                 sp.highest_elo = sp.elo
         else:
-            raise Exception(f"Unexpected result type: %s", result.type)
+            raise Exception("Unexpected result type: %s", result.type)
 
         sp.win_perc = sp.win_count / sp.match_count * 100
         sp.loss_perc = sp.loss_count / sp.match_count * 100
@@ -200,7 +200,7 @@ class BotStatistics:
         elif result.is_tie:
             matchup_stats.tie_count += 1
         else:
-            raise Exception(f"Unexpected result type: %s", result.type)
+            raise Exception("Unexpected result type: %s", result.type)
 
         matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
         matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
@@ -254,7 +254,7 @@ class BotStatistics:
         elif result.is_tie:
             map_stats.tie_count += 1
         else:
-            raise Exception(f"Unexpected result type: %s", result.type)
+            raise Exception("Unexpected result type: %s", result.type)
 
         map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
         map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
