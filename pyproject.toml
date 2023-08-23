@@ -19,6 +19,7 @@ select = [
     "I",
 ]
 fixable = ["I", "F541", "E712"]
+ignore = ["E501"]
 exclude = [
     "django-discord-bind"
 ]
