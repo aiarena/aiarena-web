@@ -47,21 +47,21 @@ def smooth_timedelta(timedeltaobj):
     timetot = ""
     if secs > 86400:  # 60sec * 60min * 24hrs
         days = secs // 86400
-        timetot += "{} days".format(int(days))
+        timetot += f"{int(days)} days"
         secs = secs - days * 86400
 
     if secs > 3600:
         hrs = secs // 3600
-        timetot += " {} hours".format(int(hrs))
+        timetot += f" {int(hrs)} hours"
         secs = secs - hrs * 3600
 
     if secs > 60:
         mins = secs // 60
-        timetot += " {} minutes".format(int(mins))
+        timetot += f" {int(mins)} minutes"
         secs = secs - mins * 60
 
     if secs > 0:
-        timetot += " {} seconds".format(int(secs))
+        timetot += f" {int(secs)} seconds"
     return timetot
 
 

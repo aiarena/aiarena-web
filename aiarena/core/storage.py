@@ -31,7 +31,7 @@ class OverwritePrivateStorage(PrivateFileSystemStorage):
     """
 
     def __init__(self, location=None, base_url=None, **kwargs):
-        super(OverwritePrivateStorage, self).__init__(location=location, base_url=base_url, **kwargs)
+        super().__init__(location=location, base_url=base_url, **kwargs)
 
     def get_available_name(self, name, max_length=None):
         overwrite_file(self, name)

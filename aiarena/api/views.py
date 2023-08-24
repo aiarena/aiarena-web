@@ -494,7 +494,7 @@ class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet
         bot = Bot.objects.get(id=kwargs["pk"])
         if bot.can_download_bot_zip(request.user):
             response = HttpResponse(FileWrapper(bot.bot_zip), content_type="application/zip")
-            response["Content-Disposition"] = 'inline; filename="{0}.zip"'.format(bot.name)
+            response["Content-Disposition"] = f'inline; filename="{bot.name}.zip"'
             return response
         else:
             raise Http404()
@@ -504,7 +504,7 @@ class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet
         bot = Bot.objects.get(id=kwargs["pk"])
         if bot.can_download_bot_data(request.user):
             response = HttpResponse(FileWrapper(bot.bot_data), content_type="application/zip")
-            response["Content-Disposition"] = 'inline; filename="{0}_data.zip"'.format(bot.name)
+            response["Content-Disposition"] = f'inline; filename="{bot.name}_data.zip"'
             return response
         else:
             raise Http404()

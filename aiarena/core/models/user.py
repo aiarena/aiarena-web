@@ -57,7 +57,7 @@ class User(AbstractUser, LockableModelMixin):
 
     @cached_property
     def as_html_link(self):
-        return mark_safe('<a href="{0}">{1}</a>'.format(self.get_absolute_url, escape(self.__str__())))
+        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())}</a>')
 
     @cached_property
     def as_truncated_html_link(self):

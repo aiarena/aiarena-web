@@ -16,9 +16,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--days",
             type=int,
-            help="Number of days into the past to start cleaning from. Default is {0}.".format(
-                self._DEFAULT_DAYS_LOOKBACK
-            ),
+            help=f"Number of days into the past to start cleaning from. Default is {self._DEFAULT_DAYS_LOOKBACK}.",
         )
         parser.add_argument("--verbose", action="store_true", help="Output information with each action.")
 
@@ -27,8 +25,9 @@ class Command(BaseCommand):
             days = options["days"]
         else:
             days = self._DEFAULT_DAYS_LOOKBACK
-        self.stdout.write("Cleaning up match logfiles starting from {0} days into the past...".format(days))
-        self.stdout.write("Cleaned up {0} logfiles.".format(self.cleanup_logfiles(days, options["verbose"])))
+        self.stdout.write(f"Cleaning up match logfiles starting from {days} days into the past...")
+        cleaned = self.cleanup_logfiles(days, options["verbose"])
+        self.stdout.write(f"Cleaned up {cleaned} logfiles.")
 
     def cleanup_logfiles(self, days, verbose):
         self.stdout.write("Gathering records to clean...")

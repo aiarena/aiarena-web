@@ -30,7 +30,7 @@ class CompetitionBotMapStats(models.Model):
         # update time pre save
         self.updated = timezone.now()
         # now we call django's save protocol
-        super(CompetitionBotMapStats, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.bot) + " on " + str(self.map)

@@ -39,7 +39,7 @@ def replay_file_upload_to(instance, filename):
 
 
 def arenaclient_log_upload_to(instance, filename):
-    return "/".join(["arenaclient-logs", "{0}_arenaclientlog.zip".format(instance.match_id)])
+    return "/".join(["arenaclient-logs", f"{instance.match_id}_arenaclientlog.zip"])
 
 
 class Result(models.Model, LockableModelMixin):

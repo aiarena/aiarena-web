@@ -51,15 +51,15 @@ class BotTestCase(LoggedInMixin, TestCase):
         # test max bots for user
         for i in range(0, config.MAX_USER_BOT_COUNT):
             if i < config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER:
-                self._create_active_bot_for_competition(competition.id, self.regularUser1, "testbot{0}".format(i))
+                self._create_active_bot_for_competition(competition.id, self.regularUser1, f"testbot{i}")
             else:
-                self._create_bot(self.regularUser1, "testbot{0}".format(i))
+                self._create_bot(self.regularUser1, f"testbot{i}")
         with self.assertRaisesMessage(
             ValidationError,
-            "Maximum bot count of {0} already reached. "
-            "No more bots may be added for this user.".format(config.MAX_USER_BOT_COUNT),
+            f"Maximum bot count of {config.MAX_USER_BOT_COUNT} already reached. "
+            "No more bots may be added for this user.",
         ):
-            self._create_bot(self.regularUser1, "testbot{0}".format(config.MAX_USER_BOT_COUNT))
+            self._create_bot(self.regularUser1, f"testbot{config.MAX_USER_BOT_COUNT}")
 
         bot1 = Bot.objects.first()
 
@@ -74,14 +74,14 @@ class BotTestCase(LoggedInMixin, TestCase):
         self.assertEqual(TestAssetPaths.test_bot_datas["bot1"][0]["hash"], bot1.bot_data_md5hash)
 
         # check the bot file now exists
-        self.assertTrue(os.path.isfile("./private-media/bots/{0}/bot_zip".format(bot1.id)))
+        self.assertTrue(os.path.isfile(f"./private-media/bots/{bot1.id}/bot_zip"))
 
         with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot1.bot_zip = File(bot_zip)
             bot1.save()
 
         # check the bot file backup now exists
-        self.assertTrue(os.path.isfile("./private-media/bots/{0}/bot_zip_backup".format(bot1.id)))
+        self.assertTrue(os.path.isfile(f"./private-media/bots/{bot1.id}/bot_zip_backup"))
 
         # test active bots per race limit for user
         # this shouldn't trip the validation
@@ -413,10 +413,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
         out = StringIO()
         call_command("cancelmatches", match_id, stdout=out)
-        self.assertIn('Successfully marked match "{0}" with MatchCancelled'.format(match_id), out.getvalue())
+        self.assertIn(f'Successfully marked match "{match_id}" with MatchCancelled', out.getvalue())
 
         # test result already exists
-        with self.assertRaisesMessage(CommandError, 'A result already exists for match "{0}"'.format(match_id)):
+        with self.assertRaisesMessage(CommandError, f'A result already exists for match "{match_id}"'):
             call_command("cancelmatches", match_id)
 
         # test that cancelling the match marks it as started.
@@ -427,7 +427,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         active_match_id = response.data["id"]
         out = StringIO()
         call_command("cancelmatches", "--active", stdout=out)
-        self.assertIn('Successfully marked match "{0}" with MatchCancelled'.format(active_match_id), out.getvalue())
+        self.assertIn(f'Successfully marked match "{active_match_id}" with MatchCancelled', out.getvalue())
 
         # cancel the rest of the matches.
         # start at 2 because we already cancelled some above
@@ -438,10 +438,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
             out = StringIO()
             call_command("cancelmatches", match_id, stdout=out)
-            self.assertIn('Successfully marked match "{0}" with MatchCancelled'.format(match_id), out.getvalue())
+            self.assertIn(f'Successfully marked match "{match_id}" with MatchCancelled', out.getvalue())
 
             # test result already exists
-            with self.assertRaisesMessage(CommandError, 'A result already exists for match "{0}"'.format(match_id)):
+            with self.assertRaisesMessage(CommandError, f'A result already exists for match "{match_id}"'):
                 call_command("cancelmatches", match_id)
 
             # test that cancelling the match marks it as started.
@@ -483,9 +483,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command("cleanupreplays", stdout=out)
         self.assertIn(
-            "Cleaning up replays starting from 30 days into the past...\nGathering records to clean...\n{0} records gathered.\nCleaned up {0} replays.".format(
-                NUM_MATCHES
-            ),
+            "Cleaning up replays starting from 30 days into the past...\n"
+            "Gathering records to clean...\n"
+            f"{NUM_MATCHES} records gathered.\n"
+            f"Cleaned up {NUM_MATCHES} replays.",
             out.getvalue(),
         )
 
@@ -493,7 +494,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command("cleanupreplays", stdout=out)
         self.assertIn(
-            "Cleaning up replays starting from 30 days into the past...\nGathering records to clean...\n0 records gathered.\nCleaned up 0 replays.",
+            "Cleaning up replays starting from 30 days into the past...\n"
+            "Gathering records to clean...\n"
+            "0 records gathered.\n"
+            "Cleaned up 0 replays.",
             out.getvalue(),
         )
 
@@ -504,9 +508,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command("cleanuparenaclientlogfiles", stdout=out)
         self.assertIn(
-            "Cleaning up arena client logfiles starting from 30 days into the past...\nGathering records to clean...\n{0} records gathered.\nCleaned up {0} logfiles.".format(
-                NUM_MATCHES
-            ),
+            "Cleaning up arena client logfiles starting from 30 days into the past...\n"
+            "Gathering records to clean...\n"
+            f"{NUM_MATCHES} records gathered.\n"
+            f"Cleaned up {NUM_MATCHES} logfiles.",
             out.getvalue(),
         )
 
@@ -514,7 +519,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command("cleanuparenaclientlogfiles", stdout=out)
         self.assertIn(
-            "Cleaning up arena client logfiles starting from 30 days into the past...\nGathering records to clean...\n0 records gathered.\nCleaned up 0 logfiles.",
+            "Cleaning up arena client logfiles starting from 30 days into the past...\n"
+            "Gathering records to clean...\n"
+            "0 records gathered.\n"
+            "Cleaned up 0 logfiles.",
             out.getvalue(),
         )
 
@@ -525,9 +533,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command("cleanupmatchlogfiles", stdout=out)
         self.assertIn(
-            "Cleaning up match logfiles starting from 30 days into the past...\nGathering records to clean...\n{0} records gathered.\nCleaned up {0} logfiles.".format(
-                NUM_MATCHES * 2
-            ),
+            "Cleaning up match logfiles starting from 30 days into the past...\n"
+            "Gathering records to clean...\n"
+            f"{NUM_MATCHES * 2} records gathered.\n"
+            f"Cleaned up {NUM_MATCHES * 2} logfiles.",
             out.getvalue(),
         )
 
@@ -535,7 +544,10 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         out = StringIO()
         call_command("cleanupmatchlogfiles", stdout=out)
         self.assertIn(
-            "Cleaning up match logfiles starting from 30 days into the past...\nGathering records to clean...\n0 records gathered.\nCleaned up 0 logfiles.",
+            "Cleaning up match logfiles starting from 30 days into the past...\n"
+            "Gathering records to clean...\n"
+            "0 records gathered.\n"
+            "Cleaned up 0 logfiles.",
             out.getvalue(),
         )
 
@@ -562,7 +574,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         for competition in Competition.objects.all():
             with self.assertRaisesMessage(
                 CommandError,
-                f"Competition {competition.id} is not closed! It must be closed before it can be finalized.",
+                f"Competition {competition.id} is not closed! " "It must be closed before it can be finalized.",
             ):
                 out = StringIO()
                 call_command("finalizecompetition", "--competitionid", competition.id, stdout=out)

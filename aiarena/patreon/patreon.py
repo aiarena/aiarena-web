@@ -83,9 +83,9 @@ class PatreonApi:
 
     def get_from_endpoint(self, endpoint):
         response = requests.get(
-            "https://www.patreon.com/api/{}".format(endpoint),
+            f"https://www.patreon.com/api/{endpoint}",
             headers={
-                "Authorization": "Bearer {}".format(self.token),
+                "Authorization": f"Bearer {self.token}",
                 "User-Agent": user_agent_string(),
             },
         )

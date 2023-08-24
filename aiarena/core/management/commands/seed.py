@@ -27,14 +27,15 @@ class Command(BaseCommand):
             "--matches",
             type=int,
             default=self._DEFAULT_MATCHES_TO_GENERATE,
-            help="Number of matches to generate. Default is {0}.".format(self._DEFAULT_MATCHES_TO_GENERATE),
+            help=f"Number of matches to generate. Default is {self._DEFAULT_MATCHES_TO_GENERATE}.",
         )
         parser.add_argument(
             "--numacs",
             type=int,
             default=self._DEFAULT_ARENACLIENTS_TO_GENERATE,
-            help="Number of Arena Clients to generate. Default is {0}. MUST be at least 1.".format(
-                self._DEFAULT_ARENACLIENTS_TO_GENERATE
+            help=(
+                f"Number of Arena Clients to generate. "
+                f"Default is {self._DEFAULT_ARENACLIENTS_TO_GENERATE}. MUST be at least 1."
             ),
         )
         parser.add_argument("--flush", action="store_true", help="Whether to flush the existing database data.")
@@ -61,7 +62,7 @@ class Command(BaseCommand):
 
             self.stdout.write("Seeding data...")
 
-            self.stdout.write("Generating {0} match(es)...".format(options["matches"]))
+            self.stdout.write(f"Generating {options['matches']} match(es)...")
             self.run_seed(options["numacs"], options["matches"])
 
             self.stdout.write("Creating news items...")

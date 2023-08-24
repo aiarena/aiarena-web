@@ -108,7 +108,7 @@ class Competition(models.Model, LockableModelMixin):
             self.save()
             return None
         else:
-            return "Cannot freeze a competition with a status of {}".format(self.status)
+            return f"Cannot freeze a competition with a status of {self.status}"
 
     @transaction.atomic
     def pause(self):
@@ -118,7 +118,7 @@ class Competition(models.Model, LockableModelMixin):
             self.save()
             return None
         else:
-            return "Cannot pause a competition with a status of {}".format(self.status)
+            return f"Cannot pause a competition with a status of {self.status}"
 
     @transaction.atomic
     def open(self):
@@ -132,7 +132,7 @@ class Competition(models.Model, LockableModelMixin):
             self.save()
             return None
         else:
-            return "Cannot open a competition with a status of {}".format(self.status)
+            return f"Cannot open a competition with a status of {self.status}"
 
     @transaction.atomic
     def start_closing(self):
@@ -142,7 +142,7 @@ class Competition(models.Model, LockableModelMixin):
             self.save()
             return None
         else:
-            return "Cannot start closing a competition with a status of {}".format(self.status)
+            return f"Cannot start closing a competition with a status of {self.status}"
 
     @transaction.atomic
     def try_to_close(self):

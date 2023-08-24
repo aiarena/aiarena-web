@@ -28,9 +28,8 @@ _PYTHON_REQUIRED_VERSION_MINOR = 10
 def verify_python_version():
     if sys.version_info[0] != _PYTHON_REQUIRED_VERSION_MAJOR or sys.version_info[1] != _PYTHON_REQUIRED_VERSION_MINOR:
         raise Exception(
-            "This install procedure requires Python {0}.{1}".format(
-                _PYTHON_REQUIRED_VERSION_MAJOR, _PYTHON_REQUIRED_VERSION_MINOR
-            )
+            "This install procedure requires "
+            f"Python {_PYTHON_REQUIRED_VERSION_MAJOR}.{_PYTHON_REQUIRED_VERSION_MINOR}"
         )
 
 

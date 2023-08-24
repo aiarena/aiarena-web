@@ -179,7 +179,7 @@ class MockArenaClient:
         # todo: log stuff to bot data & AC log
 
         # Create a fake replay file
-        with open(os.path.join(self._working_dir, "replay.SC2Replay"), "wt") as f:
+        with open(os.path.join(self._working_dir, "replay.SC2Replay"), "w") as f:
             f.write("This is a mock replay")
 
         return "Tie"

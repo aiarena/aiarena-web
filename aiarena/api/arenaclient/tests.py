@@ -33,7 +33,7 @@ from aiarena.settings import BASE_DIR, ELO_START_VALUE, MEDIA_ROOT, PRIVATE_STOR
 
 class MatchesTestCase(LoggedInMixin, TransactionTestCase):
     def setUp(self):
-        super(MatchesTestCase, self).setUp()
+        super().setUp()
         self.regularUser2 = User.objects.create_user(
             username="regular_user2", password="x", email="regular_user2@aiarena.net"
         )
@@ -570,7 +570,7 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
     """
 
     def setUp(self):
-        super(EloTestCase, self).setUp()
+        super().setUp()
 
         self.test_client.login(self.staffUser1)
 

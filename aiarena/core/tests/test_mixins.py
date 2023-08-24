@@ -23,7 +23,7 @@ from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.testing_utils import TestAssetPaths
 
 
-class BaseTestMixin(object):
+class BaseTestMixin:
     """
     Base test case for testing. Contains references to all the test files such as test bot zips etc.
     """

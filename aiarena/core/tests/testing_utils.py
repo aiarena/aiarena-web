@@ -1,5 +1,3 @@
-from typing import List
-
 from django.test import Client
 from django.urls import reverse
 
@@ -190,7 +188,7 @@ class TestingClient:
         # we should be redirected back to the same page
         assert response.status_code == 302 and response.url == "."
 
-    def cancel_matches(self, match_ids: List[int]):
+    def cancel_matches(self, match_ids: list[int]):
         url = reverse("admin:core_match_changelist")
         data = {
             "action": ["cancel_matches"],

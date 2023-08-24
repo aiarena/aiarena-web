@@ -81,7 +81,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
         return self.request.user
 
     def get_context_data(self, **kwargs):
-        context = super(UserProfile, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         # Add in the user's bots
         context["bot_list"] = self.request.user.bots.all()
         context["max_user_bot_count"] = config.MAX_USER_BOT_COUNT
@@ -234,7 +234,7 @@ class BotUpload(SuccessMessageMixin, LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         # set the bot's user
-        kwargs = super(BotUpload, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         if kwargs["instance"] is None:
             kwargs["instance"] = Bot()
         kwargs["instance"].user = self.request.user
@@ -259,7 +259,7 @@ class BotList(ListView):
     paginate_by = 50
 
     def get_context_data(self, **kwargs):
-        context = super(BotList, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         # add the page ranges
         page_obj = context["page_obj"]
@@ -472,7 +472,7 @@ class BotDetail(DetailView):
     template_name = "bot.html"
 
     def get_context_data(self, **kwargs):
-        context = super(BotDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         # Create Table
         results_qs = (
@@ -637,7 +637,7 @@ class BotUpdate(SuccessMessageMixin, LoginRequiredMixin, UpdateView):
             new_content=form.cleaned_data["wiki_article_content"],
             request=self.request,
         )
-        return super(BotUpdate, self).form_valid(form)
+        return super().form_valid(form)
 
 
 class CompetitionParticipationForm(forms.ModelForm):
@@ -738,7 +738,7 @@ class AuthorDetail(DetailView):
         return results, restrict_page_range(paginator.num_pages, results.number)
 
     def get_context_data(self, **kwargs):
-        context = super(AuthorDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["bot_list"] = (
             Bot.objects.select_related("user", "plays_race").filter(user_id=self.object.id).order_by("-created")
         )
@@ -820,7 +820,7 @@ class ArenaClientView(DetailView):
     context_object_name = "arenaclient"  # change the context name to avoid overriding the current user oontext object
 
     def get_context_data(self, **kwargs):
-        context = super(ArenaClientView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         context["assigned_matches_list"] = Match.objects.filter(
             assigned_to=self.object, result__isnull=True
@@ -903,7 +903,7 @@ class BotZipDownloadView(PrivateStorageDetailView):
     content_disposition = "attachment"
 
     def get_content_disposition_filename(self, private_file):
-        return "{0}.zip".format(private_file.parent_object.name)
+        return f"{private_file.parent_object.name}.zip"
 
     def can_access_file(self, private_file):
         user = private_file.request.user
@@ -923,7 +923,7 @@ class BotDataDownloadView(PrivateStorageDetailView):
     content_disposition = "attachment"
 
     def get_content_disposition_filename(self, private_file):
-        return "{0}_data.zip".format(private_file.parent_object.name)
+        return f"{private_file.parent_object.name}_data.zip"
 
     def can_access_file(self, private_file):
         user = private_file.request.user
@@ -943,7 +943,7 @@ class MatchLogDownloadView(PrivateStorageDetailView):
     content_disposition = "attachment"
 
     def get_content_disposition_filename(self, private_file):
-        return "{0}_{1}_log.zip".format(private_file.parent_object.bot.name, private_file.parent_object.id)
+        return f"{private_file.parent_object.bot.name}_{private_file.parent_object.id}_log.zip"
 
     def can_access_file(self, private_file):
         user = private_file.request.user
@@ -1152,7 +1152,7 @@ class CompetitionDetail(DetailView):
     template_name = "competition.html"
 
     def get_context_data(self, **kwargs):
-        context = super(CompetitionDetail, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         maps = self.object.maps.all()
         map_names = []

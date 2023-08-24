@@ -78,7 +78,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
 
         # bot
         active_bot = Bot.objects.filter(competition_participations__active=True)[0]
-        response = self.client.get("/bots/{0}/".format(active_bot.id))
+        response = self.client.get(f"/bots/{active_bot.id}/")
         self.assertEqual(response.status_code, 200)
 
         # bot edit
@@ -86,13 +86,13 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         # test bot edit pages we can access
         bots = Bot.objects.filter(user=self.regularUser1)
         for bot in bots:
-            response = self.client.get("/bots/{0}/edit/".format(bot.pk))
+            response = self.client.get(f"/bots/{bot.pk}/edit/")
             self.assertEqual(response.status_code, 200)
 
         # test bot edit pages we can't access
         bots = Bot.objects.exclude(user=self.regularUser1)
         for bot in bots:
-            response = self.client.get("/bots/{0}/edit/".format(bot.pk))
+            response = self.client.get(f"/bots/{bot.pk}/edit/")
             self.assertEqual(response.status_code, 404)
 
         # authors
@@ -100,11 +100,11 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 200)
 
         # author
-        response = self.client.get("/authors/{0}/".format(self.regularUser1.id))
+        response = self.client.get(f"/authors/{self.regularUser1.id}/")
         self.assertEqual(response.status_code, 200)
 
         # match
-        response = self.client.get("/matches/{0}/".format(Match.objects.all()[0].id))
+        response = self.client.get(f"/matches/{Match.objects.all()[0].id}/")
         self.assertEqual(response.status_code, 200)
 
         # results
@@ -124,7 +124,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 200)
 
         # round
-        response = self.client.get("/rounds/{0}/".format(Round.objects.all()[0].id))
+        response = self.client.get(f"/rounds/{Round.objects.all()[0].id}/")
         self.assertEqual(response.status_code, 200)
 
         # arenaclients
@@ -133,7 +133,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
 
         # arenaclients
         for arenaclient in User.objects.filter(type="ARENA_CLIENT"):
-            response = self.client.get("/arenaclients/{0}/".format(arenaclient.id))
+            response = self.client.get(f"/arenaclients/{arenaclient.id}/")
             self.assertEqual(response.status_code, 200)
 
         # profile

@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 from django.db import models
 from django.db.models import F
@@ -44,7 +43,7 @@ class RelativeResult(models.Model):
         managed = False
 
     @classmethod
-    def with_row_number(cls, bot_ids: List[int], competition: Competition):
+    def with_row_number(cls, bot_ids: list[int], competition: Competition):
         return (
             cls.objects.all()
             .filter(me__bot__id__in=bot_ids, match__requested_by__isnull=True, match__round__competition=competition)

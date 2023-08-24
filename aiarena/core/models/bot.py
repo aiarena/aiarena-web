@@ -154,9 +154,8 @@ class Bot(models.Model, LockableModelMixin):
     def validate_max_bot_count(self):
         if Bot.objects.filter(user=self.user).exclude(id=self.id).count() >= config.MAX_USER_BOT_COUNT:
             raise ValidationError(
-                "Maximum bot count of {0} already reached. No more bots may be added for this user.".format(
-                    config.MAX_USER_BOT_COUNT
-                )
+                f"Maximum bot count of {config.MAX_USER_BOT_COUNT} already reached. "
+                "No more bots may be added for this user."
             )
 
     def validate_bot_zip_file(self, value=None):

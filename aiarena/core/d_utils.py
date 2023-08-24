@@ -16,7 +16,7 @@ class GroupConcat(Aggregate):
     template = "%(function)s(%(distinct)s%(expressions)s%(ordering)s%(separator)s)"
 
     def __init__(self, expression, ordering=None, separator=",", **extra):
-        super(GroupConcat, self).__init__(
+        super().__init__(
             expression,
             ordering=" ORDER BY %s" % ordering if ordering is not None else "",
             separator=' SEPARATOR "%s"' % separator,
@@ -36,7 +36,7 @@ def filter_tags(qs, value, tags_field_name, tags_lookup_expr="iexact", user_fiel
 
     # Check for pipe separator
     if "|" in value:
-        users_str, tags_str = [s.strip() for s in value.split("|")]
+        users_str, tags_str = (s.strip() for s in value.split("|"))
     else:
         users_str = ""
         tags_str = value
@@ -59,7 +59,7 @@ def filter_tags(qs, value, tags_field_name, tags_lookup_expr="iexact", user_fiel
 
     # Build query for users
     user_query = Q()
-    user_lookup = "%s__%s" % (user_field_name, "exact")
+    user_lookup = f"{user_field_name}__exact"
     for v in users:
         user_query |= Q(**{user_lookup: v})
 
@@ -72,13 +72,13 @@ def filter_tags(qs, value, tags_field_name, tags_lookup_expr="iexact", user_fiel
             qs = method(qs)(user_query).distinct()
             # Create string with all tag names and run icontains on the string
             qs = qs.annotate(all_tags=StringAgg(tags_field_name, delimiter=","))
-            tags_lookup = "%s__%s" % ("all_tags", tags_lookup_expr)
+            tags_lookup = f"all_tags__{tags_lookup_expr}"
             for v in tags:
                 tag_query &= Q(**{tags_lookup: v})
             return method(qs)(tag_query)
         else:
-            user_lookup = "%s__%s" % (user_field_name, "in")
-            tags_lookup = "%s__%s" % (tags_field_name, tags_lookup_expr)
+            user_lookup = f"{user_field_name}__in"
+            tags_lookup = f"{tags_field_name}__{tags_lookup_expr}"
             for v in tags:
                 if users:
                     qs = qs.filter(**{tags_lookup: v, user_lookup: users})

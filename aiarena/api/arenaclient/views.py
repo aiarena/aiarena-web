@@ -141,7 +141,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         p = MatchParticipation.objects.get(match=kwargs["pk"], participant_number=kwargs["p_num"])
         if p.bot.can_download_bot_zip(request.user):
             response = HttpResponse(FileWrapper(p.bot.bot_zip), content_type="application/zip")
-            response["Content-Disposition"] = 'inline; filename="{0}.zip"'.format(p.bot.name)
+            response["Content-Disposition"] = f'inline; filename="{p.bot.name}.zip"'
             return response
         else:
             raise PermissionDenied("You cannot download that bot zip.")
@@ -152,7 +152,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         p = MatchParticipation.objects.get(match=kwargs["pk"], participant_number=kwargs["p_num"])
         if p.bot.can_download_bot_data(request.user):
             response = HttpResponse(FileWrapper(p.bot.bot_data), content_type="application/zip")
-            response["Content-Disposition"] = 'inline; filename="{0}_data.zip"'.format(p.bot.name)
+            response["Content-Disposition"] = f'inline; filename="{p.bot.name}_data.zip"'
             return response
         else:
             raise PermissionDenied("You cannot download that bot data.")
@@ -297,7 +297,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                             f"which Bot {p1_instance.bot.name} isn't currently in!"
                         )
                         raise APIException(
-                            "Unable to log result: Bot {0} is not currently in this match!".format(p1_instance.bot.name)
+                            f"Unable to log result: Bot {p1_instance.bot.name} is not currently in this match!"
                         )
 
                     if not p2_instance.bot.is_in_match(match_id):
@@ -306,7 +306,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                             f"which Bot {p2_instance.bot.name} isn't currently in!"
                         )
                         raise APIException(
-                            "Unable to log result: Bot {0} is not currently in this match!".format(p2_instance.bot.name)
+                            f"Unable to log result: Bot {p2_instance.bot.name} is not currently in this match!"
                         )
 
                     bot1 = None
@@ -441,9 +441,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
                             if actual_elo_sum["elo__sum"] != expected_elo_sum:
                                 logger.critical(
-                                    "ELO sum of {0} did not match expected value of {1} upon submission of result {2}".format(
-                                        actual_elo_sum["elo__sum"], expected_elo_sum, result.id
-                                    )
+                                    f"ELO sum of {actual_elo_sum['elo__sum']} did not match expected value "
+                                    f"of {expected_elo_sum} upon submission of result {result.id}"
                                 )
                             elif config.DEBUG_LOGGING_ENABLED:
                                 logger.info("ENABLE_ELO_SANITY_CHECK passed!")
