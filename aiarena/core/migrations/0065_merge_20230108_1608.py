@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0061_botcrashlimitalert'),
-        ('core', '0064_alter_competitionbotmapstats_unique_together'),
+        ("core", "0061_botcrashlimitalert"),
+        ("core", "0064_alter_competitionbotmapstats_unique_together"),
     ]
 
-    operations = [
-    ]
+    operations = []

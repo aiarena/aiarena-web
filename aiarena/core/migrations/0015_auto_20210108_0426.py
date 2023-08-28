@@ -4,15 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0014_auto_20210106_1638'),
+        ("core", "0014_auto_20210106_1638"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='competition',
-            name='status',
-            field=models.CharField(blank=True, choices=[('created', 'Created'), ('frozen', 'Frozen'), ('paused', 'Paused'), ('open', 'Open'), ('closing', 'Closing'), ('closed', 'Closed')], default='created', max_length=16),
+            model_name="competition",
+            name="status",
+            field=models.CharField(
+                blank=True,
+                choices=[
+                    ("created", "Created"),
+                    ("frozen", "Frozen"),
+                    ("paused", "Paused"),
+                    ("open", "Open"),
+                    ("closing", "Closing"),
+                    ("closed", "Closed"),
+                ],
+                default="created",
+                max_length=16,
+            ),
         ),
     ]

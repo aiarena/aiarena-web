@@ -5,6 +5,7 @@ from django.db import models
 from .bot import Bot
 from .trophy_icon import TrophyIcon
 
+
 logger = logging.getLogger(__name__)
 
 

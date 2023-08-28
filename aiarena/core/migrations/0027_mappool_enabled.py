@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0026_map_enabled'),
+        ("core", "0026_map_enabled"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='mappool',
-            name='enabled',
+            model_name="mappool",
+            name="enabled",
             field=models.BooleanField(default=True),
         ),
     ]

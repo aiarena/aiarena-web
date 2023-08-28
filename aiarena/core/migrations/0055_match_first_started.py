@@ -5,16 +5,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0054_rename_plays_race_model_bot_plays_race'),
+        ("core", "0054_rename_plays_race_model_bot_plays_race"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='match',
-            name='first_started',
+            model_name="match",
+            name="first_started",
             field=models.DateTimeField(blank=True, db_index=True, editable=False, null=True),
         ),
-        migrations.RunSQL("""
+        migrations.RunSQL(
+            """
     drop view if exists core_relativeresult;
     create view core_relativeresult as
                        select cr.id as id,
@@ -34,5 +35,6 @@ class Migration(migrations.Migration):
                        join core_match cm on cr.match_id = cm.id
                        join core_matchparticipation me_mp on cm.id = me_mp.match_id
                        join core_matchparticipation opponent_mp on cm.id = opponent_mp.match_id and me_mp.participant_number!=opponent_mp.participant_number
-    """),
+    """
+        ),
     ]

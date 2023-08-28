@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0054_rename_plays_race_model_bot_plays_race'),
+        ("core", "0054_rename_plays_race_model_bot_plays_race"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='competition',
-            name='require_trusted_infrastructure',
+            model_name="competition",
+            name="require_trusted_infrastructure",
             field=models.BooleanField(default=True),
         ),
     ]

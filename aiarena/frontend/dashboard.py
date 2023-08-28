@@ -1,7 +1,6 @@
 from django.utils.translation import ugettext_lazy as _
-from django.urls import reverse
 
-from grappelli.dashboard import modules, Dashboard
+from grappelli.dashboard import Dashboard, modules
 from grappelli.dashboard.utils import get_admin_site_name
 
 
@@ -11,7 +10,7 @@ class CustomIndexDashboard(Dashboard):
     """
 
     def init_with_context(self, context):
-        site_name = get_admin_site_name(context)
+        get_admin_site_name(context)
 
         # append a group for "Administration" & "Applications"
         self.children.append(
@@ -26,7 +25,6 @@ class CustomIndexDashboard(Dashboard):
                         collapsible=False,
                         models=("django.contrib.*",),
                     ),
-
                 ],
             )
         )
@@ -45,9 +43,10 @@ class CustomIndexDashboard(Dashboard):
                 ],
             )
         )
-        self.children.append(modules.RecentActions(
-            title='Recent actions',
-            column=3,
-            limit=5,
-        ))
-
+        self.children.append(
+            modules.RecentActions(
+                title="Recent actions",
+                column=3,
+                limit=5,
+            )
+        )

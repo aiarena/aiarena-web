@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0009_auto_20201225_0542'),
+        ("core", "0009_auto_20201225_0542"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='competition',
-            name='type',
-            field=models.CharField(choices=[('L', 'League - Round Robin')], default='L', max_length=32),
+            model_name="competition",
+            name="type",
+            field=models.CharField(choices=[("L", "League - Round Robin")], default="L", max_length=32),
         ),
     ]

@@ -4,19 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0008_auto_20201225_0503'),
+        ("core", "0008_auto_20201225_0503"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='gamemode',
-            name='name',
+            model_name="gamemode",
+            name="name",
             field=models.CharField(max_length=50),
         ),
         migrations.AlterUniqueTogether(
-            name='gamemode',
-            unique_together={('name', 'game')},
+            name="gamemode",
+            unique_together={("name", "game")},
         ),
     ]

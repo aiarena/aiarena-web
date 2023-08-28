@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0025_delete_websitenotice'),
+        ("core", "0025_delete_websitenotice"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='map',
-            name='enabled',
+            model_name="map",
+            name="enabled",
             field=models.BooleanField(default=True),
         ),
     ]

@@ -3,6 +3,7 @@ from django_random_queryset import RandomManager
 
 class RandomManagerMixin:
     """Allows selection of a random item from a queryset."""
+
     objects = RandomManager()
 
 

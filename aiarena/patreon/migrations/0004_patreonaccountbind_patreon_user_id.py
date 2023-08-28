@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('patreon', '0003_auto_20211112_1942'),
+        ("patreon", "0003_auto_20211112_1942"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='patreonaccountbind',
-            name='patreon_user_id',
+            model_name="patreonaccountbind",
+            name="patreon_user_id",
             field=models.CharField(blank=True, max_length=64, null=True),
         ),
     ]

@@ -17,21 +17,25 @@ class PatreonOAuth:
         self.client_secret = client_secret
 
     def get_tokens(self, code, redirect_uri):
-        return self.__update_token({
-            "code": code,
-            "grant_type": "authorization_code",
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
-            "redirect_uri": redirect_uri
-        })
+        return self.__update_token(
+            {
+                "code": code,
+                "grant_type": "authorization_code",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "redirect_uri": redirect_uri,
+            }
+        )
 
     def refresh_token(self, refresh_token):
-        return self.__update_token({
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "client_id": self.client_id,
-            "client_secret": self.client_secret
-        })
+        return self.__update_token(
+            {
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            }
+        )
 
     @staticmethod
     def __update_token(params):
@@ -39,23 +43,23 @@ class PatreonOAuth:
             "https://www.patreon.com/api/oauth2/token",
             params=params,
             headers={
-                'Content-type': 'application/x-www-form-urlencoded',
-                'User-Agent': user_agent_string(),
-            }
+                "Content-type": "application/x-www-form-urlencoded",
+                "User-Agent": user_agent_string(),
+            },
         )
         return response.json()
 
     def update_tokens(self, refresh_token) -> (str, str):
         oauth_client = PatreonOAuth(self.client_id, self.client_secret)
         tokens = oauth_client.refresh_token(refresh_token)
-        if 'access_token' in tokens and 'refresh_token' in tokens:
-            return tokens['access_token'], tokens['refresh_token']
+        if "access_token" in tokens and "refresh_token" in tokens:
+            return tokens["access_token"], tokens["refresh_token"]
         else:
             raise Exception("Failed to refresh patreon token. Tokens dump:\n" + json.dumps(tokens))
 
 
 def user_agent_string():
-    return 'Python'
+    return "Python"
 
 
 class PatreonApi:
@@ -63,27 +67,27 @@ class PatreonApi:
         self.token = token
 
     def current_user(self):
-        return self.get_from_oauth_endpoint('current_user')
+        return self.get_from_oauth_endpoint("current_user")
 
     def current_user_campaigns(self):
-        return self.get_from_oauth_endpoint('current_user/campaigns')
+        return self.get_from_oauth_endpoint("current_user/campaigns")
 
     def campaign_pledges(self, campaign_id):
-        return self.get_from_oauth_endpoint(f'campaigns/{campaign_id}/pledges')
+        return self.get_from_oauth_endpoint(f"campaigns/{campaign_id}/pledges")
 
     def user(self, user_id):
-        return self.get_from_endpoint(f'user/{user_id}')
+        return self.get_from_endpoint(f"user/{user_id}")
 
     def get_from_oauth_endpoint(self, endpoint):
-        return self.get_from_endpoint(f'oauth2/api/{endpoint}')
+        return self.get_from_endpoint(f"oauth2/api/{endpoint}")
 
     def get_from_endpoint(self, endpoint):
         response = requests.get(
-            "https://www.patreon.com/api/{}".format(endpoint),
+            f"https://www.patreon.com/api/{endpoint}",
             headers={
-                'Authorization': "Bearer {}".format(self.token),
-                'User-Agent': user_agent_string(),
-            }
+                "Authorization": f"Bearer {self.token}",
+                "User-Agent": user_agent_string(),
+            },
         )
         return response.json()
 
@@ -91,7 +95,7 @@ class PatreonApi:
 def update_unlinked_discord_users():
     if config.PATREON_CLIENT_ID and config.PATREON_CLIENT_SECRET and config.PATREON_CREATOR_REFRESH_TOKEN:
         # avoid circular import
-        from aiarena.patreon.models import PatreonUnlinkedDiscordUID, PatreonAccountBind
+        from aiarena.patreon.models import PatreonAccountBind, PatreonUnlinkedDiscordUID
 
         access_token, _ = refresh_creator_tokens()
         api = PatreonApi(access_token)
@@ -103,9 +107,10 @@ def update_unlinked_discord_users():
         PatreonUnlinkedDiscordUID.objects.all().delete()
 
         for discord_uid in discord_uids:
-            if not PatreonAccountBind.objects.filter(patreon_user_id=discord_uid['patreon_user_id']).exists():
-                PatreonUnlinkedDiscordUID.objects.create(patreon_user_id=discord_uid['patreon_user_id'],
-                                                         discord_uid=discord_uid['discord_uid'])
+            if not PatreonAccountBind.objects.filter(patreon_user_id=discord_uid["patreon_user_id"]).exists():
+                PatreonUnlinkedDiscordUID.objects.create(
+                    patreon_user_id=discord_uid["patreon_user_id"], discord_uid=discord_uid["discord_uid"]
+                )
 
 
 def refresh_creator_tokens() -> (str, str):
@@ -115,25 +120,25 @@ def refresh_creator_tokens() -> (str, str):
         config.PATREON_CREATOR_REFRESH_TOKEN = refresh_token
         return access_token, refresh_token
     except Exception as e:
-        raise Exception(f"Failed to refresh Patreon creator tokens.") from e
+        raise Exception("Failed to refresh Patreon creator tokens.") from e
 
 
 def get_campaign_id(campaigns) -> str:
-    if 'data' in campaigns and len(campaigns['data']) == 1 and 'id' in campaigns['data'][0]:
-        return campaigns['data'][0]['id']
-    raise Exception('Unable to locate campaign.')
+    if "data" in campaigns and len(campaigns["data"]) == 1 and "id" in campaigns["data"][0]:
+        return campaigns["data"][0]["id"]
+    raise Exception("Unable to locate campaign.")
 
 
 def get_pledge_user_discord_uids(campaign):
-    if 'included' in campaign:
+    if "included" in campaign:
         discord_uids = []
-        for entry in campaign['included']:
-            if entry['type'] == 'user':
-                discord = entry['attributes']['social_connections']['discord']
+        for entry in campaign["included"]:
+            if entry["type"] == "user":
+                discord = entry["attributes"]["social_connections"]["discord"]
                 if discord is not None:
-                    if 'user_id' in discord:
-                        discord_uids.append({'patreon_user_id': entry['id'], 'discord_uid': discord['user_id']})
+                    if "user_id" in discord:
+                        discord_uids.append({"patreon_user_id": entry["id"], "discord_uid": discord["user_id"]})
                     else:
-                        raise Exception('Discord user_id was missing!')
+                        raise Exception("Discord user_id was missing!")
         return discord_uids
-    raise Exception('Unable to locate pledge user discord uids.')
+    raise Exception("Unable to locate pledge user discord uids.")

@@ -1,4 +1,3 @@
-
 def restrict_page_range(num_pages, page_number):
     if num_pages <= 11 or page_number <= 6:  # case 1 and 2
         return [x for x in range(1, min(num_pages + 1, 12))]

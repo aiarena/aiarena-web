@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0019_competition_max_active_rounds'),
+        ("core", "0019_competition_max_active_rounds"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='arenaclient',
-            options={'verbose_name': 'ArenaClient'},
+            name="arenaclient",
+            options={"verbose_name": "ArenaClient"},
         ),
     ]

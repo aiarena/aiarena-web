@@ -1,18 +1,18 @@
 import logging
 import multiprocessing
 import sys
+from multiprocessing import Process
 from time import sleep
 
 from aiarena.api.arenaclient.integration_tests.mock_ac import MockArenaClient
 
-from multiprocessing import Process
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -20,6 +20,7 @@ NUM_ACS = 10
 NUM_MATCHES_TO_RUN = 100
 API_URL = "http://127.0.0.1:8000"
 AC_SLEEP_TIME = 0.1
+
 
 def run_ac(ac_id, num_matches, lock):
     ac_id = str(ac_id)
@@ -44,9 +45,9 @@ def run_ac(ac_id, num_matches, lock):
             sleep(AC_SLEEP_TIME)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     processes = []
-    num_matches = multiprocessing.Value('i', 0)
+    num_matches = multiprocessing.Value("i", 0)
     lock = multiprocessing.Lock()
 
     for ac_id in range(NUM_ACS):
@@ -59,4 +60,3 @@ if __name__ == '__main__':
         p.join()
 
     logger.info(f"Total matches played: {num_matches.value}")
-

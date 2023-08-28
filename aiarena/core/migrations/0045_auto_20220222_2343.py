@@ -6,13 +6,13 @@ from aiarena.core.models import Competition
 
 
 def create_competition_wiki_articles(apps, schema_editor):
-    for competition in Competition.objects.only('id').all(): # .only('id') avoids future conflicts
+    for competition in Competition.objects.only("id").all():  # .only('id') avoids future conflicts
         competition.save()  # trigger the presave hook that creates the article
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0044_auto_20220222_2151'),
+        ("core", "0044_auto_20220222_2151"),
     ]
 
     operations = [

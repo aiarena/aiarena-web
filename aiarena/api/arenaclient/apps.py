@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class ArenaClientConfig(AppConfig):
-    name = 'aiarena.api.arenaclient'
+    name = "aiarena.api.arenaclient"

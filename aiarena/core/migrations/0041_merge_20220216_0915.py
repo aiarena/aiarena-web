@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0029_competition_wiki_article'),
-        ('core', '0040_alter_arenaclientstatus_logged_at'),
+        ("core", "0029_competition_wiki_article"),
+        ("core", "0040_alter_arenaclientstatus_logged_at"),
     ]
 
-    operations = [
-    ]
+    operations = []
