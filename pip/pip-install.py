@@ -20,9 +20,9 @@ _PROJECT_ROOT_DIRECTORY = os.path.join(_LOCAL_DIRECTORY, "..")
 _DEFAULT_PIP_BINARY = "pip3"
 _DEFAULT_PYTHON_BINARY = "python3"
 
-# Require Python 3.10
+# Require Python 3.7
 _PYTHON_REQUIRED_VERSION_MAJOR = 3
-_PYTHON_REQUIRED_VERSION_MINOR = 10
+_PYTHON_REQUIRED_VERSION_MINOR = 7
 
 
 def verify_python_version():
@@ -54,8 +54,6 @@ def run_install(pip_binary_name, python_binary_name):
 
 
 if __name__ == "__main__":
-    verify_python_version()
-
     parser = optparse.OptionParser()
     parser.set_defaults(pip=_DEFAULT_PIP_BINARY, python=_DEFAULT_PYTHON_BINARY)
     parser.add_option("--pip", dest="pip")

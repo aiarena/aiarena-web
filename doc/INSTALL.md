@@ -9,7 +9,7 @@
    git submodule update --init --recursive
    ```
 
-2. Install python 3.10 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
+2. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
 
 3. Install PostgreSQL and create a Database and a User who can access it  
     Using SQL:
