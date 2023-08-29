@@ -1,2 +1,1 @@
-django-constance[redis]==2.8.0
 redis==3.5.3
