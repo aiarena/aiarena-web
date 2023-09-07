@@ -108,7 +108,7 @@ SERVICES = [
             command="",
         ),
         container_port=WEB_PORT,
-        container_name="nginx",
+        container_name=UWSGI_CONTAINER_NAME,
         health_check_grace_sec=120,
         health_check_failed_count=2,
     ),
