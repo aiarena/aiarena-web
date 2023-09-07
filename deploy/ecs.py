@@ -5,11 +5,12 @@ DYNAMIC_PORT = 0
 
 
 class Task:
+    default_requires_capabilities = ["FARGATE"]
     family_prefix = ""
     command_prefix = ""
     default_image = None
-    default_cpu = 1
-    default_memory = 192
+    default_cpu = 0.5
+    default_memory = 512
 
     def __init__(
         self,
@@ -21,6 +22,7 @@ class Task:
         memory=None,
         volumes=None,
         hostname=None,
+        requires_capabilities=None,
     ):
         self.family = self.family_prefix + family
         self.image = image or self.default_image
@@ -32,6 +34,7 @@ class Task:
         self.volumes = volumes
         self.command_chunk = command
         self.hostname = hostname
+        self.requires_capabilities = requires_capabilities or self.default_requires_capabilities
 
     def code_container(self, env, ports, name="code", command=None, hostname=None):
         task_config = {
@@ -77,6 +80,7 @@ class Task:
             "family": self.family,
             "containerDefinitions": self.containers(env, ports),
             "volumes": self.volumes or [],
+            "requiresCapabilities": self.requires_capabilities,
         }
 
 
