@@ -44,9 +44,10 @@ SECRETS_PATH = PROJECT_PATH / SECRETS_FOLDER
 def kms_master_key_provider(*, for_decrypt):
     access_key = os.environ.get("AWS_ACCESS_KEY_ID")
     secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    session_token = os.environ.get("AWS_SESSION_TOKEN")
     if access_key:
         botocore_session = Session()
-        botocore_session.set_credentials(access_key, secret_key)
+        botocore_session.set_credentials(access_key, secret_key, session_token)
     else:
         profile = os.environ.get("AWS_PROFILE") or PROJECT_NAME
         botocore_session = Session(profile=profile)
