@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from .ecs import DYNAMIC_PORT, Service, Task
+from .ecs import Service, Task
 from .utils import str_to_bool
 
 
@@ -36,9 +36,6 @@ AWS_ACCOUNT_ID = "315513665747"
 AWS_ELB_HEALTH_CHECK_ENDPOINT = "/health-check/"
 
 PRIVATE_REGISTRY_URL = f"{AWS_ACCOUNT_ID}.dkr.ecr.{AWS_REGION}.amazonaws.com"
-
-FLUENT_HOST = "172.17.0.1"
-FLUENT_PORT = "24224"
 
 # Change this in Actions variables
 # https://github.com/Perceptive-Care-Systems/app/settings/variables/actions
@@ -87,31 +84,6 @@ class BaseTask(Task):
 
 
 class WebTask(BaseTask):
-    # noinspection PyUnusedLocal
-    def nginx_container(self, env, ports, code_containers, name="nginx", command=None, hostname=None):
-        return {
-            "name": name,
-            "cpu": 64,
-            "environment": [],
-            "essential": True,
-            "image": "fholzer/nginx-brotli:v1.21.6",
-            "links": code_containers,
-            "memory": 32,
-            "mountPoints": [
-                {
-                    "containerPath": volume["host"]["sourcePath"],
-                    "readOnly": False,
-                    "sourceVolume": volume["name"],
-                }
-                for volume in (self.volumes or [])
-            ],
-            "volumesFrom": [{"sourceContainer": container, "readOnly": False} for container in code_containers],
-            "hostname": hostname or name,
-            "portMappings": ports,
-            "entryPoint": ["/bin/sh", "-c"],
-            "command": command.split(" "),
-        }
-
     def code_container(self, env, ports, name="code", command=None, hostname=None):
         config = super().code_container(
             env,
@@ -133,17 +105,10 @@ class WebTask(BaseTask):
         return [
             self.code_container(
                 env,
-                (),
-                name=UWSGI_CONTAINER_NAME,
-                command="/code/uwsgi.sh",
-                hostname=UWSGI_CONTAINER_NAME,
-            ),
-            self.nginx_container(
-                env,
                 ports,
-                code_containers=[UWSGI_CONTAINER_NAME],
-                name="nginx",
-                command="/code/nginx.sh",
+                name=UWSGI_CONTAINER_NAME,
+                command="/app/aiarena/uwsgi.sh",
+                hostname=UWSGI_CONTAINER_NAME,
             ),
         ]
 
@@ -151,12 +116,11 @@ class WebTask(BaseTask):
 SERVICES = [
     WebService(
         name="webService",
-        count=4,
+        count=2,
         task=WebTask(
             family="websiteTask",
-            ports=[(DYNAMIC_PORT, WEB_PORT)],
+            ports=[(WEB_PORT, WEB_PORT)],
             command="",
-            cpu=64,  # + 64 nginx = 128
         ),
         container_port=WEB_PORT,
         container_name="nginx",

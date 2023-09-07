@@ -1,9 +1,6 @@
 import re
 
 
-DYNAMIC_PORT = 0
-
-
 class Task:
     default_requires_compatibilities = ["FARGATE"]
     family_prefix = ""
