@@ -87,23 +87,6 @@ class BaseTask(Task):
 
 
 class WebTask(BaseTask):
-    def code_container(self, env, ports, name="code", command=None, hostname=None):
-        config = super().code_container(
-            env,
-            ports,
-            name=name,
-            command=command,
-            hostname=hostname,
-        )
-        config["logConfiguration"] = {
-            "logDriver": "json-file",
-            "options": {
-                "max-size": "100m",
-                "max-file": "3",
-            },
-        }
-        return config
-
     def containers(self, env, ports):
         return [
             self.code_container(
