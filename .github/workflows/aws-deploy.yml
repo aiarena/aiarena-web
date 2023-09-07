@@ -20,6 +20,15 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::315513665747:role/aiarena-DeployRole-NUZWXPWHC0MZ
+          aws-region: eu-central-1
+
+      - name: Confirm AWS identity
+        run: aws sts get-caller-identity
+
       - name: Setup python
         uses: actions/setup-python@v4
         with:
@@ -31,11 +40,6 @@ jobs:
           python -m pip install --upgrade pip
           python ./pip/pip-install.py --python=python --pip=pip
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::315513665747:role/aiarena-DeployRole-NUZWXPWHC0MZ
-          aws-region: eu-central-1
 
       - name: Prepare image
         id: prepare_images
