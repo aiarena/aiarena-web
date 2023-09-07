@@ -81,6 +81,7 @@ class Task:
             "containerDefinitions": self.containers(env, ports),
             "volumes": self.volumes or [],
             "requiresCompatibilities": self.requires_compatibilities,
+            "networkMode": "awsvpc",
         }
 
 
