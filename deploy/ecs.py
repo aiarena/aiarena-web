@@ -6,7 +6,7 @@ class Task:
     family_prefix = ""
     command_prefix = ""
     default_image = None
-    default_cpu = 0.5
+    default_cpu = 256
     default_memory = 512
 
     def __init__(
