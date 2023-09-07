@@ -147,7 +147,7 @@ def ecs():
     aws.pull_image("cloud:latest")
 
     # Migrate production DB and load initial data
-    manage_py_cmd = "python -B /code/manage.py"
+    manage_py_cmd = "python -B /app/manage.py"
     docker.cli(
         f"run --rm {env_as_cli_args(root_environment)} "
         f"{PROJECT_NAME}/cloud "
