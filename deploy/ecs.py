@@ -36,10 +36,8 @@ class Task:
     def code_container(self, env, ports, name="code", command=None, hostname=None):
         task_config = {
             "name": name,
-            "cpu": self.cpu,
             "essential": True,
             "image": self.image,
-            "memory": self.memory,
             "command": (command or self.command).split(" "),
             "environment": env,
             "portMappings": ports,
@@ -74,6 +72,8 @@ class Task:
         env = [{"name": k, "value": v} for k, v in environment.items()]
         ports = [{"hostPort": host_port, "containerPort": container_port} for (host_port, container_port) in self.ports]
         return {
+            "cpu": self.cpu,
+            "memory": self.memory,
             "family": self.family,
             "containerDefinitions": self.containers(env, ports),
             "volumes": self.volumes or [],
