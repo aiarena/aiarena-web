@@ -2,37 +2,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Resources:
-
-  DeployUser:
-    Type: AWS::IAM::User
-    Properties:
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
-        - arn:aws:iam::aws:policy/AmazonElasticContainerRegistryPublicFullAccess
-        - arn:aws:iam::aws:policy/AmazonECS_FullAccess
-        - arn:aws:iam::aws:policy/AmazonElastiCacheReadOnlyAccess
-        - arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
-        - arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess
-        - arn:aws:iam::aws:policy/CloudFrontReadOnlyAccess
-      Policies:
-        - PolicyName: connect-via-ssm
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ssm:*
-                Resource: "*"
-        - PolicyName: pass-role
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - iam:ListInstanceProfiles
-                  - iam:ListRoles
-                  - iam:PassRole
-                Resource: "*"
-
   KeyAlias:
     Type: AWS::KMS::Alias
     DeletionPolicy: Delete
@@ -82,7 +51,7 @@ Resources:
             Principal:
               AWS:
                 - Fn::GetAtt:
-                    - DeployUser
+                    - DeployRole
                     - Arn
             Action:
               - kms:GenerateDataKey
