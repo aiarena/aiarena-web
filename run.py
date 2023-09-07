@@ -87,20 +87,12 @@ def cloudformation():
 
 def deploy_environment():
     build_number = os.environ.get("BUILD_NUMBER", "")
-    try:
-        REDIS_CACHE_DB = int(os.environ.get("BUILD_NUMBER", "")) % 5 + 5
-    except ValueError:
-        REDIS_CACHE_DB = 5
     environment = {
         "AWS_REGION": AWS_REGION,
         "BUILD_NUMBER": build_number,
-        "C_FORCE_ROOT": "1",  # force Celery to run as root
-        "DB_HOST": aws.db_endpoint(PROJECT_NAME, "MainDBEncrypted"),
+        "DB_HOST": aws.db_endpoint(PROJECT_NAME, "MainDB"),
         "DB_NAME": DB_NAME,
         "DB_USER": PRODUCTION_DB_USER,
-        "REDIS_HOST": aws.replication_group_nodes("RedisReplicationGroup")[0],
-        "REDIS_USE_SSL": "1",
-        "REDIS_CACHE_DB": str(REDIS_CACHE_DB),
         "STATIC_URL": "https://cdn.aiarena.net/",
         "MAINTENANCE_MODE": str(MAINTENANCE_MODE),
         "DJANGO_ALLOW_ASYNC_UNSAFE": "1",
