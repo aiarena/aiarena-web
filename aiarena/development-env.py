@@ -1,4 +1,4 @@
 from aiarena.core.utils import EnvironmentType
 
 
-ENVIRONMENT_TYPE = EnvironmentType.PRODUCTION
+ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
