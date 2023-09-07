@@ -37,6 +37,9 @@ AWS_ELB_HEALTH_CHECK_ENDPOINT = "/health-check/"
 
 PRIVATE_REGISTRY_URL = f"{AWS_ACCOUNT_ID}.dkr.ecr.{AWS_REGION}.amazonaws.com"
 
+FLUENT_HOST = "172.17.0.1"
+FLUENT_PORT = "24224"
+
 # Change this in Actions variables
 # https://github.com/Perceptive-Care-Systems/app/settings/variables/actions
 MAINTENANCE_MODE = str_to_bool(os.environ.get("MAINTENANCE_MODE", "False"))
