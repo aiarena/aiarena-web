@@ -1,0 +1,402 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+
+  DeployUser:
+    Type: AWS::IAM::User
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+        - arn:aws:iam::aws:policy/AmazonElasticContainerRegistryPublicFullAccess
+        - arn:aws:iam::aws:policy/AmazonECS_FullAccess
+        - arn:aws:iam::aws:policy/AmazonElastiCacheReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess
+        - arn:aws:iam::aws:policy/CloudFrontReadOnlyAccess
+      Policies:
+        - PolicyName: connect-via-ssm
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:*
+                Resource: "*"
+        - PolicyName: pass-role
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:ListInstanceProfiles
+                  - iam:ListRoles
+                  - iam:PassRole
+                Resource: "*"
+
+  KeyAlias:
+    Type: AWS::KMS::Alias
+    DeletionPolicy: Delete
+    Properties:
+      AliasName: !format "alias/{project_name}"
+      TargetKeyId:
+        Ref: MasterKey
+
+  MasterKey:
+    Type: AWS::KMS::Key
+    DeletionPolicy: Delete
+    Properties:
+      Description: !format "{project_name} key"
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: !format "{project_name}-key-1"
+        Statement:
+          - Sid: Allow administration of the key
+            Effect: Allow
+            Principal:
+              AWS:
+                - Fn::Join:
+                    - ''
+                    - - 'arn:aws:iam::'
+                      - Ref: AWS::AccountId
+                      - ":root"
+            Action:
+              - kms:Create*
+              - kms:Describe*
+              - kms:Enable*
+              - kms:List*
+              - kms:Put*
+              - kms:Update*
+              - kms:Revoke*
+              - kms:Disable*
+              - kms:Get*
+              - kms:Delete*
+              - kms:ScheduleKeyDeletion
+              - kms:CancelKeyDeletion
+              - kms:Encrypt
+              - kms:ReEncrypt*
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+            Resource: "*"
+          - Sid: Allow use of the key
+            Effect: Allow
+            Principal:
+              AWS:
+                - Fn::GetAtt:
+                    - DeployUser
+                    - Arn
+            Action:
+              - kms:GenerateDataKey
+              - kms:Decrypt
+            Resource: "*"
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: 10.0.0.0/16
+
+  PublicSubnetZoneA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      VpcId:
+        Ref: VPC
+      CidrBlock: 10.0.0.0/24
+
+  PublicSubnetZoneB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1c
+      VpcId:
+        Ref: VPC
+      CidrBlock: 10.0.1.0/24
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties: { }
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: VPC
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      GatewayId:
+        Ref: InternetGateway
+      DestinationCidrBlock: 0.0.0.0/0
+    DependsOn:
+      - InternetGatewayAttachment
+
+  SubnetZoneARouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      SubnetId:
+        Ref: PublicSubnetZoneA
+
+  SubnetZoneBRouteTable:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId:
+        Ref: PublicRouteTable
+      SubnetId:
+        Ref: PublicSubnetZoneB
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId:
+        Ref: InternetGateway
+      VpcId:
+        Ref: VPC
+
+  PublicLoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Public Elastic Load Balancing security group with HTTP access
+        on port 80 from the Internet
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 32768
+          ToPort: 61000
+          CidrIp: 0.0.0.0/0
+      VpcId:
+        Ref: VPC
+
+  ContainerInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access from load balancer and SSH traffic
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 32768
+          ToPort: 61000
+          SourceSecurityGroupId:
+            Ref: PublicLoadBalancerSecurityGroup
+      VpcId:
+        Ref: VPC
+
+  DBEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open database for access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId:
+            Ref: ContainerInstanceSecurityGroup
+      VpcId:
+        Ref: VPC
+
+  MainDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      Engine: postgres
+      EngineVersion: 15.3
+      MultiAZ: false
+      DBInstanceIdentifier: !format "{project_name}-maindb"
+      DBName: !var db_name
+      DeletionProtection: true
+      MasterUsername: !var db_master_user
+      MasterUserPassword: !var db_master_password
+      DBInstanceClass:
+        Ref: DBClass
+      DBParameterGroupName:
+        Ref: DBParameterGroup
+      AllocatedStorage:
+        Ref: DBAllocatedStorage
+      AllowMajorVersionUpgrade: true
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+        - Fn::GetAtt:
+            - DBEC2SecurityGroup
+            - GroupId
+      DBSubnetGroupName:
+        Ref: DBSubnetGroup
+      StorageType: gp2
+    DeletionPolicy: Retain
+    DependsOn:
+      - PublicRoute
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Database Subnet Group
+      SubnetIds:
+        - Ref: PublicSubnetZoneA
+        - Ref: PublicSubnetZoneB
+
+  DBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: !format "{project_name}-db-params"
+      Family: postgres15
+      Parameters:
+        rds.force_ssl: 0
+
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterSettings:
+        - Name: containerInsights
+          Value: !var container_insights
+
+  ECRRepositoryCloud:
+    Type: AWS::ECR::Repository
+    Properties:
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 10,
+                "description": "Purge untagged images",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 2
+                },
+                "action": {
+                  "type": "expire"
+                }
+              },
+              {
+                "action": {
+                  "type": "expire"
+                },
+                "selection": {
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 3,
+                  "tagStatus": "tagged",
+                  "tagPrefixList": [
+                    "build-"
+                  ]
+                },
+                "description": "Remove temporary build images",
+                "rulePriority": 11
+              }
+            ]
+          }
+      RepositoryName: !format "{project_name}/cloud"
+      ImageScanningConfiguration:
+        scanOnPush: 'true'
+
+  DeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+        - arn:aws:iam::aws:policy/AmazonElasticContainerRegistryPublicFullAccess
+        - arn:aws:iam::aws:policy/AmazonECS_FullAccess
+        - arn:aws:iam::aws:policy/AmazonElastiCacheReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonRDSReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AWSCloudFormationReadOnlyAccess
+        - arn:aws:iam::aws:policy/CloudFrontReadOnlyAccess
+      Policies:
+        - PolicyName: connect-via-ssm
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:*
+                Resource: "*"
+        - PolicyName: pass-role
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:ListInstanceProfiles
+                  - iam:ListRoles
+                  - iam:PassRole
+                Resource: "*"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated:
+                - Ref: GithubOidc
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud:
+                  Ref: OIDCAudience
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  - Fn::Join:
+                    - ''
+                    - - 'repo:'
+                      - Ref: GitHubOrg
+                      - "/"
+                      - Ref: RepositoryName
+                      - ":*"
+    DependsOn: GithubOidc
+
+  GithubOidc:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - ffffffffffffffffffffffffffffffffffffffff
+
+Parameters:
+
+  DBClass:
+    Description: DB instance type
+    Type: String
+    Default: db.t3.micro
+    AllowedValues:
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.medium
+      - db.t4g.medium
+      - db.r5.large
+      - db.r5.xlarge
+      - db.r5.2xlarge
+      - db.r5.4xlarge
+    ConstraintDescription: must be a valid RDS instance type.
+
+  DBAllocatedStorage:
+    Description: Database Allocated Storage
+    Type: Number
+    Default: 50
+    MinValue: 5
+    MaxValue: 6144
+
+  GitHubOrg:
+    Description: Name of GitHub organization/user (case sensitive)
+    Type: String
+
+  RepositoryName:
+    Description: Name of GitHub repository (case sensitive)
+    Type: String
+
+  OIDCAudience:
+    Description: Audience supplied to configure-aws-credentials.
+    Default: "sts.amazonaws.com"
+    Type: String
+
+Mappings:
+
+  AWSRegionToAMI:
+    eu-central-1:
+      AMIID: ami-0e8851af9b98bb0f5

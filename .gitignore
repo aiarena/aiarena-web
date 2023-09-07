@@ -17,3 +17,5 @@ private-media/
 # coverage
 .coverage
 coverage-reports
+
+cloudformation-default.yaml

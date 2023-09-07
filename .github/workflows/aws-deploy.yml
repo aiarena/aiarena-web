@@ -1,0 +1,77 @@
+name: AWS deploy
+
+on:
+  push:
+    branches: [ aws-infrastructure ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  prepare-images:
+    name: Build and push production image to ECR
+    runs-on: ubuntu-latest
+    outputs:
+      status_message_id: ${{ steps.slack.outputs.message_id }}
+      images: ${{ steps.prepare_images.outputs.images }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python ./pip/pip-install.py --python=python --pip=pip
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::315513665747:role/aiarena-DeployRole-NUZWXPWHC0MZ
+          aws-region: eu-central-1
+
+      - name: Prepare image
+        id: prepare_images
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: ./run.py prepare-images
+
+  deploy:
+    name: Deploy to ECS
+    runs-on: ubuntu-latest
+    needs: [ prepare-images ]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python ./pip/pip-install.py --python=python --pip=pip
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::315513665747:role/aiarena-DeployRole-NUZWXPWHC0MZ
+          aws-region: eu-central-1
+
+      - name: Deploy
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+          PREPARED_IMAGES: ${{ needs.prepare-images.outputs.images }}
+        run: ./run.py ecs
+
+      - name: Monitor deployment
+        run: ./run.py monitor-ecs

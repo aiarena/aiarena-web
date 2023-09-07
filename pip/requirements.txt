@@ -1,12 +1,12 @@
 confusable-homoglyphs==3.2.0
 Django==3.2.16
-numpy==1.19.2
-django-appconf==1.0.4
+numpy==1.25.2
+django-appconf==1.0.5
 django-bootstrap-form==3.4
 django-filter==22.1
 django-private-storage==3.0
 django-registration-redux==2.10
-django-avatar==5.0.0
+django-avatar==7.1.1
 djangorestframework==3.14.0
 wheel==0.38.4
 psycopg2-binary==2.9.5
@@ -28,3 +28,4 @@ django-select2==7.5.0
 django-tables2==2.3.4
 django-debug-toolbar==3.2.2
 django-pglocks==1.0.4
+uwsgi==2.0.21
