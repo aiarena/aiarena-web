@@ -111,7 +111,6 @@ class WebTask(BaseTask):
                 ports,
                 name=UWSGI_CONTAINER_NAME,
                 command="/app/aiarena/uwsgi.sh",
-                hostname=UWSGI_CONTAINER_NAME,
             ),
         ]
 
