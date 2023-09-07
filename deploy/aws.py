@@ -294,7 +294,7 @@ def cloudformation_load(source="index-default.yaml"):
             "container_insights": "enabled" if CONTAINER_INSIGHTS else "disabled",
             "db_name": DB_NAME,
             "db_master_user": PRODUCTION_DB_ROOT_USER,
-            "db_master_password": decrypt_secret("DB_ROOT_PASSWORD"),
+            "db_master_password": decrypt_secret("POSTGRES_ROOT_PASSWORD"),
             "web_port": WEB_PORT,
             "health_check_path": AWS_ELB_HEALTH_CHECK_ENDPOINT,
             "syslog_port": SYSLOG_PORT,

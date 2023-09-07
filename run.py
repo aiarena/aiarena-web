@@ -90,9 +90,9 @@ def deploy_environment():
     environment = {
         "AWS_REGION": AWS_REGION,
         "BUILD_NUMBER": build_number,
-        "DB_HOST": aws.db_endpoint(PROJECT_NAME, "MainDB"),
-        "DB_NAME": DB_NAME,
-        "DB_USER": PRODUCTION_DB_USER,
+        "POSTGRES_HOST": aws.db_endpoint(PROJECT_NAME, "MainDB"),
+        "POSTGRES_DATABASE": DB_NAME,
+        "POSTGRES_USER": PRODUCTION_DB_USER,
         "STATIC_URL": "https://cdn.aiarena.net/",
         "MAINTENANCE_MODE": str(MAINTENANCE_MODE),
         "DJANGO_ALLOW_ASYNC_UNSAFE": "1",
@@ -141,8 +141,8 @@ def ecs():
     # required in order to prevent long-running migrations from being killed by
     # Slow Query Killer (tm) which kills queries only for regular user
     root_environment = environment.copy()
-    root_environment["DB_USER"] = PRODUCTION_DB_ROOT_USER
-    root_environment["DB_PASSWORD"] = root_environment["DB_ROOT_PASSWORD"]
+    root_environment["POSTGRES_USER"] = PRODUCTION_DB_ROOT_USER
+    root_environment["POSTGRES_PASSWORD"] = root_environment["POSTGRES_ROOT_PASSWORD"]
 
     aws.pull_image("cloud:latest")
 
