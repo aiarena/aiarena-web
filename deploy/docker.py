@@ -1,7 +1,7 @@
 import os
 
 from .settings import IMAGES, PROJECT_NAME, PROJECT_PATH
-from .utils import cd, echo, run, str_to_bool
+from .utils import echo, run, str_to_bool
 
 
 _COMPOSE_VERSION: tuple[int, ...] | None = None
@@ -73,17 +73,15 @@ def build_image(
     image_tags: str = " ".join([f"-t {PROJECT_NAME}/{image}:{t}" for t in tags])
 
     path = IMAGES[image]
-    folder, filename = str(path.parent), path.name
-    with cd(folder):
-        if build_args:
-            args = " ".join([f'--build-arg {k}="{v}"' for k, v in build_args.items()])
-        else:
-            args = ""
-        if arch:
-            platform = f"--platform={arch}"
-        else:
-            platform = ""
-        cli(f"build --force-rm {args} {platform} {extra_args} {image_tags} -f {filename} .")
+    if build_args:
+        args = " ".join([f'--build-arg {k}="{v}"' for k, v in build_args.items()])
+    else:
+        args = ""
+    if arch:
+        platform = f"--platform={arch}"
+    else:
+        platform = ""
+    cli(f"build --force-rm {args} {platform} {extra_args} {image_tags} -f {path} .")
 
 
 def remove_unused_local_images():
