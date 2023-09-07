@@ -2,3 +2,5 @@ FROM aiarena/env
 
 ADD ./pip/requirements.DEVELOPMENT.txt /srv/requirements.DEVELOPMENT.txt
 RUN pip install -r /srv/requirements.DEVELOPMENT.txt
+
+COPY ./aiarena/development-env.py ./aiarena/env.py

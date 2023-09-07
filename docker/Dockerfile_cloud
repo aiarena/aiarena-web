@@ -2,3 +2,5 @@ FROM aiarena/env
 
 ADD ./pip/requirements.PRODUCTION.txt /srv/requirements.PRODUCTION.txt
 RUN pip install -r /srv/requirements.PRODUCTION.txt
+
+COPY ./aiarena/production-env.py ./aiarena/env.py
