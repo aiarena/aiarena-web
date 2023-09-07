@@ -39,9 +39,6 @@ jobs:
         run: |
           pip install -r ./pip/requirements.LOCAL.txt
 
-      - uses: satackey/action-docker-layer-caching@v0.0.11
-        continue-on-error: true
-
       - name: Prepare image
         id: prepare_images
         env:
