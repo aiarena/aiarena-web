@@ -226,6 +226,31 @@ Resources:
         - Name: containerInsights
           Value: !var container_insights
 
+  ECSServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: ecs-service
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - elasticloadbalancing:Describe*
+                  - elasticloadbalancing:Deregister*
+                  - elasticloadbalancing:Register*
+                  - ec2:Describe*
+                  - ec2:AuthorizeSecurityGroupIngress
+                Resource: "*"
+
   ECRRepositoryCloud:
     Type: AWS::ECR::Repository
     Properties:
