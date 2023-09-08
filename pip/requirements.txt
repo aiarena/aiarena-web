@@ -28,3 +28,4 @@ django-select2==7.5.0
 django-tables2==2.3.4
 django-debug-toolbar==3.2.2
 django-pglocks==1.0.4
+django-constance[database]==2.9.1

@@ -1,5 +1,7 @@
 Werkzeug==2.2.3
 black==23.7.0
+django-constance[database]==2.9.1
+django-sslserver==0.22
 coverage==6.1.1
 django-constance[database]==2.9.1
 django-fakeredis==0.1.2
