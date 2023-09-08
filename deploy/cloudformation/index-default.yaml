@@ -242,7 +242,7 @@ Resources:
         HttpCode: '200'
       Port: !var web_port
       Protocol: HTTP
-      TargetType: instance
+      TargetType: ip
       UnhealthyThresholdCount: 2
       VpcId:
         Ref: VPC
