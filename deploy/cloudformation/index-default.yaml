@@ -148,6 +148,23 @@ Resources:
       VpcId:
         Ref: VPC
 
+  ECSTaskSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access load balancer
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8301
+          ToPort: 8301
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 32768
+          ToPort: 61000
+          CidrIp: 0.0.0.0/0
+      VpcId:
+        Ref: VPC
+
   ContainerInstanceSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:

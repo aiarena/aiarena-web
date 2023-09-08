@@ -173,3 +173,8 @@ class Service:
             value = self.health_check_failed_count
             assert isinstance(value, int), f"health_check_failed_count must be an int, got: {type(value)}"
             assert self.health_check_failed_count >= 0, f"health_check_failed_count cant be negative, got: {value}"
+
+        self.network_configuration = self.get_network_configuration()
+
+    def get_network_configuration(self):
+        return None

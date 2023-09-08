@@ -469,22 +469,21 @@ def update_all_services(environment):
                     for p in service.placement_constraints
                 ]
             )
+        network_configuration = ""
+        if service.network_configuration:
+            network_configuration = f"--network-configuration '{json.dumps(service.network_configuration)}'"
+
         cli(
-            "ecs create-service --service-name {service.name} "
-            "--cluster {cluster} "
-            "--task-definition {service.task.family} "
-            "--desired-count {service.count} "
-            '--deployment-configuration "maximumPercent={service.max_percent},'
-            'minimumHealthyPercent={service.min_percent}" '
-            "{placement_strategy} "
-            "{placement_constraints} "
-            "{balancers}".format(
-                service=service,
-                cluster=clusters[service.cluster_name],
-                balancers=balancers,
-                placement_strategy=placement_strategy,
-                placement_constraints=placement_constraints,
-            ),
+            f"ecs create-service --service-name {service.name} "
+            f"--cluster {clusters[service.cluster_name]} "
+            f"--task-definition {service.task.family} "
+            f"--desired-count {service.count} "
+            f'--deployment-configuration "maximumPercent={service.max_percent},'
+            f'minimumHealthyPercent={service.min_percent}" '
+            f"{placement_strategy} "
+            f"{placement_constraints} "
+            f"{balancers}"
+            f"{network_configuration}"
         )
         echo(f"Service created: {name}")
 

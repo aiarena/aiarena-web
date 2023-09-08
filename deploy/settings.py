@@ -63,6 +63,20 @@ class WebService(BaseService):
     default_min_percent = 50
     default_max_percent = 200
 
+    def get_network_configuration(self):
+        from .aws import physical_name
+
+        return {
+            "awsvpcConfiguration": {
+                "subnets": [
+                    physical_name(PROJECT_NAME, "PublicSubnetZoneA"),
+                    physical_name(PROJECT_NAME, "PublicSubnetZoneB"),
+                ],
+                "securityGroups": [physical_name(PROJECT_NAME, "ECSTaskSecurityGroup")],
+                "assignPublicIp": "ENABLED",
+            }
+        }
+
 
 class WorkerService(BaseService):
     default_min_percent = 0
