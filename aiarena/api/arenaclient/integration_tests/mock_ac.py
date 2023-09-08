@@ -8,6 +8,7 @@ from urllib import parse
 
 import requests
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,6 +16,7 @@ class AiArenaWebACApi:
     """
     An interface to the live AI Arena website ArenaClient API
     """
+
     API_MATCHES_ENDPOINT = "/api/arenaclient/matches/"
     API_RESULTS_ENDPOINT = "/api/arenaclient/results/"
 
@@ -41,17 +43,27 @@ class AiArenaWebACApi:
         if next_match_response.status_code >= 400:
             if next_match_response.status_code >= 500:
                 # scheduling related functionality
-                logger.info(f"AC {self._ac_id}: Failed to retrieve game. Status code: {next_match_response.status_code}.")
+                logger.info(
+                    f"AC {self._ac_id}: Failed to retrieve game. Status code: {next_match_response.status_code}."
+                )
             else:
-                logger.error(f"AC {self._ac_id}: Failed to retrieve game. Status code: {next_match_response.status_code}.")
+                logger.error(
+                    f"AC {self._ac_id}: Failed to retrieve game. Status code: {next_match_response.status_code}."
+                )
             return None
 
         return json.loads(next_match_response.text)
 
-    def submit_result(self, payload: dict,
-                      bot1_data_file_stream, bot2_data_file_stream,
-                      bot1_log_file_stream, bot2_log_file_stream,
-                      arenaclient_log_zip_file_stream, replay_file_stream=None):
+    def submit_result(
+        self,
+        payload: dict,
+        bot1_data_file_stream,
+        bot2_data_file_stream,
+        bot1_log_file_stream,
+        bot2_log_file_stream,
+        arenaclient_log_zip_file_stream,
+        replay_file_stream=None,
+    ):
         """
         Submits the supplied result to the AI Arena website API
         """
@@ -65,7 +77,7 @@ class AiArenaWebACApi:
         }
 
         if replay_file_stream:
-             file_list["replay_file"] = replay_file_stream
+            file_list["replay_file"] = replay_file_stream
 
         post = requests.post(
             self.API_RESULTS_URL,
@@ -90,16 +102,12 @@ class AiArenaWebACApi:
         return success
 
     def download_bot_zip(self, bot_zip_url: str, to_path: str):
-        r = requests.get(
-            bot_zip_url, headers={"Authorization": "Token " + self.API_TOKEN}
-        )
+        r = requests.get(bot_zip_url, headers={"Authorization": "Token " + self.API_TOKEN})
         with open(to_path, "wb") as bot_zip:
             bot_zip.write(r.content)
 
     def download_bot_data(self, bot_data_url: str, to_path: str):
-        r = requests.get(
-            bot_data_url, headers={"Authorization": "Token " + self.API_TOKEN}
-        )
+        r = requests.get(bot_data_url, headers={"Authorization": "Token " + self.API_TOKEN})
         with open(to_path, "wb") as bot_data_zip:
             bot_data_zip.write(r.content)
 
@@ -138,7 +146,7 @@ class MockArenaClient:
 
         # Download map
         logger.info(f"AC {self._ac_id}: Downloading map {match['map']['name']}")
-        map_path = os.path.join(self._working_dir, f"map.SC2Map")
+        map_path = os.path.join(self._working_dir, "map.SC2Map")
         if not self._api.download_map(match["map"]["file"], map_path):
             logger.error(f"AC {self._ac_id}: Map download failed.")
             return False
@@ -164,15 +172,14 @@ class MockArenaClient:
                 logger.error(f"AC {self._ac_id}: Failed to delete {file_path}. Reason: {e}")
 
     def _download_bots_files(self, match: dict):
-        return self._download_bot_files(match["bot1"], "1") \
-            and self._download_bot_files(match["bot2"], "2")
+        return self._download_bot_files(match["bot1"], "1") and self._download_bot_files(match["bot2"], "2")
 
     def _mock_match_activity(self) -> str:
         # todo: determine result
         # todo: log stuff to bot data & AC log
 
         # Create a fake replay file
-        with open(os.path.join(self._working_dir, "replay.SC2Replay"), 'wt') as f:
+        with open(os.path.join(self._working_dir, "replay.SC2Replay"), "w") as f:
             f.write("This is a mock replay")
 
         return "Tie"
@@ -203,10 +210,9 @@ class MockArenaClient:
         # if result.bot2_tags is not None:
         #     payload["bot2_tags"] = result.bot2_tags
 
-        post = self._api.submit_result(payload,
-                                       bot1_data, bot2_data,
-                                       bot1_log, bot2_log,
-                                       arenaclient_log, replay_file_stream)
+        post = self._api.submit_result(
+            payload, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log, replay_file_stream
+        )
 
         if post is None:
             success = False
@@ -261,7 +267,9 @@ class MockArenaClient:
             calculated_md5 = hashlib.md5(self.file_as_bytes(bot_data_zip)).hexdigest()
 
             if not bot["bot_data_md5hash"] == calculated_md5:
-                logger.error(f"AC {self._ac_id}: MD5 hash ({bot['bot_zip_md5hash']}) does not match transferred file ({calculated_md5})")
+                logger.error(
+                    f"AC {self._ac_id}: MD5 hash ({bot['bot_zip_md5hash']}) does not match transferred file ({calculated_md5})"
+                )
                 return False
         return True
 

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0031_competition_interest'),
+        ("core", "0031_competition_interest"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='competition',
-            name='interest',
+            model_name="competition",
+            name="interest",
             field=models.IntegerField(blank=True, default=0),
         ),
     ]

@@ -2,15 +2,22 @@ import logging
 
 from django.db import models
 from django.utils import timezone
-from aiarena.core.validators import validate_not_nan, validate_not_inf
+
+from aiarena.core.validators import validate_not_inf, validate_not_nan
+
 from .competition_participation import CompetitionParticipation
+
 
 logger = logging.getLogger(__name__)
 
 
 class CompetitionBotMatchupStats(models.Model):
-    bot = models.ForeignKey(CompetitionParticipation, on_delete=models.CASCADE, related_name='competition_matchup_stats')
-    opponent = models.ForeignKey(CompetitionParticipation, on_delete=models.CASCADE, related_name='opponent_matchup_stats')
+    bot = models.ForeignKey(
+        CompetitionParticipation, on_delete=models.CASCADE, related_name="competition_matchup_stats"
+    )
+    opponent = models.ForeignKey(
+        CompetitionParticipation, on_delete=models.CASCADE, related_name="opponent_matchup_stats"
+    )
     match_count = models.IntegerField(default=0, blank=True)
     win_count = models.IntegerField(default=0, blank=True)
     win_perc = models.FloatField(default=0, blank=True, validators=[validate_not_nan, validate_not_inf])
@@ -26,10 +33,10 @@ class CompetitionBotMatchupStats(models.Model):
         # update time pre save
         self.updated = timezone.now()
         # now we call django's save protocol
-        super(CompetitionBotMatchupStats, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.bot) + ' VS ' + str(self.opponent)
+        return str(self.bot) + " VS " + str(self.opponent)
 
     class Meta:
-        unique_together = (('bot', 'opponent'),)
+        unique_together = (("bot", "opponent"),)

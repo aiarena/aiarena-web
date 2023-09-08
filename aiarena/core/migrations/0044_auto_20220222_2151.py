@@ -2,11 +2,11 @@
 
 from django.db import migrations
 
-from aiarena.core.models import User, ServiceUser
+from aiarena.core.models import ServiceUser, User
 
 
 def migrate_service_users(apps, schema_editor):
-    service_users = User.objects.filter(type='SERVICE')
+    service_users = User.objects.filter(type="SERVICE")
 
     for service_user in service_users:
         # find parent class fields:
@@ -21,7 +21,7 @@ def migrate_service_users(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0043_merge_0034_serviceuser_0042_merge_20220222_2117'),
+        ("core", "0043_merge_0034_serviceuser_0042_merge_20220222_2117"),
     ]
 
     operations = [

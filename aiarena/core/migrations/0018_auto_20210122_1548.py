@@ -6,12 +6,12 @@ from aiarena.core.models import CompetitionParticipation
 
 
 def deactivate_participants_of_closed_competitions(apps, schema_editor):
-    CompetitionParticipation.objects.filter(competition__status='closed').update(active=False)
+    CompetitionParticipation.objects.filter(competition__status="closed").update(active=False)
+
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0017_auto_20210116_0812'),
+        ("core", "0017_auto_20210116_0812"),
     ]
 
     operations = [

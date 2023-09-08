@@ -11,18 +11,18 @@ def pretty_bool(value):
     :returns:  ``✔`` / ``✘``
     :raises: AttributeError, KeyError
 
-        """
-    if value == True:
-        value = '✔'
+    """
+    if value is True:
+        value = "✔"
         return value
-    if value == False:
-        value = '✘'
+    if value is False:
+        value = "✘"
         return value
-    if str(value).lower() == 'yes':
-        value = '✔'
+    if str(value).lower() == "yes":
+        value = "✔"
         return value
-    if str(value).lower() == 'no':
-        value = '✘'
+    if str(value).lower() == "no":
+        value = "✘"
         return value
     return value
 
@@ -30,7 +30,7 @@ def pretty_bool(value):
 def cents_to_usd(cents):
     if cents is None:
         return "--"
-    return str(float(cents / 100)) + '$'
+    return str(float(cents / 100)) + "$"
 
 
 def format_elo_change(value):
@@ -47,25 +47,27 @@ def smooth_timedelta(timedeltaobj):
     timetot = ""
     if secs > 86400:  # 60sec * 60min * 24hrs
         days = secs // 86400
-        timetot += "{} days".format(int(days))
+        timetot += f"{int(days)} days"
         secs = secs - days * 86400
 
     if secs > 3600:
         hrs = secs // 3600
-        timetot += " {} hours".format(int(hrs))
+        timetot += f" {int(hrs)} hours"
         secs = secs - hrs * 3600
 
     if secs > 60:
         mins = secs // 60
-        timetot += " {} minutes".format(int(mins))
+        timetot += f" {int(mins)} minutes"
         secs = secs - mins * 60
 
     if secs > 0:
-        timetot += " {} seconds".format(int(secs))
+        timetot += f" {int(secs)} seconds"
     return timetot
+
 
 def result_color_class(value):
     return f"result-{str(value).lower()}"
+
 
 def step_time_color(value):
     """Generate color for given step time(ms)."""
@@ -97,14 +99,22 @@ def step_time_color(value):
 def shorten_naturaltime(naturaltime):
     # Remove 0xa0 character separating words and replace with spaces
     naturaltime = " ".join(naturaltime.split())
-    return (naturaltime
-            .replace(' seconds', 's').replace(' second', 's')
-            .replace(' minutes', 'm').replace('a minute', '1m')
-            .replace(' hours', 'h').replace('an hour', '1h')
-            .replace(' days', 'd').replace(' day', 'd')
-            .replace(' months', 'mon').replace(' month', 'mon')
-            .replace(' weeks', 'w').replace(' week', 'w')
-            .replace(' years', 'y').replace(' year', 'y'))
+    return (
+        naturaltime.replace(" seconds", "s")
+        .replace(" second", "s")
+        .replace(" minutes", "m")
+        .replace("a minute", "1m")
+        .replace(" hours", "h")
+        .replace("an hour", "1h")
+        .replace(" days", "d")
+        .replace(" day", "d")
+        .replace(" months", "mon")
+        .replace(" month", "mon")
+        .replace(" weeks", "w")
+        .replace(" week", "w")
+        .replace(" years", "y")
+        .replace(" year", "y")
+    )
 
 
 def bot_competition_trend(bot, competition, n_matches):
@@ -112,10 +122,10 @@ def bot_competition_trend(bot, competition, n_matches):
 
 
 register = template.Library()
-register.filter('pretty_bool', pretty_bool)
-register.filter('format_elo_change', format_elo_change)
-register.filter('smooth_timedelta', smooth_timedelta)
-register.filter('cents_to_usd', cents_to_usd)
-register.filter('step_time_color', step_time_color)
-register.filter('shorten_naturaltime', shorten_naturaltime)
-register.simple_tag(bot_competition_trend, name='bot_competition_trend')
+register.filter("pretty_bool", pretty_bool)
+register.filter("format_elo_change", format_elo_change)
+register.filter("smooth_timedelta", smooth_timedelta)
+register.filter("cents_to_usd", cents_to_usd)
+register.filter("step_time_color", step_time_color)
+register.filter("shorten_naturaltime", shorten_naturaltime)
+register.simple_tag(bot_competition_trend, name="bot_competition_trend")

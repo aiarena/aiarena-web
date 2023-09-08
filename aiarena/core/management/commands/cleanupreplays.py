@@ -13,23 +13,26 @@ class Command(BaseCommand):
     _DEFAULT_DAYS_LOOKBACK = 30
 
     def add_arguments(self, parser):
-        parser.add_argument('--days', type=int,
-                            help="Number of days into the past to start cleaning from. Default is {0}.".format(
-                                self._DEFAULT_DAYS_LOOKBACK))
-        parser.add_argument('--verbose', action='store_true', help="Output information with each action.")
+        parser.add_argument(
+            "--days",
+            type=int,
+            help=f"Number of days into the past to start cleaning from. Default is {self._DEFAULT_DAYS_LOOKBACK}.",
+        )
+        parser.add_argument("--verbose", action="store_true", help="Output information with each action.")
 
     def handle(self, *args, **options):
-        if options['days'] is not None:
-            days = options['days']
+        if options["days"] is not None:
+            days = options["days"]
         else:
             days = self._DEFAULT_DAYS_LOOKBACK
-        self.stdout.write('Cleaning up replays starting from {0} days into the past...'.format(days))
-        self.stdout.write('Cleaned up {0} replays.'.format(self.cleanup_replays(days, options['verbose'])))
+        self.stdout.write(f"Cleaning up replays starting from {days} days into the past...")
+        cleaned = self.cleanup_replays(days, options["verbose"])
+        self.stdout.write(f"Cleaned up {cleaned} replays.")
 
     def cleanup_replays(self, days, verbose):
-        self.stdout.write(f'Gathering records to clean...')
-        results = Result.objects.exclude(replay_file='').filter(created__lt=timezone.now() - timedelta(days=days))
-        self.stdout.write(f'{results.count()} records gathered.')
+        self.stdout.write("Gathering records to clean...")
+        results = Result.objects.exclude(replay_file="").filter(created__lt=timezone.now() - timedelta(days=days))
+        self.stdout.write(f"{results.count()} records gathered.")
         for result in results:
             with transaction.atomic():
                 result.lock_me()
@@ -37,5 +40,5 @@ class Command(BaseCommand):
                 result.replay_file.delete()
                 result.save()
                 if verbose:
-                    self.stdout.write(f'Match {result.match_id} replay file deleted.')
+                    self.stdout.write(f"Match {result.match_id} replay file deleted.")
         return results.count()

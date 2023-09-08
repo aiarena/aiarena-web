@@ -16,13 +16,13 @@ def migrate_website_user(website_user: User):
 
 
 class Command(BaseCommand):
-    help = 'Migrates normal django Users to WebsiteUsers.'
+    help = "Migrates normal django Users to WebsiteUsers."
 
     def add_arguments(self, parser):
-        parser.add_argument('user_ids', nargs='+', type=int, help="A space separated list of user ids to migrate.")
+        parser.add_argument("user_ids", nargs="+", type=int, help="A space separated list of user ids to migrate.")
 
     def handle(self, *args, **options):
-        for user_id in options['user_ids']:
+        for user_id in options["user_ids"]:
             try:
                 with transaction.atomic():
                     user = User.objects.select_for_update().get(pk=user_id)

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0057_merge_20221108_0651'),
+        ("core", "0057_merge_20221108_0651"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='competition',
-            name='statistics_finalized',
+            model_name="competition",
+            name="statistics_finalized",
             field=models.BooleanField(default=False),
         ),
     ]

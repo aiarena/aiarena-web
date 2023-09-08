@@ -9,7 +9,7 @@
    git submodule update --init --recursive
    ```
 
-2. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
+2. Install python 3.10 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
 
 3. Install PostgreSQL and create a Database and a User who can access it  
     Using SQL:
@@ -34,7 +34,7 @@
    
 
 5. Modify the Website config to use your Database.  
-    If you are using a standard mysql setup at localhost:3306 and step 3's SQL script, then you can skip this step -
+    If you are using a standard postgres setup at localhost:5432 and step 3's SQL script, then you can skip this step -
     the credentials will already be configured.  
     If you need to configure different credentials, make a copy of the `/aiarena/example-dev-env.py` file as 
     `/aiarena/env.py` and update the relevant details
@@ -78,3 +78,13 @@
     You can log into the website using the accounts below:      
     Admin user: username - devadmin, password - x.  
     Regular user: username - devuser, password - x.
+
+
+## Configure dev environment
+
+### Install pre-commit hooks
+
+Assuming you have run `python ./pip/pip-install.py`, you only need to run this to set up pre-commit linter checking.
+```
+pre-commit install
+```

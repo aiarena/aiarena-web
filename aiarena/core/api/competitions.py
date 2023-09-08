@@ -2,24 +2,25 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from django.db.models import QuerySet
+
     from aiarena.core.models import Competition
 
-from aiarena.core.models import CompetitionParticipation
-from aiarena.core.models import Bot
+from aiarena.core.models import Bot, CompetitionParticipation
 
 
 class Competitions:
     @staticmethod
     def get_active_bots(competition: Competition) -> QuerySet:
-        return Bot.objects.only("id").filter(competition_participations__competition=competition,
-                                             competition_participations__active=True)
+        return Bot.objects.only("id").filter(
+            competition_participations__competition=competition, competition_participations__active=True
+        )
 
     @staticmethod
     def get_active_participants(competition: Competition) -> QuerySet:
-        return CompetitionParticipation.objects.only("id").filter(competition=competition,
-                                                                  active=True)
+        return CompetitionParticipation.objects.only("id").filter(competition=competition, active=True)
 
     @staticmethod
     def check_has_matches_to_play_and_apply_locks(competition: Competition) -> bool:

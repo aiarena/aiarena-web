@@ -4,18 +4,17 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0020_auto_20210131_0136'),
+        ("core", "0020_auto_20210131_0136"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='MapPool',
+            name="MapPool",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, unique=True)),
-                ('maps', models.ManyToManyField(related_name='map_pools', to='core.Map')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("name", models.CharField(max_length=50, unique=True)),
+                ("maps", models.ManyToManyField(related_name="map_pools", to="core.Map")),
             ],
         ),
     ]

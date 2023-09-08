@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0056_competitionparticipation_winrate_vs_duration_graph'),
-        ('core', '0056_merge_20221001_1414'),
+        ("core", "0056_competitionparticipation_winrate_vs_duration_graph"),
+        ("core", "0056_merge_20221001_1414"),
     ]
 
-    operations = [
-    ]
+    operations = []

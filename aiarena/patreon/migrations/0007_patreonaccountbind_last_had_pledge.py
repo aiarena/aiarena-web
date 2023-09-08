@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('patreon', '0006_patreonaccountbind_last_refresh_attempt_current_user_json'),
+        ("patreon", "0006_patreonaccountbind_last_refresh_attempt_current_user_json"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='patreonaccountbind',
-            name='last_had_pledge',
+            model_name="patreonaccountbind",
+            name="last_had_pledge",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

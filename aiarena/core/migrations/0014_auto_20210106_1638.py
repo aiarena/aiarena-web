@@ -4,16 +4,15 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0013_map_game_mode'),
+        ("core", "0013_map_game_mode"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='competition',
-            name='name',
-            field=models.CharField(default='Unknown', max_length=50, unique=True),
+            model_name="competition",
+            name="name",
+            field=models.CharField(default="Unknown", max_length=50, unique=True),
             preserve_default=False,
         ),
     ]

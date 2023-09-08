@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0018_auto_20210122_1548'),
+        ("core", "0018_auto_20210122_1548"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='competition',
-            name='max_active_rounds',
+            model_name="competition",
+            name="max_active_rounds",
             field=models.IntegerField(blank=True, default=2),
         ),
     ]

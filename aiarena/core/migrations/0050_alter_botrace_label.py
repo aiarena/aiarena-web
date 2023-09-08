@@ -4,15 +4,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0049_alter_bot_plays_race_model'),
+        ("core", "0049_alter_bot_plays_race_model"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='botrace',
-            name='label',
-            field=models.CharField(choices=[('T', 'Terran'), ('Z', 'Zerg'), ('P', 'Protoss'), ('R', 'Random')], max_length=1, unique=True),
+            model_name="botrace",
+            name="label",
+            field=models.CharField(
+                choices=[("T", "Terran"), ("Z", "Zerg"), ("P", "Protoss"), ("R", "Random")], max_length=1, unique=True
+            ),
         ),
     ]
