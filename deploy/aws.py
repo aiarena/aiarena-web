@@ -492,8 +492,8 @@ def update_all_services(environment):
             f'minimumHealthyPercent={service.min_percent}" '
             f"{placement_strategy} "
             f"{placement_constraints} "
-            f"{balancers}"
-            f"{network_configuration}"
+            f"{balancers} "
+            f"{network_configuration} "
         )
         echo(f"Service created: {name}")
 
