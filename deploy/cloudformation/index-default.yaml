@@ -284,6 +284,22 @@ Resources:
       Port: 80
       Protocol: HTTP
 
+  ALBHttpsListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      Certificates:
+        - CertificateArn:
+            Ref: SSLCertificateARN
+      DefaultActions:
+        - TargetGroupArn:
+            Ref: ALBWebServerTargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: ECSElasticLoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -486,6 +502,14 @@ Parameters:
     Default: 30
     MinValue: 0
     MaxValue: 3600
+
+  SSLCertificateARN:
+    Description: ARN of SSL certificate to use (it must be already uploaded to IAM
+      or created in ACM)
+    Type: String
+    MinLength: 1
+    MaxLength: 100
+    Default: arn:aws:acm:eu-central-1:315513665747:certificate/74441d53-854a-4b33-9bfc-7e3686956006
 
 Mappings:
 
