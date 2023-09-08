@@ -101,6 +101,7 @@ class Service:
     default_placement_constraints = []
     default_health_check_grace_sec = None
     default_health_check_fail_cnt = None
+    add_network_configuration = False
 
     def __init__(
         self,
@@ -173,8 +174,3 @@ class Service:
             value = self.health_check_failed_count
             assert isinstance(value, int), f"health_check_failed_count must be an int, got: {type(value)}"
             assert self.health_check_failed_count >= 0, f"health_check_failed_count cant be negative, got: {value}"
-
-        self.network_configuration = self.get_network_configuration()
-
-    def get_network_configuration(self):
-        return None

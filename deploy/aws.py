@@ -470,8 +470,18 @@ def update_all_services(environment):
                 ]
             )
         network_configuration = ""
-        if service.network_configuration:
-            network_configuration = f"--network-configuration '{json.dumps(service.network_configuration)}'"
+        if service.add_network_configuration:
+            network_configuration = {
+                "awsvpcConfiguration": {
+                    "subnets": [
+                        physical_name(PROJECT_NAME, "PublicSubnetZoneA"),
+                        physical_name(PROJECT_NAME, "PublicSubnetZoneB"),
+                    ],
+                    "securityGroups": [physical_name(PROJECT_NAME, "ECSTaskSecurityGroup")],
+                    "assignPublicIp": "ENABLED",
+                }
+            }
+            network_configuration = f"--network-configuration '{json.dumps(network_configuration)}'"
 
         cli(
             f"ecs create-service --service-name {service.name} "
