@@ -90,6 +90,19 @@ class BaseTask(Task):
 
 
 class WebTask(BaseTask):
+    def code_container(self, *args, **kwargs):
+        container = super().code_container(*args, **kwargs)
+        container["logConfiguration"] = {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-create-group": "true",
+                "awslogs-group": f"awslogs-{self.family}",
+                "awslogs-region": AWS_REGION,
+                "awslogs-stream-prefix": f"awslogs-{self.family}",
+            },
+        }
+        return container
+
     def containers(self, env, ports):
         return [
             self.code_container(
