@@ -90,6 +90,9 @@ class BaseTask(Task):
 
 
 class WebTask(BaseTask):
+    default_cpu = "512"
+    default_memory = "1024"
+
     def code_container(self, *args, **kwargs):
         container = super().code_container(*args, **kwargs)
         container["logConfiguration"] = {
