@@ -55,6 +55,7 @@ class BaseService(Service):
     """
 
     name_prefix = "%s-" % PROJECT_NAME
+    launch_type = "FARGATE"
     default_cluster_name = "ECSCluster"
 
 

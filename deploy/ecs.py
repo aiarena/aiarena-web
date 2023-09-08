@@ -102,6 +102,7 @@ class Service:
     default_health_check_grace_sec = None
     default_health_check_fail_cnt = None
     add_network_configuration = False
+    launch_type = "EC2"
 
     def __init__(
         self,

@@ -487,6 +487,7 @@ def update_all_services(environment):
             f"ecs create-service --service-name {service.name} "
             f"--cluster {clusters[service.cluster_name]} "
             f"--task-definition {service.task.family} "
+            f"--launch-type {service.launch_type} "
             f"--desired-count {service.count} "
             f'--deployment-configuration "maximumPercent={service.max_percent},'
             f'minimumHealthyPercent={service.min_percent}" '
