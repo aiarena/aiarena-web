@@ -251,6 +251,32 @@ Resources:
                   - ec2:AuthorizeSecurityGroupIngress
                 Resource: "*"
 
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Policies:
+        - PolicyName: ecs-task
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                  - secretsmanager:GetSecretValue
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
   ECRRepositoryCloud:
     Type: AWS::ECR::Repository
     Properties:
