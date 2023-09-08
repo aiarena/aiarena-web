@@ -340,6 +340,7 @@ Resources:
                   - secretsmanager:GetSecretValue
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+                  - ssm:GetParameters
                 Resource: "*"
 
   ECRRepositoryCloud:
