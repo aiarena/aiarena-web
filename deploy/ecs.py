@@ -8,6 +8,7 @@ class Task:
     default_image = None
     default_cpu = "256"
     default_memory = "512"
+    role_name = "ECSTaskRole"
 
     def __init__(
         self,
@@ -69,12 +70,18 @@ class Task:
         ]
 
     def as_dict(self, environment):
+        from deploy.aws import physical_name
+        from deploy.settings import AWS_ACCOUNT_ID, PROJECT_NAME
+
+        execution_role_arn = f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/{physical_name(PROJECT_NAME, self.role_name)}"
+
         env = [{"name": k, "value": v} for k, v in environment.items()]
         ports = [{"hostPort": host_port, "containerPort": container_port} for (host_port, container_port) in self.ports]
         return {
             "cpu": self.cpu,
             "memory": self.memory,
             "family": self.family,
+            "executionRoleArn": execution_role_arn,
             "containerDefinitions": self.containers(env, ports),
             "volumes": self.volumes or [],
             "requiresCompatibilities": self.requires_compatibilities,
