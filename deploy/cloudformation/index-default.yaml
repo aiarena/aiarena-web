@@ -354,6 +354,7 @@ Resources:
                 Action:
                   - kms:Decrypt
                   - secretsmanager:GetSecretValue
+                  - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                   - ssm:GetParameters
