@@ -441,15 +441,15 @@ def update_all_services(environment):
             target_group = target_groups_by_ports[service.container_port]
             balancers = (
                 '--load-balancers "'
-                "targetGroupArn={target_group},"
-                "containerName={container_name},"
-                'containerPort={port}" --role {role}'.format(
-                    port=service.container_port,
-                    container_name=service.container_name,
-                    role=roles[service.role_name],
-                    target_group=target_group,
-                )
+                f"targetGroupArn={target_group},"
+                f"containerName={service.container_name},"
+                f'containerPort={service.container_port}"'
             )
+
+        role = ""
+        if service.role_name is not None:
+            role = f"--role {roles[service.role_name]}"
+
         placement_strategy = ""
         if service.placement_strategy:
             placement_strategy = "--placement-strategy " + " ".join(
@@ -493,6 +493,7 @@ def update_all_services(environment):
             f"{placement_strategy} "
             f"{placement_constraints} "
             f"{balancers} "
+            f"{role} "
             f"{network_configuration} "
         )
         echo(f"Service created: {name}")

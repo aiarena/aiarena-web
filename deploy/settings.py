@@ -59,7 +59,6 @@ class BaseService(Service):
 
 
 class WebService(BaseService):
-    default_role_name = "ECSServiceRole"
     default_min_percent = 50
     default_max_percent = 200
     add_network_configuration = True

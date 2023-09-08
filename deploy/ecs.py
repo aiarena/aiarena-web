@@ -128,7 +128,6 @@ class Service:
         self.container_name = container_name
         self.container_port = container_port
         if self.container_port is not None:
-            assert self.role_name, "role_name is required when container port is specified"
             assert self.container_name, "container_name is required when container port is specified"
 
         else:
