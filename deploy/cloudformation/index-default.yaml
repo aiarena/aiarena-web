@@ -219,6 +219,54 @@ Resources:
       Parameters:
         rds.force_ssl: 0
 
+  ECSElasticLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !var project_name
+      SecurityGroups:
+        - Ref: PublicLoadBalancerSecurityGroup
+      Subnets:
+        - Ref: PublicSubnetZoneA
+        - Ref: PublicSubnetZoneB
+
+  ALBWebServerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !var project_name
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: !var health_check_path
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: '200'
+      Port: !var web_port
+      Protocol: HTTP
+      TargetType: instance
+      UnhealthyThresholdCount: 2
+      VpcId:
+        Ref: VPC
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value:
+            Ref: DeregistrationDelay
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+
+  ALBHttpListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn:
+            Ref: ALBWebServerTargetGroup
+          Type: forward
+      LoadBalancerArn:
+        Ref: ECSElasticLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
@@ -413,6 +461,13 @@ Parameters:
     Description: Audience supplied to configure-aws-credentials.
     Default: "sts.amazonaws.com"
     Type: String
+
+  DeregistrationDelay:
+    Description: Deregistration delay for target groups
+    Type: Number
+    Default: 30
+    MinValue: 0
+    MaxValue: 3600
 
 Mappings:
 
