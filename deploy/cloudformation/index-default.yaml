@@ -159,7 +159,7 @@ Resources:
           CidrIp: 0.0.0.0/0
       SecurityGroupEgress:
         - IpProtocol: tcp
-          FromPort: 32768
+          FromPort: 0
           ToPort: 61000
           CidrIp: 0.0.0.0/0
       VpcId:
