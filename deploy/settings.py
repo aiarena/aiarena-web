@@ -57,6 +57,8 @@ class BaseService(Service):
     name_prefix = "%s-" % PROJECT_NAME
     launch_type = "FARGATE"
     default_cluster_name = "ECSCluster"
+    default_placement_strategy = []
+    default_placement_constraints = []
 
 
 class WebService(BaseService):

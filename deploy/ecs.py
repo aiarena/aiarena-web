@@ -159,6 +159,10 @@ class Service:
             self.placement_constraints = placement_constraints
         assert isinstance(self.placement_constraints, list | tuple), "placement_constraints must be a list"
 
+        if self.launch_type == "FARGATE":
+            assert not self.placement_strategy, "placement_strategy doesn't work with FARGATE"
+            assert not self.placement_constraints, "placement_constraints doesn't work with FARGATE"
+
         self.health_check_grace_sec = health_check_grace_sec
         if self.health_check_grace_sec is None:
             self.health_check_grace_sec = self.default_health_check_grace_sec
