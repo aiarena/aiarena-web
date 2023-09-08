@@ -252,6 +252,7 @@ Resources:
       Name: !var project_name
       HealthCheckIntervalSeconds: 10
       HealthCheckPath: !var health_check_path
+      HealthCheckPort: traffic-port
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
