@@ -42,7 +42,7 @@ MAINTENANCE_MODE = str_to_bool(os.environ.get("MAINTENANCE_MODE", "False"))
 
 # Enable "Container Insights" for the ECS cluster.
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html
-CONTAINER_INSIGHTS = False
+CONTAINER_INSIGHTS = True
 
 
 class BaseService(Service):
