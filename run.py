@@ -93,7 +93,6 @@ def deploy_environment():
         "POSTGRES_HOST": aws.db_endpoint(PROJECT_NAME, "MainDB"),
         "POSTGRES_DATABASE": DB_NAME,
         "POSTGRES_USER": PRODUCTION_DB_USER,
-        "STATIC_URL": "https://cdn.aiarena.net/",
         "MAINTENANCE_MODE": str(MAINTENANCE_MODE),
         "DJANGO_ALLOW_ASYNC_UNSAFE": "1",
     }
