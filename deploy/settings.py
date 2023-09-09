@@ -12,7 +12,6 @@ PROJECT_PATH = Path(__file__).parent.parent
 PROJECT_ID = 83
 
 WEB_PORT = PROJECT_ID * 100 + 1
-SYSLOG_PORT = 42185
 
 IMAGES: dict[str, Path] = {
     "env": PROJECT_PATH / "docker/Dockerfile",
@@ -36,9 +35,6 @@ AWS_ACCOUNT_ID = "315513665747"
 AWS_ELB_HEALTH_CHECK_ENDPOINT = "/accounts/login/"
 
 PRIVATE_REGISTRY_URL = f"{AWS_ACCOUNT_ID}.dkr.ecr.{AWS_REGION}.amazonaws.com"
-
-FLUENT_HOST = "172.17.0.1"
-FLUENT_PORT = "24224"
 
 # Change this in Actions variables
 # https://github.com/Perceptive-Care-Systems/app/settings/variables/actions

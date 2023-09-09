@@ -23,14 +23,12 @@ from .settings import (
     AWS_REGION,
     CONTAINER_INSIGHTS,
     DB_NAME,
-    FLUENT_PORT,
     PRIVATE_REGISTRY_URL,
     PRODUCTION_DB_ROOT_USER,
     PROJECT_NAME,
     PROJECT_PATH,
     SECRETS_FOLDER,
     SERVICES,
-    SYSLOG_PORT,
     UWSGI_CONTAINER_NAME,
     WEB_PORT,
 )
@@ -297,8 +295,6 @@ def cloudformation_load(source="index-default.yaml"):
             "db_master_password": decrypt_secret("POSTGRES_ROOT_PASSWORD"),
             "web_port": WEB_PORT,
             "health_check_path": AWS_ELB_HEALTH_CHECK_ENDPOINT,
-            "syslog_port": SYSLOG_PORT,
-            "fluent_port": FLUENT_PORT,
             "uwsgi_container_name": UWSGI_CONTAINER_NAME,
         },
     )
