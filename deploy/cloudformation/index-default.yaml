@@ -2,6 +2,19 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Resources:
+  mediaTestBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods:
+              - GET
+              - HEAD
+              - PUT
+            AllowedOrigins:
+              - https://aiarena-test.net
+            MaxAge: 3000
+
   KeyAlias:
     Type: AWS::KMS::Alias
     DeletionPolicy: Delete
@@ -332,7 +345,32 @@ Resources:
                   - ec2:Describe*
                   - ec2:AuthorizeSecurityGroupIngress
                 Resource: "*"
-
+        - PolicyName: media-test-bucket
+          PolicyDocument:
+            Statement:
+              - Action:
+                  - s3:GetBucketLocation
+                  - s3:ListBucket
+                Effect: Allow
+                Resource:
+                  - Fn::Join:
+                      - ''
+                      - - 'arn:aws:s3:::'
+                        - Ref: mediaTestBucket
+                        - "/"
+              - Action:
+                  - s3:DeleteObject
+                  - s3:GetObject
+                  - s3:GetObjectAcl
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Effect: Allow
+                Resource:
+                  - Fn::Join:
+                      - ''
+                      - - 'arn:aws:s3:::'
+                        - Ref: mediaTestBucket
+                        - "/*"
   ECSTaskRole:
     Type: AWS::IAM::Role
     Properties:
