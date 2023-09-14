@@ -87,6 +87,8 @@ def cloudformation():
 
 def deploy_environment():
     build_number = os.environ.get("BUILD_NUMBER", "")
+    media_bucket = aws.physical_name(PROJECT_NAME, "mediaTestBucket")
+    media_domain = aws.s3_domain(PROJECT_NAME, "mediaTestBucket")
     environment = {
         "AWS_REGION": AWS_REGION,
         "BUILD_NUMBER": build_number,
@@ -95,6 +97,8 @@ def deploy_environment():
         "POSTGRES_USER": PRODUCTION_DB_USER,
         "MAINTENANCE_MODE": str(MAINTENANCE_MODE),
         "DJANGO_ALLOW_ASYNC_UNSAFE": "1",
+        "MEDIA_URL": f"https://{media_domain}/",
+        "MEDIA_BUCKET": media_bucket,
     }
     environment.update(aws.decrypt_secrets())
     return environment, build_number

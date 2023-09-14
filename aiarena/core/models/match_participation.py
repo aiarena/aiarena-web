@@ -4,7 +4,6 @@ from django.utils.functional import cached_property
 
 from private_storage.fields import PrivateFileField
 
-from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.validators import validate_not_inf, validate_not_nan
 
 from .bot import Bot
@@ -44,9 +43,7 @@ class MatchParticipation(models.Model, LockableModelMixin):
     Note that this isn't necessarily the same as starting_elo + elo_change."""
     elo_change = models.SmallIntegerField(null=True)
     """The amount the bot's ELO changed as a result of this match."""
-    match_log = PrivateFileField(
-        upload_to=match_log_upload_to, storage=OverwritePrivateStorage(base_url="/"), blank=True, null=True
-    )
+    match_log = PrivateFileField(upload_to=match_log_upload_to, blank=True, null=True)
     avg_step_time = models.FloatField(blank=True, null=True, validators=[validate_not_nan, validate_not_inf])
     result = models.CharField(max_length=32, choices=RESULT_TYPES, blank=True, null=True)
     result_cause = models.CharField(max_length=32, choices=CAUSE_TYPES, blank=True, null=True)

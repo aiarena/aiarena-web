@@ -450,9 +450,24 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-# Private media storage
-# https://github.com/edoburu/django-private-storage
-PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private-media")
+#################################
+# Django Storages & django-private-storage configuration #
+#################################
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
+
+AWS_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
+AWS_PRIVATE_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
+
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_S3_REGION_NAME = "eu-central-1"
+AWS_S3_OBJECT_PARAMETERS = {"ACL": "private"}
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_QUERYSTRING_AUTH = True
+AWS_QUERYSTRING_EXPIRE = 60 * 60
+
 
 # Random scripts such as SQL
 SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts")

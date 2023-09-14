@@ -9,7 +9,6 @@ from private_storage.fields import PrivateFileField
 
 from aiarena.settings import ELO_START_VALUE
 
-from ..storage import OverwritePrivateStorage, OverwriteStorage
 from ..validators import validate_not_inf, validate_not_nan
 from .bot import Bot
 from .competition import Competition
@@ -44,13 +43,9 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     tie_count = models.IntegerField(default=0)
     crash_perc = models.FloatField(default=0, blank=True, validators=[validate_not_nan, validate_not_inf])
     crash_count = models.IntegerField(default=0)
-    elo_graph = models.FileField(upload_to=elo_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True)
-    elo_graph_update_plot = PrivateFileField(
-        upload_to=elo_graph_update_plot_upload_to, storage=OverwritePrivateStorage(base_url="/"), blank=True, null=True
-    )
-    winrate_vs_duration_graph = models.FileField(
-        upload_to=winrate_vs_duration_graph_upload_to, storage=OverwriteStorage(), blank=True, null=True
-    )
+    elo_graph = models.FileField(upload_to=elo_graph_upload_to, blank=True, null=True)
+    elo_graph_update_plot = PrivateFileField(upload_to=elo_graph_update_plot_upload_to, blank=True, null=True)
+    winrate_vs_duration_graph = models.FileField(upload_to=winrate_vs_duration_graph_upload_to, blank=True, null=True)
     highest_elo = models.IntegerField(blank=True, null=True)
     slug = models.SlugField(max_length=255, blank=True)
     active = models.BooleanField(default=True)

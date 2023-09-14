@@ -17,7 +17,6 @@ from constance import config
 from private_storage.fields import PrivateFileField
 from wiki.models import Article, ArticleRevision
 
-from aiarena.core.storage import OverwritePrivateStorage
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name
 
@@ -62,7 +61,7 @@ class Bot(models.Model, LockableModelMixin):
         ],
     )
     created = models.DateTimeField(auto_now_add=True)
-    bot_zip = PrivateFileField(upload_to=bot_zip_upload_to, storage=OverwritePrivateStorage(base_url="/"))
+    bot_zip = PrivateFileField(upload_to=bot_zip_upload_to)
     bot_zip_updated = models.DateTimeField(editable=False)
     bot_zip_md5hash = models.CharField(max_length=32, editable=False)
     bot_zip_publicly_downloadable = models.BooleanField(default=False)
@@ -70,9 +69,7 @@ class Bot(models.Model, LockableModelMixin):
     # and the bot deactivated if the file size exceeds it
     bot_data_enabled = models.BooleanField(default=True)
     """Whether the use of bot data is enabled."""
-    bot_data = PrivateFileField(
-        upload_to=bot_data_upload_to, storage=OverwritePrivateStorage(base_url="/"), blank=True, null=True
-    )
+    bot_data = PrivateFileField(upload_to=bot_data_upload_to, blank=True, null=True)
     bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
     bot_data_publicly_downloadable = models.BooleanField(default=False)
     # todo: rename back to plays_race

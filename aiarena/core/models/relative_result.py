@@ -9,7 +9,6 @@ from private_storage.fields import PrivateFileField
 
 from aiarena.core.models.competition import Competition
 
-from ..storage import OverwritePrivateStorage
 from .match import Match
 from .match_participation import MatchParticipation
 
@@ -37,7 +36,7 @@ class RelativeResult(models.Model):
     game_time_formatted = models.CharField(max_length=32)
     game_steps = models.IntegerField()
     replay_file = models.FileField()
-    match_log = PrivateFileField(storage=OverwritePrivateStorage(base_url="/"))
+    match_log = PrivateFileField()
 
     class Meta:
         managed = False
