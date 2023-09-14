@@ -454,7 +454,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # Django Storages & django-private-storage configuration #
 #################################
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
 
 AWS_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
