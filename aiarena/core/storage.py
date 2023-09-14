@@ -36,22 +36,3 @@ class OverwritePrivateStorage(PrivateFileSystemStorage):
     def get_available_name(self, name, max_length=None):
         overwrite_file(self, name)
         return name
-
-
-class HardcodedURLFilenamePrivateStorage(PrivateFileSystemStorage):
-    """
-    Allows for hard-coding the filename in the url of a filefield
-    e.g.
-    if a file name has a timestamp in it such as "filename_20201212_201212" then the url can
-    be hardcoded as "filename" instead to avoid the ugly timestamp showing to users
-    """
-
-    def __init__(self, url_filename=None, location=None, base_url=None, **kwargs):
-        super().__init__(location=location, base_url=base_url, **kwargs)
-        self._url_filename = url_filename
-
-    def url(self, name):
-        transformed_name = (
-            ("/".join(name.split("/")[:-1]) + "/" + self._url_filename) if self._url_filename is not None else name
-        )
-        return super().url(transformed_name)
