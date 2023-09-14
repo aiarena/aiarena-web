@@ -4,3 +4,7 @@ class BotNotInMatchException(Exception):
 
 class BotAlreadyInMatchException(Exception):
     pass
+
+
+class OpponentNotAvailableException(Exception):
+    pass

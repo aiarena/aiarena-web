@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import List, Dict, Any
 
 from django import forms
 from django.contrib import messages
@@ -33,6 +34,7 @@ from aiarena.core.api import Matches
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api.maps import Maps
 from aiarena.core.d_utils import filter_tags
+from aiarena.core.exceptions import OpponentNotAvailableException
 from aiarena.core.models import (
     ArenaClient,
     Bot,
@@ -1345,63 +1347,80 @@ class RequestMatch(LoginRequiredMixin, FormView):
     def get_success_url(self):
         return reverse("requestmatch")
 
-    def _get_map(self, form):
+    def _get_match_request_map(self, form):
         if form.cleaned_data["map_selection_type"] == "map_pool":
             return Maps.random_from_map_pool(form.cleaned_data["map_pool"])
         else:
             return form.cleaned_data["map"]
 
     def form_valid(self, form):
-        if config.ALLOW_REQUESTED_MATCHES:
-            if form.cleaned_data["bot1"] != form.cleaned_data["bot2"]:
-                if self.request.user.websiteuser.match_request_count_left >= form.cleaned_data["match_count"]:
-                    with transaction.atomic():  # do this all in one commit
-                        match_list = []
-                        if form.cleaned_data["matchup_type"] == "random_ladder_bot":
-                            bot1 = form.cleaned_data["bot1"]
-
-                            for _ in range(0, form.cleaned_data["match_count"]):
-                                bot2 = (
-                                    bot1.get_random_active_excluding_self()
-                                    if form.cleaned_data["matchup_race"] == "any"
-                                    else bot1.get_active_excluding_self.filter(
-                                        plays_race=form.cleaned_data["matchup_race"]
-                                    )
-                                )
-
-                                if bot2 is None:
-                                    messages.error(self.request, "No opponents of that type could be found.")
-                                    return self.render_to_response(self.get_context_data(form=form))
-
-                                match_list.append(
-                                    Matches.request_match(
-                                        self.request.user, form.cleaned_data["bot1"], bot2, self._get_map(form)
-                                    )
-                                )
-                        else:  # specific_matchup
-                            for _ in range(0, form.cleaned_data["match_count"]):
-                                match_list.append(
-                                    Matches.request_match(
-                                        self.request.user,
-                                        form.cleaned_data["bot1"],
-                                        form.cleaned_data["bot2"],
-                                        self._get_map(form),
-                                    )
-                                )
-
-                    message = ""
-                    for match in match_list:
-                        message += (
-                            f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
-                        )
-                    messages.success(self.request, mark_safe(message))
-                    return super().form_valid(form)
-                else:
-                    messages.error(self.request, "That number of matches exceeds your match request limit.")
-                    return self.render_to_response(self.get_context_data(form=form))
-            else:
-                messages.error(self.request, "Sorry - you cannot request matches between the same bot.")
-                return self.render_to_response(self.get_context_data(form=form))
+        if not config.ALLOW_REQUESTED_MATCHES:
+            return self._log_error_and_render_response("Sorry. Requested matches are currently disabled.", form)
+        elif form.cleaned_data["bot1"] == form.cleaned_data["bot2"]:
+            return self._log_error_and_render_response("Sorry - you cannot request matches between the same bot.", form)
+        elif self.request.user.websiteuser.match_request_count_left >= form.cleaned_data["match_count"]:
+            return self._log_error_and_render_response("That number of matches exceeds your match request limit.", form)
         else:
-            messages.error(self.request, "Sorry. Requested matches are currently disabled.")
-            return self.render_to_response(self.get_context_data(form=form))
+            try:
+                return self._process_request_for_matches(form)
+            except OpponentNotAvailableException:
+                return self._log_error_and_render_response("No opponents of that type could be found.", form)
+
+    def _log_error_and_render_response(self, error_message:str, form):
+        messages.error(self.request, error_message)
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def _process_request_for_matches(self, form):
+        with transaction.atomic():  # do this all in one commit
+            match_list = []
+
+            matches_to_request = self._calculate_matches_to_request(form)
+
+            for match in matches_to_request:
+                match_list.append(
+                    Matches.request_match(
+                        self.request.user,
+                        match["bot1"],
+                        match["bot2"],
+                        match["map"],
+                    )
+                )
+
+        message = ""
+        for match in match_list:
+            message += (
+                f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
+            )
+        messages.success(self.request, mark_safe(message))
+        return super().form_valid(form)
+
+
+    def _calculate_matches_to_request(self, form) -> List[Dict[str, Any]]:
+        matches_to_request = []
+
+        bot1 = form.cleaned_data["bot1"]
+
+        for _ in range(0, form.cleaned_data["match_count"]):
+            if form.cleaned_data["matchup_type"] == "random_ladder_bot":  # random match up
+                bot2 = (
+                    bot1.get_random_active_excluding_self()
+                    if form.cleaned_data["matchup_race"] == "any"
+                    else bot1.get_active_excluding_self.filter(
+                        plays_race=form.cleaned_data["matchup_race"]
+                    )
+                )
+
+                if bot2 is None:
+                    raise OpponentNotAvailableException()
+            else:  # specific match up
+                bot2 = form.cleaned_data["bot2"]
+
+            matches_to_request.append(
+                {
+                    "bot1": bot1,
+                    "bot2": bot2,
+                    "map": self._get_match_request_map(form)
+                }
+            )
+
+        return matches_to_request
