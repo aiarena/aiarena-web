@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import List, Dict, Any
+from typing import Any
 
 from django import forms
 from django.contrib import messages
@@ -1366,7 +1366,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
             except OpponentNotAvailableException:
                 return self._log_error_and_render_response("No opponents of that type could be found.", form)
 
-    def _log_error_and_render_response(self, error_message:str, form):
+    def _log_error_and_render_response(self, error_message: str, form):
         messages.error(self.request, error_message)
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -1388,14 +1388,11 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
         message = ""
         for match in match_list:
-            message += (
-                f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
-            )
+            message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
         messages.success(self.request, mark_safe(message))
         return super().form_valid(form)
 
-
-    def _calculate_matches_to_request(self, form) -> List[Dict[str, Any]]:
+    def _calculate_matches_to_request(self, form) -> list[dict[str, Any]]:
         matches_to_request = []
 
         bot1 = form.cleaned_data["bot1"]
@@ -1405,9 +1402,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
                 bot2 = (
                     bot1.get_random_active_excluding_self()
                     if form.cleaned_data["matchup_race"] == "any"
-                    else bot1.get_active_excluding_self.filter(
-                        plays_race=form.cleaned_data["matchup_race"]
-                    )
+                    else bot1.get_active_excluding_self.filter(plays_race=form.cleaned_data["matchup_race"])
                 )
 
                 if bot2 is None:
@@ -1415,12 +1410,6 @@ class RequestMatch(LoginRequiredMixin, FormView):
             else:  # specific match up
                 bot2 = form.cleaned_data["bot2"]
 
-            matches_to_request.append(
-                {
-                    "bot1": bot1,
-                    "bot2": bot2,
-                    "map": self._get_match_request_map(form)
-                }
-            )
+            matches_to_request.append({"bot1": bot1, "bot2": bot2, "map": self._get_match_request_map(form)})
 
         return matches_to_request
