@@ -1358,7 +1358,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
             return self._log_error_and_render_response("Sorry. Requested matches are currently disabled.", form)
         elif form.cleaned_data["bot1"] == form.cleaned_data["bot2"]:
             return self._log_error_and_render_response("Sorry - you cannot request matches between the same bot.", form)
-        elif self.request.user.websiteuser.match_request_count_left >= form.cleaned_data["match_count"]:
+        elif self.request.user.websiteuser.match_request_count_left < form.cleaned_data["match_count"]:
             return self._log_error_and_render_response("That number of matches exceeds your match request limit.", form)
         else:
             try:
