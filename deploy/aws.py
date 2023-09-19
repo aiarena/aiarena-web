@@ -398,6 +398,7 @@ def update_all_services(environment):
                             "cluster": cluster_id,
                             "desired-count": match.count,
                             "task-definition": match.task.family,
+                            "enable-execute-command": "true",
                             "deployment-configuration": (
                                 f'"maximumPercent={match.max_percent},' f'minimumHealthyPercent={match.min_percent}"'
                             ),

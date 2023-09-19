@@ -320,6 +320,11 @@ Resources:
       ClusterSettings:
         - Name: containerInsights
           Value: !var container_insights
+      Configuration:
+         ExecuteCommandConfiguration:
+            Logging: NONE
+            KmsKeyId:
+              Ref: MasterKey
 
   ECSServiceRole:
     Type: AWS::IAM::Role
@@ -371,7 +376,39 @@ Resources:
                       - - 'arn:aws:s3:::'
                         - Ref: mediaTestBucket
                         - "/*"
+
   ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      Policies:
+        - PolicyName: enable-ssm-to-container
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssmmessages:CreateControlChannel
+                  - ssmmessages:CreateDataChannel
+                  - ssmmessages:OpenControlChannel
+                  - ssmmessages:OpenDataChannel
+                  - ssm:GetParameters
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: "*"
+
+  ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:

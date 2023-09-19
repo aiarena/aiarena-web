@@ -9,6 +9,7 @@ class Task:
     default_cpu = "256"
     default_memory = "512"
     role_name = "ECSTaskRole"
+    execution_role_name = "ECSTaskExecutionRole"
 
     def __init__(
         self,
@@ -73,7 +74,10 @@ class Task:
         from deploy.aws import physical_name
         from deploy.settings import AWS_ACCOUNT_ID, PROJECT_NAME
 
-        execution_role_arn = f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/{physical_name(PROJECT_NAME, self.role_name)}"
+        role_arn = f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/{physical_name(PROJECT_NAME, self.role_name)}"
+        execution_role_arn = (
+            f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/{physical_name(PROJECT_NAME, self.execution_role_name)}"
+        )
 
         env = [{"name": k, "value": v} for k, v in environment.items()]
         ports = [{"hostPort": host_port, "containerPort": container_port} for (host_port, container_port) in self.ports]
@@ -81,6 +85,7 @@ class Task:
             "cpu": self.cpu,
             "memory": self.memory,
             "family": self.family,
+            "taskRoleArn": role_arn,
             "executionRoleArn": execution_role_arn,
             "containerDefinitions": self.containers(env, ports),
             "volumes": self.volumes or [],
