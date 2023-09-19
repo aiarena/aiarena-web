@@ -42,7 +42,7 @@ class Command(BaseCommand):
         parser.add_argument("--randomseed", type=int, help="Set the random seed. Useful for consistent test results.")
 
     def handle(self, *args, **options):
-        if settings.ENVIRONMENT_TYPE == settings.EnvironmentType.DEVELOPMENT:
+        if settings.ENVIRONMENT_TYPE == settings.ENVIRONMENT_TYPES.DEVELOPMENT:
             started_at = datetime.datetime.now()
             self.stdout.write(f"Started at: {started_at}")
             if options["randomseed"] is not None:

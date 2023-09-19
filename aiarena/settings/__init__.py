@@ -2,7 +2,7 @@ import os
 from enum import Enum
 
 
-class EnvironmentType(Enum):
+class ENVIRONMENT_TYPES(Enum):
     DEVELOPMENT = 1
     PRODUCTION = 2
 
@@ -11,10 +11,10 @@ env = os.getenv("DJANGO_ENVIRONMENT")
 if env is None:
     raise Exception("The environment variable DJANGO_ENVIRONMENT must be set to one of: DEVELOPMENT, PRODUCTION")
 
-ENVIRONMENT_TYPE = EnvironmentType[env]
-if ENVIRONMENT_TYPE == EnvironmentType.PRODUCTION:
+ENVIRONMENT_TYPE = ENVIRONMENT_TYPES[env]
+if ENVIRONMENT_TYPE == ENVIRONMENT_TYPES.PRODUCTION:
     from .prod import *  # noqa: F403, F405
-elif ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT:
+elif ENVIRONMENT_TYPE == ENVIRONMENT_TYPES.DEVELOPMENT:
     try:
         from .local import *  # noqa: F403, F405
     except ImportError as e:

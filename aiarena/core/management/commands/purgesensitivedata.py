@@ -27,7 +27,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        if settings.ENVIRONMENT_TYPE == settings.EnvironmentType.DEVELOPMENT:
+        if settings.ENVIRONMENT_TYPE == settings.ENVIRONMENT_TYPES.DEVELOPMENT:
             purge_user_data()
         else:
             self.stdout.write("Command failed: This is not a development or staging environment!")
