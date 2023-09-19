@@ -22,6 +22,7 @@ from django.urls import path, re_path
 from django.views.generic.base import TemplateView
 
 import debug_toolbar
+import private_storage.urls
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
@@ -108,6 +109,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     url(r"^patreon/", include("aiarena.patreon.urls")),
     re_path("^sitemap\.xml/$", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     re_path("^robots\.txt", include("robots.urls")),
+    path("private-media/", include(private_storage.urls)),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
