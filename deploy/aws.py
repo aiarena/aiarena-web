@@ -368,6 +368,7 @@ def update_all_services(environment):
                     role = None
                     port = None
                     target_group = None
+                    enable_execute_command = details["enableExecuteCommand"]
                     placement_strategy = details["placementStrategy"]
                     placement_constraints = details["placementConstraints"]
                     if details["loadBalancers"]:
@@ -377,6 +378,7 @@ def update_all_services(environment):
                         target_group = balancer_details.get("targetGroupArn")
                     if (
                         task_family != match.task.family
+                        or not enable_execute_command
                         or role != roles.get(match.role_name)
                         or placement_strategy != match.placement_strategy
                         or placement_constraints != match.placement_constraints
