@@ -1,8 +1,8 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from aiarena.core.models import Competition, CompetitionParticipation, Match, MatchParticipation
-from aiarena.settings import ELO_START_VALUE
 
 
 class Command(BaseCommand):
@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
             self.stdout.write("Resetting all ELOs to starting ELO...", ending="\r")
             for participant in competition_participants:
-                participant.elo = ELO_START_VALUE
+                participant.elo = settings.ELO_START_VALUE
                 participant.save()
             self.stdout.write("Resetting all ELOs to starting ELO...done")
 

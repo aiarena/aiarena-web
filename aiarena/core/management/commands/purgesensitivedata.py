@@ -1,8 +1,8 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from discord_bind.models import DiscordInvite, DiscordUser
 
-from aiarena import settings
 from aiarena.core.models import User
 from aiarena.core.utils import EnvironmentType
 from aiarena.patreon.models import PatreonAccountBind

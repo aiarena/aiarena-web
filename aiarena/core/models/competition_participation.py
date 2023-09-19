@@ -1,13 +1,12 @@
 import logging
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.text import slugify
 
 from private_storage.fields import PrivateFileField
-
-from aiarena.settings import ELO_START_VALUE
 
 from ..validators import validate_not_inf, validate_not_nan
 from .bot import Bot
@@ -33,7 +32,7 @@ def winrate_vs_duration_graph_upload_to(instance, filename):
 class CompetitionParticipation(models.Model, LockableModelMixin):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE, related_name="participations")
     bot = models.ForeignKey(Bot, on_delete=models.CASCADE, related_name="competition_participations")
-    elo = models.SmallIntegerField(default=ELO_START_VALUE)
+    elo = models.SmallIntegerField(default=settings.ELO_START_VALUE)
     match_count = models.IntegerField(default=0)
     win_perc = models.FloatField(default=0, blank=True, validators=[validate_not_nan, validate_not_inf])
     win_count = models.IntegerField(default=0)

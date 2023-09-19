@@ -1,13 +1,13 @@
 import datetime
 import random
 
+from django.conf import settings
 from django.core.files import File
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from rest_framework.authtoken.models import Token
 
-from aiarena import settings
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
 from aiarena.core.models import Bot, CompetitionParticipation, Map, MapPool, News, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
@@ -145,10 +145,12 @@ class Command(BaseCommand):
             m1.competitions.add(competition2)
             m1.save()
 
+        with open(TestAssetPaths.test_map_path, "rb") as map:
             m2 = Map.objects.create(name="test_map2_terran_only", file=File(map), game_mode=gamemode)
             m2.competitions.add(competition3)
             m2.save()
 
+        with open(TestAssetPaths.test_map_path, "rb") as map:
             # unused map
             Map.objects.create(name="test_map3", file=File(map), game_mode=gamemode)
 
@@ -181,55 +183,66 @@ class Command(BaseCommand):
             CompetitionParticipation.objects.create(competition=competition2, bot=bot)
             CompetitionParticipation.objects.create(competition=competition3, bot=bot)
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot = Bot.objects.create(
                 user=devadmin, name="devadmin_bot2", plays_race=zerg, type="python", bot_zip=File(bot_zip)
             )
             CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             Bot.objects.create(
                 user=devadmin, name="devadmin_bot3", plays_race=protoss, type="python", bot_zip=File(bot_zip)
             )  # inactive bot
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot = Bot.objects.create(
                 user=devuser1, name="devuser1_bot1", plays_race=protoss, type="python", bot_zip=File(bot_zip)
             )
             CompetitionParticipation.objects.create(competition=competition1, bot=bot)
             CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot = Bot.objects.create(
                 user=devuser1, name="devuser1_bot2", plays_race=zerg, type="python", bot_zip=File(bot_zip)
             )
             CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             Bot.objects.create(
                 user=devuser1, name="devuser1_bot3", plays_race=terran, type="python", bot_zip=File(bot_zip)
             )  # inactive bot
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot = Bot.objects.create(
                 user=devuser2, name="devuser2_bot1", plays_race=protoss, type="python", bot_zip=File(bot_zip)
             )
             CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot = Bot.objects.create(
                 user=devuser2, name="devuser2_bot2", plays_race=terran, type="python", bot_zip=File(bot_zip)
             )
             CompetitionParticipation.objects.create(competition=competition1, bot=bot)
             CompetitionParticipation.objects.create(competition=competition3, bot=bot)
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             Bot.objects.create(
                 user=devuser2, name="devuser2_bot3", plays_race=zerg, type="python", bot_zip=File(bot_zip)
             )  # inactive bot
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot = Bot.objects.create(
                 user=devuser3, name="devuser3_bot1", plays_race=terran, type="python", bot_zip=File(bot_zip)
             )
             CompetitionParticipation.objects.create(competition=competition1, bot=bot)
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot = Bot.objects.create(
                 user=devuser4, name="devuser4_bot1", plays_race=zerg, type="python", bot_zip=File(bot_zip)
             )
             CompetitionParticipation.objects.create(competition=competition2, bot=bot)
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot = Bot.objects.create(
                 user=devuser5, name="devuser5_bot1", plays_race=protoss, type="python", bot_zip=File(bot_zip)
             )
@@ -268,6 +281,7 @@ class Command(BaseCommand):
             if matches != 0:
                 ac_client.next_match()
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             # bot still in placement
             bot = Bot.objects.create(
                 user=devadmin, name="devadmin_bot100", plays_race=terran, type="python", bot_zip=File(bot_zip)
@@ -277,6 +291,7 @@ class Command(BaseCommand):
             cp.division_num = competition1.n_divisions
             cp.save()
 
+        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             # bot that just joined the competition
             bot = Bot.objects.create(
                 user=devadmin, name="devadmin_bot101", plays_race=terran, type="python", bot_zip=File(bot_zip)

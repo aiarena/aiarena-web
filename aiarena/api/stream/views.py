@@ -1,11 +1,12 @@
 import logging
 
+from django.conf import settings
+
 from constance import config
 from rest_framework import serializers, viewsets
 
 from aiarena.core.models import Bot, CompetitionParticipation, Match, Result
 from aiarena.core.permissions import IsServiceOrAdminUser
-from aiarena.settings import ELO_START_VALUE
 
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,7 @@ class StreamNextReplayViewSet(viewsets.ReadOnlyModelViewSet):
             result__isnull=False,
             requested_by__isnull=True,
             matchparticipation__bot__competition_participations__in=CompetitionParticipation.objects.filter(
-                elo__gte=ELO_START_VALUE
+                elo__gte=settings.ELO_START_VALUE
             ).exclude(bot__user_id=config.HOUSE_BOTS_USER_ID),
         )
 

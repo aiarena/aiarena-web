@@ -1,12 +1,12 @@
 import logging
 import time
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.functional import cached_property
 
-from aiarena.settings import ELO
-
+from ..utils import Elo
 from .bot import Bot
 from .match import Match
 from .mixins import LockableModelMixin
@@ -14,6 +14,7 @@ from .user import User
 
 
 logger = logging.getLogger(__name__)
+ELO = Elo(settings.ELO_K)
 
 # todo: move sanity checking to DB constraints:
 # https://docs.djangoproject.com/en/3.0/ref/models/options/#constraints

@@ -1,6 +1,7 @@
 import logging
 from wsgiref.util import FileWrapper
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import Prefetch, Sum
 from django.http import HttpResponse
@@ -13,7 +14,6 @@ from rest_framework.fields import FileField, FloatField
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
-from aiarena import settings
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
 from aiarena.core.api import BotStatistics

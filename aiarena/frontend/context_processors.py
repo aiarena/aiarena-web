@@ -2,16 +2,13 @@ import hashlib
 import os
 from datetime import timedelta
 
+from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 
 from constance import config
 
-from aiarena import settings
 from aiarena.core.models import Result, User
-
-# these are available globally in the django templates
-from aiarena.settings import BASE_DIR
 
 
 def stats(request):
@@ -29,7 +26,7 @@ def stats(request):
 def style_md5() -> str:
     md5_value = cache.get("style_md5")
     if md5_value is None:
-        md5_value = md5(os.path.join(BASE_DIR, "aiarena/frontend/static/style.css"))[0:8]
+        md5_value = md5(os.path.join(settings.BASE_DIR, "aiarena/frontend/static/style.css"))[0:8]
         cache.set("style_md5", md5_value, 3600)
     return md5_value
 

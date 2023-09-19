@@ -6,7 +6,7 @@ import traceback
 from enum import Enum
 from urllib import request
 
-from aiarena import settings
+from django.conf import settings
 
 
 logger = logging.getLogger(__name__)
@@ -128,4 +128,3 @@ class Elo:
 class EnvironmentType(Enum):
     DEVELOPMENT = 1
     PRODUCTION = 2
-    STAGING = 3

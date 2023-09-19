@@ -2,6 +2,7 @@ import io
 import json
 import os
 
+from django.conf import settings
 from django.db.models import Sum
 from django.test import TransactionTestCase
 
@@ -28,7 +29,6 @@ from aiarena.core.models.game_mode import GameMode
 from aiarena.core.tests.test_mixins import LoggedInMixin, MatchReadyMixin
 from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5
-from aiarena.settings import BASE_DIR, ELO_START_VALUE, MEDIA_ROOT, PRIVATE_STORAGE_ROOT
 
 
 class MatchesTestCase(LoggedInMixin, TransactionTestCase):
@@ -313,10 +313,12 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
 
 class ResultsTestCase(LoggedInMixin, TransactionTestCase):
-    uploaded_bot_data_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, "bots", "{0}", "bot_data")
-    uploaded_bot_data_backup_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, "bots", "{0}", "bot_data_backup")
-    uploaded_match_log_path = os.path.join(BASE_DIR, PRIVATE_STORAGE_ROOT, "match-logs", "{0}")
-    uploaded_arenaclient_log_path = os.path.join(MEDIA_ROOT, "arenaclient-logs", "{0}_arenaclientlog.zip")
+    uploaded_bot_data_path = os.path.join(settings.BASE_DIR, settings.PRIVATE_STORAGE_ROOT, "bots", "{0}", "bot_data")
+    uploaded_bot_data_backup_path = os.path.join(
+        settings.BASE_DIR, settings.PRIVATE_STORAGE_ROOT, "bots", "{0}", "bot_data_backup"
+    )
+    uploaded_match_log_path = os.path.join(settings.BASE_DIR, settings.PRIVATE_STORAGE_ROOT, "match-logs", "{0}")
+    uploaded_arenaclient_log_path = os.path.join(settings.MEDIA_ROOT, "arenaclient-logs", "{0}_arenaclientlog.zip")
 
     def test_create_results(self):
         self.test_client.login(self.staffUser1)
@@ -667,7 +669,7 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         comp = Competition.objects.get()
         sumElo = CompetitionParticipation.objects.filter(competition=comp).aggregate(Sum("elo"))
         self.assertEqual(
-            sumElo["elo__sum"], ELO_START_VALUE * Bot.objects.all().count()
+            sumElo["elo__sum"], settings.ELO_START_VALUE * Bot.objects.all().count()
         )  # starting ELO times number of bots
 
     def test_elo(self):
@@ -689,7 +691,7 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         # os.remove(log_file)  # clean it
 
         # intentionally cause a sanity check failure
-        self.regularUserBot1.elo = ELO_START_VALUE - 1
+        self.regularUserBot1.elo = settings.ELO_START_VALUE - 1
         self.regularUserBot1.save()
 
         response = self._post_to_matches()
