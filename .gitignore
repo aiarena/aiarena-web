@@ -4,8 +4,8 @@ venv/
 
 .idea/
 
-# environment specific settings
-aiarena/env.py
+# local development only settings
+aiarena/settings/local.py
 
 # python env
 python_env/

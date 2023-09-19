@@ -10,10 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import os
-import sys
 from datetime import timedelta
-
-from aiarena.core.utils import Elo, EnvironmentType
 
 
 # Temp workaround for discord-bind error: Warning: Scope has changed from "identify" to "guilds.join identify email".
@@ -29,17 +26,8 @@ GRAPPELLI_INDEX_DASHBOARD = "aiarena.frontend.dashboard.CustomIndexDashboard"
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "t*4r1u49=a!ah1!z8ydsaajr!lv-f(@r07lm)-9fro_9&67xqd"
-
-# Flag whether we're in testing mode
-# Checks that the second argument is the test command.
-TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ["127.0.0.1", "testserver", "aiarena-web", "*"]  # testserver is the django testing client
 
 INTERNAL_IPS = ["127.0.0.1"]
 
@@ -95,10 +83,8 @@ INSTALLED_APPS = [
     "wiki.plugins.macros.apps.MacrosConfig",
     "wiki.plugins.help.apps.HelpConfig",
     "constance",
-    "constance.backends.database",  # this should be removed by any env.py file overriding the constance backend
-    "debug_toolbar",  # This will be removed automatically in non-development environments
+    "constance.backends.database",
     "discord_bind",
-    "sslserver",  # This will be removed automatically in non-development environments
     "robots",
     "django.contrib.admindocs",
     "drf_yasg",
@@ -106,8 +92,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # This will be removed automatically in non-development environments
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -122,7 +106,7 @@ ROOT_URLCONF = "aiarena.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(APP_DIR, "frontend/templates")],
+        "DIRS": [os.path.join(APP_DIR, "../frontend/templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -167,9 +151,6 @@ CACHES = {
 SELECT2_CACHE_BACKEND = "select2"
 # SELECT2_CSS = ''
 # Constance https://github.com/jazzband/django-constance
-# !IMPORTANT! If you override this setting in an env.py,
-# don't forget to remove 'constance.backends.database' from the INSTALLED_APPS array
-# Use the database backend in dev for ease of use. We will use Redis in staging/prod.
 CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 
 # This is the dynamic config, update-able during runtime
@@ -440,7 +421,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "../../static")
 # Don't configure this, because the files wil be automagically located
 # STATICFILES_DIRS = [
 #     os.path.join(APP_DIR, "frontend/static"),
@@ -448,25 +429,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # public media
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-#################################
-# Django Storages & django-private-storage configuration #
-#################################
-
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
-
-AWS_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
-AWS_PRIVATE_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
-
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_S3_REGION_NAME = "eu-central-1"
-AWS_S3_OBJECT_PARAMETERS = {"ACL": "private"}
-AWS_S3_SIGNATURE_VERSION = "s3v4"
-AWS_QUERYSTRING_AUTH = True
-AWS_QUERYSTRING_EXPIRE = 60 * 60
+MEDIA_ROOT = os.path.join(BASE_DIR, "../../media")
 
 
 # Random scripts such as SQL
@@ -543,8 +506,6 @@ DISCORD_CLIENT_ID = get_discord_client_id
 DISCORD_CLIENT_SECRET = get_discord_client_secret
 DISCORD_RETURN_URI = "/profile/"
 
-ENVIRONMENT_TYPE = EnvironmentType.DEVELOPMENT
-
 # django wiki
 WIKI_ACCOUNT_HANDLING = True
 WIKI_ATTACHMENTS_EXTENSIONS = ["pdf", "doc", "odt", "docx", "txt", "zip"]
@@ -552,23 +513,6 @@ WIKI_ACCOUNT_SIGNUP_ALLOWED = False
 SITE_ID = 1
 
 SITE_PROTOCOL = "https"
-
-# override any of these settings with an env.py file
-try:
-    from aiarena.env import *  # noqa F403
-except ImportError as e:
-    if e.name != "aiarena.env":
-        raise
-
-if ENVIRONMENT_TYPE != EnvironmentType.DEVELOPMENT:
-    # not required in staging or production
-    INSTALLED_APPS.remove("debug_toolbar")
-    MIDDLEWARE.remove("debug_toolbar.middleware.DebugToolbarMiddleware")
-
-    INSTALLED_APPS.remove("sslserver")
-
-# load this after the env file so if the ELO_K value was overridden, it will be applied properly
-ELO = Elo(ELO_K)
 
 # Match Tag Constants
 MATCH_TAG_REGEX = r"[^a-z0-9 _]"
