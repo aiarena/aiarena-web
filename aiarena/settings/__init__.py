@@ -1,6 +1,10 @@
 import os
+from enum import Enum
 
-from ..core.utils import EnvironmentType
+
+class EnvironmentType(Enum):
+    DEVELOPMENT = 1
+    PRODUCTION = 2
 
 
 env = os.getenv("DJANGO_ENVIRONMENT")

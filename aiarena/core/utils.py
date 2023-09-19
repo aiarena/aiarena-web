@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import traceback
-from enum import Enum
 from urllib import request
 
 from django.conf import settings
@@ -123,8 +122,3 @@ class Elo:
 
     def calculate_elo_expected_win_rate(self, rating1, rating2):
         return 1.0 / (1.0 + 10.0 ** ((rating2 - rating1) / 400.0))
-
-
-class EnvironmentType(Enum):
-    DEVELOPMENT = 1
-    PRODUCTION = 2

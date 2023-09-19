@@ -4,7 +4,6 @@ from django.core.management.base import BaseCommand
 from discord_bind.models import DiscordInvite, DiscordUser
 
 from aiarena.core.models import User
-from aiarena.core.utils import EnvironmentType
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -28,10 +27,7 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        if (
-            settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT
-            or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING
-        ):
+        if settings.ENVIRONMENT_TYPE == settings.EnvironmentType.DEVELOPMENT:
             purge_user_data()
         else:
             self.stdout.write("Command failed: This is not a development or staging environment!")

@@ -13,7 +13,6 @@ from aiarena.core.models import Bot, CompetitionParticipation, Map, MapPool, New
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.testing_utils import TestingClient
 from aiarena.core.tests.tests import TestAssetPaths
-from aiarena.core.utils import EnvironmentType
 
 
 class Command(BaseCommand):
@@ -43,10 +42,7 @@ class Command(BaseCommand):
         parser.add_argument("--randomseed", type=int, help="Set the random seed. Useful for consistent test results.")
 
     def handle(self, *args, **options):
-        if (
-            settings.ENVIRONMENT_TYPE == EnvironmentType.DEVELOPMENT
-            or settings.ENVIRONMENT_TYPE == EnvironmentType.STAGING
-        ):
+        if settings.ENVIRONMENT_TYPE == settings.EnvironmentType.DEVELOPMENT:
             started_at = datetime.datetime.now()
             self.stdout.write(f"Started at: {started_at}")
             if options["randomseed"] is not None:
