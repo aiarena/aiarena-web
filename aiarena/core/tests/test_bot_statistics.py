@@ -19,9 +19,14 @@ class BotStatisticsTestCase(FullDataSetMixin, TransactionTestCase):
         # the match activity generated in FullDataSetMixin
 
         update_stats_json = dict()
-        update_stats_json["global_stats"] = serializers.serialize(
-            "json", CompetitionParticipation.objects.order_by("id")
-        )
+
+        global_stats = json.loads(serializers.serialize("json", CompetitionParticipation.objects.order_by("id")))
+        for global_stat in global_stats:
+            del global_stat["fields"]["elo_graph"]
+            del global_stat["fields"]["elo_graph_update_plot"]
+            del global_stat["fields"]["winrate_vs_duration_graph"]
+        update_stats_json["global_stats"] = json.dumps(global_stats)
+
         matchup_stats = list(CompetitionBotMatchupStats.objects.order_by("bot", "opponent").values())
         for matchup_stat in matchup_stats:
             # these won't match, so remove them
@@ -41,9 +46,13 @@ class BotStatisticsTestCase(FullDataSetMixin, TransactionTestCase):
         self.assertIn("Done", out.getvalue())
 
         recalc_stats_json = dict()
-        recalc_stats_json["global_stats"] = serializers.serialize(
-            "json", CompetitionParticipation.objects.order_by("id")
-        )
+        global_stats = json.loads(serializers.serialize("json", CompetitionParticipation.objects.order_by("id")))
+        for global_stat in global_stats:
+            del global_stat["fields"]["elo_graph"]
+            del global_stat["fields"]["elo_graph_update_plot"]
+            del global_stat["fields"]["winrate_vs_duration_graph"]
+        recalc_stats_json["global_stats"] = json.dumps(global_stats)
+
         matchup_stats = list(CompetitionBotMatchupStats.objects.order_by("bot", "opponent").values())
         for matchup_stat in matchup_stats:
             # these won't match, so remove them
