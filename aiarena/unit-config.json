@@ -11,7 +11,6 @@
       },
       "action": {
         "share": "/app/$uri",
-        "chroot": "/app/static/",
         "follow_symlinks": false,
         "traverse_mounts": false
       }
