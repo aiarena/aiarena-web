@@ -54,7 +54,7 @@ class Task:
         }
 
         if entrypoint:
-            task_config["entryPoint"] = entrypoint
+            task_config["entryPoint"] = entrypoint.split(" ")
 
         if self.hostname:
             hostname = self.hostname
