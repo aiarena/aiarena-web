@@ -121,7 +121,12 @@ def prepare_images():
     base_tag = f"build-{build_number}"
 
     tag_amd64 = f"{base_tag}-{docker.ARCH_AMD64}"
-    docker.build_image("cloud", tag=tag_amd64, arch=docker.ARCH_AMD64)
+    docker.build_image(
+        "cloud",
+        tag=tag_amd64,
+        arch=docker.ARCH_AMD64,
+        build_args={"SECRET_KEY": "temporary-secret-key"},  # Does not stay in the image, just for build
+    )
 
     cloud_images = aws.push_images("cloud", [tag_amd64])
     set_github_actions_output(
