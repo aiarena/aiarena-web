@@ -398,7 +398,7 @@ def update_all_services(environment):
                             "cluster": cluster_id,
                             "desired-count": match.count,
                             "task-definition": match.task.family,
-                            "enable-execute-command": "true",
+                            "enable-execute-command": None,
                             "deployment-configuration": (
                                 f'"maximumPercent={match.max_percent},' f'minimumHealthyPercent={match.min_percent}"'
                             ),
@@ -406,7 +406,7 @@ def update_all_services(environment):
                         grace = match.health_check_grace_sec
                         if grace is not None:
                             conf["health-check-grace-period-seconds"] = grace
-                        args = " ".join(f"--{k} {v}" for k, v in conf.items())
+                        args = " ".join(f"--{k} {v}" if v else f"--{k}" for k, v in conf.items())
                         cli(f"ecs update-service {args}")
                         updated.append(match.name)
                         echo(f"Service updated: {service}")
