@@ -371,30 +371,21 @@ LOGGING = {
         },
     },
     "handlers": {
-        "django-file": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": "./logs/django.log",
-            "formatter": "verbose",
-        },
-        "aiarena-file": {
-            "level": "DEBUG",
-            "class": "logging.FileHandler",
-            "filename": "./logs/aiarena.log",
-            "formatter": "verbose",
+        "console": {
+            "class": "logging.StreamHandler",
         },
     },
     "loggers": {
         "django": {
             "handlers": [
-                "django-file",
+                "console",
             ],
             "level": "DEBUG",
             "propagate": True,
         },
         "aiarena": {
             "handlers": [
-                "aiarena-file",
+                "console",
             ],
             "level": "DEBUG",
             "propagate": True,
