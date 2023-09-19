@@ -10,9 +10,7 @@
         "uri": "/static/*"
       },
       "action": {
-        "share": "/app/$uri",
-        "follow_symlinks": false,
-        "traverse_mounts": false
+        "share": "/app/$uri"
       }
     },
     {
