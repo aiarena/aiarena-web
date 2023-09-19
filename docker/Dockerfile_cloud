@@ -1,8 +1,10 @@
 FROM aiarena/env
 
-ENV DJANGO_ENVIRONMENT PRODUCTION
+ENV DJANGO_ENVIRONMENT DEVELOPMENT
 
 ADD ./pip/requirements.PRODUCTION.txt /srv/requirements.PRODUCTION.txt
 RUN pip install -r /srv/requirements.PRODUCTION.txt
 
 RUN python /app/manage.py collectstatic --noinput --clear
+
+ENV DJANGO_ENVIRONMENT PRODUCTION
