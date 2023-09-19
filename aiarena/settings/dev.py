@@ -14,7 +14,6 @@ MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F4
 # Django Storages & django-private-storage configuration #
 #################################
 
-DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"  # TODO: set to local filesystem
-PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
-
-# PRIVATE_STORAGE_ROOT =  TODO
+DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+PRIVATE_STORAGE_CLASS = "private_storage.storage.files.PrivateFileSystemStorage"
+PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private-media")  # noqa: F405
