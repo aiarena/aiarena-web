@@ -2,7 +2,7 @@ name: AWS deploy
 
 on:
   push:
-    branches: [ aws-infrastructure ]
+    branches: [ main ]
 
 permissions:
   id-token: write
