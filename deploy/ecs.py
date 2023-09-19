@@ -35,7 +35,7 @@ class Task:
         self.hostname = hostname
         self.requires_compatibilities = requires_compatibilities or self.default_requires_compatibilities
 
-    def code_container(self, env, ports, name="code", command=None, hostname=None):
+    def code_container(self, env, ports, name="code", command=None, hostname=None, entrypoint=None):
         task_config = {
             "name": name,
             "essential": True,
@@ -52,6 +52,9 @@ class Task:
                 for volume in (self.volumes or [])
             ],
         }
+
+        if entrypoint:
+            task_config["entrypoint"] = entrypoint
 
         if self.hostname:
             hostname = self.hostname
