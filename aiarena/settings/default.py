@@ -18,8 +18,8 @@ from datetime import timedelta
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-APP_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GRAPPELLI_ADMIN_TITLE = "AiArena Admin"
 GRAPPELLI_SWITCH_USER_ORIGINAL = True
 GRAPPELLI_INDEX_DASHBOARD = "aiarena.frontend.dashboard.CustomIndexDashboard"
