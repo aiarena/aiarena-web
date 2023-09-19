@@ -17,3 +17,4 @@ MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F4
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 PRIVATE_STORAGE_CLASS = "private_storage.storage.files.PrivateFileSystemStorage"
 PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private-media")  # noqa: F405
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # noqa: F405
