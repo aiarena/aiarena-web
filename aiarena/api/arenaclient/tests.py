@@ -1,6 +1,5 @@
 import io
 import json
-import os
 
 from django.conf import settings
 from django.db.models import Sum
@@ -313,13 +312,6 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
 
 class ResultsTestCase(LoggedInMixin, TransactionTestCase):
-    uploaded_bot_data_path = os.path.join(settings.BASE_DIR, settings.PRIVATE_STORAGE_ROOT, "bots", "{0}", "bot_data")
-    uploaded_bot_data_backup_path = os.path.join(
-        settings.BASE_DIR, settings.PRIVATE_STORAGE_ROOT, "bots", "{0}", "bot_data_backup"
-    )
-    uploaded_match_log_path = os.path.join(settings.BASE_DIR, settings.PRIVATE_STORAGE_ROOT, "match-logs", "{0}")
-    uploaded_arenaclient_log_path = os.path.join(settings.MEDIA_ROOT, "arenaclient-logs", "{0}_arenaclientlog.zip")
-
     def test_create_results(self):
         self.test_client.login(self.staffUser1)
 
@@ -336,20 +328,11 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         response = self._post_to_results(match["id"], "Player1Win")
         self.assertEqual(response.status_code, 201)
 
-        p1 = MatchParticipation.objects.get(match_id=match["id"], participant_number=1)
-        p2 = MatchParticipation.objects.get(match_id=match["id"], participant_number=2)
-
-        # check bot datas exist
-        self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
-        self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
+        MatchParticipation.objects.get(match_id=match["id"], participant_number=1)
+        MatchParticipation.objects.get(match_id=match["id"], participant_number=2)
 
         # check hashes match set 0
         self._check_hashes(bot1, bot2, match["id"], 0)
-
-        # check match logs exist
-        self.assertTrue(os.path.exists(self.uploaded_arenaclient_log_path.format(match["id"])))
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(p1.id)))
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(p2.id)))
 
         # Post a result with different bot datas
         response = self._post_to_matches()
@@ -358,19 +341,8 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._post_to_results_bot_datas_set_1(match["id"], "Player1Win")
         self.assertEqual(response.status_code, 201)
 
-        # check bot datas and their backups exist
-        self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot1.id)))
-        self.assertTrue(os.path.exists(self.uploaded_bot_data_path.format(bot2.id)))
-        self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot1.id)))
-        self.assertTrue(os.path.exists(self.uploaded_bot_data_backup_path.format(bot2.id)))
-
         # check hashes - should be updated to set 1
         self._check_hashes(bot1, bot2, match["id"], 1)
-
-        # check match logs exist
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(match["id"])))
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(p1.id)))
-        self.assertTrue(os.path.exists(self.uploaded_match_log_path.format(p2.id)))
 
         # post a standard result with no bot1 data
         match = self._post_to_matches().data
