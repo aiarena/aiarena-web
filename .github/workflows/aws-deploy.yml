@@ -8,6 +8,9 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  DJANGO_ENVIRONMENT: DEVELOPMENT
+
 jobs:
   linters:
     runs-on: ubuntu-latest
@@ -21,8 +24,6 @@ jobs:
           python-version: "3.10"
           cache: 'pip'
       - name: Install Dependencies
-        env:
-          DJANGO_ENVIRONMENT: DEVELOPMENT
         run: |
           python -m pip install --upgrade pip
           python ./pip/pip-install.py --python=python --pip=pip
@@ -64,8 +65,6 @@ jobs:
           python-version: "3.10"
           cache: 'pip'
       - name: Install Dependencies
-        env:
-          DJANGO_ENVIRONMENT: DEVELOPMENT
         run: |
           python -m pip install --upgrade pip
           python ./pip/pip-install.py --python=python --pip=pip
