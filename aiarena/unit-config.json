@@ -1,0 +1,32 @@
+{
+  "listeners": {
+    "*:8301": {
+      "pass": "routes"
+    }
+  },
+  "routes": [
+    {
+      "match": {
+        "uri": "/static/*"
+      },
+      "action": {
+        "share": "/app/$uri",
+        "chroot": "/app/static/",
+        "follow_symlinks": false,
+        "traverse_mounts": false
+      }
+    },
+    {
+      "action": {
+        "pass": "applications/django"
+      }
+    }
+  ],
+  "applications": {
+    "django": {
+      "type": "python",
+      "path": "/app/",
+      "module": "aiarena.wsgi"
+    }
+  }
+}
