@@ -204,6 +204,22 @@ def production_ssh(server_number, instance_id):
     )
 
 
+@cli.command(help="Connect to an ECS task")
+@click.argument("task-id", type=str)
+def ecs_task_ssh(task_id):
+    cluster_id = aws.physical_name(PROJECT_NAME, "ECSCluster")
+
+    echo(f"Connecting to task_id = {task_id}")
+    aws.cli(
+        "ecs execute-command"
+        f" --cluster {cluster_id}"
+        f" --task {task_id}"
+        f' --command "/bin/bash"'
+        " --interactive",
+        parse_output=False,
+    )
+
+
 @cli.command(help="Build dev image")
 @timing
 def build_dev_image():
