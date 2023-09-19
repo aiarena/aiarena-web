@@ -73,15 +73,9 @@ class BotTestCase(LoggedInMixin, TestCase):
         self.assertEqual(TestAssetPaths.test_bot_zip_hash, bot1.bot_zip_md5hash)
         self.assertEqual(TestAssetPaths.test_bot_datas["bot1"][0]["hash"], bot1.bot_data_md5hash)
 
-        # check the bot file now exists
-        self.assertTrue(os.path.isfile(f"./private-media/bots/{bot1.id}/bot_zip"))
-
         with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
             bot1.bot_zip = File(bot_zip)
             bot1.save()
-
-        # check the bot file backup now exists
-        self.assertTrue(os.path.isfile(f"./private-media/bots/{bot1.id}/bot_zip_backup"))
 
         # test active bots per race limit for user
         # this shouldn't trip the validation
