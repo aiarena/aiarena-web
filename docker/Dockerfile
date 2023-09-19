@@ -1,4 +1,4 @@
-FROM 1.31.0-python3.11
+FROM unit:1.31.0-python3.11
 
 RUN apt-get update && \
     apt-get install -y \
