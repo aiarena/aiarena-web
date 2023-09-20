@@ -26,9 +26,6 @@ GRAPPELLI_INDEX_DASHBOARD = "aiarena.frontend.dashboard.CustomIndexDashboard"
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
 INTERNAL_IPS = ["127.0.0.1"]
 
 # Database

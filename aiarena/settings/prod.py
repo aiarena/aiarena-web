@@ -3,6 +3,8 @@ import os
 from .default import *  # noqa: F403
 
 
+DEBUG = False
+
 SECRET_KEY = os.environ.get("SECRET_KEY", None)
 if SECRET_KEY is None:
     raise Exception("You must set the SECRET_KEY to something secure before running in production or staging.")
