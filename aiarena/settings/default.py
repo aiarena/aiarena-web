@@ -376,7 +376,21 @@ LOGGING = {
         },
     },
     "loggers": {
-        "django": {
+        "django.request": {
+            "handlers": [
+                "console",
+            ],
+            "level": "WARNING",
+            "propagate": True,
+        },
+        "django.template": {
+            "handlers": [
+                "console",
+            ],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django.security": {
             "handlers": [
                 "console",
             ],
