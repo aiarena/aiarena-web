@@ -10,6 +10,9 @@ if SECRET_KEY is None:
 
 ALLOWED_HOSTS = ["aiarena-test.net", "aiarena.net", "*"]
 
+INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
+MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
+
 #################################
 # Django Storages & django-private-storage configuration #
 #################################
