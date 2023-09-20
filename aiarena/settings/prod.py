@@ -15,7 +15,15 @@ def custom_show_toolbar(request):
 
 DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": custom_show_toolbar,
+    "DISABLE_PANELS": {
+        "debug_toolbar.panels.profiling.ProfilingPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+    },
 }
+
 
 SECRET_KEY = os.environ.get("SECRET_KEY", None)
 if SECRET_KEY is None:
