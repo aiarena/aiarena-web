@@ -7,11 +7,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", None)
 if SECRET_KEY is None:
     raise Exception("You must set the SECRET_KEY to something secure before running in production or staging.")
 
-
 ALLOWED_HOSTS = ["aiarena-test.net", "aiarena.net", "*"]
-
-INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
-MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
 
 #################################
 # Django Storages & django-private-storage configuration #
