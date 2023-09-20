@@ -356,6 +356,7 @@ def update_all_services(environment):
             match = desired_services.get(service)
             if match:
                 if match.cluster_name != cluster_name:
+                    echo(f"Cluster name mismatch for service: {service}")
                     match = None
                 else:
                     details = cli(
@@ -368,7 +369,6 @@ def update_all_services(environment):
                     role = None
                     port = None
                     target_group = None
-                    enable_execute_command = details["enableExecuteCommand"]
                     placement_strategy = details["placementStrategy"]
                     placement_constraints = details["placementConstraints"]
                     if details["loadBalancers"]:
@@ -378,7 +378,6 @@ def update_all_services(environment):
                         target_group = balancer_details.get("targetGroupArn")
                     if (
                         task_family != match.task.family
-                        or not enable_execute_command
                         or role != roles.get(match.role_name)
                         or placement_strategy != match.placement_strategy
                         or placement_constraints != match.placement_constraints
@@ -391,6 +390,7 @@ def update_all_services(environment):
                             )
                         )
                     ):
+                        echo(f"Service has changes that require re-creation: {service}")
                         match = None
                     else:
                         echo(f"Updating service: {service}")
@@ -412,6 +412,9 @@ def update_all_services(environment):
                         cli(f"ecs update-service {args}")
                         updated.append(match.name)
                         echo(f"Service updated: {service}")
+            else:
+                echo(f"Service not in desired_services: {service}")
+
             if not match:
                 echo(f"Removing service: {service}")
                 cli(f"ecs update-service --desired-count 0 --service {service} " f"--cluster {cluster_id}")
