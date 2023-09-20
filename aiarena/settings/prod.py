@@ -5,6 +5,18 @@ from .default import *  # noqa: F403
 
 DEBUG = False
 
+INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
+MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
+
+
+def custom_show_toolbar(request):
+    return True  # Always show toolbar, for example purposes only.
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": custom_show_toolbar,
+}
+
 SECRET_KEY = os.environ.get("SECRET_KEY", None)
 if SECRET_KEY is None:
     raise Exception("You must set the SECRET_KEY to something secure before running in production or staging.")
