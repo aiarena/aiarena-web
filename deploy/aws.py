@@ -376,25 +376,37 @@ def update_all_services(environment):
                         port = balancer_details["containerPort"]
                         role = details["roleArn"].split("/")[-1]
                         target_group = balancer_details.get("targetGroupArn")
+
+                    re_creation_message = f"Service has changes that require re-creation: {service}"
+
                     if task_family != match.task.family:
-                        echo(f"Service has changes that require re-creation: {service}, task family")
+                        echo(f"{re_creation_message}, task family is {task_family}, should be {match.task.family}")
                         match = None
                     elif role != roles.get(match.role_name):
-                        echo(f"Service has changes that require re-creation: {service}, role")
+                        echo(f"{re_creation_message}, role is {role}, should be {roles.get(match.role_name)}")
                         match = None
                     elif placement_strategy != match.placement_strategy:
-                        echo(f"Service has changes that require re-creation: {service}, placement_strategy")
+                        echo(
+                            f"{re_creation_message}, placement_strategy is {placement_strategy}, "
+                            f"should be {match.placement_strategy}"
+                        )
                         match = None
                     elif placement_constraints != match.placement_constraints:
-                        echo(f"Service has changes that require re-creation: {service}, placement_constraints")
+                        echo(
+                            f"{re_creation_message}, placement_constraints is {placement_constraints}, "
+                            f"should be {match.placement_constraints}"
+                        )
                         match = None
                     elif port != match.container_port:
-                        echo(f"Service has changes that require re-creation: {service}, port")
+                        echo(f"{re_creation_message}, port is {port}, should be {match.container_port}")
                         match = None
                     elif target_group and target_group != target_groups_by_ports.get(
                         match.container_port,
                     ):
-                        echo(f"Service has changes that require re-creation: {service}, target_group")
+                        echo(
+                            f"{re_creation_message}, target group is {target_group}, "
+                            f"should be {target_groups_by_ports.get(match.container_port)}"
+                        )
                         match = None
                     else:
                         echo(f"Updating service: {service}")
