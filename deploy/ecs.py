@@ -100,7 +100,7 @@ class Task:
 class Service:
     name_prefix = ""
     default_cluster_name = None
-    default_role_name = None
+    default_role_name = "AWSServiceRoleForECS"  # Service-linked role
     default_min_percent = 100
     default_max_percent = 200
     default_placement_strategy = [
