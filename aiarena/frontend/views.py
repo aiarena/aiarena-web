@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import ValidationError
+from django.core.exceptions import EmptyResultSet, ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db import IntegrityError, connection, transaction
 from django.db.models import Case, Count, F, Prefetch, Q, Sum, Value, When
@@ -1004,11 +1004,12 @@ class Index(ListView):
 
                 relative_result = RelativeResult.with_row_number([x.bot.id for x in top10], comp)
 
-                # This check avoids a potential EmptyResultSet exception.
-                # See https://code.djangoproject.com/ticket/26061
-                if relative_result.count() > 0:
+                try:
                     sql, params = relative_result.query.sql_with_params()
-
+                except EmptyResultSet:
+                    # See https://code.djangoproject.com/ticket/26061
+                    pass
+                else:
                     with connection.cursor() as cursor:
                         cursor.execute(
                             """
