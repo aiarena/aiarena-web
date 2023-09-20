@@ -4,7 +4,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import ValidationError
+from django.core.exceptions import EmptyResultSet, ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db import IntegrityError, connection, transaction
 from django.db.models import Case, Count, F, Prefetch, Q, Sum, Value, When
@@ -993,6 +993,7 @@ class Index(ListView):
         competitions = competitions.order_by("-n_active_bots", "-interest", "-num_participants")
         context["competitions"] = []
 
+        elo_trend_n_matches = config.ELO_TREND_N_MATCHES
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
                 top10 = Ladders.get_competition_ranked_participants(comp, amount=10).prefetch_related(
@@ -1001,7 +1002,6 @@ class Index(ListView):
                     Prefetch(
                         "bot__matchparticipation_set",
                         queryset=MatchParticipation.objects.filter(
-                            elo_change__isnull=False,
                             match__requested_by__isnull=True,
                             match__round__competition=comp,
                         ),
@@ -1009,11 +1009,29 @@ class Index(ListView):
                     ),
                 )
                 # top 10 bots
-                for participant in top10:
-                    participant.trend = sum(
-                        participation.elo_change
-                        for participation in participant.bot.match_participations[: config.ELO_TREND_N_MATCHES]
-                    )
+
+                relative_result = RelativeResult.with_row_number([x.bot.id for x in top10], comp)
+
+                try:
+                    sql, params = relative_result.query.sql_with_params()
+                except EmptyResultSet:
+                    # See https://code.djangoproject.com/ticket/26061
+                    pass
+                else:
+                    with connection.cursor() as cursor:
+                        cursor.execute(
+                            """
+                            SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
+                            WHERE "row_number" <= %s
+                            GROUP BY bot_id
+                        """.format(
+                                sql
+                            ),
+                            [*params, elo_trend_n_matches],
+                        )
+                        rows = cursor.fetchall()
+                        for participant in top10:
+                            participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
 
                 context["competitions"].append(
                     {
