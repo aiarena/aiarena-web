@@ -339,8 +339,12 @@ def update_all_services(environment):
         clusters[c] = clusters.get(c) or physical_name(PROJECT_NAME, c)
         r = service.role_name
         if r:
-            assert r in resources, f"{r} not found in CloudFormation template"
-            roles[r] = roles.get(r) or physical_name(PROJECT_NAME, r)
+            aws_roles = ["AWSServiceRoleForECS"]  # They exist by default, not part of our stack
+            if r in aws_roles:
+                roles[r] = r
+            else:
+                assert r in resources, f"{r} not found in CloudFormation template"
+                roles[r] = roles.get(r) or physical_name(PROJECT_NAME, r)
 
     # Walk through all services in each cluster, and:
     #   - update services which can be updated;
