@@ -19,7 +19,11 @@ class Command(BaseCommand):
         parser.add_argument('--allcompetitions', action='store_true', help="Run this for all competition")
         parser.add_argument('--finalize', action='store_true',
                             help="Mark the processed competition's stats as finalized. "
-                                 "Only valid when specifying --competitionid.")
+                                 "Only valid when specifying --competitionid."
+                                 "WARNING: This is not protected by a lock or transaction. "
+                                 "Ensure no other stats are being generated at the same time for the same competition. "
+                                 "If the command fails partway through, you might need to revert the competition's "
+                                 "statistics_finalized flag in order to run this command again.")
 
     def handle(self, *args, **options):
         if options['allcompetitions']:
@@ -38,18 +42,22 @@ class Command(BaseCommand):
             # only process competitions this bot was present for.
             competitions = competitions.filter(participations__bot_id=bot_id)
 
-        self.stdout.write(f'looping   {len(competitions)} Competitions')
+        self.stdout.write(f'looping {len(competitions)} Competitions')
         for competition in competitions:
-            with transaction.atomic():
-                competition.lock_me()
-                if not competition.statistics_finalized:
-                    if finalize:
-                        competition.statistics_finalized = True
-                        competition.save()
-                    for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
-                        self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
-                        BotStatistics.recalculate_stats(sp)
-                else:
-                    self.stdout.write(f'WARNING: Skipping competition {competition.id} - stats already finalized.')
+            # technically a race condition can occur here if two processes are running this command at the same time
+            # for the same competition. This is unlikely to happen, and if it does, it's not a big deal, so we avoid
+            # the overhead of a transaction.
+            if not competition.statistics_finalized:
+                if finalize:
+                    competition.statistics_finalized = True
+                    competition.save()
+                self.recalculate_competition_stats(competition)
+            else:
+                self.stdout.write(f'WARNING: Skipping competition {competition.id} - stats already finalized.')
 
         self.stdout.write('Done')
+
+    def recalculate_competition_stats(self, competition: Competition):
+        for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
+            self.stdout.write(f'Generating current competition stats for bot {sp.bot_id}...')
+            BotStatistics.recalculate_stats(sp)

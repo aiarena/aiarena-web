@@ -5,7 +5,7 @@ import matplotlib.dates as mdates
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 import pandas as pd
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Max
 from django_pglocks import advisory_lock
 from pytz import utc
@@ -33,8 +33,7 @@ class BotStatistics:
     @staticmethod
     def recalculate_stats(sp: CompetitionParticipation):
         """This method entirely recalculates a bot's set of stats."""
-
-        with advisory_lock(f'stats_lock_{sp.id}') as acquired:
+        with transaction.atomic(), advisory_lock(f'stats_lock_{sp.id}') as acquired:
             if not acquired:
                 raise Exception('Could not acquire lock on bot statistics for competition participation '
                                 + str(sp.id))
