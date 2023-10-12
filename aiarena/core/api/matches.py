@@ -296,9 +296,10 @@ class Matches:
                     WHERE 
                         competition_id=%s 
                     AND finished IS NULL 
-                    AND cm.started IS NULL 
-                    ORDER BY NUMBER
-                ) for update""", (competition.id,))
+                    AND cm.started IS NULL
+                )  
+                    ORDER BY number asc
+                    for update""", (competition.id,))
 
         for round in rounds:
             match = Matches._attempt_to_start_a_ladder_match(requesting_ac, round)
