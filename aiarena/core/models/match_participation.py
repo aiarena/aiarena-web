@@ -33,7 +33,7 @@ class MatchParticipation(models.Model, LockableModelMixin):
 
     )
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    participant_number = models.PositiveSmallIntegerField()
+    participant_number = models.PositiveSmallIntegerField(db_index=True)
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT)
     starting_elo = models.SmallIntegerField(null=True)
     """The bot's ELO at the time the match started
