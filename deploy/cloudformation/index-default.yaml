@@ -208,7 +208,7 @@ Resources:
           FromPort: 6379
           ToPort: 6379
           SourceSecurityGroupId:
-            Ref: ContainerInstanceSecurityGroup
+            Ref: ECSTaskSecurityGroup
       VpcId:
         Ref: VPC
 
