@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0072_remove_override_storage_from_filefields'),
+        ("core", "0072_remove_override_storage_from_filefields"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='matchparticipation',
-            name='participant_number',
+            model_name="matchparticipation",
+            name="participant_number",
             field=models.PositiveSmallIntegerField(db_index=True),
         ),
         migrations.AlterField(
-            model_name='news',
-            name='created',
+            model_name="news",
+            name="created",
             field=models.DateTimeField(auto_now_add=True, db_index=True),
         ),
     ]
