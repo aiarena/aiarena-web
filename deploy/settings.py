@@ -157,7 +157,6 @@ SERVICES = [
         task=CeleryWorkerTask(
             family="celeryWorker-Default",
             command="-P prefork -Q default",
-            memory=448,
         ),
     ),
     WorkerService(
@@ -165,7 +164,6 @@ SERVICES = [
         task=CeleryTask(
             family="celeryBeat",
             command="beat --loglevel=INFO -s /tmp/celerybeat-schedule --pidfile=",
-            memory=256,
         ),
     ),
 ]
