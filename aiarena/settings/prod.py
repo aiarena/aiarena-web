@@ -40,6 +40,7 @@ AWS_QUERYSTRING_EXPIRE = 60 * 60
 
 # Sentry configuration
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
+BUILD_NUMBER = os.environ.get("BUILD_NUMBER")
 if SENTRY_DSN:
     sentry_kwargs = {
         "dsn": SENTRY_DSN,  # noqa: F405
@@ -48,7 +49,7 @@ if SENTRY_DSN:
             DjangoIntegration(),
             RedisIntegration(),
         ],
-        "release": os.environ.get("BUILD_NUMBER"),
+        "release": BUILD_NUMBER,
         "send_default_pii": True,
         # https://docs.sentry.io/performance/distributed-tracing/#python
         # https://ivelum.slack.com/archives/C0PT3267R/p1675054580786709

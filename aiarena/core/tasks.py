@@ -1,6 +1,20 @@
+from django.conf import settings
 from django.core import management
 
+import sentry_sdk
+from celery import signals
+from sentry_sdk.integrations.celery import CeleryIntegration
+
 from aiarena.celery import app
+
+
+@signals.celeryd_init.connect
+def init_sentry(**kwargs):
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        integrations=[CeleryIntegration(monitor_beat_tasks=True)],
+        release=settings.BUILD_NUMBER,
+    )
 
 
 @app.task(ignore_result=True)
