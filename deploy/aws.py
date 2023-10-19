@@ -255,6 +255,17 @@ def db_endpoint(stack_name, logical_id):
     return db_instance["DBInstances"][0]["Endpoint"]["Address"]
 
 
+def cache_cluster_nodes(logical_id):
+    cloudformation = cloudformation_load()
+    cl_id = cloudformation["Resources"][logical_id]["Properties"]["ClusterName"]
+    cluster = cli(
+        "elasticache describe-cache-clusters --show-cache-node-info " "--cache-cluster-id %s" % cl_id,
+    )[
+        "CacheClusters"
+    ][0]
+    return [n["Endpoint"]["Address"] for n in cluster["CacheNodes"]]
+
+
 def replication_group_nodes(logical_id):
     cloudformation = cloudformation_load()
     rg_id = cloudformation["Resources"][logical_id]["Properties"]["ReplicationGroupId"]
@@ -487,7 +498,7 @@ def update_all_services(environment):
         if service.placement_constraints:
             placement_constraints = "--placement-constraints " + " ".join(
                 [
-                    f'"type={p["type"]}' f'{"expression" in p and ",expression="+p["expression"] or ""}"'
+                    f'"type={p["type"]}' f'{"expression" in p and ",expression=" + p["expression"] or ""}"'
                     for p in service.placement_constraints
                 ]
             )

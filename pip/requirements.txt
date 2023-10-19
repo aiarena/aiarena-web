@@ -1,6 +1,7 @@
 Django==3.2.16
 Markdown==3.1
 boto3==1.28.47
+celery==5.2.7  # https://docs.celeryproject.org/en/latest/changelog.html
 confusable-homoglyphs==3.2.0
 django-appconf==1.0.5
 django-avatar==7.1.1
@@ -22,7 +23,7 @@ django-tables2==2.3.4
 djangorestframework==3.14.0
 docutils==0.20
 drf-yasg==1.21.5
-matplotlib==3.3.2
+matplotlib==3.8.0
 numpy==1.25.2
 pandas==1.5.3
 pinax-theme-bootstrap==8.0.1

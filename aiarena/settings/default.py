@@ -42,7 +42,6 @@ DATABASES = {
     },
 }
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -517,3 +516,46 @@ MATCH_TAG_PER_MATCH_LIMIT = 32
 
 # If a primary field isn't specified on models, add an auto ID field. This affects all loaded modules.
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+
+def str_to_bool(s):
+    return s.lower() in ("yes", "y", "true", "1")
+
+
+# Redis
+REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
+REDIS_USE_SSL = str_to_bool(os.environ.get("REDIS_USE_SSL", "false"))
+REDIS_CELERY_DB = 0
+
+
+def redis_url(db):
+    if REDIS_USE_SSL:
+        schema = "rediss"
+        ssl_reqs = "?ssl_cert_reqs=required"
+    else:
+        schema = "redis"
+        ssl_reqs = ""
+
+    if not REDIS_PASSWORD:
+        password = ""
+    else:
+        password = f":{REDIS_PASSWORD}@"
+
+    return f"{schema}://{password}{REDIS_HOST}:{REDIS_PORT}/{db}{ssl_reqs}"
+
+
+# Celery
+CELERY_BROKER_URL = redis_url(REDIS_CELERY_DB)
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+    "visibility_timeout": 3600,  # in seconds
+}
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ACCEPT_CONTENT = ["pickle"]
+CELERY_RESULT_SERIALIZER = "pickle"
+CELERY_TASK_SERIALIZER = "pickle"
+CELERY_TASK_REJECT_ON_WORKER_LOST = False
+CELERY_TASK_ACKS_LATE = False
+CELERY_TASK_DEFAULT_QUEUE = "default"

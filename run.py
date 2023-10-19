@@ -86,6 +86,11 @@ def cloudformation():
 
 
 def deploy_environment():
+    try:
+        REDIS_CACHE_DB = int(os.environ.get("BUILD_NUMBER", "")) % 5 + 5
+    except ValueError:
+        REDIS_CACHE_DB = 5
+
     build_number = os.environ.get("BUILD_NUMBER", "")
     media_bucket = aws.physical_name(PROJECT_NAME, "mediaTestBucket")
     media_domain = aws.s3_domain(PROJECT_NAME, "mediaTestBucket")
@@ -95,6 +100,8 @@ def deploy_environment():
         "POSTGRES_HOST": aws.db_endpoint(PROJECT_NAME, "MainDB"),
         "POSTGRES_DATABASE": DB_NAME,
         "POSTGRES_USER": PRODUCTION_DB_USER,
+        "REDIS_HOST": aws.cache_cluster_nodes("RedisCluster")[0],
+        "REDIS_CACHE_DB": "%s" % REDIS_CACHE_DB,
         "MAINTENANCE_MODE": str(MAINTENANCE_MODE),
         "DJANGO_ALLOW_ASYNC_UNSAFE": "1",
         "MEDIA_URL": f"https://{media_domain}/",

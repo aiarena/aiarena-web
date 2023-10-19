@@ -66,6 +66,7 @@ class WebService(BaseService):
 class WorkerService(BaseService):
     default_min_percent = 0
     default_max_percent = 150
+    default_role_name = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -114,6 +115,28 @@ class WebTask(BaseTask):
         ]
 
 
+class CeleryTask(BaseTask):
+    command_prefix = "/bin/bash /code/celery.sh -A perceptive_app "
+    default_memory = 128
+    default_cpu = 32
+
+    def code_container(self, *args, **kwargs):
+        config = super().code_container(*args, **kwargs)
+        config["logConfiguration"] = {
+            "logDriver": "json-file",
+            "options": {
+                "max-size": "100m",
+                "max-file": "3",
+            },
+        }
+        config["stopTimeout"] = 120
+        return config
+
+
+class CeleryWorkerTask(CeleryTask):
+    command_prefix = "/bin/bash /code/worker.sh -A perceptive_app worker -E -l INFO "
+
+
 SERVICES = [
     WebService(
         name="webService",
@@ -127,5 +150,22 @@ SERVICES = [
         container_name=UWSGI_CONTAINER_NAME,
         health_check_grace_sec=120,
         health_check_failed_count=2,
+    ),
+    WorkerService(
+        name="celeryWorker-Default",
+        count=2,
+        task=CeleryWorkerTask(
+            family="celeryWorker-Default",
+            command="-P prefork -Q default",
+            memory=448,
+        ),
+    ),
+    WorkerService(
+        name="celeryBeat",
+        task=CeleryTask(
+            family="celeryBeat",
+            command="beat --loglevel=INFO -s /tmp/celerybeat-schedule --pidfile=",
+            memory=256,
+        ),
     ),
 ]
