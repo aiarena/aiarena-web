@@ -52,6 +52,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.relative_result import RelativeResult
+from aiarena.core.tasks import celery_exception_test
 from aiarena.core.utils import parse_tags
 from aiarena.frontend.templatetags.core_filters import format_elo_change, result_color_class, step_time_color
 from aiarena.frontend.utils import restrict_page_range
@@ -1414,3 +1415,8 @@ class RequestMatch(LoginRequiredMixin, FormView):
         else:
             messages.error(self.request, "Sorry. Requested matches are currently disabled.")
             return self.render_to_response(self.get_context_data(form=form))
+
+
+def http_500(request):
+    celery_exception_test.delay()
+    raise Exception("Testing HTTP 500")
