@@ -191,6 +191,46 @@ Resources:
       VpcId:
         Ref: VPC
 
+  RedisSubnetGroup:
+    Type: AWS::ElastiCache::SubnetGroup
+    Properties:
+      Description: Redis Subnet Group
+      SubnetIds:
+        - Ref: PublicSubnetZoneA
+        - Ref: PublicSubnetZoneB
+
+  RedisEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open Redis for access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 6379
+          ToPort: 6379
+          SourceSecurityGroupId:
+            Ref: ContainerInstanceSecurityGroup
+      VpcId:
+        Ref: VPC
+
+  RedisCluster:
+    Type: AWS::ElastiCache::CacheCluster
+    Properties:
+      AZMode: single-az
+      CacheNodeType:
+        Ref: CacheNodeType
+      CacheSubnetGroupName:
+        Ref: RedisSubnetGroup
+      ClusterName: !var project_name
+      Engine: redis
+      EngineVersion: 6.x
+      NumCacheNodes: 1
+      Port: 6379
+      PreferredAvailabilityZone: eu-central-1a
+      VpcSecurityGroupIds:
+        - Fn::GetAtt:
+            - RedisEC2SecurityGroup
+            - GroupId
+
   DBEC2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -321,10 +361,10 @@ Resources:
         - Name: containerInsights
           Value: !var container_insights
       Configuration:
-         ExecuteCommandConfiguration:
-            Logging: NONE
-            KmsKeyId:
-              Ref: MasterKey
+        ExecuteCommandConfiguration:
+          Logging: NONE
+          KmsKeyId:
+            Ref: MasterKey
 
   ECSServiceRole:
     Type: AWS::IAM::Role
@@ -519,12 +559,12 @@ Resources:
               StringLike:
                 token.actions.githubusercontent.com:sub:
                   - Fn::Join:
-                    - ''
-                    - - 'repo:'
-                      - Ref: GitHubOrg
-                      - "/"
-                      - Ref: RepositoryName
-                      - ":*"
+                      - ''
+                      - - 'repo:'
+                        - Ref: GitHubOrg
+                        - "/"
+                        - Ref: RepositoryName
+                        - ":*"
     DependsOn: GithubOidc
 
   GithubOidc:
@@ -537,6 +577,15 @@ Resources:
         - ffffffffffffffffffffffffffffffffffffffff
 
 Parameters:
+  CacheNodeType:
+    Description: Cache node type
+    Type: String
+    Default: cache.t3.micro
+    AllowedValues:
+      - cache.t3.micro
+      - cache.t3.small
+      - cache.t3.medium
+    ConstraintDescription: must be a valid cache instance type.
 
   DBClass:
     Description: DB instance type
