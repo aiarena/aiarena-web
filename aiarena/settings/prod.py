@@ -1,5 +1,10 @@
 import os
 
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+
 from .default import *  # noqa: F403
 
 
@@ -32,3 +37,22 @@ AWS_PRIVATE_S3_SIGNATURE_VERSION = "s3v4"
 AWS_PRIVATE_S3_ENCRYPTION = True
 AWS_QUERYSTRING_AUTH = True
 AWS_QUERYSTRING_EXPIRE = 60 * 60
+
+# Sentry configuration
+SENTRY_DSN = os.environ.get("SENTRY_DSN")
+if SENTRY_DSN:
+    sentry_kwargs = {
+        "dsn": SENTRY_DSN,  # noqa: F405
+        "integrations": [
+            CeleryIntegration(),
+            DjangoIntegration(),
+            RedisIntegration(),
+        ],
+        "release": os.environ.get("BUILD_NUMBER"),
+        "send_default_pii": True,
+        # https://docs.sentry.io/performance/distributed-tracing/#python
+        # https://ivelum.slack.com/archives/C0PT3267R/p1675054580786709
+        "traces_sample_rate": 0.0,
+        "attach_stacktrace": True,
+    }
+    sentry_sdk.init(**sentry_kwargs)

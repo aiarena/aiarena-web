@@ -29,6 +29,7 @@ pandas==1.5.3
 pinax-theme-bootstrap==8.0.1
 psycopg2-binary==2.9.5
 pytz==2022.7.1
+sentry-sdk[django]==1.32.0
 six==1.16.0
 wheel==0.38.4
 wiki==0.7.5
