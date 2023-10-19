@@ -566,29 +566,30 @@ CELERY_TASK_SERIALIZER = "pickle"
 CELERY_TASK_REJECT_ON_WORKER_LOST = False
 CELERY_TASK_ACKS_LATE = False
 CELERY_TASK_DEFAULT_QUEUE = "default"
-CELERY_BEAT_SCHEDULE = {
-    "clean_up_replays": {
-        "task": "core.tasks.clean_up_replays",
-        "schedule": crontab(minute="*/30"),  # */30 * * * *
-    },
-    "clean_up_match_log_files": {
-        "task": "core.tasks.clean_up_match_log_files",
-        "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
-    },
-    "clean_up_arena_client_log_files": {
-        "task": "core.tasks.clean_up_arena_client_log_files",
-        "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
-    },
-    "generate_stats": {
-        "task": "core.tasks.generate_stats",
-        "schedule": crontab(minute="*/60"),  # */60 * * * *
-    },
-    "refresh_patreon_tiers": {
-        "task": "core.tasks.refresh_patreon_tiers",
-        "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
-    },
-    "timeout_overtime_matches": {
-        "task": "core.tasks.timeout_overtime_matches",
-        "schedule": crontab(minute="*/30"),  # */30 * * * *
-    },
-}
+if crontab:
+    CELERY_BEAT_SCHEDULE = {
+        "clean_up_replays": {
+            "task": "core.tasks.clean_up_replays",
+            "schedule": crontab(minute="*/30"),  # */30 * * * *
+        },
+        "clean_up_match_log_files": {
+            "task": "core.tasks.clean_up_match_log_files",
+            "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
+        },
+        "clean_up_arena_client_log_files": {
+            "task": "core.tasks.clean_up_arena_client_log_files",
+            "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
+        },
+        "generate_stats": {
+            "task": "core.tasks.generate_stats",
+            "schedule": crontab(minute="*/60"),  # */60 * * * *
+        },
+        "refresh_patreon_tiers": {
+            "task": "core.tasks.refresh_patreon_tiers",
+            "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
+        },
+        "timeout_overtime_matches": {
+            "task": "core.tasks.timeout_overtime_matches",
+            "schedule": crontab(minute="*/30"),  # */30 * * * *
+        },
+    }
