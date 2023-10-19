@@ -109,7 +109,7 @@ class WebTask(BaseTask):
                 env,
                 ports,
                 name=UWSGI_CONTAINER_NAME,
-                command="/app/aiarena/unit.sh",
+                command="unitd --no-daemon --control unix:/var/run/control.unit.sock",
                 entrypoint="/usr/local/bin/docker-entrypoint.sh",
             ),
         ]
