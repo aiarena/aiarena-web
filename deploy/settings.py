@@ -67,6 +67,7 @@ class WorkerService(BaseService):
     default_min_percent = 0
     default_max_percent = 150
     default_role_name = None
+    add_network_configuration = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
