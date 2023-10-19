@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-# Helper to run celery worker using /code as a current working directory
+# Helper to run celery worker using /app as a current working directory
 random_suffix=$(</dev/urandom tr -cd 'a-f0-9' | head -c 8)
 queue=${!#//,/-}
 
@@ -13,5 +13,5 @@ export CONTAINER_ID
 celery="/usr/local/bin/celery-${random_suffix}"
 ln -s /usr/local/bin/celery ${celery}
 
-cd /code || exit 1
+cd /app || exit 1
 exec ${celery} $* -n ${CELERY_WORKER_NAME}
