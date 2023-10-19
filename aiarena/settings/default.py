@@ -12,7 +12,12 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 from datetime import timedelta
 
-from celery.schedules import crontab
+
+# celery isn't available if we're currently installing dependencies
+try:
+    from celery.schedules import crontab
+except ImportError:
+    crontab = None
 
 
 # Temp workaround for discord-bind error: Warning: Scope has changed from "identify" to "guilds.join identify email".
