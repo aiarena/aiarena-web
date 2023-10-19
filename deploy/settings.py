@@ -37,7 +37,6 @@ AWS_ELB_HEALTH_CHECK_ENDPOINT = "/accounts/login/"
 PRIVATE_REGISTRY_URL = f"{AWS_ACCOUNT_ID}.dkr.ecr.{AWS_REGION}.amazonaws.com"
 
 # Change this in Actions variables
-# https://github.com/Perceptive-Care-Systems/app/settings/variables/actions
 MAINTENANCE_MODE = str_to_bool(os.environ.get("MAINTENANCE_MODE", "False"))
 
 # Enable "Container Insights" for the ECS cluster.
@@ -110,14 +109,14 @@ class WebTask(BaseTask):
                 env,
                 ports,
                 name=UWSGI_CONTAINER_NAME,
-                command="unitd --no-daemon --control unix:/var/run/control.unit.sock",
+                command="/app/aiarena/unit.sh",
                 entrypoint="/usr/local/bin/docker-entrypoint.sh",
             ),
         ]
 
 
 class CeleryTask(BaseTask):
-    command_prefix = "/bin/bash /code/celery.sh -A perceptive_app "
+    command_prefix = "/bin/bash /app/aiarena/celery.sh -A aiarena "
     default_cpu = "256"
     default_memory = "512"
 
@@ -137,7 +136,7 @@ class CeleryTask(BaseTask):
 
 
 class CeleryWorkerTask(CeleryTask):
-    command_prefix = "/bin/bash /code/worker.sh -A perceptive_app worker -E -l INFO "
+    command_prefix = "/bin/bash /app/aiarena/worker.sh -A aiarena worker -E -l INFO "
 
 
 SERVICES = [
