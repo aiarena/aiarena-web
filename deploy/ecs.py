@@ -1,6 +1,3 @@
-import re
-
-
 class Task:
     default_requires_compatibilities = ["FARGATE"]
     family_prefix = ""
@@ -20,7 +17,6 @@ class Task:
         cpu=None,
         memory=None,
         volumes=None,
-        hostname=None,
         requires_compatibilities=None,
     ):
         self.family = self.family_prefix + family
@@ -32,7 +28,6 @@ class Task:
         self.memory = memory or self.default_memory
         self.volumes = volumes
         self.command_chunk = command
-        self.hostname = hostname
         self.requires_compatibilities = requires_compatibilities or self.default_requires_compatibilities
 
     def code_container(self, env, ports, name="code", command=None, hostname=None, entrypoint=None):
@@ -55,16 +50,6 @@ class Task:
 
         if entrypoint:
             task_config["entryPoint"] = entrypoint.split(" ")
-
-        if self.hostname:
-            hostname = self.hostname
-        elif self.command_chunk:
-            regex = re.search(r"[-A-Za-z0-9_]+$", self.command_chunk.split(" ")[0])
-            if regex:
-                hostname = regex.group(0).replace("_", "-")
-
-        if hostname:
-            task_config["hostname"] = hostname
 
         return task_config
 
