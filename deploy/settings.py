@@ -123,10 +123,12 @@ class CeleryTask(BaseTask):
     def code_container(self, *args, **kwargs):
         config = super().code_container(*args, **kwargs)
         config["logConfiguration"] = {
-            "logDriver": "json-file",
+            "logDriver": "awslogs",
             "options": {
-                "max-size": "100m",
-                "max-file": "3",
+                "awslogs-create-group": "true",
+                "awslogs-group": f"awslogs-{self.family}",
+                "awslogs-region": AWS_REGION,
+                "awslogs-stream-prefix": f"awslogs-{self.family}",
             },
         }
         config["stopTimeout"] = 120
