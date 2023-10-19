@@ -117,8 +117,8 @@ class WebTask(BaseTask):
 
 class CeleryTask(BaseTask):
     command_prefix = "/bin/bash /code/celery.sh -A perceptive_app "
-    default_memory = 128
-    default_cpu = 32
+    default_cpu = "256"
+    default_memory = "512"
 
     def code_container(self, *args, **kwargs):
         config = super().code_container(*args, **kwargs)
