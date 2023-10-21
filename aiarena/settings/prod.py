@@ -28,6 +28,19 @@ AWS_PRIVATE_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+if (
+    not AWS_ACCESS_KEY_ID
+    or not AWS_SECRET_ACCESS_KEY
+    and (credentials_endpoint := os.environ.get("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"))
+):
+    import requests
+
+    # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+    credentials = requests.get(f"169.254.170.2{credentials_endpoint}").json()
+    AWS_ACCESS_KEY_ID = credentials["AccessKeyId"]
+    AWS_SECRET_ACCESS_KEY = credentials["SecretAccessKey"]
+
+
 AWS_S3_REGION_NAME = "eu-central-1"
 AWS_S3_OBJECT_PARAMETERS = {"ACL": "private"}
 AWS_S3_ADDRESSING_STYLE = "virtual"
