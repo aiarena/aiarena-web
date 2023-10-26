@@ -49,6 +49,7 @@ def run(
     cmd,
     raise_on_error=True,
     capture_stdout=False,
+    capture_stderr=False,
     parse_json=False,
     print_cmd=False,
     **kwargs,
@@ -58,6 +59,8 @@ def run(
     """
     if capture_stdout:
         kwargs["stdout"] = sarge.Capture()
+    if capture_stderr:
+        kwargs["stderr"] = sarge.Capture()
     if print_cmd:
         echo(cmd)
     result = sarge.run(cmd, **kwargs)
@@ -69,7 +72,12 @@ def run(
         raise RuntimeError(msg)
     result.json = None
     if result.stdout:
-        result.stdout_lines = result.stdout.read().decode().split("\n")
+        output = result.stdout.read()
+        try:
+            decoded = output.decode()
+        except UnicodeDecodeError:
+            raise RuntimeError(f"Non unicode chars in output: {output}")
+        result.stdout_lines = decoded.split("\n")
         if result.stdout_lines[-1] == "":
             result.stdout_lines = result.stdout_lines[:-1]
         if parse_json:

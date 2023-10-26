@@ -2,8 +2,10 @@
 import json
 import os
 import sys
+from shlex import quote
 
 import click
+import questionary
 import yaml
 
 from deploy import aws, docker
@@ -182,50 +184,70 @@ def monitor_ecs():
     )
 
 
-def _find_instance_id(server_number: int) -> str | None:
-    logical_id = "ECSCluster"
-    servers = aws.cluster_ec2_instances(PROJECT_NAME, logical_id)
-    if server_number < 0 or server_number > len(servers) - 1:
-        echo(f"Wrong server number, should be between 0-{len(servers) - 1}")
-        return None
-    return servers[server_number]["InstanceId"]
+@cli.command(help="Spin up a new ECS task, and connect to it")
+@click.option("--infinite", is_flag=True, help="Create a task without a 1-day time limit")
+@click.option("--cpu")
+@click.option("--memory")
+def production_one_off_task(infinite, cpu, memory):
+    task_definitions = aws.task_definitions()
+    task_definition_id = questionary.select("Select the base task definition & revision", task_definitions).unsafe_ask()
 
+    container_names = aws.task_definition_container_names(task_definition_id)
+    if len(container_names) > 1:
+        container_name = questionary.select(
+            "This task definition has multiple containers, pick the one to connect to",
+            container_names,
+        ).ask()
+    else:
+        container_name = container_names[0]
 
-@cli.command(help="SSH to production web server")
-@click.argument("server-number", type=int, default=-1)
-@click.option("--instance-id", default="")
-def production_ssh(server_number, instance_id):
-    if server_number == -1 and not instance_id:
-        click.echo("Please provide either server_number or instance_id")
-        return
+    clusters = aws.all_clusters()
+    cluster_id = questionary.select("Choose the ECS cluster", clusters).unsafe_ask()
 
-    instance_id = instance_id or _find_instance_id(server_number)
-    if not instance_id:
-        return
+    cpu = aws.clean_fargate_cpu(cpu)
+    memory = aws.clean_fargate_memory(cpu, memory)
 
-    echo(f"Connecting to instance_id = {instance_id}")
-    aws.cli(
-        "ssm start-session"
-        f" --target {instance_id}"
-        ' --document-name AWS-StartInteractiveCommand --parameters command="bash -l"',
-        parse_output=False,
+    command = ["tail", "-f", "/dev/null"] if infinite else ["sleep", str(24 * 60 * 60)]
+    overrides = {
+        "containerOverrides": [
+            {
+                "name": container_name,
+                "command": command,
+            },
+        ],
+        "cpu": cpu,
+        "memory": memory,
+    }
+
+    echo("Running ECS task...")
+    result = aws.cli(
+        f"ecs run-task --cluster {cluster_id}"
+        " --launch-type FARGATE"
+        " --enable-execute-command"
+        f" --task-definition {task_definition_id}"
+        f" --overrides {quote(json.dumps(overrides))}"
+        f"--network-configuration '{json.dumps(aws.get_network_configuration())}'"
     )
+    task_id = result["tasks"][0]["taskArn"].split("/")[-1]
+
+    aws.connect_to_ecs_task(cluster_id, task_id)
+
+    aws.cli(f"ecs stop-task --cluster {cluster_id} --task {task_id}", parse_output=True)
+    echo(f"Task {task_id} stopped")
 
 
-@cli.command(help="Connect to an ECS task")
-@click.argument("task-id", type=str)
-def ecs_task_ssh(task_id):
-    cluster_id = aws.physical_name(PROJECT_NAME, "ECSCluster")
+@cli.command(help="Get a secure connection to a running ECS task")
+@click.option("--task-id")
+def production_attach_to_task(task_id):
+    clusters = aws.all_clusters()
+    cluster_id = questionary.select("First, choose an ECS cluster", clusters).unsafe_ask()
+    if not task_id:
+        services = aws.cluster_services(cluster_id)
+        service_id = questionary.select("Then, pick the service", services).unsafe_ask()
+        tasks = aws.service_tasks(cluster_id, service_id)
+        task_id = questionary.select("Finally, select the task ID", tasks).unsafe_ask()
 
-    echo(f"Connecting to task_id = {task_id}")
-    aws.cli(
-        "ecs execute-command"
-        f" --cluster {cluster_id}"
-        f" --task {task_id}"
-        f' --command "/bin/bash"'
-        " --interactive",
-        parse_output=False,
-    )
+    aws.connect_to_ecs_task(cluster_id, task_id)
 
 
 @cli.command(help="Build dev image")

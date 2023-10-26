@@ -8,6 +8,7 @@ from functools import wraps
 from multiprocessing.pool import ThreadPool
 from shlex import quote
 
+import questionary
 from aws_encryption_sdk import (
     DiscoveryAwsKmsMasterKeyProvider,
     EncryptionSDKClient,
@@ -100,12 +101,14 @@ def aws_cmd(cmd, region):
     return f"{command} {cmd}"
 
 
-def cli(cmd, region=None, parse_output=True, **kwargs):
+def cli(cmd, region=None, parse_output=True, capture_stderr=False, **kwargs):
     """
     Shortcut for aws cli.
     """
     if parse_output:
         kwargs["capture_stdout"] = True
+    if capture_stderr:
+        kwargs["capture_stderr"] = True
     result = run(aws_cmd(cmd, region), **kwargs)
     if parse_output:
         result = json.loads("".join(result.stdout_lines))
@@ -216,6 +219,117 @@ def resource_details(stack_name, logical_id):
 def physical_name(stack_name, logical_id):
     res_id = resource_details(stack_name, logical_id)["PhysicalResourceId"]
     return res_id.split("/")[-1]
+
+
+def task_definitions():
+    arn_list = cli("ecs list-task-definitions")["taskDefinitionArns"]
+    return [task_definition_arn.split("/")[-1] for task_definition_arn in arn_list]
+
+
+def task_definition_container_names(task_definition):
+    container_definitions = cli(f"ecs describe-task-definition --task-definition {task_definition}")["taskDefinition"][
+        "containerDefinitions"
+    ]
+    return [container["name"] for container in container_definitions]
+
+
+def all_clusters():
+    arn_list = cli("ecs list-clusters")["clusterArns"]
+    return [cluster_arn.split("/")[-1] for cluster_arn in arn_list]
+
+
+def cluster_services(cluster):
+    arn_list = cli(f"ecs list-services --cluster {cluster}")["serviceArns"]
+    return [service_arn.split("/")[-1] for service_arn in arn_list]
+
+
+def service_tasks(cluster, service):
+    arn_list = cli(f"ecs list-tasks --cluster {cluster} --service-name {service}")["taskArns"]
+    return [task_arn.split("/")[-1] for task_arn in arn_list]
+
+
+def connect_to_ecs_task(cluster_id, task_id):
+    while True:
+        tasks = cli(f"ecs describe-tasks --cluster {cluster_id} --tasks {task_id}")["tasks"]
+
+        task_last_status = tasks[0]["lastStatus"]
+        if task_last_status == "RUNNING":
+            break
+
+        echo(f"Task {task_id} has status {task_last_status}, waiting 10s for RUNNING status ")
+        time.sleep(10)
+
+    echo(f"Connecting to task_id = {task_id}")
+    attempts = 10
+    while attempts > 0:
+        try:
+            cli(
+                "ecs execute-command"
+                f" --cluster {cluster_id}"
+                f" --task {task_id}"
+                f' --command "/bin/bash"'
+                " --interactive",
+                parse_output=False,
+                capture_stderr=True,
+            )
+        except RuntimeError:
+            echo("Execute agent not running yet, re-trying in 10s")
+            time.sleep(10)
+            attempts -= 1
+        else:
+            break
+    else:
+        raise RuntimeError("Execute agent wasn't available after 10 attempts, giving up :(")
+
+
+def clean_fargate_cpu(value=None):
+    valid = [
+        "256",
+        "512",
+        "1024",
+        "2048",
+        "4096",
+        "8192",
+        "16384",
+    ]
+    if value in valid:
+        return value
+    elif value:
+        echo(f"{value} is not a valid CPU value for Fargate")
+    return questionary.select("Pick the CPU value", valid).unsafe_ask()
+
+
+def clean_fargate_memory(cpu_value, value=None):
+    # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-cpu-memory-error.html
+    by_cpu = {
+        "256": [0.5, 1, 2],
+        "512": list(range(1, 4 + 1)),
+        "1024": list(range(2, 8 + 1)),
+        "2048": list(range(4, 16 + 1)),
+        "4096": list(range(8, 30 + 1)),
+        "8192": list(range(16, 60 + 1, 4)),
+        "16384": list(range(32, 120 + 1, 8)),
+    }
+    valid = [str(gib * 1024) for gib in by_cpu[cpu_value]]
+
+    if value in valid:
+        return value
+    elif value:
+        echo(f"{value} is not a valid memory value for a Fargate instance with {cpu_value} CPU")
+    return questionary.select("Pick the memory value", valid).unsafe_ask()
+
+
+def get_network_configuration():
+    return {
+        "awsvpcConfiguration": {
+            "subnets": [
+                physical_name(PROJECT_NAME, "PublicSubnetZoneA"),
+                physical_name(PROJECT_NAME, "PublicSubnetZoneB"),
+            ],
+            "securityGroups": [physical_name(PROJECT_NAME, "ECSTaskSecurityGroup")],
+            "assignPublicIp": "ENABLED",
+        }
+    }
 
 
 def cluster_ec2_instances(stack_name, logical_id):
@@ -504,17 +618,7 @@ def update_all_services(environment):
             )
         network_configuration = ""
         if service.add_network_configuration:
-            network_configuration = {
-                "awsvpcConfiguration": {
-                    "subnets": [
-                        physical_name(PROJECT_NAME, "PublicSubnetZoneA"),
-                        physical_name(PROJECT_NAME, "PublicSubnetZoneB"),
-                    ],
-                    "securityGroups": [physical_name(PROJECT_NAME, "ECSTaskSecurityGroup")],
-                    "assignPublicIp": "ENABLED",
-                }
-            }
-            network_configuration = f"--network-configuration '{json.dumps(network_configuration)}'"
+            network_configuration = f"--network-configuration '{json.dumps(get_network_configuration())}'"
 
         cli(
             f"ecs create-service --service-name {service.name} "
