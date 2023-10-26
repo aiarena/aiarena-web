@@ -55,8 +55,7 @@ if SENTRY_DSN:
         "release": BUILD_NUMBER,
         "send_default_pii": True,
         # https://docs.sentry.io/performance/distributed-tracing/#python
-        # https://ivelum.slack.com/archives/C0PT3267R/p1675054580786709
-        "traces_sample_rate": 0.0,
+        "traces_sample_rate": 1.0,
         "attach_stacktrace": True,
     }
     sentry_sdk.init(**sentry_kwargs)
