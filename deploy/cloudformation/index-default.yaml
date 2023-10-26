@@ -572,6 +572,13 @@ Resources:
                   - iam:ListRoles
                   - iam:PassRole
                 Resource: "*"
+        - PolicyName: read-secrets
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: "*"
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow
