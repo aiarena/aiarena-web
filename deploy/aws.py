@@ -9,17 +9,9 @@ from multiprocessing.pool import ThreadPool
 from shlex import quote
 
 import questionary
-from aws_encryption_sdk import (
-    DiscoveryAwsKmsMasterKeyProvider,
-    EncryptionSDKClient,
-    StrictAwsKmsMasterKeyProvider,
-)
-from aws_encryption_sdk.key_providers.kms import DiscoveryFilter
-from botocore.session import Session
 
 from . import docker
 from .settings import (
-    AWS_ACCOUNT_ID,
     AWS_ELB_HEALTH_CHECK_ENDPOINT,
     AWS_REGION,
     CONTAINER_INSIGHTS,
@@ -28,7 +20,6 @@ from .settings import (
     PRODUCTION_DB_ROOT_USER,
     PROJECT_NAME,
     PROJECT_PATH,
-    SECRETS_FOLDER,
     SERVICES,
     UWSGI_CONTAINER_NAME,
     WEB_PORT,
@@ -37,58 +28,30 @@ from .utils import echo, run
 from .yaml_template import load_yaml_template
 
 
-SECRETS_PATH = PROJECT_PATH / SECRETS_FOLDER
+def get_secrets(secret_id="production-env"):
+    secret_string = cli(f"secretsmanager get-secret-value --secret-id {secret_id}")["SecretString"]
+    return json.loads(secret_string)
 
 
-def kms_master_key_provider(*, for_decrypt):
-    access_key = os.environ.get("AWS_ACCESS_KEY_ID")
-    secret_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    session_token = os.environ.get("AWS_SESSION_TOKEN")
-    if access_key:
-        botocore_session = Session()
-        botocore_session.set_credentials(access_key, secret_key, session_token)
-    else:
-        profile = os.environ.get("AWS_PROFILE") or PROJECT_NAME
-        botocore_session = Session(profile=profile)
-    if for_decrypt:
-        provider = DiscoveryAwsKmsMasterKeyProvider(
-            botocore_session=botocore_session,
-            discovery_filter=DiscoveryFilter(
-                partition="aws",
-                account_ids=[AWS_ACCOUNT_ID],
-            ),
-        )
-    else:
-        key_arn = f"arn:aws:kms:{AWS_REGION}:{AWS_ACCOUNT_ID}:alias/" f"{PROJECT_NAME}"
-        provider = StrictAwsKmsMasterKeyProvider(
-            key_ids=[key_arn],
-            botocore_session=botocore_session,
-        )
-    return provider
+def store_secret(key, value, secret_id="production-env"):
+    current_values = get_secrets(secret_id)
+    if key in current_values and not questionary.confirm(f"{key} already in secrets. Override?").unsafe_ask():
+        raise RuntimeError("Aborting...")
+
+    current_values[key] = value
+    secret_string = quote(json.dumps(current_values))
+    cli(f"secretsmanager put-secret-value --secret-id {secret_id} --secret-string {secret_string}")
 
 
-def encrypt_secret(value):
-    provider = kms_master_key_provider(for_decrypt=False)
-    client = EncryptionSDKClient()
-    encrypted_value, _ = client.encrypt(source=value, key_provider=provider)
-    return encrypted_value
+def remove_secret(key, secret_id="production-env"):
+    current_values = get_secrets(secret_id)
+    if key not in current_values:
+        echo(f"{key} not found in secrets, nothing to do")
+        return
 
-
-def decrypt_secret(name, provider=None):
-    provider = provider or kms_master_key_provider(for_decrypt=True)
-    path = SECRETS_PATH / name
-    if not path.is_file():
-        raise ValueError(f"Secrets file not found: {name}")
-    client = EncryptionSDKClient()
-    with path.open("rb") as f:
-        value, _ = client.decrypt(source=f, key_provider=provider)
-    return value.decode("utf-8")
-
-
-def decrypt_secrets(*keys):
-    keys = keys or [f.stem for f in SECRETS_PATH.iterdir()]
-    provider = kms_master_key_provider(for_decrypt=True)
-    return {name: decrypt_secret(name, provider=provider) for name in keys}
+    del current_values[key]
+    secret_string = quote(json.dumps(current_values))
+    cli(f"secretsmanager put-secret-value --secret-id {secret_id} --secret-string {secret_string}")
 
 
 def aws_cmd(cmd, region):
@@ -417,7 +380,7 @@ def cloudformation_load(source="index-default.yaml"):
             "container_insights": "enabled" if CONTAINER_INSIGHTS else "disabled",
             "db_name": DB_NAME,
             "db_master_user": PRODUCTION_DB_ROOT_USER,
-            "db_master_password": decrypt_secret("POSTGRES_ROOT_PASSWORD"),
+            "db_master_password": get_secrets()["POSTGRES_ROOT_PASSWORD"],
             "web_port": WEB_PORT,
             "health_check_path": AWS_ELB_HEALTH_CHECK_ENDPOINT,
             "uwsgi_container_name": UWSGI_CONTAINER_NAME,

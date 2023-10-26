@@ -17,7 +17,6 @@ from deploy.settings import (
     PRODUCTION_DB_USER,
     PROJECT_NAME,
     PROJECT_PATH,
-    SECRETS_FOLDER,
     SERVICES,
 )
 from deploy.utils import echo, env_as_cli_args, timing
@@ -28,40 +27,43 @@ def cli():
     pass
 
 
-@cli.command(help=f'Get value(s) stored in "{SECRETS_FOLDER}"')
+@cli.command(help="Get value(s) stored in AWS Secrets Manager")
+@click.option("--secret-id", default="production-env")
 @click.argument("key", default="")
-def get_secret(key):
+def get_secret(secret_id, key):
+    secrets_dict = aws.get_secrets(secret_id)
     if key:
-        key_path = PROJECT_PATH / SECRETS_FOLDER / key
-        if not key_path.is_file():
-            echo(f"File not found: {key_path}")
+        if key not in secrets_dict:
+            echo(f"Secret not found in Secrets Manager: {key}")
             sys.exit(1)
-        click.echo(aws.decrypt_secret(key))
+        click.echo(secrets_dict[key])
         return
-    click.echo(json.dumps(aws.decrypt_secrets(), indent=2, sort_keys=True))
+    click.echo(json.dumps(secrets_dict, indent=2, sort_keys=True))
 
 
-def _store_secret(key, value):
-    outfile = f"{SECRETS_FOLDER}/{key}"
-    with (PROJECT_PATH / outfile).open("wb") as f:
-        f.write(aws.encrypt_secret(value))
-    echo(f"Saved to {outfile}")
+@cli.command(help="Remove a secret from AWS Secrets Manager")
+@click.option("--secret-id", default="production-env")
+@click.argument("key")
+def remove_secret(key, secret_id):
+    aws.remove_secret(key, secret_id)
 
 
-@cli.command(help=f'Securely store key-value pair in "{SECRETS_FOLDER}"')
+@cli.command(help="Securely store key-value pair in AWS Secrets Manager")
+@click.option("--secret-id", default="production-env")
 @click.argument("key")
 @click.argument("value")
-def store_secret(key, value):
-    _store_secret(key, value)
+def store_secret(key, value, secret_id):
+    aws.store_secret(key, value, secret_id)
 
 
-@cli.command(help=f'Securely store value from file in "{SECRETS_FOLDER}"')
+@cli.command(help="Securely store value from file in AWS Secrets Manager")
+@click.option("--secret-id", default="production-env")
 @click.argument("key")
 @click.argument("filename")
-def store_secret_file(key, filename):
+def store_secret_file(key, filename, secret_id):
     with open(filename) as source:
         value = source.read()
-    _store_secret(key, value)
+    aws.store_secret(key, value, secret_id)
 
 
 @cli.command(help="Management command")
@@ -110,7 +112,7 @@ def deploy_environment():
         "MEDIA_URL": f"https://{media_domain}/",
         "MEDIA_BUCKET": media_bucket,
     }
-    environment.update(aws.decrypt_secrets())
+    environment.update(aws.get_secrets())
     return environment, build_number
 
 

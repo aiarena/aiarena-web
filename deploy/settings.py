@@ -25,8 +25,6 @@ DB_NAME = "aiarena"
 PRODUCTION_DB_USER = "aiarena"
 PRODUCTION_DB_ROOT_USER = "aiarena"
 
-SECRETS_FOLDER = "secrets"
-
 AWS_REGION = "eu-central-1"
 
 AWS_ACCOUNT_ID = "315513665747"
