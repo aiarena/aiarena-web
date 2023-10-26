@@ -1,5 +1,5 @@
 Django==3.2.16
-Markdown==3.1
+Markdown==3.3
 boto3==1.28.47
 celery==5.2.7  # https://docs.celeryproject.org/en/latest/changelog.html
 confusable-homoglyphs==3.2.0
@@ -32,4 +32,4 @@ pytz==2022.7.1
 sentry-sdk[django]==1.32.0
 six==1.16.0
 wheel==0.38.4
-wiki==0.7.5
+wiki==0.10
