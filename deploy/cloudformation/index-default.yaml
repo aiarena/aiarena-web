@@ -12,14 +12,6 @@ Resources:
               - Action:
                   - s3:GetBucketLocation
                   - s3:ListBucket
-                Effect: Allow
-                Resource:
-                  - Fn::Join:
-                      - ''
-                      - - 'arn:aws:s3:::'
-                        - Ref: mediaTestBucket
-                        - "/"
-              - Action:
                   - s3:DeleteObject
                   - s3:GetObject
                   - s3:GetObjectAcl
@@ -32,6 +24,10 @@ Resources:
                       - - 'arn:aws:s3:::'
                         - Ref: mediaTestBucket
                         - "/*"
+                  - Fn::Join:
+                      - ''
+                      - - 'arn:aws:s3:::'
+                        - Ref: mediaTestBucket
 
   mediaTestBucket:
     Type: AWS::S3::Bucket
