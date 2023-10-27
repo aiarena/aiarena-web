@@ -5,6 +5,8 @@ A website for running the aiarena.net infrastructure.
 
 [Dev Install instructions](./doc/INSTALL.md)
 
+[Working with infrastructure](./deploy/README.md)
+
 ## Module structure:
 ### aiarena/core
 Core project functionality
