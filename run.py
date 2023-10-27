@@ -187,10 +187,11 @@ def monitor_ecs():
 
 
 @cli.command(help="Spin up a new ECS task, and connect to it")
-@click.option("--infinite", is_flag=True, help="Create a task without a 1-day time limit")
+@click.option("--lifetime-hours", default=24)
+@click.option("--dont-kill-on-disconnect", is_flag=True)
 @click.option("--cpu")
 @click.option("--memory")
-def production_one_off_task(infinite, cpu, memory):
+def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory):
     task_definitions = aws.task_definitions()
     task_definition_id = questionary.select("Select the base task definition & revision", task_definitions).unsafe_ask()
 
@@ -209,12 +210,11 @@ def production_one_off_task(infinite, cpu, memory):
     cpu = aws.clean_fargate_cpu(cpu)
     memory = aws.clean_fargate_memory(cpu, memory)
 
-    command = ["tail", "-f", "/dev/null"] if infinite else ["sleep", str(24 * 60 * 60)]
     overrides = {
         "containerOverrides": [
             {
                 "name": container_name,
-                "command": command,
+                "command": ["sleep", str(lifetime_hours * 60 * 60)],
             },
         ],
         "cpu": cpu,
@@ -234,8 +234,9 @@ def production_one_off_task(infinite, cpu, memory):
 
     aws.connect_to_ecs_task(cluster_id, task_id)
 
-    aws.cli(f"ecs stop-task --cluster {cluster_id} --task {task_id}", parse_output=True)
-    echo(f"Task {task_id} stopped")
+    if not dont_kill_on_disconnect:
+        aws.cli(f"ecs stop-task --cluster {cluster_id} --task {task_id}", parse_output=True)
+        echo(f"Task {task_id} stopped")
 
 
 @cli.command(help="Get a secure connection to a running ECS task")
