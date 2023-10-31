@@ -339,10 +339,10 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         result.match.round.update_if_completed()
 
                         # Update and record ELO figures
-                        p1_initial_elo, p2_initial_elo = result.get_initial_elos
+                        participant1.starting_elo, participant2.starting_elo = result.get_initial_elos
                         result.adjust_elo()
 
-                        initial_elo_sum = p1_initial_elo + p2_initial_elo
+                        initial_elo_sum = participant1.starting_elo + participant2.starting_elo
 
                         # Calculate the change in ELO
                         # the bot elos have changed so refresh them
@@ -350,8 +350,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                         sp1, sp2 = result.get_competition_participants
                         participant1.resultant_elo = sp1.elo
                         participant2.resultant_elo = sp2.elo
-                        participant1.elo_change = participant1.resultant_elo - p1_initial_elo
-                        participant2.elo_change = participant2.resultant_elo - p2_initial_elo
+                        participant1.elo_change = participant1.resultant_elo - participant1.starting_elo
+                        participant2.elo_change = participant2.resultant_elo - participant2.starting_elo
                         participant1.save()
                         participant2.save()
 
