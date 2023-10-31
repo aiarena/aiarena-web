@@ -35,6 +35,9 @@ class MatchParticipation(models.Model, LockableModelMixin):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     participant_number = models.PositiveSmallIntegerField(db_index=True)
     bot = models.ForeignKey(Bot, on_delete=models.PROTECT)
+    starting_elo = models.SmallIntegerField(null=True)
+    """The bot's ELO at the time the match started
+    Note that this isn't necessarily the same as resultant_elo - elo_change."""
     resultant_elo = models.SmallIntegerField(null=True)
     """The bot's ELO as a result of this match.
     Note that this isn't necessarily the same as starting_elo + elo_change."""
@@ -54,16 +57,6 @@ class MatchParticipation(models.Model, LockableModelMixin):
 
     def __str__(self):
         return self.bot.name
-
-    @property
-    def starting_elo(self):
-        if self.resultant_elo is None or self.elo_change is None:
-            raise Exception("Cannot calculate starting ELO when resultant ELO or ELO change is None!")
-        return (
-            self.resultant_elo - self.elo_change
-            if self.resultant_elo is not None and self.elo_change is not None
-            else None
-        )
 
     @property
     def step_time_ms(self):
