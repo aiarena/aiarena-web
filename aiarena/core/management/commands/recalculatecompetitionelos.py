@@ -39,9 +39,9 @@ class Command(BaseCommand):
                 p2: MatchParticipation = match.participant2
 
                 # Starting ELO
-                p1.starting_elo = p1.competition_participant.elo
-                p2.starting_elo = p2.competition_participant.elo
-                initial_elo_sum = p1.starting_elo + p2.starting_elo
+                p1_starting_elo = p1.competition_participant.elo
+                p2_starting_elo = p2.competition_participant.elo
+                initial_elo_sum = p1_starting_elo + p2_starting_elo
 
                 match.result.adjust_elo()
                 p1.competition_participant.refresh_from_db()
@@ -53,8 +53,8 @@ class Command(BaseCommand):
                 resultant_elo_sum = p1.resultant_elo + p2.resultant_elo
 
                 # ELO change
-                p1.elo_change = p1.resultant_elo - p1.starting_elo
-                p2.elo_change = p2.resultant_elo - p2.starting_elo
+                p1.elo_change = p1.resultant_elo - p1_starting_elo
+                p2.elo_change = p2.resultant_elo - p2_starting_elo
 
                 p1.save()
                 p2.save()

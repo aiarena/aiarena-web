@@ -94,12 +94,6 @@ class Matches:
                 #                f" because one of the participants was not available.")
                 return False
 
-            if match.round:  # if this is a ladder match, record the starting elo
-                for p in participations:
-                    p.starting_elo = p.bot.competition_participations.only('elo', 'bot_id') \
-                        .get(competition=match.round.competition).elo
-                    p.save()
-
             now = timezone.now()
             match.started = now
             match.first_started = now
