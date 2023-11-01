@@ -46,8 +46,9 @@ class Command(BaseCommand):
             started_at = datetime.datetime.now()
             self.stdout.write(f"Started at: {started_at}")
             if options["randomseed"] is not None:
-                self.stdout.write("Setting random seed to {randomseed}")
-                random.seed(options["randomseed"])
+                random_seed = options["randomseed"]
+                self.stdout.write(f"Setting random seed to {random_seed}")
+                random.seed(random_seed)
             if options["migrate"] is not None:
                 self.stdout.write("Migrating database...")
                 call_command("migrate", "--noinput")
