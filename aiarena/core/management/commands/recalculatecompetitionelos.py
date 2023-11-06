@@ -94,7 +94,7 @@ class Command(BaseCommand):
 
         self.stdout.write("bot_id starting_elo ending_elo elo_change")
         for participant in competition_participants:
-            elo_change = participant.elo-participant.starting_elo
+            elo_change = participant.elo - participant.starting_elo
             self.stdout.write(f"{participant.bot_id:>6}{participant.starting_elo:>13}{participant.elo:>11}{elo_change:>11}")
 
             if not dryrun:
