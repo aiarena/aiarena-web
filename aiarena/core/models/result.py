@@ -158,16 +158,6 @@ class Result(models.Model, LockableModelMixin):
             return None
 
     @cached_property
-    def get_winner_loser_competition_participants(self):
-        bot1, bot2 = self.get_competition_participants
-        if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
-            return bot1, bot2
-        elif self.type in ('Player2Win', 'Player1Crash', 'Player1TimeOut', 'Player1Surrender'):
-            return bot2, bot1
-        else:
-            raise Exception('There was no winner or loser for this match.')
-
-    @cached_property
     def get_winner_loser_bots(self):
         bot1, bot2 = self.get_match_participant_bots
         if self.type in ('Player1Win', 'Player2Crash', 'Player2TimeOut', 'Player2Surrender'):
@@ -176,15 +166,6 @@ class Result(models.Model, LockableModelMixin):
             return bot2, bot1
         else:
             raise Exception('There was no winner or loser for this match.')
-
-    @cached_property
-    def get_competition_participants(self):
-        """Returns the SeasonParticipant models for the MatchParticipants"""
-        from .match_participation import MatchParticipation
-        match_id = self.match_id
-        first = MatchParticipation.objects.get(match_id=match_id, participant_number=1)
-        second = MatchParticipation.objects.get(match_id=match_id, participant_number=2)
-        return first.competition_participant, second.competition_participant
 
     @cached_property
     def get_match_participants(self):
@@ -208,22 +189,3 @@ class Result(models.Model, LockableModelMixin):
         self.full_clean()  # ensure validation is run on save
         super().save(*args, **kwargs)
 
-    def adjust_elo(self):
-        if self.has_winner:
-            sp_winner, sp_loser = self.get_winner_loser_competition_participants
-            self._apply_elo_delta(ELO.calculate_elo_delta(sp_winner.elo, sp_loser.elo, 1.0), sp_winner, sp_loser)
-        elif self.type == 'Tie':
-            sp_first, sp_second = self.get_competition_participants
-            self._apply_elo_delta(ELO.calculate_elo_delta(sp_first.elo, sp_second.elo, 0.5), sp_first, sp_second)
-
-    @cached_property
-    def get_initial_elos(self):
-        first, second = self.get_competition_participants
-        return first.elo, second.elo
-
-    def _apply_elo_delta(self, delta, sp1, sp2):
-        delta = int(round(delta))
-        sp1.elo += delta
-        sp1.save()
-        sp2.elo -= delta
-        sp2.save()
