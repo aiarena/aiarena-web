@@ -30,6 +30,9 @@ class Command(BaseCommand):
         started_at = datetime.datetime.now()
         self.stdout.write(f"Started at: {started_at}")
 
+        if dryrun:
+            self.stdout.write(f"DRY RUN - no changes will be made to the database.")
+
         self.stdout.write(f"Locating records...")
         target_competition = Competition.objects.get(id=options['competition_id'])
         self.stdout.write(f"Competition id {target_competition.id} located.")
