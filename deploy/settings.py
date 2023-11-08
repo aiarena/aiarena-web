@@ -85,8 +85,8 @@ class BaseTask(Task):
 
 
 class WebTask(BaseTask):
-    default_cpu = "512"
-    default_memory = "1024"
+    default_cpu = "1024"
+    default_memory = "2048"
 
     def code_container(self, *args, **kwargs):
         container = super().code_container(*args, **kwargs)
@@ -140,7 +140,7 @@ class CeleryWorkerTask(CeleryTask):
 SERVICES = [
     WebService(
         name="webService",
-        count=2,
+        count=1,
         task=WebTask(
             family="websiteTask",
             ports=[(WEB_PORT, WEB_PORT)],
