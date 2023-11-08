@@ -15,6 +15,7 @@ if SECRET_KEY is None:
     raise Exception("You must set the SECRET_KEY to something secure before running in production or staging.")
 
 ALLOWED_HOSTS = ["aiarena-test.net", "aiarena.net", "*"]
+SECURE_SSL_REDIRECT = True
 
 #################################
 # Django Storages & django-private-storage configuration #
