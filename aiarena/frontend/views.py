@@ -838,31 +838,23 @@ class Index(ListView):
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
-                top10 = Ladders.get_competition_ranked_participants(
-                    comp, amount=10).prefetch_related(
-                    Prefetch('bot', queryset=Bot.objects.all().only('user_id', 'name')),
-                    Prefetch('bot__user', queryset=User.objects.all().only('patreon_level'))
+                top10 = Ladders.get_competition_ranked_participants(comp, amount=10).prefetch_related(
+                    Prefetch("bot", queryset=Bot.objects.all().only("user_id", "name")),
+                    Prefetch("bot__user", queryset=User.objects.all().only("patreon_level")),
+                    Prefetch(
+                        "bot__matchparticipation_set",
+                        queryset=MatchParticipation.objects.filter(
+                            elo_change__isnull=False,
+                            match__requested_by__isnull=True,
+                            match__round__competition=comp,
+                        ).order_by('-match__started'),
+                        to_attr="match_participations",
+                    ),
                 )
-                # top 10 bots
 
-                relative_result = RelativeResult.with_row_number([x.bot.id for x in top10], comp)
-
-
-                # This check avoids a potential EmptyResultSet exception.
-                # See https://code.djangoproject.com/ticket/26061
-                if relative_result.count() > 0:
-                    sql, params = relative_result.query.sql_with_params()
-
-                    with connection.cursor() as cursor:
-                        cursor.execute("""
-                            SELECT bot_id as id, SUM("elo_change") trend FROM ({}) row_numbers
-                            WHERE "row_number" <= %s
-                            GROUP BY bot_id
-                        """.format(sql),
-                                       [*params, elo_trend_n_matches], )
-                        rows = cursor.fetchall()
-                        for participant in top10:
-                            participant.trend = next(iter([x[1] for x in rows if x[0] == participant.bot.id]), None)
+                for participant in top10:
+                    participant.trend = sum(
+                        participation.elo_change for participation in participant.bot.match_participations[:elo_trend_n_matches])
 
                 context['competitions'].append({
                     'competition': comp,
