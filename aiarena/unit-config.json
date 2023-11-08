@@ -25,5 +25,10 @@
       "path": "/app/",
       "module": "aiarena.wsgi"
     }
+  },
+  "settings": {
+    "http": {
+      "max_body_size": 209715200
+    }
   }
 }
