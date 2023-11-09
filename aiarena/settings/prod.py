@@ -16,6 +16,7 @@ if SECRET_KEY is None:
 
 ALLOWED_HOSTS = ["aiarena-test.net", "aiarena.net", "*"]
 SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 #################################
 # Django Storages & django-private-storage configuration #
