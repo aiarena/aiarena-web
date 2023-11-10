@@ -55,14 +55,14 @@ class BaseService(Service):
 
 
 class WebService(BaseService):
-    default_min_percent = 50
+    default_min_percent = 100
     default_max_percent = 200
     add_network_configuration = True
 
 
 class WorkerService(BaseService):
     default_min_percent = 0
-    default_max_percent = 150
+    default_max_percent = 200
     default_role_name = None
     add_network_configuration = True
 
