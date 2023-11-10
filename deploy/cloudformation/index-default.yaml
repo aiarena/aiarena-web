@@ -333,11 +333,11 @@ Resources:
       HealthCheckIntervalSeconds: 10
       HealthCheckPath: !var health_check_path
       HealthCheckPort: traffic-port
-      HealthCheckProtocol: HTTPS
+      HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Matcher:
-        HttpCode: '200'
+        HttpCode: '200,301'
       Port: !var web_port
       Protocol: HTTP
       TargetType: ip
