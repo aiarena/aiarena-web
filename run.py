@@ -228,7 +228,7 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
         " --enable-execute-command"
         f" --task-definition {task_definition_id}"
         f" --overrides {quote(json.dumps(overrides))}"
-        f"--network-configuration '{json.dumps(aws.get_network_configuration())}'"
+        f" --network-configuration '{json.dumps(aws.get_network_configuration())}'"
     )
     task_id = result["tasks"][0]["taskArn"].split("/")[-1]
 
