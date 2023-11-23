@@ -1,10 +1,12 @@
 import os
 
+from django.utils.functional import SimpleLazyObject
+from django.utils.module_loading import import_string
+
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
-from storages.backends.s3boto3 import S3Boto3Storage
 
 from .default import *  # noqa: F403
 
@@ -26,7 +28,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
 
-WIKI_STORAGE_BACKEND = S3Boto3Storage()
+WIKI_STORAGE_BACKEND = SimpleLazyObject(lambda: import_string("storages.backends.s3boto3.S3Boto3Storage")())
 WIKI_ATTACHMENTS_LOCAL_PATH = False
 WIKI_ATTACHMENTS_APPEND_EXTENSION = False
 
