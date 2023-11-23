@@ -27,6 +27,7 @@ PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
 
 WIKI_STORAGE_BACKEND = "storages.backends.s3boto3.S3Boto3Storage"
 WIKI_ATTACHMENTS_LOCAL_PATH = False
+WIKI_ATTACHMENTS_APPEND_EXTENSION = False
 
 AWS_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
 AWS_PRIVATE_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
