@@ -455,3 +455,10 @@ MATCH_TAG_PER_MATCH_LIMIT = 32
 
 # If a primary field isn't specified on models, add an auto ID field. This affects all loaded modules.
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+def str_to_bool(s):
+    return s.lower() in ("yes", "y", "true", "1")
+
+MAINTENANCE_MODE = str_to_bool(os.getenv("MAINTENANCE_MODE", "False"))
+if MAINTENANCE_MODE:
+    MIDDLEWARE = ["aiarena.core.middleware.maintenance"] + MIDDLEWARE
