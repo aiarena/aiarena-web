@@ -25,6 +25,9 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
 
+WIKI_STORAGE_BACKEND = "storages.backends.s3boto3.S3Boto3Storage"
+WIKI_USE_LOCAL_PATH = False
+
 AWS_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
 AWS_PRIVATE_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
 
