@@ -2,7 +2,9 @@ name: AWS deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   id-token: write
