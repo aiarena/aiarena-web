@@ -113,6 +113,7 @@ jobs:
         id: prepare_images
         env:
           BUILD_NUMBER: ${{ github.run_number }}
+          MAINTENANCE_MODE: ${{ vars.MAINTENANCE_MODE }}
         run: ./run.py prepare-images
 
   deploy:
@@ -144,6 +145,7 @@ jobs:
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           PREPARED_IMAGES: ${{ needs.prepare-images.outputs.images }}
+          MAINTENANCE_MODE: ${{ vars.MAINTENANCE_MODE }}
         run: ./run.py ecs
 
       - name: Monitor deployment

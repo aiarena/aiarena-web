@@ -20,6 +20,10 @@ except ImportError:
     crontab = None
 
 
+def str_to_bool(s):
+    return s.lower() in ("yes", "y", "true", "1")
+
+
 # Temp workaround for discord-bind error: Warning: Scope has changed from "identify" to "guilds.join identify email".
 # https://stackoverflow.com/a/51643134
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
@@ -103,6 +107,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+
+MAINTENANCE_MODE = str_to_bool(os.getenv("MAINTENANCE_MODE", "False"))
+if MAINTENANCE_MODE:
+    MIDDLEWARE = ["aiarena.core.middleware.maintenance"] + MIDDLEWARE
 
 ROOT_URLCONF = "aiarena.urls"
 
@@ -523,10 +532,6 @@ MATCH_TAG_PER_MATCH_LIMIT = 32
 
 # If a primary field isn't specified on models, add an auto ID field. This affects all loaded modules.
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
-
-
-def str_to_bool(s):
-    return s.lower() in ("yes", "y", "true", "1")
 
 
 # Redis
