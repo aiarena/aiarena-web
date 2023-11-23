@@ -9,7 +9,7 @@ django-bootstrap-form==3.4
 django-debug-toolbar==3.2.2
 django-extensions==3.2.1
 django-filter==22.1
-django-grappelli==2.15.3
+django-grappelli==3.0.8
 django-pglocks==1.0.4
 django-picklefield==3.1
 django-private-storage==3.1
