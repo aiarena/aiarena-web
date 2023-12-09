@@ -21,7 +21,7 @@ if SECRET_KEY is None:
 ALLOWED_HOSTS = ["aiarena-test.net", "aiarena.net", "sc2ai.net", "www.sc2ai.net", gethostbyname(gethostname())]
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_REDIRECT_EXEMPT = ["/health-check/"]
+SECURE_REDIRECT_EXEMPT = [r"^health-check/$"]
 
 ################################################################################
 # Password validation                                                          #
