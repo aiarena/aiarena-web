@@ -64,6 +64,7 @@ CACHES = {
 # Email Settings #
 ##################
 
+DEFAULT_FROM_EMAIL = "AI Arena <noreply@aiarena.net>"
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS")
