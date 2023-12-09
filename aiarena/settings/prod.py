@@ -1,4 +1,5 @@
 import os
+from socket import gethostbyname, gethostname
 
 from django.utils.functional import SimpleLazyObject
 from django.utils.module_loading import import_string
@@ -17,7 +18,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", None)
 if SECRET_KEY is None:
     raise Exception("You must set the SECRET_KEY to something secure before running in production or staging.")
 
-ALLOWED_HOSTS = ["aiarena-test.net", "aiarena.net", "sc2ai.net", "www.sc2ai.net"]
+ALLOWED_HOSTS = ["aiarena-test.net", "aiarena.net", "sc2ai.net", "www.sc2ai.net", gethostbyname(gethostname())]
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
