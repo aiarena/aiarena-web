@@ -79,6 +79,9 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
 
+AWS_S3_FILE_OVERWRITE = True
+AWS_PRIVATE_S3_FILE_OVERWRITE = True
+
 WIKI_STORAGE_BACKEND = SimpleLazyObject(lambda: import_string("storages.backends.s3boto3.S3Boto3Storage")())
 WIKI_ATTACHMENTS_LOCAL_PATH = False
 WIKI_ATTACHMENTS_APPEND_EXTENSION = False
