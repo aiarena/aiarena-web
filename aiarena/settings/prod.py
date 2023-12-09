@@ -47,14 +47,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "django-cache-default",
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": redis_url(REDIS_CACHE_DB),  # noqa F405
     },
     "select2": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "django-cache-select2",
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": redis_url(REDIS_CACHE_DB),  # noqa F405
+        "KEY_PREFIX": "select2",
     },
 }
+
 
 ##################
 # Email Settings #
