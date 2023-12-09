@@ -408,7 +408,7 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Matcher:
-        HttpCode: '200,301'
+        HttpCode: '200'
       Port: !var web_port
       Protocol: HTTP
       TargetType: ip

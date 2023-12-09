@@ -30,7 +30,7 @@ AWS_REGION = "eu-central-1"
 AWS_ACCOUNT_ID = "315513665747"
 
 # Endpoint used by an ELB target group health checker.
-AWS_ELB_HEALTH_CHECK_ENDPOINT = "/accounts/login/"
+AWS_ELB_HEALTH_CHECK_ENDPOINT = "/health-check/"
 
 PRIVATE_REGISTRY_URL = f"{AWS_ACCOUNT_ID}.dkr.ecr.{AWS_REGION}.amazonaws.com"
 
