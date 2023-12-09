@@ -1,0 +1,31 @@
+name: backup
+on:
+  schedule:
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+
+
+jobs:
+  backup:
+    name: Backup production DB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r ./pip/requirements.LOCAL.txt
+
+      - name: Install python dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: pip install -r requirements-local.txt
+
+      - name: Perform production DB backup
+        run: ./run.py production-backup
+
