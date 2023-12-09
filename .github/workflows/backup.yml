@@ -12,6 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::315513665747:role/aiarena-DeployRole-NUZWXPWHC0MZ
+          aws-region: eu-central-1
+
+      - name: Confirm AWS identity
+        run: aws sts get-caller-identity
+
       - name: Setup python
         uses: actions/setup-python@v4
         with:
