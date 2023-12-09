@@ -19,7 +19,6 @@
       },
       "action": {
         "pass": "applications/django",
-        "rewrite": "/accounts/login/?health-check=1",
         "response_headers": {
           "Host": "aiarena-test.net",
           "X-Forwarded-Proto": "https"

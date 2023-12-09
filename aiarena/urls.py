@@ -50,6 +50,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [  # todo: replace usage of url with path for all these
     path("__debug__/", include(debug_toolbar.urls)),
+    path("health-check/", core_views.CompetitionList.as_view(), name="health_check"),
     path("500/", core_views.http_500),
     path("grappelli/", include("grappelli.urls")),  # Grappelli URLS
     path("select2/", include("django_select2.urls")),
