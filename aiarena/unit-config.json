@@ -14,18 +14,6 @@
       }
     },
     {
-      "match": {
-        "uri": "/health-check/"
-      },
-      "action": {
-        "pass": "applications/django",
-        "response_headers": {
-          "Host": "aiarena-test.net",
-          "X-Forwarded-Proto": "https"
-        }
-      }
-    },
-    {
       "action": {
         "pass": "applications/django"
       }
