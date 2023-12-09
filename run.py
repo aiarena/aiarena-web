@@ -2,6 +2,8 @@
 import json
 import os
 import sys
+from datetime import datetime
+from pathlib import Path
 from shlex import quote
 
 import click
@@ -19,7 +21,7 @@ from deploy.settings import (
     PROJECT_PATH,
     SERVICES,
 )
-from deploy.utils import echo, env_as_cli_args, timing
+from deploy.utils import echo, env_as_cli_args, run, timing
 
 
 @click.group()
@@ -251,6 +253,133 @@ def production_attach_to_task(task_id):
         task_id = questionary.select("Finally, select the task ID", tasks).unsafe_ask()
 
     aws.connect_to_ecs_task(cluster_id, task_id)
+
+
+def backup_cmd(**kwargs):
+    command = "PGPASSWORD={password} pg_dump -U {user} -h {host} {db} -Fc -f {filename}".format(**kwargs)
+    return f"bash -c '{command}'"
+
+
+def _find_first_task_id():
+    clusters = aws.all_clusters()
+    cluster_id = clusters[0]
+    services = aws.cluster_services(cluster_id)
+    service_id = [service for service in services if "webService" in service][0]
+    tasks = aws.service_tasks(cluster_id, service_id)
+    task_id = tasks[0]
+    return cluster_id, task_id
+
+
+@cli.command(help="Make a production DB backup and upload it to S3")
+@timing
+def production_backup():
+    # Pick one of production servers
+    cluster_id, task_id = _find_first_task_id()
+
+    # Make a DB backup on that server
+    now = datetime.utcnow().replace(microsecond=0)
+    filename = "{}_{}.dump".format(
+        DB_NAME,
+        now.isoformat("_").replace(":", "-"),
+    )
+    backup_file = f"/tmp/{filename}"  # nosec
+    backup_command = backup_cmd(
+        user=PRODUCTION_DB_ROOT_USER,
+        password=aws.get_secrets()["POSTGRES_ROOT_PASSWORD"],
+        host=aws.db_endpoint(PROJECT_NAME, "MainDB"),
+        db=DB_NAME,
+        filename=backup_file,
+    )
+
+    echo(f"Making backup on task_id == {task_id}...")
+    aws.execute_command(cluster_id, task_id, backup_command, interactive=True)
+
+    # Move the backup to S3
+    bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
+
+    echo("Uploading to S3...")
+    aws.execute_command(cluster_id, task_id, f"aws s3 mv {backup_file} s3://{bucket}/", interactive=True)
+
+
+def _confirm_restore(filename):
+    confirm = input(  # nosec
+        f"Your local DB will be overwritten from {filename}\n" f"Continue (y/N)? ",
+    )
+    if confirm.lower() == "y":
+        return True
+    echo("Backup restore cancelled, exiting")
+    return False
+
+
+@cli.command(help="Restore DB backup locally")
+@click.argument("filename", default="")
+@click.option("--s3", "s3", flag_value="s3", default=None)
+@click.option("--quiet", "quiet", flag_value="quiet", default=None)
+@timing
+def restore_backup(filename, s3, quiet):
+    if s3:
+        bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
+        filenames = sorted(
+            aws.cli(
+                f"s3api list-objects-v2 --bucket {bucket} "
+                f"--max-items 1000 --output text --query 'Contents[].[Key]'",
+                capture_stdout=True,
+                parse_output=False,
+            ).stdout_lines
+        )
+        if not filenames:
+            echo("The backups S3 bucket is empty")
+            return
+        filename = filename or filenames[-1]
+        s3_filenames = [fn for fn in filenames if filename in fn]
+        if not s3_filenames:
+            echo(f"File not found: s3://{bucket}/{filename}*")
+            return
+        elif len(s3_filenames) > 1:
+            echo(f"More than one file found: {s3_filenames[:5]}")
+            return
+        filename = s3_filenames[0]
+        if not quiet and not _confirm_restore(f"s3://{bucket}/{filename}"):
+            return
+        local_file = PROJECT_PATH / "backup" / filename
+        echo(f"Downloading: S3 -> ./backup/{filename}")
+        aws.cli(f"s3 cp s3://{bucket}/{filename} {local_file}", parse_output=False)
+    else:
+        if filename:
+            # Allow providing absolute and relative path, not just filename,
+            # this enables using terminal completion to choose the backup file
+            options = [
+                PROJECT_PATH / "backup" / filename,
+                PROJECT_PATH / filename,
+                Path(filename),
+            ]
+            for option in options:
+                if option.exists():
+                    filename = option.name
+                    break
+            else:
+                echo(f"File not found: ./backup/{filename}")
+                return
+        else:
+            filenames = sorted((PROJECT_PATH / "backup").iterdir())
+            if not filenames:
+                echo("./backup directory is empty")
+                return
+            filename = filenames[-1].name
+        if not quiet and not _confirm_restore(f"./backup/{filename}"):
+            return
+
+    DB_USER = "aiarena"
+    DB_PASSWORD = "aiarena"
+
+    echo("Dropping and re-creating the DB...")
+    run(f"dropdb -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
+    run(f"createdb -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
+
+    echo("Restoring DB backup...")
+    run(f"pg_restore -U {DB_USER} -d {DB_NAME} ./backup/{filename}", env={"PGPASSWORD": DB_PASSWORD})
+
+    echo("Done.")
 
 
 @cli.command(help="Build dev image")

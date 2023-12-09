@@ -211,6 +211,19 @@ def service_tasks(cluster, service):
     return [task_arn.split("/")[-1] for task_arn in arn_list]
 
 
+def execute_command(cluster_id, task_id, command: str, interactive=True):
+    cmd = f'ecs execute-command --cluster {cluster_id} --task {task_id} --command "{command}"'
+
+    if interactive:
+        cmd = f"{cmd} --interactive"
+
+    cli(
+        cmd,
+        parse_output=False,
+        capture_stderr=True,
+    )
+
+
 def connect_to_ecs_task(cluster_id, task_id):
     while True:
         tasks = cli(f"ecs describe-tasks --cluster {cluster_id} --tasks {task_id}")["tasks"]
@@ -226,15 +239,7 @@ def connect_to_ecs_task(cluster_id, task_id):
     attempts = 10
     while attempts > 0:
         try:
-            cli(
-                "ecs execute-command"
-                f" --cluster {cluster_id}"
-                f" --task {task_id}"
-                f' --command "/bin/bash"'
-                " --interactive",
-                parse_output=False,
-                capture_stderr=True,
-            )
+            execute_command(cluster_id, task_id, "/bin/bash", interactive=True)
         except RuntimeError:
             echo("Execute agent not running yet, re-trying in 10s")
             time.sleep(10)
