@@ -341,6 +341,7 @@ Resources:
       DeletionProtection: true
       MasterUsername: !var db_master_user
       MasterUserPassword: !var db_master_password
+      EnablePerformanceInsights: true
       DBInstanceClass:
         Ref: DBClass
       DBParameterGroupName:
