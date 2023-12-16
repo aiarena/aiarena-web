@@ -98,8 +98,8 @@ def deploy_environment():
         REDIS_CACHE_DB = 5
 
     build_number = os.environ.get("BUILD_NUMBER", "")
-    media_bucket = aws.physical_name(PROJECT_NAME, "mediaTestBucket")
-    media_domain = aws.s3_domain(PROJECT_NAME, "mediaTestBucket")
+    media_bucket = aws.physical_name(PROJECT_NAME, "mediaProductionBucket")
+    media_domain = aws.s3_domain(PROJECT_NAME, "mediaProductionBucket")
     environment = {
         "AWS_REGION": AWS_REGION,
         "BUILD_NUMBER": build_number,
