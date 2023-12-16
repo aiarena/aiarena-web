@@ -153,7 +153,7 @@ SERVICES = [
     ),
     WorkerService(
         name="celeryWorker-Default",
-        count=2,
+        count=1,
         task=CeleryWorkerTask(
             family="celeryWorker-Default",
             command="-P prefork -Q default",
