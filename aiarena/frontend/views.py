@@ -9,7 +9,7 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db import IntegrityError, connection, transaction
 from django.db.models import Case, Count, F, Prefetch, Q, Sum, Value, When
 from django.db.models.fields import IntegerField
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -65,6 +65,14 @@ def project_finance(request):
         return redirect(to=config.PROJECT_FINANCE_LINK)
     else:
         raise Http404()
+
+
+def health_check(*args, **kwargs):
+    # test database connection
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")
+
+    return HttpResponse("OK")
 
 
 class UserProfile(LoginRequiredMixin, DetailView):
