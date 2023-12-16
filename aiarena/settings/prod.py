@@ -1,6 +1,7 @@
 import os
 from socket import gethostbyname, gethostname
 
+from django.core.exceptions import DisallowedHost
 from django.utils.functional import SimpleLazyObject
 from django.utils.module_loading import import_string
 
@@ -114,6 +115,15 @@ AWS_QUERYSTRING_EXPIRE = 60 * 60
 AWS_LOCATION = "media/"
 AWS_PRIVATE_LOCATION = "private-media/"
 
+
+def before_send(event, hint):
+    if "exc_info" in hint:
+        exc_type, exc_value, tb = hint["exc_info"]
+        if isinstance(exc_value, DisallowedHost):
+            return
+    return event
+
+
 # Sentry configuration
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
 BUILD_NUMBER = os.environ.get("BUILD_NUMBER")
@@ -130,5 +140,6 @@ if SENTRY_DSN:
         # https://docs.sentry.io/performance/distributed-tracing/#python
         "traces_sample_rate": 1.0,
         "attach_stacktrace": True,
+        "before_send": before_send,
     }
     sentry_sdk.init(**sentry_kwargs)
