@@ -85,8 +85,8 @@ class BaseTask(Task):
 
 
 class WebTask(BaseTask):
-    default_cpu = "1024"
-    default_memory = "2048"
+    default_cpu = "4096"
+    default_memory = "16384"
 
     def code_container(self, *args, **kwargs):
         container = super().code_container(*args, **kwargs)
