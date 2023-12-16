@@ -376,45 +376,20 @@ CONSTANCE_CONFIG_FIELDSETS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
-        },
-    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "level": "DEBUG",
         },
     },
     "loggers": {
-        "django.request": {
-            "handlers": [
-                "console",
-            ],
-            "level": "WARNING",
-            "propagate": True,
-        },
-        "django.template": {
-            "handlers": [
-                "console",
-            ],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        "django.security": {
-            "handlers": [
-                "console",
-            ],
-            "level": "DEBUG",
-            "propagate": True,
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
         "aiarena": {
-            "handlers": [
-                "console",
-            ],
+            "handlers": ["console"],
             "level": "DEBUG",
-            "propagate": True,
         },
     },
 }
