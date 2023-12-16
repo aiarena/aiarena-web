@@ -20,8 +20,11 @@ if SECRET_KEY is None:
 
 ALLOWED_HOSTS = [
     "aiarena-test.net",
+    "www.aiarena-test.net",
     "aiarena.net",
+    "www.aiarena.net",
     "sc2ai.com",
+    "www.sc2ai.com",
     "sc2ai.net",
     "www.sc2ai.net",
     gethostbyname(gethostname()),
