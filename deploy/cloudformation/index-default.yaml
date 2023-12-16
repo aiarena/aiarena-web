@@ -41,7 +41,9 @@ Resources:
           PolicyDocument:
             Statement:
             - Action:
+              - s3:ListBucket
               - s3:PutObject
+              - s3:GetObject
               - s3:AbortMultipartUpload
               - s3:ListMultipartUploadParts
               - s3:ListBucketMultipartUploads
@@ -52,9 +54,18 @@ Resources:
                 - - 'arn:aws:s3:::'
                   - Ref: backupsBucket
                   - "/*"
+              - Fn::Join:
+                - ''
+                - - 'arn:aws:s3:::'
+                  - Ref: backupsBucket
             - Action:
               - kms:GenerateDataKey
               - kms:Decrypt
+              Effect: Allow
+              Resource:
+              - "*"
+            - Action:
+              - cloudformation:DescribeStackResource
               Effect: Allow
               Resource:
               - "*"
