@@ -88,6 +88,8 @@ Resources:
   mediaProductionBucket:
     Type: AWS::S3::Bucket
     Properties:
+      VersioningConfiguration:
+        Status: Enabled
       CorsConfiguration:
         CorsRules:
           - AllowedMethods:
