@@ -18,7 +18,14 @@ SECRET_KEY = os.environ.get("SECRET_KEY", None)
 if SECRET_KEY is None:
     raise Exception("You must set the SECRET_KEY to something secure before running in production or staging.")
 
-ALLOWED_HOSTS = ["aiarena-test.net", "aiarena.net", "sc2ai.net", "www.sc2ai.net", gethostbyname(gethostname())]
+ALLOWED_HOSTS = [
+    "aiarena-test.net",
+    "aiarena.net",
+    "sc2ai.com",
+    "sc2ai.net",
+    "www.sc2ai.net",
+    gethostbyname(gethostname()),
+]
 SECURE_SSL_REDIRECT = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_REDIRECT_EXEMPT = [r"^health-check/$"]
