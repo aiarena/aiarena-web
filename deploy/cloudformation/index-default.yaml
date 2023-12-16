@@ -22,15 +22,6 @@ Resources:
                   - Fn::Join:
                       - ''
                       - - 'arn:aws:s3:::'
-                        - Ref: mediaTestBucket
-                        - "/*"
-                  - Fn::Join:
-                      - ''
-                      - - 'arn:aws:s3:::'
-                        - Ref: mediaTestBucket
-                  - Fn::Join:
-                      - ''
-                      - - 'arn:aws:s3:::'
                         - Ref: mediaProductionBucket
                         - "/*"
                   - Fn::Join:
@@ -69,21 +60,6 @@ Resources:
               Effect: Allow
               Resource:
               - "*"
-
-  mediaTestBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      CorsConfiguration:
-        CorsRules:
-          - AllowedMethods:
-              - GET
-              - HEAD
-              - PUT
-            AllowedOrigins:
-              - https://aiarena-test.net
-              - https://aiarena.net
-              - https://sc2ai.net
-            MaxAge: 3000
 
   mediaProductionBucket:
     Type: AWS::S3::Bucket
@@ -501,32 +477,6 @@ Resources:
                   - ec2:Describe*
                   - ec2:AuthorizeSecurityGroupIngress
                 Resource: "*"
-        - PolicyName: media-test-bucket
-          PolicyDocument:
-            Statement:
-              - Action:
-                  - s3:GetBucketLocation
-                  - s3:ListBucket
-                Effect: Allow
-                Resource:
-                  - Fn::Join:
-                      - ''
-                      - - 'arn:aws:s3:::'
-                        - Ref: mediaTestBucket
-                        - "/"
-              - Action:
-                  - s3:DeleteObject
-                  - s3:GetObject
-                  - s3:GetObjectAcl
-                  - s3:PutObject
-                  - s3:PutObjectAcl
-                Effect: Allow
-                Resource:
-                  - Fn::Join:
-                      - ''
-                      - - 'arn:aws:s3:::'
-                        - Ref: mediaTestBucket
-                        - "/*"
         - PolicyName: media-production-bucket
           PolicyDocument:
             Statement:
