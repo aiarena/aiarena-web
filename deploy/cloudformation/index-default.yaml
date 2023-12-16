@@ -390,20 +390,20 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: !var project_name
-      HealthCheckIntervalSeconds: 10
-      HealthCheckPath: !var health_check_path
-      HealthCheckPort: traffic-port
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      Matcher:
-        HttpCode: '200'
       Port: !var web_port
       Protocol: HTTP
       TargetType: ip
-      UnhealthyThresholdCount: 2
       VpcId:
         Ref: VPC
+      HealthCheckIntervalSeconds: 60
+      HealthCheckTimeoutSeconds: 30
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      HealthCheckPath: !var health_check_path
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      Matcher:
+        HttpCode: '200'
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value:
