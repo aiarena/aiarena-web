@@ -140,7 +140,7 @@ class CeleryWorkerTask(CeleryTask):
 SERVICES = [
     WebService(
         name="webService",
-        count=1,
+        count=2,
         task=WebTask(
             family="websiteTask",
             ports=[(WEB_PORT, WEB_PORT)],
