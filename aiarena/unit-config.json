@@ -28,7 +28,7 @@
   },
   "settings": {
     "http": {
-      "max_body_size": 209715200
+      "max_body_size": 5368709120
     }
   }
 }
