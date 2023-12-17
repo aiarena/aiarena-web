@@ -23,7 +23,8 @@
     "django": {
       "type": "python",
       "path": "/app/",
-      "module": "aiarena.wsgi"
+      "module": "aiarena.wsgi",
+      "processes": 2
     }
   },
   "settings": {
