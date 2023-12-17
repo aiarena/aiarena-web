@@ -78,6 +78,22 @@ Resources:
               - https://sc2ai.net
             MaxAge: 3000
 
+  lladdyDevTestingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods:
+              - GET
+              - HEAD
+              - PUT
+            AllowedOrigins:
+              - http://127.0.0.1:8000
+              - http://localhost:8000
+            MaxAge: 3000
+
   backupsBucket:
     Type: AWS::S3::Bucket
     Properties:
