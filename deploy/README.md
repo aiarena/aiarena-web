@@ -74,7 +74,7 @@ section of AWS Console:
 
 1. Select `aiarena` and click `Update`
 2. Choose `Replace current template`
-3. Choose `Upload a template file`
-4. Update the variables if you want to
+3. Choose `Upload a template file`, and select the `cloudformation-default.yaml` file that you generated in the previous step. Then click next.
+4. Update the variables if you want to, then click next until you get to the last screen.
 5. On the last screen please wait for the `Change set preview` to be generated, it can take a minute. Take a look at the preview, and make sure it makes sense.
 6. Click `Submit` and watch the infrastructure change
