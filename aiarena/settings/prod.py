@@ -1,7 +1,6 @@
 import os
 from socket import gethostbyname, gethostname
 
-from django.core.exceptions import DisallowedHost
 from django.utils.functional import SimpleLazyObject
 from django.utils.module_loading import import_string
 
