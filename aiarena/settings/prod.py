@@ -116,14 +116,6 @@ AWS_LOCATION = "media/"
 AWS_PRIVATE_LOCATION = "private-media/"
 
 
-def before_send(event, hint):
-    if "exc_info" in hint:
-        exc_type, exc_value, tb = hint["exc_info"]
-        if isinstance(exc_value, DisallowedHost):
-            return
-    return event
-
-
 # Sentry configuration
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
 BUILD_NUMBER = os.environ.get("BUILD_NUMBER")
@@ -140,6 +132,5 @@ if SENTRY_DSN:
         # https://docs.sentry.io/performance/distributed-tracing/#python
         "traces_sample_rate": 0.0,
         "attach_stacktrace": True,
-        "before_send": before_send,
     }
     sentry_sdk.init(**sentry_kwargs)
