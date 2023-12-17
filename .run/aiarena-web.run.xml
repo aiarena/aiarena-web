@@ -1,6 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="aiarena-web" type="Python.DjangoServer" factoryName="Django server">
     <module name="aiarena-web" />
+    <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
@@ -9,14 +10,13 @@
       <env name="DJANGO_ENVIRONMENT" value="DEVELOPMENT" />
     </envs>
     <option name="SDK_HOME" value="C:\Users\ipete\PycharmProjects\aiarena-web\venv\Scripts\python.exe" />
-    <option name="SDK_NAME" value="Python 3.10 (aiarena-web)" />
     <option name="WORKING_DIRECTORY" value="" />
-    <option name="IS_MODULE_SDK" value="false" />
+    <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <option name="launchJavascriptDebuger" value="false" />
     <option name="port" value="8000" />
-    <option name="host" value="" />
+    <option name="host" value="localhost" />
     <option name="additionalOptions" value="" />
     <option name="browserUrl" value="" />
     <option name="runTestServer" value="false" />
