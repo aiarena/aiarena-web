@@ -88,6 +88,14 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertTrue(round.complete)
         self.assertIsNotNone(round.finished)
 
+    def test_doglobalfilecleanup(self):
+        """
+        Test that the command runs without error
+        """
+        NUM_MATCHES = 12
+        self._generate_files_to_cleanup(NUM_MATCHES)
+        call_command("doglobalfilecleanup")
+
     def test_cleanup_replays_and_logs(self):
         NUM_MATCHES = 12
         participants, results = self._generate_files_to_cleanup(NUM_MATCHES)
