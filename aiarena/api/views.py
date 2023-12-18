@@ -438,7 +438,7 @@ class BotUpdateSerializer(serializers.ModelSerializer):
 
     def validate_bot_data(self, value):
         if self.instance.bot_data_is_currently_frozen():
-            raise serializers.ValidationError("Cannot edit bot_data when it's frozen")
+            raise serializers.ValidationError("Cannot edit bot_data when it's frozen (probably in a match)")
         return value
 
 
