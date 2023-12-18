@@ -90,31 +90,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
     def test_cleanup_replays_and_logs(self):
         NUM_MATCHES = 12
-        self.test_client.login(self.staffUser1)
-
-        # freeze competition2, so we can get anticipatable results
-        competition1 = Competition.objects.filter(status="open").first()
-        competition2 = Competition.objects.exclude(id=competition1.id).get()
-        competition2.freeze()
-
-        # generate some matches so we have replays to delete...
-        for x in range(NUM_MATCHES):  # 12 = two rounds
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201, f"{response.status_code} {response.data}")
-            match_id = response.data["id"]
-            self._post_to_results(match_id, "Player1Win")
-
-        # double check the replay and log files exist
-        results = Result.objects.filter(replay_file__isnull=False)
-        self.assertEqual(results.count(), NUM_MATCHES)
-        # after we ensure the arena client log count matches, we can safely just use the above results list
-        results_logs = Result.objects.filter(arenaclient_log__isnull=False)
-        self.assertEqual(results_logs.count(), NUM_MATCHES)
-        participants = MatchParticipation.objects.filter(match_log__isnull=False)
-        self.assertEqual(participants.count(), NUM_MATCHES * 2)
-
-        # set the created time so they'll be purged
-        results.update(created=timezone.now() - timedelta(days=cleanupresultfiles.Command._DEFAULT_DAYS_LOOKBACK + 1))
+        participants, results = self._generate_files_to_cleanup(NUM_MATCHES)
 
         out = StringIO()
         call_command("cleanupresultfiles", stdout=out)
@@ -165,6 +141,30 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertEqual(participants.count(), NUM_MATCHES * 2)
         for participant in participants:
             self.assertFalse(participant.match_log)
+
+    def _generate_files_to_cleanup(self, num_matches: int):
+        self.test_client.login(self.staffUser1)
+        # freeze competition2, so we can get anticipatable results
+        competition1 = Competition.objects.filter(status="open").first()
+        competition2 = Competition.objects.exclude(id=competition1.id).get()
+        competition2.freeze()
+        # generate some matches so we have replays to delete...
+        for x in range(num_matches):  # 12 = two rounds
+            response = self._post_to_matches()
+            self.assertEqual(response.status_code, 201, f"{response.status_code} {response.data}")
+            match_id = response.data["id"]
+            self._post_to_results(match_id, "Player1Win")
+        # double check the replay and log files exist
+        results = Result.objects.filter(replay_file__isnull=False)
+        self.assertEqual(results.count(), num_matches)
+        # after we ensure the arena client log count matches, we can safely just use the above results list
+        results_logs = Result.objects.filter(arenaclient_log__isnull=False)
+        self.assertEqual(results_logs.count(), num_matches)
+        participants = MatchParticipation.objects.filter(match_log__isnull=False)
+        self.assertEqual(participants.count(), num_matches * 2)
+        # set the created time so they'll be purged
+        results.update(created=timezone.now() - timedelta(days=cleanupresultfiles.Command._DEFAULT_DAYS_LOOKBACK + 1))
+        return participants, results
 
     def test_generatestats(self):
         self._generate_full_data_set()
