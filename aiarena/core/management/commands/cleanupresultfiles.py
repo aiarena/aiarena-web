@@ -25,14 +25,12 @@ class Command(BaseFileCleanupCommand):
             with transaction.atomic():
                 result.lock_me()
                 change_made = False
-                if result.replay_file:
-                    result.clean_replay_file()
+                if result.clean_replay_file():
                     replays_cleaned_count += 1
                     change_made = True
                     if verbose:
                         self.stdout.write(f"Match {result.match_id} replay file deleted.")
-                if result.arenaclient_log:
-                    result.clean_arenaclient_log()
+                if result.clean_arenaclient_log():
                     ac_logs_cleaned_count += 1
                     change_made = True
                     if verbose:
