@@ -23,7 +23,7 @@ class BotStatistics:
         This can be done much quicker that regenerating a bot's entire set of stats"""
 
         if result.type not in BotStatistics._ignored_result_types and bot.competition.indepth_bot_statistics_enabled:
-            with advisory_lock(f"stats_lock_{bot.id}") as acquired:
+            with advisory_lock(f"stats_lock_competitionparticipation_{bot.id}") as acquired:
                 if not acquired:
                     raise Exception(
                         "Could not acquire lock on bot statistics for competition participation " + str(bot.id)
