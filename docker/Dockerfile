@@ -15,7 +15,7 @@ RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-k
 RUN apt -y update
 RUN apt-get install postgresql-client-15 -y
 
-ADD ./pip/requirements.txt /srv/requirements.txt
+ADD ./requirements.txt /srv/requirements.txt
 RUN pip install -r /srv/requirements.txt
 
 COPY . /app

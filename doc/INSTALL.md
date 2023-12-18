@@ -22,15 +22,8 @@
 
 4. Install python modules
     ```
-    python ./pip/pip-install.py
+    pip install -r ./requirements.DEVELOPMENT.txt
     ```
-   The `pip-install.py` script runs a pip install using the generic and environment specific `requirements.txt` files.
-   If you experience issues with it, you can simply run the commands manually instead:
-   ```
-   pip install -r ./pip/requirements.txt
-   pip install -r ./pip/requirements.DEVELOPMENT.txt
-   ```
-   If these commands fail, then you likely have an issue with your environment (is `pip3` in your PATH?).
    
 
 5. Modify the Website config to use your Database.  
@@ -84,7 +77,7 @@
 
 ### Install pre-commit hooks
 
-Assuming you have run `python ./pip/pip-install.py`, you only need to run this to set up pre-commit linter checking.
+Assuming you have run `pip install -r ./requirements.DEVELOPMENT.txt`, you only need to run this to set up pre-commit linter checking.
 ```
 pre-commit install
 ```

@@ -20,7 +20,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          python ./pip/pip-install.py --python=python --pip=pip
+          python -m pip install -r requirements.DEVELOPMENT.txt
       - uses: pre-commit/action@v3.0.0
 
   test:
@@ -65,7 +65,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          python ./pip/pip-install.py --python=python --pip=pip
+          python -m pip install -r requirements.DEVELOPMENT.txt
       - name: Grant aiarena user full access
         env:
           PORT: ${{ job.services.postgres.ports[5432] }}
