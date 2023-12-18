@@ -16,6 +16,7 @@ from rest_framework.reverse import reverse
 
 from aiarena.api.arenaclient.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.exceptions import LadderDisabled, NoGameForClient
+from aiarena.api.arenaclient.s3_helpers import get_file_s3_url_with_content_disposition, is_s3_file
 from aiarena.core.api import BotStatistics
 from aiarena.core.models import (
     Bot,
@@ -52,12 +53,18 @@ class BotSerializer(serializers.ModelSerializer):
     plays_race = serializers.CharField(source="plays_race.label")
 
     def get_bot_zip(self, obj):
-        p = MatchParticipation.objects.only("participant_number").get(bot=obj, match_id=self.root.instance.id)
-        return reverse(
-            "match-download-zip",
-            kwargs={"pk": self.root.instance.id, "p_num": p.participant_number},
-            request=self.context["request"],
-        )
+        # This is_s3_file check is a quick fix to avoid having to figure out how to restructure the storage backend.
+        # The parameters in get_file_s3_url_with_content_disposition can only be specified with the S3 backend, else
+        # it breaks.
+        if is_s3_file(obj.bot_zip):
+            return get_file_s3_url_with_content_disposition(obj.bot_zip, f"{obj.name}.zip")
+        else:
+            p = MatchParticipation.objects.only("participant_number").get(bot=obj, match_id=self.root.instance.id)
+            return reverse(
+                "match-download-zip",
+                kwargs={"pk": self.root.instance.id, "p_num": p.participant_number},
+                request=self.context["request"],
+            )
 
     def get_bot_data(self, obj):
         p = (
@@ -66,11 +73,17 @@ class BotSerializer(serializers.ModelSerializer):
             .get(bot=obj, match_id=self.root.instance.id)
         )
         if p.use_bot_data and p.bot.bot_data:
-            return reverse(
-                "match-download-data",
-                kwargs={"pk": self.root.instance.id, "p_num": p.participant_number},
-                request=self.context["request"],
-            )
+            # This is_s3_file check is a quick fix to avoid having to figure out how to restructure the storage backend.
+            # The parameters in get_file_s3_url_with_content_disposition can only be specified with the S3 backend, else
+            # it breaks.
+            if is_s3_file(obj.bot_data):
+                return get_file_s3_url_with_content_disposition(obj.bot_data, f"{obj.name}_data.zip")
+            else:
+                return reverse(
+                    "match-download-data",
+                    kwargs={"pk": self.root.instance.id, "p_num": p.participant_number},
+                    request=self.context["request"],
+                )
         else:
             return None
 

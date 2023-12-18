@@ -100,30 +100,26 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         bot1_zip = self.client.get(response.data["bot1"]["bot_zip"])
         bot1_zip_path = "./tmp/bot1.zip"
         with open(bot1_zip_path, "wb") as bot1_zip_file:  # todo: this can probably be done without saving to file
-            bot1_zip_file.write(bot1_zip.content)
-            bot1_zip_file.close()
+            self._write_file_response_to_file(bot1_zip, bot1_zip_file)
         self.assertEqual(response.data["bot1"]["bot_zip_md5hash"], calculate_md5(bot1_zip_path))
 
         bot1_zip = self.client.get(response.data["bot2"]["bot_zip"])
         bot1_zip_path = "./tmp/bot2.zip"
         with open(bot1_zip_path, "wb") as bot1_zip_file:
-            bot1_zip_file.write(bot1_zip.content)
-            bot1_zip_file.close()
+            self._write_file_response_to_file(bot1_zip, bot1_zip_file)
         self.assertEqual(response.data["bot2"]["bot_zip_md5hash"], calculate_md5(bot1_zip_path))
 
         # data
         bot1_zip = self.client.get(response.data["bot1"]["bot_data"])
         bot1_zip_path = "./tmp/bot1_data.zip"
         with open(bot1_zip_path, "wb") as bot1_zip_file:
-            bot1_zip_file.write(bot1_zip.content)
-            bot1_zip_file.close()
+            self._write_file_response_to_file(bot1_zip, bot1_zip_file)
         self.assertEqual(response.data["bot1"]["bot_data_md5hash"], calculate_md5(bot1_zip_path))
 
         bot1_zip = self.client.get(response.data["bot2"]["bot_data"])
         bot1_zip_path = "./tmp/bot2_data.zip"
         with open(bot1_zip_path, "wb") as bot1_zip_file:
-            bot1_zip_file.write(bot1_zip.content)
-            bot1_zip_file.close()
+            self._write_file_response_to_file(bot1_zip, bot1_zip_file)
         self.assertEqual(response.data["bot2"]["bot_data_md5hash"], calculate_md5(bot1_zip_path))
 
         # not enough available bots
@@ -132,6 +128,23 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)
+
+    def _write_file_response_to_file(self, file_response, file):
+        # we need to do this because, if the file backend is S3, it will be a streaming response
+        # otherwise it will be a regular response
+        # This enables the tests to run against S3 or local file storage
+        if hasattr(file_response, "streaming_content"):
+            self._write_streaming_content_to_file(file_response.streaming_content, file)
+        else:
+            self._write_content_to_file(file_response.content, file)
+
+    def _write_streaming_content_to_file(self, streaming_content, file):
+        for chunk in streaming_content:
+            file.write(chunk)
+
+    def _write_content_to_file(self, content, file):
+        file.write(content)
+        file.close()
 
     def test_match_reissue(self):
         self.test_client.login(self.staffUser1)
