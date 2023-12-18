@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters humanize %}
+{% load i18n core_filters humanize cache %}
 {% block content %}
 
     <div class="divider"><span></span><span><h2>Welcome to SC2 AI Arena!</h2></span><span></span></div>
@@ -38,6 +38,7 @@
         <div id="contribute">
             Refer to the <a href="https://aiarena.net/wiki/contribute/">wiki</a> on ways to contribute.
         </div>
+        {% cache 600 news %}
         <div id="news_feed">
             <div class="divider"><span></span><span><h2>News</h2></span><span></span></div>
             {% for new in news %}
@@ -79,6 +80,7 @@
                 {% endfor %}
             </div>
         </div>
+        {% endcache %}
         <div class="divider-full div-transparent-full "></div>
     </div>
 
@@ -89,6 +91,7 @@
             <br/>
             The old sc2ai.net website can be accessed at <a href="http://archive.sc2ai.net/">archive.sc2ai.net</a>
         </div>
+        {% cache 600 competition_feed %}
         {% if competitions %}
             <div id="competition_feed">
                 <div class="divider"><span></span><span><h2>Competitions</h2></span><span></span></div>
@@ -156,6 +159,7 @@
                 </div>
             </div>
         {% endif %}
+        {% endcache %}
         <div id="activity_feed">
             <div class="divider"><span></span><span><h2>Activity</h2></span><span></span></div>
         <table>
