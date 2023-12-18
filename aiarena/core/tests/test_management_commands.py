@@ -10,7 +10,7 @@ from django.utils import timezone
 from constance import config
 
 from aiarena.core.api import Ladders
-from aiarena.core.management.commands import cleanupreplays
+from aiarena.core.management.commands import cleanupresultfiles
 from aiarena.core.models import (
     Bot,
     Competition,
@@ -114,51 +114,26 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertEqual(participants.count(), NUM_MATCHES * 2)
 
         # set the created time so they'll be purged
-        results.update(created=timezone.now() - timedelta(days=cleanupreplays.Command._DEFAULT_DAYS_LOOKBACK + 1))
+        results.update(created=timezone.now() - timedelta(days=cleanupresultfiles.Command._DEFAULT_DAYS_LOOKBACK + 1))
 
         out = StringIO()
-        call_command("cleanupreplays", stdout=out)
+        call_command("cleanupresultfiles", stdout=out)
         self.assertIn(
-            "Cleaning up replays starting from 30 days into the past...\n"
+            "Cleaning up result files starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
-            f"{NUM_MATCHES} records gathered.\n"
-            f"Cleaned up {NUM_MATCHES} replays.",
+            "12 records gathered.\n"
+            "Cleaned up 12 replays and 12 arena client logs.",
             out.getvalue(),
         )
 
         # ensure the job doesn't re-clean the same records when run again
         out = StringIO()
-        call_command("cleanupreplays", stdout=out)
+        call_command("cleanupresultfiles", stdout=out)
         self.assertIn(
-            "Cleaning up replays starting from 30 days into the past...\n"
+            "Cleaning up result files starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
             "0 records gathered.\n"
-            "Cleaned up 0 replays.",
-            out.getvalue(),
-        )
-
-        self.assertEqual(results.count(), NUM_MATCHES)
-        for result in results:
-            self.assertFalse(result.replay_file)
-
-        out = StringIO()
-        call_command("cleanuparenaclientlogfiles", stdout=out)
-        self.assertIn(
-            "Cleaning up arena client logfiles starting from 30 days into the past...\n"
-            "Gathering records to clean...\n"
-            f"{NUM_MATCHES} records gathered.\n"
-            f"Cleaned up {NUM_MATCHES} logfiles.",
-            out.getvalue(),
-        )
-
-        # ensure the job doesn't re-clean the same records when run again
-        out = StringIO()
-        call_command("cleanuparenaclientlogfiles", stdout=out)
-        self.assertIn(
-            "Cleaning up arena client logfiles starting from 30 days into the past...\n"
-            "Gathering records to clean...\n"
-            "0 records gathered.\n"
-            "Cleaned up 0 logfiles.",
+            "Cleaned up 0 replays and 0 arena client logs.",
             out.getvalue(),
         )
 
