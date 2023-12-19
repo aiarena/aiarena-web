@@ -731,7 +731,7 @@ class AuthorList(ListView):
 class AuthorDetail(DetailView):
     queryset = User.objects.filter(is_active=1, type="WEBSITE_USER")
     template_name = "author.html"
-    context_object_name = "author"  # change the context name to avoid overriding the current user oontext object
+    context_object_name = "author"  # change the context name to avoid overriding the current user context object
 
     def _paginate_query(self, results_queryset):
         page_size = 10
