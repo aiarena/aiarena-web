@@ -9,7 +9,8 @@ class ENVIRONMENT_TYPES(Enum):
 
 env = os.getenv("DJANGO_ENVIRONMENT")
 if env is None:
-    raise Exception("The environment variable DJANGO_ENVIRONMENT must be set to one of: DEVELOPMENT, PRODUCTION")
+    print("DJANGO_ENVIRONMENT not set. Defaulting to DEVELOPMENT")
+    env = "DEVELOPMENT"
 
 ENVIRONMENT_TYPE = ENVIRONMENT_TYPES[env]
 if ENVIRONMENT_TYPE == ENVIRONMENT_TYPES.PRODUCTION:
