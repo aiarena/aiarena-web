@@ -756,7 +756,7 @@ class AuthorDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["bot_list"] = (
-            Bot.objects.select_related("user", "plays_race").filter(user_id=self.object.id).order_by("-created")
+            Bot.objects.select_related("plays_race").only("name", "type", "plays_race").filter(user_id=self.object.id).order_by("-created")
         )
         results_queryset = (
             Result.objects.filter(match__matchparticipation__bot__in=context["bot_list"])
@@ -766,7 +766,7 @@ class AuthorDetail(DetailView):
                 Prefetch("match__requested_by"),
                 Prefetch(
                     "match__matchparticipation_set",
-                    MatchParticipation.objects.all().prefetch_related("bot"),
+                    MatchParticipation.objects.all().prefetch_related("bot").only("participant_number", "bot_id", "match_id", "elo_change"),
                     to_attr="participants",
                 ),
             )
