@@ -122,7 +122,7 @@
             </tr>
             </thead>
             <tbody>
-            {% if competition_map_stats.count > 0 %}
+            {% if competition_map_stats|length > 0 %}
                 {% for map_stat in competition_map_stats %}
                     <tr style="text-align: right">
                         <td class="mono">{{map_stat.map.name}}</td>
