@@ -546,19 +546,22 @@ class BotCompetitionStatsDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["competition_bot_matchups"] = (
-            self.object.competition_matchup_stats.filter(
-                opponent__competition=context["competitionparticipation"].competition
-            )
-            .order_by("-win_perc")
-            .distinct()
-            .prefetch_related("opponent__bot")
+        context["competition_bot_matchups"] = self.__get_competition_bot_matchups(
+            context["competitionparticipation"].competition
         )
         context["competition_map_stats"] = self.object.competition_map_stats.order_by("map__name")
         context["updated"] = (
             context["competition_bot_matchups"][0].updated if context["competition_bot_matchups"] else "Never"
         )
         return context
+
+    def __get_competition_bot_matchups(self, competition):
+        return (
+            self.object.competition_matchup_stats.filter(opponent__competition=competition)
+            .order_by("-win_perc")
+            .distinct()
+            .prefetch_related("opponent__bot")
+        )
 
 
 class BotCompetitionStatsEloGraphUpdatePlot(PrivateStorageDetailView):
