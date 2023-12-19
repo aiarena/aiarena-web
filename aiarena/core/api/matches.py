@@ -119,9 +119,8 @@ class Matches:
             #                f" because one of the participants was not available.")
             return False
 
-        now = timezone.now()
-        match.started = now
-        match.first_started = now
+        # If all checks pass, start the match
+        match.started = match.first_started = timezone.now()
         match.assigned_to = arenaclient
         match.save()
         return True
