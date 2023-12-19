@@ -107,8 +107,7 @@ class Matches:
                     and (core_matchparticipation.use_bot_data  or core_matchparticipation.update_bot_data)       
                     and m.id != %s 
                 )) and match_id = %s
-
-        """,
+                """,
             (match.id, match.id),
         )
 
