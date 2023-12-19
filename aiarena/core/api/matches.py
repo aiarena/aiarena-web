@@ -84,17 +84,14 @@ class Matches:
 
     @staticmethod
     def __start_match(match: Match, arenaclient: ArenaClient) -> bool:
-        # Allowing the match to be played on a untrusted client if the user allows the download after requesting a match.
-        require_trusted_arenaclient = match.require_trusted_arenaclient
-        if not require_trusted_arenaclient:
-            bot1 = match.participant1.bot
-            bot2 = match.participant2.bot
-            require_trusted_arenaclient = (
-                not bot1.bot_zip_publicly_downloadable
-                or not bot2.bot_zip_publicly_downloadable
-                or not bot1.bot_data_publicly_downloadable
-                or not bot2.bot_data_publicly_downloadable
-            )
+        # Check if the match requires a trusted arenaclient
+        require_trusted_arenaclient = match.require_trusted_arenaclient or (
+            not match.participant1.bot.bot_zip_publicly_downloadable
+            or not match.participant2.bot.bot_zip_publicly_downloadable
+            or not match.participant1.bot.bot_data_publicly_downloadable
+            or not match.participant2.bot.bot_data_publicly_downloadable
+        )
+
         if require_trusted_arenaclient and not arenaclient.trusted:
             return False
         match.lock_me()  # lock self to avoid race conditions
