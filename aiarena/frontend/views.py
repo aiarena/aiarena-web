@@ -557,14 +557,14 @@ class BotCompetitionStatsDetail(DetailView):
         return context
 
     def __get_competition_map_stats(self):
-        return self.object.competition_map_stats.prefetch_related("map").order_by("map__name")
+        return self.object.competition_map_stats.select_related("map").order_by("map__name")
 
     def __get_competition_bot_matchups(self, competition):
         return (
             self.object.competition_matchup_stats.filter(opponent__competition=competition)
             .order_by("-win_perc")
             .distinct()
-            .prefetch_related("opponent__bot", "opponent__bot__plays_race")
+            .select_related("opponent__bot", "opponent__bot__plays_race")
         )
 
 
