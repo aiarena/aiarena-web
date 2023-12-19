@@ -37,7 +37,11 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
         User, on_delete=models.SET_NULL, blank=True, null=True, related_name="requested_matches"
     )
     require_trusted_arenaclient = models.BooleanField(default=True)
-    """Whether this match should require it be run on a trusted arena client"""
+    """
+    Whether this match should require it be run on a trusted arena client
+    IMPORTANT: This is only a flag to force the use of a trusted client.
+    This can be false and other factors can still cause the match to be run on a trusted client.
+    """
     tags = models.ManyToManyField(MatchTag, blank=True)
 
     def __str__(self):
