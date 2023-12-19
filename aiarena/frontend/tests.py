@@ -103,6 +103,10 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get(f"/authors/{self.regularUser1.id}/")
         self.assertEqual(response.status_code, 200)
 
+        # author - test out of range paging 404
+        response = self.client.get(f"/authors/{self.regularUser1.id}/?page=999")
+        self.assertEqual(response.status_code, 404)
+
         # match
         response = self.client.get(f"/matches/{Match.objects.all()[0].id}/")
         self.assertEqual(response.status_code, 200)
