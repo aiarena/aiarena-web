@@ -135,3 +135,10 @@ class MatchParticipation(models.Model, LockableModelMixin):
 
     def can_download_match_log(self, user):
         return self.bot.user == user or user.is_staff
+
+    def clean_match_log(self) -> bool:
+        if self.match_log:
+            self.match_log_has_been_cleaned = True
+            self.match_log.delete()
+            return True
+        return False

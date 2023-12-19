@@ -547,18 +547,10 @@ CELERY_TASK_ACKS_LATE = False
 CELERY_TASK_DEFAULT_QUEUE = "default"
 if crontab:
     CELERY_BEAT_SCHEDULE = {
-        # "clean_up_replays": {
-        #     "task": "aiarena.core.tasks.clean_up_replays",
-        #     "schedule": crontab(minute="*/30"),  # */30 * * * *
-        # },
-        # "clean_up_match_log_files": {
-        #     "task": "aiarena.core.tasks.clean_up_match_log_files",
-        #     "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
-        # },
-        # "clean_up_arena_client_log_files": {
-        #     "task": "aiarena.core.tasks.clean_up_arena_client_log_files",
-        #     "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
-        # },
+        "doglobalfilecleanup": {
+            "task": "aiarena.core.tasks.clean_up_match_log_files",
+            "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
+        },
         "generate_stats": {
             "task": "aiarena.core.tasks.generate_stats",
             "schedule": crontab(minute="*/60"),  # */60 * * * *

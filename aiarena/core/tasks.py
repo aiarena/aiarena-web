@@ -23,18 +23,8 @@ def celery_exception_test():
 
 
 @app.task(ignore_result=True)
-def clean_up_replays():
-    management.call_command("cleanupreplays", days=90)
-
-
-@app.task(ignore_result=True)
-def clean_up_match_log_files():
-    management.call_command("cleanupmatchlogfiles")
-
-
-@app.task(ignore_result=True)
-def clean_up_arena_client_log_files():
-    management.call_command("cleanuparenaclientlogfiles")
+def doglobalfilecleanup():
+    management.call_command("doglobalfilecleanup", days=90)
 
 
 @app.task(ignore_result=True)

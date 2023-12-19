@@ -203,6 +203,20 @@ class Result(models.Model, LockableModelMixin):
         first, second = self.get_match_participants
         return first.bot, second.bot
 
+    def clean_replay_file(self) -> bool:
+        if self.replay_file:
+            self.replay_file_has_been_cleaned = True
+            self.replay_file.delete()
+            return True
+        return False
+
+    def clean_arenaclient_log(self) -> bool:
+        if self.arenaclient_log:
+            self.arenaclient_log_has_been_cleaned = True
+            self.arenaclient_log.delete()
+            return True
+        return False
+
     def save(self, *args, **kwargs):
         from .match_participation import MatchParticipation
 
