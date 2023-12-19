@@ -730,13 +730,9 @@ class AuthorList(ListView):
 
 
 class AuthorDetail(DetailView):
-    queryset = User.objects.filter(is_active=1, type="WEBSITE_USER")\
-        .only(
-            "username",
-            "date_joined",
-            "patreon_level",
-            "last_login"
-               )
+    queryset = User.objects.filter(is_active=1, type="WEBSITE_USER").only(
+        "username", "date_joined", "patreon_level", "last_login"
+    )
     template_name = "author.html"
     context_object_name = "author"  # change the context name to avoid overriding the current user oontext object
 
@@ -756,7 +752,10 @@ class AuthorDetail(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["bot_list"] = (
-            Bot.objects.select_related("plays_race").only("name", "type", "plays_race").filter(user_id=self.object.id).order_by("-created")
+            Bot.objects.select_related("plays_race")
+            .only("name", "type", "plays_race")
+            .filter(user_id=self.object.id)
+            .order_by("-created")
         )
         results_queryset = (
             Result.objects.filter(match__matchparticipation__bot__in=context["bot_list"])
@@ -766,7 +765,9 @@ class AuthorDetail(DetailView):
                 Prefetch("match__requested_by"),
                 Prefetch(
                     "match__matchparticipation_set",
-                    MatchParticipation.objects.all().prefetch_related("bot").only("participant_number", "bot_id", "match_id", "elo_change"),
+                    MatchParticipation.objects.all()
+                    .prefetch_related("bot")
+                    .only("participant_number", "bot_id", "match_id", "elo_change"),
                     to_attr="participants",
                 ),
             )
@@ -972,13 +973,15 @@ class Index(ListView):
         """This was applicable before multiple competitions and has only been left here to avoid having to refactor
         the code"""
         return CompetitionParticipation.objects.none()
-    
+
     def get_competitions(self):
         competition_context = []
         cache_time = config.TOP10_CACHE_TIME
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
-        competitions = Competition.objects.only("name", "interest").filter(status__in=["frozen", "paused", "open", "closing"]).annotate(
-            num_participants=Count("participations")
+        competitions = (
+            Competition.objects.only("name", "interest")
+            .filter(status__in=["frozen", "paused", "open", "closing"])
+            .annotate(num_participants=Count("participations"))
         )
         # Count active bots of the user in each competition
         if self.request.user.is_authenticated:
@@ -1010,7 +1013,7 @@ class Index(ListView):
                                 elo_change__isnull=False,
                                 match__requested_by__isnull=True,
                                 match__round__competition=comp,
-                            ).order_by("-match__started")[: elo_trend_n_matches],
+                            ).order_by("-match__started")[:elo_trend_n_matches],
                             to_attr="match_participations",
                         ),
                     )
@@ -1028,7 +1031,7 @@ class Index(ListView):
                     }
                 )
         return competition_context
-    
+
     def get_news(self):
         cache_time = config.NEWS_CACHE_TIME
         cache_key = "news"
@@ -1037,7 +1040,7 @@ class Index(ListView):
             news = News.objects.all().order_by("-created")
             cache.set(cache_key, news, cache_time)
         return news
-    
+
     def get_events(self):
         events = (
             Bot.objects.select_related("user")
@@ -1052,11 +1055,10 @@ class Index(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        
         context["events"] = self.get_events
         context["news"] = self.get_news()
         context["competitions"] = self.get_competitions()
-        
+
         return context
 
     template_name = "index.html"
