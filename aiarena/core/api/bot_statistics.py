@@ -23,7 +23,7 @@ class BotStatistics:
         This can be done much quicker that regenerating a bot's entire set of stats"""
 
         if result.type not in BotStatistics._ignored_result_types and bot.competition.indepth_bot_statistics_enabled:
-            with advisory_lock(f"stats_lock_{bot.id}") as acquired:
+            with advisory_lock(f"stats_lock_competitionparticipation_{bot.id}") as acquired:
                 if not acquired:
                     raise Exception(
                         "Could not acquire lock on bot statistics for competition participation " + str(bot.id)
@@ -36,9 +36,9 @@ class BotStatistics:
     def recalculate_stats(sp: CompetitionParticipation):
         """This method entirely recalculates a bot's set of stats."""
 
-        with advisory_lock(f"stats_lock_{sp.id}") as acquired:
+        with advisory_lock(f"stats_lock_competitionparticipation_{sp.id}") as acquired:
             if not acquired:
-                raise Exception("Could not acquire lock on bot statistics for competition participation " + str(sp.id))
+                raise Exception(f"Could not acquire lock on bot statistics for competition participation  {str(sp.id)}")
 
             BotStatistics._recalculate_global_statistics(sp)
 
@@ -154,7 +154,7 @@ class BotStatistics:
             with connection.cursor() as cursor:
                 match_count = BotStatistics._calculate_matchup_count(cursor, competition_participation, sp)
                 if match_count > 0:
-                    matchup_stats = CompetitionBotMatchupStats.objects.select_for_update().get_or_create(
+                    matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(
                         bot=sp, opponent=competition_participation
                     )[0]
 
@@ -183,9 +183,7 @@ class BotStatistics:
 
     @staticmethod
     def _update_matchup_stats(bot: CompetitionParticipation, opponent: CompetitionParticipation, result: Result):
-        matchup_stats = CompetitionBotMatchupStats.objects.select_for_update().get_or_create(
-            bot=bot, opponent=opponent
-        )[0]
+        matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(bot=bot, opponent=opponent)[0]
 
         matchup_stats.match_count += 1
 
