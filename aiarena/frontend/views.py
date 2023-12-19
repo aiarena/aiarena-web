@@ -544,21 +544,28 @@ class BotDetail(DetailView):
 class BotCompetitionStatsDetail(DetailView):
     model = CompetitionParticipation
     template_name = "bot_competition_stats.html"
+    queryset = CompetitionParticipation.objects.select_related("competition", "bot")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["competition_bot_matchups"] = (
-            self.object.competition_matchup_stats.filter(
-                opponent__competition=context["competitionparticipation"].competition
-            )
-            .order_by("-win_perc")
-            .distinct()
-        )
-        context["competition_map_stats"] = self.object.competition_map_stats.order_by("map__name")
+        competition = context["competitionparticipation"].competition
+        context["competition_bot_matchups"] = self.__get_competition_bot_matchups(competition)
+        context["competition_map_stats"] = self.__get_competition_map_stats()
         context["updated"] = (
             context["competition_bot_matchups"][0].updated if context["competition_bot_matchups"] else "Never"
         )
         return context
+
+    def __get_competition_map_stats(self):
+        return self.object.competition_map_stats.select_related("map").order_by("map__name")
+
+    def __get_competition_bot_matchups(self, competition):
+        return (
+            self.object.competition_matchup_stats.filter(opponent__competition=competition)
+            .order_by("-win_perc")
+            .distinct()
+            .select_related("opponent__bot", "opponent__bot__plays_race")
+        )
 
 
 class BotCompetitionStatsEloGraphUpdatePlot(PrivateStorageDetailView):

@@ -122,7 +122,7 @@
             </tr>
             </thead>
             <tbody>
-            {% if competition_map_stats.count > 0 %}
+            {% if competition_map_stats|length > 0 %}
                 {% for map_stat in competition_map_stats %}
                     <tr style="text-align: right">
                         <td class="mono">{{map_stat.map.name}}</td>
@@ -180,7 +180,7 @@
             </tr>
             </thead>
             <tbody>
-            {% if competition_bot_matchups.count > 0 %}
+            {% if competition_bot_matchups|length > 0 %}
                 {% for bot_matchup in competition_bot_matchups %}
                     <tr style="text-align: right">
                         <td style="text-align: right">{{ bot_matchup.opponent.bot.as_truncated_html_link }}</td>
