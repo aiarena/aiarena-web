@@ -83,7 +83,7 @@ class Matches:
                 match.round.update_if_completed()
 
     @staticmethod
-    def start_match(match: Match, arenaclient: ArenaClient) -> bool:
+    def __start_match(match: Match, arenaclient: ArenaClient) -> bool:
         # Allowing the match to be played on a untrusted client if the user allows the download after requesting a match.
         require_trusted_arenaclient = match.require_trusted_arenaclient
         if not require_trusted_arenaclient:
@@ -155,7 +155,7 @@ class Matches:
     @staticmethod
     def _start_and_return_a_match(requesting_ac: ArenaClient, matches):
         for match in matches:
-            if Matches.start_match(match, requesting_ac):
+            if Matches.__start_match(match, requesting_ac):
                 return match
         return None  # No match was able to start
 
