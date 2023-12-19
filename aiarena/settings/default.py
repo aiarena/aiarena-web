@@ -552,18 +552,18 @@ if crontab:
     CELERY_BEAT_SCHEDULE = {
         "doglobalfilecleanup": {
             "task": "aiarena.core.tasks.clean_up_match_log_files",
-            "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
+            "schedule": crontab(minute=0, hour=1),  # 0 1 * * *
         },
-        "generate_stats": {
-            "task": "aiarena.core.tasks.generate_stats",
-            "schedule": crontab(minute="*/60"),  # */60 * * * *
-        },
+        # "generate_stats": {
+        #     "task": "aiarena.core.tasks.generate_stats",
+        #     "schedule": crontab(minute="*/60"),  # */60 * * * *
+        # },
         "refresh_patreon_tiers": {
             "task": "aiarena.core.tasks.refresh_patreon_tiers",
             "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
         },
-        "timeout_overtime_matches": {
-            "task": "aiarena.core.tasks.timeout_overtime_matches",
-            "schedule": crontab(minute="*/30"),  # */30 * * * *
-        },
+        # "timeout_overtime_matches": {
+        #     "task": "aiarena.core.tasks.timeout_overtime_matches",
+        #     "schedule": crontab(minute="*/30"),  # */30 * * * *
+        # },
     }
