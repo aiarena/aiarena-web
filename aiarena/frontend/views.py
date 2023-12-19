@@ -4,6 +4,7 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db import IntegrityError, connection, transaction
@@ -17,7 +18,6 @@ from django.utils.safestring import mark_safe
 from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, FormView, ListView, UpdateView
 from django.views.generic.detail import SingleObjectMixin
-from django.core.cache import cache
 
 import django_filters as filters
 import django_tables2 as tables
