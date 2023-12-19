@@ -9,6 +9,9 @@ RUN apt-get update \
 COPY . workspace
 
 WORKDIR /workspace/pip
+
+ENV DJANGO_ENVIRONMENT=DEVELOPMENT
+
 RUN pip install --upgrade pip
 RUN python pip-install.py
 RUN pip install -r requirements.txt
