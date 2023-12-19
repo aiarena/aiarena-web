@@ -549,11 +549,14 @@ class BotCompetitionStatsDetail(DetailView):
         context["competition_bot_matchups"] = self.__get_competition_bot_matchups(
             context["competitionparticipation"].competition
         )
-        context["competition_map_stats"] = self.object.competition_map_stats.order_by("map__name")
+        context["competition_map_stats"] = self.__get_competition_map_stats()
         context["updated"] = (
             context["competition_bot_matchups"][0].updated if context["competition_bot_matchups"] else "Never"
         )
         return context
+
+    def __get_competition_map_stats(self):
+        return self.object.competition_map_stats.prefetch_related("map").order_by("map__name")
 
     def __get_competition_bot_matchups(self, competition):
         return (
