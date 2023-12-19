@@ -742,7 +742,7 @@ class AuthorDetail(DetailView):
         except PageNotAnInteger:
             results = paginator.page(1)
         except EmptyPage:
-            results = paginator.page(paginator.num_pages)
+            raise Http404("Page is out of range.")
 
         return results, restrict_page_range(paginator.num_pages, results.number)
 
