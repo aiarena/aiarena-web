@@ -60,6 +60,10 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
         return self.requested_by is not None
 
     @property
+    def is_already_started(self):
+        return self.started is not None
+
+    @property
     def status(self):
         from .result import Result  # avoid circular import
 
