@@ -185,18 +185,14 @@ class Bot(models.Model, LockableModelMixin):
         return self.name
 
     def bot_data_is_currently_frozen(self):
-        # dont alter bot_data while the data is locked in a match, unless there was no bot_data initially
-        matches = Match.objects.only("id").filter(
-            matchparticipation__bot=self, started__isnull=False, result__isnull=True
-        )
-        data_frozen = False
-        for match in matches:
-            for p in match.matchparticipation_set.filter(bot=self):
-                if p.use_bot_data and p.update_bot_data:
-                    data_frozen = True  # todo: maybe we can cache this flag
-                    break
-            if data_frozen:
-                break
+        # Check if there's any match where the bot's data is being used and updated
+        data_frozen = Match.objects.filter(
+            matchparticipation__bot=self,
+            matchparticipation__use_bot_data=True,
+            matchparticipation__update_bot_data=True,
+            started__isnull=False,
+            result__isnull=True,
+        ).exists()
 
         return self.bot_data and data_frozen
 
