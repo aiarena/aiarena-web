@@ -547,9 +547,8 @@ class BotCompetitionStatsDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["competition_bot_matchups"] = self.__get_competition_bot_matchups(
-            context["competitionparticipation"].competition
-        )
+        competition = context["competitionparticipation"].competition
+        context["competition_bot_matchups"] = self.__get_competition_bot_matchups(competition)
         context["competition_map_stats"] = self.__get_competition_map_stats()
         context["updated"] = (
             context["competition_bot_matchups"][0].updated if context["competition_bot_matchups"] else "Never"
