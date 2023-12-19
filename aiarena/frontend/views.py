@@ -543,6 +543,7 @@ class BotDetail(DetailView):
 class BotCompetitionStatsDetail(DetailView):
     model = CompetitionParticipation
     template_name = "bot_competition_stats.html"
+    queryset = CompetitionParticipation.objects.select_related("competition", "bot")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
