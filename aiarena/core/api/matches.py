@@ -84,16 +84,9 @@ class Matches:
 
     @staticmethod
     def __start_match(match: Match, arenaclient: ArenaClient) -> bool:
-        # Check if the match requires a trusted arenaclient
-        require_trusted_arenaclient = match.require_trusted_arenaclient or (
-            not match.participant1.bot.bot_zip_publicly_downloadable
-            or not match.participant2.bot.bot_zip_publicly_downloadable
-            or not match.participant1.bot.bot_data_publicly_downloadable
-            or not match.participant2.bot.bot_data_publicly_downloadable
-        )
-
-        if require_trusted_arenaclient and not arenaclient.trusted:
+        if Matches.__requires_trusted_arenaclient(match) and not arenaclient.trusted:
             return False
+
         match.lock_me()  # lock self to avoid race conditions
         if match.started is None:
             # Avoid starting a match when a participant is not available
@@ -132,6 +125,16 @@ class Matches:
         else:
             logger.warning(f"Match {match.id} failed to start unexpectedly as it was already started.")
             return False
+
+    @staticmethod
+    def __requires_trusted_arenaclient(match):
+        require_trusted_arenaclient = match.require_trusted_arenaclient or (
+            not match.participant1.bot.bot_zip_publicly_downloadable
+            or not match.participant2.bot.bot_zip_publicly_downloadable
+            or not match.participant1.bot.bot_data_publicly_downloadable
+            or not match.participant2.bot.bot_data_publicly_downloadable
+        )
+        return require_trusted_arenaclient
 
     @staticmethod
     def attempt_to_start_a_requested_match(requesting_ac: ArenaClient):
