@@ -563,7 +563,7 @@ class BotCompetitionStatsDetail(DetailView):
             self.object.competition_matchup_stats.filter(opponent__competition=competition)
             .order_by("-win_perc")
             .distinct()
-            .prefetch_related("opponent__bot")
+            .prefetch_related("opponent__bot", "opponent__bot__plays_race")
         )
 
 
