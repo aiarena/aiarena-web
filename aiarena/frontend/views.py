@@ -552,6 +552,7 @@ class BotCompetitionStatsDetail(DetailView):
             )
             .order_by("-win_perc")
             .distinct()
+            .prefetch_related("opponent__bot")
         )
         context["competition_map_stats"] = self.object.competition_map_stats.order_by("map__name")
         context["updated"] = (
