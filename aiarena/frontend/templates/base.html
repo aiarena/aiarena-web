@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n cache %}
 <!DOCTYPE html>
 <html lang="en">
 {% with public_banner_message=config.PUBLIC_BANNER_MESSAGE discord_invite_link=config.DISCORD_INVITE_LINK patreon_link=config.PATREON_LINK logged_in_banner_message=config.LOGGED_IN_BANNER_MESSAGE    project_finance_link=config.PROJECT_FINANCE_LINK    admin_cluster_link=config.ADMIN_CLUSTER_LINK    admin_webstats_link=config.ADMIN_WEBSTATS_LINK    github_link=config.GITHUB_LINK    twitch_link=config.TWITCH_LINK     youtube_link=config.YOUTUBE_LINK    %}
@@ -147,9 +147,11 @@
                     <ul class="links">
                         <li>Date: {% now "d. N Y" %}</li>
                         <li>Time: {% now "H:i:s" %} UTC</li>
+                        {% cache 60 matches %}
                         <li>Matches (1h): {{ match_count_1h }}</li>
                         <li>Matches (24h): {{ match_count_24h }}</li>
                         <li><a href="{% url 'arenaclients' %}">Arena Clients</a>: {{ arenaclients }}</li>
+                        {% endcache %}
                     </ul>
                 </li>
 

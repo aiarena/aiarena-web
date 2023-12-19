@@ -13,9 +13,9 @@ from aiarena.core.models import Result, User
 
 def stats(request):
     return {
-        "match_count_1h": Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=1)).count(),
-        "match_count_24h": Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=24)).count(),
-        "arenaclients": User.objects.only("id").filter(type="ARENA_CLIENT", is_active=True).count(),
+        "match_count_1h": Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=1)).count,
+        "match_count_24h": Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=24)).count,
+        "arenaclients": User.objects.only("id").filter(type="ARENA_CLIENT", is_active=True).count,
         "aiarena_settings": settings,
         "random_supporter": User.random_supporter(),
         "config": config,

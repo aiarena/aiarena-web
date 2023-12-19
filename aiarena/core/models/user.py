@@ -140,7 +140,7 @@ class User(AbstractUser, LockableModelMixin):
     def random_supporter():
         # todo: apparently order_by('?') is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return User.objects.only("id", "username").exclude(patreon_level="none").order_by("?").first()
+        return User.objects.only("id", "username", "type").exclude(patreon_level="none").order_by("?").first()
 
     @property
     def is_arenaclient(self):
