@@ -183,10 +183,7 @@ class Matches:
                     FROM CORE_MATCH CM
                     INNER JOIN CORE_MATCHPARTICIPATION C ON CM.ID = C.MATCH_ID
                     INNER JOIN CORE_BOT CB ON C.BOT_ID = CB.ID
-                WHERE CM.STARTED IS NULL
-                        AND REQUESTED_BY_ID IS NULL
-                        AND C.BOT_ID not in
-                            (SELECT CB.ID
+                    LEFT JOIN (SELECT CB.ID
                                 FROM CORE_MATCHPARTICIPATION
                                 INNER JOIN CORE_MATCH M ON CORE_MATCHPARTICIPATION.MATCH_ID = M.ID
                                 LEFT JOIN CORE_RESULT CR ON M.ID = CR.MATCH_ID
@@ -194,9 +191,12 @@ class Matches:
                             WHERE M.STARTED IS NOT NULL
                                     AND CR.ID IS NULL
                                     AND CORE_MATCHPARTICIPATION.USE_BOT_DATA
-                                    AND CORE_MATCHPARTICIPATION.UPDATE_BOT_DATA )  
-
-            """
+                                    AND CORE_MATCHPARTICIPATION.UPDATE_BOT_DATA ) as MP ON C.BOT_ID = MP.ID
+                WHERE CM.STARTED IS NULL
+                AND REQUESTED_BY_ID IS NULL
+                -- with the join to the MP subquery above, this equates to C.BOT_ID NOT IN (SELECT ID FROM MP)
+                AND MP.ID IS NULL 
+                """
             )
             match_ids = [match.id for match in ladder_matches_to_play]
             bot_ids = [bot.id for bot in bots_with_a_ladder_match_to_play]
