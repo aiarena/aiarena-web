@@ -834,11 +834,18 @@ class ArenaClientView(DetailView):
         return context
 
     def get_assigned_matches(self):
-        return Match.objects.filter(assigned_to=self.object, result__isnull=True).prefetch_related(
-            Prefetch(
-                "matchparticipation_set",
-                MatchParticipation.objects.all().prefetch_related("bot"),
-                to_attr="participants",
+        return (
+            Match.objects.filter(assigned_to=self.object, result__isnull=True)
+            .select_related("map")
+            .only("map__name", "started")
+            .prefetch_related(
+                Prefetch(
+                    "matchparticipation_set",
+                    MatchParticipation.objects.all()
+                    .select_related("bot")
+                    .only("match_id", "participant_number", "bot__name"),
+                    to_attr="participants",
+                )
             )
         )
 
@@ -846,11 +853,14 @@ class ArenaClientView(DetailView):
         return (
             Result.objects.filter(match__assigned_to=arenaclient)
             .order_by("-created")
-            .select_related("winner")
+            .select_related("winner", "match")
+            .only("type", "game_steps", "created", "match__id", "match__requested_by_id", "winner__name", "replay_file")
             .prefetch_related(
                 Prefetch(
                     "match__matchparticipation_set",
-                    MatchParticipation.objects.all().prefetch_related("bot"),
+                    MatchParticipation.objects.all()
+                    .select_related("bot")
+                    .only("participant_number", "elo_change", "match_id", "bot__name"),
                     to_attr="participants",
                 ),
             )
