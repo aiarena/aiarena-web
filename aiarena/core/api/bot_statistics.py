@@ -51,43 +51,31 @@ class BotStatistics:
 
     @staticmethod
     def _recalculate_global_statistics(sp: CompetitionParticipation):
-        sp.match_count = (
+        match_participations = (
             MatchParticipation.objects.filter(
                 bot=sp.bot, match__result__isnull=False, match__round__competition=sp.competition
             )
             .exclude(match__result__type__in=BotStatistics._ignored_result_types)
             .count()
         )
+
+        sp.match_count = match_participations.count()
         if sp.match_count != 0:
-            sp.win_count = MatchParticipation.objects.filter(
-                bot=sp.bot, result="win", match__round__competition=sp.competition
-            ).count()
+            sp.win_count = match_participations.filter(result="win").count()
             sp.win_perc = sp.win_count / sp.match_count * 100
 
             if sp.competition.indepth_bot_statistics_enabled:
-                sp.loss_count = MatchParticipation.objects.filter(
-                    bot=sp.bot, result="loss", match__round__competition=sp.competition
-                ).count()
+                sp.loss_count = match_participations.filter(result="loss").count()
                 sp.loss_perc = sp.loss_count / sp.match_count * 100
-                sp.tie_count = MatchParticipation.objects.filter(
-                    bot=sp.bot, result="tie", match__round__competition=sp.competition
-                ).count()
+                sp.tie_count = match_participations.filter(result="tis").count()
                 sp.tie_perc = sp.tie_count / sp.match_count * 100
-                sp.crash_count = MatchParticipation.objects.filter(
-                    bot=sp.bot,
-                    result="loss",
-                    result_cause__in=["crash", "timeout", "initialization_failure"],
-                    match__round__competition=sp.competition,
+                sp.crash_count = match_participations.filter(
+                    result="loss", result_cause__in=["crash", "timeout", "initialization_failure"]
                 ).count()
                 sp.crash_perc = sp.crash_count / sp.match_count * 100
 
-                sp.highest_elo = (
-                    MatchParticipation.objects.filter(
-                        bot=sp.bot, match__result__isnull=False, match__round__competition=sp.competition
-                    )
-                    .exclude(match__result__type__in=BotStatistics._ignored_result_types)
-                    .aggregate(Max("resultant_elo"))["resultant_elo__max"]
-                )
+                sp.highest_elo = match_participations.aggregate(Max("resultant_elo"))["resultant_elo__max"]
+
                 BotStatistics._generate_graphs(sp)
         sp.save()
 
