@@ -859,8 +859,8 @@ class ArenaClientView(DetailView):
         return (
             Result.objects.filter(match__assigned_to=arenaclient)
             .order_by("-created")
+            .select_related("winner")
             .prefetch_related(
-                Prefetch("winner"),
                 Prefetch(
                     "match__matchparticipation_set",
                     MatchParticipation.objects.all().prefetch_related("bot"),
