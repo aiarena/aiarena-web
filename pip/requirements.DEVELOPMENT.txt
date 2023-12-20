@@ -1,7 +1,7 @@
 -r requirements.LOCAL.txt
 Werkzeug==2.2.3
 black==23.7.0
-coverage==6.1.1
+coverage==7.3.3
 django-constance[database]==3.1.0
 django-fakeredis==0.1.2
 django-sslserver==0.22
