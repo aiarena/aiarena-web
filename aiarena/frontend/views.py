@@ -798,31 +798,21 @@ class Results(ListView):
 
 
 class ArenaClients(ListView):
-    queryset = ArenaClient.objects.select_related("owner").filter(is_active=True)
-    # todo: why doesn't this work?
-    # queryset = User.objects.filter(type='ARENA_CLIENT').annotate(
-    #     matches_1hr=Count('submitted_results', filter=Q(submitted_results__created__gte=timezone.now() - timedelta(hours=1))),
-    #     matches_24hr=Count('submitted_results',filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
-    #            ).order_by('username')
     template_name = "arenaclients.html"
 
-    def get_context_data(self, **kwargs):
-        for arenaclient in self.object_list:
-            arenaclient.matches_1hr = (
-                Result.objects.all()
-                .only("id", "match__assigned_to", "created")
-                .select_related("match")
-                .filter(match__assigned_to=arenaclient, created__gte=timezone.now() - timedelta(hours=1))
-                .count()
+    def get_queryset(self):
+        now = timezone.now()
+        one_hour_ago = now - timedelta(hours=1)
+        twenty_four_hours_ago = now - timedelta(hours=24)
+
+        return (
+            ArenaClient.objects.select_related("owner")
+            .filter(is_active=True)
+            .annotate(matches_1hr=Count("submitted_results", filter=Q(submitted_results__created__gte=one_hour_ago)))
+            .annotate(
+                matches_24hr=Count("submitted_results", filter=Q(submitted_results__created__gte=twenty_four_hours_ago))
             )
-            arenaclient.matches_24hr = (
-                Result.objects.all()
-                .only("id", "match__assigned_to", "created")
-                .select_related("match")
-                .filter(match__assigned_to=arenaclient, created__gte=timezone.now() - timedelta(hours=24))
-                .count()
-            )
-        return super().get_context_data(**kwargs)
+        )
 
 
 class ArenaClientView(DetailView):
@@ -833,9 +823,18 @@ class ArenaClientView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["assigned_matches_list"] = Match.objects.filter(
-            assigned_to=self.object, result__isnull=True
-        ).prefetch_related(
+        arenaclient = self.object
+        results = self.get_results(arenaclient)
+
+        context["assigned_matches_list"] = self.get_assigned_matches()
+        context["ac_match_count_1h"] = self.get_match_count(hours=1)
+        context["ac_match_count_24h"] = self.get_match_count(hours=24)
+        context["ac_match_count"] = results.count()
+        context["recent_result_list"] = results[:100]
+        return context
+
+    def get_assigned_matches(self):
+        return Match.objects.filter(assigned_to=self.object, result__isnull=True).prefetch_related(
             Prefetch(
                 "matchparticipation_set",
                 MatchParticipation.objects.all().prefetch_related("bot"),
@@ -843,11 +842,12 @@ class ArenaClientView(DetailView):
             )
         )
 
-        results = (
-            Result.objects.filter(match__assigned_to=self.object)
+    def get_results(self, arenaclient):
+        return (
+            Result.objects.filter(match__assigned_to=arenaclient)
             .order_by("-created")
+            .select_related("winner")
             .prefetch_related(
-                Prefetch("winner"),
                 Prefetch(
                     "match__matchparticipation_set",
                     MatchParticipation.objects.all().prefetch_related("bot"),
@@ -856,27 +856,9 @@ class ArenaClientView(DetailView):
             )
         )
 
-        context["ac_match_count_1h"] = Result.objects.filter(
-            match__assigned_to=self.object, created__gte=timezone.now() - timedelta(hours=1)
-        ).count()
-        context["ac_match_count_24h"] = Result.objects.filter(
-            match__assigned_to=self.object, created__gte=timezone.now() - timedelta(hours=24)
-        ).count()
-        context["ac_match_count"] = results.count()
-
-        # paginate the results
-        page = self.request.GET.get("page", 1)
-        paginator = Paginator(results, 30)
-        try:
-            results = paginator.page(page)
-        except PageNotAnInteger:
-            results = paginator.page(1)
-        except EmptyPage:
-            results = paginator.page(paginator.num_pages)
-
-        context["result_list"] = results
-        context["results_page_range"] = restrict_page_range(paginator.num_pages, results.number)
-        return context
+    def get_match_count(self, hours):
+        time_threshold = timezone.now() - timedelta(hours=hours)
+        return Result.objects.filter(match__assigned_to=self.object, created__gte=time_threshold).count()
 
 
 class RoundDetail(DetailView):
