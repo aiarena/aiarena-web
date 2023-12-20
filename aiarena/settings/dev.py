@@ -9,7 +9,7 @@ SECRET_KEY = "django-insecure-t*4r1u49=a!ah1!z8ydsaajr!lv-f(@r07lm)-9fro_9&67xqd
 ALLOWED_HOSTS = ["*"]
 
 hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-INTERNAL_IPS = [ip[:-1] + '1' for ip in ips] + ['127.0.0.1']
+INTERNAL_IPS = [ip[:-1] + "1" for ip in ips] + ["127.0.0.1"]
 
 INSTALLED_APPS.append("sslserver")  # noqa: F405
 INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
