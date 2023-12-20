@@ -811,31 +811,21 @@ class Results(ListView):
 
 
 class ArenaClients(ListView):
-    queryset = ArenaClient.objects.select_related("owner").filter(is_active=True)
-    # todo: why doesn't this work?
-    # queryset = User.objects.filter(type='ARENA_CLIENT').annotate(
-    #     matches_1hr=Count('submitted_results', filter=Q(submitted_results__created__gte=timezone.now() - timedelta(hours=1))),
-    #     matches_24hr=Count('submitted_results',filter=Q(match__result__created__gte=timezone.now() - timedelta(hours=24))),
-    #            ).order_by('username')
     template_name = "arenaclients.html"
 
-    def get_context_data(self, **kwargs):
-        for arenaclient in self.object_list:
-            arenaclient.matches_1hr = (
-                Result.objects.all()
-                .only("id", "match__assigned_to", "created")
-                .select_related("match")
-                .filter(match__assigned_to=arenaclient, created__gte=timezone.now() - timedelta(hours=1))
-                .count()
+    def get_queryset(self):
+        now = timezone.now()
+        one_hour_ago = now - timedelta(hours=1)
+        twenty_four_hours_ago = now - timedelta(hours=24)
+
+        return (
+            ArenaClient.objects.select_related("owner")
+            .filter(is_active=True)
+            .annotate(matches_1hr=Count("submitted_results", filter=Q(submitted_results__created__gte=one_hour_ago)))
+            .annotate(
+                matches_24hr=Count("submitted_results", filter=Q(submitted_results__created__gte=twenty_four_hours_ago))
             )
-            arenaclient.matches_24hr = (
-                Result.objects.all()
-                .only("id", "match__assigned_to", "created")
-                .select_related("match")
-                .filter(match__assigned_to=arenaclient, created__gte=timezone.now() - timedelta(hours=24))
-                .count()
-            )
-        return super().get_context_data(**kwargs)
+        )
 
 
 class ArenaClientView(DetailView):
