@@ -20,7 +20,7 @@ django-registration-redux==2.10
 django-robots==6.1
 django-select2==7.5.0
 django-storages==1.13.2
-django-tables2==2.3.4
+django-tables2==2.7.0
 djangorestframework==3.14.0
 docutils<0.17
 drf-yasg==1.21.5
