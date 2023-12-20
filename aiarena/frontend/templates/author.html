@@ -41,8 +41,8 @@
             </tr>
         {% endfor %}
     </table>
-    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
-    <table summary="Table containing results" class="row-hover-highlight">
+    <div class="divider"><span></span><span><h2>Recent Results</h2></span><span></span></div>
+    <table summary="Table containing recent results" class="row-hover-highlight">
         <thead>
         <td><strong>ID</strong></td>
         <td><strong>Date</strong></td>
@@ -136,30 +136,4 @@
         {% endfor %}
         </tbody>
     </table>
-    <div class="pagination">
-        {% if result_list.has_other_pages %}
-            <ul class="pagination">
-                {% if result_list.has_previous %}
-                    <li>
-                        <a href="?page={{ result_list.previous_page_number }}">&laquo;</a>
-                    </li>
-                {% else %}
-                    <li class="disabled"><span>&laquo;</span></li>
-                {% endif %}
-                {% for page_num in result_page_range %}
-                    {% if result_list.number == page_num %}
-                        <li class="active"><span>{{ page_num }}</span></li>
-                    {% else %}
-                        <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
-                    {% endif %}
-                {% endfor %}
-                {% if result_list.has_next %}
-                    <li><a href="?page={{ result_list.next_page_number }}">&raquo;</a>
-                    </li>
-                {% else %}
-                    <li class="disabled"><span>&raquo;</span></li>
-                {% endif %}
-            </ul>
-        {% endif %}
-    </div>
 {% endblock %}
