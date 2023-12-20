@@ -51,13 +51,9 @@ class BotStatistics:
 
     @staticmethod
     def _recalculate_global_statistics(sp: CompetitionParticipation):
-        match_participations = (
-            MatchParticipation.objects.filter(
-                bot=sp.bot, match__result__isnull=False, match__round__competition=sp.competition
-            )
-            .exclude(match__result__type__in=BotStatistics._ignored_result_types)
-            .count()
-        )
+        match_participations = MatchParticipation.objects.filter(
+            bot=sp.bot, match__result__isnull=False, match__round__competition=sp.competition
+        ).exclude(match__result__type__in=BotStatistics._ignored_result_types)
 
         sp.match_count = match_participations.count()
         if sp.match_count != 0:
