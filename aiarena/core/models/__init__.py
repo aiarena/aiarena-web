@@ -23,3 +23,32 @@ from .tag import Tag
 from .trophy import Trophy, TrophyIcon
 from .user import User
 from .website_user import WebsiteUser
+
+
+__all__ = [
+    "ArenaClient",
+    "ArenaClientStatus",
+    "Bot",
+    "BotCrashLimitAlert",
+    "Competition",
+    "CompetitionBotMapStats",
+    "CompetitionBotMatchupStats",
+    "CompetitionParticipation",
+    "Game",
+    "GameMode",
+    "Map",
+    "MapPool",
+    "Match",
+    "MatchParticipation",
+    "MatchTag",
+    "News",
+    "RelativeResult",
+    "Result",
+    "Round",
+    "ServiceUser",
+    "Tag",
+    "Trophy",
+    "TrophyIcon",
+    "User",
+    "WebsiteUser",
+]
