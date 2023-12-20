@@ -11,6 +11,7 @@ from aiarena.core.models import (
     Bot,
     BotCrashLimitAlert,
     Competition,
+    CompetitionBotMapStats,
     CompetitionBotMatchupStats,
     CompetitionParticipation,
     Map,
@@ -252,6 +253,27 @@ class CompetitionAdmin(admin.ModelAdmin):
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
         return super().response_change(request, obj)
+
+
+@admin.register(CompetitionBotMapStats)
+class CompetitionBotMapStatsAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "bot",
+        "map",
+        "match_count",
+        "win_count",
+        "win_perc",
+        "loss_count",
+        "loss_perc",
+        "tie_count",
+        "tie_perc",
+        "crash_count",
+        "crash_perc",
+        "updated",
+    )
+    # select related bot.competition and bot.bot because they are used to make up the display string
+    list_select_related = ["bot", "bot__competition", "bot__bot", "map"]
 
 
 @admin.register(CompetitionBotMatchupStats)
