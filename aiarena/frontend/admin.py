@@ -9,7 +9,9 @@ from aiarena.core.models import (
     ArenaClient,
     ArenaClientStatus,
     Bot,
+    BotCrashLimitAlert,
     Competition,
+    CompetitionBotMapStats,
     CompetitionBotMatchupStats,
     CompetitionParticipation,
     Map,
@@ -20,6 +22,7 @@ from aiarena.core.models import (
     News,
     Result,
     Round,
+    ServiceUser,
     Tag,
     Trophy,
     TrophyIcon,
@@ -149,6 +152,15 @@ class BotAdmin(admin.ModelAdmin):
     list_select_related = ["user", "plays_race"]
 
 
+@admin.register(BotCrashLimitAlert)
+class BotCrashLimitAlertAdmin(admin.ModelAdmin):
+    list_display = (
+        "logged_at",
+        "triggering_match_participation",
+    )
+    list_select_related = ["triggering_match_participation"]
+
+
 @admin.register(BotRace)
 class BotRaceAdmin(admin.ModelAdmin):
     search_fields = ("label",)
@@ -242,6 +254,27 @@ class CompetitionAdmin(admin.ModelAdmin):
                 self.message_user(request, error, level=messages.ERROR)
             return HttpResponseRedirect(".")
         return super().response_change(request, obj)
+
+
+@admin.register(CompetitionBotMapStats)
+class CompetitionBotMapStatsAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "bot",
+        "map",
+        "match_count",
+        "win_count",
+        "win_perc",
+        "loss_count",
+        "loss_perc",
+        "tie_count",
+        "tie_perc",
+        "crash_count",
+        "crash_perc",
+        "updated",
+    )
+    # select related bot.competition and bot.bot because they are used to make up the display string
+    list_select_related = ["bot", "bot__competition", "bot__bot", "map"]
 
 
 @admin.register(CompetitionBotMatchupStats)
@@ -437,6 +470,40 @@ class RoundAdmin(admin.ModelAdmin):
     )
     list_filter = ("competition", "started", "finished", "complete")
     list_select_related = ["competition"]
+
+
+@admin.register(ServiceUser)
+class ServiceUserAdmin(admin.ModelAdmin):
+    search_fields = ("username",)
+    list_display = (
+        "id",
+        "password",
+        "last_login",
+        "is_superuser",
+        "username",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "is_active",
+        "date_joined",
+        "email",
+        "patreon_level",
+        "type",
+        "extra_active_competition_participations",
+        "extra_periodic_match_requests",
+        "receive_email_comms",
+        "can_request_games_for_another_authors_bot",
+    )
+    list_filter = (
+        "last_login",
+        "is_superuser",
+        "is_staff",
+        "is_active",
+        "date_joined",
+        "receive_email_comms",
+        "can_request_games_for_another_authors_bot",
+    )
+    raw_id_fields = ("groups", "user_permissions")
 
 
 @admin.register(Tag)
