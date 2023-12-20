@@ -867,18 +867,7 @@ class ArenaClientView(DetailView):
         ).count()
         context["ac_match_count"] = results.count()
 
-        # paginate the results
-        page = self.request.GET.get("page", 1)
-        paginator = Paginator(results, 30)
-        try:
-            results = paginator.page(page)
-        except PageNotAnInteger:
-            results = paginator.page(1)
-        except EmptyPage:
-            results = paginator.page(paginator.num_pages)
-
-        context["result_list"] = results
-        context["results_page_range"] = restrict_page_range(paginator.num_pages, results.number)
+        context["result_list"] = results[:100]
         return context
 
 
