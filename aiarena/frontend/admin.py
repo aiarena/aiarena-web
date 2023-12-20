@@ -9,6 +9,7 @@ from aiarena.core.models import (
     ArenaClient,
     ArenaClientStatus,
     Bot,
+    BotCrashLimitAlert,
     Competition,
     CompetitionBotMatchupStats,
     CompetitionParticipation,
@@ -147,6 +148,15 @@ class BotAdmin(admin.ModelAdmin):
         "wiki_article",
     )
     list_select_related = ["user", "plays_race"]
+
+
+@admin.register(BotCrashLimitAlert)
+class BotCrashLimitAlertAdmin(admin.ModelAdmin):
+    list_display = (
+        "logged_at",
+        "triggering_match_participation",
+    )
+    list_select_related = ["triggering_match_participation"]
 
 
 @admin.register(BotRace)
