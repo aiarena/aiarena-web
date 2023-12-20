@@ -1,7 +1,8 @@
 import io
+import logging
 from datetime import datetime
 
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Max
 
 import matplotlib.dates as mdates
@@ -16,7 +17,39 @@ from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
 
 
+logger = logging.getLogger(__name__)
+
+
 class BotStatistics:
+    @staticmethod
+    def finalize_stats_for_competition(self, competition):
+        with transaction.atomic():
+            # This lock will be held for a long time.
+            # This is considered acceptable as we only finalize old competitions,
+            # so no matches should be running. We also need all bot stats data to be successfully
+            # regenerated before we can finalize the competition, else it could end up finalized in a corrupted
+            # state.
+            competition.lock_me()
+            BotStatistics.refresh_stats_for_competition(competition, finalize=True)
+
+    @staticmethod
+    def refresh_stats_for_competition(competition, finalize=False):
+        """
+        Refreshes the statistics for all bots in a competition.
+        """
+        if not competition.statistics_finalized:
+            if finalize:
+                competition.statistics_finalized = True
+                competition.save()
+            with advisory_lock(f"stats_lock_competition_{competition.id}") as acquired:
+                if not acquired:
+                    raise Exception(f"Could not acquire lock on bot statistics for competition {str(competition.id)}")
+                for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
+                    logger.info(f"Generating current competition stats for bot {sp.bot_id}...")
+                    BotStatistics._recalculate_stats_for_competition_participation(sp)
+        else:
+            logger.warning(f"Skipping competition {competition.id} - stats already finalized.")
+
     @staticmethod
     def update_stats_based_on_result(bot: CompetitionParticipation, result: Result, opponent: CompetitionParticipation):
         """This method updates a bot's existing stats based on a single result.
@@ -33,7 +66,7 @@ class BotStatistics:
                 BotStatistics._update_map_stats(bot, result)
 
     @staticmethod
-    def recalculate_stats(sp: CompetitionParticipation):
+    def _recalculate_stats_for_competition_participation(sp: CompetitionParticipation):
         """This method entirely recalculates a bot's set of stats."""
 
         with advisory_lock(f"stats_lock_competitionparticipation_{sp.id}") as acquired:

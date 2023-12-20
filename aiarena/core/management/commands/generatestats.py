@@ -1,10 +1,12 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
+import logging
 
-from django_pglocks import advisory_lock
+from django.core.management.base import BaseCommand, CommandError
 
 from aiarena.core.api.bot_statistics import BotStatistics
-from aiarena.core.models import Competition, CompetitionParticipation
+from aiarena.core.models import Competition
+
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -49,33 +51,12 @@ class Command(BaseCommand):
             # only process competitions this bot was present for.
             competitions = competitions.filter(participations__bot_id=bot_id)
 
-        self.stdout.write(f"looping {len(competitions)} Competitions")
+        logger.info(f"looping {len(competitions)} Competitions")
         for competition in competitions:
             if finalize:
-                self.stdout.write(f"Finalizing stats for competition {competition.id}...")
-                with transaction.atomic():
-                    # This lock will be held for a long time.
-                    # This is considered acceptable as we only finalize old competitions,
-                    # so no matches should be running. We also need all bot stats data to be successfully
-                    # regenerated before we can finalize the competition, else it could end up finalized in a corrupted
-                    # state.
-                    competition.lock_me()
-                    self._run_generate_stats(competition, finalize=True)
+                logger.info(f"Finalizing stats for competition {competition.id}...")
+                BotStatistics.finalize_stats_for_competition(competition)
             else:
-                self._run_generate_stats(competition)
+                BotStatistics.refresh_stats_for_competition(competition)
 
-        self.stdout.write("Done")
-
-    def _run_generate_stats(self, competition, finalize=False):
-        if not competition.statistics_finalized:
-            if finalize:
-                competition.statistics_finalized = True
-                competition.save()
-            with advisory_lock(f"stats_lock_competition_{competition.id}") as acquired:
-                if not acquired:
-                    raise Exception(f"Could not acquire lock on bot statistics for competition {str(competition.id)}")
-                for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
-                    self.stdout.write(f"Generating current competition stats for bot {sp.bot_id}...")
-                    BotStatistics.recalculate_stats(sp)
-        else:
-            self.stdout.write(f"WARNING: Skipping competition {competition.id} - stats already finalized.")
+        logger.info("Done")
