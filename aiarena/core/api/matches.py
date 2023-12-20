@@ -160,32 +160,21 @@ class Matches:
 
     @staticmethod
     def _attempt_to_start_a_ladder_match(requesting_ac: ArenaClient, for_round):
-        if for_round is not None:
-            ladder_matches_to_play = list(
-                Match.objects.raw(
-                    """
-            SELECT core_match.id, core_match.started, assigned_to_id, round_id from core_match
-            inner join core_round cr on core_match.round_id = cr.id
-            where core_match.started is null and requested_by_id is null and round_id = %s
-            order by round_id
-            for update 
-            """,
-                    (for_round.id,),
-                )
-            )
+        assert requesting_ac is not None
+        assert for_round is not None
 
-        else:
-            ladder_matches_to_play = list(
-                Match.objects.raw(
-                    """
-                SELECT core_match.id, core_match.started, assigned_to_id, round_id from core_match
-                inner join core_round cr on core_match.round_id = cr.id
-                where core_match.started is null and requested_by_id is null 
-                order by round_id
-                for update 
+        ladder_matches_to_play = list(
+            Match.objects.raw(
                 """
-                )
+        SELECT core_match.id, core_match.started, assigned_to_id, round_id from core_match
+        inner join core_round cr on core_match.round_id = cr.id
+        where core_match.started is null and requested_by_id is null and round_id = %s
+        order by round_id
+        for update 
+        """,
+                (for_round.id,),
             )
+        )
 
         if len(ladder_matches_to_play) > 0:
             bots_with_a_ladder_match_to_play = Bot.objects.raw(
