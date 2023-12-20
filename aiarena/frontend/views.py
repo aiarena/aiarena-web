@@ -836,9 +836,18 @@ class ArenaClientView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["assigned_matches_list"] = Match.objects.filter(
-            assigned_to=self.object, result__isnull=True
-        ).prefetch_related(
+        arenaclient = self.object
+        results = self.get_results(arenaclient)
+
+        context["assigned_matches_list"] = self.get_assigned_matches()
+        context["ac_match_count_1h"] = self.get_match_count(hours=1)
+        context["ac_match_count_24h"] = self.get_match_count(hours=24)
+        context["ac_match_count"] = results.count()
+        context["recent_result_list"] = results[:100]
+        return context
+
+    def get_assigned_matches(self):
+        return Match.objects.filter(assigned_to=self.object, result__isnull=True).prefetch_related(
             Prefetch(
                 "matchparticipation_set",
                 MatchParticipation.objects.all().prefetch_related("bot"),
@@ -846,8 +855,9 @@ class ArenaClientView(DetailView):
             )
         )
 
-        results = (
-            Result.objects.filter(match__assigned_to=self.object)
+    def get_results(self, arenaclient):
+        return (
+            Result.objects.filter(match__assigned_to=arenaclient)
             .order_by("-created")
             .prefetch_related(
                 Prefetch("winner"),
@@ -859,16 +869,9 @@ class ArenaClientView(DetailView):
             )
         )
 
-        context["ac_match_count_1h"] = Result.objects.filter(
-            match__assigned_to=self.object, created__gte=timezone.now() - timedelta(hours=1)
-        ).count()
-        context["ac_match_count_24h"] = Result.objects.filter(
-            match__assigned_to=self.object, created__gte=timezone.now() - timedelta(hours=24)
-        ).count()
-        context["ac_match_count"] = results.count()
-
-        context["result_list"] = results[:100]
-        return context
+    def get_match_count(self, hours):
+        time_threshold = timezone.now() - timedelta(hours=hours)
+        return Result.objects.filter(match__assigned_to=self.object, created__gte=time_threshold).count()
 
 
 class RoundDetail(DetailView):
