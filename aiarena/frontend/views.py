@@ -743,19 +743,6 @@ class AuthorDetail(DetailView):
     template_name = "author.html"
     context_object_name = "author"  # change the context name to avoid overriding the current user context object
 
-    def _paginate_query(self, results_queryset):
-        page_size = 10
-        page = self.request.GET.get("page", 1)
-        paginator = Paginator(results_queryset, page_size)
-        try:
-            results = paginator.page(page)
-        except PageNotAnInteger:
-            results = paginator.page(1)
-        except EmptyPage:
-            raise Http404("Page is out of range.")
-
-        return results, restrict_page_range(paginator.num_pages, results.number)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["bot_list"] = (
@@ -766,10 +753,10 @@ class AuthorDetail(DetailView):
         )
         results_queryset = (
             Result.objects.filter(match__matchparticipation__bot__in=context["bot_list"])
+            .only("type", "match__requested_by__username", "created", "game_steps", "replay_file", "winner__name")
+            .select_related("match__requested_by", "winner")
             .order_by("-created")
             .prefetch_related(
-                Prefetch("winner"),
-                Prefetch("match__requested_by"),
                 Prefetch(
                     "match__matchparticipation_set",
                     MatchParticipation.objects.all()
@@ -777,9 +764,9 @@ class AuthorDetail(DetailView):
                     .only("participant_number", "bot_id", "match_id", "elo_change"),
                     to_attr="participants",
                 ),
-            )
+            )[:25]
         )
-        context["result_list"], context["result_page_range"] = self._paginate_query(results_queryset)
+        context["result_list"] = results_queryset
         return context
 
 

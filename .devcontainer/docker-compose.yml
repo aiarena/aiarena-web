@@ -10,7 +10,7 @@ services:
       - 6379:6379
 
   devcontainer-aiarena-postgres:
-    image: postgres:12.13
+    image: postgres:15.3
     container_name: devcontainer-aiarena-postgres
     restart: unless-stopped
     env_file:
