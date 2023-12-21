@@ -982,7 +982,7 @@ class Index(ListView):
         cache_time = config.TOP10_CACHE_TIME
         elo_trend_n_matches = config.ELO_TREND_N_MATCHES
         competitions = (
-            Competition.objects.only("name", "interest")
+            Competition.objects.only("name", "interest", "n_divisions", "n_placements")
             .filter(status__in=["frozen", "paused", "open", "closing"])
             .annotate(num_participants=Count("participations"))
         )
