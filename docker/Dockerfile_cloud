@@ -1,5 +1,6 @@
 FROM aiarena/env
 
+ENV DJANGO_ENVIRONMENT PRODUCTION
 ARG SECRET_KEY
 
 ADD ./aiarena/unit-config.json /docker-entrypoint.d/
@@ -8,8 +9,4 @@ RUN chown -R unit:unit /app/
 ADD ./pip/requirements.PRODUCTION.txt /srv/requirements.PRODUCTION.txt
 RUN pip install -r /srv/requirements.PRODUCTION.txt
 
-ENV DJANGO_ENVIRONMENT DEVELOPMENT
-
 RUN python /app/manage.py collectstatic --noinput --clear
-
-ENV DJANGO_ENVIRONMENT PRODUCTION
