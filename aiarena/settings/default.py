@@ -518,6 +518,7 @@ REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
 REDIS_USE_SSL = str_to_bool(os.environ.get("REDIS_USE_SSL", "false"))
 REDIS_CELERY_DB = 0
 REDIS_CACHE_DB = 1
+REDIS_CONSTANCE_DB = 2
 
 
 def redis_url(db):
