@@ -167,7 +167,7 @@ CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 # This is the dynamic config, update-able during runtime
 CONSTANCE_CONFIG = {
     "LADDER_ENABLED": (
-        False,
+        True,
         "Whether the ladder is currently enabled. This will control whether matches are run or not.",
     ),
     "TIMEOUT_MATCHES_AFTER": (
@@ -518,7 +518,6 @@ REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
 REDIS_USE_SSL = str_to_bool(os.environ.get("REDIS_USE_SSL", "false"))
 REDIS_CELERY_DB = 0
 REDIS_CACHE_DB = 1
-REDIS_CONSTANCE_DB = 2
 
 
 def redis_url(db):
