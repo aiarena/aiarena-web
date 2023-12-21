@@ -167,7 +167,7 @@ CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
 # This is the dynamic config, update-able during runtime
 CONSTANCE_CONFIG = {
     "LADDER_ENABLED": (
-        True,
+        False,
         "Whether the ladder is currently enabled. This will control whether matches are run or not.",
     ),
     "TIMEOUT_MATCHES_AFTER": (
