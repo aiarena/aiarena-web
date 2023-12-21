@@ -2,7 +2,7 @@
 {% load i18n core_filters %}
 {% load humanize %}
 {% block content %}
-    <div class="divider"><span></span><span><h2>Results</h2></span><span></span></div>
+    <div class="divider"><span></span><span><h2>Recent results</h2></span><span></span></div>
     <table summary="Table containing results" class="row-hover-highlight">
         <thead>
         <td><strong>ID</strong></td>
@@ -97,31 +97,5 @@
         {% endfor %}
         </tbody>
     </table>
-    <div class="pagination">
-        {% if is_paginated %}
-            <ul class="pagination">
-                {% if page_obj.has_previous %}
-                    <li>
-                        <a href="?page={{ bot_list.page_obj }}">&laquo;</a>
-                    </li>
-                {% else %}
-                    <li class="disabled"><span>&laquo;</span></li>
-                {% endif %}
-                {% for page_num in page_range %}
-                    {% if page_obj.number == page_num %}
-                        <li class="active"><span>{{ page_num }}</span></li>
-                    {% else %}
-                        <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
-                    {% endif %}
-                {% endfor %}
-                {% if page_obj.has_next %}
-                    <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a>
-                    </li>
-                {% else %}
-                    <li class="disabled"><span>&raquo;</span></li>
-                {% endif %}
-            </ul>
-        {% endif %}
-    </div>
 
 {% endblock %}
