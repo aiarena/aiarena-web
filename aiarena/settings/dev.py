@@ -1,5 +1,7 @@
-from .default import *  # noqa: F403
 import socket
+
+from .default import *  # noqa: F403
+
 
 DEBUG = True
 
