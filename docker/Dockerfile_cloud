@@ -1,6 +1,5 @@
 FROM aiarena/env
 
-ENV DJANGO_ENVIRONMENT DEVELOPMENT
 ARG SECRET_KEY
 
 ADD ./aiarena/unit-config.json /docker-entrypoint.d/
