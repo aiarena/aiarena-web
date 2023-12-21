@@ -149,7 +149,8 @@ class MatchViewSet(viewsets.GenericViewSet):
                 serializer = self.get_serializer(match)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                cache.set("NoGameAvailable", True, config.GAME_AVAILABLE_CACHE_TIME)
+                if not no_game_available:
+                    cache.set("NoGameAvailable", True, config.GAME_AVAILABLE_CACHE_TIME)
 
         raise NoGameForClient()
 
