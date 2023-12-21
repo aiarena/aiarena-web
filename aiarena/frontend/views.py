@@ -787,7 +787,7 @@ class AuthorDetail(DetailView):
         return context
 
 
-class Results(ListView):
+class RecentResults(ListView):
     queryset = (
         Result.objects.all()
         .order_by("-created")
@@ -799,19 +799,9 @@ class Results(ListView):
                 MatchParticipation.objects.all().prefetch_related("bot"),
                 to_attr="participants",
             ),
-        )
+        )[:200]
     )
-    template_name = "results.html"
-    paginate_by = 50
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        # add the page ranges
-        page_obj = context["page_obj"]
-        context["page_range"] = restrict_page_range(page_obj.paginator.num_pages, page_obj.number)
-
-        return context
+    template_name = "recent_results.html"
 
 
 class ArenaClients(ListView):
