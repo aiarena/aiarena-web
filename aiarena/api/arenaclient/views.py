@@ -2,6 +2,7 @@ import logging
 from wsgiref.util import FileWrapper
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Prefetch, Sum
 from django.http import HttpResponse
@@ -138,13 +139,17 @@ class MatchViewSet(viewsets.GenericViewSet):
         )
 
     def create(self, request, *args, **kwargs):
+        no_game_available = cache.get("NoGameAvailable", False)
+
         if request.user.is_arenaclient:
-            match = ACCoordinator.next_match(request.user.arenaclient)
+            match = ACCoordinator.next_match(request.user.arenaclient, no_game_available)
             if match:
                 self.load_participants(match)
 
                 serializer = self.get_serializer(match)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                cache.set("NoGameAvailable", True, config.GAME_AVAILABLE_CACHE_TIME)
 
         raise NoGameForClient()
 

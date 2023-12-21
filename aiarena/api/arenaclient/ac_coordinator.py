@@ -79,7 +79,7 @@ class ACCoordinator:
         return ACCoordinator.next_competition_match(arenaclient)
 
     @staticmethod
-    def next_match(arenaclient: ArenaClient) -> Match:
+    def next_match(arenaclient: ArenaClient, only_unfinished_matches: bool) -> Match:
         if config.LADDER_ENABLED:
             try:
                 if config.REISSUE_UNFINISHED_MATCHES:
@@ -91,6 +91,8 @@ class ACCoordinator:
                     )
                     if unfinished_matches.count() > 0:
                         return unfinished_matches[0]  # todo: re-set started time?
+                    if only_unfinished_matches:
+                        return None  # Return None so we don't try to start a new match
                 # Trying a new match
                 return ACCoordinator.next_new_match(arenaclient)
             except Exception:
