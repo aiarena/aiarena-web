@@ -67,6 +67,11 @@ CACHES = {
         "LOCATION": redis_url(REDIS_CACHE_DB),  # noqa F405
         "KEY_PREFIX": "select2",
     },
+    "constance": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": redis_url(REDIS_CACHE_DB),  # noqa F405
+        "KEY_PREFIX": "constance",
+    },
 }
 
 
