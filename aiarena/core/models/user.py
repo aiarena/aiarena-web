@@ -14,6 +14,20 @@ from django.utils.translation import gettext_lazy as _
 from constance import config
 
 from aiarena.core.models.mixins import LockableModelMixin
+from aiarena.settings import (
+    MATCH_REQUEST_LIMIT_BRONZE_TIER,
+    MATCH_REQUEST_LIMIT_DIAMOND_TIER,
+    MATCH_REQUEST_LIMIT_FREE_TIER,
+    MATCH_REQUEST_LIMIT_GOLD_TIER,
+    MATCH_REQUEST_LIMIT_PLATINUM_TIER,
+    MATCH_REQUEST_LIMIT_SILVER_TIER,
+    MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
+    MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER,
+    MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
+    MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
+    MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
+    MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -68,12 +82,12 @@ class User(AbstractUser, LockableModelMixin):
         )
 
     BOTS_LIMIT_MAP = {
-        "none": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
-        "bronze": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
-        "silver": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
-        "gold": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
-        "platinum": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
-        "diamond": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER,
+        "none": MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
+        "bronze": MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
+        "silver": MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
+        "gold": MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
+        "platinum": MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
+        "diamond": MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER,
     }
 
     def get_active_bots_limit(self):
@@ -91,12 +105,12 @@ class User(AbstractUser, LockableModelMixin):
             return limit + self.extra_active_competition_participations
 
     REQUESTED_MATCHES_LIMIT_MAP = {
-        "none": config.MATCH_REQUEST_LIMIT_FREE_TIER,
-        "bronze": config.MATCH_REQUEST_LIMIT_BRONZE_TIER,
-        "silver": config.MATCH_REQUEST_LIMIT_SILVER_TIER,
-        "gold": config.MATCH_REQUEST_LIMIT_GOLD_TIER,
-        "platinum": config.MATCH_REQUEST_LIMIT_PLATINUM_TIER,
-        "diamond": config.MATCH_REQUEST_LIMIT_DIAMOND_TIER,
+        "none": MATCH_REQUEST_LIMIT_FREE_TIER,
+        "bronze": MATCH_REQUEST_LIMIT_BRONZE_TIER,
+        "silver": MATCH_REQUEST_LIMIT_SILVER_TIER,
+        "gold": MATCH_REQUEST_LIMIT_GOLD_TIER,
+        "platinum": MATCH_REQUEST_LIMIT_PLATINUM_TIER,
+        "diamond": MATCH_REQUEST_LIMIT_DIAMOND_TIER,
     }
 
     @property
