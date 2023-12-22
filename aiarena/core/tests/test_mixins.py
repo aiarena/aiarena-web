@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from constance import config
 from rest_framework.authtoken.models import Token
 
+from aiarena import settings
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
 from aiarena.core.api import Matches
 from aiarena.core.models import (
@@ -372,7 +373,7 @@ class MatchReadyMixin(LoggedInMixin):
         super().setUp()
 
         # raise the configured per user limits
-        config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER = 10
+        settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER = 10
         config.MAX_USER_BOT_COUNT = 10
 
         self.test_client.login(self.staffUser1)
