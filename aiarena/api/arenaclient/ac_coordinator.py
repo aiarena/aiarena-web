@@ -84,12 +84,12 @@ class ACCoordinator:
             try:
                 if config.REISSUE_UNFINISHED_MATCHES:
                     # Check for any unfinished matches assigned to this user. If any are present, return that.
-                    unfinished_matches = (
+                    unfinished_matches = list(
                         Match.objects.only("id", "map")
                         .filter(started__isnull=False, assigned_to=arenaclient, result__isnull=True)
-                        .order_by(F("round_id").asc())
+                        .order_by(F("round_id").asc())[:1]
                     )
-                    if unfinished_matches.count() > 0:
+                    if len(unfinished_matches) > 0:
                         return unfinished_matches[0]  # todo: re-set started time?
                     if only_unfinished_matches:
                         return None  # Return None so we don't try to start a new match
