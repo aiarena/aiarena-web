@@ -994,7 +994,7 @@ class Index(ListView):
 
         for comp in competitions:
             if Round.objects.filter(competition=comp).count() > 0:
-                cache_key = f"{comp.name}top10"
+                cache_key = f"{comp.id}-top10-cache"
                 top10 = cache.get(cache_key)
                 if top10 is None:
                     top10 = Ladders.get_competition_ranked_participants(comp, amount=10).prefetch_related(
