@@ -9,4 +9,8 @@ RUN chown -R unit:unit /app/
 ADD ./pip/requirements.PRODUCTION.txt /srv/requirements.PRODUCTION.txt
 RUN pip install -r /srv/requirements.PRODUCTION.txt
 
+ENV CONSTANCE_BACKEND constance.backends.memory.MemoryBackend
+
 RUN python /app/manage.py collectstatic --noinput --clear
+
+RUN unset CONSTANCE_BACKEND

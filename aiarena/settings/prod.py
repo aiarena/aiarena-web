@@ -53,6 +53,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+###########################
+# Constance Configuration #
+###########################
+
+CONSTANCE_BACKEND = os.getenv("CONSTANCE_BACKEND", "constance.backends.redisd.CachingRedisBackend")
+CONSTANCE_REDIS_CONNECTION = redis_url(REDIS_CONSTANCE_DB)  # noqa: F405
+# optionally set a value ttl
+CONSTANCE_REDIS_CACHE_TIMEOUT = 60
+
+
 #######################
 # Cache Configuration #
 #######################
