@@ -6,6 +6,7 @@ from django.test import TestCase, TransactionTestCase
 
 from constance import config
 
+from aiarena import settings
 from aiarena.core.api import Matches
 from aiarena.core.models import (
     Bot,
@@ -41,7 +42,7 @@ class BotTestCase(LoggedInMixin, TestCase):
 
         # test max bots for user
         for i in range(0, config.MAX_USER_BOT_COUNT):
-            if i < config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER:
+            if i < settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER:
                 self._create_active_bot_for_competition(competition.id, self.regularUser1, f"testbot{i}")
             else:
                 self._create_bot(self.regularUser1, f"testbot{i}")

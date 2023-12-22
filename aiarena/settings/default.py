@@ -189,30 +189,6 @@ CONSTANCE_CONFIG = {
         "Any value below 1 will disable this check. Default: 0",
     ),
     "MAX_USER_BOT_COUNT": (20, "Maximum bots a user can have uploaded."),
-    "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER": (
-        4,
-        "Maximum active competition participations a free tier" " user can have at one time.",
-    ),
-    "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER": (
-        4,
-        "Maximum active competition participations a bronze tier" " user can have at one time.",
-    ),
-    "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER": (
-        8,
-        "Maximum active competition participations a silver tier" " user can have at one time.",
-    ),
-    "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER": (
-        16,
-        "Maximum active competition participations a gold tier" " user can have at one time.",
-    ),
-    "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER": (
-        32,
-        "Maximum active competition participations a platinum tier" " user can have at one time.",
-    ),
-    "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER": (
-        9999,
-        "Maximum active competition participations a diamond tier" " user can have at one time.",
-    ),
     "DEBUG_LOGGING_ENABLED": (
         False,
         "Enable debug logging. "
@@ -233,15 +209,6 @@ CONSTANCE_CONFIG = {
     ),
     "HOUSE_BOTS_USER_ID": (0, "The user ID of the user account which hosts all the house bots."),
     "ALLOW_REQUESTED_MATCHES": (True, "Whether to allow users to request matches."),
-    "MATCH_REQUEST_LIMIT_FREE_TIER": (30, "The periodic limit of match requests for a free patreon tier user."),
-    "MATCH_REQUEST_LIMIT_BRONZE_TIER": (80, "The periodic limit of match requests for a bronze patreon tier user."),
-    "MATCH_REQUEST_LIMIT_SILVER_TIER": (200, "The periodic limit of match requests for a silver patreon tier user."),
-    "MATCH_REQUEST_LIMIT_GOLD_TIER": (600, "The periodic limit of match requests for a gold patreon tier user."),
-    "MATCH_REQUEST_LIMIT_PLATINUM_TIER": (
-        2000,
-        "The periodic limit of match requests for a platinum patreon tier user.",
-    ),
-    "MATCH_REQUEST_LIMIT_DIAMOND_TIER": (8000, "The periodic limit of match requests for a diamond patreon tier user."),
     "MATCH_REQUESTS_PREFILL_MAP_POOL_ID": (
         0,
         "The ID of the map pool that should be selected by default " "when requesting matches.",
@@ -314,12 +281,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
     "Bots": (
         "BOT_UPLOADS_ENABLED",
         "MAX_USER_BOT_COUNT",
-        "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER",
-        "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER",
-        "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER",
-        "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER",
-        "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER",
-        "MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER",
     ),
     "General": (
         "DEBUG_LOGGING_ENABLED",
@@ -332,12 +293,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "ELO_TREND_N_MATCHES",
     ),
     "Match Requests": (
-        "MATCH_REQUEST_LIMIT_FREE_TIER",
-        "MATCH_REQUEST_LIMIT_BRONZE_TIER",
-        "MATCH_REQUEST_LIMIT_SILVER_TIER",
-        "MATCH_REQUEST_LIMIT_GOLD_TIER",
-        "MATCH_REQUEST_LIMIT_PLATINUM_TIER",
-        "MATCH_REQUEST_LIMIT_DIAMOND_TIER",
         "REQUESTED_MATCHES_LIMIT_PERIOD",
         "MATCH_REQUESTS_PREFILL_MAP_POOL_ID",
     ),
@@ -572,3 +527,19 @@ if crontab:
             "schedule": crontab(minute="*/30"),  # */30 * * * *
         },
     }
+
+# User Settings
+
+MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER = 4
+MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER = 4
+MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER = 8
+MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER = 16
+MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER = 32
+MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER = 9999
+
+MATCH_REQUEST_LIMIT_FREE_TIER = 30
+MATCH_REQUEST_LIMIT_BRONZE_TIER = 80
+MATCH_REQUEST_LIMIT_SILVER_TIER = 200
+MATCH_REQUEST_LIMIT_GOLD_TIER = 600
+MATCH_REQUEST_LIMIT_PLATINUM_TIER = 2000
+MATCH_REQUEST_LIMIT_DIAMOND_TIER = 8000

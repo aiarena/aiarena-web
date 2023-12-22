@@ -13,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 
 from constance import config
 
+from aiarena import settings
 from aiarena.core.models.mixins import LockableModelMixin
 
 
@@ -68,12 +69,12 @@ class User(AbstractUser, LockableModelMixin):
         )
 
     BOTS_LIMIT_MAP = {
-        "none": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
-        "bronze": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
-        "silver": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
-        "gold": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
-        "platinum": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
-        "diamond": config.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER,
+        "none": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
+        "bronze": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
+        "silver": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
+        "gold": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
+        "platinum": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
+        "diamond": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER,
     }
 
     def get_active_bots_limit(self):
@@ -91,12 +92,12 @@ class User(AbstractUser, LockableModelMixin):
             return limit + self.extra_active_competition_participations
 
     REQUESTED_MATCHES_LIMIT_MAP = {
-        "none": config.MATCH_REQUEST_LIMIT_FREE_TIER,
-        "bronze": config.MATCH_REQUEST_LIMIT_BRONZE_TIER,
-        "silver": config.MATCH_REQUEST_LIMIT_SILVER_TIER,
-        "gold": config.MATCH_REQUEST_LIMIT_GOLD_TIER,
-        "platinum": config.MATCH_REQUEST_LIMIT_PLATINUM_TIER,
-        "diamond": config.MATCH_REQUEST_LIMIT_DIAMOND_TIER,
+        "none": settings.MATCH_REQUEST_LIMIT_FREE_TIER,
+        "bronze": settings.MATCH_REQUEST_LIMIT_BRONZE_TIER,
+        "silver": settings.MATCH_REQUEST_LIMIT_SILVER_TIER,
+        "gold": settings.MATCH_REQUEST_LIMIT_GOLD_TIER,
+        "platinum": settings.MATCH_REQUEST_LIMIT_PLATINUM_TIER,
+        "diamond": settings.MATCH_REQUEST_LIMIT_DIAMOND_TIER,
     }
 
     @property
