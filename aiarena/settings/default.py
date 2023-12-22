@@ -156,6 +156,9 @@ CACHES = {
     "select2": {
         "BACKEND": "django.core.cache.backends.dummy.DummyCache",
     },
+    "constance": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    },
 }
 
 # Tell select2 which cache configuration to use:
@@ -163,6 +166,7 @@ SELECT2_CACHE_BACKEND = "select2"
 # SELECT2_CSS = ''
 # Constance https://github.com/jazzband/django-constance
 CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+CONSTANCE_DATABASE_CACHE_BACKEND = "constance"
 
 # This is the dynamic config, update-able during runtime
 CONSTANCE_CONFIG = {
