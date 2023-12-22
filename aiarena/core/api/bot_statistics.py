@@ -4,11 +4,10 @@ from datetime import datetime
 from django.db import connection
 from django.db.models import Max
 
+import matplotlib
 import matplotlib.dates as mdates
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('agg')
 import pandas as pd
 from django_pglocks import advisory_lock
 from pytz import utc
@@ -16,6 +15,9 @@ from pytz import utc
 from aiarena.core.models import Bot, CompetitionParticipation, Map, Match, MatchParticipation, Result
 from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
+
+
+matplotlib.use("agg")
 
 
 class BotStatistics:
