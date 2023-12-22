@@ -7,6 +7,8 @@ from django.db.models import Max
 import matplotlib.dates as mdates
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('agg')
 import pandas as pd
 from django_pglocks import advisory_lock
 from pytz import utc
@@ -92,15 +94,15 @@ class BotStatistics:
         sp.save()
 
     @staticmethod
-    def _generate_graphs(sp):
-        graph1, graph2 = BotStatistics._generate_elo_graph(sp.bot.id, sp.competition_id)
+    def _generate_graphs(sp: CompetitionParticipation):
+        graph1, graph2 = BotStatistics._generate_elo_graph(sp.bot, sp.competition_id)
         if graph1 is not None:
-            sp.elo_graph.save("elo.png", graph1)
+            sp.elo_graph.save("elo.png", graph1, False)
         if graph2 is not None:
-            sp.elo_graph_update_plot.save("elo_update_plot.png", graph2)
+            sp.elo_graph_update_plot.save("elo_update_plot.png", graph2, False)
         graph3 = BotStatistics._generate_winrate_graph(sp.bot.id, sp.competition_id)
         if graph3 is not None:
-            sp.winrate_vs_duration_graph.save("winrate_vs_duration.png", graph3)
+            sp.winrate_vs_duration_graph.save("winrate_vs_duration.png", graph3, False)
 
     @staticmethod
     def _update_global_statistics(sp: CompetitionParticipation, result: Result):
@@ -209,7 +211,7 @@ class BotStatistics:
 
     @staticmethod
     def _recalculate_map_stats(sp: CompetitionParticipation):
-        competition_matches = Match.objects.filter(round__competition_id=sp.competition.id)
+        competition_matches = Match.objects.filter(round__competition_id=sp.competition.id).select_related("map")
         maps = Map.objects.filter(id__in=competition_matches.values_list("map_id", flat=True))
 
         # purge existing stats entries for all maps
@@ -360,7 +362,7 @@ class BotStatistics:
         )
 
     @staticmethod
-    def _get_elo_data(bot_id, competition_id):
+    def _get_elo_data(bot, competition_id):
         with connection.cursor() as cursor:
             query = f"""
                 select 
@@ -374,14 +376,14 @@ class BotStatistics:
                     left join core_round crnd on cm.round_id = crnd.id
                     left join core_competition cc on crnd.competition_id = cc.id
                 where resultant_elo is not null 
-                    and bot_id = {bot_id} 
+                    and bot_id = {bot.id} 
                     and competition_id = {competition_id}
                 order by cr.created
                 """
             cursor.execute(query)
             elo_over_time = pd.DataFrame(cursor.fetchall())
 
-        earliest_result_datetime = BotStatistics.get_earliest_result_datetime(bot_id, competition_id)
+        earliest_result_datetime = BotStatistics.get_earliest_result_datetime(bot.id, competition_id)
         return elo_over_time, earliest_result_datetime
 
     @staticmethod
@@ -440,8 +442,8 @@ class BotStatistics:
         return plot1, plot2
 
     @staticmethod
-    def _generate_elo_graph(bot_id: int, competition_id: int):
-        df, update_date = BotStatistics._get_elo_data(bot_id, competition_id)
+    def _generate_elo_graph(bot: Bot, competition_id: int):
+        df, update_date = BotStatistics._get_elo_data(bot, competition_id)
         if not df.empty:
             df.columns = ["Name", "ELO", "Date"]
 
@@ -452,7 +454,7 @@ class BotStatistics:
             else:
                 update_date = utc.localize(update_date)
 
-            bot_updated_datetime = Bot.objects.get(id=bot_id).bot_zip_updated
+            bot_updated_datetime = bot.bot_zip_updated
             if bot_updated_datetime > update_date:
                 update_date = bot_updated_datetime
 
