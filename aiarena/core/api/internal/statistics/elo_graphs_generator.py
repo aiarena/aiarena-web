@@ -27,7 +27,7 @@ class EloGraphsGenerator:
         return graph1, graph2, graph3
 
     def _generate_elo_graph(self, bot: Bot, competition_id: int):
-        df = self._get_elo_data(bot, competition_id)
+        df = self._get_elo_data_frame(bot, competition_id)
 
         if df.empty:
             return None, None  # no elo data
@@ -177,7 +177,7 @@ class EloGraphsGenerator:
         plt.close(fig)
         return plot1
 
-    def _get_elo_data(self, bot, competition_id):
+    def _get_elo_data_frame(self, bot, competition_id):
         with connection.cursor() as cursor:
             query = f"""
                 select 
