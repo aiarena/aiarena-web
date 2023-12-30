@@ -34,20 +34,22 @@ class EloGraphsGenerator:
 
         df.columns = ["Name", "ELO", "Date"]
 
-        update_date = self.get_earliest_result_datetime(bot.id, competition_id)
+        update_date = self._get_graph_update_line_datetime(bot, competition_id)
 
+        return self._generate_elo_plot_images(df, update_date)
+
+    def _get_graph_update_line_datetime(self, bot, competition_id):
+        update_date = self.get_earliest_result_datetime(bot.id, competition_id)
         # if the bot was updated more recently than the first result datetime, then use the bot updated date
         update_date = update_date[0][0]
         if update_date.tzinfo:
             update_date = utc.normalize(update_date)  # convert from a tuple
         else:
             update_date = utc.localize(update_date)
-
         bot_updated_datetime = bot.bot_zip_updated
         if bot_updated_datetime > update_date:
             update_date = bot_updated_datetime
-
-        return self._generate_elo_plot_images(df, update_date)
+        return update_date
 
     def _generate_winrate_graph(self, bot_id: int, competition_id: int):
         df = self._get_winrate_data(bot_id, competition_id)
