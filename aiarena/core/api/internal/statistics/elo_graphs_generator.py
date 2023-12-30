@@ -28,23 +28,24 @@ class EloGraphsGenerator:
 
     def _generate_elo_graph(self, bot: Bot, competition_id: int):
         df, update_date = self._get_elo_data(bot, competition_id)
-        if not df.empty:
-            df.columns = ["Name", "ELO", "Date"]
 
-            # if the bot was updated more recently than the first result datetime, then use the bot updated date
-            update_date = update_date[0][0]
-            if update_date.tzinfo:
-                update_date = utc.normalize(update_date)  # convert from a tuple
-            else:
-                update_date = utc.localize(update_date)
+        if df.empty:
+            return None, None  # no elo data
 
-            bot_updated_datetime = bot.bot_zip_updated
-            if bot_updated_datetime > update_date:
-                update_date = bot_updated_datetime
+        df.columns = ["Name", "ELO", "Date"]
 
-            return self._generate_elo_plot_images(df, update_date)
+        # if the bot was updated more recently than the first result datetime, then use the bot updated date
+        update_date = update_date[0][0]
+        if update_date.tzinfo:
+            update_date = utc.normalize(update_date)  # convert from a tuple
         else:
-            return None
+            update_date = utc.localize(update_date)
+
+        bot_updated_datetime = bot.bot_zip_updated
+        if bot_updated_datetime > update_date:
+            update_date = bot_updated_datetime
+
+        return self._generate_elo_plot_images(df, update_date)
 
     def _generate_winrate_graph(self, bot_id: int, competition_id: int):
         df = self._get_winrate_data(bot_id, competition_id)
