@@ -27,12 +27,14 @@ class EloGraphsGenerator:
         return graph1, graph2, graph3
 
     def _generate_elo_graph(self, bot: Bot, competition_id: int):
-        df, update_date = self._get_elo_data(bot, competition_id)
+        df = self._get_elo_data(bot, competition_id)
 
         if df.empty:
             return None, None  # no elo data
 
         df.columns = ["Name", "ELO", "Date"]
+
+        update_date = self.get_earliest_result_datetime(bot.id, competition_id)
 
         # if the bot was updated more recently than the first result datetime, then use the bot updated date
         update_date = update_date[0][0]
@@ -196,8 +198,7 @@ class EloGraphsGenerator:
             cursor.execute(query)
             elo_over_time = pd.DataFrame(cursor.fetchall())
 
-        earliest_result_datetime = self.get_earliest_result_datetime(bot.id, competition_id)
-        return elo_over_time, earliest_result_datetime
+        return elo_over_time
 
     def get_earliest_result_datetime(self, bot_id, competition_id):
         with connection.cursor() as cursor:
