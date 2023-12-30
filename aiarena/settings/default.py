@@ -510,10 +510,6 @@ CELERY_TASK_ACKS_LATE = False
 CELERY_TASK_DEFAULT_QUEUE = "default"
 if crontab:
     CELERY_BEAT_SCHEDULE = {
-        "doglobalfilecleanup": {
-            "task": "aiarena.core.tasks.clean_up_match_log_files",
-            "schedule": crontab(minute=0, hour=1),  # 0 1 * * *
-        },
         "generate_stats": {
             "task": "aiarena.core.tasks.generate_stats",
             "schedule": crontab(minute="*/60"),  # */60 * * * *
