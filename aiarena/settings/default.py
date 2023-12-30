@@ -512,15 +512,19 @@ if crontab:
     CELERY_BEAT_SCHEDULE = {
         "generate_stats": {
             "task": "aiarena.core.tasks.generate_stats",
-            "schedule": crontab(minute="*/60"),  # */60 * * * *
+            "schedule": crontab(minute=0, hour="11,23"),  # At minute 0 past hour 11 and 23
+        },
+        "generate_stats_graphsonly": {
+            "task": "aiarena.core.tasks.generate_stats_graphsonly",
+            "schedule": crontab(minute=40, hour="*/1"),  # At minute 40 past every hour.
         },
         "refresh_patreon_tiers": {
             "task": "aiarena.core.tasks.refresh_patreon_tiers",
-            "schedule": crontab(minute=0, hour=0),  # 0 0 * * *
+            "schedule": crontab(minute=0, hour=0),  # Everyday at 00:00
         },
         "timeout_overtime_matches": {
             "task": "aiarena.core.tasks.timeout_overtime_matches",
-            "schedule": crontab(minute="*/30"),  # */30 * * * *
+            "schedule": crontab(minute="*/30"),  # At every 30th minute.
         },
     }
 
