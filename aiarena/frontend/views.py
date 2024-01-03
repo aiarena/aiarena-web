@@ -30,7 +30,7 @@ from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 
-from aiarena.api.arenaclient.s3_helpers import get_file_s3_url_with_content_disposition, is_s3_file
+from aiarena.api.arenaclient.s3_helpers import get_file_url_s3_hack
 from aiarena.core.api import Matches
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api.maps import Maps
@@ -546,16 +546,10 @@ class BotDetail(DetailView):
         return context
 
     def get_bot_zip_url(self):
-        return self.get_bot_file_url(self.object.bot_zip, f"{self.object.name}.zip")
+        return get_file_url_s3_hack(self.object.bot_zip, f"{self.object.name}.zip")
 
     def get_bot_zip_data_url(self):
-        return self.get_bot_file_url(self.object.bot_data, f"{self.object.name}_data.zip")
-
-    def get_bot_file_url(self, file, file_name):
-        if is_s3_file(file):
-            return get_file_s3_url_with_content_disposition(file, file_name)
-        else:
-            return file.url
+        return get_file_url_s3_hack(self.object.bot_data, f"{self.object.name}_data.zip")
 
 
 class BotCompetitionStatsDetail(DetailView):
