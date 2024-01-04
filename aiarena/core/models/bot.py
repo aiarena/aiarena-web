@@ -72,7 +72,6 @@ class Bot(models.Model, LockableModelMixin):
     bot_data = PrivateFileField(upload_to=bot_data_upload_to, blank=True, null=True)
     bot_data_md5hash = models.CharField(max_length=32, editable=False, null=True)
     bot_data_publicly_downloadable = models.BooleanField(default=False)
-    # todo: rename back to plays_race
     plays_race = models.ForeignKey(BotRace, on_delete=models.PROTECT)
     type = models.CharField(max_length=32, choices=TYPES)
     # the ID displayed to other bots during a game so they can recognize their opponent
