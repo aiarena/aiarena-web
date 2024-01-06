@@ -52,6 +52,7 @@ DATABASES = {
         "PORT": os.getenv("POSTGRES_PORT", "5432"),  # default postgres port
     },
 }
+SQL_TIME_LIMIT = 60  # seconds. Enforced by Slow Query Killer (tm)
 
 # Application definition
 
