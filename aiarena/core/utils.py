@@ -6,9 +6,25 @@ import traceback
 from urllib import request
 
 from django.conf import settings
+from django.db import connection
 
 
 logger = logging.getLogger(__name__)
+
+
+def dictfetchall(cursor) -> list[dict]:
+    """
+    Returns all rows from a cursor as a dict
+
+    Source: https://docs.djangoproject.com/en/dev/topics/db/sql/#executing-custom-sql-directly
+    """
+    return [{col[0]: x for col, x in zip(cursor.description, row)} for row in cursor.fetchall()]
+
+
+def sql(statement, params=()) -> list[dict]:
+    with connection.cursor() as cursor:
+        cursor.execute(statement, params)
+        return dictfetchall(cursor)
 
 
 def parse_tags(tags):
