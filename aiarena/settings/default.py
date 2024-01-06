@@ -511,6 +511,10 @@ CELERY_TASK_ACKS_LATE = False
 CELERY_TASK_DEFAULT_QUEUE = "default"
 if crontab:
     CELERY_BEAT_SCHEDULE = {
+        "kill_slow_queries": {
+            "task": "aiarena.core.tasks.kill_slow_queries",
+            "schedule": timedelta(seconds=5),
+        },
         "generate_stats": {
             "task": "aiarena.core.tasks.generate_stats",
             "schedule": crontab(minute="*/60"),  # */60 * * * *
