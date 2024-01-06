@@ -52,7 +52,7 @@ DATABASES = {
         "PORT": os.getenv("POSTGRES_PORT", "5432"),  # default postgres port
     },
 }
-SQL_TIME_LIMIT = 60  # seconds. Enforced by Slow Query Killer (tm)
+SQL_TIME_LIMIT = 120  # seconds. Enforced by Slow Query Killer (tm)
 
 # Application definition
 
@@ -513,7 +513,7 @@ if crontab:
     CELERY_BEAT_SCHEDULE = {
         "kill_slow_queries": {
             "task": "aiarena.core.tasks.kill_slow_queries",
-            "schedule": timedelta(seconds=5),
+            "schedule": timedelta(seconds=15),
         },
         "generate_stats": {
             "task": "aiarena.core.tasks.generate_stats",
