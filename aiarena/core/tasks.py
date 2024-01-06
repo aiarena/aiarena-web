@@ -6,6 +6,7 @@ from celery import signals
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from aiarena.celery import app
+from aiarena.core.utils import sql
 
 
 @signals.celeryd_init.connect
@@ -40,3 +41,25 @@ def refresh_patreon_tiers():
 @app.task(ignore_result=True)
 def timeout_overtime_matches():
     management.call_command("timeoutovertimematches")
+
+
+@app.task(ignore_result=True)
+def kill_slow_queries(timeout=settings.SQL_TIME_LIMIT):
+    db_name = settings.DATABASES["default"]["NAME"]
+    db_user = settings.DATABASES["default"]["USER"]
+    slow_queries = sql(
+        "select * "
+        "from pg_stat_activity "
+        "where datname = %s and usename = %s and query_start < (NOW() - interval '%s seconds') "
+        "order by backend_start desc",
+        (db_name, db_user, timeout),
+    )
+    query_types = ("select", "update", "delete", "insert")
+    for query in slow_queries:
+        query_type = query["query"].split(" ")[0].lower()
+        if query_type not in query_types:
+            continue
+        sql("select pg_terminate_backend(%s)", [query["pid"]])
+        with sentry_sdk.push_scope() as scope:
+            scope.set_extra("query", query)
+            sentry_sdk.capture_message("Slow query killed")
