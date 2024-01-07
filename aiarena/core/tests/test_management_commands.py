@@ -180,6 +180,19 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         call_command("generatestats", stdout=out)
         self.assertIn("Done", out.getvalue())
 
+    def test_generatestats_graphsonly(self):
+        self._generate_full_data_set()
+        out = StringIO()
+        call_command("generatestats", "--graphsonly", stdout=out)
+        self.assertIn("Done", out.getvalue())
+
+    def test_generatestats_graphsonly_invalid_call(self):
+        self._generate_full_data_set()
+        out = StringIO()
+        competition_id = Competition.objects.first().id
+        with self.assertRaisesMessage(CommandError, "--graphsonly is not valid with --finalize"):
+            call_command("generatestats", "--graphsonly", "--competitionid", competition_id, "--finalize", stdout=out)
+
     def test_finalizecompetition(self):
         def _sort_json(json_str: str):
             json_list = json.loads(json_str)

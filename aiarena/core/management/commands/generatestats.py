@@ -31,6 +31,11 @@ class Command(BaseCommand):
             action="store_true",
             help="Mark the processed competition's stats as finalized. " "Only valid when specifying --competitionid.",
         )
+        parser.add_argument(
+            "--graphsonly",
+            action="store_true",
+            help="Generate only ELO graphs. Not valid with --finalize. ",
+        )
 
     def handle(self, *args, **options):
         if options["allcompetitions"]:
@@ -43,6 +48,10 @@ class Command(BaseCommand):
         finalize = options["finalize"]
         if finalize and (options["allcompetitions"] or not options["competitionid"]):
             raise CommandError("--finalize is only valid with --competitionid")
+
+        graphs_only = options["graphsonly"]
+        if graphs_only and finalize:
+            raise CommandError("--graphsonly is not valid with --finalize")
 
         bot_id = options["botid"]
         if bot_id is not None:
@@ -62,11 +71,11 @@ class Command(BaseCommand):
                     competition.lock_me()
                     self._run_generate_stats(competition, finalize=True)
             else:
-                self._run_generate_stats(competition)
+                self._run_generate_stats(competition, graphs_only=graphs_only)
 
         self.stdout.write("Done")
 
-    def _run_generate_stats(self, competition, finalize=False):
+    def _run_generate_stats(self, competition, finalize=False, graphs_only=False):
         if not competition.statistics_finalized:
             if finalize:
                 competition.statistics_finalized = True
@@ -76,6 +85,9 @@ class Command(BaseCommand):
                     raise Exception(f"Could not acquire lock on bot statistics for competition {str(competition.id)}")
                 for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
                     self.stdout.write(f"Generating current competition stats for bot {sp.bot_id}...")
-                    BotStatistics.recalculate_stats(sp)
+                    if graphs_only:
+                        BotStatistics.generate_graphs(sp)
+                    else:
+                        BotStatistics.recalculate_stats(sp)
         else:
             self.stdout.write(f"WARNING: Skipping competition {competition.id} - stats already finalized.")

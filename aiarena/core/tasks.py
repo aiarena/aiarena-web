@@ -34,6 +34,11 @@ def generate_stats():
 
 
 @app.task(ignore_result=True)
+def generate_stats_graphsonly():
+    management.call_command("generatestats", "--graphsonly")
+
+
+@app.task(ignore_result=True)
 def refresh_patreon_tiers():
     management.call_command("refreshpatreontiers")
 
