@@ -9,9 +9,9 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      perform_tests:
-        description: 'Perform tests'
-        default: true
+      skip_tests:
+        description: 'Skip tests'
+        default: false
         type: boolean
 
 permissions:
@@ -24,8 +24,10 @@ env:
 jobs:
   linters:
     runs-on: ubuntu-latest
-    if:  ${{ inputs.perform_tests != false }}
     steps:
+      - name: Skip linters
+        if:  ${{ inputs.skip_tests }}
+        run: exit 0
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -42,7 +44,6 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
-    if:  ${{ inputs.perform_tests != false }}
     services:
       postgres:
         # Docker Hub image
@@ -63,6 +64,9 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
+      - name: Skip tests
+        if:  ${{ inputs.skip_tests }}
+        run: exit 0
       - name: Checkout repository and submodules
         uses: actions/checkout@v3
         with:
