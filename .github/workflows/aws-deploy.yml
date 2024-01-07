@@ -8,6 +8,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      perform_tests:
+        description: 'Perform tests'
+        default: true
+        type: boolean
 
 permissions:
   id-token: write
@@ -19,6 +24,7 @@ env:
 jobs:
   linters:
     runs-on: ubuntu-latest
+    if:  ${{ inputs.perform_tests }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -36,6 +42,7 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
+    if:  ${{ inputs.perform_tests }}
     services:
       postgres:
         # Docker Hub image
