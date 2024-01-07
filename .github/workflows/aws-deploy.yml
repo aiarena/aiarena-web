@@ -24,7 +24,7 @@ env:
 jobs:
   linters:
     runs-on: ubuntu-latest
-    if:  ${{ inputs.perform_tests }}
+    if:  ${{ inputs.perform_tests != false }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -42,7 +42,7 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
-    if:  ${{ inputs.perform_tests }}
+    if:  ${{ inputs.perform_tests != false }}
     services:
       postgres:
         # Docker Hub image
