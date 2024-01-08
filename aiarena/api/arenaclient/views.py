@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
-        fields = "__all__"
+        fields = ["name", "file", "file_hash"]
 
 
 class BotSerializer(serializers.ModelSerializer):
