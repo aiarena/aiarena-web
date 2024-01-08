@@ -1294,7 +1294,7 @@ class ArenaClientCompatibilityTestCase(MatchReadyMixin, TransactionTestCase):
                     "properties": {
                         "name": {"type": "string"},
                         "file": {"type": "string"},
-                        "file_hash": {"type": "string"},
+                        "file_hash": {"type": ["string", "null"]},
                     },
                 },
             },
