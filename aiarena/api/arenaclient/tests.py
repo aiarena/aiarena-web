@@ -1290,14 +1290,11 @@ class ArenaClientCompatibilityTestCase(MatchReadyMixin, TransactionTestCase):
                 "map": {
                     "type": "object",
                     "additionalProperties": False,
-                    "required": ["id", "name", "file", "enabled", "game_mode", "competitions"],
+                    "required": ["name", "file"],
                     "properties": {
-                        "id": {"type": "number"},
                         "name": {"type": "string"},
                         "file": {"type": "string"},
-                        "enabled": {"type": "boolean"},
-                        "game_mode": {"type": "number"},
-                        "competitions": {"type": "array"},
+                        "file_hash": {"type": "string"},
                     },
                 },
             },
