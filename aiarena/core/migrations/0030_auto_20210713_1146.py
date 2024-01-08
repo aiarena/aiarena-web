@@ -11,6 +11,7 @@ def migrate_website_users(apps, schema_editor):
     for website_user in website_users:
         # find parent class fields:
         fields = [f.name for f in User._meta.fields]
+        fields.remove("note")  # this newly added field breaks this migration
 
         # get the values from the user instance
         values = dict([(x, getattr(website_user, x)) for x in fields])
