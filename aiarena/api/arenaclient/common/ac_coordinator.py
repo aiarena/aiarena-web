@@ -19,16 +19,17 @@ from django.db.models.signals import pre_save
 
 from constance import config
 
-from aiarena.api.arenaclient.exceptions import (
+from aiarena.core.api import Matches
+from aiarena.core.exceptions import (
     CompetitionClosing,
     CompetitionPaused,
-    LadderDisabled,
     MaxActiveRounds,
     NoMaps,
     NotEnoughAvailableBots,
 )
-from aiarena.core.api import Matches
 from aiarena.core.models import Competition, Match
+
+from .exceptions import LadderDisabled
 
 
 logger = logging.getLogger(__name__)

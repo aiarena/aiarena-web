@@ -8,16 +8,16 @@ from django.utils import timezone
 from constance import config
 from rest_framework.exceptions import APIException
 
-from aiarena.api.arenaclient.exceptions import (
+from aiarena.core.api import Bots
+from aiarena.core.api.competitions import Competitions
+from aiarena.core.api.maps import Maps
+from aiarena.core.exceptions import (
     CompetitionClosing,
     CompetitionPaused,
     MaxActiveRounds,
     NoMaps,
     NotEnoughAvailableBots,
 )
-from aiarena.core.api import Bots
-from aiarena.core.api.competitions import Competitions
-from aiarena.core.api.maps import Maps
 from aiarena.core.models import (
     ArenaClient,
     Bot,

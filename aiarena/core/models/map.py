@@ -1,8 +1,8 @@
 from django.db import models
 
-from aiarena.api.arenaclient.s3_helpers import is_s3_file
 from aiarena.core.models.competition import Competition
 from aiarena.core.models.game_mode import GameMode
+from aiarena.core.s3_helpers import is_s3_file
 
 
 def map_file_upload_to(instance, filename):
