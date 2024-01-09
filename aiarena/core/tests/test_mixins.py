@@ -107,7 +107,9 @@ class BaseTestMixin:
             CompetitionParticipation.objects.create(bot_id=bot.id, competition_id=competition_id)
             return bot
 
-    def _post_to_matches(self):
+    def _post_to_matches(self, api_version=None):
+        if api_version:
+            self.test_ac_api_client.set_api_version(api_version)
         return self.test_ac_api_client.post_to_matches()
 
     def _post_to_results(self, match_id, result_type, bot1_tags=None, bot2_tags=None):

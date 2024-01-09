@@ -30,7 +30,6 @@ from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 
-from aiarena.api.arenaclient.s3_helpers import get_file_url_s3_hack
 from aiarena.core.api import Matches
 from aiarena.core.api.ladders import Ladders
 from aiarena.core.api.maps import Maps
@@ -54,6 +53,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.relative_result import RelativeResult
+from aiarena.core.s3_helpers import get_file_url_s3_hack
 from aiarena.core.tasks import celery_exception_test
 from aiarena.core.utils import parse_tags
 from aiarena.frontend.templatetags.core_filters import format_elo_change, result_color_class, step_time_color

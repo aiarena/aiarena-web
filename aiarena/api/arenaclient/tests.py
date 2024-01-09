@@ -225,13 +225,13 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 201)
 
         # Round 3 - should fail due to active round limit
-        with self.assertLogs(logger="aiarena.api.arenaclient.ac_coordinator", level="DEBUG") as log:
+        with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 200)
             self.assertTrue("detail" in response.data)
             self.assertEqual("No game available for client.", response.data["detail"])
             self.assertIn(
-                f"DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition {comp.id}: "
+                f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {comp.id}: "
                 "This competition has reached it's maximum active rounds.",
                 log.output,
             )
@@ -261,10 +261,10 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         # we shouldn't be able to get a new match
         self.test_ac_api_client.set_api_token(Token.objects.create(user=self.arenaclientUser2).key)
 
-        with self.assertLogs(logger="aiarena.api.arenaclient.ac_coordinator", level="DEBUG") as log:
+        with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
             response = self.test_ac_api_client.post_to_matches()
             self.assertIn(
-                f"DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition {comp.id}: "
+                f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {comp.id}: "
                 f"Not enough available bots for a match. Wait until more bots become available.",
                 log.output,
             )
@@ -1226,10 +1226,91 @@ class ArenaClientCompatibilityTestCase(MatchReadyMixin, TransactionTestCase):
             return False, error
         return True, None
 
-    def test_endpoint_contract(self):
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        json_schema = {
+    v1_expected_json_schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["id"],
+        "properties": {
+            "id": {"type": "number"},
+            "bot1": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "id",
+                    "name",
+                    "game_display_id",
+                    "bot_zip",
+                    "bot_zip_md5hash",
+                    "bot_data",
+                    "bot_data_md5hash",
+                    "plays_race",
+                    "type",
+                ],
+                "properties": {
+                    "id": {"type": "number"},
+                    "name": {"type": "string"},
+                    "game_display_id": {"type": "string"},
+                    "bot_zip": {"type": "string"},
+                    "bot_zip_md5hash": {"type": "string"},
+                    "bot_data": {"type": "string"},
+                    "bot_data_md5hash": {"type": "string"},
+                    "plays_race": {"type": "string"},
+                    "type": {"type": "string"},
+                },
+            },
+            "bot2": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "id",
+                    "name",
+                    "game_display_id",
+                    "bot_zip",
+                    "bot_zip_md5hash",
+                    "bot_data",
+                    "bot_data_md5hash",
+                    "plays_race",
+                    "type",
+                ],
+                "properties": {
+                    "id": {"type": "number"},
+                    "name": {"type": "string"},
+                    "game_display_id": {"type": "string"},
+                    "bot_zip": {"type": "string"},
+                    "bot_zip_md5hash": {"type": "string"},
+                    "bot_data": {"type": "string"},
+                    "bot_data_md5hash": {"type": "string"},
+                    "plays_race": {"type": "string"},
+                    "type": {"type": "string"},
+                },
+            },
+            "map": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["id", "name", "file", "enabled", "game_mode", "competitions"],
+                "properties": {
+                    "id": {"type": "number"},
+                    "name": {"type": "string"},
+                    "file": {"type": "string"},
+                    "enabled": {"type": "boolean"},
+                    "game_mode": {"type": "number"},
+                    "competitions": {"type": "array"},
+                },
+            },
+        },
+    }
+
+    def test_default_version_endpoint_contract(self):
+        api_version = None  # should default to v1
+        self._test_endpoint_contract(api_version, ArenaClientCompatibilityTestCase.v1_expected_json_schema)
+
+    def test_v1_version_endpoint_contract(self):
+        api_version = "v1"
+        self._test_endpoint_contract(api_version, ArenaClientCompatibilityTestCase.v1_expected_json_schema)
+
+    def test_v2_version_endpoint_contract(self):
+        api_version = "v2"
+        expected_json_schema = {
             "type": "object",
             "additionalProperties": False,
             "required": ["id"],
@@ -1290,23 +1371,26 @@ class ArenaClientCompatibilityTestCase(MatchReadyMixin, TransactionTestCase):
                 "map": {
                     "type": "object",
                     "additionalProperties": False,
-                    "required": ["id", "name", "file", "enabled", "game_mode", "competitions"],
+                    "required": ["name", "file"],
                     "properties": {
-                        "id": {"type": "number"},
                         "name": {"type": "string"},
                         "file": {"type": "string"},
-                        "enabled": {"type": "boolean"},
-                        "game_mode": {"type": "number"},
-                        "competitions": {"type": "array"},
+                        "file_hash": {"type": ["string", "null"]},
                     },
                 },
             },
         }
+        self._test_endpoint_contract(api_version, expected_json_schema)
 
-        validation_successful, error = self.validateJson_bySchema(json.load(io.BytesIO(response.content)), json_schema)
+    def _test_endpoint_contract(self, version, expected_json_schema):
+        response = self._post_to_matches(version)
+        self.assertEqual(response.status_code, 201)
+        validation_successful, error = self.validateJson_bySchema(
+            json.load(io.BytesIO(response.content)), expected_json_schema
+        )
         if not validation_successful:
             raise Exception(
-                "The AC API next match endpoint json schema has changed! "
+                f"The AC API {version} next match endpoint json schema has changed! "
                 "If you intentionally changed it, update this test and the arenaclient.\n"
                 "ValidationError:\n" + str(error)
             )

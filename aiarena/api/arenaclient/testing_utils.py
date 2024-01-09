@@ -8,17 +8,33 @@ from aiarena.core.tests.testing_utils import TestAssetPaths
 
 
 class AcApiTestingClient(APIClient):
-    def __init__(self, api_token: str = None, **defaults):
+    NEXT_MATCH_REVERSE_NAME = "ac_next_match-list"
+    SUBMIT_RESULT_REVERSE_NAME = "ac_submit_result-list"
+
+    def __init__(self, api_token: str = None, api_version=None, **defaults):
         super().__init__(**defaults)
 
         if api_token:
             self.credentials(HTTP_AUTHORIZATION="Token " + api_token)
 
+        self.api_version = api_version
+
+    def set_api_version(self, api_version):
+        self.api_version = api_version
+
     def set_api_token(self, api_token: str):
         self.credentials(HTTP_AUTHORIZATION="Token " + api_token)
 
+    def get_endpoint_url(self, endpoint_name: str) -> str:
+        if self.api_version:
+            endpoint_name = f"{self.api_version}_{endpoint_name}"
+        else:
+            endpoint_name = endpoint_name
+
+        return reverse(endpoint_name)
+
     def post_to_matches(self) -> Match:
-        url = reverse("ac_next_match-list")
+        url = self.get_endpoint_url(self.NEXT_MATCH_REVERSE_NAME)
         response = self.post(url)
         return response
 
@@ -61,7 +77,7 @@ class AcApiTestingClient(APIClient):
         return self.publish_result(data)
 
     def publish_result(self, data):
-        url = reverse("ac_submit_result-list")
+        url = self.get_endpoint_url(self.SUBMIT_RESULT_REVERSE_NAME)
         return self.post(url, data=data)
 
     def submit_result(self, match_id: int, type: str) -> Result:
