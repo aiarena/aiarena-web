@@ -1,9 +1,9 @@
+from django.urls import include, path
+
 from rest_framework.routers import DefaultRouter
 
 from aiarena.api import views as publicapi_views
 from aiarena.api.stream import views as stream_views
-
-from .arenaclient import views as arenaclient_views
 
 
 router = DefaultRouter()
@@ -43,19 +43,11 @@ router.register(r"results", publicapi_views.ResultViewSet, basename="api_result"
 router.register(r"rounds", publicapi_views.RoundViewSet, basename="api_round")
 router.register(r"users", publicapi_views.UserViewSet, basename="api_user")
 
-# arena client
-router.register(
-    r"arenaclient/matches", arenaclient_views.MatchViewSet, basename="match"
-)  # legacy todo: remove once ACs updated
-router.register(
-    r"arenaclient/results", arenaclient_views.ResultViewSet, basename="result"
-)  # legacy todo: remove once ACs updated
-router.register(r"arenaclient/next-match", arenaclient_views.MatchViewSet, basename="ac_next_match")
-router.register(r"arenaclient/submit-result", arenaclient_views.ResultViewSet, basename="ac_submit_result")
-router.register(r"arenaclient/set-status", arenaclient_views.SetArenaClientStatusViewSet, basename="api_ac_set_status")
-
 # stream
 router.register(r"stream/next-replay", stream_views.StreamNextReplayViewSet, basename="api_stream_nextreplay")
 
+urlpatterns = [
+    path("arenaclient/", include("aiarena.api.arenaclient.urls")),
+]
 
-urlpatterns = router.urls
+urlpatterns += router.urls
