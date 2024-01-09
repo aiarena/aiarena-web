@@ -261,12 +261,12 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         self._finish_competition_rounds(competition2.id)
 
         # this should fail due to a new round trying to generate while the competition is paused
-        with self.assertLogs(logger="aiarena.api.arenaclient.ac_coordinator", level="DEBUG") as log:
+        with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 200)
             self.assertEqual("No game available for client.", response.data["detail"])
             self.assertIn(
-                f"DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition {competition1.id}: "
+                f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {competition1.id}: "
                 f"This competition is paused.",
                 log.output,
             )
@@ -329,12 +329,12 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
             self.assertEqual(updated_bot.game_display_id, bot.game_display_id)
 
         # no maps
-        with self.assertLogs(logger="aiarena.api.arenaclient.ac_coordinator", level="DEBUG") as log:
+        with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 200)
             self.assertEqual("No game available for client.", response.data["detail"])
             self.assertIn(
-                f"DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition {competition2.id}: "
+                f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {competition2.id}: "
                 f"There are no active maps available for a match.",
                 log.output,
             )

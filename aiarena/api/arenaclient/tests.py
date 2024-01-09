@@ -225,13 +225,13 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 201)
 
         # Round 3 - should fail due to active round limit
-        with self.assertLogs(logger="aiarena.api.arenaclient.ac_coordinator", level="DEBUG") as log:
+        with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
             response = self._post_to_matches()
             self.assertEqual(response.status_code, 200)
             self.assertTrue("detail" in response.data)
             self.assertEqual("No game available for client.", response.data["detail"])
             self.assertIn(
-                f"DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition {comp.id}: "
+                f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {comp.id}: "
                 "This competition has reached it's maximum active rounds.",
                 log.output,
             )
@@ -261,10 +261,10 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         # we shouldn't be able to get a new match
         self.test_ac_api_client.set_api_token(Token.objects.create(user=self.arenaclientUser2).key)
 
-        with self.assertLogs(logger="aiarena.api.arenaclient.ac_coordinator", level="DEBUG") as log:
+        with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
             response = self.test_ac_api_client.post_to_matches()
             self.assertIn(
-                f"DEBUG:aiarena.api.arenaclient.ac_coordinator:Skipping competition {comp.id}: "
+                f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {comp.id}: "
                 f"Not enough available bots for a match. Wait until more bots become available.",
                 log.output,
             )
