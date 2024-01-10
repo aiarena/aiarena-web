@@ -57,7 +57,7 @@ class PatreonAccountBind(models.Model):
         logger.info(f"Refreshing patreon for user {self.user.id} {self.user.username}")
         self.last_refresh_attempt_current_user_json = str(user)
 
-        if self._has_pledge(user):
+        if self._has_current_pledge(user):
             pledge = self._get_pledge_reward_name(user, self._get_pledge_reward_id(user)).lower()
             logger.info(f"Pledge found: {pledge}")
             self.user.patreon_level = pledge
@@ -77,12 +77,15 @@ class PatreonAccountBind(models.Model):
     def _is_past_the_grace_period(self):
         return self.last_had_pledge is None or (timezone.now() - self.last_had_pledge).days > self.DAYS_GRACE_PERIOD
 
-    def _has_pledge(self, user) -> bool:
-        if "included" in user:
-            for entry in user["included"]:
-                if entry["type"] == "pledge":
-                    return True
-        return False
+    def _has_current_pledge(self, user) -> bool:
+        pledge = self._get_pledge_or_none(user)
+        return pledge is not None and self._is_current_pledge(pledge)
+
+    def _is_current_pledge(self, pledge):
+        return pledge["attributes"]["declined_since"] is None
+
+    def _get_pledge_or_none(self, user):
+        next((entry for entry in user.get("included", []) if entry["type"] == "pledge"), None)
 
     def _get_pledge_reward_id(self, user) -> str:
         for entry in user["included"]:
