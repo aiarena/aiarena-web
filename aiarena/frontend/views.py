@@ -1047,7 +1047,7 @@ class Index(ListView):
         events = (
             Bot.objects.select_related("user")
             .only("user", "name", "created", "bot_zip_updated")
-            .order_by("-bot_zip_updated")[:10]
+            .order_by("-bot_zip_updated")[:15]
         )
         for event in events:
             # if these are within a second, then the bot was created, not updated
