@@ -590,21 +590,24 @@ class BotCompetitionStatsDetail(DetailView):
 
     def __get_elo_chart_data(self, sp, competition_id):
         elo_data = EloGraphsGenerator(sp)._get_elo_data(self.object.bot, competition_id)
+        last_updated = (
+            EloGraphsGenerator(sp)._get_graph_update_line_datetime(self.object.bot, competition_id).timestamp() * 1000
+            if sp.bot.user == self.request.user and self.request.user.patreon_level != "none"
+            else None
+        )
+
         return json.dumps(
             {
                 "title": "ELO over time",
-                "lastUpdated": EloGraphsGenerator(sp)
-                ._get_graph_update_line_datetime(self.object.bot, competition_id)
-                .timestamp()
-                * 1000,
+                "lastUpdated": last_updated,
                 "data": {
-                    "labels": list(elo[2].timestamp() * 1000 for elo in elo_data),
+                    "labels": [elo[2].timestamp() * 1000 for elo in elo_data],
                     "datasets": [
                         {
                             "label": "ELO",
                             "backgroundColor": "#86c232",
                             "borderColor": "#86c232",
-                            "data": list(elo[1] for elo in elo_data),
+                            "data": [elo[1] for elo in elo_data],
                         }
                     ],
                 },
@@ -614,22 +617,18 @@ class BotCompetitionStatsDetail(DetailView):
 
     def __get_winrate_chart_data(self, sp, competition_id):
         winrate_data = EloGraphsGenerator(sp)._get_winrate_data(self.object.bot.id, competition_id)
-        winrate_data_with_total = list(
-            (x[0], x[1], x[2], x[3], x[4], (x[1] + x[2] + x[3] + x[4])) for x in winrate_data
-        )
-        labels = list(f"{winrate[0]}-{winrate[0]+5}" for winrate in winrate_data_with_total)
-        if "35" in labels[-1]:
+        winrate_data_with_total = [(x[0], x[1], x[2], x[3], x[4], (x[1] + x[2] + x[3] + x[4])) for x in winrate_data]
+        labels = [f"{winrate[0]}-{winrate[0]+5}" for winrate in winrate_data_with_total]
+        if labels[-1] == "30-35":
             labels[-1] = "30+"
         datasets = []
         # Wins
         datasets.append(
             {
                 "label": "Wins",
-                "data": list(x[1] for x in winrate_data_with_total),
+                "data": [x[1] for x in winrate_data_with_total],
                 "backgroundColor": "#86C232",
-                "extraLabels": list(
-                    str(round((x[1] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total
-                ),
+                "extraLabels": [str(round((x[1] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total],
                 "datalabels": {"align": "center", "anchor": "center"},
             }
         )
@@ -638,11 +637,9 @@ class BotCompetitionStatsDetail(DetailView):
         datasets.append(
             {
                 "label": "Losses",
-                "data": list(x[2] for x in winrate_data_with_total),
+                "data": [x[2] for x in winrate_data_with_total],
                 "backgroundColor": "#D20044",
-                "extraLabels": list(
-                    str(round((x[2] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total
-                ),
+                "extraLabels": [str(round((x[2] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total],
                 "datalabels": {"align": "center", "anchor": "center"},
             }
         )
@@ -651,11 +648,9 @@ class BotCompetitionStatsDetail(DetailView):
         datasets.append(
             {
                 "label": "Crashes",
-                "data": list(x[3] for x in winrate_data_with_total),
+                "data": [x[3] for x in winrate_data_with_total],
                 "backgroundColor": "#AAAAAA",
-                "extraLabels": list(
-                    str(round((x[3] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total
-                ),
+                "extraLabels": [str(round((x[3] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total],
                 "datalabels": {"align": "center", "anchor": "center"},
             }
         )
@@ -664,11 +659,9 @@ class BotCompetitionStatsDetail(DetailView):
         datasets.append(
             {
                 "label": "Ties",
-                "data": list(x[4] for x in winrate_data_with_total),
+                "data": [x[4] for x in winrate_data_with_total],
                 "backgroundColor": "#DFCE00",
-                "extraLabels": list(
-                    str(round((x[4] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total
-                ),
+                "extraLabels": [str(round((x[4] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total],
                 "datalabels": {"align": "center", "anchor": "center"},
             }
         )

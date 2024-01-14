@@ -254,6 +254,7 @@
                                 type: "line",
                                 borderDash: [6,3],
                                 mode: "vertical",
+                                display: false,
                                 scaleID: "x",
                                 value: "",
                                 endValue: "",
@@ -328,8 +329,12 @@
             eloChartJsonResponse.data.datasets.forEach(dataset => {
                 eloChart.data.datasets.push(dataset);
             });
-            eloChart.options.plugins.annotation.annotations[0].value = eloChartJsonResponse.lastUpdated;
-            eloChart.options.plugins.annotation.annotations[0].endValue = eloChartJsonResponse.lastUpdated;
+            
+            if (eloChartJsonResponse.lastUpdated != null){
+                eloChart.options.plugins.annotation.annotations[0].value = eloChartJsonResponse.lastUpdated;
+                eloChart.options.plugins.annotation.annotations[0].endValue = eloChartJsonResponse.lastUpdated;
+                eloChart.options.plugins.annotation.annotations[0].display = true;
+            }
             eloChart.update();
 
 
