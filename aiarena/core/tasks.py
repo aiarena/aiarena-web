@@ -66,5 +66,5 @@ def kill_slow_queries(timeout=settings.SQL_TIME_LIMIT):
             continue
         sql("select pg_terminate_backend(%s)", [query["pid"]])
         with sentry_sdk.push_scope() as scope:
-            scope.set_extra("query", query)
+            scope.set_context("query", query)
             sentry_sdk.capture_message("Slow query killed")
