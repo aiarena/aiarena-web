@@ -627,7 +627,9 @@ class BotCompetitionStatsDetail(DetailView):
                 "label": "Wins",
                 "data": list(x[1] for x in winrate_data_with_total),
                 "backgroundColor": "#86C232",
-                "extraLabels": list(str(round((x[1] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total),
+                "extraLabels": list(
+                    str(round((x[1] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total
+                ),
                 "datalabels": {"align": "center", "anchor": "center"},
             }
         )
@@ -638,7 +640,9 @@ class BotCompetitionStatsDetail(DetailView):
                 "label": "Losses",
                 "data": list(x[2] for x in winrate_data_with_total),
                 "backgroundColor": "#D20044",
-                "extraLabels": list(str(round((x[2] /x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total),
+                "extraLabels": list(
+                    str(round((x[2] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total
+                ),
                 "datalabels": {"align": "center", "anchor": "center"},
             }
         )
@@ -649,7 +653,9 @@ class BotCompetitionStatsDetail(DetailView):
                 "label": "Crashes",
                 "data": list(x[3] for x in winrate_data_with_total),
                 "backgroundColor": "#AAAAAA",
-                "extraLabels": list(str(round((x[3] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total),
+                "extraLabels": list(
+                    str(round((x[3] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total
+                ),
                 "datalabels": {"align": "center", "anchor": "center"},
             }
         )
@@ -660,7 +666,9 @@ class BotCompetitionStatsDetail(DetailView):
                 "label": "Ties",
                 "data": list(x[4] for x in winrate_data_with_total),
                 "backgroundColor": "#DFCE00",
-                "extraLabels": list(str(round((x[4] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total),
+                "extraLabels": list(
+                    str(round((x[4] / x[5] if x[5] else 0) * 100)) + "%" for x in winrate_data_with_total
+                ),
                 "datalabels": {"align": "center", "anchor": "center"},
             }
         )
