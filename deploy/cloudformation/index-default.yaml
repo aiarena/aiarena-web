@@ -66,6 +66,9 @@ Resources:
     Properties:
       VersioningConfiguration:
         Status: Enabled
+      LoggingConfiguration:
+        DestinationBucketName:
+          Ref: s3LogsBucket
       CorsConfiguration:
         CorsRules:
           - AllowedMethods:
@@ -77,6 +80,29 @@ Resources:
               - https://aiarena.net
               - https://sc2ai.net
             MaxAge: 3000
+
+  s3LogsBucket:
+    Type: AWS::S3::Bucket
+
+  s3LogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: s3LogsBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:PutObject'
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - Ref: s3LogsBucket
+                    - "/*"
+            Principal:
+              Service: "logging.s3.amazonaws.com"
 
   lladdyDevTestingBucket:
     Type: AWS::S3::Bucket
