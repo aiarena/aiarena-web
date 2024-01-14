@@ -27,7 +27,7 @@ class EloGraphsGenerator:
         return graph1, graph2, graph3
 
     def _generate_elo_graph(self, bot: Bot, competition_id: int):
-        df = self._get_elo_data_frame(bot, competition_id)
+        df = self._get_elo_dataframe(bot, competition_id)
 
         if df.empty:
             return None, None  # no elo data
@@ -45,12 +45,15 @@ class EloGraphsGenerator:
         return max(update_date, bot.bot_zip_updated)
 
     def _generate_winrate_graph(self, bot_id: int, competition_id: int):
-        df = self._get_winrate_data(bot_id, competition_id)
+        df = self._get_winrate_dataframe(bot_id, competition_id)
         if not df.empty:
             df.columns = ["Duration (Minutes)", "Wins", "Losses", "Crashes", "Ties"]
             return self._generate_winrate_plot_images(df)
         else:
             return None
+
+    def _get_winrate_dataframe(self, bot_id, competition_id):
+        return pd.DataFrame(self._get_winrate_data(bot_id, competition_id))
 
     def _get_winrate_data(self, bot_id, competition_id):
         # this does not distinct between competitions
@@ -67,7 +70,7 @@ class EloGraphsGenerator:
                         (cp.result = 'loss' and cp.result_cause != 'crash') as is_loser,
                         (cp.result_cause = 'crash') as is_crasher,
                         (cp.result = 'tie') as is_tied,
-                        floor(cr.game_steps/((22.4*60)*5))*5 as duration_minutes
+                        CASE WHEN floor(cr.game_steps/((22.4*60)*5))*5 > 30 THEN 30 ELSE floor(cr.game_steps/((22.4*60)*5))*5 END as duration_minutes
                     from core_matchparticipation cp
                         inner join core_result cr on cp.match_id = cr.match_id
                         left join core_bot cb on cp.bot_id = cb.id
@@ -80,7 +83,7 @@ class EloGraphsGenerator:
                     order by duration_minutes
                 """
             cursor.execute(query)
-            stats_vs_duration = pd.DataFrame(cursor.fetchall())
+            stats_vs_duration = cursor.fetchall()
 
         return stats_vs_duration
 
@@ -172,7 +175,10 @@ class EloGraphsGenerator:
         plt.close(fig)
         return plot1
 
-    def _get_elo_data_frame(self, bot, competition_id):
+    def _get_elo_dataframe(self, bot, competition_id):
+        return pd.DataFrame(self._get_elo_data(bot, competition_id))
+
+    def _get_elo_data(self, bot, competition_id):
         with connection.cursor() as cursor:
             query = f"""
                 select 
@@ -191,7 +197,7 @@ class EloGraphsGenerator:
                 order by cr.created
                 """
             cursor.execute(query)
-            elo_over_time = pd.DataFrame(cursor.fetchall())
+            elo_over_time = cursor.fetchall()
 
         return elo_over_time
 

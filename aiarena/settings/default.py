@@ -519,10 +519,6 @@ if crontab:
             "task": "aiarena.core.tasks.generate_stats",
             "schedule": crontab(minute=0, hour="11,23"),  # At minute 0 past hour 11 and 23
         },
-        "generate_stats_graphsonly": {
-            "task": "aiarena.core.tasks.generate_stats_graphsonly",
-            "schedule": crontab(minute=40, hour="*/1"),  # At minute 40 past every hour.
-        },
         "refresh_patreon_tiers": {
             "task": "aiarena.core.tasks.refresh_patreon_tiers",
             "schedule": crontab(minute=0, hour=0),  # Everyday at 00:00
