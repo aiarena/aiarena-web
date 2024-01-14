@@ -316,7 +316,6 @@
                 }
             });
             var eloChartJsonResponse = JSON.parse('{{ elo_chart_data|escapejs }}');
-            console.log(eloChartJsonResponse);
             // Reset the current chart
             eloChart.data.datasets = [];
             eloChart.data.labels = [];
@@ -327,7 +326,6 @@
             eloChart.data.labels = eloChartJsonResponse.data.labels;
             eloChart.data.labels2 = eloChartJsonResponse.data.labels;
             eloChartJsonResponse.data.datasets.forEach(dataset => {
-                console.log(dataset)
                 eloChart.data.datasets.push(dataset);
             });
             eloChart.options.plugins.annotation.annotations[0].value = eloChartJsonResponse.lastUpdated;
@@ -336,7 +334,6 @@
 
 
             var winrateChartJsonResponse = JSON.parse('{{ winrate_chart_data|escapejs }}');
-            console.log(winrateChartJsonResponse);
             // Reset the current chart
             winrateChart.data.datasets = [];
             winrateChart.data.labels = [];
