@@ -1565,3 +1565,9 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
     top: 0;
     left: 0;
 }
+.stats_and_graphs {
+    display: flex;    
+}
+#bot_competition_stats_graphs{
+    margin-top: -2%;
+}

@@ -6,104 +6,96 @@
     <div class="divider">
         <span></span><span><h2>{{ competitionparticipation.bot.as_html_link }} - {{ competitionparticipation.competition.as_html_link }} stats</h2></span><span></span>
     </div>
-    <div id="bot_competition_stats">
-        <table summary="Table containing competition participation information" style="text-align: right">
-            <thead>
-            <tr style="text-align: center">
-                <td colspan="3"><strong>Stats</strong></td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr class="mono">
-                <td>Generated</td>
-                <td colspan="2">{{ updated|naturaltime|shorten_naturaltime }}</td>
-            </tr>
-            <tr class="mono">
-                <td>Current ELO</td>
-                <td>{{ competitionparticipation.elo }}</td>
-                <td></td>
-            </tr>
-            <tr class="mono">
-                <td>Highest ELO</td>
-                {% if competitionparticipation.highest_elo != None %}
-                    <td>{{ competitionparticipation.highest_elo }}</td>
+    <div class="stats_and_graphs">
+        <div id="bot_competition_stats">
+            <table summary="Table containing competition participation information" style="text-align: right">
+                <thead>
+                <tr style="text-align: center">
+                    <td colspan="3"><strong>Stats</strong></td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="mono">
+                    <td>Generated</td>
+                    <td colspan="2">{{ updated|naturaltime|shorten_naturaltime }}</td>
+                </tr>
+                <tr class="mono">
+                    <td>Current ELO</td>
+                    <td>{{ competitionparticipation.elo }}</td>
                     <td></td>
-                {% else %}
-                    <td colspan="2">No stats</td>
-                {% endif %}
-            </tr>
-            <tr class="mono">
-                <td>Matches</td>
-                <td>{{ competitionparticipation.match_count }}</td>
-                <td></td>
-            </tr>
-            <tr class="mono">
-                <td>Wins</td>
-                {% if competitionparticipation.win_perc != None %}
-                    <td>{{ competitionparticipation.win_count }}</td>
-                    <td>{{ competitionparticipation.win_perc|floatformat:2 }}%</td>
-                {% else %}
-                    <td colspan="2">No stats</td>
-                {% endif %}
-            </tr>
-            <tr class="mono">
-                <td>Losses</td>
-                {% if competitionparticipation.loss_perc != None %}
-                    <td>{{ competitionparticipation.loss_count }}</td>
-                    <td>{{ competitionparticipation.loss_perc|floatformat:2 }}%</td>
-                {% else %}
-                    <td colspan="2">No stats</td>
-                {% endif %}
-            </tr>
-            <tr class="mono">
-                <td>Ties</td>
-                {% if competitionparticipation.tie_perc != None %}
-                    <td>{{ competitionparticipation.tie_count }}</td>
-                    <td>{{ competitionparticipation.tie_perc|floatformat:2 }}%</td>
-                {% else %}
-                    <td colspan="2">No stats</td>
-                {% endif %}
-            </tr>
-            <tr class="mono">
-                <td>Crashes</td>
-                {% if competitionparticipation.crash_perc != None %}
-                    <td>{{ competitionparticipation.crash_count }}</td>
-                    <td>{{ competitionparticipation.crash_perc|floatformat:2 }}%</td>
-                {% else %}
-                    <td colspan="2">No stats</td>
-                {% endif %}
-            </tr>
+                </tr>
+                <tr class="mono">
+                    <td>Highest ELO</td>
+                    {% if competitionparticipation.highest_elo != None %}
+                        <td>{{ competitionparticipation.highest_elo }}</td>
+                        <td></td>
+                    {% else %}
+                        <td colspan="2">No stats</td>
+                    {% endif %}
+                </tr>
+                <tr class="mono">
+                    <td>Matches</td>
+                    <td>{{ competitionparticipation.match_count }}</td>
+                    <td></td>
+                </tr>
+                <tr class="mono">
+                    <td>Wins</td>
+                    {% if competitionparticipation.win_perc != None %}
+                        <td>{{ competitionparticipation.win_count }}</td>
+                        <td>{{ competitionparticipation.win_perc|floatformat:2 }}%</td>
+                    {% else %}
+                        <td colspan="2">No stats</td>
+                    {% endif %}
+                </tr>
+                <tr class="mono">
+                    <td>Losses</td>
+                    {% if competitionparticipation.loss_perc != None %}
+                        <td>{{ competitionparticipation.loss_count }}</td>
+                        <td>{{ competitionparticipation.loss_perc|floatformat:2 }}%</td>
+                    {% else %}
+                        <td colspan="2">No stats</td>
+                    {% endif %}
+                </tr>
+                <tr class="mono">
+                    <td>Ties</td>
+                    {% if competitionparticipation.tie_perc != None %}
+                        <td>{{ competitionparticipation.tie_count }}</td>
+                        <td>{{ competitionparticipation.tie_perc|floatformat:2 }}%</td>
+                    {% else %}
+                        <td colspan="2">No stats</td>
+                    {% endif %}
+                </tr>
+                <tr class="mono">
+                    <td>Crashes</td>
+                    {% if competitionparticipation.crash_perc != None %}
+                        <td>{{ competitionparticipation.crash_count }}</td>
+                        <td>{{ competitionparticipation.crash_perc|floatformat:2 }}%</td>
+                    {% else %}
+                        <td colspan="2">No stats</td>
+                    {% endif %}
+                </tr>
 
-            </tbody>
-        </table>
-        <br/>
-    </div>
-    <div id="bot_competition_stats_graphs">
-        <div class="statSlides">
-            {# If this user owns the bot, and is a supporter, display the private ELO graph #}
-            {% if competitionparticipation.bot.user == user and user.patreon_level != 'none' and competitionparticipation.elo_graph_update_plot %}
-            <div id="elo_graph">
-                <img src="{{ competitionparticipation.elo_graph_update_plot.url }}" alt="ELOGraph"/>
-            </div>
-            {% elif competitionparticipation.elo_graph %}
+                </tbody>
+            </table>
+            <br/>
+        </div>
+        <div id="bot_competition_stats_graphs" style="width: 50%;height: 100%;">
+            <div class="statSlides">
                 <div id="elo_graph">
-                    <img src="{{ competitionparticipation.elo_graph.url }}" alt="ELOGraph"/>
+                    <canvas id="eloChart"></canvas>
                 </div>
-            {% endif %}
-        </div>
-        <div class="statSlides">
-            {% if competitionparticipation.winrate_vs_duration_graph %}
-            <div id="elo_graph">
-                <img src="{{ competitionparticipation.winrate_vs_duration_graph.url }}" alt="WinrateGraph"/>
             </div>
-            {% endif %}
-        </div>
-        <div class="slide-selector">
+            <div class="statSlides">
+                <div id="elo_graph">
+                    <canvas id="winrateChart"></canvas>
+                </div>
+            </div>
+            <div class="slide-selector">
                 <span class="slide-select" id="statSlideSelect" onclick="selectSlide(1)"></span>
                 <span class="slide-select" id="statSlideSelect" onclick="selectSlide(2)"></span>
+            </div>
         </div>
     </div>
-
     <div class="divider"><span></span><span><h2>Maps</h2></span><span></span></div>
     <div id="bot_competition_stats_list">
         <table summary="Table containing matchup information" class="row-hover-highlight">
@@ -224,6 +216,141 @@
         <br/>
     </div>
     <script>
+        
+        $(document).ready(function(){
+            let eloChartCtx = document.getElementById("eloChart").getContext("2d");
+
+            let eloChart = new Chart(eloChartCtx, {
+                type: "line",                
+                options: {
+                    aspectRatio: 1,
+                    responsive: true,                    
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 8
+                            },
+                           type: 'time',
+                           display: true,
+                           time: {
+                            displayFormats: {
+                                    day: 'MMM-DD',
+                                    hour: 'MMM-DD',
+                                    minute: 'MMM-DD',
+                                    second: 'MMM-DD',
+                                }
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                callback: function(value) {if (value % 1 === 0) {return value;}}
+                            },
+                        }
+                    },
+                    plugins: {
+                        annotation: {
+                            annotations: [
+                            {
+                                type: "line",
+                                borderDash: [6,3],
+                                mode: "vertical",
+                                scaleID: "x",
+                                value: "",
+                                endValue: "",
+                                borderColor: "red",
+                                label: {
+                                    enabled: true,
+                                    display: true,
+                                    content: "Updated",  
+                                    color: '#86c232',              
+                                    position: 'top'
+                                    }
+                                }
+                            ]
+                        },
+                        title: {
+                            display: true,
+                            text: ""
+                        }
+                    }
+                }
+            });
+            let winrateChartCtx = document.getElementById("winrateChart").getContext("2d");
+            let winrateChart = new Chart(winrateChartCtx, {
+                type: "bar",
+                plugins: [ChartDataLabels],
+                options: {
+                    aspectRatio: 1,
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: ""
+                        },
+                        datalabels: {
+                            color: 'white',
+                            display: function(context) {
+                                return context.dataset.data[context.dataIndex] > 0;
+                            },
+                            font: {
+                            weight: 'bold'
+                            },
+                            formatter: function(value, context) {
+                                return context.dataset.extraLabels[context.dataIndex];
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+
+                        },
+                        y: {
+                            ticks: {
+                                beginAtZero: true,
+                                callback: function(value) {if (value % 1 === 0) {return value;}}
+                            },
+                            stacked: true
+                        }
+                        }
+                }
+            });
+            var eloChartJsonResponse = JSON.parse('{{ elo_chart_data|escapejs }}');
+            console.log(eloChartJsonResponse);
+            // Reset the current chart
+            eloChart.data.datasets = [];
+            eloChart.data.labels = [];
+
+            // Load new data into the chart
+            eloChart.options.plugins.title.text = eloChartJsonResponse.title;
+            eloChart.options.plugins.title.display = true;
+            eloChart.data.labels = eloChartJsonResponse.data.labels;
+            eloChart.data.labels2 = eloChartJsonResponse.data.labels;
+            eloChartJsonResponse.data.datasets.forEach(dataset => {
+                console.log(dataset)
+                eloChart.data.datasets.push(dataset);
+            });
+            eloChart.options.plugins.annotation.annotations[0].value = eloChartJsonResponse.lastUpdated;
+            eloChart.options.plugins.annotation.annotations[0].endValue = eloChartJsonResponse.lastUpdated;
+            eloChart.update();
+
+
+            var winrateChartJsonResponse = JSON.parse('{{ winrate_chart_data|escapejs }}');
+            console.log(winrateChartJsonResponse);
+            // Reset the current chart
+            winrateChart.data.datasets = [];
+            winrateChart.data.labels = [];
+
+            // Load new data into the chart
+            winrateChart.options.plugins.title.text = winrateChartJsonResponse.title;
+            winrateChart.options.plugins.title.display = true;
+            winrateChart.data.labels = winrateChartJsonResponse.data.labels;
+            winrateChartJsonResponse.data.datasets.forEach(dataset => {
+                winrateChart.data.datasets.push(dataset);
+            });
+            winrateChart.update();
+        })
+        
         var slideIndex = 1;
         showSlides(slideIndex);
 
