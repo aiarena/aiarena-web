@@ -223,15 +223,13 @@
             let eloChart = new Chart(eloChartCtx, {
                 type: "line",
                 options: {
+                    parsing: false,
                     aspectRatio: 1,
                     responsive: true,
                     pointRadius: 0,
                     pointHitRadius: 10,
                     scales: {
                         x: {
-                            ticks: {
-                                maxTicksLimit: 8
-                            },
                            type: 'time',
                            display: true,
                            time: {
@@ -250,6 +248,11 @@
                         }
                     },
                     plugins: {
+                        decimation: {
+                            enabled: true,
+                            algorithm: 'lttb',
+                            samples: 500,
+                        },
                         annotation: {
                             annotations: [
                             {
