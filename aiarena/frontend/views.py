@@ -583,7 +583,7 @@ class BotCompetitionStatsDetail(DetailView):
             context["competition_bot_matchups"][0].updated if context["competition_bot_matchups"] else "Never"
         )
         context["competition_closed"] = competition.statistics_finalized
-        
+
         if not context["competition_closed"]:
             context["elo_chart_data"] = self.__get_elo_chart_data(context["competitionparticipation"], competition.id)
             context["winrate_chart_data"] = self.__get_winrate_chart_data(

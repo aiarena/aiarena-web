@@ -45,8 +45,7 @@ class EloGraphsGenerator:
             # use the most recent date for the graph update line
             return max(update_date, bot.bot_zip_updated)
         return bot.bot_zip_updated
-        
-        
+
     def _generate_winrate_graph(self, bot_id: int, competition_id: int):
         df = self._get_winrate_dataframe(bot_id, competition_id)
         if not df.empty:
