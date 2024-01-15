@@ -23,7 +23,7 @@ services:
 
   devcontainer-aiarena-app:
     build:
-      dockerfile: .devcontainer/Dockerfile
+      dockerfile: ./docker/Dockerfile_dev
       context: ../
     container_name: devcontainer-aiarena-web
     restart: unless-stopped
@@ -35,7 +35,7 @@ services:
       - devcontainer-aiarena-redis
       - devcontainer-aiarena-postgres
     volumes:
-      - ..:/workspace
+      - ..:/app
     command: sleep infinity
 
 volumes:
