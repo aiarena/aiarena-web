@@ -1,4 +1,4 @@
-FROM unit:1.31.0-python3.11
+FROM unit:1.31.0-python3.11 as base
 
 RUN apt-get update && \
     apt-get install -y \
@@ -26,3 +26,23 @@ RUN python django-discord-bind/setup.py install --force
 ENV PYTHONDONTWRITEBYTECODE 1
 
 EXPOSE 8411
+
+FROM base as cloud
+
+ENV DJANGO_ENVIRONMENT PRODUCTION
+ARG SECRET_KEY
+
+ADD ./aiarena/unit-config.json /docker-entrypoint.d/
+RUN chown -R unit:unit /app/
+
+ADD ./pip/requirements.PRODUCTION.txt /srv/requirements.PRODUCTION.txt
+RUN pip install -r /srv/requirements.PRODUCTION.txt
+
+RUN python /app/manage.py collectstatic --noinput --clear
+
+FROM base as dev
+
+ENV DJANGO_ENVIRONMENT DEVELOPMENT
+
+ADD ./pip/requirements.DEVELOPMENT.txt /srv/requirements.DEVELOPMENT.txt
+RUN pip install -r /srv/requirements.DEVELOPMENT.txt
