@@ -216,7 +216,7 @@
         <br/>
     </div>
     <script>
-        
+
         $(document).ready(function(){
             let eloChartCtx = document.getElementById("eloChart").getContext("2d");
 
@@ -228,6 +228,7 @@
                     responsive: true,
                     pointRadius: 0,
                     pointHitRadius: 10,
+                    borderWidth: 1,
                     scales: {
                         x: {
                            type: 'time',
@@ -265,6 +266,7 @@
                                     value: "",
                                     endValue: "",
                                     borderColor: "red",
+                                    borderWidth: 3,
                                     label: {
                                         enabled: true,
                                         display: true,
@@ -282,7 +284,7 @@
                     }
                 }
             });
-            
+
             let winrateChartCtx = document.getElementById("winrateChart").getContext("2d");
             let winrateChart = new Chart(winrateChartCtx, {
                 type: "bar",
@@ -302,7 +304,7 @@
                                             size: 18
                                         }
                                     },
-                                    
+
                             }
                         },
                         title: {
@@ -342,7 +344,7 @@
                         }
                 }
             });
-            
+
             var competitionClosed = '{{ competition_closed|escapejs }}' ==="True"
             if (!competitionClosed){
                 var eloChartJsonResponse = JSON.parse('{{ elo_chart_data|escapejs }}');
