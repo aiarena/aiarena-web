@@ -8,6 +8,7 @@ django-appconf==1.0.5
 django-avatar==7.1.1
 django-bootstrap-form==3.4
 django-debug-toolbar==3.2.2
+django-discord-bind @ git+https://github.com/aiarena/django-discord-bind@6c98745
 django-extensions==3.2.1
 django-filter==22.1
 django-grappelli==3.0.8
