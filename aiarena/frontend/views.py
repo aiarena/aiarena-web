@@ -601,13 +601,12 @@ class BotCompetitionStatsDetail(DetailView):
                 "title": "ELO over time",
                 "lastUpdated": last_updated,
                 "data": {
-                    "labels": [elo[2].timestamp() * 1000 for elo in elo_data],
                     "datasets": [
                         {
                             "label": "ELO",
                             "backgroundColor": "#86c232",
                             "borderColor": "#86c232",
-                            "data": [elo[1] for elo in elo_data],
+                            "data": [{"x": elo[2].timestamp() * 1000, "y": elo[1]} for elo in elo_data],
                         }
                     ],
                 },

@@ -223,15 +223,13 @@
             let eloChart = new Chart(eloChartCtx, {
                 type: "line",
                 options: {
+                    parsing: false,
                     aspectRatio: 1,
                     responsive: true,
                     pointRadius: 0,
                     pointHitRadius: 10,
                     scales: {
                         x: {
-                            ticks: {
-                                maxTicksLimit: 8
-                            },
                            type: 'time',
                            display: true,
                            time: {
@@ -250,6 +248,11 @@
                         }
                     },
                     plugins: {
+                        decimation: {
+                            enabled: true,
+                            algorithm: 'lttb',
+                            samples: 500,
+                        },
                         annotation: {
                             annotations: [
                             {
@@ -290,11 +293,16 @@
                             display: true,
                             text: ""
                         },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return [context.formattedValue, context.dataset.extraLabels[context.dataIndex]];
+                                },
+                            }
+                        },
                         datalabels: {
                             color: 'white',
-                            display: function(context) {
-                                return context.dataset.data[context.dataIndex] > 0;
-                            },
+                            display: "auto",
                             font: {
                             weight: 'bold'
                             },
@@ -336,6 +344,7 @@
                 eloChart.options.plugins.annotation.annotations[0].value = eloChartJsonResponse.lastUpdated;
                 eloChart.options.plugins.annotation.annotations[0].endValue = eloChartJsonResponse.lastUpdated;
                 eloChart.options.plugins.annotation.annotations[0].display = true;
+                eloChart.options.plugins.annotation.annotations[0].label.content = ["Last Update:", moment.utc(eloChartJsonResponse.lastUpdated).format('MMM-DD')];//new Date(eloChartJsonResponse.lastUpdated).toDateString();
             }
             eloChart.update();
 
