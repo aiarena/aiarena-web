@@ -582,10 +582,14 @@ class BotCompetitionStatsDetail(DetailView):
         context["updated"] = (
             context["competition_bot_matchups"][0].updated if context["competition_bot_matchups"] else "Never"
         )
-        context["elo_chart_data"] = self.__get_elo_chart_data(context["competitionparticipation"], competition.id)
-        context["winrate_chart_data"] = self.__get_winrate_chart_data(
-            context["competitionparticipation"], competition.id
-        )
+        context["competition_closed"] = competition.statistics_finalized
+        
+        if not context["competition_closed"]:
+            context["elo_chart_data"] = self.__get_elo_chart_data(context["competitionparticipation"], competition.id)
+            context["winrate_chart_data"] = self.__get_winrate_chart_data(
+                context["competitionparticipation"], competition.id
+            )
+
         return context
 
     def __get_elo_chart_data(self, sp, competition_id):
@@ -618,8 +622,9 @@ class BotCompetitionStatsDetail(DetailView):
         winrate_data = EloGraphsGenerator(sp)._get_winrate_data(self.object.bot.id, competition_id)
         winrate_data_with_total = [(x[0], x[1], x[2], x[3], x[4], (x[1] + x[2] + x[3] + x[4])) for x in winrate_data]
         labels = [f"{winrate[0]}-{winrate[0]+5}" for winrate in winrate_data_with_total]
-        if labels[-1] == "30-35":
-            labels[-1] = "30+"
+        if len(labels) > 0:
+            if labels[-1] == "30-35":
+                labels[-1] = "30+"
         datasets = []
         # Wins
         datasets.append(
