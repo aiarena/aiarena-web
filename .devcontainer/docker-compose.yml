@@ -23,7 +23,8 @@ services:
 
   devcontainer-aiarena-app:
     build:
-      dockerfile: ./docker/Dockerfile_dev
+      dockerfile: ./docker/Dockerfile
+      target: dev
       context: ../
     container_name: devcontainer-aiarena-web
     restart: unless-stopped
