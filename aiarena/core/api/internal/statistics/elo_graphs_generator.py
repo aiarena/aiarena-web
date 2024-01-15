@@ -40,9 +40,11 @@ class EloGraphsGenerator:
 
     def _get_graph_update_line_datetime(self, bot, competition_id):
         update_date = self.get_earliest_result_datetime(bot.id, competition_id)[0][0]
-        update_date = utc.normalize(update_date) if update_date.tzinfo else utc.localize(update_date)
-        # use the most recent date for the graph update line
-        return max(update_date, bot.bot_zip_updated)
+        if update_date is not None:
+            update_date = utc.normalize(update_date) if update_date.tzinfo else utc.localize(update_date)
+            # use the most recent date for the graph update line
+            return max(update_date, bot.bot_zip_updated)
+        return bot.bot_zip_updated
 
     def _generate_winrate_graph(self, bot_id: int, competition_id: int):
         df = self._get_winrate_dataframe(bot_id, competition_id)
