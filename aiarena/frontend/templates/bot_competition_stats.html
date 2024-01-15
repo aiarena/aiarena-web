@@ -341,6 +341,7 @@
                 eloChart.options.plugins.annotation.annotations[0].value = eloChartJsonResponse.lastUpdated;
                 eloChart.options.plugins.annotation.annotations[0].endValue = eloChartJsonResponse.lastUpdated;
                 eloChart.options.plugins.annotation.annotations[0].display = true;
+                eloChart.options.plugins.annotation.annotations[0].label.content = ["Last Update:", moment.utc(eloChartJsonResponse.lastUpdated).format('MMM-DD')];//new Date(eloChartJsonResponse.lastUpdated).toDateString();
             }
             eloChart.update();
 
