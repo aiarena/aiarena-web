@@ -42,5 +42,6 @@ FROM base as dev
 
 ENV DJANGO_ENVIRONMENT DEVELOPMENT
 
+ADD ./pip/requirements.LOCAL.txt /srv/requirements.LOCAL.txt
 ADD ./pip/requirements.DEVELOPMENT.txt /srv/requirements.DEVELOPMENT.txt
 RUN pip install -r /srv/requirements.DEVELOPMENT.txt
