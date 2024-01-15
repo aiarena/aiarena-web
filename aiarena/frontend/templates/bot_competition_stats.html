@@ -288,11 +288,16 @@
                             display: true,
                             text: ""
                         },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return [context.formattedValue, context.dataset.extraLabels[context.dataIndex]];
+                                },
+                            }
+                        },
                         datalabels: {
                             color: 'white',
-                            display: function(context) {
-                                return context.dataset.data[context.dataIndex] > 0;
-                            },
+                            display: "auto",
                             font: {
                             weight: 'bold'
                             },
