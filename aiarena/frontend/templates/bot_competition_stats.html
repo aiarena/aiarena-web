@@ -221,10 +221,12 @@
             let eloChartCtx = document.getElementById("eloChart").getContext("2d");
 
             let eloChart = new Chart(eloChartCtx, {
-                type: "line",                
+                type: "line",
                 options: {
                     aspectRatio: 1,
-                    responsive: true,                    
+                    responsive: true,
+                    pointRadius: 0,
+                    pointHitRadius: 10,
                     scales: {
                         x: {
                             ticks: {
@@ -262,8 +264,8 @@
                                 label: {
                                     enabled: true,
                                     display: true,
-                                    content: "Updated",  
-                                    color: '#86c232',              
+                                    content: "Updated",
+                                    color: '#86c232',
                                     position: 'top'
                                     }
                                 }
@@ -334,7 +336,7 @@
             eloChartJsonResponse.data.datasets.forEach(dataset => {
                 eloChart.data.datasets.push(dataset);
             });
-            
+
             if (eloChartJsonResponse.lastUpdated != null){
                 eloChart.options.plugins.annotation.annotations[0].value = eloChartJsonResponse.lastUpdated;
                 eloChart.options.plugins.annotation.annotations[0].endValue = eloChartJsonResponse.lastUpdated;
@@ -357,7 +359,7 @@
             });
             winrateChart.update();
         })
-        
+
         var slideIndex = 1;
         showSlides(slideIndex);
 
