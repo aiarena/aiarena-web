@@ -4,11 +4,6 @@ requires-python = ">=3.10"
 [tool.black]
 line-length = 120
 target-version = ['py310']
-extend-exclude = '''
-(
-    django-discord-bind/
-)
-'''
 
 [tool.ruff]
 line-length = 120
@@ -16,7 +11,6 @@ target-version = "py310"
 select = ["E", "F", "I", "UP"]
 fixable = ["I", "F541", "E712"]
 ignore = ["E501", "E741", "E731"]
-exclude = ["django-discord-bind"]
 
 [tool.ruff.isort]
 lines-after-imports = 2

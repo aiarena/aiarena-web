@@ -21,8 +21,6 @@ RUN pip install -r /srv/requirements.txt
 COPY . /app
 WORKDIR /app
 
-RUN python django-discord-bind/setup.py install --force
-
 ENV PYTHONDONTWRITEBYTECODE 1
 
 EXPOSE 8411
