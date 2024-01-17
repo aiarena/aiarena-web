@@ -34,4 +34,4 @@ sentry-sdk[django]==1.32.0
 six==1.16.0
 wheel==0.38.4
 wiki==0.10
-git+https://github.com/aiarena/django-discord-bind.git@697b41ce6d31c6e2a998025c4760507913407605
+git+https://github.com/aiarena/django-discord-bind.git@6c987450c2573ae73537d4ea89ec76679c0418f2
