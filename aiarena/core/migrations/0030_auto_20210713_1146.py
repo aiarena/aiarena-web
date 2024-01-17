@@ -2,21 +2,21 @@
 
 from django.db import migrations
 
-from aiarena.core.models import User, WebsiteUser
-
 
 def migrate_website_users(apps, schema_editor):
-    website_users = User.objects.filter(type="WEBSITE_USER")
-
-    for website_user in website_users:
-        # find parent class fields:
-        fields = [f.name for f in User._meta.fields]
-
-        # get the values from the user instance
-        values = dict([(x, getattr(website_user, x)) for x in fields])
-
-        new_instance = WebsiteUser.objects.create(**values)
-        new_instance.save()  # save new one
+    pass  # migration broke and is no longer required
+    # website_users = User.objects.filter(type="WEBSITE_USER")
+    #
+    # for website_user in website_users:
+    #     # find parent class fields:
+    #     fields = [f.name for f in User._meta.fields]
+    #     fields.remove("note")  # this newly added field breaks this migration
+    #
+    #     # get the values from the user instance
+    #     values = dict([(x, getattr(website_user, x)) for x in fields])
+    #
+    #     new_instance = WebsiteUser.objects.create(**values)
+    #     new_instance.save()  # save new one
 
 
 class Migration(migrations.Migration):

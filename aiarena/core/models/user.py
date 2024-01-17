@@ -43,6 +43,7 @@ class User(AbstractUser, LockableModelMixin):
     extra_periodic_match_requests = models.IntegerField(default=0, blank=True)
     receive_email_comms = models.BooleanField(default=True, blank=True)
     sync_patreon_status = models.BooleanField(default=True, blank=True)
+    note = models.TextField(blank=True, null=True)
 
     # permissions
     can_request_games_for_another_authors_bot = models.BooleanField(default=False, blank=True)

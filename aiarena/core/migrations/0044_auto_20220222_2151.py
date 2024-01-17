@@ -2,21 +2,20 @@
 
 from django.db import migrations
 
-from aiarena.core.models import ServiceUser, User
-
 
 def migrate_service_users(apps, schema_editor):
-    service_users = User.objects.filter(type="SERVICE")
-
-    for service_user in service_users:
-        # find parent class fields:
-        fields = [f.name for f in User._meta.fields]
-
-        # get the values from the user instance
-        values = dict([(x, getattr(service_user, x)) for x in fields])
-
-        new_instance = ServiceUser.objects.create(**values)
-        new_instance.save()  # save new one
+    pass  # migration broke and is no longer required
+    # service_users = User.objects.filter(type="SERVICE")
+    #
+    # for service_user in service_users:
+    #     # find parent class fields:
+    #     fields = [f.name for f in User._meta.fields]
+    #
+    #     # get the values from the user instance
+    #     values = dict([(x, getattr(service_user, x)) for x in fields])
+    #
+    #     new_instance = ServiceUser.objects.create(**values)
+    #     new_instance.save()  # save new one
 
 
 class Migration(migrations.Migration):
