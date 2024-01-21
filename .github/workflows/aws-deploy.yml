@@ -26,8 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -36,7 +34,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          python ./pip/pip-install.py --python=python --pip=pip
+          python -m pip install -r requirements.DEVELOPMENT.txt
       - name: Run linters
         uses: pre-commit/action@v3.0.0
 
@@ -64,8 +62,6 @@ jobs:
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
       - uses: shogo82148/actions-setup-redis@v1
         with:
           redis-version: '6.x'
@@ -78,7 +74,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          python ./pip/pip-install.py --python=python --pip=pip
+          python -m pip install -r requirements.DEVELOPMENT.txt
       - name: Grant aiarena user full access
         env:
           PORT: ${{ job.services.postgres.ports[5432] }}
@@ -100,8 +96,6 @@ jobs:
       images: ${{ steps.prepare_images.outputs.images }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -136,8 +130,6 @@ jobs:
     needs: [ linters, tests, prepare-images ]
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
       - name: Setup python
         uses: actions/setup-python@v4
