@@ -1,5 +1,5 @@
 Django==4.2
-Markdown==3.3
+Markdown==3.5.2
 awscli==1.31.6
 boto3==1.33.6
 celery==5.2.7  # https://docs.celeryproject.org/en/latest/changelog.html
