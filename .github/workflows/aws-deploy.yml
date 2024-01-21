@@ -114,7 +114,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r ./pip/requirements.LOCAL.txt
+          pip install -r ./requirements.LOCAL.txt
 
       - name: Prepare image
         id: prepare_images
@@ -139,7 +139,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r ./pip/requirements.LOCAL.txt
+          pip install -r ./requirements.LOCAL.txt
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
