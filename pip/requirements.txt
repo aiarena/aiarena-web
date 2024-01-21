@@ -1,4 +1,4 @@
-Django==4.2
+Django==5.0.1
 Markdown==3.3
 awscli==1.31.6
 boto3==1.33.6
