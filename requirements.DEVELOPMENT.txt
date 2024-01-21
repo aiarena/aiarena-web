@@ -1,5 +1,5 @@
 -r requirements.LOCAL.txt
-
+-r requirements.txt
 Werkzeug==2.2.3
 black==23.7.0
 coverage==6.1.1
