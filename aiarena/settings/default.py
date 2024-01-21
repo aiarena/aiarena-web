@@ -118,7 +118,7 @@ ROOT_URLCONF = "aiarena.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(APP_DIR, "../frontend/templates")],
+        "DIRS": [os.path.join(APP_DIR, "frontend/templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
