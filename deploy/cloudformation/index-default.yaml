@@ -69,6 +69,11 @@ Resources:
       LoggingConfiguration:
         DestinationBucketName:
           Ref: s3LogsBucket
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: false
       CorsConfiguration:
         CorsRules:
           - AllowedMethods:
@@ -80,6 +85,25 @@ Resources:
               - https://aiarena.net
               - https://sc2ai.net
             MaxAge: 3000
+
+  mediaProductionBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: mediaProductionBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Effect: Allow
+            Principal: "*"
+            Resource:
+              - Fn::Join:
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - Ref: mediaProductionBucket
+                    - '/robots.txt'
 
   s3LogsBucket:
     Type: AWS::S3::Bucket
