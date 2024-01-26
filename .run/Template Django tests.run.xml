@@ -8,7 +8,7 @@
       <env name="PYTHONUNBUFFERED" value="1" />
       <env name="DJANGO_ENVIRONMENT" value="DEVELOPMENT" />
     </envs>
-    <option name="SDK_HOME" value="C:\Users\ipete\PycharmProjects\aiarena-web\venv\Scripts\python.exe" />
+    <option name="SDK_HOME" value=".\venv\Scripts\python.exe" />
     <option name="SDK_NAME" value="Python 3.10 (aiarena-web)" />
     <option name="WORKING_DIRECTORY" value="" />
     <option name="IS_MODULE_SDK" value="false" />
