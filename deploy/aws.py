@@ -560,6 +560,7 @@ class ApplicationUpdater:
             "task-definition": match.task.family,
             "enable-execute-command": "",
             "capacity-provider-strategy": match.capacity_provider_strategy,
+            "force-new-deployment": "",
             "deployment-configuration": {
                 "maximumPercent": match.max_percent,
                 "minimumHealthyPercent": match.min_percent,
