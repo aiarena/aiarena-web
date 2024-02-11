@@ -24,7 +24,7 @@
       "type": "python",
       "path": "/app/",
       "module": "aiarena.wsgi",
-      "processes": 2
+      "processes": 1
     }
   },
   "settings": {
