@@ -51,7 +51,7 @@ class BaseService(Service):
     default_cluster_name = "ECSCluster"
     default_capacity_provider_strategy = [
         {
-            "capacityProvider": "FARGATE",
+            "capacityProvider": "FARGATE_SPOT",
             "weight": 1,
         }
     ]
