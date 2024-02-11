@@ -174,7 +174,16 @@ def ecs():
         f"{PROJECT_NAME}/cloud "
         f'bash -c "{manage_py_cmd} migrate -v 0 --noinput"',
     )
-    aws.update_all_services(environment)
+    application_updater = aws.ApplicationUpdater()
+    application_updater.update_application(environment)
+
+
+@cli.command(help="Deploy dry run")
+@timing
+def deploy_dry_run():
+    environment, build_number = deploy_environment()
+    updater = aws.ApplicationUpdater(dry_run=True)
+    updater.update_application(environment)
 
 
 @cli.command(help="Monitor ECS deployment")
@@ -216,7 +225,9 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
         "ecs run-task",
         {
             "cluster": cluster_id,
-            "launch-type": "FARGATE",
+            "capacity-provider-strategy": [
+                {"capacityProvider": "FARGATE_SPOT", "weight": 1},
+            ],
             "enable-execute-command": "",
             "task-definition": task_definition_id,
             "overrides": {

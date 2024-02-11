@@ -364,210 +364,276 @@ def register_task(task_definition):
     return result
 
 
-def update_all_services(environment):
-    if len({s.name for s in SERVICES}) != len(SERVICES):
-        raise ValueError("Duplicate service name detected")
-    desired_services = {s.name: s for s in SERVICES if s.count}
+class ApplicationUpdater:
+    def __init__(self, dry_run=False):
+        self.dry_run = dry_run
 
-    # Find balancers for each port mentioned in services
-    resources = cloudformation_load().get("Resources", {})
-    target_groups_by_ports = {}
-    for name, resource in resources.items():
-        if resource["Type"] == "AWS::ElasticLoadBalancingV2::TargetGroup":
-            target_groups_by_ports[resource["Properties"]["Port"]] = resource_details(PROJECT_NAME, name)[
-                "PhysicalResourceId"
-            ]
+        # Find target group ARNs
+        self.target_group_arns = {}
+        resources = cloudformation_load().get("Resources", {})
+        for name, resource in resources.items():
+            if resource["Type"] != "AWS::ElasticLoadBalancingV2::TargetGroup":
+                continue
+            arn = resource_details(PROJECT_NAME, name)["PhysicalResourceId"]
+            self.target_group_arns[name] = arn
 
-    # Detect clusters and roles in use (logical -> physical name mapping)
-    clusters = {}
-    roles = {}
-    for service in SERVICES:
-        c = service.cluster_name
-        assert c in resources, f"{c} not found in CloudFormation template"
-        clusters[c] = clusters.get(c) or physical_name(PROJECT_NAME, c)
-        r = service.role_name
-        if r:
-            aws_roles = ["AWSServiceRoleForECS"]  # They exist by default, not part of our stack
+        # Detect clusters and roles in use (logical -> physical name mapping)
+        self.clusters = {}
+        self.roles = {}
+        for service in SERVICES:
+            c = service.cluster_name
+            assert c in resources, f"{c} not found in CloudFormation template"
+            self.clusters[c] = self.clusters.get(c) or physical_name(PROJECT_NAME, c)
+
+            r = service.role_name
+            if not r:
+                continue
+
+            aws_roles = {"AWSServiceRoleForECS"}  # They exist by default, not part of our stack
             if r in aws_roles:
-                roles[r] = r
+                self.roles[r] = r
             else:
                 assert r in resources, f"{r} not found in CloudFormation template"
-                roles[r] = roles.get(r) or physical_name(PROJECT_NAME, r)
+                self.roles[r] = self.roles.get(r) or physical_name(PROJECT_NAME, r)
 
-    # Walk through all services in each cluster, and:
-    #   - update services which can be updated;
-    #   - remove services which can't be updated without recreation;
-    #   - remove services which are no longer needed.
-    updated = []
-    for cluster_name, cluster_id in clusters.items():
-        services = cli("ecs list-services", {"cluster": cluster_id})["serviceArns"]
-        for service in services:
-            service = service.split("/")[-1]
-            match = desired_services.get(service)
-            if match:
-                if match.cluster_name != cluster_name:
-                    echo(f"Cluster name mismatch for service: {service}")
-                    match = None
+    @property
+    def desired_services(self):
+        if len({s.name for s in SERVICES}) != len(SERVICES):
+            raise ValueError("Duplicate service name detected")
+        return {s.name: s for s in SERVICES if s.count}
+
+    def update_application(self, environment):
+        if self.dry_run:
+            echo("Running in dry run mode")
+
+        self.update_all_services(environment)
+        self.delete_inactive_ecs_task_definitions()
+
+    def update_all_services(self, environment):
+        updated = []
+        for cluster_name, cluster_id in self.clusters.items():
+            existing_services = cli(
+                "ecs list-services",
+                {"cluster": cluster_id},
+            )["serviceArns"]
+            for service in existing_services:
+                service_name = service.split("/")[-1]
+                match = self.match_service_for_update(cluster_name, cluster_id, service_name)
+                if match:
+                    self.update_service(cluster_id, service_name, match, environment)
+                    updated.append(service_name)
                 else:
-                    details = cli(
-                        "ecs describe-services",
-                        {"service": service, "cluster": cluster_id},
-                    )[
-                        "services"
-                    ][0]
-                    task = details["taskDefinition"].split("/")[-1]
-                    task_family = task.split(":")[0]
-                    role = None
-                    port = None
-                    target_group = None
-                    placement_strategy = details["placementStrategy"]
-                    placement_constraints = details["placementConstraints"]
-                    if details["loadBalancers"]:
-                        balancer_details = details["loadBalancers"][0]
-                        port = balancer_details["containerPort"]
-                        role = details["roleArn"].split("/")[-1]
-                        target_group = balancer_details.get("targetGroupArn")
+                    self.remove_service(cluster_id, service_name)
 
-                    re_creation_message = f"Service has changes that require re-creation: {service}"
+        for service_name, match in self.desired_services.items():
+            if service_name in updated:
+                continue
+            self.create_service(service_name, match, environment)
 
-                    if task_family != match.task.family:
-                        echo(f"{re_creation_message}, task family is {task_family}, should be {match.task.family}")
-                        match = None
-                    elif role != roles.get(match.role_name):
-                        echo(f"{re_creation_message}, role is {role}, should be {roles.get(match.role_name)}")
-                        match = None
-                    elif placement_strategy != match.placement_strategy:
-                        echo(
-                            f"{re_creation_message}, placement_strategy is {placement_strategy}, "
-                            f"should be {match.placement_strategy}"
-                        )
-                        match = None
-                    elif placement_constraints != match.placement_constraints:
-                        echo(
-                            f"{re_creation_message}, placement_constraints is {placement_constraints}, "
-                            f"should be {match.placement_constraints}"
-                        )
-                        match = None
-                    elif port != match.container_port:
-                        echo(f"{re_creation_message}, port is {port}, should be {match.container_port}")
-                        match = None
-                    elif target_group and target_group != target_groups_by_ports.get(
-                        match.container_port,
-                    ):
-                        echo(
-                            f"{re_creation_message}, target group is {target_group}, "
-                            f"should be {target_groups_by_ports.get(match.container_port)}"
-                        )
-                        match = None
-                    else:
-                        echo(f"Updating service: {service}")
-                        register_task(match.task.as_dict(environment))
-                        conf = {
-                            "service": service,
-                            "cluster": cluster_id,
-                            "desired-count": match.count,
-                            "task-definition": match.task.family,
-                            "enable-execute-command": None,
-                            "deployment-configuration": {
-                                "maximumPercent": match.max_percent,
-                                "minimumHealthyPercent": match.min_percent,
-                            },
-                        }
+    @staticmethod
+    def explain_service_re_create(
+        service_name,
+        attribute,
+        current_value,
+        new_value,
+    ):
+        echo(
+            f"{service_name}: {attribute} forces re-creation, "
+            f"current value: {current_value}, new value: {new_value}",
+        )
 
-                        grace = match.health_check_grace_sec
-                        if grace is not None:
-                            conf["health-check-grace-period-seconds"] = grace
+    def match_service_for_update(self, cluster_name, cluster_id, service_name):
+        match = self.desired_services.get(service_name)
 
-                        cli("ecs update-service", conf)
-                        updated.append(match.name)
-                        echo(f"Service updated: {service}")
-            else:
-                echo(f"Service not in desired_services: {service}")
+        if not match:
+            echo(f"Service {service_name} not found")
+            return None
 
-            if not match:
-                echo(f"Removing service: {service}")
-                cli(
-                    "ecs update-service",
-                    {
-                        "desired-count": 0,
-                        "service": service,
-                        "cluster": cluster_id,
-                    },
-                )
-                deleted = cli(
-                    "ecs delete-service",
-                    {
-                        "service": service,
-                        "cluster": cluster_id,
-                    },
-                )
-                echo(f"Service removed: {service}")
-                t = deleted["service"]["taskDefinition"].split("/")[-1]
-                cli(
-                    "ecs deregister-task-definition",
-                    {"task-definition": t},
-                )
-                echo(f"De-registered task definition {t}")
-                echo(f"Wait until service terminates: {service}")
-                cli(
-                    "ecs wait services-inactive",
-                    {
-                        "cluster": cluster_id,
-                        "service": service,
-                    },
-                    raise_on_error=False,
-                    parse_output=False,
-                )
+        if match.cluster_name != cluster_name:
+            echo(f"Service {service_name} not in cluster {cluster_name}")
+            return None
 
-    # Create services
-    for name, service in desired_services.items():
-        if name in updated:
-            continue
-        echo(f"Creating service: {name}")
-        register_task(service.task.as_dict(environment))
+        details = cli(
+            "ecs describe-services",
+            {
+                "service": service_name,
+                "cluster": cluster_id,
+            },
+        )[
+            "services"
+        ][0]
+
+        task = details["taskDefinition"].split("/")[-1]
+        task_family = task.split(":")[0]
+        if task_family != match.task.family:
+            self.explain_service_re_create(
+                service_name,
+                "task family",
+                task_family,
+                match.task.family,
+            )
+            return None
+
+        role = None
+        port = None
+        target_group = None
+        if details["loadBalancers"]:
+            balancer_details = details["loadBalancers"][0]
+            port = balancer_details["containerPort"]
+            role = details["roleArn"].split("/")[-1]
+            target_group = balancer_details.get("targetGroupArn")
+
+        if role != self.roles.get(match.role_name):
+            self.explain_service_re_create(
+                service_name,
+                "role",
+                role,
+                self.roles.get(match.role_name),
+            )
+            return None
+
+        if port != match.container_port:
+            self.explain_service_re_create(
+                service_name,
+                "port",
+                port,
+                match.container_port,
+            )
+            return None
+
+        if target_group != self.target_group_arns.get(match.target_group):
+            self.explain_service_re_create(
+                service_name,
+                "target group",
+                target_group,
+                self.target_group_arns.get(match.target_group),
+            )
+            return None
+
+        return match
+
+    def create_service(self, service_name, match, environment):
+        if self.dry_run:
+            echo(f"Would have created service {service_name}")
+            return
+
+        echo(f"Creating service: {service_name}")
+        register_task(match.task.as_dict(environment))
 
         conf = {
-            "service-name": name,
-            "cluster": clusters[service.cluster_name],
-            "task-definition": service.task.family,
-            "launch-type": service.launch_type,
-            "desired-count": service.count,
+            "service-name": service_name,
             "enable-execute-command": "",
+            "capacity-provider-strategy": match.capacity_provider_strategy,
+            "cluster": self.clusters[match.cluster_name],
+            "task-definition": match.task.family,
+            "desired-count": match.count,
             "deployment-configuration": {
-                "maximumPercent": service.max_percent,
-                "minimumHealthyPercent": service.min_percent,
+                "maximumPercent": match.max_percent,
+                "minimumHealthyPercent": match.min_percent,
             },
         }
 
-        if service.container_port is not None:
-            target_group = target_groups_by_ports[service.container_port]
-            conf["load-balancers"] = (
-                f'"targetGroupArn={target_group},'
-                f"containerName={service.container_name},"
-                f'containerPort={service.container_port}"'
-            )
-
-        if service.role_name is not None:
-            conf["role"] = roles[service.role_name]
-
-        if service.add_network_configuration:
-            conf["network-configuration"] = get_network_configuration()
+        if match.container_port is not None:
+            target_group = self.target_group_arns[match.target_group]
+            conf["load-balancers"] = {
+                "targetGroupArn": target_group,
+                "containerName": match.container_name,
+                "containerPort": match.container_port,
+            }
+            conf["role"] = self.roles[match.role_name]
 
         cli("ecs create-service", conf)
-        echo(f"Service created: {name}")
 
-    delete_inactive_ecs_task_definitions()
+        echo(f"Service created: {service_name}")
 
+    def update_service(self, cluster_id, service_name, match, environment):
+        if self.dry_run:
+            echo(f"Would have updated service {service_name}")
+            return
 
-def delete_inactive_ecs_task_definitions():
-    inactive_tasks = cli("ecs list-task-definitions", {"status": "INACTIVE"})["taskDefinitionArns"]
-    echo(
-        f"Cleaning up inactive ECS tasks definitions. " f"Definitions to delete: {len(inactive_tasks)}",
-    )
-    chunk_size = 10  # aws API allows to delete up to 10 tasks at once
-    for i in range(0, len(inactive_tasks), chunk_size):
-        tasks_to_delete = " ".join(inactive_tasks[i : i + chunk_size])
-        cli("ecs delete-task-definitions", {"task-definitions": tasks_to_delete}, print_cmd=True)
+        echo(f"Updating service: {service_name}")
+        register_task(match.task.as_dict(environment))
+        conf = {
+            "service": service_name,
+            "cluster": cluster_id,
+            "desired-count": match.count,
+            "task-definition": match.task.family,
+            "enable-execute-command": "",
+            "capacity-provider-strategy": match.capacity_provider_strategy,
+            "deployment-configuration": {
+                "maximumPercent": match.max_percent,
+                "minimumHealthyPercent": match.min_percent,
+            },
+        }
+
+        grace = match.health_check_grace_sec
+        if grace is not None:
+            conf["health-check-grace-period-seconds"] = grace
+
+        cli("ecs update-service", conf)
+        echo(f"Service updated: {service_name}")
+
+    def remove_service(self, cluster_id, service_name):
+        if self.dry_run:
+            echo(f"Would have removed service {service_name}")
+            return
+
+        echo(f"Removing service: {service_name}")
+
+        cli(
+            "ecs update-service",
+            {
+                "desired-count": 0,
+                "service": service_name,
+                "cluster": cluster_id,
+            },
+        )
+        deleted = cli(
+            "ecs delete-service",
+            {
+                "service": service_name,
+                "cluster": cluster_id,
+            },
+        )
+        echo(f"Service removed: {service_name}")
+
+        t = deleted["service"]["taskDefinition"].split("/")[-1]
+        cli(
+            "ecs deregister-task-definition",
+            {"task-definition": t},
+        )
+        echo(f"De-registered task definition {t}")
+
+        echo(f"Wait until service terminates: {service_name}")
+        cli(
+            "ecs wait services-inactive",
+            {
+                "cluster": cluster_id,
+                "service": service_name,
+            },
+            raise_on_error=False,
+            parse_output=False,
+        )
+
+    def delete_inactive_ecs_task_definitions(self):
+        inactive_tasks = cli(
+            "ecs list-task-definitions",
+            {"status": "INACTIVE"},
+        )["taskDefinitionArns"]
+        echo(
+            f"Cleaning up inactive ECS tasks definitions. Definitions to delete: {len(inactive_tasks)}",
+        )
+        chunk_size = 10  # aws API allows to delete up to 10 tasks at once
+        for i in range(0, len(inactive_tasks), chunk_size):
+            tasks_to_delete = " ".join(inactive_tasks[i : i + chunk_size])
+            if self.dry_run:
+                echo(f"Would have deleted task definitions: {tasks_to_delete}")
+                continue
+            cli(
+                "ecs delete-task-definitions",
+                {"task-definitions": tasks_to_delete},
+                print_cmd=True,
+            )
 
 
 def get_all_ecs_tasks(cluster):

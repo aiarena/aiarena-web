@@ -88,14 +88,11 @@ class Service:
     default_role_name = "AWSServiceRoleForECS"  # Service-linked role
     default_min_percent = 100
     default_max_percent = 200
-    default_placement_strategy = [
-        {"type": "spread", "field": "instanceId"},
-    ]
-    default_placement_constraints = []
     default_health_check_grace_sec = None
     default_health_check_fail_cnt = None
+    default_target_group = None
+    default_capacity_provider_strategy = []
     add_network_configuration = False
-    launch_type = "EC2"
 
     def __init__(
         self,
@@ -108,8 +105,8 @@ class Service:
         count=1,
         min_percent=None,
         max_percent=None,
-        placement_strategy=None,
-        placement_constraints=None,
+        target_group=None,
+        capacity_provider_strategy=None,
         health_check_grace_sec=None,
         health_check_failed_count=None,
     ):
@@ -140,21 +137,15 @@ class Service:
             self.max_percent = max_percent
         assert isinstance(self.max_percent, int), "max_percent must be an int"
 
-        if placement_strategy is None:
-            self.placement_strategy = self.default_placement_strategy
+        if target_group is None:
+            self.target_group = self.default_target_group
         else:
-            self.placement_strategy = placement_strategy
-        assert isinstance(self.placement_strategy, list | tuple), "placement_strategy must be a list"
+            self.target_group = target_group
 
-        if placement_constraints is None:
-            self.placement_constraints = self.default_placement_constraints
+        if capacity_provider_strategy is None:
+            self.capacity_provider_strategy = self.default_capacity_provider_strategy
         else:
-            self.placement_constraints = placement_constraints
-        assert isinstance(self.placement_constraints, list | tuple), "placement_constraints must be a list"
-
-        if self.launch_type == "FARGATE":
-            assert not self.placement_strategy, "placement_strategy doesn't work with FARGATE"
-            assert not self.placement_constraints, "placement_constraints doesn't work with FARGATE"
+            self.capacity_provider_strategy = capacity_provider_strategy
 
         self.health_check_grace_sec = health_check_grace_sec
         if self.health_check_grace_sec is None:

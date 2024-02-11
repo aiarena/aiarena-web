@@ -48,15 +48,19 @@ class BaseService(Service):
     """
 
     name_prefix = "%s-" % PROJECT_NAME
-    launch_type = "FARGATE"
     default_cluster_name = "ECSCluster"
-    default_placement_strategy = []
-    default_placement_constraints = []
+    default_capacity_provider_strategy = [
+        {
+            "capacityProvider": "FARGATE",
+            "weight": 1,
+        }
+    ]
 
 
 class WebService(BaseService):
     default_min_percent = 100
     default_max_percent = 200
+    default_target_group = "ALBWebServerTargetGroup"
     add_network_configuration = True
 
 
