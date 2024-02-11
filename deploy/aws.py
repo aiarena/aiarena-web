@@ -301,51 +301,58 @@ def get_network_configuration():
 
 
 def db_endpoint(stack_name, logical_id):
-    db_id = physical_name(stack_name, logical_id)
-    db_instance = cli(
-        "rds describe-db-instances",
-        {"db-instance-identifier": db_id},
-    )
-    return db_instance["DBInstances"][0]["Endpoint"]["Address"]
+    def tags_match(instance_description):
+        tags = {tag["Key"]: tag["Value"] for tag in instance_description["TagList"]}
+
+        if tags["aws:cloudformation:stack-name"] != stack_name:
+            return False
+
+        if tags["aws:cloudformation:logical-id"] != logical_id:
+            return False
+
+        return True
+
+    db_instances = cli("rds describe-db-instances")["DBInstances"]
+    instance = next(i for i in db_instances if tags_match(i))
+    return instance["Endpoint"]["Address"]
 
 
-def cache_cluster_nodes(logical_id):
-    cloudformation = cloudformation_load()
-    cl_id = cloudformation["Resources"][logical_id]["Properties"]["ClusterName"]
+def cache_cluster_nodes(cluster_id):
     result = cli(
         "elasticache describe-cache-clusters",
         {
             "show-cache-node-info": "",
-            "cache-cluster-id": cl_id,
+            "cache-cluster-id": cluster_id,
         },
     )
     cluster = result["CacheClusters"][0]
     return [n["Endpoint"]["Address"] for n in cluster["CacheNodes"]]
 
 
-def s3_domain(stack_name: str, logical_id: str) -> str:
-    """
-    Get S3 bucket domain by stack logical resource ID.
-    """
-    cf_id = physical_name(stack_name, logical_id)
+def s3_domain(cf_id) -> str:
     return f"{cf_id}.s3.amazonaws.com"
 
 
-def cloudformation_load(source="index-default.yaml"):
+def cloudformation_load(source="index-default.yaml", skip_secrets=False):
     source_path = PROJECT_PATH / "deploy/cloudformation"
-    return load_yaml_template(
-        source_path / source,
-        context={
-            "project_name": PROJECT_NAME,
-            "container_insights": "enabled" if CONTAINER_INSIGHTS else "disabled",
-            "db_name": DB_NAME,
-            "db_master_user": PRODUCTION_DB_ROOT_USER,
-            "db_master_password": get_secrets()["POSTGRES_ROOT_PASSWORD"],
-            "web_port": WEB_PORT,
-            "health_check_path": AWS_ELB_HEALTH_CHECK_ENDPOINT,
-            "uwsgi_container_name": UWSGI_CONTAINER_NAME,
-        },
-    )
+
+    context = {
+        "project_name": PROJECT_NAME,
+        "container_insights": "enabled" if CONTAINER_INSIGHTS else "disabled",
+        "db_name": DB_NAME,
+        "db_master_user": PRODUCTION_DB_ROOT_USER,
+        "web_port": WEB_PORT,
+        "health_check_path": AWS_ELB_HEALTH_CHECK_ENDPOINT,
+        "uwsgi_container_name": UWSGI_CONTAINER_NAME,
+    }
+
+    if skip_secrets:
+        context["db_master_password"] = ""
+    else:
+        secrets = get_secrets()
+        context["db_master_password"] = secrets["POSTGRES_ROOT_PASSWORD"]
+
+    return load_yaml_template(source_path / source, context=context)
 
 
 def register_task(task_definition):
@@ -368,9 +375,12 @@ class ApplicationUpdater:
     def __init__(self, dry_run=False):
         self.dry_run = dry_run
 
+        if self.dry_run:
+            echo("Running in dry run mode")
+
         # Find target group ARNs
         self.target_group_arns = {}
-        resources = cloudformation_load().get("Resources", {})
+        resources = cloudformation_load(skip_secrets=True).get("Resources", {})
         for name, resource in resources.items():
             if resource["Type"] != "AWS::ElasticLoadBalancingV2::TargetGroup":
                 continue
@@ -403,9 +413,7 @@ class ApplicationUpdater:
         return {s.name: s for s in SERVICES if s.count}
 
     def update_application(self, environment):
-        if self.dry_run:
-            echo("Running in dry run mode")
-
+        echo("Starting application update")
         self.update_all_services(environment)
         self.delete_inactive_ecs_task_definitions()
 
