@@ -2,7 +2,7 @@ import hashlib
 
 
 """
-This serves as a reference implement for the S3 etag calculation.
+This serves as a reference implementation for the S3 etag calculation.
 It takes into account the format of multipart uploads, and the fact that the etag is a hash of the concatenated md5s of 
 the parts, followed by a dash and the number of parts.
 This has been confirmed to work on at least one large multipart upload bot file (it was ~250 MB), 
