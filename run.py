@@ -4,7 +4,6 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from shlex import quote
 
 import click
 import questionary
@@ -212,32 +211,37 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
     cpu = aws.clean_fargate_cpu(cpu)
     memory = aws.clean_fargate_memory(cpu, memory)
 
-    overrides = {
-        "containerOverrides": [
-            {
-                "name": container_name,
-                "command": ["sleep", str(lifetime_hours * 60 * 60)],
-            },
-        ],
-        "cpu": cpu,
-        "memory": memory,
-    }
-
     echo("Running ECS task...")
     result = aws.cli(
-        f"ecs run-task --cluster {cluster_id}"
-        " --launch-type FARGATE"
-        " --enable-execute-command"
-        f" --task-definition {task_definition_id}"
-        f" --overrides {quote(json.dumps(overrides))}"
-        f" --network-configuration '{json.dumps(aws.get_network_configuration())}'"
+        "ecs run-task",
+        {
+            "cluster": cluster_id,
+            "launch-type": "FARGATE",
+            "enable-execute-command": "",
+            "task-definition": task_definition_id,
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": container_name,
+                        "command": ["sleep", str(lifetime_hours * 60 * 60)],
+                    },
+                ],
+                "cpu": cpu,
+                "memory": memory,
+            },
+            "network-configuration": aws.get_network_configuration(),
+        },
     )
     task_id = result["tasks"][0]["taskArn"].split("/")[-1]
 
     aws.connect_to_ecs_task(cluster_id, task_id)
 
     if not dont_kill_on_disconnect:
-        aws.cli(f"ecs stop-task --cluster {cluster_id} --task {task_id}", parse_output=True)
+        aws.cli(
+            "ecs stop-task",
+            {"cluster": cluster_id, "task": task_id},
+            parse_output=True,
+        )
         echo(f"Task {task_id} stopped")
 
 
@@ -319,14 +323,14 @@ def _confirm_restore(filename):
 def restore_backup(filename, s3, quiet):
     if s3:
         bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
-        filenames = sorted(
-            aws.cli(
-                f"s3api list-objects-v2 --bucket {bucket} "
-                f"--max-items 1000 --output text --query 'Contents[].[Key]'",
-                capture_stdout=True,
-                parse_output=False,
-            ).stdout_lines
-        )
+        backups = aws.cli(
+            "s3api list-objects-v2",
+            {
+                "bucket": bucket,
+                "max-items": 1000,
+            },
+        )["Contents"]
+        filenames = sorted(obj["Key"] for obj in backups)
         if not filenames:
             echo("The backups S3 bucket is empty")
             return
@@ -343,7 +347,7 @@ def restore_backup(filename, s3, quiet):
             return
         local_file = PROJECT_PATH / "backup" / filename
         echo(f"Downloading: S3 -> ./backup/{filename}")
-        aws.cli(f"s3 cp s3://{bucket}/{filename} {local_file}", parse_output=False)
+        aws.cli(f"s3 cp s3://{bucket}/{filename} {local_file}")
     else:
         if filename:
             # Allow providing absolute and relative path, not just filename,

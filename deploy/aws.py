@@ -28,8 +28,47 @@ from .utils import echo, run
 from .yaml_template import load_yaml_template
 
 
+def cli(
+    command: str,
+    conf=None,
+    region=None,
+    parse_output=True,
+    capture_stderr=False,
+    **kwargs,
+):
+    def format_value(value):
+        if isinstance(value, str):
+            return value
+        return f"'{json.dumps(value, separators=(',', ':'))}'"
+
+    if conf is None:
+        conf = {}
+    arguments = " ".join(f"--{k} {format_value(v)}" for k, v in conf.items())
+    cmd = f"{command} {arguments}"
+
+    if parse_output:
+        kwargs["capture_stdout"] = True
+    if capture_stderr:
+        kwargs["capture_stderr"] = True
+
+    region = region or AWS_REGION
+    if os.environ.get("AWS_ACCESS_KEY_ID"):
+        prefix = f"aws --region {region}"
+    else:
+        profile = os.environ.get("AWS_PROFILE") or PROJECT_NAME
+        prefix = f"aws --profile {profile} --region {region}"
+    cmd = f"{prefix} {cmd}"
+
+    result = run(cmd, **kwargs)
+
+    if parse_output:
+        result = json.loads("".join(result.stdout_lines))
+
+    return result
+
+
 def get_secrets(secret_id="production-env"):
-    secret_string = cli(f"secretsmanager get-secret-value --secret-id {secret_id}")["SecretString"]
+    secret_string = cli("secretsmanager get-secret-value", {"secret-id": secret_id})["SecretString"]
     return json.loads(secret_string)
 
 
@@ -40,7 +79,7 @@ def store_secret(key, value, secret_id="production-env"):
 
     current_values[key] = value
     secret_string = quote(json.dumps(current_values))
-    cli(f"secretsmanager put-secret-value --secret-id {secret_id} --secret-string {secret_string}")
+    cli("secretsmanager put-secret-value", {"secret-id": secret_id, "secret-string": secret_string})
 
 
 def remove_secret(key, secret_id="production-env"):
@@ -51,31 +90,7 @@ def remove_secret(key, secret_id="production-env"):
 
     del current_values[key]
     secret_string = quote(json.dumps(current_values))
-    cli(f"secretsmanager put-secret-value --secret-id {secret_id} --secret-string {secret_string}")
-
-
-def aws_cmd(cmd, region):
-    region = region or AWS_REGION
-    if os.environ.get("AWS_ACCESS_KEY_ID"):
-        command = f"aws --region {region}"
-    else:
-        profile = os.environ.get("AWS_PROFILE") or PROJECT_NAME
-        command = f"aws --profile {profile} --region {region}"
-    return f"{command} {cmd}"
-
-
-def cli(cmd, region=None, parse_output=True, capture_stderr=False, **kwargs):
-    """
-    Shortcut for aws cli.
-    """
-    if parse_output:
-        kwargs["capture_stdout"] = True
-    if capture_stderr:
-        kwargs["capture_stderr"] = True
-    result = run(aws_cmd(cmd, region), **kwargs)
-    if parse_output:
-        result = json.loads("".join(result.stdout_lines))
-    return result
+    cli("secretsmanager put-secret-value", {"secret-id": secret_id, "secret-string": secret_string})
 
 
 def ensure_docker_login(func):
@@ -94,7 +109,8 @@ def ensure_docker_login(func):
         except RuntimeError:
             echo("Try adding ECR authorization...")
             docker_login = cli(
-                "ecr get-login --no-include-email",
+                "ecr get-login",
+                {"no-include-email": ""},
                 capture_stdout=True,
                 parse_output=False,
             ).stdout_lines[0]
@@ -150,33 +166,11 @@ def push_manifest(
     docker.cli(f"manifest push --purge {manifest_name}", print_cmd=True)
 
 
-def replace_image_tag(repository, old_tag, new_tag):
-    image = cli(
-        "ecr batch-get-image" f" --repository-name {repository}" f" --image-ids imageTag={old_tag}",
-    )[
-        "images"
-    ][0]
-    existing_tags = [
-        img["imageId"]["imageTag"]
-        for img in cli(
-            "ecr batch-get-image"
-            f" --repository-name {repository}"
-            f' --image-ids imageDigest={image["imageId"]["imageDigest"]}',
-        )["images"]
-    ]
-    if new_tag not in existing_tags:
-        cli(
-            "ecr put-image"
-            f" --repository-name {repository}"
-            f" --image-tag {new_tag}"
-            f' --image-manifest {quote(image["imageManifest"])}',
-        )
-
-
 def resource_details(stack_name, logical_id):
-    return cli(f"cloudformation describe-stack-resource --stack-name {stack_name} --logical-resource-id {logical_id}")[
-        "StackResourceDetail"
-    ]
+    return cli(
+        "cloudformation describe-stack-resource",
+        {"stack-name": stack_name, "logical-resource-id": logical_id},
+    )["StackResourceDetail"]
 
 
 def physical_name(stack_name, logical_id):
@@ -190,9 +184,11 @@ def task_definitions():
 
 
 def task_definition_container_names(task_definition):
-    container_definitions = cli(f"ecs describe-task-definition --task-definition {task_definition}")["taskDefinition"][
-        "containerDefinitions"
-    ]
+    result = cli(
+        "ecs describe-task-definition",
+        {"task-definition": task_definition},
+    )
+    container_definitions = result["taskDefinition"]["containerDefinitions"]
     return [container["name"] for container in container_definitions]
 
 
@@ -202,23 +198,24 @@ def all_clusters():
 
 
 def cluster_services(cluster):
-    arn_list = cli(f"ecs list-services --cluster {cluster}")["serviceArns"]
+    arn_list = cli("ecs list-services", {"cluster": cluster})["serviceArns"]
     return [service_arn.split("/")[-1] for service_arn in arn_list]
 
 
 def service_tasks(cluster, service):
-    arn_list = cli(f"ecs list-tasks --cluster {cluster} --service-name {service}")["taskArns"]
+    arn_list = cli("ecs list-tasks", {"cluster": cluster, "service-name": service})["taskArns"]
     return [task_arn.split("/")[-1] for task_arn in arn_list]
 
 
 def execute_command(cluster_id, task_id, command: str, interactive=True):
-    cmd = f'ecs execute-command --cluster {cluster_id} --task {task_id} --command "{command}"'
+    conf = {"cluster": cluster_id, "task": task_id, "command": f'"{command}"'}
 
     if interactive:
-        cmd = f"{cmd} --interactive"
+        conf["interactive"] = ""
 
     cli(
-        cmd,
+        "ecs execute-command",
+        conf,
         parse_output=False,
         capture_stderr=True,
     )
@@ -226,7 +223,10 @@ def execute_command(cluster_id, task_id, command: str, interactive=True):
 
 def connect_to_ecs_task(cluster_id, task_id):
     while True:
-        tasks = cli(f"ecs describe-tasks --cluster {cluster_id} --tasks {task_id}")["tasks"]
+        tasks = cli(
+            "ecs describe-tasks",
+            {"cluster": cluster_id, "tasks": task_id},
+        )["tasks"]
 
         task_last_status = tasks[0]["lastStatus"]
         if task_last_status == "RUNNING":
@@ -300,39 +300,11 @@ def get_network_configuration():
     }
 
 
-def cluster_ec2_instances(stack_name, logical_id):
-    cluster_id = physical_name(stack_name, logical_id)
-    instances = cli(
-        "ecs list-container-instances --cluster %s" % cluster_id,
-    )["containerInstanceArns"]
-    instance_ids = " ".join('"%s"' % i for i in instances)
-    instance_details = cli(
-        f"ecs describe-container-instances --cluster {cluster_id} --container-instances {instance_ids}"
-    )["containerInstances"]
-    ec2_instance_ids = " ".join('"%s"' % i["ec2InstanceId"] for i in instance_details)
-    ec2_details = cli(
-        "ec2 describe-instances --instance-ids %s" % ec2_instance_ids,
-    )
-    instances = []
-    for reservation in ec2_details["Reservations"]:
-        instances.extend(reservation["Instances"])
-    return instances
-
-
-def ci_managed_nodes(stack_name):
-    all_managed_nodes = cli(
-        "ssm describe-instance-information --filters"
-        ' "Key=ResourceType,Values=ManagedInstance"'
-        ' "Key=PingStatus,Values=Online"',
-    )["InstanceInformationList"]
-    return [managed_node for managed_node in all_managed_nodes if managed_node["Name"] == "GHARServers"]
-
-
 def db_endpoint(stack_name, logical_id):
     db_id = physical_name(stack_name, logical_id)
     db_instance = cli(
-        "rds describe-db-instances --db-instance-identifier %s" % db_id,
-        parse_output=True,
+        "rds describe-db-instances",
+        {"db-instance-identifier": db_id},
     )
     return db_instance["DBInstances"][0]["Endpoint"]["Address"]
 
@@ -340,19 +312,15 @@ def db_endpoint(stack_name, logical_id):
 def cache_cluster_nodes(logical_id):
     cloudformation = cloudformation_load()
     cl_id = cloudformation["Resources"][logical_id]["Properties"]["ClusterName"]
-    cluster = cli(
-        "elasticache describe-cache-clusters --show-cache-node-info " "--cache-cluster-id %s" % cl_id,
-    )[
-        "CacheClusters"
-    ][0]
+    result = cli(
+        "elasticache describe-cache-clusters",
+        {
+            "show-cache-node-info": "",
+            "cache-cluster-id": cl_id,
+        },
+    )
+    cluster = result["CacheClusters"][0]
     return [n["Endpoint"]["Address"] for n in cluster["CacheNodes"]]
-
-
-def replication_group_nodes(logical_id):
-    cloudformation = cloudformation_load()
-    rg_id = cloudformation["Resources"][logical_id]["Properties"]["ReplicationGroupId"]
-    cluster = cli(f"elasticache describe-replication-groups --replication-group-id {rg_id}")["ReplicationGroups"][0]
-    return [n["PrimaryEndpoint"]["Address"] for n in cluster["NodeGroups"]]
 
 
 def s3_domain(stack_name: str, logical_id: str) -> str:
@@ -361,19 +329,6 @@ def s3_domain(stack_name: str, logical_id: str) -> str:
     """
     cf_id = physical_name(stack_name, logical_id)
     return f"{cf_id}.s3.amazonaws.com"
-
-
-def cloudfront_domain(stack_name, logical_id):
-    cf_id = physical_name(stack_name, logical_id)
-    cli("configure set preview.cloudfront true", parse_output=False)
-    cf_distribution = cli(
-        "cloudfront get-distribution --id %s" % cf_id,
-    )
-    return cf_distribution["Distribution"]["DomainName"]
-
-
-def task_family(stack_name, logical_id):
-    return physical_name(stack_name, logical_id).split(":")[0]
 
 
 def cloudformation_load(source="index-default.yaml"):
@@ -395,13 +350,13 @@ def cloudformation_load(source="index-default.yaml"):
 
 def register_task(task_definition):
     echo(f"Registering task definition: {task_definition.get('family', '')}")
-    result = cli(f"ecs register-task-definition --cli-input-json {quote(json.dumps(task_definition))}")
+    result = cli("ecs register-task-definition", {"cli-input-json": quote(json.dumps(task_definition))})
     revision = int(result["taskDefinition"]["revision"])
     echo(f"Revision registered: {revision}")
     if revision > 1:
         previous = f"{result['taskDefinition']['family']}:{revision - 1}"
         try:
-            cli(f"ecs deregister-task-definition --task-definition {previous}")
+            cli("ecs deregister-task-definition", {"task-definition": previous})
         except RuntimeError as e:
             echo(f"Couldn't de-register previous revision: {e}")
         else:
@@ -445,9 +400,7 @@ def update_all_services(environment):
     #   - remove services which are no longer needed.
     updated = []
     for cluster_name, cluster_id in clusters.items():
-        services = cli(
-            f"ecs list-services --cluster {cluster_id}",
-        )["serviceArns"]
+        services = cli("ecs list-services", {"cluster": cluster_id})["serviceArns"]
         for service in services:
             service = service.split("/")[-1]
             match = desired_services.get(service)
@@ -457,7 +410,8 @@ def update_all_services(environment):
                     match = None
                 else:
                     details = cli(
-                        f"ecs describe-services --service {service} " f"--cluster {cluster_id}",
+                        "ecs describe-services",
+                        {"service": service, "cluster": cluster_id},
                     )[
                         "services"
                     ][0]
@@ -514,15 +468,17 @@ def update_all_services(environment):
                             "desired-count": match.count,
                             "task-definition": match.task.family,
                             "enable-execute-command": None,
-                            "deployment-configuration": (
-                                f'"maximumPercent={match.max_percent},' f'minimumHealthyPercent={match.min_percent}"'
-                            ),
+                            "deployment-configuration": {
+                                "maximumPercent": match.max_percent,
+                                "minimumHealthyPercent": match.min_percent,
+                            },
                         }
+
                         grace = match.health_check_grace_sec
                         if grace is not None:
                             conf["health-check-grace-period-seconds"] = grace
-                        args = " ".join(f"--{k} {v}" if v else f"--{k}" for k, v in conf.items())
-                        cli(f"ecs update-service {args}")
+
+                        cli("ecs update-service", conf)
                         updated.append(match.name)
                         echo(f"Service updated: {service}")
             else:
@@ -530,17 +486,35 @@ def update_all_services(environment):
 
             if not match:
                 echo(f"Removing service: {service}")
-                cli(f"ecs update-service --desired-count 0 --service {service} " f"--cluster {cluster_id}")
+                cli(
+                    "ecs update-service",
+                    {
+                        "desired-count": 0,
+                        "service": service,
+                        "cluster": cluster_id,
+                    },
+                )
                 deleted = cli(
-                    f"ecs delete-service --service {service} " f"--cluster {cluster_id}",
+                    "ecs delete-service",
+                    {
+                        "service": service,
+                        "cluster": cluster_id,
+                    },
                 )
                 echo(f"Service removed: {service}")
                 t = deleted["service"]["taskDefinition"].split("/")[-1]
-                cli(f"ecs deregister-task-definition --task-definition {t}")
+                cli(
+                    "ecs deregister-task-definition",
+                    {"task-definition": t},
+                )
                 echo(f"De-registered task definition {t}")
                 echo(f"Wait until service terminates: {service}")
                 cli(
-                    f"ecs wait services-inactive " f"--cluster {cluster_id} " f"--service {service}",
+                    "ecs wait services-inactive",
+                    {
+                        "cluster": cluster_id,
+                        "service": service,
+                    },
                     raise_on_error=False,
                     parse_output=False,
                 )
@@ -551,105 +525,49 @@ def update_all_services(environment):
             continue
         echo(f"Creating service: {name}")
         register_task(service.task.as_dict(environment))
-        balancers = ""
+
+        conf = {
+            "service-name": name,
+            "cluster": clusters[service.cluster_name],
+            "task-definition": service.task.family,
+            "launch-type": service.launch_type,
+            "desired-count": service.count,
+            "enable-execute-command": "",
+            "deployment-configuration": {
+                "maximumPercent": service.max_percent,
+                "minimumHealthyPercent": service.min_percent,
+            },
+        }
+
         if service.container_port is not None:
             target_group = target_groups_by_ports[service.container_port]
-            balancers = (
-                '--load-balancers "'
-                f"targetGroupArn={target_group},"
+            conf["load-balancers"] = (
+                f'"targetGroupArn={target_group},'
                 f"containerName={service.container_name},"
                 f'containerPort={service.container_port}"'
             )
 
-        role = ""
         if service.role_name is not None:
-            role = f"--role {roles[service.role_name]}"
+            conf["role"] = roles[service.role_name]
 
-        placement_strategy = ""
-        if service.placement_strategy:
-            placement_strategy = "--placement-strategy " + " ".join(
-                [
-                    '"type={type},field={field}"'.format(
-                        type=p["type"],
-                        field=p["field"],
-                    )
-                    for p in service.placement_strategy
-                ]
-            )
-        placement_constraints = ""
-        if service.placement_constraints:
-            placement_constraints = "--placement-constraints " + " ".join(
-                [
-                    f'"type={p["type"]}' f'{"expression" in p and ",expression=" + p["expression"] or ""}"'
-                    for p in service.placement_constraints
-                ]
-            )
-        network_configuration = ""
         if service.add_network_configuration:
-            network_configuration = f"--network-configuration '{json.dumps(get_network_configuration())}'"
+            conf["network-configuration"] = get_network_configuration()
 
-        cli(
-            f"ecs create-service --service-name {service.name} "
-            f"--cluster {clusters[service.cluster_name]} "
-            f"--task-definition {service.task.family} "
-            f"--launch-type {service.launch_type} "
-            f"--enable-execute-command "
-            f"--desired-count {service.count} "
-            f'--deployment-configuration "maximumPercent={service.max_percent},'
-            f'minimumHealthyPercent={service.min_percent}" '
-            f"{placement_strategy} "
-            f"{placement_constraints} "
-            f"{balancers} "
-            f"{role} "
-            f"{network_configuration} "
-        )
+        cli("ecs create-service", conf)
         echo(f"Service created: {name}")
 
     delete_inactive_ecs_task_definitions()
 
 
 def delete_inactive_ecs_task_definitions():
-    inactive_tasks = cli("ecs list-task-definitions --status INACTIVE")["taskDefinitionArns"]
+    inactive_tasks = cli("ecs list-task-definitions", {"status": "INACTIVE"})["taskDefinitionArns"]
     echo(
         f"Cleaning up inactive ECS tasks definitions. " f"Definitions to delete: {len(inactive_tasks)}",
     )
     chunk_size = 10  # aws API allows to delete up to 10 tasks at once
     for i in range(0, len(inactive_tasks), chunk_size):
         tasks_to_delete = " ".join(inactive_tasks[i : i + chunk_size])
-        cli(f"ecs delete-task-definitions --task-definitions {tasks_to_delete}", print_cmd=True)
-
-
-def calculate_memory():
-    if len({s.name for s in SERVICES}) != len(SERVICES):
-        raise ValueError("Duplicate service name detected")
-    desired_services = {s.name: s for s in SERVICES if s.count}
-
-    clusters = {s.cluster_name for s in desired_services.values()}
-    for cluster in sorted(clusters):
-        echo(cluster, prefix="")
-        total_memory = 0
-        total_memory_at_deploy = 0
-        for name, service in desired_services.items():
-            if cluster != service.cluster_name:
-                continue
-
-            count_at_deploy = int(service.count * service.max_percent / 100)
-            memory = service.count * service.task.memory / 1024
-            memory_at_deploy = count_at_deploy * service.task.memory / 1024
-            total_memory += memory
-            total_memory_at_deploy += memory_at_deploy
-
-            display_deploy = count_at_deploy != service.count
-            deploy_count = f" (up to {count_at_deploy:g}x during deploy)"
-            deploy_memory = f" and up to {memory_at_deploy:g}GB at deploy"
-            echo(
-                f'{service.count:g}x{deploy_count if display_deploy else ""}'
-                f' {name}: {memory:g}GB{deploy_memory if display_deploy else ""}',
-            )
-
-        echo(
-            f"Total for cluster: {total_memory:g}GB" f" and up to {total_memory_at_deploy:g}GB at deploy",
-        )
+        cli("ecs delete-task-definitions", {"task-definitions": tasks_to_delete}, print_cmd=True)
 
 
 def get_all_ecs_tasks(cluster):
@@ -662,10 +580,13 @@ def get_all_ecs_tasks(cluster):
     for status in ["RUNNING", "STOPPED"]:
         next_token = None
         while True:
-            cmd = f"ecs list-tasks --cluster {cluster} " f"--desired-status {status}"
+            conf = {
+                "cluster": cluster,
+                "desired-status": status,
+            }
             if next_token:
-                cmd += f" --next-token {next_token}"
-            result = cli(cmd)
+                conf["next-token"] = next_token
+            result = cli("ecs list-tasks", conf)
             next_token = result.get("nextToken")
             task_arns += result["taskArns"]
             if not next_token:
@@ -673,7 +594,8 @@ def get_all_ecs_tasks(cluster):
     tasks = []
     for arns_chunk in grouper(100, task_arns):
         tasks += cli(
-            f'ecs describe-tasks --tasks {" ".join(arns_chunk)} ' f"--cluster {cluster}",
+            "ecs describe-tasks",
+            {"tasks": " ".join(arns_chunk), "cluster": cluster},
         )["tasks"]
     return tasks
 
@@ -690,9 +612,16 @@ def get_ecs_status(stack_name, services, threads=8):
         Returns task definition with last revision number and its service
         """
         c = service.cluster_name
-        cmd = f"ecs list-task-definitions " f"--family-prefix {service.task.family} " f"--max-item 1 --sort desc"
+        result = cli(
+            "ecs list-task-definitions",
+            {
+                "family-prefix": service.task.family,
+                "max-item": 1,
+                "sort": "desc",
+            },
+        )
         task_def, actual_version = split_task_def(
-            cli(cmd)["taskDefinitionArns"][0],
+            result["taskDefinitionArns"][0],
         )
         if c not in clusters:
             # physical_name take some time, do not use setdefault
