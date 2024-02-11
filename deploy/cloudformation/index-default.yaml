@@ -475,6 +475,8 @@ Resources:
         - Key: deregistration_delay.timeout_seconds
           Value:
             Ref: DeregistrationDelay
+        - Key: load_balancing.algorithm.type
+          Value: least_outstanding_requests
         - Key: stickiness.enabled
           Value: false
 
