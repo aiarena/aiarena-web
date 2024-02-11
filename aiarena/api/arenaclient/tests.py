@@ -1376,6 +1376,80 @@ class ArenaClientCompatibilityTestCase(MatchReadyMixin, TransactionTestCase):
         }
         self._test_endpoint_contract(api_version, expected_json_schema)
 
+    def test_v3_version_endpoint_contract(self):
+        api_version = "v3"
+        expected_json_schema = {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["id"],
+            "properties": {
+                "id": {"type": "number"},
+                "bot1": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": [
+                        "id",
+                        "name",
+                        "game_display_id",
+                        "bot_zip",
+                        "bot_zip_md5hash",
+                        "bot_data",
+                        "bot_data_md5hash",
+                        "plays_race",
+                        "type",
+                    ],
+                    "properties": {
+                        "id": {"type": "number"},
+                        "name": {"type": "string"},
+                        "game_display_id": {"type": "string"},
+                        "bot_zip": {"type": "string"},
+                        "bot_zip_md5hash": {"type": "string"},
+                        "bot_data": {"type": "string"},
+                        "bot_data_md5hash": {"type": "string"},
+                        "plays_race": {"type": "string"},
+                        "type": {"type": "string"},
+                    },
+                },
+                "bot2": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": [
+                        "id",
+                        "name",
+                        "game_display_id",
+                        "bot_zip",
+                        "bot_zip_md5hash",
+                        "bot_data",
+                        "bot_data_md5hash",
+                        "plays_race",
+                        "type",
+                    ],
+                    "properties": {
+                        "id": {"type": "number"},
+                        "name": {"type": "string"},
+                        "game_display_id": {"type": "string"},
+                        "bot_zip": {"type": "string"},
+                        "bot_zip_md5hash": {"type": "string"},
+                        "bot_data": {"type": "string"},
+                        "bot_data_md5hash": {"type": "string"},
+                        "plays_race": {"type": "string"},
+                        "type": {"type": "string"},
+                    },
+                },
+                "map": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": ["name", "file"],
+                    "properties": {
+                        "name": {"type": "string"},
+                        "file": {"type": "string"},
+                        "file_hash": {"type": ["string", "null"]},
+                    },
+                },
+            },
+        }
+        self._test_endpoint_contract(api_version, expected_json_schema)
+
     def _test_endpoint_contract(self, version, expected_json_schema):
         response = self._post_to_matches(version)
         self.assertEqual(response.status_code, 201)
