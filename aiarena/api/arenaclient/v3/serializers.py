@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 from aiarena.api.arenaclient.common.serializers import BotSerializer
-from aiarena.api.arenaclient.common.util import obtain_s3_filehash_or_default
 from aiarena.api.arenaclient.v2.serializers import V2MatchSerializer
+from aiarena.core.utils import obtain_s3_filehash_or_default
 
 
 class V3BotSerializer(BotSerializer):

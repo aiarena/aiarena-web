@@ -1,8 +1,8 @@
 from django.db import models
 
-from aiarena.api.arenaclient.common.util import obtain_s3_filehash_or_default
 from aiarena.core.models.competition import Competition
 from aiarena.core.models.game_mode import GameMode
+from aiarena.core.utils import obtain_s3_filehash_or_default
 
 
 def map_file_upload_to(instance, filename):
