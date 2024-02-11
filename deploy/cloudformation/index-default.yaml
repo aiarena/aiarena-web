@@ -594,6 +594,9 @@ Resources:
       ClusterSettings:
         - Name: containerInsights
           Value: !var container_insights
+      CapacityProviders:
+        - FARGATE
+        - FARGATE_SPOT
       Configuration:
         ExecuteCommandConfiguration:
           Logging: NONE
