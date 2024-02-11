@@ -31,5 +31,5 @@ def calculate_s3_etag(file_path, chunk_size=8 * 1024 * 1024):
     return f'"{digests_md5.hexdigest()}-{len(md5s)}"'
 
 
-md5 = calculate_s3_etag("/home/lladdy/Downloads/RomanticideAIE")
+md5 = calculate_s3_etag("/path/to/file")
 print(md5)
