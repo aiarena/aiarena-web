@@ -541,6 +541,9 @@ class ApplicationUpdater:
             },
         }
 
+        if match.add_network_configuration:
+            conf["network-configuration"] = get_network_configuration()
+
         if match.container_port is not None:
             target_group = self.target_group_arns[match.target_group]
             conf["load-balancers"] = {
