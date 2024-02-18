@@ -50,7 +50,7 @@ class CloudWatchLogger(AbstractLogger):
 
         try:
             self.client.put_log_events(**log_args)
-        except self.client.ResourceNotFoundException:
+        except self.client.exceptions.ResourceNotFoundException:
             self.ensure_log_group_and_stream_exist(log_group, log_stream)
             self.client.put_log_events(**log_args)
 
