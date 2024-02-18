@@ -6,6 +6,7 @@ from django.conf import settings
 
 import boto3
 import sentry_sdk
+from botocore.exceptions import BotoCoreError
 
 from aiarena.core.utils import ReprJSONEncoder
 
@@ -17,7 +18,10 @@ class AbstractLogger:
 
 class CloudWatchLogger(AbstractLogger):
     def __init__(self):
-        self.client = boto3.client("logs")
+        try:
+            self.client = boto3.client("logs")
+        except BotoCoreError:
+            self.client = None
 
     def ensure_log_group_and_stream_exist(self, log_group, log_stream):
         try:
@@ -32,6 +36,9 @@ class CloudWatchLogger(AbstractLogger):
 
     def send(self, payload: dict, log_group="default", log_stream="default"):
         from core.tasks import task_info_context
+
+        if self.client is None:
+            return
 
         payload |= task_info_context()
         try:
