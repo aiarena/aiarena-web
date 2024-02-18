@@ -6,7 +6,8 @@ from django.conf import settings
 
 import boto3
 import sentry_sdk
-from core.utils import ReprJSONEncoder
+
+from aiarena.core.utils import ReprJSONEncoder
 
 
 class AbstractLogger:
