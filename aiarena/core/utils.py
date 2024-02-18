@@ -6,6 +6,7 @@ import traceback
 from urllib import request
 
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import connection
 
 from aiarena.core.s3_helpers import is_s3_file
@@ -160,3 +161,11 @@ class Elo:
 
     def calculate_elo_expected_win_rate(self, rating1, rating2):
         return 1.0 / (1.0 + 10.0 ** ((rating2 - rating1) / 400.0))
+
+
+class ReprJSONEncoder(DjangoJSONEncoder):
+    def default(self, o):
+        try:
+            return super().default(o)
+        except TypeError:
+            return repr(o)

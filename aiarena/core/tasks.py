@@ -1,12 +1,182 @@
+import json
+import os
+import time
+import tracemalloc
+
 from django.conf import settings
 from django.core import management
+from django.core.cache import caches
 
 import sentry_sdk
 from celery import signals
+from celery.signals import after_task_publish, celeryd_after_setup, task_postrun, task_prerun
+from redis import Redis
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from aiarena.celery import app
-from aiarena.core.utils import sql
+from aiarena.core.utils import ReprJSONEncoder, sql
+from aiarena.loggers import logger
+
+
+celery_redis = Redis.from_url(settings.CELERY_BROKER_URL)
+
+task_track_cache = caches[settings.CELERY_MONITORING_CACHE_ALIAS]
+task_track_timeout = 24 * 60 * 60  # 1 day
+
+worker_queues: list[str] | None = None
+worker_id: str | None = None
+
+
+def task_track_key(task_id):
+    return f"{settings.CELERY_MONITORING_TRACK_PREFIX}:{task_id}"
+
+
+def task_stat_key(task_queue, minutes_from_now=0):
+    minute_key = int(time.time() // 60 + minutes_from_now) * 60
+    return f"{settings.CELERY_MONITORING_STAT_PREFIX}:{task_queue}:{minute_key}"
+
+
+def task_info_context() -> dict:
+    return {
+        k: v
+        for k, v in {
+            "task_container_id": os.environ.get("CONTAINER_ID"),
+            "task_worker_id": worker_id,
+            "task_worker_queues": worker_queues,
+        }.items()
+        if v is not None
+    }
+
+
+# noinspection PyUnusedLocal
+@celeryd_after_setup.connect
+def save_celery_worker_hostname(sender, instance, **kwargs):
+    global worker_queues
+    global worker_id
+
+    try:
+        # Get the `worker` part of the full hostname, e.g `celery@worker1`
+        hostname: str = instance.hostname.split("@")[1]
+        *worker_queues, worker_id = hostname.split("-")
+    except (IndexError, TypeError, ValueError):
+        pass
+
+
+@after_task_publish.connect
+def track_task_published(headers, body, *args, **kwargs):
+    task_id = headers["id"]
+    task_track_cache.set(
+        task_track_key(task_id),
+        {
+            "task_name": headers["task"],
+            "task_id": task_id,
+            "task_published": time.time(),
+            "task_queue": kwargs.get("routing_key"),
+        },
+        timeout=task_track_timeout,
+    )
+
+
+@task_prerun.connect
+def track_task_start(task_id, task, args, kwargs, **other):
+    task_start = time.time()
+    task_key = task_track_key(task_id)
+    props = task_track_cache.get(task_key)
+    if not isinstance(props, dict):
+        props = {}
+    props.update(
+        {
+            "task_name": task.name,
+            "task_start": task_start,
+        }
+    )
+    # Convert task arguments to strings
+    props.update(
+        json.loads(
+            json.dumps(
+                {
+                    "task_args": args,
+                    "task_kwargs": kwargs,
+                },
+                cls=ReprJSONEncoder,
+            )
+        )
+    )
+
+    task_track_cache.set(task_key, props, timeout=task_track_timeout)
+
+    published_time = props.get("task_published")
+    if published_time:
+        task_wait = round(task_start - published_time, 3)
+        props["task_wait"] = task_wait
+        task_queue = props.get("task_queue")
+        if task_queue:
+            stats_key = task_stat_key(task_queue)
+            celery_redis.lpush(stats_key, task_wait)
+            # We only need stats for a short period of time, because
+            # the monitoring task sends the data for the previous minute only
+            celery_redis.expire(stats_key, 5 * 60)
+
+    logger.send(
+        {
+            "source": "Celery",
+            "task_id": task_id,
+            "task_pid": os.getpid(),
+            **task_info_context(),
+            **props,
+        },
+        log_group="celery-tasks",
+    )
+
+    if settings.TRACK_TASKS_MEMORY:
+        tracemalloc.start()
+
+
+@task_postrun.connect
+def track_task_end(task_id, task, args, kwargs, retval, state, **other):
+    payload = {}
+
+    if settings.TRACK_TASKS_MEMORY:
+        # we don't calculate memory diff because we restart malloc trace on every task
+        # the stapshot on the task end will contain memory allocated by the task
+        snap = tracemalloc.take_snapshot()
+        memsize = sum([s.size for s in snap.statistics("filename", True)])
+
+        # stop memory tracing immediately after the task completes to avoid memory overhead
+        tracemalloc.stop()
+        payload.update(
+            {
+                "mem_end": memsize,
+            }
+        )
+
+    cache_key = task_track_key(task_id)
+    tracked = task_track_cache.get(cache_key)
+    if tracked:
+        if isinstance(tracked, dict):
+            payload.update(tracked)
+            start_time = tracked.get("task_start")
+            if start_time:
+                payload.update(
+                    {
+                        "task_duration": round(time.time() - start_time, 3),
+                    }
+                )
+
+        task_track_cache.delete(cache_key)
+    payload.update(
+        {
+            "source": "Celery",
+            "task_id": task_id,
+            "task_pid": os.getpid(),
+            "task_name": task.name,
+            "task_args": args,
+            "task_kwargs": kwargs,
+            "task_retval": str(retval),
+            "task_state": state,
+        }
+    )
+    logger.send(payload, log_group="celery-tasks")
 
 
 @signals.celeryd_init.connect
