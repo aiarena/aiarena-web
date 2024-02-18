@@ -119,7 +119,7 @@ class WebTask(BaseTask):
 
 class CeleryTask(BaseTask):
     command_prefix = "/bin/bash /app/aiarena/celery.sh -A aiarena "
-    default_cpu = "256"
+    default_cpu = "128"
     default_memory = "512"
 
     def code_container(self, *args, **kwargs):
@@ -157,10 +157,10 @@ SERVICES = [
     ),
     WorkerService(
         name="celeryWorker-Default",
-        count=1,
+        count=2,
         task=CeleryWorkerTask(
             family="celeryWorker-Default",
-            command="-P prefork -Q default",
+            command="--concurrency 1 -P solo -Q default",
         ),
     ),
     WorkerService(
