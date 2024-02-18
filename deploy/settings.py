@@ -119,7 +119,7 @@ class WebTask(BaseTask):
 
 class CeleryTask(BaseTask):
     command_prefix = "/bin/bash /app/aiarena/celery.sh -A aiarena "
-    default_cpu = "128"
+    default_cpu = "256"
     default_memory = "512"
 
     def code_container(self, *args, **kwargs):
