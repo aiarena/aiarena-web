@@ -649,6 +649,11 @@ a:hover, a:visited, a:link, a:active {
     outline: 1px solid #86c232;
 }
 
+.author-image > img {
+    width: 150px;
+    height: 150px;
+}
+
 .author-name {
     position: relative;
     height: 40px;
