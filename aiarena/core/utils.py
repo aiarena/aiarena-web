@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import time
 import traceback
 from urllib import request
 
@@ -169,3 +170,11 @@ class ReprJSONEncoder(DjangoJSONEncoder):
             return super().default(o)
         except TypeError:
             return repr(o)
+
+
+def timestamp_ms():
+    return int(round(time.time() * 1000))
+
+
+def monitoring_minute_key(minutes_from_now=0):
+    return int(time.time() // 60 + minutes_from_now) * 60

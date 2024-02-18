@@ -525,13 +525,17 @@ if crontab:
             "task": "aiarena.core.tasks.kill_slow_queries",
             "schedule": timedelta(seconds=15),
         },
+        "celery_queue_monitoring": {
+            "task": "aiarena.core.tasks.celery_queue_monitoring",
+            "schedule": timedelta(seconds=13),
+        },
         "generate_stats": {
             "task": "aiarena.core.tasks.generate_stats",
             "schedule": crontab(minute=0, hour="11,23"),  # At minute 0 past hour 11 and 23
         },
         "refresh_patreon_tiers": {
             "task": "aiarena.core.tasks.refresh_patreon_tiers",
-            "schedule": crontab(minute=0, hour=0),  # Everyday at 00:00
+            "schedule": crontab(minute=0, hour=0),  # Every day at 00:00
         },
         "timeout_overtime_matches": {
             "task": "aiarena.core.tasks.timeout_overtime_matches",
@@ -541,6 +545,9 @@ if crontab:
 
 CELERY_TASK_ROUTES = {
     "aiarena.core.tasks.kill_slow_queries": {
+        "queue": "monitoring",
+    },
+    "aiarena.core.tasks.celery_queue_monitoring": {
         "queue": "monitoring",
     },
 }

@@ -1,5 +1,4 @@
 import json
-import time
 from functools import cached_property
 from pprint import pprint
 
@@ -8,7 +7,7 @@ from django.conf import settings
 import boto3
 import sentry_sdk
 
-from aiarena.core.utils import ReprJSONEncoder
+from aiarena.core.utils import ReprJSONEncoder, timestamp_ms
 
 
 class AbstractLogger:
@@ -45,7 +44,7 @@ class CloudWatchLogger(AbstractLogger):
         log_args = {
             "logGroupName": log_group,
             "logStreamName": log_stream,
-            "logEvents": [{"timestamp": int(round(time.time() * 1000)), "message": message}],
+            "logEvents": [{"timestamp": timestamp_ms(), "message": message}],
         }
 
         try:

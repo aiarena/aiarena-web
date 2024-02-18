@@ -2,19 +2,22 @@ import json
 import os
 import time
 import tracemalloc
+from collections import Counter
 
 from django.conf import settings
 from django.core import management
 from django.core.cache import caches
 
+import boto3
 import sentry_sdk
+from botocore.exceptions import BotoCoreError
 from celery import signals
 from celery.signals import after_task_publish, celeryd_after_setup, task_postrun, task_prerun
 from redis import Redis
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from aiarena.celery import app
-from aiarena.core.utils import ReprJSONEncoder, sql
+from aiarena.core.utils import ReprJSONEncoder, monitoring_minute_key, sql, timestamp_ms
 from aiarena.loggers import logger
 
 
@@ -26,13 +29,18 @@ task_track_timeout = 24 * 60 * 60  # 1 day
 worker_queues: list[str] | None = None
 worker_id: str | None = None
 
+try:
+    cloudwatch = boto3.client("cloudwatch")
+except BotoCoreError:
+    cloudwatch = None
+
 
 def task_track_key(task_id):
     return f"{settings.CELERY_MONITORING_TRACK_PREFIX}:{task_id}"
 
 
 def task_stat_key(task_queue, minutes_from_now=0):
-    minute_key = int(time.time() // 60 + minutes_from_now) * 60
+    minute_key = monitoring_minute_key(minutes_from_now)
     return f"{settings.CELERY_MONITORING_STAT_PREFIX}:{task_queue}:{minute_key}"
 
 
@@ -186,6 +194,52 @@ def init_sentry(**kwargs):
         integrations=[CeleryIntegration(monitor_beat_tasks=True)],
         release=settings.BUILD_NUMBER,
     )
+
+
+@app.task(ignore_result=True)
+def celery_queue_monitoring():
+    # Queue lengths
+    queues = {settings.CELERY_TASK_DEFAULT_QUEUE}
+    for config in settings.CELERY_TASK_ROUTES.values():
+        if q := config.get("queue"):
+            queues.add(q)
+
+    cloudwatch.put_metric_data(
+        Namespace="CeleryQueue",
+        MetricData=[
+            {
+                "Name": "QueueLength",
+                "Dimensions": [{"Name": "Queue", "Value": q}],
+                "Value": celery_redis.llen(q),
+                "Timestamp": timestamp_ms(),
+            }
+            for q in queues
+        ],
+    )
+
+    # Queue wait stats
+    wait_metrics = []
+    for key in celery_redis.keys(f"{settings.CELERY_MONITORING_STAT_PREFIX}:*:{monitoring_minute_key(-1)}"):
+        key = key.decode()
+        task_queue = key.split(":")[1]
+        timings = [float(m) for m in celery_redis.lrange(key, 0, -1)]
+        if not timings:
+            continue
+
+        counter = Counter(timings)
+        values, counts = zip(*counter.items())
+        wait_metrics.append(
+            {
+                "Name": "TaskWait",
+                "Dimensions": [{"Name": "Queue", "Value": task_queue}],
+                "Values": values,
+                "Counts": counts,
+                "Timestamp": timestamp_ms(),
+            }
+        )
+
+        celery_redis.delete(key)
+    cloudwatch.put_metric_data(Namespace="CeleryQueue", MetricData=wait_metrics)
 
 
 @app.task(ignore_result=True)
