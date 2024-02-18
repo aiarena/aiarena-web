@@ -33,7 +33,7 @@ class CloudWatchLogger(AbstractLogger):
             pass
 
     def send(self, payload: dict, log_group="default", log_stream="default"):
-        from core.tasks import task_info_context
+        from aiarena.core.tasks import task_info_context
 
         payload |= task_info_context()
         try:
@@ -57,7 +57,7 @@ class CloudWatchLogger(AbstractLogger):
 
 class ConsoleLogger(AbstractLogger):
     def send(self, payload: dict):
-        from core.tasks import task_info_context
+        from aiarena.core.tasks import task_info_context
 
         pprint(payload | task_info_context())  # noqa: T203
 
