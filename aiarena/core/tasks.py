@@ -212,6 +212,7 @@ def celery_queue_monitoring():
                 "MetricName": "QueueLength",
                 "Dimensions": [{"Name": "Queue", "Value": q}],
                 "Value": celery_redis.llen(q),
+                "Unit": "Count",
                 "Timestamp": datetime.datetime.now(),
             }
             for q in queues
@@ -235,6 +236,7 @@ def celery_queue_monitoring():
                 "Dimensions": [{"Name": "Queue", "Value": task_queue}],
                 "Values": values,
                 "Counts": counts,
+                "Unit": "Seconds",
                 "Timestamp": datetime.datetime.now(),
             }
         )
