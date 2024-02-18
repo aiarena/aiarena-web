@@ -12,7 +12,7 @@ from aiarena.core.utils import ReprJSONEncoder
 
 
 class AbstractLogger:
-    def send(self, payload: dict):
+    def send(self, payload: dict, **kwargs):
         raise NotImplementedError
 
 
@@ -56,14 +56,14 @@ class CloudWatchLogger(AbstractLogger):
 
 
 class ConsoleLogger(AbstractLogger):
-    def send(self, payload: dict):
+    def send(self, payload: dict, **kwargs):
         from aiarena.core.tasks import task_info_context
 
         pprint(payload | task_info_context())  # noqa: T203
 
 
 class DummyLogger(AbstractLogger):
-    def send(self, payload: dict):
+    def send(self, payload: dict, **kwargs):
         pass
 
 
