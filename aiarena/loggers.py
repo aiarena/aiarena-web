@@ -60,7 +60,14 @@ class ConsoleLogger(AbstractLogger):
         pprint(payload | task_info_context())  # noqa: T203
 
 
-if settings.DEBUG:
+class DummyLogger(AbstractLogger):
+    def send(self, payload: dict):
+        pass
+
+
+if settings.RUNNING_TESTS:
+    logger = DummyLogger()
+elif settings.DEBUG:
     logger = ConsoleLogger()
 else:
     logger = CloudWatchLogger()

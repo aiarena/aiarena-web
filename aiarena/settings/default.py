@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import os
+import sys
 from datetime import timedelta
 
 
@@ -383,6 +384,15 @@ MEDIA_URL = "/media/"
 
 # Random scripts such as SQL
 SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts")
+
+
+def is_running_tests():
+    return bool(
+        ("test" in sys.argv) or ("pytest" in sys.argv[0]) or os.environ.get("PYTEST_XDIST_WORKER"),
+    )
+
+
+RUNNING_TESTS = is_running_tests()
 
 # registration
 # https://django-registration-redux.readthedocs.io/en/latest/default-backend.html
