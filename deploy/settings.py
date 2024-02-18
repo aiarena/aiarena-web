@@ -164,6 +164,14 @@ SERVICES = [
         ),
     ),
     WorkerService(
+        name="celeryWorker-Monitoring",
+        count=1,
+        task=CeleryWorkerTask(
+            family="celeryWorker-Monitoring",
+            command="--concurrency 1 -P solo -Q monitoring",
+        ),
+    ),
+    WorkerService(
         name="celeryBeat",
         task=CeleryTask(
             family="celeryBeat",
