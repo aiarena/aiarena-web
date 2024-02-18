@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 import time
@@ -17,7 +18,7 @@ from redis import Redis
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from aiarena.celery import app
-from aiarena.core.utils import ReprJSONEncoder, monitoring_minute_key, sql, timestamp_ms
+from aiarena.core.utils import ReprJSONEncoder, monitoring_minute_key, sql
 from aiarena.loggers import logger
 
 
@@ -208,10 +209,10 @@ def celery_queue_monitoring():
         Namespace="CeleryQueue",
         MetricData=[
             {
-                "Name": "QueueLength",
+                "MetricName": "QueueLength",
                 "Dimensions": [{"Name": "Queue", "Value": q}],
                 "Value": celery_redis.llen(q),
-                "Timestamp": timestamp_ms(),
+                "Timestamp": datetime.datetime.now(),
             }
             for q in queues
         ],
@@ -230,11 +231,11 @@ def celery_queue_monitoring():
         values, counts = zip(*counter.items())
         wait_metrics.append(
             {
-                "Name": "TaskWait",
+                "MetricName": "TaskWait",
                 "Dimensions": [{"Name": "Queue", "Value": task_queue}],
                 "Values": values,
                 "Counts": counts,
-                "Timestamp": timestamp_ms(),
+                "Timestamp": datetime.datetime.now(),
             }
         )
 
