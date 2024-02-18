@@ -540,7 +540,7 @@ if crontab:
     }
 
 CELERY_TASK_ROUTES = {
-    "core.tasks.kill_slow_queries": {
+    "aiarena.core.tasks.kill_slow_queries": {
         "queue": "monitoring",
     },
 }
