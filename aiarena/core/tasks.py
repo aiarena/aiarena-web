@@ -240,7 +240,8 @@ def celery_queue_monitoring():
         )
 
         celery_redis.delete(key)
-    cloudwatch.put_metric_data(Namespace="CeleryQueue", MetricData=wait_metrics)
+    if wait_metrics:
+        cloudwatch.put_metric_data(Namespace="CeleryQueue", MetricData=wait_metrics)
 
 
 @app.task(ignore_result=True)
