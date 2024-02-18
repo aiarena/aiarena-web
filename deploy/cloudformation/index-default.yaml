@@ -684,6 +684,16 @@ Resources:
                 Action:
                   - kms:Decrypt
                 Resource: "*"
+        - PolicyName: allow-logging
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - cloudwatch:PutMetricData
+                Resource: "*"
 
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
