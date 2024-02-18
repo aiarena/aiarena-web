@@ -539,6 +539,12 @@ if crontab:
         },
     }
 
+CELERY_TASK_ROUTES = {
+    "core.tasks.kill_slow_queries": {
+        "queue": "monitoring",
+    },
+}
+
 CELERY_MONITORING_CACHE_ALIAS = "default"
 CELERY_MONITORING_TRACK_PREFIX = "task_track"
 CELERY_MONITORING_STAT_PREFIX = "task_stat"
