@@ -140,6 +140,10 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         response = self.client.get("/profile/")
         self.assertEqual(response.status_code, 200)
 
+        # profile edit
+        response = self.client.get("/profile/edit/")
+        self.assertEqual(response.status_code, 200)
+
         # token
         response = self.client.get("/profile/token/")
         self.assertEqual(response.status_code, 200)
