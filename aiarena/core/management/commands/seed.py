@@ -10,8 +10,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
 from aiarena.core.models import Bot, CompetitionParticipation, Map, MapPool, News, WebsiteUser
-from aiarena.core.models.bot_race import BotRace
-from aiarena.core.tests.testing_utils import TestingClient
+from aiarena.core.tests.testing_utils import TestingClient, create_arena_clients_with_matching_tokens, create_game_races
 from aiarena.core.tests.tests import TestAssetPaths
 
 
@@ -93,19 +92,18 @@ class Command(BaseCommand):
         client = TestingClient()
         client.login(devadmin)
 
-        self.create_arena_clients(client, devadmin, num_acs)
-
-        self.stdout.write("Creating ACs...100%")
+        create_arena_clients_with_matching_tokens(self.stdout, client, num_acs, devadmin)
 
         client.create_user("service_user", "x", "service_user@dev.aiarena.net", "SERVICE", devadmin.id)
 
         ac_client = AcApiTestingClient(api_token=Token.objects.first().key)
 
-        gamemode = self.create_game_and_gamemode(client)
+        game = client.create_game("StarCraft II")
+        gamemode = client.create_gamemode("Melee", game.id)
 
-        protoss, terran, zerg = self.create_game_races()
+        protoss, terran, zerg = create_game_races()
 
-        competition1, competition2, competition3 = self.create_competitions(client, gamemode, terran)
+        competition1, competition2, competition3 = self.create_open_competitions(client, gamemode, terran)
         self.create_competition_maps(competition1, competition2, competition3, gamemode)
 
         devuser1, devuser2, devuser3, devuser4, devuser5 = self.create_5_website_users()
@@ -275,11 +273,6 @@ class Command(BaseCommand):
         )
         return devuser1, devuser2, devuser3, devuser4, devuser5
 
-    def create_game_and_gamemode(self, client):
-        game = client.create_game("StarCraft II")
-        gamemode = client.create_gamemode("Melee", game.id)
-        return gamemode
-
     def create_competition_maps(self, competition1, competition2, competition3, gamemode):
         with open(TestAssetPaths.test_map_path, "rb") as map:
             m1 = Map.objects.create(name="test_map1", file=File(map), game_mode=gamemode)
@@ -297,36 +290,20 @@ class Command(BaseCommand):
         map_pool.maps.add(m1)
         map_pool.maps.add(m2)
 
-    def create_competitions(self, client, gamemode, terran):
-        competition1 = client.create_competition("Competition 1", "L", gamemode.id)
-        competition1.target_n_divisions = 2
-        competition1.target_division_size = 2
-        competition1.n_placements = 2
-        competition1.rounds_per_cycle = 1
-        competition1.indepth_bot_statistics_enabled = True
-        competition1.save()
+    def create_open_competitions(self, client, gamemode, terran):
+        competition1 = client.create_competition(
+            "Competition 1",
+            "L",
+            gamemode.id,
+            target_n_divisions=2,
+            target_division_size=2,
+            n_placements=2,
+            rounds_per_cycle=1,
+            indepth_bot_statistics_enabled=True,
+        )
         client.open_competition(competition1.id)
-        competition2 = client.create_competition("Competition 2", "L", gamemode.id)
-        competition2.indepth_bot_statistics_enabled = True
-        competition2.save()
+        competition2 = client.create_competition("Competition 2", "L", gamemode.id, indepth_bot_statistics_enabled=True)
         client.open_competition(competition2.id)
         competition3 = client.create_competition("Competition 3 - Terran Only", "L", gamemode.id, {terran.id})
         client.open_competition(competition3.id)
         return competition1, competition2, competition3
-
-    def create_arena_clients(self, client, devadmin, num_acs):
-        ac_count = 0
-        for x in range(num_acs):
-            self.stdout.write(f"Creating ACs...{ac_count / num_acs * 100}%", ending="\r")
-            ac = client.create_arenaclient(
-                "aiarenaclient-" + str(x), "aiarenaclient-" + str(x) + "@dev.aiarena.net", devadmin.id
-            )
-            # if token is None it will generate a new one, otherwise it will use the one specified
-            Token.objects.create(user=ac, key=str(x))
-
-    def create_game_races(self):
-        BotRace.create_all_races()
-        terran = BotRace.objects.get(label="T")
-        zerg = BotRace.objects.get(label="Z")
-        protoss = BotRace.objects.get(label="P")
-        return protoss, terran, zerg
