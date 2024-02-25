@@ -118,7 +118,13 @@ class TestingClient:
         return GameMode.objects.get(name=name, game_id=game_id)
 
     def create_competition(
-        self, name: str, type: str, game_mode_id: int, playable_race_ids=None, require_trusted_infrastructure=True
+        self,
+        name: str,
+        type: str,
+        game_mode_id: int,
+        playable_race_ids=None,
+        require_trusted_infrastructure=True,
+        **kwargs,
     ) -> Competition:
         if playable_race_ids is None:
             playable_race_ids = {}
@@ -134,6 +140,7 @@ class TestingClient:
                 "game_mode": game_mode_id,
                 "playable_races": playable_race_ids,
                 "require_trusted_infrastructure": require_trusted_infrastructure,
+                **kwargs,
             },
         )
 
