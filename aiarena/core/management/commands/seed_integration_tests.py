@@ -15,6 +15,10 @@ from aiarena.core.tests.testing_utils import (
 
 
 class Command(BaseCommand):
+    """
+    This command is intended for use alongside the integration tests found at /aiarena/api/arenaclient/integration_tests
+    """
+
     help = "A convenience command to seed the database with initial data for arena client integration tests."
 
     _DEFAULT_ARENACLIENTS_TO_GENERATE = 10
