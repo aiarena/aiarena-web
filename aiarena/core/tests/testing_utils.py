@@ -1,7 +1,11 @@
+from django.core.files import File
 from django.test import Client
 from django.urls import reverse
 
-from aiarena.core.models import ArenaClient, Bot, Competition, Map, MapPool, Match, User
+from rest_framework.authtoken.models import Token
+
+from aiarena.core.models import ArenaClient, Bot, Competition, CompetitionParticipation, Map, MapPool, Match, User
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
 
@@ -28,6 +32,51 @@ class TestAssetPaths:
     test_arenaclient_log_path = "aiarena/core/tests/test-media/test_arenaclient_log.zip"
     test_replay_path = "aiarena/core/tests/test-media/testReplay.SC2Replay"
     test_map_path = "aiarena/core/tests/test-media/AutomatonLE.SC2Map"
+
+
+# These utility methods are placed here isntead of in the TestingClient, as the TestingClient operates through the
+# Django admin interface. This is done to make clear that these methods operate in a different manner.
+# It's possible that the TestingClient should be refactored to operate in the way these methods do, instead of using
+# the admin interface
+
+
+def create_game_races():
+    BotRace.create_all_races()
+    terran = BotRace.objects.get(label="T")
+    zerg = BotRace.objects.get(label="Z")
+    protoss = BotRace.objects.get(label="P")
+    return protoss, terran, zerg
+
+
+def create_bot_for_competition(
+    competition: Competition, for_user: User, bot_name: str, bot_type: str, bot_race: BotRace
+):
+    with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip:
+        bot = Bot.objects.create(
+            user=for_user, name=bot_name, plays_race=bot_race, type=bot_type, bot_zip=File(bot_zip)
+        )
+        CompetitionParticipation.objects.create(competition=competition, bot=bot)
+
+
+def create_arena_clients_with_matching_tokens(stdout, client, num_acs, for_user):
+    ac_count = 0
+    for x in range(num_acs):
+        stdout.write(f"Creating ACs...{ac_count / num_acs * 100}%", ending="\r")
+        ac = client.create_arenaclient(
+            "aiarenaclient-" + str(x), "aiarenaclient-" + str(x) + "@dev.aiarena.net", for_user.id
+        )
+        Token.objects.create(user=ac, key=str(x))
+
+    stdout.write("Creating ACs...100%")
+
+
+def create_open_competition_with_map(client, name: str, type: str, game_mode_id: int, **competition_kwargs):
+    competition = client.create_competition(name, type, game_mode_id, **competition_kwargs)
+    with open(TestAssetPaths.test_map_path, "rb") as map:
+        map = Map.objects.create(name="test_map1", file=File(map), game_mode_id=game_mode_id)
+        map.competitions.add(competition)
+    client.open_competition(competition.id)
+    return competition
 
 
 class TestingClient:
@@ -118,7 +167,13 @@ class TestingClient:
         return GameMode.objects.get(name=name, game_id=game_id)
 
     def create_competition(
-        self, name: str, type: str, game_mode_id: int, playable_race_ids=None, require_trusted_infrastructure=True
+        self,
+        name: str,
+        type: str,
+        game_mode_id: int,
+        playable_race_ids=None,
+        require_trusted_infrastructure=True,
+        **kwargs,
     ) -> Competition:
         if playable_race_ids is None:
             playable_race_ids = {}
@@ -134,6 +189,7 @@ class TestingClient:
                 "game_mode": game_mode_id,
                 "playable_races": playable_race_ids,
                 "require_trusted_infrastructure": require_trusted_infrastructure,
+                **kwargs,
             },
         )
 
