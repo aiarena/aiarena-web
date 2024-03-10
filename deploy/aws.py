@@ -295,7 +295,7 @@ def get_network_configuration():
                 physical_name(PROJECT_NAME, "PublicSubnetZoneB"),
             ],
             "securityGroups": [physical_name(PROJECT_NAME, "ECSTaskSecurityGroup")],
-            "assignPublicIp": "ENABLED",
+            "assignPublicIp": "DISABLED",
         }
     }
 
@@ -577,6 +577,9 @@ class ApplicationUpdater:
                 "minimumHealthyPercent": match.min_percent,
             },
         }
+
+        if match.add_network_configuration:
+            conf["network-configuration"] = get_network_configuration()
 
         grace = match.health_check_grace_sec
         if grace is not None:
