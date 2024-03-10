@@ -295,7 +295,7 @@ def get_network_configuration():
                 physical_name(PROJECT_NAME, "PublicSubnetZoneB"),
             ],
             "securityGroups": [physical_name(PROJECT_NAME, "ECSTaskSecurityGroup")],
-            "assignPublicIp": "DISABLED",
+            "assignPublicIp": "ENABLE",
         }
     }
 
