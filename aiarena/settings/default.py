@@ -40,6 +40,8 @@ GRAPPELLI_INDEX_DASHBOARD = "aiarena.frontend.dashboard.CustomIndexDashboard"
 
 INTERNAL_IPS = ["127.0.0.1"]
 
+BUILD_NUMBER = os.environ.get("BUILD_NUMBER", "local")
+
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 

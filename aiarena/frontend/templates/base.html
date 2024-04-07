@@ -167,6 +167,7 @@
                         <li>Matches (24h): {{ match_count_24h }}</li>
                         <li><a href="{% url 'arenaclients' %}">Arena Clients</a>: {{ arenaclients }}</li>
                         {% endcache %}
+                        <li>Build: {{ aiarena_settings.BUILD_NUMBER }}</li>
                     </ul>
                 </li>
 

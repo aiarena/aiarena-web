@@ -122,7 +122,6 @@ AWS_PRIVATE_LOCATION = "private-media/"
 
 # Sentry configuration
 SENTRY_DSN = os.environ.get("SENTRY_DSN")
-BUILD_NUMBER = os.environ.get("BUILD_NUMBER")
 if SENTRY_DSN:
     sentry_kwargs = {
         "dsn": SENTRY_DSN,  # noqa: F405
@@ -131,7 +130,7 @@ if SENTRY_DSN:
             DjangoIntegration(),
             RedisIntegration(),
         ],
-        "release": BUILD_NUMBER,
+        "release": BUILD_NUMBER,  # noqa: F405
         "send_default_pii": True,
         # https://docs.sentry.io/performance/distributed-tracing/#python
         "traces_sample_rate": 0.0025,  # 0.25%
