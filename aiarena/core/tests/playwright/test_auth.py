@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.playwright]
 def test_login(page: Page, bh: BrowserHelper, user, admin_user):
     page.goto(bh.reverse("login"))
     page.get_by_label("Username:").fill("billy")
-    page.get_by_label("Password:").fill("guest1")
+    page.get_by_label("Password:").fill("guest")
     page.get_by_role("button", name="Log in").click()
     expect(page.locator("#sidebar-items")).to_contain_text("Logged in: billy")
 
