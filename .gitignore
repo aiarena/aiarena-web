@@ -23,4 +23,6 @@ coverage-reports
 
 cloudformation-default.yaml
 
+test-results/
+
 testtest11.py

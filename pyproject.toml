@@ -18,3 +18,9 @@ section-order = ["future", "standard-library", "django", "third-party", "first-p
 
 [tool.ruff.isort.sections]
 "django" = ["django"]
+
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "aiarena.settings"
+addpots = "--tb=short --showlocals --browser=chromium"
+markers = ["playwright"]
