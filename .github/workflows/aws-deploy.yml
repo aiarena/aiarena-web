@@ -17,6 +17,8 @@ on:
 permissions:
   id-token: write
   contents: read
+  checks: write
+  pull-requests: write
 
 env:
   DJANGO_ENVIRONMENT: DEVELOPMENT
@@ -95,7 +97,6 @@ jobs:
           fail_on: "nothing"
           files: |
             test-results/pytest-regular.xml
-
 
   tests-playwright:
     runs-on: ubuntu-latest
