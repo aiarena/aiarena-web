@@ -153,7 +153,7 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
         if: always()
         with:
-          check_name: "Test Report"
+          check_name: "Playwright test Report"
           fail_on: "nothing"
           files: |
             test-results/pytest-playwright.xml
