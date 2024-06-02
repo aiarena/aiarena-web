@@ -18,7 +18,7 @@ from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
-from django.urls import path, re_path
+from django.urls import path
 from django.views.generic.base import TemplateView
 
 import debug_toolbar
@@ -57,9 +57,9 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("select2/", include("django_select2.urls")),
     path("admin/doc/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
-    re_path(r"^accounts/", include("registration.backends.default.urls")),
-    re_path(r"^accounts/", include("django.contrib.auth.urls")),
-    re_path(r"^$", core_views.Index.as_view(), name="home"),
+    path("accounts/", include("registration.backends.default.urls")),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("", core_views.Index.as_view(), name="home"),
     path("api/", include("aiarena.api.urls")),
     path("results/", core_views.RecentResults.as_view(), name="results"),
     path("arenaclients/", core_views.ArenaClients.as_view(), name="arenaclients"),
@@ -99,7 +99,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("botupload/", core_views.BotUpload.as_view(), name="botupload"),
     path("requestmatch/", core_views.RequestMatch.as_view(), name="requestmatch"),
     path("avatar/", include("avatar.urls")),
-    re_path(r"^swagger/$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("finance/", core_views.project_finance, name="finance"),
     path("profile/", core_views.UserProfile.as_view(), name="profile"),
     path("profile/edit/", core_views.UserProfileUpdate.as_view(), name="profile_edit"),
@@ -108,10 +108,10 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("profile/unlink/patreon/", core_views.UnlinkPatreonView.as_view(), name="unlink_patreon"),
     path("notifications/", include("django_nyt.urls")),
     path("wiki/", include("wiki.urls")),
-    re_path(r"^discord/", include("discord_bind.urls")),
-    re_path(r"^patreon/", include("aiarena.patreon.urls")),
-    re_path("^sitemap\.xml/$", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
-    re_path("^robots\.txt", include("robots.urls")),
+    path("discord/", include("discord_bind.urls")),
+    path("patreon/", include("aiarena.patreon.urls")),
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
+    path("robots.txt", include("robots.urls")),
     path("private-media/", include(private_storage.urls)),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
