@@ -26,7 +26,7 @@ from constance import config
 from discord_bind.models import DiscordUser
 from django_filters.widgets import RangeWidget
 from django_select2.forms import Select2Widget
-from django_tables2 import RequestConfig
+from django_tables2 import LazyPaginator, RequestConfig
 from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
@@ -536,7 +536,7 @@ class BotDetail(DetailView):
         if not (self.request.user == self.object.user or self.request.user.is_staff):
             result_table.exclude.append("match_log")
         # Update table based on request information
-        RequestConfig(self.request, paginate={"per_page": 30}).configure(result_table)
+        RequestConfig(self.request, paginate={"per_page": 30, "paginator_class": LazyPaginator}).configure(result_table)
         context["results_table"] = result_table
         context["filter"] = result_filter
 
