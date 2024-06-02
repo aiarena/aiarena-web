@@ -27,7 +27,7 @@ docutils<0.17
 drf-yasg @ git+https://github.com/max-muoto/drf-yasg.git@68cc6fa76848d1d0194d847569009eb603e516b2
 matplotlib==3.8.0
 numpy==1.26.3
-pandas==1.5.3
+pandas==2.2.2
 pinax-theme-bootstrap==8.0.1
 psycopg2-binary==2.9.9
 pytz==2022.7.1
