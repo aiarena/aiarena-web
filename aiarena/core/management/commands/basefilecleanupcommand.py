@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 
-class BaseFileCleanupCommand(BaseCommand):
+class Command(BaseCommand):
     _DEFAULT_DAYS_LOOKBACK = 30
 
     def add_arguments(self, parser):
