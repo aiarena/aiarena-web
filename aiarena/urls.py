@@ -110,7 +110,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("wiki/", include("wiki.urls")),
     path("discord/", include("discord_bind.urls")),
     path("patreon/", include("aiarena.patreon.urls")),
-    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
+    path("sitemap.xml/", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", include("robots.urls")),
     path("private-media/", include(private_storage.urls)),
 ] + static(
