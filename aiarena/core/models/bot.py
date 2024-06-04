@@ -202,7 +202,7 @@ class Bot(models.Model, LockableModelMixin):
         return Bot.objects.filter(competition_participations__active=True).order_by("?").first()
 
     def get_random_active_excluding_self(self):
-        from ..api import Bots  # avoid circular reference
+        from ..services import Bots  # avoid circular reference
 
         if Bots.get_active().count() <= 1:
             raise RuntimeError("I am the only bot.")
@@ -210,7 +210,7 @@ class Bot(models.Model, LockableModelMixin):
 
     def get_active_excluding_self(self):
         """Returns a queryset of active bots, excluding this one."""
-        from ..api import Bots  # avoid circular reference
+        from ..services import Bots  # avoid circular reference
 
         if Bots.get_active().count() <= 1:
             raise RuntimeError("I am the only bot.")

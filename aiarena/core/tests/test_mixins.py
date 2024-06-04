@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
-from aiarena.core.api import Matches
+from aiarena.core.services import Matches
 from aiarena.core.models import (
     ArenaClient,
     Bot,
@@ -241,7 +241,7 @@ class BaseTestMixin:
         self._generate_match_activity()
 
         # generate a bot match request to ensure it doesn't bug things out
-        from aiarena.core.api import Bots  # avoid circular reference
+        from aiarena.core.services import Bots  # avoid circular reference
 
         game_mode = GameMode.objects.get(name="Melee")
         bots = Bots.get_available(Bot.objects.all())

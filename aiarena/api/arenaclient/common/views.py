@@ -13,7 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import APIException, PermissionDenied
 from rest_framework.response import Response
 
-from aiarena.core.api import BotStatistics
+from aiarena.core.services import BotStatistics
 from aiarena.core.models import (
     BotCrashLimitAlert,
     CompetitionParticipation,

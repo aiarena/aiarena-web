@@ -9,7 +9,7 @@ import jsonschema
 from constance import config
 from rest_framework.authtoken.models import Token
 
-from aiarena.core.api import Matches
+from aiarena.core.services import Matches
 from aiarena.core.models import (
     ArenaClient,
     Bot,

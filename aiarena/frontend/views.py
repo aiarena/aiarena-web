@@ -31,10 +31,10 @@ from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 
-from aiarena.core.api import Matches
-from aiarena.core.api.internal.statistics.elo_graphs_generator import EloGraphsGenerator
-from aiarena.core.api.ladders import Ladders
-from aiarena.core.api.maps import Maps
+from aiarena.core.services import Matches
+from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
+from aiarena.core.services.ladders import Ladders
+from aiarena.core.services.maps import Maps
 from aiarena.core.d_utils import filter_tags
 from aiarena.core.models import (
     ArenaClient,

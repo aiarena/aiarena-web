@@ -7,7 +7,7 @@ from django.test import TestCase, TransactionTestCase
 from constance import config
 
 from aiarena import settings
-from aiarena.core.api import Matches
+from aiarena.core.services import Matches
 from aiarena.core.models import (
     Bot,
     Competition,

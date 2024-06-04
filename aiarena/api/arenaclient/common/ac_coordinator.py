@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from django.core.cache import cache
 from django.dispatch import receiver
 
-from aiarena.core.api.competitions import Competitions
+from aiarena.core.services.competitions import Competitions
 
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ from django.db.models.signals import pre_save
 
 from constance import config
 
-from aiarena.core.api import Matches
+from aiarena.core.services import Matches
 from aiarena.core.exceptions import (
     CompetitionClosing,
     CompetitionPaused,

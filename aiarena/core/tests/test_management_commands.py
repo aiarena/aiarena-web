@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from constance import config
 
-from aiarena.core.api import Ladders
+from aiarena.core.services import Ladders
 from aiarena.core.management.commands import cleanupresultfiles
 from aiarena.core.models import (
     Bot,

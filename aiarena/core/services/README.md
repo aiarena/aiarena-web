@@ -1,4 +1,4 @@
-# aiarena/core/api
+# aiarena/core/services
 This section approximates a service layer pattern.
 
 Ideally the aim is to eventually have all requests from external sources (frontend, webapi, etc) go through this API layer.
