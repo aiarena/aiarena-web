@@ -5,3 +5,5 @@ from .competitions import Competitions
 from .ladders import Ladders
 from .maps import Maps
 from .matches import Matches
+from .internal.match_requests import MatchRequestException
+from .match_requests import MatchRequests

@@ -1,17 +1,12 @@
 import logging
 import random
 
+from constance import config
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
-
-from constance import config
 from rest_framework.exceptions import APIException
 
-from aiarena.core.services import Bots
-from aiarena.core.services.competitions import Competitions
-from aiarena.core.services.internal.matches import cancel, CancelResult, create
-from aiarena.core.services.maps import Maps
 from aiarena.core.exceptions import (
     CompetitionClosing,
     CompetitionPaused,
@@ -28,10 +23,10 @@ from aiarena.core.models import (
     Match,
     MatchParticipation,
     Result,
-    Round,
-)
-from aiarena.core.models.game_mode import GameMode
-
+    Round, )
+from aiarena.core.services import Bots
+from aiarena.core.services.competitions import Competitions
+from aiarena.core.services.internal.matches import cancel, CancelResult, create
 
 logger = logging.getLogger(__name__)
 
@@ -49,25 +44,6 @@ class Matches:
                     raise Exception('A result already exists for match "%s"' % match_id)
         except Match.DoesNotExist:
             raise Exception('Match "%s" does not exist' % match_id)
-
-    @staticmethod
-    def request_match(user, bot, opponent, map: Map = None, game_mode: GameMode = None):
-        # if map is none, a game mode must be supplied and a random map gets chosen
-        if map is None:
-            if game_mode:
-                map = Maps.random_of_game_mode(game_mode)
-            else:
-                map = Map.objects.first()  # maybe improve this logic,  perhaps a random map and not just the first one
-        return create(
-            None,
-            map,
-            bot,
-            opponent,
-            user,
-            bot1_update_data=False,
-            bot2_update_data=False,
-            require_trusted_arenaclient=False,
-        )
 
     # todo: have arena client check in with web service in order to delay this
     @staticmethod
