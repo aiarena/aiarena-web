@@ -5,7 +5,6 @@ from django.db import models, transaction
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
@@ -127,31 +126,6 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
         SUCCESS = 1
         MATCH_DOES_NOT_EXIST = 3
         RESULT_ALREADY_EXISTS = 2
-
-    def cancel(self, requesting_user):
-        from . import Result
-
-        with transaction.atomic():
-            try:
-                # do this to lock the record
-                # select_related() for the round data
-                match = Match.objects.select_related("round").select_for_update(of=("self",)).get(pk=self.id)
-            except Match.DoesNotExist:
-                return Match.CancelResult.MATCH_DOES_NOT_EXIST  # should basically not happen, but just in case
-
-            if Result.objects.filter(match=match).count() > 0:
-                return Match.CancelResult.RESULT_ALREADY_EXISTS
-
-            Result.objects.create(match=match, type="MatchCancelled", game_steps=0, submitted_by=requesting_user)
-
-            if not match.started:
-                now = timezone.now()
-                match.started = now
-                match.first_started = now
-                match.save()
-
-            if match.round is not None:
-                match.round.update_if_completed()
 
     def get_absolute_url(self):
         return reverse("match", kwargs={"pk": self.pk})

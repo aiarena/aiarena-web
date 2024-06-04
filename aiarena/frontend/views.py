@@ -32,6 +32,7 @@ from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 
 from aiarena.core.services import Matches
+from aiarena.core.services.internal.matches import cancel
 from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
 from aiarena.core.services.ladders import Ladders
 from aiarena.core.services.maps import Maps
@@ -129,7 +130,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
         if matches:
             message = "Matches " if len(matches) > 1 else "Match "
             for match in matches:
-                result = match.cancel(request.user)
+                result = cancel(match.id, request.user)
                 if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
                     raise Exception('Match "%s" does not exist' % match.id)
                 elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
