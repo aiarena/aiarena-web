@@ -122,11 +122,6 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
 
             return match
 
-    class CancelResult(Enum):
-        SUCCESS = 1
-        MATCH_DOES_NOT_EXIST = 3
-        RESULT_ALREADY_EXISTS = 2
-
     def get_absolute_url(self):
         return reverse("match", kwargs={"pk": self.pk})
 

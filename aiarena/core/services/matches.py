@@ -10,7 +10,7 @@ from rest_framework.exceptions import APIException
 
 from aiarena.core.services import Bots
 from aiarena.core.services.competitions import Competitions
-from aiarena.core.services.internal.matches import cancel
+from aiarena.core.services.internal.matches import cancel, CancelResult
 from aiarena.core.services.maps import Maps
 from aiarena.core.exceptions import (
     CompetitionClosing,
@@ -43,9 +43,9 @@ class Matches:
             with transaction.atomic():
                 match = Match.objects.select_for_update().get(pk=match_id)
                 result = cancel(match.id, None)
-                if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
+                if result == CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
                     raise Exception('Match "%s" does not exist' % match_id)
-                elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
+                elif result == CancelResult.RESULT_ALREADY_EXISTS:
                     raise Exception('A result already exists for match "%s"' % match_id)
         except Match.DoesNotExist:
             raise Exception('Match "%s" does not exist' % match_id)
