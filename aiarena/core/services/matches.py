@@ -10,7 +10,7 @@ from rest_framework.exceptions import APIException
 
 from aiarena.core.services import Bots
 from aiarena.core.services.competitions import Competitions
-from aiarena.core.services.internal.matches import cancel, CancelResult
+from aiarena.core.services.internal.matches import cancel, CancelResult, create
 from aiarena.core.services.maps import Maps
 from aiarena.core.exceptions import (
     CompetitionClosing,
@@ -58,7 +58,7 @@ class Matches:
                 map = Maps.random_of_game_mode(game_mode)
             else:
                 map = Map.objects.first()  # maybe improve this logic,  perhaps a random map and not just the first one
-        return Match.create(
+        return create(
             None,
             map,
             bot,
@@ -326,7 +326,7 @@ class Matches:
                 .exclude(id__in=already_processed_participants)
             )
             for participant2 in active_participants_in_div:
-                Match.create(
+                create(
                     new_round,
                     random.choice(active_maps),
                     participant1.bot,

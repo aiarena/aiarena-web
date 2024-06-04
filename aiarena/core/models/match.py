@@ -77,51 +77,6 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
         else:
             return "Queued"
 
-    @staticmethod
-    def create(
-        round,
-        map,
-        bot1,
-        bot2,
-        requested_by=None,
-        bot1_use_data=None,
-        bot1_update_data=None,
-        bot2_use_data=None,
-        bot2_update_data=None,
-        require_trusted_arenaclient=True,
-    ):
-        with transaction.atomic():
-            if bot1_use_data is None:
-                bot1_use_data = bot1.bot_data_enabled
-            if bot1_update_data is None:
-                bot1_update_data = bot1.bot_data_enabled
-            if bot2_use_data is None:
-                bot2_use_data = bot2.bot_data_enabled
-            if bot2_update_data is None:
-                bot2_update_data = bot2.bot_data_enabled
-            match = Match.objects.create(
-                map=map, round=round, requested_by=requested_by, require_trusted_arenaclient=require_trusted_arenaclient
-            )
-            # create match participations
-            from .match_participation import MatchParticipation  # avoid circular reference
-
-            MatchParticipation.objects.create(
-                match=match,
-                participant_number=1,
-                bot=bot1,
-                use_bot_data=bot1_use_data,
-                update_bot_data=bot1_update_data,
-            )
-            MatchParticipation.objects.create(
-                match=match,
-                participant_number=2,
-                bot=bot2,
-                use_bot_data=bot2_use_data,
-                update_bot_data=bot2_update_data,
-            )
-
-            return match
-
     def get_absolute_url(self):
         return reverse("match", kwargs={"pk": self.pk})
 
