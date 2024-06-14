@@ -32,6 +32,7 @@ from aiarena.core.models import (
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
+from aiarena.core.services import Matches
 from aiarena.patreon.models import PatreonAccountBind, PatreonUnlinkedDiscordUID
 
 
@@ -369,14 +370,9 @@ class MatchAdmin(admin.ModelAdmin):
     def cancel_matches(self, request, queryset):
         """
         Registers a MatchCancelled result for the selected matches.
-
         """
         for match in queryset:
-            result = match.cancel(request.user)
-            if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
-                raise Exception('Match "%s" does not exist' % match.id)
-            elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
-                raise Exception('A result already exists for match "%s"' % match.id)
+            Matches.cancel(match.id)
 
     cancel_matches.short_description = "Cancel selected matches"
 

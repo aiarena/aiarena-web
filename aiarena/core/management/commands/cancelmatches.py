@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from aiarena.core.api import Matches
 from aiarena.core.models import Match
+from aiarena.core.services import Matches
 
 
 class Command(BaseCommand):

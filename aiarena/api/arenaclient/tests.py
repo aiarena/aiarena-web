@@ -9,7 +9,6 @@ import jsonschema
 from constance import config
 from rest_framework.authtoken.models import Token
 
-from aiarena.core.api import Matches
 from aiarena.core.models import (
     ArenaClient,
     Bot,
@@ -25,6 +24,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
+from aiarena.core.services import MatchRequests
 from aiarena.core.tests.test_mixins import LoggedInMixin, MatchReadyMixin
 from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5
@@ -186,7 +186,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual("no_game_available", response.data["detail"].code)
 
-        Matches.request_match(self.regularUser2, bot1, bot1.get_random_excluding_self(), game_mode=game_mode)
+        MatchRequests.request_match(self.regularUser2, bot1, bot1.get_random_excluding_self(), game_mode=game_mode)
 
         # now we should be able to get a match - the requested one
         response = self._post_to_matches()
@@ -272,7 +272,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual("No game available for client.", response.data["detail"])
 
-        Matches.request_match(
+        MatchRequests.request_match(
             self.regularUser2, bot1, bot1.get_random_active_excluding_self(), game_mode=GameMode.objects.first()
         )
 
@@ -378,7 +378,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._check_hashes(bot1, bot2, match["id"], 1)
 
         # test that requested matches don't update bot_data
-        match5 = Matches.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get())
+        match5 = MatchRequests.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get())
         self._post_to_results_bot_datas_set_1(match5.id, "Player1Win")
 
         # check hashes - nothing should have changed

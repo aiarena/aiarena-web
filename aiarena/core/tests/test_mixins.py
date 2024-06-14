@@ -8,7 +8,6 @@ from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
-from aiarena.core.api import Matches
 from aiarena.core.models import (
     ArenaClient,
     Bot,
@@ -21,6 +20,7 @@ from aiarena.core.models import (
     WebsiteUser,
 )
 from aiarena.core.models.bot_race import BotRace
+from aiarena.core.services import MatchRequests
 from aiarena.core.tests.testing_utils import TestAssetPaths
 
 
@@ -241,20 +241,20 @@ class BaseTestMixin:
         self._generate_match_activity()
 
         # generate a bot match request to ensure it doesn't bug things out
-        from aiarena.core.api import Bots  # avoid circular reference
+        from aiarena.core.services import Bots  # avoid circular reference
 
         game_mode = GameMode.objects.get(name="Melee")
         bots = Bots.get_available(Bot.objects.all())
-        Matches.request_match(
+        MatchRequests.request_match(
             self.regularUser2, bots[0], bots[0].get_random_active_excluding_self(), game_mode=game_mode
         )
 
         # generate match requests from regularUser1
         bot = Bot.get_random_active()
-        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
-        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
+        MatchRequests.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
+        MatchRequests.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
         bot = Bot.get_random_active()
-        Matches.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
+        MatchRequests.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
 
         self.test_client.logout()  # child tests can login if they require
 

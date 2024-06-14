@@ -8,9 +8,6 @@ from django.utils import timezone
 from constance import config
 from rest_framework.exceptions import APIException
 
-from aiarena.core.api import Bots
-from aiarena.core.api.competitions import Competitions
-from aiarena.core.api.maps import Maps
 from aiarena.core.exceptions import (
     CompetitionClosing,
     CompetitionPaused,
@@ -29,7 +26,9 @@ from aiarena.core.models import (
     Result,
     Round,
 )
-from aiarena.core.models.game_mode import GameMode
+from aiarena.core.services import Bots
+from aiarena.core.services.competitions import Competitions
+from aiarena.core.services.internal.matches import CancelResult, cancel, create
 
 
 logger = logging.getLogger(__name__)
@@ -41,32 +40,13 @@ class Matches:
         try:
             with transaction.atomic():
                 match = Match.objects.select_for_update().get(pk=match_id)
-                result = match.cancel(None)
-                if result == Match.CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
+                result = cancel(match.id, None)
+                if result == CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
                     raise Exception('Match "%s" does not exist' % match_id)
-                elif result == Match.CancelResult.RESULT_ALREADY_EXISTS:
+                elif result == CancelResult.RESULT_ALREADY_EXISTS:
                     raise Exception('A result already exists for match "%s"' % match_id)
         except Match.DoesNotExist:
             raise Exception('Match "%s" does not exist' % match_id)
-
-    @staticmethod
-    def request_match(user, bot, opponent, map: Map = None, game_mode: GameMode = None):
-        # if map is none, a game mode must be supplied and a random map gets chosen
-        if map is None:
-            if game_mode:
-                map = Maps.random_of_game_mode(game_mode)
-            else:
-                map = Map.objects.first()  # maybe improve this logic,  perhaps a random map and not just the first one
-        return Match.create(
-            None,
-            map,
-            bot,
-            opponent,
-            user,
-            bot1_update_data=False,
-            bot2_update_data=False,
-            require_trusted_arenaclient=False,
-        )
 
     # todo: have arena client check in with web service in order to delay this
     @staticmethod
@@ -325,7 +305,7 @@ class Matches:
                 .exclude(id__in=already_processed_participants)
             )
             for participant2 in active_participants_in_div:
-                Match.create(
+                create(
                     new_round,
                     random.choice(active_maps),
                     participant1.bot,
