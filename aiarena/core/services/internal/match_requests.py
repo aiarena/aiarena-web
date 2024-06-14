@@ -2,12 +2,8 @@ from constance import config
 
 from aiarena.core.models import Map
 from aiarena.core.services import Maps
+from aiarena.core.services.exceptions import MatchRequestException
 from aiarena.core.services.internal.matches import create
-
-
-class MatchRequestException(Exception):
-    def __init__(self, message):
-        super().__init__(message)
 
 
 def _get_map(map_selection_type, map_pool, chosen_map):
