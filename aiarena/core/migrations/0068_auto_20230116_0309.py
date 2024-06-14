@@ -2,8 +2,8 @@
 
 from django.db import migrations
 
-from aiarena.core.services import Ladders
 from aiarena.core.models import Competition, CompetitionParticipation, Match
+from aiarena.core.services import Ladders
 
 
 def mark_participated_in_most_recent_round(apps, schema_editor):

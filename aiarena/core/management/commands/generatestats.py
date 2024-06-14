@@ -3,8 +3,8 @@ from django.db import transaction
 
 from django_pglocks import advisory_lock
 
-from aiarena.core.services.bot_statistics import BotStatistics
 from aiarena.core.models import Competition, CompetitionParticipation
+from aiarena.core.services.bot_statistics import BotStatistics
 
 
 class Command(BaseCommand):

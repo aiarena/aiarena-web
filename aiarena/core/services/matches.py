@@ -1,10 +1,11 @@
 import logging
 import random
 
-from constance import config
 from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
+
+from constance import config
 from rest_framework.exceptions import APIException
 
 from aiarena.core.exceptions import (
@@ -23,10 +24,12 @@ from aiarena.core.models import (
     Match,
     MatchParticipation,
     Result,
-    Round, )
+    Round,
+)
 from aiarena.core.services import Bots
 from aiarena.core.services.competitions import Competitions
-from aiarena.core.services.internal.matches import cancel, CancelResult, create
+from aiarena.core.services.internal.matches import CancelResult, cancel, create
+
 
 logger = logging.getLogger(__name__)
 

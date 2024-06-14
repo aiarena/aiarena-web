@@ -31,10 +31,6 @@ from private_storage.views import PrivateStorageDetailView
 from rest_framework.authtoken.models import Token
 from wiki.editors import getEditor
 
-from aiarena.core.services import MatchRequests
-from aiarena.core.services.internal.matches import cancel, CancelResult
-from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
-from aiarena.core.services.ladders import Ladders
 from aiarena.core.d_utils import filter_tags
 from aiarena.core.models import (
     ArenaClient,
@@ -56,7 +52,10 @@ from aiarena.core.models import (
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.relative_result import RelativeResult
 from aiarena.core.s3_helpers import get_file_url_s3_hack
-from aiarena.core.services import MatchRequestException
+from aiarena.core.services import MatchRequestException, MatchRequests
+from aiarena.core.services.internal.matches import CancelResult, cancel
+from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
+from aiarena.core.services.ladders import Ladders
 from aiarena.core.tasks import celery_exception_test
 from aiarena.core.utils import parse_tags
 from aiarena.frontend.templatetags.core_filters import format_elo_change, result_color_class, step_time_color
@@ -1484,17 +1483,26 @@ class RequestMatch(LoginRequiredMixin, FormView):
             map_pool = form.cleaned_data["map_pool"]
             chosen_map = form.cleaned_data["map"]
 
-            match_list = MatchRequests.request_matches(self.request.user.websiteuser, bot1, opponent, match_count, matchup_race, matchup_type, map_selection_type, map_pool, chosen_map)
+            match_list = MatchRequests.request_matches(
+                self.request.user.websiteuser,
+                bot1,
+                opponent,
+                match_count,
+                matchup_race,
+                matchup_type,
+                map_selection_type,
+                map_pool,
+                chosen_map,
+            )
             message = ""
             for match in match_list:
-                message += (
-                    f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
-                )
+                message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>Match {match.id}</a> created.<br/>"
             messages.success(self.request, mark_safe(message))
             return super().form_valid(form)
         except MatchRequestException as e:
             messages.error(self.request, str(e))
             return self.render_to_response(self.get_context_data(form=form))
+
 
 def http_500(request):
     celery_exception_test.delay()

@@ -373,6 +373,7 @@ class MatchAdmin(admin.ModelAdmin):
         """
         for match in queryset:
             Matches.cancel(match.id)
+
     cancel_matches.short_description = "Cancel selected matches"
 
 

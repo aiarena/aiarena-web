@@ -1,7 +1,6 @@
 import logging
-from enum import Enum
 
-from django.db import models, transaction
+from django.db import models
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
 from django.urls import reverse

@@ -17,8 +17,9 @@ def _get_map(map_selection_type, map_pool, chosen_map):
         return chosen_map
 
 
-def handle_request_matches(requested_by_user, bot1, opponent, match_count, matchup_race, matchup_type, map_selection_type, map_pool, chosen_map):
-
+def handle_request_matches(
+    requested_by_user, bot1, opponent, match_count, matchup_race, matchup_type, map_selection_type, map_pool, chosen_map
+):
     if not config.ALLOW_REQUESTED_MATCHES:
         raise MatchRequestException("Sorry. Requested matches are currently disabled.")
     if bot1 == opponent:
@@ -33,9 +34,7 @@ def handle_request_matches(requested_by_user, bot1, opponent, match_count, match
             opponent = (
                 bot1.get_random_active_excluding_self()
                 if matchup_race == "any"
-                else bot1.get_active_excluding_self.filter(
-                    plays_race=matchup_race
-                )
+                else bot1.get_active_excluding_self.filter(plays_race=matchup_race)
             )
 
             if opponent is None:
@@ -47,7 +46,7 @@ def handle_request_matches(requested_by_user, bot1, opponent, match_count, match
                     user=requested_by_user,
                     opponent=opponent,
                     map=_get_map(map_selection_type, map_pool, chosen_map),
-                    game_mode=None
+                    game_mode=None,
                 )
             )
     else:  # specific_matchup
@@ -58,7 +57,7 @@ def handle_request_matches(requested_by_user, bot1, opponent, match_count, match
                     user=requested_by_user,
                     opponent=opponent,
                     map=_get_map(map_selection_type, map_pool, chosen_map),
-                    game_mode=None
+                    game_mode=None,
                 )
             )
     return match_list

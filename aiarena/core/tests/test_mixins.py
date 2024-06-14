@@ -8,7 +8,6 @@ from rest_framework.authtoken.models import Token
 
 from aiarena import settings
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
-from aiarena.core.services import MatchRequests
 from aiarena.core.models import (
     ArenaClient,
     Bot,
@@ -21,6 +20,7 @@ from aiarena.core.models import (
     WebsiteUser,
 )
 from aiarena.core.models.bot_race import BotRace
+from aiarena.core.services import MatchRequests
 from aiarena.core.tests.testing_utils import TestAssetPaths
 
 

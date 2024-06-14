@@ -9,7 +9,6 @@ import jsonschema
 from constance import config
 from rest_framework.authtoken.models import Token
 
-from aiarena.core.services import MatchRequests
 from aiarena.core.models import (
     ArenaClient,
     Bot,
@@ -25,6 +24,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
+from aiarena.core.services import MatchRequests
 from aiarena.core.tests.test_mixins import LoggedInMixin, MatchReadyMixin
 from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5

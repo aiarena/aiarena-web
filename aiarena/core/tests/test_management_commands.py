@@ -9,7 +9,6 @@ from django.utils import timezone
 
 from constance import config
 
-from aiarena.core.services import Ladders
 from aiarena.core.management.commands import cleanupresultfiles
 from aiarena.core.models import (
     Bot,
@@ -20,6 +19,7 @@ from aiarena.core.models import (
     Result,
     User,
 )
+from aiarena.core.services import Ladders
 from aiarena.core.tests.test_mixins import MatchReadyMixin
 
 

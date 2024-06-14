@@ -7,7 +7,6 @@ from django.test import TestCase, TransactionTestCase
 from constance import config
 
 from aiarena import settings
-from aiarena.core.services import MatchRequests
 from aiarena.core.models import (
     Bot,
     Competition,
@@ -19,6 +18,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
+from aiarena.core.services import MatchRequests
 from aiarena.core.tests.test_mixins import BaseTestMixin, FullDataSetMixin, LoggedInMixin, MatchReadyMixin
 from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5
@@ -148,7 +148,9 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         bot1_tags_list = [_temp_tags, [_temp_tag1]]
         bot2_tags_list = [[_temp_tag1], _temp_tags]
         for i in range(2):
-            MatchRequests.request_match(self.regularUser1, self.regularUser1Bot1, self.staffUser1Bot1, game_mode=game_mode)
+            MatchRequests.request_match(
+                self.regularUser1, self.regularUser1Bot1, self.staffUser1Bot1, game_mode=game_mode
+            )
             match_response, _ = self._send_tags(bot1_tags_list[i], bot2_tags_list[i])
             match = Match.objects.get(id=match_response.data["id"])
             user1 = match.participant1.bot.user

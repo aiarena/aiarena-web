@@ -3,20 +3,20 @@ from enum import Enum
 from django.db import transaction
 from django.utils import timezone
 
-from aiarena.core.models import Match, Result, MatchParticipation
+from aiarena.core.models import Match, MatchParticipation, Result
 
 
 def create(
-        round,
-        map,
-        bot1,
-        bot2,
-        requested_by=None,
-        bot1_use_data=None,
-        bot1_update_data=None,
-        bot2_use_data=None,
-        bot2_update_data=None,
-        require_trusted_arenaclient=True,
+    round,
+    map,
+    bot1,
+    bot2,
+    requested_by=None,
+    bot1_use_data=None,
+    bot1_update_data=None,
+    bot2_use_data=None,
+    bot2_update_data=None,
+    require_trusted_arenaclient=True,
 ):
     with transaction.atomic():
         if bot1_use_data is None:

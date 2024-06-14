@@ -3,6 +3,7 @@ from django.test import TestCase
 from aiarena.core.models import Bot, Map, MapPool
 from aiarena.core.tests.test_mixins import FullDataSetMixin
 
+
 class RequestMatchTestCase(FullDataSetMixin, TestCase):
     def test_request_match_regular_user(self):
         # log in as a regular user
