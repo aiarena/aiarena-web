@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from django.core.cache import cache
 from django.dispatch import receiver
 
+from aiarena.core.models import Result
 from aiarena.core.services.competitions import Competitions
 
 
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
 import logging
 
 from django.db import connection, transaction
-from django.db.models import F
+from django.db.models import Exists, OuterRef
 from django.db.models.signals import pre_save
 
 from constance import config
@@ -87,8 +88,12 @@ class ACCoordinator:
                     # Check for any unfinished matches assigned to this user. If any are present, return that.
                     unfinished_matches = list(
                         Match.objects.only("id", "map")
-                        .filter(started__isnull=False, assigned_to=arenaclient, result__isnull=True)
-                        .order_by(F("round_id").asc())[:1]
+                        .filter(
+                            ~Exists(Result.objects.filter(match=OuterRef("pk"))),
+                            started__isnull=False,
+                            assigned_to=arenaclient,
+                        )
+                        .order_by("round_id")
                     )
                     if len(unfinished_matches) > 0:
                         return unfinished_matches[0]  # todo: re-set started time?
