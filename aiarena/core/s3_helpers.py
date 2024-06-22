@@ -22,6 +22,9 @@ def get_file_url_s3_hack(file, file_name):
     Returns a URL to a file with a content disposition header set, if we're using the S3 backend.
     This is a quick hack and ideally should be refactored to work regardless of the storage backend.
     """
+    if not file:
+        return None
+
     if is_s3_file(file):
         return get_file_s3_url_with_content_disposition(file, file_name)
     else:
