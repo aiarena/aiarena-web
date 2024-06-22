@@ -190,7 +190,7 @@
             </tfoot>
         </table>
     </div>
-    {% if match_participations %}
+    {% if queued_or_in_progress %}
         <div id="bot_matches_anker"></div>
 
         <div class="divider"><span></span><span><h2>Requested or In Progress Matches</h2></span><span></span></div>
@@ -207,7 +207,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for participation in match_participations %}
+            {% for participation in queued_or_in_progress %}
                 <tr>
                     <td>{{ participation.match.as_html_link }}</td>
                     {% for p in participation.match.participants %}

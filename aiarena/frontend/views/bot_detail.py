@@ -1,5 +1,5 @@
 from django import forms
-from django.db.models import F, Prefetch, Q
+from django.db.models import Exists, F, OuterRef, Prefetch, Q
 from django.utils.safestring import mark_safe
 from django.views.generic import DetailView
 
@@ -9,7 +9,7 @@ from django_filters.widgets import RangeWidget
 from django_tables2 import LazyPaginator, RequestConfig
 
 from aiarena.core.d_utils import filter_tags
-from aiarena.core.models import Bot, Competition, MatchParticipation, RelativeResult, Trophy
+from aiarena.core.models import Bot, Competition, MatchParticipation, RelativeResult, Result, Trophy
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.s3_helpers import get_file_url_s3_hack
 from aiarena.frontend.templatetags.core_filters import format_elo_change, result_color_class, step_time_color
@@ -252,12 +252,16 @@ class BotDetail(DetailView):
 
         context["bot_trophies"] = Trophy.objects.filter(bot=self.object)
         context["rankings"] = self.object.competition_participations.all().select_related("competition").order_by("-id")
-        context["match_participations"] = (
+        context["queued_or_in_progress"] = (
             MatchParticipation.objects.only("match")
             .filter(
+                ~Exists(
+                    Result.objects.filter(
+                        match=OuterRef("match_id"),
+                    )
+                ),
                 Q(match__requested_by__isnull=False) | Q(match__assigned_to__isnull=False),
                 bot=self.object,
-                match__result__isnull=True,
             )
             .order_by(F("match__started").asc(nulls_last=True), F("match__id").asc())
             .prefetch_related(
