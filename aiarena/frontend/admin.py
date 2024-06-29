@@ -366,6 +366,12 @@ class MatchAdmin(admin.ModelAdmin):
     search_fields = ["id"]
     actions = ["cancel_matches"]
     list_select_related = ["round", "map", "assigned_to"]
+    raw_id_fields = [
+        "round",
+        "assigned_to",
+        "requested_by",
+        "tags",
+    ]
 
     def cancel_matches(self, request, queryset):
         """
@@ -452,6 +458,11 @@ class ResultAdmin(admin.ModelAdmin):
         "replay_file_has_been_cleaned",
     )
     list_select_related = ["match", "winner", "submitted_by"]
+    raw_id_fields = [
+        "match",
+        "winner",
+        "submitted_by",
+    ]
 
 
 @admin.register(Round)
