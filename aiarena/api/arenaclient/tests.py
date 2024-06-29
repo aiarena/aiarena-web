@@ -39,13 +39,11 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
     def test_get_next_match_not_authorized(self):
         self.test_ac_api_client.set_api_token("")
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 403)
+        self._post_to_matches(expected_code=403)
 
         # create and use a regular user's api token
         self.test_ac_api_client.set_api_token(Token.objects.create(user=self.regularUser1).key)
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 403)
+        self._post_to_matches(expected_code=403)
 
     def test_post_next_match(self):
         # avoid old tests breaking that were pre-this feature
@@ -54,45 +52,38 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.test_client.login(self.staffUser1)
 
         # no current competition
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200, f"{response.status_code} {response.data}")
+        self._post_to_matches(expected_code=200)
 
         # needs a valid competition to be able to activate a bot.
         comp = self._create_game_mode_and_open_competition()
 
         # no maps
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("no_game_available", response.data["detail"].code)
 
         # not enough active bots
         self._create_map_for_competition("test_map", comp.id)
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("no_game_available", response.data["detail"].code)
 
         # not enough active bots
         bot1 = self._create_bot(self.regularUser1, "testbot1")
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("no_game_available", response.data["detail"].code)
 
         # not enough active bots
         bot2 = self._create_bot(self.regularUser1, "testbot2")
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("no_game_available", response.data["detail"].code)
 
         # not enough active bots
         bot1.competition_participations.create(competition=comp)
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("no_game_available", response.data["detail"].code)
 
         # success
         bot2.competition_participations.create(competition=comp)
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
 
         # test download files
 
@@ -123,8 +114,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.assertEqual(response.data["bot2"]["bot_data_md5hash"], calculate_md5(bot1_zip_path))
 
         # not enough available bots
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        self._post_to_matches(expected_code=200)
 
         # ensure only 1 match was created
         self.assertEqual(Match.objects.count(), 1)
@@ -156,11 +146,9 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # currently we should be using arenaclientUser1's token
         response_m1 = self.test_ac_api_client.post_to_matches()
-        self.assertEqual(response_m1.status_code, 201)
 
         # should be the same match reissued
         response_m2 = self.test_ac_api_client.post_to_matches()
-        self.assertEqual(response_m2.status_code, 201)
 
         self.assertEqual(response_m1.data["id"], response_m2.data["id"])
 
@@ -182,15 +170,13 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         # self.test_client.login(self.arenaclientUser1)
 
         # we shouldn't be able to get a new match
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("no_game_available", response.data["detail"].code)
 
         MatchRequests.request_match(self.regularUser2, bot1, bot1.get_random_excluding_self(), game_mode=game_mode)
 
         # now we should be able to get a match - the requested one
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
+        self._post_to_matches()
 
     def test_max_active_rounds(self):
         # we don't want to have to create lots of arenaclients for multiple matches
@@ -209,25 +195,19 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # Round 1
         # self.test_client.login(self.arenaclientUser1)
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
+        self._post_to_matches()
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results(match_id, "Player1Win")
 
         # Match 1 has started, Match 2 is finished.
 
         # Round 2
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results(match_id, "Player1Win")
 
         # Round 3 - should fail due to active round limit
         with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 200)
+            response = self._post_to_matches(expected_code=200)
             self.assertTrue("detail" in response.data)
             self.assertEqual("No game available for client.", response.data["detail"])
             self.assertIn(
@@ -255,22 +235,19 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # at this point we are using arenaclientUser1's token
         # this should tie up both bots
-        response = self.test_ac_api_client.post_to_matches()
-        self.assertEqual(response.status_code, 201)
+        self.test_ac_api_client.post_to_matches()
 
         # we shouldn't be able to get a new match
         self.test_ac_api_client.set_api_token(Token.objects.create(user=self.arenaclientUser2).key)
 
         with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
-            response = self.test_ac_api_client.post_to_matches()
+            response = self.test_ac_api_client.post_to_matches(expected_code=200)
+            self.assertEqual("No game available for client.", response.data["detail"])
             self.assertIn(
                 f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {comp.id}: "
                 f"Not enough available bots for a match. Wait until more bots become available.",
                 log.output,
             )
-
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual("No game available for client.", response.data["detail"])
 
         MatchRequests.request_match(
             self.regularUser2, bot1, bot1.get_random_active_excluding_self(), game_mode=GameMode.objects.first()
@@ -278,7 +255,6 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # now we should be able to get a match - the requested one
         response = self.test_ac_api_client.post_to_matches()
-        self.assertEqual(response.status_code, 201)
 
     def test_untrusted_competition(self):
         untrustedClient = ArenaClient.objects.create(
@@ -311,12 +287,9 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
 
         # Round 1
         self.test_ac_api_client.set_api_token(Token.objects.create(user=untrustedClient).key)
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
+        self._post_to_matches()
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results(match_id, "Player1Win")
 
     def test_participated_in_most_recent_round(self):
         """
@@ -336,10 +309,8 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         # post a standard result
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201, f"{response.status_code} {response.data}")
         match = response.data
-        response = self._post_to_results(match["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
+        self._post_to_results(match["id"], "Player1Win")
 
         MatchParticipation.objects.get(match_id=match["id"], participant_number=1)
         MatchParticipation.objects.get(match_id=match["id"], participant_number=2)
@@ -349,10 +320,8 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
 
         # Post a result with different bot datas
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
         match = response.data
         self._post_to_results_bot_datas_set_1(match["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
 
         # check hashes - should be updated to set 1
         self._check_hashes(bot1, bot2, match["id"], 1)
@@ -360,7 +329,6 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         # post a standard result with no bot1 data
         match = self._post_to_matches().data
         response = self._post_to_results_no_bot1_data(match["id"], "Player1Win", 1)
-        self.assertEqual(response.status_code, 201)
 
         # check hashes - nothing should have changed
         self._check_hashes(bot1, bot2, match["id"], 1)
@@ -370,24 +338,24 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self.assertTrue(Bot.objects.get(id=bot2.id).bot_data)
 
         # post a standard result with no bot2 data
-        match = self._post_to_matches().data
-        response = self._post_to_results_no_bot2_data(match["id"], "Player1Win", 1)
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results_no_bot2_data(match_id, "Player1Win", 1)
 
         # check hashes - nothing should have changed
         self._check_hashes(bot1, bot2, match["id"], 1)
 
         # test that requested matches don't update bot_data
-        match5 = MatchRequests.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get())
-        self._post_to_results_bot_datas_set_1(match5.id, "Player1Win")
+        requested_match = MatchRequests.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get())
+        match_id = self._post_to_matches().data["id"]
+        assert match_id == requested_match.id
+        self._post_to_results_bot_datas_set_1(requested_match.id, "Player1Win")
 
         # check hashes - nothing should have changed
-        self._check_hashes(bot1, bot2, match5.id, 1)
+        self._check_hashes(bot1, bot2, requested_match.id, 1)
 
         # post a win without a replay - should fail
-        match = self._post_to_matches().data
-        response = self._post_to_results_no_replay(match["id"], "Player2Win")
-        self.assertEqual(response.status_code, 400)
+        match_id = self._post_to_matches().data["id"]
+        response = self._post_to_results_no_replay(match_id, "Player2Win", expected_code=400)
         self.assertTrue("non_field_errors" in response.data)
         self.assertEqual(
             response.data["non_field_errors"][0], "A win/loss or tie result must be accompanied by a replay file."
@@ -426,14 +394,12 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._create_active_bot_for_competition(comp.id, self.regularUser1, "bot1")
         self._create_active_bot_for_competition(comp.id, self.regularUser1, "bot2", BotRace.zerg())
         self._create_active_bot_for_competition(comp.id, self.regularUser1, "bot3", BotRace.protoss())
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201, f"{response.status_code} {response.data}")
+        self._post_to_matches()
 
         not_started_match = Match.objects.filter(started__isnull=True, result__isnull=True).first()
 
         # should fail
-        response = self._post_to_results(not_started_match.id, "Player1Win")
-        self.assertEqual(response.status_code, 500)
+        response = self._post_to_results(not_started_match.id, "Player1Win", expected_code=500)
         self.assertTrue("detail" in response.data)
         self.assertEqual("Unable to log result: Bot bot1 is not currently in this match!", response.data["detail"])
 
@@ -475,15 +441,12 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self.assertTrue(BotCrashLimitAlert.objects.count() == 2)
 
     def _log_match_crash(self, bot1):
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201, f"{response.status_code} {response.data}")
-        match = response.data
+        match = self._post_to_matches().data
         # always make the same bot crash
         if match["bot1"]["name"] == bot1.name:
-            response = self._post_to_results(match["id"], "Player1Crash")
+            self._post_to_results(match["id"], "Player1Crash")
         else:
-            response = self._post_to_results(match["id"], "Player2Crash")
-        self.assertEqual(response.status_code, 201)
+            self._post_to_results(match["id"], "Player2Crash")
 
     # DISABLED UNTIL THIS FEATURE IS USED
     # def test_bot_disable_on_consecutive_crashes(self):
@@ -624,12 +587,10 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
 
     def CreateMatch(self):
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
         return response.data
 
     def CreateResult(self, match_id, r_type):
-        response = self._post_to_results(match_id, r_type)
-        self.assertEqual(response.status_code, 201, response.data)
+        self._post_to_results(match_id, r_type)
 
     def DetermineResultType(self, bot1_id, iteration):
         if self.expected_result_sequence[iteration] == "Tie":
@@ -679,9 +640,8 @@ class EloTestCase(LoggedInMixin, TransactionTestCase):
         self.regularUserBot1.elo = settings.ELO_START_VALUE - 1
         self.regularUserBot1.save()
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        self._post_to_results(response.data["id"], "Player1Win")
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results(match_id, "Player1Win")
 
         # with open(log_file, "r") as f:
         #     self.assertFalse("did not match expected value of" in f.read())
@@ -726,7 +686,6 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         )
 
         response = self._post_to_matches()  # this should trigger a new round robin generation
-        self.assertEqual(response.status_code, 201)
 
         # Validate that participated_in_most_recent_round flags have now been set
         self.assertTrue(
@@ -747,15 +706,12 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertFalse(round1.complete)
 
         # finish the initial match
-        response = self._post_to_results(response.data["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
+        self._post_to_results(response.data["id"], "Player1Win")
 
         # start and finish all the rest of the generated matches
         for x in range(1, expected_match_count_per_round):
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201)
-            response = self._post_to_results(response.data["id"], "Player1Win")
-            self.assertEqual(response.status_code, 201)
+            match_id = self._post_to_matches().data["id"]
+            self._post_to_results(match_id, "Player1Win")
             # double check the match count
             self.assertEqual(Match.objects.filter(started__isnull=True).count(), expected_match_count_per_round - x - 1)
 
@@ -767,8 +723,7 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
 
         # Repeat again but with quirks
 
-        response = self._post_to_matches()  # this should trigger another new round robin generation
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]  # this should trigger another new round robin generation
 
         # Validate that participated_in_most_recent_round flags are still set properly
         self.assertTrue(
@@ -789,15 +744,12 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertFalse(round2.complete)
 
         # finish the initial match
-        response = self._post_to_results(response.data["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
+        self._post_to_results(match_id, "Player1Win")
 
         # start and finish all except one the rest of the generated matches
         for x in range(1, expected_match_count_per_round - 1):
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201)
-            response = self._post_to_results(response.data["id"], "Player1Win")
-            self.assertEqual(response.status_code, 201)
+            response = self._post_to_matches().data["id"]
+            self._post_to_results(match_id, "Player1Win")
             # double check the match count
             self.assertEqual(Match.objects.filter(started__isnull=True).count(), expected_match_count_per_round - x - 1)
 
@@ -814,8 +766,7 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         bot_to_deactivate.save(update_fields=["active"])
 
         # the following part ensures round generation is properly handled when an old round is not yet finished
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
+        self._post_to_matches()
 
         # Validate that participated_in_most_recent_round flags reflect the deactivated bot
         self.assertTrue(
@@ -851,8 +802,7 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
         self.assertFalse(round3.complete)
 
         # now finish the 2nd round
-        response = self._post_to_results(response2ndRoundLastMatch.data["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
+        self._post_to_results(response2ndRoundLastMatch.data["id"], "Player1Win")
 
         # check round is finished
         round2.refresh_from_db()
@@ -990,7 +940,6 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
     def _complete_round(self, competition, exp_round, exp_div_participant_count, exp_n_matches):
         # this should trigger a new round
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
         # check round data
         round = Round.objects.filter(competition=competition).order_by("-number").first()
         self.assertEqual(round.number, exp_round)
@@ -1005,15 +954,12 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         total_exp_matches_per_div = sum(exp_matches_per_div.values())
         self.assertEqual(Match.objects.filter(round=round).count(), total_exp_matches_per_div)
         # finish the initial match
-        response = self._post_to_results(response.data["id"], "Player1Win")
-        self.assertEqual(response.status_code, 201)
+        self._post_to_results(response.data["id"], "Player1Win")
 
         # start and finish all the rest of the generated matches
         for x in range(1, total_exp_matches_per_div):
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201)
-            response = self._post_to_results(response.data["id"], "Player1Win")
-            self.assertEqual(response.status_code, 201)
+            match_id = self._post_to_matches().data["id"]
+            self._post_to_results(match_id, "Player1Win")
             # double check the match count
             self.assertEqual(Match.objects.filter(started__isnull=True).count(), total_exp_matches_per_div - x - 1)
 
@@ -1452,7 +1398,6 @@ class ArenaClientCompatibilityTestCase(MatchReadyMixin, TransactionTestCase):
 
     def _test_endpoint_contract(self, version, expected_json_schema):
         response = self._post_to_matches(version)
-        self.assertEqual(response.status_code, 201)
         validation_successful, error = self.validateJson_bySchema(
             json.load(io.BytesIO(response.content)), expected_json_schema
         )

@@ -44,7 +44,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         # test match successfully cancelled
         self.client.login(username="staff_user", password="x")
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
         match_id = response.data["id"]
 
         out = StringIO()
@@ -59,7 +58,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIsNotNone(Match.objects.get(id=match_id).started)
 
         response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
         active_match_id = response.data["id"]
         out = StringIO()
         call_command("cancelmatches", "--active", stdout=out)
@@ -69,7 +67,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         # start at 2 because we already cancelled some above
         for x in range(2, expectedMatchCountPerRound):
             response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201)
             match_id = response.data["id"]
 
             out = StringIO()
@@ -159,7 +156,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         # generate some matches so we have replays to delete...
         for x in range(num_matches):  # 12 = two rounds
             response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201, f"{response.status_code} {response.data}")
             match_id = response.data["id"]
             self._post_to_results(match_id, "Player1Win")
         # double check the replay and log files exist

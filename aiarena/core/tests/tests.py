@@ -220,11 +220,8 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         for x in range(
             Match.objects.exclude(round__competition_id=exclude_competition_id).filter(result__isnull=True).count()
         ):
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201)
-
-            response = self._post_to_results(response.data["id"], "Player1Win")
-            self.assertEqual(response.status_code, 201)
+            match_id = self._post_to_matches().data["id"]
+            self._post_to_results(match_id, "Player1Win")
 
     def test_competition_states(self):
         # self.test_client.login(self.arenaclientUser1)
@@ -248,13 +245,10 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
         # play all the requested matches
         for i in range(Match.objects.filter(requested_by__isnull=False).count()):
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 201)
-            response = self._post_to_results(response.data["id"], "Player1Win")
-            self.assertEqual(response.status_code, 201)
+            match_id = self._post_to_matches().data["id"]
+            self._post_to_results(match_id, "Player1Win")
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("No game available for client.", response.data["detail"])
 
         # Pause the competition and finish the round
@@ -264,8 +258,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
         # this should fail due to a new round trying to generate while the competition is paused
         with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 200)
+            response = self._post_to_matches(expected_code=200)
             self.assertEqual("No game available for client.", response.data["detail"])
             self.assertIn(
                 f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {competition1.id}: "
@@ -277,8 +270,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         competition1.open()
 
         # start a new round
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
+        self._post_to_matches()
 
         competition1.start_closing()
 
@@ -309,8 +301,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         competition2 = Competition.objects.create(game_mode=GameMode.objects.first())
 
         # no currently available competitions
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("No game available for client.", response.data["detail"])
 
         # active bots
@@ -318,8 +309,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
             CompetitionParticipation.objects.create(bot=bot, competition=competition2)
 
         # current competition is paused
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 200)
+        response = self._post_to_matches(expected_code=200)
         self.assertEqual("No game available for client.", response.data["detail"])
 
         competition2.open()
@@ -332,8 +322,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
 
         # no maps
         with self.assertLogs(logger="aiarena.api.arenaclient.common.ac_coordinator", level="DEBUG") as log:
-            response = self._post_to_matches()
-            self.assertEqual(response.status_code, 200)
+            response = self._post_to_matches(expected_code=200)
             self.assertEqual("No game available for client.", response.data["detail"])
             self.assertIn(
                 f"DEBUG:aiarena.api.arenaclient.common.ac_coordinator:Skipping competition {competition2.id}: "
@@ -345,8 +334,7 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         map.competitions.add(competition2)
 
         # start a new round
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
+        self._post_to_matches()
 
         # New round should be number 1 for the new competition
         round = Round.objects.get(competition=competition2)

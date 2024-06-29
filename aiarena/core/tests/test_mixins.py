@@ -1,4 +1,5 @@
 import os
+from unittest import TestCase
 
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -24,7 +25,7 @@ from aiarena.core.services import MatchRequests
 from aiarena.core.tests.testing_utils import TestAssetPaths
 
 
-class BaseTestMixin:
+class BaseTestMixin(TestCase):
     """
     Base test case for testing. Contains references to all the test files such as test bot zips etc.
     """
@@ -107,12 +108,12 @@ class BaseTestMixin:
             CompetitionParticipation.objects.create(bot_id=bot.id, competition_id=competition_id)
             return bot
 
-    def _post_to_matches(self, api_version=None):
+    def _post_to_matches(self, api_version=None, expected_code=201):
         if api_version:
             self.test_ac_api_client.set_api_version(api_version)
-        return self.test_ac_api_client.post_to_matches()
+        return self.test_ac_api_client.post_to_matches(expected_code=expected_code)
 
-    def _post_to_results(self, match_id, result_type, bot1_tags=None, bot2_tags=None):
+    def _post_to_results(self, match_id, result_type, bot1_tags=None, bot2_tags=None, expected_code=201):
         """
         Posts a generic result.
         :param match_id:
@@ -142,9 +143,10 @@ class BaseTestMixin:
                 arenaclient_log,
                 bot1_tags,
                 bot2_tags,
+                expected_code=expected_code,
             )
 
-    def _post_to_results_bot_datas_set_1(self, match_id, result_type):
+    def _post_to_results_bot_datas_set_1(self, match_id, result_type, expected_code=201):
         """
         Posts a generic result, using bot datas of index 1.
         :param match_id:
@@ -164,7 +166,15 @@ class BaseTestMixin:
             TestAssetPaths.test_arenaclient_log_path, "rb"
         ) as arenaclient_log:
             return self.test_ac_api_client.submit_custom_result(
-                match_id, result_type, replay_file, bot1_data, bot2_data, bot1_log, bot2_log, arenaclient_log
+                match_id,
+                result_type,
+                replay_file,
+                bot1_data,
+                bot2_data,
+                bot1_log,
+                bot2_log,
+                arenaclient_log,
+                expected_code=expected_code,
             )
 
     def _post_to_results_no_bot_datas(self, match_id, result_type):
@@ -178,10 +188,10 @@ class BaseTestMixin:
                     "type": result_type,
                     "replay_file": SimpleUploadedFile("replayFile.SC2Replay", replayFile.read()),
                     "game_steps": 500,
-                }
+                },
             )
 
-    def _post_to_results_no_bot1_data(self, match_id, result_type, bot_data_set):
+    def _post_to_results_no_bot1_data(self, match_id, result_type, bot_data_set, expected_code=201):
         filename = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "test-media/../test-media/testReplay.SC2Replay"
         )
@@ -189,10 +199,18 @@ class BaseTestMixin:
             TestAssetPaths.test_bot_datas["bot2"][bot_data_set]["path"], "rb"
         ) as bot2_data:
             return self.test_ac_api_client.submit_custom_result(
-                match_id, result_type, replay_file, "", bot2_data, "", "", ""
+                match_id,
+                result_type,
+                replay_file,
+                "",
+                bot2_data,
+                "",
+                "",
+                "",
+                expected_code=expected_code,
             )
 
-    def _post_to_results_no_bot2_data(self, match_id, result_type, bot_data_set):
+    def _post_to_results_no_bot2_data(self, match_id, result_type, bot_data_set, expected_code=201):
         filename = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "test-media/../test-media/testReplay.SC2Replay"
         )
@@ -200,12 +218,21 @@ class BaseTestMixin:
             TestAssetPaths.test_bot_datas["bot1"][bot_data_set]["path"], "rb"
         ) as bot1_data:
             return self.test_ac_api_client.submit_custom_result(
-                match_id, result_type, replay_file, bot1_data, "", "", "", ""
+                match_id,
+                result_type,
+                replay_file,
+                bot1_data,
+                "",
+                "",
+                "",
+                "",
+                expected_code=expected_code,
             )
 
-    def _post_to_results_no_replay(self, match_id, result_type):
+    def _post_to_results_no_replay(self, match_id, result_type, expected_code=201):
         return self.test_ac_api_client.publish_result(
-            {"match": match_id, "type": result_type, "replay_file": "", "game_steps": 500}
+            {"match": match_id, "type": result_type, "replay_file": "", "game_steps": 500},
+            expected_code=expected_code,
         )
 
     def _post_to_results_no_replay_updated_datas(self, match_id, result_type):
@@ -259,55 +286,35 @@ class BaseTestMixin:
         self.test_client.logout()  # child tests can login if they require
 
     def _generate_match_activity(self):
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results_no_replay(response.data["id"], "InitializationError")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results_no_replay(match_id, "InitializationError")
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data["id"], "MatchCancelled")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results(match_id, "MatchCancelled")
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results_no_bot1_data(response.data["id"], "Player1Win", 0)
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results_no_bot1_data(match_id, "Player1Win", 0)
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results_no_bot2_data(response.data["id"], "Player1Crash", 0)
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results_no_bot2_data(match_id, "Player1Crash", 0)
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data["id"], "Player1TimeOut")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results(match_id, "Player1TimeOut")
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results_no_bot_datas(response.data["id"], "Player2Win")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results_no_bot_datas(match_id, "Player2Win")
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results_no_bot_datas(response.data["id"], "Player2Crash")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results_no_bot_datas(match_id, "Player2Crash")
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data["id"], "Player2TimeOut")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results(match_id, "Player2TimeOut")
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results(response.data["id"], "Tie")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results(match_id, "Tie")
 
-        response = self._post_to_matches()
-        self.assertEqual(response.status_code, 201)
-        response = self._post_to_results_no_replay(response.data["id"], "Error")
-        self.assertEqual(response.status_code, 201)
+        match_id = self._post_to_matches().data["id"]
+        self._post_to_results_no_replay(match_id, "Error")
 
     def _generate_extra_bots(self):
         competition = Competition.objects.order_by("id").first()

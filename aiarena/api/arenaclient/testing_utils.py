@@ -33,15 +33,14 @@ class AcApiTestingClient(APIClient):
 
         return reverse(endpoint_name)
 
-    def post_to_matches(self) -> Match:
+    def post_to_matches(self, expected_code=201):
         url = self.get_endpoint_url(self.NEXT_MATCH_REVERSE_NAME)
         response = self.post(url)
+        assert response.status_code == expected_code, f"{response.status_code} {response.data}"
         return response
 
     def next_match(self) -> Match:
         response = self.post_to_matches()
-
-        assert response.status_code == 201, f"{response.status_code} {response.data}"
         return Match.objects.get(id=response.data["id"])
 
     def submit_custom_result(
@@ -56,6 +55,7 @@ class AcApiTestingClient(APIClient):
         arenaclient_log,
         bot1_tags=None,
         bot2_tags=None,
+        expected_code=201,
     ):
         data = {
             "match": match_id,
@@ -74,11 +74,14 @@ class AcApiTestingClient(APIClient):
             data["bot1_tags"] = bot1_tags
         if bot2_tags:
             data["bot2_tags"] = bot2_tags
-        return self.publish_result(data)
+        response = self.publish_result(data, expected_code=expected_code)
+        return response
 
-    def publish_result(self, data):
+    def publish_result(self, data, expected_code=201):
         url = self.get_endpoint_url(self.SUBMIT_RESULT_REVERSE_NAME)
-        return self.post(url, data=data)
+        response = self.post(url, data=data)
+        assert response.status_code == expected_code, f"{response.status_code} {response.data}"
+        return response
 
     def submit_result(self, match_id: int, type: str) -> Result:
         with open(TestAssetPaths.test_replay_path, "rb") as replay_file, open(
