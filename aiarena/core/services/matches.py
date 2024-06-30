@@ -81,7 +81,7 @@ class Matches:
                     select bot_id
                     from core_matchparticipation
                     inner join core_match m on core_matchparticipation.match_id = m.id
-                    left join core_result cr on m.id = cr.match_id
+                    left join core_result cr on m.result_id = cr.id
                     where m.started is not null
                     and cr.type is null
                     and (core_matchparticipation.use_bot_data  or core_matchparticipation.update_bot_data)       
@@ -166,7 +166,7 @@ class Matches:
                     LEFT JOIN (SELECT CB.ID
                                 FROM CORE_MATCHPARTICIPATION
                                 INNER JOIN CORE_MATCH M ON CORE_MATCHPARTICIPATION.MATCH_ID = M.ID
-                                LEFT JOIN CORE_RESULT CR ON M.ID = CR.MATCH_ID
+                                LEFT JOIN CORE_RESULT CR ON M.RESULT_ID = CR.ID
                                 INNER JOIN CORE_BOT CB ON CORE_MATCHPARTICIPATION.BOT_ID = CB.ID
                             WHERE M.STARTED IS NOT NULL
                                     AND CR.ID IS NULL

@@ -74,11 +74,11 @@ class EloGraphsGenerator:
                         (cp.result = 'tie') as is_tied,
                         CASE WHEN floor(cr.game_steps/((22.4*60)*5))*5 > 30 THEN 30 ELSE floor(cr.game_steps/((22.4*60)*5))*5 END as duration_minutes
                     from core_matchparticipation cp
-                        inner join core_result cr on cp.match_id = cr.match_id
                         left join core_bot cb on cp.bot_id = cb.id
                         left join core_match cm on cp.match_id = cm.id
                         left join core_round crnd on cm.round_id = crnd.id
                         left join core_competition cc on crnd.competition_id = cc.id
+                        inner join core_result cr on cm.result_id = cr.id
                     where bot_id = {bot_id}
                         and competition_id = {competition_id}) matches
                     group by duration_minutes
@@ -188,11 +188,11 @@ class EloGraphsGenerator:
                     cp.resultant_elo as elo, 
                     cr.created as date
                 from core_matchparticipation cp
-                    inner join core_result cr on cp.match_id = cr.match_id
                     left join core_bot cb on cp.bot_id = cb.id
                     left join core_match cm on cp.match_id = cm.id
                     left join core_round crnd on cm.round_id = crnd.id
                     left join core_competition cc on crnd.competition_id = cc.id
+                    inner join core_result cr on cm.result_id = cr.id
                 where resultant_elo is not null 
                     and bot_id = {bot.id} 
                     and competition_id = {competition_id}
@@ -209,11 +209,11 @@ class EloGraphsGenerator:
                 select 
                     MIN(cr.created) as date
                 from core_matchparticipation cp
-                    inner join core_result cr on cp.match_id = cr.match_id
                     left join core_bot cb on cp.bot_id = cb.id
                     left join core_match cm on cp.match_id = cm.id
                     left join core_round crnd on cm.round_id = crnd.id
                     left join core_competition cc on crnd.competition_id = cc.id
+                    inner join core_result cr on cm.result_id = cr.id
                 where resultant_elo is not null 
                     and bot_id = {bot_id} 
                     and competition_id = {competition_id}
