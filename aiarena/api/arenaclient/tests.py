@@ -748,7 +748,7 @@ class RoundRobinGenerationTestCase(MatchReadyMixin, TransactionTestCase):
 
         # start and finish all except one the rest of the generated matches
         for x in range(1, expected_match_count_per_round - 1):
-            response = self._post_to_matches().data["id"]
+            match_id = self._post_to_matches().data["id"]
             self._post_to_results(match_id, "Player1Win")
             # double check the match count
             self.assertEqual(Match.objects.filter(started__isnull=True).count(), expected_match_count_per_round - x - 1)
