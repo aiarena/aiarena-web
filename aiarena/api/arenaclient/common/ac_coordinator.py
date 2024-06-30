@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 from django.core.cache import cache
 from django.dispatch import receiver
 
-from aiarena.core.models import Result
 from aiarena.core.services.competitions import Competitions
 
 
@@ -15,7 +14,6 @@ if TYPE_CHECKING:
 import logging
 
 from django.db import connection, transaction
-from django.db.models import Exists, OuterRef
 from django.db.models.signals import pre_save
 
 from constance import config
@@ -90,7 +88,7 @@ class ACCoordinator:
             unfinished_matches = list(
                 Match.objects.only("id", "map")
                 .filter(
-                    ~Exists(Result.objects.filter(match=OuterRef("pk"))),
+                    result=None,
                     started__isnull=False,
                     assigned_to=arenaclient,
                 )
