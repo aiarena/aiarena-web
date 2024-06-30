@@ -81,31 +81,28 @@ class ACCoordinator:
         return ACCoordinator.next_competition_match(arenaclient)
 
     @staticmethod
-    def next_match(arenaclient: ArenaClient, only_unfinished_matches: bool) -> Match:
-        if config.LADDER_ENABLED:
-            try:
-                if config.REISSUE_UNFINISHED_MATCHES:
-                    # Check for any unfinished matches assigned to this user. If any are present, return that.
-                    unfinished_matches = list(
-                        Match.objects.only("id", "map")
-                        .filter(
-                            ~Exists(Result.objects.filter(match=OuterRef("pk"))),
-                            started__isnull=False,
-                            assigned_to=arenaclient,
-                        )
-                        .order_by("round_id")
-                    )
-                    if len(unfinished_matches) > 0:
-                        return unfinished_matches[0]  # todo: re-set started time?
-                    if only_unfinished_matches:
-                        return None  # Return None so we don't try to start a new match
-                # Trying a new match
-                return ACCoordinator.next_new_match(arenaclient)
-            except Exception:
-                logger.exception("Exception while processing request for match.")
-                raise
-        else:
+    def next_match(arenaclient: ArenaClient, only_unfinished_matches: bool) -> Match | None:
+        if not config.LADDER_ENABLED:
             raise LadderDisabled()
+
+        if config.REISSUE_UNFINISHED_MATCHES:
+            # Check for any unfinished matches assigned to this user. If any are present, return that.
+            unfinished_matches = list(
+                Match.objects.only("id", "map")
+                .filter(
+                    ~Exists(Result.objects.filter(match=OuterRef("pk"))),
+                    started__isnull=False,
+                    assigned_to=arenaclient,
+                )
+                .order_by("round_id")
+            )
+            if len(unfinished_matches) > 0:
+                return unfinished_matches[0]  # todo: re-set started time?
+            if only_unfinished_matches:
+                return None  # Return None so we don't try to start a new match
+
+        # Trying a new match
+        return ACCoordinator.next_new_match(arenaclient)
 
     @staticmethod
     def _get_competition_priority_order():
