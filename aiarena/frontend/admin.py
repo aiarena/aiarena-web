@@ -367,6 +367,7 @@ class MatchAdmin(admin.ModelAdmin):
     actions = ["cancel_matches"]
     list_select_related = ["round", "map", "assigned_to"]
     raw_id_fields = [
+        "result",
         "round",
         "assigned_to",
         "requested_by",
@@ -459,7 +460,6 @@ class ResultAdmin(admin.ModelAdmin):
     )
     list_select_related = ["match", "winner", "submitted_by"]
     raw_id_fields = [
-        "match",
         "winner",
         "submitted_by",
     ]
