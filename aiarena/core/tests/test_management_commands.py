@@ -314,4 +314,5 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         call_command("timeoutovertimematches")
 
         # confirm a result was registered
+        match1.refresh_from_db()
         self.assertTrue(match1.result is not None)
