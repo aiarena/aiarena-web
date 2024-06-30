@@ -60,7 +60,6 @@ class Result(models.Model, LockableModelMixin):
         ("Player2Surrender", "Player2Surrender"),
         ("Tie", "Tie"),
     )
-    match = models.OneToOneField(Match, on_delete=models.CASCADE, related_name="result")
     winner = models.ForeignKey(Bot, on_delete=models.PROTECT, related_name="matches_won", blank=True, null=True)
     type = models.CharField(max_length=32, choices=TYPES, db_index=True)
     created = models.DateTimeField(auto_now_add=True, db_index=True)

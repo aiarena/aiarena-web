@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 class Match(models.Model, LockableModelMixin, RandomManagerMixin):
     """Represents a match between 2 bots. Usually this is within the context of a round, but doesn't have to be."""
 
+    result = models.OneToOneField("Result", on_delete=models.CASCADE, related_name="match", null=True)
     map = models.ForeignKey(Map, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     # todo: the functionality of the started and first_started fields does not appear to be fully implemented
