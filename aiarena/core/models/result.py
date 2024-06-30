@@ -26,7 +26,7 @@ def replay_file_upload_to(instance, filename):
         Match.objects.only("map__name", "id")
         .prefetch_related("matchparticipation_set", "matchparticipation_set__bot")
         .select_related("map")
-        .get(id=instance.match_id)
+        .get(id=instance.match.id)
     )
     return "/".join(
         [
@@ -40,7 +40,7 @@ def replay_file_upload_to(instance, filename):
 
 
 def arenaclient_log_upload_to(instance, filename):
-    return "/".join(["arenaclient-logs", f"{instance.match_id}_arenaclientlog.zip"])
+    return "/".join(["arenaclient-logs", f"{instance.match.id}_arenaclientlog.zip"])
 
 
 class Result(models.Model, LockableModelMixin):
@@ -97,7 +97,7 @@ class Result(models.Model, LockableModelMixin):
 
     def validate_replay_file_requirement(self):
         if (self.has_winner or self.is_tie) and not self.replay_file and not self.replay_file_has_been_cleaned:
-            logger.warning(f"Result for match {self.match_id} failed validation due to a missing replay file.")
+            logger.warning(f"Result for match {self.match.id} failed validation due to a missing replay file.")
             raise ValidationError("A win/loss or tie result must be accompanied by a replay file.")
 
     def clean(self, *args, **kwargs):
@@ -184,7 +184,7 @@ class Result(models.Model, LockableModelMixin):
         """Returns the SeasonParticipant models for the MatchParticipants"""
         from .match_participation import MatchParticipation
 
-        match_id = self.match_id
+        match_id = self.match.id
         first = MatchParticipation.objects.get(match_id=match_id, participant_number=1)
         second = MatchParticipation.objects.get(match_id=match_id, participant_number=2)
         return first.competition_participant, second.competition_participant

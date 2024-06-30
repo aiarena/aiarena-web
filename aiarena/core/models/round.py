@@ -33,16 +33,17 @@ class Round(models.Model, LockableModelMixin):
 
     # if all the matches have been run, mark this as complete
     def update_if_completed(self):
-        from .match import Match
+        if self.complete:
+            return
+
+        if self.match_set.filter(result=None).exists():
+            return
 
         with transaction.atomic():
-            # if there are no matches without results, this round is complete
-            # if this round close attempt results in a row update, try to close the competition
-            if (
-                Match.objects.filter(round=self, result__isnull=True).count() == 0
-                and Round.objects.filter(id=self.id, complete=False).update(complete=True, finished=timezone.now()) > 0
-            ):
-                self.competition.try_to_close()
+            self.complete = True
+            self.finished = timezone.now()
+            self.save(update_fields=["complete", "finished"])
+            self.competition.try_to_close()
 
     def get_absolute_url(self):
         return reverse("round", kwargs={"pk": self.pk})

@@ -64,16 +64,17 @@ def cancel(match_id, requesting_user):
         except Match.DoesNotExist:
             return CancelResult.MATCH_DOES_NOT_EXIST  # should basically not happen, but just in case
 
-        if Result.objects.filter(match=match).count() > 0:
+        if match.result_id:
             return CancelResult.RESULT_ALREADY_EXISTS
 
-        Result.objects.create(match=match, type="MatchCancelled", game_steps=0, submitted_by=requesting_user)
+        match.result = Result.objects.create(type="MatchCancelled", game_steps=0, submitted_by=requesting_user)
 
         if not match.started:
             now = timezone.now()
             match.started = now
             match.first_started = now
-            match.save()
+
+        match.save()
 
         if match.round is not None:
             match.round.update_if_completed()

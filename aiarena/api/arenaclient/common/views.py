@@ -288,6 +288,9 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                     # add everything, this shouldn't cause duplicates
                     match.tags.add(*p2_match_tags)
 
+            match.result = result
+            match.save()
+
             # Only do these actions if the match is part of a round
             if result.match.round is not None:
                 result.match.round.update_if_completed()
