@@ -4,6 +4,7 @@ from django.conf import settings
 
 from constance import config
 from rest_framework import serializers, viewsets
+from rest_framework.pagination import CursorPagination
 
 from aiarena.core.models import CompetitionParticipation, Match, Result
 from aiarena.core.permissions import IsServiceOrAdminUser
@@ -56,6 +57,7 @@ class StreamNextReplayViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = StreamNextReplaySerializer
     permission_classes = [IsServiceOrAdminUser]
+    pagination_class = CursorPagination
     swagger_schema = None  # exclude this from swagger generation
 
     def get_queryset(self):
