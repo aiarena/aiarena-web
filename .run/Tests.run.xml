@@ -9,18 +9,17 @@
       <env name="DJANGO_SETTINGS_MODULE" value="aiarena.settings" />
       <env name="DJANGO_ENVIRONMENT" value="DEVELOPMENT" />
     </envs>
-    <option name="SDK_HOME" value="$PROJECT_DIR$/venv/bin/python" />
-    <option name="SDK_NAME" value="Python 3.10 (aiarena-web)" />
+    <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="" />
-    <option name="IS_MODULE_SDK" value="false" />
+    <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="TARGET" value="." />
     <option name="SETTINGS_FILE" value="" />
     <option name="CUSTOM_SETTINGS" value="false" />
-    <option name="USE_OPTIONS" value="false" />
-    <option name="OPTIONS" value="" />
+    <option name="USE_OPTIONS" value="true" />
+    <option name="OPTIONS" value="--noinput" />
     <method v="2" />
   </configuration>
 </component>
