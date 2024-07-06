@@ -4,8 +4,10 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Prefetch
 from django.utils.text import slugify
 
+from constance import config
 from private_storage.fields import PrivateFileField
 
 from ..validators import validate_not_inf, validate_not_nan
@@ -15,6 +17,30 @@ from .mixins import LockableModelMixin
 
 
 logger = logging.getLogger(__name__)
+
+
+class CompetitionParticipationSet(models.QuerySet):
+    def calculate_trend(self, competition):
+        from . import MatchParticipation
+
+        qs = self.prefetch_related(
+            Prefetch(
+                "bot__matchparticipation_set",
+                queryset=MatchParticipation.objects.filter(
+                    elo_change__isnull=False,
+                    match__requested_by__isnull=True,
+                    match__round__competition=competition,
+                ).order_by("-match__started")[: config.ELO_TREND_N_MATCHES],
+                to_attr="match_participations",
+            )
+        )
+
+        result = []
+        for participant in qs:
+            participant.trend = sum(participation.elo_change for participation in participant.bot.match_participations)
+            result.append(participant)
+
+        return result
 
 
 def elo_graph_upload_to(instance, filename):
@@ -57,6 +83,8 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
     DEFAULT_DIVISION = 0
     division_num = models.IntegerField(default=DEFAULT_DIVISION, validators=[MinValueValidator(DEFAULT_DIVISION)])
     in_placements = models.BooleanField(default=True)
+
+    objects = CompetitionParticipationSet.as_manager()
 
     def validate_unique(self, exclude=None):
         if self.active:

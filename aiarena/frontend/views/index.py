@@ -4,7 +4,7 @@ from django.views.generic import ListView
 
 from constance import config
 
-from aiarena.core.models import Bot, Competition, CompetitionParticipation, MatchParticipation, News, Round, User
+from aiarena.core.models import Bot, Competition, CompetitionParticipation, News, Round, User
 from aiarena.core.services import Ladders
 
 
@@ -17,7 +17,6 @@ class Index(ListView):
     def get_competitions(self):
         competition_context = []
         cache_time = config.TOP10_CACHE_TIME
-        elo_trend_n_matches = config.ELO_TREND_N_MATCHES
         competitions = (
             Competition.objects.only("name", "interest", "n_divisions", "n_placements")
             .filter(status__in=["frozen", "paused", "open", "closing"])
@@ -44,24 +43,14 @@ class Index(ListView):
                 cache_key = f"{comp.id}-top10-cache"
                 top10 = cache.get(cache_key)
                 if top10 is None:
-                    top10 = Ladders.get_competition_ranked_participants(comp, amount=10).prefetch_related(
-                        Prefetch("bot", queryset=Bot.objects.all().only("user_id", "name")),
-                        Prefetch("bot__user", queryset=User.objects.all().only("patreon_level")),
-                        Prefetch(
-                            "bot__matchparticipation_set",
-                            queryset=MatchParticipation.objects.filter(
-                                elo_change__isnull=False,
-                                match__requested_by__isnull=True,
-                                match__round__competition=comp,
-                            ).order_by("-match__started")[:elo_trend_n_matches],
-                            to_attr="match_participations",
-                        ),
-                    )
-
-                    for participant in top10:
-                        participant.trend = sum(
-                            participation.elo_change for participation in participant.bot.match_participations
+                    top10 = (
+                        Ladders.get_competition_ranked_participants(comp, amount=10)
+                        .prefetch_related(
+                            Prefetch("bot", queryset=Bot.objects.all().only("user_id", "name")),
+                            Prefetch("bot__user", queryset=User.objects.all().only("patreon_level")),
                         )
+                        .calculate_trend(comp)
+                    )
                     cache.set(cache_key, top10, cache_time)
 
                 competition_context.append(
