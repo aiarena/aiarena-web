@@ -291,11 +291,6 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         match_id = self._post_to_matches().data["id"]
         self._post_to_results(match_id, "Player1Win")
 
-    def test_participated_in_most_recent_round(self):
-        """
-        Tests that the CompetitionParticipation.participated_in_most_recent_round field matches reality.
-        """
-
 
 class ResultsTestCase(LoggedInMixin, TransactionTestCase):
     def test_create_results(self):
