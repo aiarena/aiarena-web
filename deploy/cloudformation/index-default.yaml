@@ -128,6 +128,29 @@ Resources:
             Principal:
               Service: "logging.s3.amazonaws.com"
 
+  ALBLogsBucket:
+    Type: AWS::S3::Bucket
+
+  ALBLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: ALBLogsBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:PutObject'
+            Effect: Allow
+            Resource:
+              - Fn::Join:
+                  - ''
+                  - - 'arn:aws:s3:::'
+                    - Ref: ALBLogsBucket
+                    - "/*"
+            Principal:
+              AWS: "arn:aws:iam::054676820928:root"
+
   lladdyDevTestingBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -453,6 +476,12 @@ Resources:
       Subnets:
         - Ref: PublicSubnetZoneA
         - Ref: PublicSubnetZoneB
+      LoadBalancerAttributes:
+        - Key: access_logs.s3.enabled
+          Value: true
+        - Key: access_logs.s3.bucket
+          Value:
+            Ref: ALBLogsBucket
 
   ALBWebServerTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
