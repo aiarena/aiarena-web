@@ -408,6 +408,7 @@ Resources:
       MasterUsername: !var db_master_user
       MasterUserPassword: !var db_master_password
       EnablePerformanceInsights: true
+      PerformanceInsightsRetentionPeriod: 186
       DBInstanceClass:
         Ref: DBClass
       DBParameterGroupName:
