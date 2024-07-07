@@ -29,16 +29,16 @@ class Command(BaseFileCleanupCommand):
                     replays_cleaned_count += 1
                     change_made = True
                     if verbose:
-                        self.stdout.write(f"Match {result.match_id} replay file deleted.")
+                        self.stdout.write(f"Match {result.match.id} replay file deleted.")
                 if result.clean_arenaclient_log():
                     ac_logs_cleaned_count += 1
                     change_made = True
                     if verbose:
-                        self.stdout.write(f"Match {result.match_id} arenaclient log deleted.")
+                        self.stdout.write(f"Match {result.match.id} arenaclient log deleted.")
                 if change_made:
                     result.save()
                 else:
                     self.stdout.write(
-                        f"WARNING: Match {result.match_id} had no files to clean up even though it should have."
+                        f"WARNING: Match {result.match.id} had no files to clean up even though it should have."
                     )
         self.stdout.write(f"Cleaned up {replays_cleaned_count} replays and {ac_logs_cleaned_count} arena client logs.")
