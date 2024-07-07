@@ -34,9 +34,9 @@ class BotFilter(filters.FilterSet):
 
 
 class MatchParticipationFilter(filters.FilterSet):
-    min_match = filters.NumberFilter(field_name="match_id", lookup_expr="gte")
-    max_match = filters.NumberFilter(field_name="match_id", lookup_expr="lte")
-    match = filters.NumberFilter(field_name="match_id")
+    min_match = filters.NumberFilter(field_name="match__id", lookup_expr="gte")
+    max_match = filters.NumberFilter(field_name="match__id", lookup_expr="lte")
+    match = filters.NumberFilter(field_name="match__id")
     bot = filters.NumberFilter(field_name="bot_id")
     min_avg_step_time = filters.NumberFilter(field_name="avg_step_time", lookup_expr="gte")
     max_avg_step_time = filters.NumberFilter(field_name="avg_step_time", lookup_expr="lte")
@@ -57,9 +57,9 @@ class MatchParticipationFilter(filters.FilterSet):
 
 
 class ResultFilter(filters.FilterSet):
-    min_match = filters.NumberFilter(field_name="match_id", lookup_expr="gte")
-    max_match = filters.NumberFilter(field_name="match_id", lookup_expr="lte")
-    match = filters.NumberFilter(field_name="match_id")
+    min_match = filters.NumberFilter(field_name="match__id", lookup_expr="gte")
+    max_match = filters.NumberFilter(field_name="match__id", lookup_expr="lte")
+    match = filters.NumberFilter(field_name="match__id")
     min_created = filters.NumberFilter(field_name="created", lookup_expr="gte")
     max_created = filters.NumberFilter(field_name="created", lookup_expr="lte")
     min_game_steps = filters.NumberFilter(field_name="avg_step_time", lookup_expr="gte")
