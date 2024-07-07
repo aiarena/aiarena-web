@@ -24,3 +24,4 @@ section-order = ["future", "standard-library", "django", "third-party", "first-p
 DJANGO_SETTINGS_MODULE = "aiarena.settings"
 addopts = "--tb=short --showlocals --browser=chromium"
 markers = ["playwright"]
+python_files = ["test_*.py", "tests.py"]
