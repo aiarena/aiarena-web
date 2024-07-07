@@ -109,7 +109,7 @@ def post_result_to_discord_bot(result):
             wl_bots = None
 
         json = {  # todo: nested json
-            "match_id": result.match_id,
+            "match_id": result.match.id,
             "round_id": result.match.round_id,
             "bot1": bots[0].name,
             "bot1_id": bots[0].id,
@@ -130,7 +130,7 @@ def post_result_to_discord_bot(result):
         post_json_content_to_address(json, settings.POST_SUBMITTED_RESULTS_TO_ADDRESS)
     except Exception:
         logger.warning(
-            f"Attempt to post result for match_id {result.match_id} to discord failed with error:"
+            f"Attempt to post result for match_id {result.match.id} to discord failed with error:"
             + os.linesep
             + traceback.format_exc()
         )
