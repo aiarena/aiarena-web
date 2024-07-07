@@ -1,3 +1,5 @@
+import mimetypes
+
 from .default import *  # noqa: F403
 
 
@@ -11,6 +13,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS.append("sslserver")  # noqa: F405
 INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
 MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
+mimetypes.add_type("application/javascript", ".js", True)  # Needed for debug-toolbar to work
 
 #################################
 # Django Storages & django-private-storage configuration #
