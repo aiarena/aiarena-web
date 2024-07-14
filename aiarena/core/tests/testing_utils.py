@@ -56,6 +56,7 @@ def create_bot_for_competition(
             user=for_user, name=bot_name, plays_race=bot_race, type=bot_type, bot_zip=File(bot_zip)
         )
         CompetitionParticipation.objects.create(competition=competition, bot=bot)
+        return bot
 
 
 def create_arena_clients_with_matching_tokens(stdout, client, num_acs, for_user):
