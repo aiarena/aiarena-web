@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 
 from aiarena.core.models import ArenaClient, Match, MatchParticipation
@@ -28,22 +29,22 @@ class MatchStarter:
             return False
 
         # Avoid starting a match when a participant is not available
-        participations = MatchParticipation.objects.raw(
-            """
-            SELECT cm.id FROM core_matchparticipation cm
-            where ((cm.use_bot_data or cm.update_bot_data) or cm.bot_id not in (
-                    select bot_id
-                    from core_matchparticipation
-                    inner join core_match m on core_matchparticipation.match_id = m.id
-                    left join core_result cr on m.result_id = cr.id
-                    where m.started is not null
-                    and cr.type is null
-                    and (core_matchparticipation.use_bot_data  or core_matchparticipation.update_bot_data)       
-                    and m.id != %s 
-                )) and match_id = %s
-                """,
-            (match.id, match.id),
+        allow_parallel_run = Q(use_bot_data=False, update_bot_data=False)
+        not_in_another_match = ~Exists(
+            MatchParticipation.objects.exclude(
+                match_id=match.id,
+            ).filter(
+                bot_id=OuterRef("bot_id"),
+                use_bot_data=True,
+                update_bot_data=True,
+                match__started__isnull=False,
+                match__result=None,
+            )
         )
+        participations = MatchParticipation.objects.filter(
+            allow_parallel_run | not_in_another_match,
+            match_id=match.id,
+        ).only("id")
 
         if len(participations) < 2:
             # Todo: Commented out to avoid log spam. This used to be a last second sanity check.
