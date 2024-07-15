@@ -254,7 +254,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         )
 
         # now we should be able to get a match - the requested one
-        response = self.test_ac_api_client.post_to_matches()
+        self.test_ac_api_client.post_to_matches()
 
     def test_untrusted_competition(self):
         untrustedClient = ArenaClient.objects.create(
