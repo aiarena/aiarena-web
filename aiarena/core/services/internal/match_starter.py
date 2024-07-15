@@ -29,7 +29,7 @@ class MatchStarter:
             return False
 
         # Avoid starting a match when a participant is not available
-        allow_parallel_run = Q(use_bot_data=False, update_bot_data=False)
+        allow_parallel_run = Q(use_bot_data=False) | Q(update_bot_data=False)
         not_in_another_match = ~Exists(
             MatchParticipation.objects.exclude(
                 match_id=match.id,
