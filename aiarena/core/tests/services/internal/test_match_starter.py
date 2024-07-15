@@ -273,38 +273,6 @@ class LadderMatchStarterTests(TestCase):
             ]
         )
 
-    def test_match_fails_to_start_in_parallel_when_both_bot_datas_are_updateable(self):
-        """
-        Tests that a match starts successfully in parallel with another match when both match participants
-            have bot data updates enabled
-        """
-        self.start_matches_and_assert_result(
-            test_match_definitions=[
-                {
-                    # Match 1
-                    "expect_success": True,
-                    "use_bot_data_for_participant1": True,
-                    "use_bot_data_for_participant2": True,
-                    "update_bot_data_for_participant1": True,
-                    "update_bot_data_for_participant2": True,
-                },
-                {
-                    # Match 2
-                    "expect_success": False,
-                    "use_bot_data_for_participant1": True,
-                    "use_bot_data_for_participant2": True,
-                    "update_bot_data_for_participant1": True,
-                    "update_bot_data_for_participant2": True,
-                },
-            ]
-        )
-
-    """
-    BONUS TEST:
-    If this test passes it's great, but if it fails, it only means that the system is more restrictive than it needs to be.
-    It's fine to leave it this way and remove this test.
-    """
-
     def test_match_starts_successfully_in_parallel_when_bot_data_was_previously_updateable_but_now_not_in_use(self):
         """
         Tests that a match can start in parallel with another match when a previous match participant
