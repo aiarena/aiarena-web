@@ -29,7 +29,9 @@ class MatchStarter:
             return False
 
         # Avoid starting a match when a participant is not available
-        allow_parallel_run = Q(use_bot_data=False)
+        target_match_not_locked_by_bot_data = Q(use_bot_data=False) | Q(
+            update_bot_data=False, match__requested_by__isnull=False
+        )
         not_in_another_match = ~Exists(
             MatchParticipation.objects.exclude(
                 match_id=match.id,
@@ -41,12 +43,12 @@ class MatchStarter:
                 match__result=None,
             )
         )
-        participations = MatchParticipation.objects.filter(
-            allow_parallel_run | not_in_another_match,
+        available_participants = MatchParticipation.objects.filter(
+            target_match_not_locked_by_bot_data | not_in_another_match,
             match_id=match.id,
         ).only("id")
 
-        if len(participations) < 2:
+        if len(available_participants) < 2:
             # Todo: Commented out to avoid log spam. This used to be a last second sanity check.
             # Todo: Investigate whether it is still the case or whether this is no longer considered a system fault
             # Todo: worthy of a warning message being logged.
