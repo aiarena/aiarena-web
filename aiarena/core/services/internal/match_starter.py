@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class MatchStarter:
     """
-    Responsible for starting a given competition match, including all necessary checks.
+    Responsible for starting a given match, including all necessary checks.
     """
 
     @staticmethod
