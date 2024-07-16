@@ -187,6 +187,34 @@ class LadderMatchStarterTests(TestCase):
             ]
         )
 
+    def test_match_fails_to_start_in_parallel_when_bot_data_was_updateable_but_now_isnt(self):
+        """
+        Tests that a match fails to start in parallel with another match when a match participant
+            had bot data enabled for updates but updates are now disabled.
+            If this didn't fail, then the new match could be played with old data, which wouldn't be a huge issue, but
+            blocking that situation seems more elegant.
+        """
+        self.start_matches_and_assert_result(
+            test_match_definitions=[
+                {
+                    # Match 1
+                    "expect_success": True,
+                    "use_bot_data_for_participant1": True,
+                    "use_bot_data_for_participant2": True,
+                    "update_bot_data_for_participant1": True,
+                    "update_bot_data_for_participant2": False,
+                },
+                {
+                    # Match 2
+                    "expect_success": False,
+                    "use_bot_data_for_participant1": True,
+                    "use_bot_data_for_participant2": True,
+                    "update_bot_data_for_participant1": False,
+                    "update_bot_data_for_participant2": False,
+                },
+            ]
+        )
+
     def test_match_starts_successfully_in_parallel_when_bot_data_wasnt_updateable_but_now_is(self):
         """
         Tests that a match starts successfully in parallel with another match when a match participant
@@ -264,12 +292,6 @@ class LadderMatchStarterTests(TestCase):
                 },
             ]
         )
-
-    """
-    BONUS TEST:
-    If this test passes it's great, but if it fails, it only means that the system is more restrictive than it needs to be.
-    It's fine to leave it this way and remove this test.
-    """
 
     def test_match_starts_successfully_in_parallel_when_bot_data_was_previously_updateable_but_now_not_in_use(self):
         """
