@@ -33,8 +33,9 @@ class LadderMatchStarterTests(TestCase):
         )
         return bot1, bot2, match_map
 
-    def create_test_match(self, bot1, bot2, match_map):
-        match = Match.objects.create(map=match_map, require_trusted_arenaclient=True)
+    def create_test_match(self, bot1, bot2, match_map, is_requested_match=False):
+        requested_by_user = self.user if is_requested_match else None
+        match = Match.objects.create(map=match_map, require_trusted_arenaclient=True, requested_by=requested_by_user)
         MatchParticipation.objects.create(match=match, participant_number=1, bot=bot1)
         MatchParticipation.objects.create(match=match, participant_number=2, bot=bot2)
         return match
@@ -187,9 +188,9 @@ class LadderMatchStarterTests(TestCase):
             ]
         )
 
-    def test_match_fails_to_start_in_parallel_when_bot_data_was_updateable_but_now_isnt(self):
+    def test_competition_match_fails_to_start_in_parallel_when_bot_data_was_updateable_but_now_isnt(self):
         """
-        Tests that a match fails to start in parallel with another match when a match participant
+        Tests that a match from a competition fails to start in parallel with another match when a match participant
             had bot data enabled for updates but updates are now disabled.
             If this didn't fail, then the new match could be played with old data, which wouldn't be a huge issue, but
             blocking that situation seems more elegant.
@@ -211,6 +212,37 @@ class LadderMatchStarterTests(TestCase):
                     "use_bot_data_for_participant2": True,
                     "update_bot_data_for_participant1": False,
                     "update_bot_data_for_participant2": False,
+                },
+            ]
+        )
+
+    def test_requested_match_successfully_starts_in_parallel_when_bot_data_was_updateable_but_now_isnt(self):
+        """
+        Tests that a requested match successfully starts in parallel with another match when a match participant
+            had bot data enabled for updates but updates are now disabled.
+
+            This is specifically to ensure that requested matches are not blocked by other matches from starting when
+            said other matches are updating bot data, because it is assumed that bot authors don't care as much
+            about the data being up-to-date for requested matches.
+        """
+        self.start_matches_and_assert_result(
+            test_match_definitions=[
+                {
+                    # Match 1
+                    "expect_success": True,
+                    "use_bot_data_for_participant1": True,
+                    "use_bot_data_for_participant2": True,
+                    "update_bot_data_for_participant1": True,
+                    "update_bot_data_for_participant2": False,
+                },
+                {
+                    # Match 2
+                    "expect_success": True,
+                    "use_bot_data_for_participant1": True,
+                    "use_bot_data_for_participant2": True,
+                    "update_bot_data_for_participant1": False,
+                    "update_bot_data_for_participant2": False,
+                    "is_requested_match": True,
                 },
             ]
         )
@@ -327,6 +359,7 @@ class LadderMatchStarterTests(TestCase):
                 use_bot_data_for_participant2=test_definition["use_bot_data_for_participant2"],
                 update_bot_data_for_participant1=test_definition["update_bot_data_for_participant1"],
                 update_bot_data_for_participant2=test_definition["update_bot_data_for_participant2"],
+                is_requested_match=test_definition.get("is_requested_match", False),
             )
 
     def start_new_match_and_assert_result(
@@ -336,12 +369,13 @@ class LadderMatchStarterTests(TestCase):
         use_bot_data_for_participant2,
         update_bot_data_for_participant1,
         update_bot_data_for_participant2,
+        is_requested_match=False,
     ):
-        match = self.create_test_match(self.bot1, self.bot2, self.map)
+        match = self.create_test_match(self.bot1, self.bot2, self.map, is_requested_match)
         self.set_use_bot_data(match, use_bot_data_for_participant1, use_bot_data_for_participant2)
         self.set_update_bot_data(match, update_bot_data_for_participant1, update_bot_data_for_participant2)
         result = MatchStarter.start(match, self.arenaclient)
-        self.assertEqual(result, expect_success)
+        self.assertEqual(expect_success, result)
 
     def set_use_bot_data(self, match: Match, use_bot_data_for_participant1: bool, use_bot_data_for_participant2: bool):
         p1 = match.participant1
