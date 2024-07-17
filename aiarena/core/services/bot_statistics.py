@@ -1,5 +1,5 @@
 from django.db import connection
-from django.db.models import Max
+from django.db.models import Exists, Max, OuterRef, Q
 
 from django_pglocks import advisory_lock
 
@@ -137,41 +137,32 @@ class BotStatistics:
         sp.save()
 
     @staticmethod
-    def _recalculate_matchup_stats(sp: CompetitionParticipation):
-        CompetitionBotMatchupStats.objects.filter(bot=sp).delete()
+    def _recalculate_matchup_stats(self_p: CompetitionParticipation):
+        CompetitionBotMatchupStats.objects.filter(bot=self_p).delete()
 
-        for competition_participation in CompetitionParticipation.objects.filter(competition=sp.competition).exclude(
-            bot=sp.bot
+        for opponent_p in CompetitionParticipation.objects.filter(competition=self_p.competition).exclude(
+            bot=self_p.bot
         ):
-            with connection.cursor() as cursor:
-                match_count = BotStatistics._calculate_matchup_count(cursor, competition_participation, sp)
-                if match_count > 0:
-                    matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(
-                        bot=sp, opponent=competition_participation
-                    )[0]
+            match_count = BotStatistics._calculate_matchup_count(opponent_p, self_p)
+            if not match_count:
+                continue
 
-                    matchup_stats.match_count = match_count
-                    matchup_stats.win_count = BotStatistics._calculate_matchup_win_count(
-                        cursor, competition_participation, sp
-                    )
-                    matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
+            matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(bot=self_p, opponent=opponent_p)[0]
+            matchup_stats.match_count = match_count
 
-                    matchup_stats.loss_count = BotStatistics._calculate_matchup_loss_count(
-                        cursor, competition_participation, sp
-                    )
-                    matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
+            matchup_stats.win_count = BotStatistics._calculate_matchup_win_count(opponent_p, self_p)
+            matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
 
-                    matchup_stats.tie_count = BotStatistics._calculate_matchup_tie_count(
-                        cursor, competition_participation, sp
-                    )
-                    matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
+            matchup_stats.loss_count = BotStatistics._calculate_matchup_loss_count(opponent_p, self_p)
+            matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
 
-                    matchup_stats.crash_count = BotStatistics._calculate_matchup_crash_count(
-                        cursor, competition_participation, sp
-                    )
-                    matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
+            matchup_stats.tie_count = BotStatistics._calculate_matchup_tie_count(opponent_p, self_p)
+            matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
 
-                    matchup_stats.save()
+            matchup_stats.crash_count = BotStatistics._calculate_matchup_crash_count(opponent_p, self_p)
+            matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
+
+            matchup_stats.save()
 
     @staticmethod
     def _update_matchup_stats(bot: CompetitionParticipation, opponent: CompetitionParticipation, result: Result):
@@ -260,50 +251,42 @@ class BotStatistics:
         return row[0]
 
     @staticmethod
-    def _calculate_matchup_data(cursor, competition_participation, sp, query):
-        return BotStatistics._run_single_column_query(
-            cursor,
-            """
-                    select count(cm.id) as count
-                    from core_match cm
-                    inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
-                    inner join core_matchparticipation opponent_p on cm.id = opponent_p.match_id
-                    inner join core_round cr on cm.round_id = cr.id
-                    inner join core_competition cs on cr.competition_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current competition
-                    and bot_p.bot_id = %s
-                    and opponent_p.bot_id = %s
-                    and """
-            + query,
-            [sp.competition_id, sp.bot_id, competition_participation.bot_id],
+    def _calculate_matchup_data(competition_participation, sp, result_query):
+        return Match.objects.filter(
+            Exists(MatchParticipation.objects.filter(result_query, match_id=OuterRef("id"), bot_id=sp.bot_id)),
+            Exists(MatchParticipation.objects.filter(match_id=OuterRef("id"), bot_id=competition_participation.bot_id)),
+            round__competition=sp.competition_id,
         )
 
     @staticmethod
-    def _calculate_matchup_count(cursor, competition_participation, sp):
+    def _calculate_matchup_count(competition_participation, sp):
         return BotStatistics._calculate_matchup_data(
-            cursor, competition_participation, sp, "bot_p.result is not null and bot_p.result != 'none'"
-        )
-
-    @staticmethod
-    def _calculate_matchup_win_count(cursor, competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(cursor, competition_participation, sp, "bot_p.result = 'win'")
-
-    @staticmethod
-    def _calculate_matchup_loss_count(cursor, competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(cursor, competition_participation, sp, "bot_p.result = 'loss'")
-
-    @staticmethod
-    def _calculate_matchup_tie_count(cursor, competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(cursor, competition_participation, sp, "bot_p.result = 'tie'")
-
-    @staticmethod
-    def _calculate_matchup_crash_count(cursor, competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(
-            cursor,
             competition_participation,
             sp,
-            """bot_p.result = 'loss'
-                                                     and bot_p.result_cause in ('crash', 'timeout', 'initialization_failure')""",
+            result_query=~Q(result=None) & ~Q(result="none"),
+        )
+
+    @staticmethod
+    def _calculate_matchup_win_count(competition_participation, sp):
+        return BotStatistics._calculate_matchup_data(competition_participation, sp, Q(result="win"))
+
+    @staticmethod
+    def _calculate_matchup_loss_count(competition_participation, sp):
+        return BotStatistics._calculate_matchup_data(competition_participation, sp, Q(result="loss"))
+
+    @staticmethod
+    def _calculate_matchup_tie_count(competition_participation, sp):
+        return BotStatistics._calculate_matchup_data(competition_participation, sp, Q(result="tie"))
+
+    @staticmethod
+    def _calculate_matchup_crash_count(competition_participation, sp):
+        return BotStatistics._calculate_matchup_data(
+            competition_participation,
+            sp,
+            Q(
+                result="loss",
+                result_cause__in=["crash", "timeout", "initialization_failure"],
+            ),
         )
 
     @staticmethod
