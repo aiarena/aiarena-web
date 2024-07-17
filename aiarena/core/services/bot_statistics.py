@@ -9,6 +9,15 @@ from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGr
 
 
 class BotStatistics:
+    result_exists = ~Q(result=None) & ~Q(result="none")
+    result_win = Q(result="win")
+    result_loss = Q(result="loss")
+    result_tie = Q(result="tie")
+    result_crash = Q(
+        result="loss",
+        result_cause__in=["crash", "timeout", "initialization_failure"],
+    )
+
     # ignore these result types for the purpose of statistics generation
     _ignored_result_types = ["MatchCancelled", "InitializationError", "Error"]
 
@@ -51,23 +60,22 @@ class BotStatistics:
         )
         if sp.match_count != 0:
             sp.win_count = MatchParticipation.objects.filter(
-                bot=sp.bot, result="win", match__round__competition=sp.competition
+                self.result_win, bot=sp.bot, match__round__competition=sp.competition
             ).count()
             sp.win_perc = sp.win_count / sp.match_count * 100
 
             if sp.competition.indepth_bot_statistics_enabled:
                 sp.loss_count = MatchParticipation.objects.filter(
-                    bot=sp.bot, result="loss", match__round__competition=sp.competition
+                    self.result_loss, bot=sp.bot, match__round__competition=sp.competition
                 ).count()
                 sp.loss_perc = sp.loss_count / sp.match_count * 100
                 sp.tie_count = MatchParticipation.objects.filter(
-                    bot=sp.bot, result="tie", match__round__competition=sp.competition
+                    self.result_tie, bot=sp.bot, match__round__competition=sp.competition
                 ).count()
                 sp.tie_perc = sp.tie_count / sp.match_count * 100
                 sp.crash_count = MatchParticipation.objects.filter(
+                    self.result_crash,
                     bot=sp.bot,
-                    result="loss",
-                    result_cause__in=["crash", "timeout", "initialization_failure"],
                     match__round__competition=sp.competition,
                 ).count()
                 sp.crash_perc = sp.crash_count / sp.match_count * 100
@@ -140,23 +148,23 @@ class BotStatistics:
         for opponent_p in CompetitionParticipation.objects.filter(competition=self_p.competition).exclude(
             bot=self_p.bot
         ):
-            match_count = self._calculate_matchup_count(opponent_p, self_p)
+            match_count = self._calculate_matchup_data(opponent_p, self_p, self.result_exists)
             if not match_count:
                 continue
 
             matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(bot=self_p, opponent=opponent_p)[0]
             matchup_stats.match_count = match_count
 
-            matchup_stats.win_count = self._calculate_matchup_win_count(opponent_p, self_p)
+            matchup_stats.win_count = self._calculate_matchup_data(opponent_p, self_p, self.result_win)
             matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
 
-            matchup_stats.loss_count = self._calculate_matchup_loss_count(opponent_p, self_p)
+            matchup_stats.loss_count = self._calculate_matchup_data(opponent_p, self_p, self.result_loss)
             matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
 
-            matchup_stats.tie_count = self._calculate_matchup_tie_count(opponent_p, self_p)
+            matchup_stats.tie_count = self._calculate_matchup_data(opponent_p, self_p, self.result_tie)
             matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
 
-            matchup_stats.crash_count = self._calculate_matchup_crash_count(opponent_p, self_p)
+            matchup_stats.crash_count = self._calculate_matchup_data(opponent_p, self_p, self.result_crash)
             matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
 
             matchup_stats.save()
@@ -195,23 +203,23 @@ class BotStatistics:
         CompetitionBotMapStats.objects.filter(bot=sp).delete()
 
         for map in maps:
-            match_count = self._calculate_map_count(map, sp)
+            match_count = self._calculate_map_data(map, sp, self.result_exists)
             if not match_count:
                 continue
 
             map_stats = CompetitionBotMapStats.objects.create(bot=sp, map=map)
             map_stats.match_count = match_count
 
-            map_stats.win_count = self._calculate_map_win_count(map, sp)
+            map_stats.win_count = self._calculate_map_data(map, sp, self.result_win)
             map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
 
-            map_stats.loss_count = self._calculate_map_loss_count(map, sp)
+            map_stats.loss_count = self._calculate_map_data(map, sp, self.result_loss)
             map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
 
-            map_stats.tie_count = self._calculate_map_tie_count(map, sp)
+            map_stats.tie_count = self._calculate_map_data(map, sp, self.result_tie)
             map_stats.tie_perc = map_stats.tie_count / map_stats.match_count * 100
 
-            map_stats.crash_count = self._calculate_map_crash_count(map, sp)
+            map_stats.crash_count = self._calculate_map_data(map, sp, self.result_crash)
             map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
 
             map_stats.save()
@@ -255,32 +263,6 @@ class BotStatistics:
             round__competition=sp.competition_id,
         )
 
-    def _calculate_matchup_count(self, competition_participation, sp):
-        return self._calculate_matchup_data(
-            competition_participation,
-            sp,
-            result_query=~Q(result=None) & ~Q(result="none"),
-        )
-
-    def _calculate_matchup_win_count(self, competition_participation, sp):
-        return self._calculate_matchup_data(competition_participation, sp, Q(result="win"))
-
-    def _calculate_matchup_loss_count(self, competition_participation, sp):
-        return self._calculate_matchup_data(competition_participation, sp, Q(result="loss"))
-
-    def _calculate_matchup_tie_count(self, competition_participation, sp):
-        return self._calculate_matchup_data(competition_participation, sp, Q(result="tie"))
-
-    def _calculate_matchup_crash_count(self, competition_participation, sp):
-        return self._calculate_matchup_data(
-            competition_participation,
-            sp,
-            Q(
-                result="loss",
-                result_cause__in=["crash", "timeout", "initialization_failure"],
-            ),
-        )
-
     @staticmethod
     def _calculate_map_data(map, sp, result_query):
         return Match.objects.filter(
@@ -288,25 +270,3 @@ class BotStatistics:
             map_id=map.id,
             round__competition=sp.competition_id,
         ).count()
-
-    def _calculate_map_count(self, map, sp):
-        return self._calculate_map_data(map, sp, result_query=~Q(result=None) & ~Q(result="none"))
-
-    def _calculate_map_win_count(self, map, sp):
-        return self._calculate_map_data(map, sp, Q(result="win"))
-
-    def _calculate_map_loss_count(self, map, sp):
-        return self._calculate_map_data(map, sp, Q(result="loss"))
-
-    def _calculate_map_tie_count(self, map, sp):
-        return self._calculate_map_data(map, sp, Q(result="tie"))
-
-    def _calculate_map_crash_count(self, map, sp):
-        return self._calculate_map_data(
-            map,
-            sp,
-            Q(
-                result="loss",
-                result_cause__in=["crash", "timeout", "initialization_failure"],
-            ),
-        )
