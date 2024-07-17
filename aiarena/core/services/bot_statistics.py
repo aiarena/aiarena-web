@@ -250,12 +250,6 @@ class BotStatistics:
         map_stats.save()
 
     @staticmethod
-    def _run_single_column_query(cursor, query, params):
-        cursor.execute(query, params)
-        row = cursor.fetchone()
-        return row[0]
-
-    @staticmethod
     def _calculate_matchup_data(competition_participation, sp, result_query):
         return Match.objects.filter(
             Exists(MatchParticipation.objects.filter(result_query, match_id=OuterRef("id"), bot_id=sp.bot_id)),
