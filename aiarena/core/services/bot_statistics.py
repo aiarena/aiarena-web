@@ -273,7 +273,7 @@ class BotStatistics:
             ),
             Exists(MatchParticipation.objects.filter(match_id=OuterRef("id"), bot_id=opponent_p.bot_id)),
             round__competition=self.participation.competition_id,
-        )
+        ).count()
 
     def _calculate_map_data(self, map, result_query):
         return Match.objects.filter(
