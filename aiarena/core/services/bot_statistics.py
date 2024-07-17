@@ -1,4 +1,3 @@
-from django.db import connection
 from django.db.models import Exists, Max, OuterRef, Q
 
 from django_pglocks import advisory_lock
@@ -199,25 +198,26 @@ class BotStatistics:
         CompetitionBotMapStats.objects.filter(bot=sp).delete()
 
         for map in maps:
-            with connection.cursor() as cursor:
-                match_count = BotStatistics._calculate_map_count(cursor, map, sp)
-                if match_count > 0:
-                    map_stats = CompetitionBotMapStats.objects.create(bot=sp, map=map)
-                    map_stats.match_count = match_count
+            match_count = BotStatistics._calculate_map_count(map, sp)
+            if not match_count:
+                continue
 
-                    map_stats.win_count = BotStatistics._calculate_map_win_count(cursor, map, sp)
-                    map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
+            map_stats = CompetitionBotMapStats.objects.create(bot=sp, map=map)
+            map_stats.match_count = match_count
 
-                    map_stats.loss_count = BotStatistics._calculate_map_loss_count(cursor, map, sp)
-                    map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
+            map_stats.win_count = BotStatistics._calculate_map_win_count(map, sp)
+            map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
 
-                    map_stats.tie_count = BotStatistics._calculate_map_tie_count(cursor, map, sp)
-                    map_stats.tie_perc = map_stats.tie_count / map_stats.match_count * 100
+            map_stats.loss_count = BotStatistics._calculate_map_loss_count(map, sp)
+            map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
 
-                    map_stats.crash_count = BotStatistics._calculate_map_crash_count(cursor, map, sp)
-                    map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
+            map_stats.tie_count = BotStatistics._calculate_map_tie_count(map, sp)
+            map_stats.tie_perc = map_stats.tie_count / map_stats.match_count * 100
 
-                    map_stats.save()
+            map_stats.crash_count = BotStatistics._calculate_map_crash_count(map, sp)
+            map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
+
+            map_stats.save()
 
     @staticmethod
     def _update_map_stats(bot: CompetitionParticipation, result: Result):
@@ -290,46 +290,40 @@ class BotStatistics:
         )
 
     @staticmethod
-    def _calculate_map_data(cursor, map, sp, query):
-        return BotStatistics._run_single_column_query(
-            cursor,
-            """
-                    select count(cm.id) as count
-                    from core_match cm
-                    inner join core_matchparticipation bot_p on cm.id = bot_p.match_id
-                    inner join core_map map on cm.map_id = map.id
-                    inner join core_round cr on cm.round_id = cr.id
-                    inner join core_competition cs on cr.competition_id = cs.id
-                    where cs.id = %s -- make sure it's part of the current competition
-                    and map.id = %s
-                    and bot_p.bot_id = %s
-                    and """
-            + query,
-            [sp.competition_id, map.id, sp.bot_id],
+    def _calculate_map_data(map, sp, result_query):
+        return Match.objects.filter(
+            Exists(MatchParticipation.objects.filter(result_query, match_id=OuterRef("id"), bot_id=sp.bot_id)),
+            map_id=map.id,
+            round__competition=sp.competition_id,
+        ).count()
+
+    @staticmethod
+    def _calculate_map_count(map, sp):
+        return BotStatistics._calculate_map_data(
+            map,
+            sp,
+            result_query=~Q(result=None) & ~Q(result="none"),
         )
 
     @staticmethod
-    def _calculate_map_count(cursor, map, sp):
-        return BotStatistics._calculate_map_data(cursor, map, sp, "bot_p.result is not null and bot_p.result != 'none'")
+    def _calculate_map_win_count(map, sp):
+        return BotStatistics._calculate_map_data(map, sp, Q(result="win"))
 
     @staticmethod
-    def _calculate_map_win_count(cursor, map, sp):
-        return BotStatistics._calculate_map_data(cursor, map, sp, "bot_p.result = 'win'")
+    def _calculate_map_loss_count(map, sp):
+        return BotStatistics._calculate_map_data(map, sp, Q(result="loss"))
 
     @staticmethod
-    def _calculate_map_loss_count(cursor, map, sp):
-        return BotStatistics._calculate_map_data(cursor, map, sp, "bot_p.result = 'loss'")
+    def _calculate_map_tie_count(map, sp):
+        return BotStatistics._calculate_map_data(map, sp, Q(result="tie"))
 
     @staticmethod
-    def _calculate_map_tie_count(cursor, map, sp):
-        return BotStatistics._calculate_map_data(cursor, map, sp, "bot_p.result = 'tie'")
-
-    @staticmethod
-    def _calculate_map_crash_count(cursor, map, sp):
+    def _calculate_map_crash_count(map, sp):
         return BotStatistics._calculate_map_data(
-            cursor,
             map,
             sp,
-            """bot_p.result = 'loss'
-                                                 and bot_p.result_cause in ('crash', 'timeout', 'initialization_failure')""",
+            Q(
+                result="loss",
+                result_cause__in=["crash", "timeout", "initialization_failure"],
+            ),
         )
