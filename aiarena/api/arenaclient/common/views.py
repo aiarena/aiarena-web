@@ -348,8 +348,8 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 elif config.DEBUG_LOGGING_ENABLED:
                     logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
-                BotStatistics.update_stats_based_on_result(sp1, result, sp2)
-                BotStatistics.update_stats_based_on_result(sp2, result, sp1)
+                BotStatistics(sp1).update_stats_based_on_result(result, sp2)
+                BotStatistics(sp2).update_stats_based_on_result(result, sp1)
 
                 if result.is_crash_or_timeout:
                     run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)

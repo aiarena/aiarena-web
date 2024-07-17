@@ -86,8 +86,8 @@ class Command(BaseCommand):
                 for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
                     self.stdout.write(f"Generating current competition stats for bot {sp.bot_id}...")
                     if graphs_only:
-                        BotStatistics.generate_graphs(sp)
+                        BotStatistics(sp).generate_graphs()
                     else:
-                        BotStatistics.recalculate_stats(sp)
+                        BotStatistics(sp).recalculate_stats()
         else:
             self.stdout.write(f"WARNING: Skipping competition {competition.id} - stats already finalized.")
