@@ -9,45 +9,44 @@ from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGr
 
 
 class BotStatistics:
-    @staticmethod
-    def update_stats_based_on_result(bot: CompetitionParticipation, result: Result, opponent: CompetitionParticipation):
+    # ignore these result types for the purpose of statistics generation
+    _ignored_result_types = ["MatchCancelled", "InitializationError", "Error"]
+
+    def update_stats_based_on_result(
+        self, bot: CompetitionParticipation, result: Result, opponent: CompetitionParticipation
+    ):
         """This method updates a bot's existing stats based on a single result.
         This can be done much quicker that regenerating a bot's entire set of stats"""
 
-        if result.type not in BotStatistics._ignored_result_types and bot.competition.indepth_bot_statistics_enabled:
+        if result.type not in self._ignored_result_types and bot.competition.indepth_bot_statistics_enabled:
             with advisory_lock(f"stats_lock_competitionparticipation_{bot.id}") as acquired:
                 if not acquired:
                     raise Exception(
                         "Could not acquire lock on bot statistics for competition participation " + str(bot.id)
                     )
-                BotStatistics._update_global_statistics(bot, result)
-                BotStatistics._update_matchup_stats(bot, opponent, result)
-                BotStatistics._update_map_stats(bot, result)
+                self._update_global_statistics(bot, result)
+                self._update_matchup_stats(bot, opponent, result)
+                self._update_map_stats(bot, result)
 
-    @staticmethod
-    def recalculate_stats(sp: CompetitionParticipation):
+    def recalculate_stats(self, sp: CompetitionParticipation):
         """This method entirely recalculates a bot's set of stats."""
 
         with advisory_lock(f"stats_lock_competitionparticipation_{sp.id}") as acquired:
             if not acquired:
                 raise Exception(f"Could not acquire lock on bot statistics for competition participation  {str(sp.id)}")
 
-            BotStatistics._recalculate_global_statistics(sp)
+            self._recalculate_global_statistics(sp)
 
             if sp.competition.indepth_bot_statistics_enabled:
-                BotStatistics._recalculate_matchup_stats(sp)
-                BotStatistics._recalculate_map_stats(sp)
+                self._recalculate_matchup_stats(sp)
+                self._recalculate_map_stats(sp)
 
-    # ignore these result types for the purpose of statistics generation
-    _ignored_result_types = ["MatchCancelled", "InitializationError", "Error"]
-
-    @staticmethod
-    def _recalculate_global_statistics(sp: CompetitionParticipation):
+    def _recalculate_global_statistics(self, sp: CompetitionParticipation):
         sp.match_count = (
             MatchParticipation.objects.filter(
                 bot=sp.bot, match__result__isnull=False, match__round__competition=sp.competition
             )
-            .exclude(match__result__type__in=BotStatistics._ignored_result_types)
+            .exclude(match__result__type__in=self._ignored_result_types)
             .count()
         )
         if sp.match_count != 0:
@@ -77,10 +76,10 @@ class BotStatistics:
                     MatchParticipation.objects.filter(
                         bot=sp.bot, match__result__isnull=False, match__round__competition=sp.competition
                     )
-                    .exclude(match__result__type__in=BotStatistics._ignored_result_types)
+                    .exclude(match__result__type__in=self._ignored_result_types)
                     .aggregate(Max("resultant_elo"))["resultant_elo__max"]
                 )
-                BotStatistics.generate_graphs(sp)
+                self.generate_graphs(sp)
         sp.save()
 
     @staticmethod
@@ -135,30 +134,29 @@ class BotStatistics:
 
         sp.save()
 
-    @staticmethod
-    def _recalculate_matchup_stats(self_p: CompetitionParticipation):
+    def _recalculate_matchup_stats(self, self_p: CompetitionParticipation):
         CompetitionBotMatchupStats.objects.filter(bot=self_p).delete()
 
         for opponent_p in CompetitionParticipation.objects.filter(competition=self_p.competition).exclude(
             bot=self_p.bot
         ):
-            match_count = BotStatistics._calculate_matchup_count(opponent_p, self_p)
+            match_count = self._calculate_matchup_count(opponent_p, self_p)
             if not match_count:
                 continue
 
             matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(bot=self_p, opponent=opponent_p)[0]
             matchup_stats.match_count = match_count
 
-            matchup_stats.win_count = BotStatistics._calculate_matchup_win_count(opponent_p, self_p)
+            matchup_stats.win_count = self._calculate_matchup_win_count(opponent_p, self_p)
             matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
 
-            matchup_stats.loss_count = BotStatistics._calculate_matchup_loss_count(opponent_p, self_p)
+            matchup_stats.loss_count = self._calculate_matchup_loss_count(opponent_p, self_p)
             matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
 
-            matchup_stats.tie_count = BotStatistics._calculate_matchup_tie_count(opponent_p, self_p)
+            matchup_stats.tie_count = self._calculate_matchup_tie_count(opponent_p, self_p)
             matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
 
-            matchup_stats.crash_count = BotStatistics._calculate_matchup_crash_count(opponent_p, self_p)
+            matchup_stats.crash_count = self._calculate_matchup_crash_count(opponent_p, self_p)
             matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
 
             matchup_stats.save()
@@ -189,8 +187,7 @@ class BotStatistics:
 
         matchup_stats.save()
 
-    @staticmethod
-    def _recalculate_map_stats(sp: CompetitionParticipation):
+    def _recalculate_map_stats(self, sp: CompetitionParticipation):
         competition_matches = Match.objects.filter(round__competition_id=sp.competition.id).select_related("map")
         maps = Map.objects.filter(id__in=competition_matches.values_list("map_id", flat=True))
 
@@ -198,23 +195,23 @@ class BotStatistics:
         CompetitionBotMapStats.objects.filter(bot=sp).delete()
 
         for map in maps:
-            match_count = BotStatistics._calculate_map_count(map, sp)
+            match_count = self._calculate_map_count(map, sp)
             if not match_count:
                 continue
 
             map_stats = CompetitionBotMapStats.objects.create(bot=sp, map=map)
             map_stats.match_count = match_count
 
-            map_stats.win_count = BotStatistics._calculate_map_win_count(map, sp)
+            map_stats.win_count = self._calculate_map_win_count(map, sp)
             map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
 
-            map_stats.loss_count = BotStatistics._calculate_map_loss_count(map, sp)
+            map_stats.loss_count = self._calculate_map_loss_count(map, sp)
             map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
 
-            map_stats.tie_count = BotStatistics._calculate_map_tie_count(map, sp)
+            map_stats.tie_count = self._calculate_map_tie_count(map, sp)
             map_stats.tie_perc = map_stats.tie_count / map_stats.match_count * 100
 
-            map_stats.crash_count = BotStatistics._calculate_map_crash_count(map, sp)
+            map_stats.crash_count = self._calculate_map_crash_count(map, sp)
             map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
 
             map_stats.save()
@@ -258,29 +255,24 @@ class BotStatistics:
             round__competition=sp.competition_id,
         )
 
-    @staticmethod
-    def _calculate_matchup_count(competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(
+    def _calculate_matchup_count(self, competition_participation, sp):
+        return self._calculate_matchup_data(
             competition_participation,
             sp,
             result_query=~Q(result=None) & ~Q(result="none"),
         )
 
-    @staticmethod
-    def _calculate_matchup_win_count(competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(competition_participation, sp, Q(result="win"))
+    def _calculate_matchup_win_count(self, competition_participation, sp):
+        return self._calculate_matchup_data(competition_participation, sp, Q(result="win"))
 
-    @staticmethod
-    def _calculate_matchup_loss_count(competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(competition_participation, sp, Q(result="loss"))
+    def _calculate_matchup_loss_count(self, competition_participation, sp):
+        return self._calculate_matchup_data(competition_participation, sp, Q(result="loss"))
 
-    @staticmethod
-    def _calculate_matchup_tie_count(competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(competition_participation, sp, Q(result="tie"))
+    def _calculate_matchup_tie_count(self, competition_participation, sp):
+        return self._calculate_matchup_data(competition_participation, sp, Q(result="tie"))
 
-    @staticmethod
-    def _calculate_matchup_crash_count(competition_participation, sp):
-        return BotStatistics._calculate_matchup_data(
+    def _calculate_matchup_crash_count(self, competition_participation, sp):
+        return self._calculate_matchup_data(
             competition_participation,
             sp,
             Q(
@@ -297,29 +289,20 @@ class BotStatistics:
             round__competition=sp.competition_id,
         ).count()
 
-    @staticmethod
-    def _calculate_map_count(map, sp):
-        return BotStatistics._calculate_map_data(
-            map,
-            sp,
-            result_query=~Q(result=None) & ~Q(result="none"),
-        )
+    def _calculate_map_count(self, map, sp):
+        return self._calculate_map_data(map, sp, result_query=~Q(result=None) & ~Q(result="none"))
 
-    @staticmethod
-    def _calculate_map_win_count(map, sp):
-        return BotStatistics._calculate_map_data(map, sp, Q(result="win"))
+    def _calculate_map_win_count(self, map, sp):
+        return self._calculate_map_data(map, sp, Q(result="win"))
 
-    @staticmethod
-    def _calculate_map_loss_count(map, sp):
-        return BotStatistics._calculate_map_data(map, sp, Q(result="loss"))
+    def _calculate_map_loss_count(self, map, sp):
+        return self._calculate_map_data(map, sp, Q(result="loss"))
 
-    @staticmethod
-    def _calculate_map_tie_count(map, sp):
-        return BotStatistics._calculate_map_data(map, sp, Q(result="tie"))
+    def _calculate_map_tie_count(self, map, sp):
+        return self._calculate_map_data(map, sp, Q(result="tie"))
 
-    @staticmethod
-    def _calculate_map_crash_count(map, sp):
-        return BotStatistics._calculate_map_data(
+    def _calculate_map_crash_count(self, map, sp):
+        return self._calculate_map_data(
             map,
             sp,
             Q(
