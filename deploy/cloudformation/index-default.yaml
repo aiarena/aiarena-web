@@ -874,19 +874,14 @@ Parameters:
   DBClass:
     Description: DB instance type
     Type: String
-    Default: db.t3.micro
+    Default: db.t4g.micro
     AllowedValues:
-      - db.t3.micro
-      - db.t3.small
-      - db.t3.medium
+      - db.t4g.micro
+      - db.t4g.small
       - db.t4g.medium
       - db.t4g.large
       - db.t4g.xlarge
       - db.t4g.2xlarge
-      - db.r5.large
-      - db.r5.xlarge
-      - db.r5.2xlarge
-      - db.r5.4xlarge
     ConstraintDescription: must be a valid RDS instance type.
 
   DBAllocatedStorage:
