@@ -76,18 +76,19 @@ class Command(BaseCommand):
         self.stdout.write("Done")
 
     def _run_generate_stats(self, competition, finalize=False, graphs_only=False):
-        if not competition.statistics_finalized:
-            if finalize:
-                competition.statistics_finalized = True
-                competition.save()
-            with advisory_lock(f"stats_lock_competition_{competition.id}") as acquired:
-                if not acquired:
-                    raise Exception(f"Could not acquire lock on bot statistics for competition {str(competition.id)}")
-                for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
-                    self.stdout.write(f"Generating current competition stats for bot {sp.bot_id}...")
-                    if graphs_only:
-                        BotStatistics(sp).generate_graphs()
-                    else:
-                        BotStatistics(sp).recalculate_stats()
-        else:
+        if competition.statistics_finalized:
             self.stdout.write(f"WARNING: Skipping competition {competition.id} - stats already finalized.")
+
+        if finalize:
+            competition.statistics_finalized = True
+            competition.save()
+
+        with advisory_lock(f"stats_lock_competition_{competition.id}") as acquired:
+            if not acquired:
+                raise Exception(f"Could not acquire lock on bot statistics for competition {str(competition.id)}")
+            for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
+                self.stdout.write(f"Generating current competition stats for bot {sp.bot_id}...")
+                if graphs_only:
+                    BotStatistics(sp).generate_graphs()
+                else:
+                    BotStatistics(sp).recalculate_stats()
