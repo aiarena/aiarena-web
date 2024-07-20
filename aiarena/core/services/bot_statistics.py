@@ -129,7 +129,7 @@ class BotStatistics:
                 if MatchParticipation.objects.get(match=result.match, bot=self.participation.bot).crashed:
                     self.participation.crash_count += 1
 
-                # self.participationecial case to match a full recalc:
+                # Special case to match a full recalc:
                 # Set highest_elo isn't already - this will only trigger on a loss or tie
                 # This is easier than changing the way the full recalc determines this figure
                 if self.participation.highest_elo is None:
@@ -138,7 +138,7 @@ class BotStatistics:
         elif result.is_tie:
             self.participation.tie_count += 1
 
-            # self.participationecial case to match a full recalc:
+            # Special case to match a full recalc:
             # Set highest_elo isn't already - this will only trigger on a loss or tie
             # This is easier than changing the way the full recalc determines this figure
             if self.participation.highest_elo is None:
@@ -189,31 +189,6 @@ class BotStatistics:
 
             matchup_stats.save()
 
-    def _update_matchup_stats(self, opponent: CompetitionParticipation, result: Result):
-        matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(bot=self.participation, opponent=opponent)[0]
-
-        matchup_stats.match_count += 1
-
-        if result.has_winner:
-            if self.participation.bot == result.winner:
-                matchup_stats.win_count += 1
-            else:
-                matchup_stats.loss_count += 1
-
-                if MatchParticipation.objects.get(match=result.match, bot=self.participation.bot).crashed:
-                    matchup_stats.crash_count += 1
-        elif result.is_tie:
-            matchup_stats.tie_count += 1
-        else:
-            raise Exception("Unexpected result type: %s", result.type)
-
-        matchup_stats.win_perc = matchup_stats.win_count / matchup_stats.match_count * 100
-        matchup_stats.loss_perc = matchup_stats.loss_count / matchup_stats.match_count * 100
-        matchup_stats.tie_perc = matchup_stats.tie_count / matchup_stats.match_count * 100
-        matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
-
-        matchup_stats.save()
-
     def _recalculate_map_stats(self):
         competition_matches = Match.objects.filter(
             round__competition_id=self.participation.competition.id
@@ -245,29 +220,36 @@ class BotStatistics:
 
             map_stats.save()
 
+    def _update_matchup_stats(self, opponent: CompetitionParticipation, result: Result):
+        matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(bot=self.participation, opponent=opponent)[0]
+        self._update_stats(result, matchup_stats)
+
     def _update_map_stats(self, result: Result):
         map_stats = CompetitionBotMapStats.objects.get_or_create(bot=self.participation, map=result.match.map)[0]
-        map_stats.match_count += 1
+        self._update_stats(result, map_stats)
+
+    def _update_stats(self, result: Result, stats):
+        stats.match_count += 1
 
         if result.has_winner:
             if self.participation.bot == result.winner:
-                map_stats.win_count += 1
+                stats.win_count += 1
             else:
-                map_stats.loss_count += 1
+                stats.loss_count += 1
 
                 if MatchParticipation.objects.get(match=result.match, bot=self.participation.bot).crashed:
-                    map_stats.crash_count += 1
+                    stats.crash_count += 1
         elif result.is_tie:
-            map_stats.tie_count += 1
+            stats.tie_count += 1
         else:
             raise Exception("Unexpected result type: %s", result.type)
 
-        map_stats.win_perc = map_stats.win_count / map_stats.match_count * 100
-        map_stats.loss_perc = map_stats.loss_count / map_stats.match_count * 100
-        map_stats.tie_perc = map_stats.tie_count / map_stats.match_count * 100
-        map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
+        stats.win_perc = stats.win_count / stats.match_count * 100
+        stats.loss_perc = stats.loss_count / stats.match_count * 100
+        stats.tie_perc = stats.tie_count / stats.match_count * 100
+        stats.crash_perc = stats.crash_count / stats.match_count * 100
 
-        map_stats.save()
+        stats.save()
 
     def _calculate_matchup_data(self, opponent_p, result_query):
         return Match.objects.filter(
