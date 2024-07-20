@@ -1,5 +1,6 @@
 from django.db.models import Exists, Max, OuterRef, Q
 
+import sentry_sdk
 from django_pglocks import advisory_lock
 
 from aiarena.core.models import CompetitionParticipation, Map, Match, MatchParticipation, Result
@@ -165,9 +166,10 @@ class BotStatistics:
             if not match_count:
                 continue
 
-            matchup_stats = CompetitionBotMatchupStats.objects.get_or_create(
-                bot=self.participation, opponent=opponent_p
-            )[0]
+            matchup_stats, created = CompetitionBotMatchupStats.objects.get_or_create(
+                bot=self.participation,
+                opponent=opponent_p,
+            )
             matchup_stats.match_count = match_count
 
             matchup_stats.win_count = self._calculate_matchup_data(opponent_p, self.result_win)
@@ -181,6 +183,9 @@ class BotStatistics:
 
             matchup_stats.crash_count = self._calculate_matchup_data(opponent_p, self.result_crash)
             matchup_stats.crash_perc = matchup_stats.crash_count / matchup_stats.match_count * 100
+
+            if not created and matchup_stats.is_dirty():
+                sentry_sdk.capture_message("Recalculated bot matchup stats differ from previous value")
 
             matchup_stats.save()
 
@@ -215,15 +220,12 @@ class BotStatistics:
         ).select_related("map")
         maps = Map.objects.filter(id__in=competition_matches.values_list("map_id", flat=True))
 
-        # purge existing stats entries for all maps
-        CompetitionBotMapStats.objects.filter(bot=self.participation).delete()
-
         for map in maps:
             match_count = self._calculate_map_data(map, self.result_exists)
             if not match_count:
                 continue
 
-            map_stats = CompetitionBotMapStats.objects.create(bot=self.participation, map=map)
+            map_stats, created = CompetitionBotMapStats.objects.get_or_create(bot=self.participation, map=map)
             map_stats.match_count = match_count
 
             map_stats.win_count = self._calculate_map_data(map, self.result_win)
@@ -237,6 +239,9 @@ class BotStatistics:
 
             map_stats.crash_count = self._calculate_map_data(map, self.result_crash)
             map_stats.crash_perc = map_stats.crash_count / map_stats.match_count * 100
+
+            if not created and map_stats.is_dirty():
+                sentry_sdk.capture_message("Recalculated bot map stats differ from previous value")
 
             map_stats.save()
 

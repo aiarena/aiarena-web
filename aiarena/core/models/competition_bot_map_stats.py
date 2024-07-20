@@ -3,6 +3,8 @@ import logging
 from django.db import models
 from django.utils import timezone
 
+from dirtyfields import DirtyFieldsMixin
+
 from aiarena.core.validators import validate_not_inf, validate_not_nan
 
 from .competition_participation import CompetitionParticipation
@@ -12,7 +14,7 @@ from .map import Map
 logger = logging.getLogger(__name__)
 
 
-class CompetitionBotMapStats(models.Model):
+class CompetitionBotMapStats(DirtyFieldsMixin, models.Model):
     bot = models.ForeignKey(CompetitionParticipation, on_delete=models.CASCADE, related_name="competition_map_stats")
     map = models.ForeignKey(Map, on_delete=models.CASCADE)
     match_count = models.IntegerField(default=0, blank=True)
