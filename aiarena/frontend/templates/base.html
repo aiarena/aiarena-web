@@ -62,6 +62,7 @@
     </script>
 
     <!-- Matomo -->
+    {% if not debug %}
     <script>
       var _paq = window._paq = window._paq || [];
       /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
@@ -75,6 +76,7 @@
         g.async=true; g.src='https://cdn.matomo.cloud/aiarena.matomo.cloud/matomo.js'; s.parentNode.insertBefore(g,s);
       })();
     </script>
+    {% endif %}
     <!-- End Matomo Code -->
 
 </head>

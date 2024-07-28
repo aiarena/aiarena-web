@@ -11,6 +11,10 @@ from constance import config
 from aiarena.core.models import Result, User
 
 
+def debug(request):
+    return {"debug": settings.DEBUG}
+
+
 def stats(request):
     return {
         "match_count_1h": Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=1)).count,
