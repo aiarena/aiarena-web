@@ -513,7 +513,7 @@ def redis_url(db):
 # Celery
 CELERY_BROKER_URL = redis_url(REDIS_CELERY_DB)
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    "visibility_timeout": 3600,  # in seconds
+    "visibility_timeout": 60 * 60 * 3,  # three hours
 }
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_TIMEZONE = TIME_ZONE
