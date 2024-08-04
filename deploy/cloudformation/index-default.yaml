@@ -446,7 +446,7 @@ Resources:
             - GroupId
       DBSubnetGroupName:
         Ref: DBSubnetGroup
-      StorageType: gp2
+      StorageType: gp3
     DeletionPolicy: Retain
     DependsOn:
       - PublicRoute
