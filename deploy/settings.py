@@ -157,7 +157,7 @@ SERVICES = [
     ),
     WorkerService(
         name="celeryWorker-Default",
-        count=0,
+        count=1,
         task=CeleryWorkerTask(
             family="celeryWorker-Default",
             command="--concurrency 1 -P solo -Q default",
