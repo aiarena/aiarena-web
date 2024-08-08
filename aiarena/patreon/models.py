@@ -78,30 +78,11 @@ class PatreonAccountBind(models.Model):
         return self.last_had_pledge is None or (timezone.now() - self.last_had_pledge).days > self.DAYS_GRACE_PERIOD
 
     def _has_pledge(self, user) -> bool:
-        try:
-            return self._has_current_pledge(user)
-        except Exception as e:
-            logger.error(
-                f"_has_current_pledge call failed with error, falling back to old implementation. Error was: {e}"
-            )
-            return self._OLD_has_pledge(user)
-
-    def _OLD_has_pledge(self, user) -> bool:
         if "included" in user:
             for entry in user["included"]:
                 if entry["type"] == "pledge":
                     return True
         return False
-
-    def _has_current_pledge(self, user) -> bool:
-        pledge = self._get_pledge_or_none(user)
-        return pledge is not None and self._is_current_pledge(pledge)
-
-    def _is_current_pledge(self, pledge):
-        return pledge["attributes"]["declined_since"] is None
-
-    def _get_pledge_or_none(self, user):
-        next((entry for entry in user.get("included", []) if entry["type"] == "pledge"), None)
 
     def _get_pledge_reward_id(self, user) -> str:
         for entry in user["included"]:
