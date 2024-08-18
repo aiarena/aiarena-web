@@ -5,11 +5,11 @@ import Navbar from "@/_components/_nav/Navbar";
 import { useSession } from "next-auth/react";
 
 function Page() {
-  const { data: session, status } = useSession();
-  console.log(session);
-  useEffect(() => {
-    console.log(session);
-  }, [session]);
+  // const { data: session, status } = useSession();
+  // console.log(session);
+  // useEffect(() => {
+  //   console.log(session);
+  // }, [session]);
 
   return (
     <>
