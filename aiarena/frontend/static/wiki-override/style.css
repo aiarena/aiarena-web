@@ -1,0 +1,199 @@
+a {
+    color: #86c232;
+}
+
+a:hover {
+    color: #72a629;
+}
+
+body {
+    background-image: url("/static/img/background.gif");
+    color: rgba(247, 247, 247, 0.97);
+}
+
+.ai-arena-logo {
+    max-height: 1.5em;
+    margin-bottom: .2em;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    background-color: #61892f;
+}
+
+.main-navbar {
+    background-color: rgba(97, 137, 47, 0.7);
+}
+
+.wiki-label label {
+    color: #86c232;
+}
+
+.btn-primary {
+    background-color: #61892f;
+    border-color: #649520;
+}
+
+.btn-primary:hover {
+    background-color: #72a629;
+    border-color: #72a629
+}
+
+.btn-primary:focus,
+.btn-primary.focus {
+    background-color: #72a629;
+    border-color: #72a629;
+}
+
+.btn-primary.disabled,
+.btn-primary:disabled {
+    background-color: #8ca863;
+    border-color: #8ca863
+}
+
+.btn-primary:not(:disabled):not(.disabled):active,
+.btn-primary:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle,
+.wiki-article div.toc .show > .btn-primary.toctitle {
+    background-color: #72a629;
+    border-color: #72a629
+}
+
+.btn-secondary {
+    background-color: #343837;
+    border-color: #343837
+}
+
+.btn-secondary:hover {
+    background-color: #222424;
+    border-color: #1b1e1d
+}
+
+.btn-secondary:focus,
+.btn-secondary.focus {
+    background-color: #222424;
+    border-color: #1b1e1d;
+}
+
+.btn-secondary.disabled,
+.btn-secondary:disabled {
+    background-color: #343837;
+    border-color: #343837
+}
+
+.btn-secondary:not(:disabled):not(.disabled):active,
+.btn-secondary:not(:disabled):not(.disabled).active,
+.show > .btn-secondary.dropdown-toggle,
+.wiki-article div.toc .show > .btn-secondary.toctitle {
+    background-color: #1b1e1d;
+}
+
+.form-actions {
+    background-color: rgba(0, 0, 0, 0.0);
+    border-top: 1px solid #86c232;
+}
+
+
+.btn-info {
+    background-color: #61892f;
+    border-color: #61892f;
+}
+
+.btn-info:hover {
+    background-color: #72a629;
+    border-color: #72a629
+}
+
+.btn-info:focus,
+.btn-info.focus {
+    background-color: #72a629;
+    border-color: #72a629
+}
+
+.btn-info.disabled,
+.btn-info:disabled {
+    background-color: #8ca863;
+    border-color: #8ca863
+}
+
+.btn-info:not(:disabled):not(.disabled):active,
+.btn-info:not(:disabled):not(.disabled).active,
+.show > .btn-info.dropdown-toggle,
+.wiki-article div.toc .show > .btn-info.toctitle {
+    background-color: #61892f;
+    border-color: #61892f
+}
+
+.main-content {
+    /*background-color: #5555554a;*/
+    padding: 15px 15px;
+    border-radius: .25rem;
+
+    background-color: #3c3c3cd6;
+    border: 1px solid #dbdbdb42;
+}
+
+.markItUpContainer {
+    background-color: #fbfafa;
+}
+
+.breadcrumb {
+    /*background-color: #5555554a;*/
+    background-color: #3c3c3cd6;
+    border: 1px solid #dbdbdb42;
+}
+
+.breadcrumb-item.active {
+    color: #8b998d;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: .25rem 1.5rem;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: #86c2322e
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+    background-color: #86c232
+}
+
+.text-muted {
+    color: #899585 !important;
+}
+
+.table, .wiki-article table {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.wiki-article div.toc > ul, .wiki-article div.article-list > ul {
+    background-color: #0000;
+    border: 1px solid #dbdbdb42;
+}
+
+.wiki-article div.toc ul li a, .wiki-article div.article-list ul li a {
+    border-bottom: none;
+}
+
+#article-container pre {
+    background-color: #e3e6e1;
+}
+
+#article-container {
+    margin: 10px 0;
+}
+
+.content-spacer {
+    margin-top: 1em;
+}
