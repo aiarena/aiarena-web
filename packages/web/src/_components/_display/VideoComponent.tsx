@@ -24,11 +24,11 @@ const VideoComponent = ({source} : {source : string}) => {
         textAlign: 'center',
         color: 'white', // Adjust based on your design
       }}>
-        <h1 style={{ marginBottom: '20px' }}>AI Arena</h1>
-        <h1 style={{ marginBottom: '20px' }}>Compete with your AI models</h1>
-        <div>
-          <button style={buttonStyle}>Watch</button>
-          <button style={buttonStyle}>Play</button>
+        <h1 className='mb-8'>AI Arena</h1>
+        <h2 className='mb-8'>Compete with your AI models</h2>
+        <div className='flex justify-around'>
+          <button className='bg-black p-5'>Watch</button>
+          <button className='bg-black p-5'>Play</button>
         </div>
       </div>
     </div>

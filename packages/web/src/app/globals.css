@@ -16,8 +16,28 @@
   }
 }
 @layer base {
-  h1, h2, h3, h4, h5, h6 {
-    @apply text-4xl;
+  h1 {
+    @apply text-5xl font-bold;
+  }
+
+  h2 {
+    @apply text-4xl font-semibold;
+  }
+
+  h3 {
+    @apply text-3xl font-medium;
+  }
+
+  h4 {
+    @apply text-2xl font-normal;
+  }
+
+  h5 {
+    @apply text-xl font-light;
+  }
+
+  h6 {
+    @apply text-lg font-thin;
   }
 }
 
