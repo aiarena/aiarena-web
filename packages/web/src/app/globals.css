@@ -15,6 +15,9 @@
     --background-end-rgb: 0, 0, 0;
   }
 }
+h1: {
+  textSize: 50px
+}
 
 body {
   color: rgb(var(--foreground-rgb));

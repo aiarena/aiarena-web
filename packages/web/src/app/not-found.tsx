@@ -1,8 +1,7 @@
 "use client";
 import React, { useEffect } from "react";
-import Layout from "./(unprotected_pages)/layout";
 import Navbar from "@/_components/_nav/Navbar";
-import { useSession } from "next-auth/react";
+
 
 function Page() {
   // const { data: session, status } = useSession();
