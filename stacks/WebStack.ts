@@ -23,6 +23,7 @@ export function WebStack({ stack }: StackContext) {
 
   const site = new NextjsSite(stack, "site", {
     path: "packages/web",
+    runtime: "nodejs20.x",
 
     environment: {
       NEXT_PUBLIC_API_URL: api.url,

@@ -9,7 +9,7 @@ const VideoComponent = ({ source }: { source: string }) => {
     router.push(path);
   };
   return (
-    <div style={{ width: '100%', height: '75vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '85vh', position: 'relative', overflow: 'hidden' }}>
       <video
         src={source}
         autoPlay
@@ -22,6 +22,19 @@ const VideoComponent = ({ source }: { source: string }) => {
           objectFit: 'cover',
         }}
       />
+          
+ {/* Stronger gradient overlay for fade-out effect at the bottom */}
+ <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '30%',
+          background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(50, 50, 50, 1) 100%)',
+          pointerEvents: 'none',
+        }}
+      ></div>
       {/* Tint overlay */}
       <div className="absolute inset-0 bg-black opacity-60 pointer-events-none"></div>
 

@@ -2,11 +2,11 @@
 
 
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    config.cache = false;
-    return config;
-  },
-  reactStrictMode: true,
+  // webpack: (config, { isServer }) => {
+  //   config.cache = false;
+  //   return config;
+  // },
+  // reactStrictMode: true,
 
   // images: {
   //   domains: [
