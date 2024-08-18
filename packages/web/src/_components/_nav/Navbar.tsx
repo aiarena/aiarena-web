@@ -23,7 +23,7 @@ const navLinks = [
   },
   {
     title: "Ladder",
-    path: "/",
+    path: "/ladder",
     showLoggedIn: true,
     showLoggedOut: true,
   },
