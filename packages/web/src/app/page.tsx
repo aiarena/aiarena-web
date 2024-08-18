@@ -4,6 +4,22 @@ import React, { useEffect } from "react";
 import Navbar from "@/_components/_nav/Navbar";
 import VideoComponent from "@/_components/_display/VideoComponent";
 import Footer from "@/_components/_nav/Footer";
+import NewsBox from "@/_components/_display/NewsBox";
+import PlayerRankingList from "@/_components/_display/PlayerRankingList";
+import TopContributorsList from "@/_components/_display/TopContributorList";
+const players = [
+  { rank: 1, race: "Z", name: "Player1", division: 1, elo: 2400 },
+  { rank: 2, race: "P", name: "Player2", division: 1, elo: 2350 },
+  { rank: 3, race: "T", name: "Player3", division: 2, elo: 2300 }
+  // Add more players as needed
+];
+
+const contributors = [
+  { name: "Contributor1", amount: 500 },
+  { name: "Contributor2", amount: 300 },
+  { name: "Contributor3", amount: 200 }
+  // Add more contributors as needed
+];
 
 function Page() {
 
@@ -12,16 +28,24 @@ function Page() {
       <div>
         <Navbar />
         <VideoComponent source= {"ai-banner.mp4"}/>
-        <p>Box: News</p>
-        <p> Upcoming tournaments: List</p>
-    <p>Top supporters:</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 py-8">
+          <div className="w-full">
+            <NewsBox
+              title="Exciting Updates"
+              date="August 18, 2024"
+              content="Here are the latest updates from the community."
+              videoUrl="news-video.mp4"
+            />
+          </div>
+          <div className="w-full">
+            <PlayerRankingList players={players} />
+          </div>
+          <div className="w-full">
+            <TopContributorsList contributors={contributors} />
+          </div>
+        </div>
 
 
-
-        <h1 className="text-4xl font-bold">What is AI Arena?</h1>
-        <p className="text-lg mt-4">The AI Arena ladder provides an environment where Scripted and Deep Learning AIs fight in Starcraft 2.
-
-Matches are run 24/7 and streamed to various live-stream platforms. TwtichLink</p>
         <Footer/>
       </div>
     </>

@@ -31,6 +31,7 @@ export function WebStack({ stack }: StackContext) {
     },
   });
   stack.addOutputs({
+    NEXT_PUBLIC_SITE_URL1: site.url,
     NEXT_PUBLIC_SITE_URL: site.url || "localhost:3000",
   });
 }
