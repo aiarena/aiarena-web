@@ -2,5 +2,7 @@
   "dev-ai-arena-frontend-ApiStack": {
     "ApiEndpoint": "https://hw38os4ig4.execute-api.eu-central-1.amazonaws.com"
   },
-  "dev-ai-arena-frontend-WebStack": {}
+  "dev-ai-arena-frontend-WebStack": {
+    "NEXTPUBLICSITEURL": "localhost:3000"
+  }
 }
