@@ -608,7 +608,7 @@
     "Fn::Join": [
      "",
      [
-      "{\"app\":\"ai-arena-demo\",\"stage\":\"dev\",\"version\":\"2.20.1\",\"metadata\":[{\"id\":\"STRIPE_SECRET_KEY\",\"addr\":\"c868835367c01ef08f2c7b8af80912a2f8eb0fc6bd\",\"stack\":\"dev-ai-arena-demo-ApiStack\",\"type\":\"Secret\",\"data\":{\"name\":\"STRIPE_SECRET_KEY\"}},{\"id\":\"Api\",\"addr\":\"c8b5f96e03ab6993326c5be08ab5e56d22b8c332cd\",\"stack\":\"dev-ai-arena-demo-ApiStack\",\"type\":\"Api\",\"data\":{\"graphql\":false,\"url\":\"https://",
+      "{\"app\":\"ai-arena-demo\",\"stage\":\"dev\",\"version\":\"2.20.1\",\"metadata\":[{\"id\":\"Api\",\"addr\":\"c8b5f96e03ab6993326c5be08ab5e56d22b8c332cd\",\"stack\":\"dev-ai-arena-demo-ApiStack\",\"type\":\"Api\",\"data\":{\"graphql\":false,\"url\":\"https://",
       {
        "Ref": "ApiCD79AAA0"
       },

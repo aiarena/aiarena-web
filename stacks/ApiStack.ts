@@ -3,7 +3,6 @@ import { Config, StackContext, Api, use } from "sst/constructs";
 
 export function ApiStack({ stack, app }: StackContext) {
 
-  const STRIPE_SECRET_KEY = new Config.Secret(stack, "STRIPE_SECRET_KEY");
   const api = new Api(stack, "Api", {
 
     defaults: {

@@ -148,14 +148,6 @@
               "version": "2.84.0"
             }
           },
-          "STRIPE_SECRET_KEY": {
-            "id": "STRIPE_SECRET_KEY",
-            "path": "dev-ai-arena-demo-ApiStack/STRIPE_SECRET_KEY",
-            "constructInfo": {
-              "fqn": "constructs.Construct",
-              "version": "10.1.156"
-            }
-          },
           "Api": {
             "id": "Api",
             "path": "dev-ai-arena-demo-ApiStack/Api",
