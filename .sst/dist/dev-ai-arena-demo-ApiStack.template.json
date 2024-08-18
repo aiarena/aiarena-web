@@ -1,0 +1,688 @@
+{
+ "Resources": {
+  "CustomResourceHandlerServiceRole41AEC181": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "sst:app",
+      "Value": "ai-arena-demo"
+     },
+     {
+      "Key": "sst:stage",
+      "Value": "dev"
+     }
+    ]
+   }
+  },
+  "CustomResourceHandlerE8FB56BA": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-171376673452-eu-central-1",
+     "S3Key": "ce0d19cec180a5b90b23569ac58f3abfd1c26dcbdcb2d90cd0ca0f7c682510b6.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomResourceHandlerServiceRole41AEC181",
+      "Arn"
+     ]
+    },
+    "Handler": "index.handler",
+    "MemorySize": 1024,
+    "Runtime": "nodejs16.x",
+    "Tags": [
+     {
+      "Key": "sst:app",
+      "Value": "ai-arena-demo"
+     },
+     {
+      "Key": "sst:stage",
+      "Value": "dev"
+     }
+    ],
+    "Timeout": 900
+   },
+   "DependsOn": [
+    "CustomResourceHandlerServiceRole41AEC181"
+   ]
+  },
+  "ApiCD79AAA0": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "CorsConfiguration": {
+     "AllowCredentials": false,
+     "AllowHeaders": [
+      "*"
+     ],
+     "AllowMethods": [
+      "*"
+     ],
+     "AllowOrigins": [
+      "*"
+     ]
+    },
+    "Name": "dev-ai-arena-demo-Api",
+    "ProtocolType": "HTTP",
+    "Tags": {
+     "sst:app": "ai-arena-demo",
+     "sst:stage": "dev"
+    }
+   }
+  },
+  "ApiDefaultStage1AAE989B": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "ApiCD79AAA0"
+    },
+    "StageName": "$default",
+    "AccessLogSettings": {
+     "DestinationArn": {
+      "Fn::GetAtt": [
+       "ApiLogGroup1717FE17",
+       "Arn"
+      ]
+     },
+     "Format": "{\"requestTime\":\"$context.requestTime\",\"requestId\":\"$context.requestId\",\"httpMethod\":\"$context.httpMethod\",\"path\":\"$context.path\",\"routeKey\":\"$context.routeKey\",\"status\":$context.status,\"responseLatency\":$context.responseLatency,\"integrationRequestId\":\"$context.integration.requestId\",\"integrationStatus\":\"$context.integration.status\",\"integrationLatency\":\"$context.integration.latency\",\"integrationServiceStatus\":\"$context.integration.integrationStatus\",\"ip\":\"$context.identity.sourceIp\",\"userAgent\":\"$context.identity.userAgent\"}"
+    },
+    "AutoDeploy": true,
+    "Tags": {
+     "sst:app": "ai-arena-demo",
+     "sst:stage": "dev"
+    }
+   }
+  },
+  "ApiLogGroup1717FE17": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/vendedlogs/apis/dev-ai-arena-demo-Api-",
+       {
+        "Ref": "ApiCD79AAA0"
+       },
+       "/default"
+      ]
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "sst:app",
+      "Value": "ai-arena-demo"
+     },
+     {
+      "Key": "sst:stage",
+      "Value": "dev"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain"
+  },
+  "ApiLambdaGETprivateServiceRole12DB705C": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "sst:app",
+      "Value": "ai-arena-demo"
+     },
+     {
+      "Key": "sst:stage",
+      "Value": "dev"
+     }
+    ]
+   }
+  },
+  "ApiLambdaGETprivateServiceRoleDefaultPolicy926B935A": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "iot:*",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "s3:*",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":s3:::sstbootstrap-eucentral134f82fae-1jt3qw56bbaxs"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ApiLambdaGETprivateServiceRoleDefaultPolicy926B935A",
+    "Roles": [
+     {
+      "Ref": "ApiLambdaGETprivateServiceRole12DB705C"
+     }
+    ]
+   }
+  },
+  "ApiLambdaGETprivate01176F88": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-171376673452-eu-central-1",
+     "S3Key": "af41763f6b4646fdd7a9c3b4a2c3c7aaa461bfe17d926c55c4ef1c601ed4dc1d.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "ApiLambdaGETprivateServiceRole12DB705C",
+      "Arn"
+     ]
+    },
+    "Architectures": [
+     "x86_64"
+    ],
+    "Environment": {
+     "Variables": {
+      "SST_FUNCTION_ID": "c8d9d923ee11d594ebacec244bb7f986af85291360",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "SST_APP": "ai-arena-demo",
+      "SST_STAGE": "dev",
+      "SST_SSM_PREFIX": "/sst/ai-arena-demo/dev/",
+      "SST_DEBUG_IS_API_ROUTE": "1"
+     }
+    },
+    "EphemeralStorage": {
+     "Size": 512
+    },
+    "Handler": "bridge.handler",
+    "MemorySize": 1024,
+    "Runtime": "nodejs16.x",
+    "Tags": [
+     {
+      "Key": "sst:app",
+      "Value": "ai-arena-demo"
+     },
+     {
+      "Key": "sst:stage",
+      "Value": "dev"
+     }
+    ],
+    "Timeout": 10,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "DependsOn": [
+    "ApiLambdaGETprivateServiceRoleDefaultPolicy926B935A",
+    "ApiLambdaGETprivateServiceRole12DB705C"
+   ]
+  },
+  "ApiLambdaGETprivateEventInvokeConfigCB8D396B": {
+   "Type": "AWS::Lambda::EventInvokeConfig",
+   "Properties": {
+    "FunctionName": {
+     "Ref": "ApiLambdaGETprivate01176F88"
+    },
+    "Qualifier": "$LATEST",
+    "MaximumRetryAttempts": 0
+   }
+  },
+  "ApiRouteGETprivateIntegrationGETprivate0815C686": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "ApiCD79AAA0"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiLambdaGETprivate01176F88",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   }
+  },
+  "ApiRouteGETprivateIntegrationGETprivatePermission3B52AACE": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiLambdaGETprivate01176F88",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:eu-central-1:171376673452:",
+       {
+        "Ref": "ApiCD79AAA0"
+       },
+       "/*/*/private"
+      ]
+     ]
+    }
+   }
+  },
+  "ApiRouteGETprivate77529D0C": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "ApiCD79AAA0"
+    },
+    "RouteKey": "GET /private",
+    "AuthorizationType": "NONE",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "ApiRouteGETprivateIntegrationGETprivate0815C686"
+       }
+      ]
+     ]
+    }
+   }
+  },
+  "ApiLambdaGETpublicServiceRole8DF00660": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "sst:app",
+      "Value": "ai-arena-demo"
+     },
+     {
+      "Key": "sst:stage",
+      "Value": "dev"
+     }
+    ]
+   }
+  },
+  "ApiLambdaGETpublicServiceRoleDefaultPolicy98D67C04": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "iot:*",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": "s3:*",
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          "arn:",
+          {
+           "Ref": "AWS::Partition"
+          },
+          ":s3:::sstbootstrap-eucentral134f82fae-1jt3qw56bbaxs"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ApiLambdaGETpublicServiceRoleDefaultPolicy98D67C04",
+    "Roles": [
+     {
+      "Ref": "ApiLambdaGETpublicServiceRole8DF00660"
+     }
+    ]
+   }
+  },
+  "ApiLambdaGETpublic72680C24": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-171376673452-eu-central-1",
+     "S3Key": "af41763f6b4646fdd7a9c3b4a2c3c7aaa461bfe17d926c55c4ef1c601ed4dc1d.zip"
+    },
+    "Role": {
+     "Fn::GetAtt": [
+      "ApiLambdaGETpublicServiceRole8DF00660",
+      "Arn"
+     ]
+    },
+    "Architectures": [
+     "x86_64"
+    ],
+    "Environment": {
+     "Variables": {
+      "SST_FUNCTION_ID": "c82a579a04519b891c07f894931a25e9f24f7f8c64",
+      "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+      "SST_APP": "ai-arena-demo",
+      "SST_STAGE": "dev",
+      "SST_SSM_PREFIX": "/sst/ai-arena-demo/dev/",
+      "SST_DEBUG_IS_API_ROUTE": "1"
+     }
+    },
+    "EphemeralStorage": {
+     "Size": 512
+    },
+    "Handler": "bridge.handler",
+    "MemorySize": 1024,
+    "Runtime": "nodejs16.x",
+    "Tags": [
+     {
+      "Key": "sst:app",
+      "Value": "ai-arena-demo"
+     },
+     {
+      "Key": "sst:stage",
+      "Value": "dev"
+     }
+    ],
+    "Timeout": 10,
+    "TracingConfig": {
+     "Mode": "Active"
+    }
+   },
+   "DependsOn": [
+    "ApiLambdaGETpublicServiceRoleDefaultPolicy98D67C04",
+    "ApiLambdaGETpublicServiceRole8DF00660"
+   ]
+  },
+  "ApiLambdaGETpublicEventInvokeConfigF4E1320E": {
+   "Type": "AWS::Lambda::EventInvokeConfig",
+   "Properties": {
+    "FunctionName": {
+     "Ref": "ApiLambdaGETpublic72680C24"
+    },
+    "Qualifier": "$LATEST",
+    "MaximumRetryAttempts": 0
+   }
+  },
+  "ApiRouteGETpublicIntegrationGETpublicB5E1083B": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "ApiCD79AAA0"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ApiLambdaGETpublic72680C24",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   }
+  },
+  "ApiRouteGETpublicIntegrationGETpublicPermission6A3206A1": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ApiLambdaGETpublic72680C24",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:eu-central-1:171376673452:",
+       {
+        "Ref": "ApiCD79AAA0"
+       },
+       "/*/*/public"
+      ]
+     ]
+    }
+   }
+  },
+  "ApiRouteGETpublicD5552DEC": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "ApiCD79AAA0"
+    },
+    "RouteKey": "GET /public",
+    "AuthorizationType": "NONE",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "ApiRouteGETpublicIntegrationGETpublicB5E1083B"
+       }
+      ]
+     ]
+    }
+   }
+  },
+  "ApiParameterurl09B86AB9": {
+   "Type": "AWS::SSM::Parameter",
+   "Properties": {
+    "Type": "String",
+    "Value": {
+     "Fn::GetAtt": [
+      "ApiCD79AAA0",
+      "ApiEndpoint"
+     ]
+    },
+    "Name": "/sst/ai-arena-demo/dev/Api/Api/url",
+    "Tags": {
+     "sst:app": "ai-arena-demo",
+     "sst:stage": "dev"
+    }
+   }
+  }
+ },
+ "Outputs": {
+  "ApiEndpoint": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ApiCD79AAA0",
+     "ApiEndpoint"
+    ]
+   }
+  },
+  "SSTMetadata": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "{\"app\":\"ai-arena-demo\",\"stage\":\"dev\",\"version\":\"2.20.1\",\"metadata\":[{\"id\":\"STRIPE_SECRET_KEY\",\"addr\":\"c868835367c01ef08f2c7b8af80912a2f8eb0fc6bd\",\"stack\":\"dev-ai-arena-demo-ApiStack\",\"type\":\"Secret\",\"data\":{\"name\":\"STRIPE_SECRET_KEY\"}},{\"id\":\"Api\",\"addr\":\"c8b5f96e03ab6993326c5be08ab5e56d22b8c332cd\",\"stack\":\"dev-ai-arena-demo-ApiStack\",\"type\":\"Api\",\"data\":{\"graphql\":false,\"url\":\"https://",
+      {
+       "Ref": "ApiCD79AAA0"
+      },
+      ".execute-api.eu-central-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/\",\"httpApiId\":\"",
+      {
+       "Ref": "ApiCD79AAA0"
+      },
+      "\",\"routes\":[{\"type\":\"function\",\"route\":\"GET /private\",\"fn\":{\"node\":\"c8d9d923ee11d594ebacec244bb7f986af85291360\",\"stack\":\"dev-ai-arena-demo-ApiStack\"}},{\"type\":\"function\",\"route\":\"GET /public\",\"fn\":{\"node\":\"c82a579a04519b891c07f894931a25e9f24f7f8c64\",\"stack\":\"dev-ai-arena-demo-ApiStack\"}}]}},{\"id\":\"Lambda_GET_--private\",\"addr\":\"c8d9d923ee11d594ebacec244bb7f986af85291360\",\"stack\":\"dev-ai-arena-demo-ApiStack\",\"type\":\"Function\",\"data\":{\"arn\":\"",
+      {
+       "Fn::GetAtt": [
+        "ApiLambdaGETprivate01176F88",
+        "Arn"
+       ]
+      },
+      "\",\"handler\":\"packages/functions/src/test_api/private.main\",\"localId\":\"c8d9d923ee11d594ebacec244bb7f986af85291360\",\"secrets\":[]}},{\"id\":\"Lambda_GET_--public\",\"addr\":\"c82a579a04519b891c07f894931a25e9f24f7f8c64\",\"stack\":\"dev-ai-arena-demo-ApiStack\",\"type\":\"Function\",\"data\":{\"arn\":\"",
+      {
+       "Fn::GetAtt": [
+        "ApiLambdaGETpublic72680C24",
+        "Arn"
+       ]
+      },
+      "\",\"handler\":\"packages/functions/src/test_api/public.main\",\"localId\":\"c82a579a04519b891c07f894931a25e9f24f7f8c64\",\"secrets\":[]}}]}"
+     ]
+    ]
+   }
+  },
+  "ExportsOutputFnGetAttApiCD79AAA0ApiEndpoint389C4905": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ApiCD79AAA0",
+     "ApiEndpoint"
+    ]
+   },
+   "Export": {
+    "Name": "dev-ai-arena-demo-ApiStack:ExportsOutputFnGetAttApiCD79AAA0ApiEndpoint389C4905"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

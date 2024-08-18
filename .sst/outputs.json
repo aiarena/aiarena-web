@@ -1,0 +1,8 @@
+{
+  "dev-ai-arena-demo-ApiStack": {
+    "ApiEndpoint": "https://i1n23flbs8.execute-api.eu-central-1.amazonaws.com"
+  },
+  "dev-ai-arena-demo-WebStack": {
+    "NEXTPUBLICSITEURL": "localhost:3000"
+  }
+}

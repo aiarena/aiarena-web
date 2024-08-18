@@ -1,0 +1,30 @@
+{
+  "name": "ai-arena-demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "nextdev": "cd packages/web && pnpm run dev",
+    "dev": "sst dev",
+    "test": "sst bind vitest run",
+    "build": "sst build",
+    "deploy": "sst deploy",
+    "remove": "sst remove",
+    "console": "sst console",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "20.3.3",
+    "@tsconfig/node16": "^16.1.0",
+    "aws-cdk-lib": "2.84.0",
+    "constructs": "10.1.156",
+    "sst": "2.20.1",
+    "typescript": "^5.1.6",
+    "webpack-cli": "^5.1.4"
+  
+  },
+  "dependencies": {
+    "stripe": "^12.14.0"
+
+  }
+}
