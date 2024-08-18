@@ -44,7 +44,7 @@ const VideoComponent = ({ source }: { source: string }) => {
         <h2 className="text-2xl mb-8">Compete with your AI models</h2>
         <div className="flex flex-wrap justify-around w-80">
         <button
-    onClick={() => handleRedirect('/watch')}
+    onClick={() => handleRedirect('https://aiarena.net/stream/')}
     className="
     hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform "
   >

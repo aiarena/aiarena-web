@@ -9,6 +9,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-quicksand)', 'sans-serif'],
+      },
       colors: {
         customGreen: 'rgba(97,137,47, 1)',
      

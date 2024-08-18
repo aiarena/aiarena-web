@@ -25,8 +25,11 @@ function Page() {
 
   return (
     <>
-      <div>
-        <Navbar />
+  <div className="flex flex-col min-h-screen font-sans">
+      <Navbar />
+      
+      <main className="flex-grow">
+       
         <VideoComponent source= {"ai-banner.mp4"}/>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 py-8">
           <div className="w-full">
@@ -46,8 +49,12 @@ function Page() {
         </div>
 
 
-        <Footer/>
-      </div>
+
+     
+      </main>
+      
+      <Footer />
+    </div>
     </>
   );
 }
