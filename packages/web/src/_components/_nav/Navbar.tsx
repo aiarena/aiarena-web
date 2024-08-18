@@ -78,15 +78,18 @@ function Navbar() {
 
   return (
     <>
-      <nav className="w-full bg-gray-500 px-5 text-white dark:bg-gray-900">
-        <div className="flex justify-between md:py-5 md:flex md:justify-around md:align-middle ">
-          <div className="flex justify-between items-center">
+      <nav className="w-full bg-slate-500 px-2 text-white dark:bg-gray-900">
+        <div className="flex justify-between md:p-3 md:flex ">
+          
             <Link href="/">
+            <div className="flex justify-between items-center">
+            <Image className="pr-2" src={"/ai-arena-logo.png"} alt="AI-arena-logo" width={50} height={50}></Image>
               <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0">
                 {navbarTitle.title}
               </h2>
+              </div>
             </Link>
-          </div>
+       
 
           {/* Phone */}
           <div className="md:hidden py-4">

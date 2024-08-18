@@ -2,7 +2,6 @@
 import React, { useEffect } from "react";
 
 import Navbar from "@/_components/_nav/Navbar";
-import NewNote from "@/_components/NewNote";
 // import TestApi from "@/_components/TestApi";
 // import { useSession } from "next-auth/react";
 function Page() {

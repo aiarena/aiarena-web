@@ -1,2 +1,63 @@
+# dependencies
 node_modules
-node_modules
+
+# sst
+.sst
+.build
+
+.sst.config*.mjs
+
+.env
+
+#vscode
+.vscode
+
+# misc
+.DS_Store
+
+# local env files
+.env*.local
+
+
+
+########web/next files
+# dependencies
+packages/web/node_modules
+packages/web/.pnp
+packages/web/.pnp.js
+
+# testing
+packages/web/coverage
+
+# next.js
+packages/web/.next/
+packages/web/out/
+
+# production
+packages/web/build
+
+# misc
+packages/web/.DS_Store
+packages/web/*.pem
+
+# debug
+packages/web/npm-debug.log*
+packages/web/yarn-debug.log*
+packages/web/yarn-error.log*
+packages/web/.pnpm-debug.log*
+
+# local env files
+packages/web/.env*.local
+
+# vercel
+packages/web/.vercel
+
+# typescript
+packages/web/*.tsbuildinfo+
+packages/web/next-env.d.ts
+
+# sst bundling 
+packages/web/.open-next/
+
+############### web/next files end
+packages/web/.next/cache/webpack/server-development/43.pack.gz

@@ -55,6 +55,46 @@
         "chunks": [],
         "async": false
       }
+    },
+    "(app-client)/./src/app/(unprotected_pages)/layout.tsx": {
+      "*": {
+        "id": "(sc_client)/./src/app/(unprotected_pages)/layout.tsx",
+        "name": "*",
+        "chunks": [],
+        "async": false
+      }
+    },
+    "(app-client)/./src/app/(unprotected_pages)/RouteTest/page.tsx": {
+      "*": {
+        "id": "(sc_client)/./src/app/(unprotected_pages)/RouteTest/page.tsx",
+        "name": "*",
+        "chunks": [],
+        "async": false
+      }
+    },
+    "(app-client)/./src/app/(unprotected_pages)/about/page.tsx": {
+      "*": {
+        "id": "(sc_client)/./src/app/(unprotected_pages)/about/page.tsx",
+        "name": "*",
+        "chunks": [],
+        "async": false
+      }
+    },
+    "(app-client)/./src/app/(forced_authenticated_pages)/layout.tsx": {
+      "*": {
+        "id": "(sc_client)/./src/app/(forced_authenticated_pages)/layout.tsx",
+        "name": "*",
+        "chunks": [],
+        "async": false
+      }
+    },
+    "(app-client)/./src/app/(forced_authenticated_pages)/profile/page.tsx": {
+      "*": {
+        "id": "(sc_client)/./src/app/(forced_authenticated_pages)/profile/page.tsx",
+        "name": "*",
+        "chunks": [],
+        "async": false
+      }
     }
   },
   "edgeSSRModuleMapping": {},
@@ -147,6 +187,14 @@
       ],
       "async": false
     },
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/not-found.tsx": {
+      "id": "(app-client)/./src/app/not-found.tsx",
+      "name": "*",
+      "chunks": [
+        "app/not-found:static/chunks/app/not-found.js"
+      ],
+      "async": false
+    },
     "/root/_programming/webprojects/ai-arena-frontend/node_modules/next/font/google/target.css?{\"path\":\"src/app/layout.tsx\",\"import\":\"Inter\",\"arguments\":[{\"subsets\":[\"latin\"]}],\"variableName\":\"inter\"}": {
       "id": "(app-client)/../../node_modules/next/font/google/target.css?{\"path\":\"src/app/layout.tsx\",\"import\":\"Inter\",\"arguments\":[{\"subsets\":[\"latin\"]}],\"variableName\":\"inter\"}",
       "name": "*",
@@ -163,20 +211,57 @@
       ],
       "async": false
     },
-    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/not-found.tsx": {
-      "id": "(app-client)/./src/app/not-found.tsx",
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(unprotected_pages)/layout.tsx": {
+      "id": "(app-client)/./src/app/(unprotected_pages)/layout.tsx",
       "name": "*",
       "chunks": [
-        "app/not-found:static/chunks/app/not-found.js"
+        "app/(unprotected_pages)/layout:static/chunks/app/(unprotected_pages)/layout.js"
+      ],
+      "async": false
+    },
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(unprotected_pages)/RouteTest/page.tsx": {
+      "id": "(app-client)/./src/app/(unprotected_pages)/RouteTest/page.tsx",
+      "name": "*",
+      "chunks": [
+        "app/(unprotected_pages)/RouteTest/page:static/chunks/app/(unprotected_pages)/RouteTest/page.js"
+      ],
+      "async": false
+    },
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(unprotected_pages)/about/page.tsx": {
+      "id": "(app-client)/./src/app/(unprotected_pages)/about/page.tsx",
+      "name": "*",
+      "chunks": [
+        "app/(unprotected_pages)/about/page:static/chunks/app/(unprotected_pages)/about/page.js"
+      ],
+      "async": false
+    },
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(forced_authenticated_pages)/layout.tsx": {
+      "id": "(app-client)/./src/app/(forced_authenticated_pages)/layout.tsx",
+      "name": "*",
+      "chunks": [
+        "app/(forced_authenticated_pages)/layout:static/chunks/app/(forced_authenticated_pages)/layout.js"
+      ],
+      "async": false
+    },
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(forced_authenticated_pages)/profile/page.tsx": {
+      "id": "(app-client)/./src/app/(forced_authenticated_pages)/profile/page.tsx",
+      "name": "*",
+      "chunks": [
+        "app/(forced_authenticated_pages)/profile/page:static/chunks/app/(forced_authenticated_pages)/profile/page.js"
       ],
       "async": false
     }
   },
   "entryCSSFiles": {
     "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/page": [],
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/not-found": [],
     "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/layout": [
       "static/css/app/layout.css"
     ],
-    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/not-found": []
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(unprotected_pages)/layout": [],
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(unprotected_pages)/RouteTest/page": [],
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(unprotected_pages)/about/page": [],
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(forced_authenticated_pages)/layout": [],
+    "/root/_programming/webprojects/ai-arena-frontend/packages/web/src/app/(forced_authenticated_pages)/profile/page": []
   }
 }
