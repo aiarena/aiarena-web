@@ -12,7 +12,12 @@ interface TopContributorsListProps {
 const TopContributorsList: React.FC<TopContributorsListProps> = ({ contributors }) => {
   return (
     <div className="overflow-x-auto w-full">
-      <h3 className="text-lg font-bold mb-2">Top Contributors</h3>
+<div className="flex items-center justify-center relative">
+       <div className="flex-1 h-[2px] bg-gradient-to-l from-customGreen to-transparent"></div>
+     
+    <h3 className="text-lg font-bold mb-2 text-center px-4">Top contributors</h3>
+    <div className="flex-1 h-[2px] bg-gradient-to-r from-customGreen to-transparent"></div>
+  </div>
       <table className="min-w-full table-auto">
         <thead>
           <tr>

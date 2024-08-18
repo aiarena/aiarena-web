@@ -17,7 +17,7 @@ const navLinks = [
   },
   {
     title: "Wiki",
-    path: "/",
+    path: "https://aiarena.net/wiki/",
     showLoggedIn: true,
     showLoggedOut: true,
   },
@@ -39,12 +39,7 @@ const navLinks = [
     showLoggedIn: true,
     showLoggedOut: false,
   },
-  {
-    title: "Uploads",
-    path: "/uploads",
-    showLoggedIn: true,
-    showLoggedOut: false,
-  },
+ 
 
 
 ];

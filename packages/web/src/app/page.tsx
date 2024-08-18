@@ -31,7 +31,7 @@ function Page() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 py-8">
           <div className="w-full">
             <NewsBox
-              title="Exciting Updates"
+              title="Exciting Update nr 12385"
               date="August 18, 2024"
               content="Here are the latest updates from the community."
               videoUrl="news-video.mp4"
