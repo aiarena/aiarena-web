@@ -81,13 +81,13 @@ function Navbar() {
       <nav className="w-full bg-slate-500 px-2 text-white dark:bg-gray-900">
         <div className="flex justify-between md:p-3 md:flex ">
           
-            <Link href="/">
-            <div className="flex justify-between items-center">
+            <Link href="/" className="flex justify-between items-center">
+
             <Image className="pr-2" src={"/ai-arena-logo.png"} alt="AI-arena-logo" width={50} height={50}></Image>
               <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0">
                 {navbarTitle.title}
               </h2>
-              </div>
+           
             </Link>
        
 
