@@ -38,7 +38,55 @@
                             </li>
                         </ul>
                     {% endblock %}
+                    {% if user.is_authenticated %}
+                        <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                                <a href="#" data-toggle="dropdown" class="nav-link dropdown-toggle">
+                                    <span class="badge badge-light notification-cnt">0</span>
+                                    {{ user }}
+                                    <b class="caret"></b>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    {% if "ACCOUNT_HANDLING"|wiki_settings %}
+                                        <a href="{% url 'wiki:profile_update' %}" class="dropdown-item">
+                                            <i class="fa fa-cog"></i>
+                                            {% trans "Account Settings" %}
+                                        </a>
+                                    {% endif %}
+                                    <a href="{{ "LOGOUT_URL"|wiki_settings }}" class="dropdown-item">
+                                        <i class="fa fa-power-off"></i>
+                                        {% trans "Log out" %}
+                                    </a>
+                                    {% if user.is_superuser %}
+                                        <a href="{% url 'wiki:deleted_list' %}" class="dropdown-item">
+                                            <i class="fa fa-trash"></i>
+                                            {% trans "Deleted articles" %}
+                                        </a>
+                                    {% endif %}
+                                    {% if "wiki.plugins.notifications"|plugin_enabled %}
+                                        {% include "wiki/plugins/notifications/menubaritem.html" %}
+                                    {% endif %}
+                                    {% if "wiki.plugins.globalhistory"|plugin_enabled %}
+                                        {% include "wiki/plugins/globalhistory/menubaritem.html" %}
+                                    {% endif %}
+                                </div>
+                            </li>
+                        </ul>
+                    {% else %}
+                        <ul class="navbar-nav">
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   href="{% login_url as wiki_login_url %}{{ wiki_login_url }}">{% trans "Log in" %}</a>
+                            </li>
+                            {% if "ACCOUNT_HANDLING"|wiki_settings and "ACCOUNT_SIGNUP_ALLOWED"|wiki_settings %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'wiki:signup' %}">{% trans "Sign up" %}</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
                     <form class="form-inline" method="GET" action="{% spaceless %}
+                    
             {% if article or urlpath %}
                 {% url 'wiki:search' article_id=article.id path=urlpath.path %}
               {% else %}
