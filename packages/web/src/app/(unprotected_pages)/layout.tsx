@@ -9,9 +9,12 @@ import Navbar from "@/_components/_nav/Navbar";
 function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
+    
       <Navbar />
+      
       {children}
       <Footer/>
+
     </>
   );
 }
