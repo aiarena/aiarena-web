@@ -1,0 +1,3 @@
+before_compile: 
+ - echo "Before compile in next--"
+ - n 18.17.0
