@@ -18,10 +18,8 @@
     "@types/node": "20.3.3",
     "aws-cdk-lib": "2.84.0",
     "constructs": "10.1.156",
-    "sst": "2.20.1",
+    "sst": "2.43.5",
     "typescript": "^5.5.4",
     "webpack-cli": "^5.1.4"
-  },
-  "dependencies": {
   }
 }
