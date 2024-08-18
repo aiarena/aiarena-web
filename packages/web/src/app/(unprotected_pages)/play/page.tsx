@@ -18,6 +18,7 @@ export default function Page() {
       </div>
      
       {/* <TextDisplay path="private" /> */}
+      
     </div>
   );
 }
