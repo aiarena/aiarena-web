@@ -50,3 +50,33 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+
+
+/* In your globals.css or component-specific CSS */
+.video-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  z-index: 1; /* Ensure this is above the video */
+  pointer-events: none; /* Prevent interaction with the video */
+}
+
+nav {
+  position: relative;
+  z-index: 10; /* Ensure the navbar is always above the video and overlay */
+}
+
+nav .block {
+  z-index: 20; /* For the mobile menu, ensure it is above the overlay text */
+}
+
+/* Hide video overlay when mobile navbar is active */
+@media (max-width: 768px) {
+  .navbar-active .video-overlay {
+    display: none;
+  }
+}

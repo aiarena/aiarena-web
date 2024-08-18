@@ -6,7 +6,7 @@ import { WebStack } from "stacks/WebStack";
 export default {
   config(_input) {
     return {
-      name: "ai-arena-demo",
+      name: "ai-arena-frontend",
       region: "eu-central-1",
     };
   },

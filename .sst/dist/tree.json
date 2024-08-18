@@ -4,21 +4,21 @@
     "id": "App",
     "path": "",
     "children": {
-      "dev-ai-arena-demo-ApiStack": {
-        "id": "dev-ai-arena-demo-ApiStack",
-        "path": "dev-ai-arena-demo-ApiStack",
+      "dev-ai-arena-frontend-ApiStack": {
+        "id": "dev-ai-arena-frontend-ApiStack",
+        "path": "dev-ai-arena-frontend-ApiStack",
         "children": {
           "CustomResourceHandler": {
             "id": "CustomResourceHandler",
-            "path": "dev-ai-arena-demo-ApiStack/CustomResourceHandler",
+            "path": "dev-ai-arena-frontend-ApiStack/CustomResourceHandler",
             "children": {
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "dev-ai-arena-demo-ApiStack/CustomResourceHandler/ServiceRole",
+                "path": "dev-ai-arena-frontend-ApiStack/CustomResourceHandler/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "dev-ai-arena-demo-ApiStack/CustomResourceHandler/ServiceRole/ImportServiceRole",
+                    "path": "dev-ai-arena-frontend-ApiStack/CustomResourceHandler/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.84.0"
@@ -26,7 +26,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-ApiStack/CustomResourceHandler/ServiceRole/Resource",
+                    "path": "dev-ai-arena-frontend-ApiStack/CustomResourceHandler/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -59,7 +59,7 @@
                         "tags": [
                           {
                             "key": "sst:app",
-                            "value": "ai-arena-demo"
+                            "value": "ai-arena-frontend"
                           },
                           {
                             "key": "sst:stage",
@@ -81,11 +81,11 @@
               },
               "Code": {
                 "id": "Code",
-                "path": "dev-ai-arena-demo-ApiStack/CustomResourceHandler/Code",
+                "path": "dev-ai-arena-frontend-ApiStack/CustomResourceHandler/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "dev-ai-arena-demo-ApiStack/CustomResourceHandler/Code/Stage",
+                    "path": "dev-ai-arena-frontend-ApiStack/CustomResourceHandler/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.84.0"
@@ -93,7 +93,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "dev-ai-arena-demo-ApiStack/CustomResourceHandler/Code/AssetBucket",
+                    "path": "dev-ai-arena-frontend-ApiStack/CustomResourceHandler/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.84.0"
@@ -107,13 +107,13 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "dev-ai-arena-demo-ApiStack/CustomResourceHandler/Resource",
+                "path": "dev-ai-arena-frontend-ApiStack/CustomResourceHandler/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-171376673452-eu-central-1",
-                      "s3Key": "ce0d19cec180a5b90b23569ac58f3abfd1c26dcbdcb2d90cd0ca0f7c682510b6.zip"
+                      "s3Key": "5ddb576ca9ab6afc74a4f465ce6e91522b6e01e19444e5d783c1277fd88a28e9.zip"
                     },
                     "role": {
                       "Fn::GetAtt": [
@@ -127,7 +127,7 @@
                     "tags": [
                       {
                         "key": "sst:app",
-                        "value": "ai-arena-demo"
+                        "value": "ai-arena-frontend"
                       },
                       {
                         "key": "sst:stage",
@@ -150,15 +150,15 @@
           },
           "Api": {
             "id": "Api",
-            "path": "dev-ai-arena-demo-ApiStack/Api",
+            "path": "dev-ai-arena-frontend-ApiStack/Api",
             "children": {
               "Api": {
                 "id": "Api",
-                "path": "dev-ai-arena-demo-ApiStack/Api/Api",
+                "path": "dev-ai-arena-frontend-ApiStack/Api/Api",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Api/Resource",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Api/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Api",
                       "aws:cdk:cloudformation:props": {
@@ -174,10 +174,10 @@
                             "*"
                           ]
                         },
-                        "name": "dev-ai-arena-demo-Api",
+                        "name": "dev-ai-arena-frontend-Api",
                         "protocolType": "HTTP",
                         "tags": {
-                          "sst:app": "ai-arena-demo",
+                          "sst:app": "ai-arena-frontend",
                           "sst:stage": "dev"
                         }
                       }
@@ -189,11 +189,11 @@
                   },
                   "DefaultStage": {
                     "id": "DefaultStage",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Api/DefaultStage",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Api/DefaultStage",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Api/DefaultStage/Resource",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Api/DefaultStage/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Stage",
                           "aws:cdk:cloudformation:props": {
@@ -212,7 +212,7 @@
                             },
                             "autoDeploy": true,
                             "tags": {
-                              "sst:app": "ai-arena-demo",
+                              "sst:app": "ai-arena-frontend",
                               "sst:stage": "dev"
                             }
                           }
@@ -236,11 +236,11 @@
               },
               "LogGroup": {
                 "id": "LogGroup",
-                "path": "dev-ai-arena-demo-ApiStack/Api/LogGroup",
+                "path": "dev-ai-arena-frontend-ApiStack/Api/LogGroup",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/LogGroup/Resource",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/LogGroup/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Logs::LogGroup",
                       "aws:cdk:cloudformation:props": {
@@ -248,7 +248,7 @@
                           "Fn::Join": [
                             "",
                             [
-                              "/aws/vendedlogs/apis/dev-ai-arena-demo-Api-",
+                              "/aws/vendedlogs/apis/dev-ai-arena-frontend-Api-",
                               {
                                 "Ref": "ApiCD79AAA0"
                               },
@@ -259,7 +259,7 @@
                         "tags": [
                           {
                             "key": "sst:app",
-                            "value": "ai-arena-demo"
+                            "value": "ai-arena-frontend"
                           },
                           {
                             "key": "sst:stage",
@@ -281,15 +281,15 @@
               },
               "Lambda_GET_--private": {
                 "id": "Lambda_GET_--private",
-                "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private",
+                "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private",
                 "children": {
                   "ServiceRole": {
                     "id": "ServiceRole",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/ServiceRole",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/ServiceRole",
                     "children": {
                       "ImportServiceRole": {
                         "id": "ImportServiceRole",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/ServiceRole/ImportServiceRole",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/ServiceRole/ImportServiceRole",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.Resource",
                           "version": "2.84.0"
@@ -297,7 +297,7 @@
                       },
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/ServiceRole/Resource",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/ServiceRole/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                           "aws:cdk:cloudformation:props": {
@@ -330,7 +330,7 @@
                             "tags": [
                               {
                                 "key": "sst:app",
-                                "value": "ai-arena-demo"
+                                "value": "ai-arena-frontend"
                               },
                               {
                                 "key": "sst:stage",
@@ -346,11 +346,11 @@
                       },
                       "DefaultPolicy": {
                         "id": "DefaultPolicy",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/ServiceRole/DefaultPolicy",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/ServiceRole/DefaultPolicy",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/ServiceRole/DefaultPolicy/Resource",
+                            "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/ServiceRole/DefaultPolicy/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                               "aws:cdk:cloudformation:props": {
@@ -415,11 +415,11 @@
                   },
                   "Code": {
                     "id": "Code",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/Code",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/Code",
                     "children": {
                       "Stage": {
                         "id": "Stage",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/Code/Stage",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/Code/Stage",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.AssetStaging",
                           "version": "2.84.0"
@@ -427,7 +427,7 @@
                       },
                       "AssetBucket": {
                         "id": "AssetBucket",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/Code/AssetBucket",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/Code/AssetBucket",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                           "version": "2.84.0"
@@ -441,7 +441,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/Resource",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                       "aws:cdk:cloudformation:props": {
@@ -460,11 +460,11 @@
                         ],
                         "environment": {
                           "variables": {
-                            "SST_FUNCTION_ID": "c8d9d923ee11d594ebacec244bb7f986af85291360",
+                            "SST_FUNCTION_ID": "c888e1497a3bd1cbd065a10c6a47afdf27abe81f39",
                             "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
-                            "SST_APP": "ai-arena-demo",
+                            "SST_APP": "ai-arena-frontend",
                             "SST_STAGE": "dev",
-                            "SST_SSM_PREFIX": "/sst/ai-arena-demo/dev/",
+                            "SST_SSM_PREFIX": "/sst/ai-arena-frontend/dev/",
                             "SST_DEBUG_IS_API_ROUTE": "1"
                           }
                         },
@@ -477,7 +477,7 @@
                         "tags": [
                           {
                             "key": "sst:app",
-                            "value": "ai-arena-demo"
+                            "value": "ai-arena-frontend"
                           },
                           {
                             "key": "sst:stage",
@@ -497,11 +497,11 @@
                   },
                   "EventInvokeConfig": {
                     "id": "EventInvokeConfig",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/EventInvokeConfig",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/EventInvokeConfig",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--private/EventInvokeConfig/Resource",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/EventInvokeConfig/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::Lambda::EventInvokeConfig",
                           "aws:cdk:cloudformation:props": {
@@ -531,15 +531,15 @@
               },
               "Route_GET_--private": {
                 "id": "Route_GET_--private",
-                "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--private",
+                "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--private",
                 "children": {
                   "Integration_GET_--private": {
                     "id": "Integration_GET_--private",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--private/Integration_GET_--private",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--private/Integration_GET_--private",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--private/Integration_GET_--private/Resource",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--private/Integration_GET_--private/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Integration",
                           "aws:cdk:cloudformation:props": {
@@ -569,7 +569,7 @@
                   },
                   "Integration_GET_--private-Permission": {
                     "id": "Integration_GET_--private-Permission",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--private/Integration_GET_--private-Permission",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--private/Integration_GET_--private-Permission",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                       "aws:cdk:cloudformation:props": {
@@ -606,7 +606,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--private/Resource",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--private/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Route",
                       "aws:cdk:cloudformation:props": {
@@ -641,15 +641,15 @@
               },
               "Lambda_GET_--public": {
                 "id": "Lambda_GET_--public",
-                "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public",
+                "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public",
                 "children": {
                   "ServiceRole": {
                     "id": "ServiceRole",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/ServiceRole",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/ServiceRole",
                     "children": {
                       "ImportServiceRole": {
                         "id": "ImportServiceRole",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/ServiceRole/ImportServiceRole",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/ServiceRole/ImportServiceRole",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.Resource",
                           "version": "2.84.0"
@@ -657,7 +657,7 @@
                       },
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/ServiceRole/Resource",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/ServiceRole/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                           "aws:cdk:cloudformation:props": {
@@ -690,7 +690,7 @@
                             "tags": [
                               {
                                 "key": "sst:app",
-                                "value": "ai-arena-demo"
+                                "value": "ai-arena-frontend"
                               },
                               {
                                 "key": "sst:stage",
@@ -706,11 +706,11 @@
                       },
                       "DefaultPolicy": {
                         "id": "DefaultPolicy",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/ServiceRole/DefaultPolicy",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/ServiceRole/DefaultPolicy",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/ServiceRole/DefaultPolicy/Resource",
+                            "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/ServiceRole/DefaultPolicy/Resource",
                             "attributes": {
                               "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                               "aws:cdk:cloudformation:props": {
@@ -775,11 +775,11 @@
                   },
                   "Code": {
                     "id": "Code",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/Code",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/Code",
                     "children": {
                       "Stage": {
                         "id": "Stage",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/Code/Stage",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/Code/Stage",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.AssetStaging",
                           "version": "2.84.0"
@@ -787,7 +787,7 @@
                       },
                       "AssetBucket": {
                         "id": "AssetBucket",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/Code/AssetBucket",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/Code/AssetBucket",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                           "version": "2.84.0"
@@ -801,7 +801,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/Resource",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                       "aws:cdk:cloudformation:props": {
@@ -820,11 +820,11 @@
                         ],
                         "environment": {
                           "variables": {
-                            "SST_FUNCTION_ID": "c82a579a04519b891c07f894931a25e9f24f7f8c64",
+                            "SST_FUNCTION_ID": "c8bf35e6d6343fd9e4336f5fc9209693b3eb271b0c",
                             "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
-                            "SST_APP": "ai-arena-demo",
+                            "SST_APP": "ai-arena-frontend",
                             "SST_STAGE": "dev",
-                            "SST_SSM_PREFIX": "/sst/ai-arena-demo/dev/",
+                            "SST_SSM_PREFIX": "/sst/ai-arena-frontend/dev/",
                             "SST_DEBUG_IS_API_ROUTE": "1"
                           }
                         },
@@ -837,7 +837,7 @@
                         "tags": [
                           {
                             "key": "sst:app",
-                            "value": "ai-arena-demo"
+                            "value": "ai-arena-frontend"
                           },
                           {
                             "key": "sst:stage",
@@ -857,11 +857,11 @@
                   },
                   "EventInvokeConfig": {
                     "id": "EventInvokeConfig",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/EventInvokeConfig",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/EventInvokeConfig",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Lambda_GET_--public/EventInvokeConfig/Resource",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/EventInvokeConfig/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::Lambda::EventInvokeConfig",
                           "aws:cdk:cloudformation:props": {
@@ -891,15 +891,15 @@
               },
               "Route_GET_--public": {
                 "id": "Route_GET_--public",
-                "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--public",
+                "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--public",
                 "children": {
                   "Integration_GET_--public": {
                     "id": "Integration_GET_--public",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--public/Integration_GET_--public",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--public/Integration_GET_--public",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--public/Integration_GET_--public/Resource",
+                        "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--public/Integration_GET_--public/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Integration",
                           "aws:cdk:cloudformation:props": {
@@ -929,7 +929,7 @@
                   },
                   "Integration_GET_--public-Permission": {
                     "id": "Integration_GET_--public-Permission",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--public/Integration_GET_--public-Permission",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--public/Integration_GET_--public-Permission",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Lambda::Permission",
                       "aws:cdk:cloudformation:props": {
@@ -966,7 +966,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Route_GET_--public/Resource",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Route_GET_--public/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::ApiGatewayV2::Route",
                       "aws:cdk:cloudformation:props": {
@@ -1001,11 +1001,11 @@
               },
               "Parameter_url": {
                 "id": "Parameter_url",
-                "path": "dev-ai-arena-demo-ApiStack/Api/Parameter_url",
+                "path": "dev-ai-arena-frontend-ApiStack/Api/Parameter_url",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-ApiStack/Api/Parameter_url/Resource",
+                    "path": "dev-ai-arena-frontend-ApiStack/Api/Parameter_url/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::SSM::Parameter",
                       "aws:cdk:cloudformation:props": {
@@ -1016,9 +1016,9 @@
                             "ApiEndpoint"
                           ]
                         },
-                        "name": "/sst/ai-arena-demo/dev/Api/Api/url",
+                        "name": "/sst/ai-arena-frontend/dev/Api/Api/url",
                         "tags": {
-                          "sst:app": "ai-arena-demo",
+                          "sst:app": "ai-arena-frontend",
                           "sst:stage": "dev"
                         }
                       }
@@ -1042,7 +1042,7 @@
           },
           "SSTStackOutputApiEndpoint": {
             "id": "SSTStackOutputApiEndpoint",
-            "path": "dev-ai-arena-demo-ApiStack/SSTStackOutputApiEndpoint",
+            "path": "dev-ai-arena-frontend-ApiStack/SSTStackOutputApiEndpoint",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.84.0"
@@ -1050,7 +1050,7 @@
           },
           "SSTStackOutputSSTMetadata": {
             "id": "SSTStackOutputSSTMetadata",
-            "path": "dev-ai-arena-demo-ApiStack/SSTStackOutputSSTMetadata",
+            "path": "dev-ai-arena-frontend-ApiStack/SSTStackOutputSSTMetadata",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.84.0"
@@ -1058,11 +1058,11 @@
           },
           "Exports": {
             "id": "Exports",
-            "path": "dev-ai-arena-demo-ApiStack/Exports",
+            "path": "dev-ai-arena-frontend-ApiStack/Exports",
             "children": {
               "Output{\"Fn::GetAtt\":[\"ApiCD79AAA0\",\"ApiEndpoint\"]}": {
                 "id": "Output{\"Fn::GetAtt\":[\"ApiCD79AAA0\",\"ApiEndpoint\"]}",
-                "path": "dev-ai-arena-demo-ApiStack/Exports/Output{\"Fn::GetAtt\":[\"ApiCD79AAA0\",\"ApiEndpoint\"]}",
+                "path": "dev-ai-arena-frontend-ApiStack/Exports/Output{\"Fn::GetAtt\":[\"ApiCD79AAA0\",\"ApiEndpoint\"]}",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnOutput",
                   "version": "2.84.0"
@@ -1076,7 +1076,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "dev-ai-arena-demo-ApiStack/BootstrapVersion",
+            "path": "dev-ai-arena-frontend-ApiStack/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.84.0"
@@ -1084,7 +1084,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "dev-ai-arena-demo-ApiStack/CheckBootstrapVersion",
+            "path": "dev-ai-arena-frontend-ApiStack/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.84.0"
@@ -1096,21 +1096,21 @@
           "version": "2.84.0"
         }
       },
-      "dev-ai-arena-demo-WebStack": {
-        "id": "dev-ai-arena-demo-WebStack",
-        "path": "dev-ai-arena-demo-WebStack",
+      "dev-ai-arena-frontend-WebStack": {
+        "id": "dev-ai-arena-frontend-WebStack",
+        "path": "dev-ai-arena-frontend-WebStack",
         "children": {
           "CustomResourceHandler": {
             "id": "CustomResourceHandler",
-            "path": "dev-ai-arena-demo-WebStack/CustomResourceHandler",
+            "path": "dev-ai-arena-frontend-WebStack/CustomResourceHandler",
             "children": {
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "dev-ai-arena-demo-WebStack/CustomResourceHandler/ServiceRole",
+                "path": "dev-ai-arena-frontend-WebStack/CustomResourceHandler/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "dev-ai-arena-demo-WebStack/CustomResourceHandler/ServiceRole/ImportServiceRole",
+                    "path": "dev-ai-arena-frontend-WebStack/CustomResourceHandler/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.84.0"
@@ -1118,7 +1118,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-WebStack/CustomResourceHandler/ServiceRole/Resource",
+                    "path": "dev-ai-arena-frontend-WebStack/CustomResourceHandler/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -1151,7 +1151,7 @@
                         "tags": [
                           {
                             "key": "sst:app",
-                            "value": "ai-arena-demo"
+                            "value": "ai-arena-frontend"
                           },
                           {
                             "key": "sst:stage",
@@ -1173,11 +1173,11 @@
               },
               "Code": {
                 "id": "Code",
-                "path": "dev-ai-arena-demo-WebStack/CustomResourceHandler/Code",
+                "path": "dev-ai-arena-frontend-WebStack/CustomResourceHandler/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "dev-ai-arena-demo-WebStack/CustomResourceHandler/Code/Stage",
+                    "path": "dev-ai-arena-frontend-WebStack/CustomResourceHandler/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.84.0"
@@ -1185,7 +1185,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "dev-ai-arena-demo-WebStack/CustomResourceHandler/Code/AssetBucket",
+                    "path": "dev-ai-arena-frontend-WebStack/CustomResourceHandler/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.84.0"
@@ -1199,13 +1199,13 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "dev-ai-arena-demo-WebStack/CustomResourceHandler/Resource",
+                "path": "dev-ai-arena-frontend-WebStack/CustomResourceHandler/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-171376673452-eu-central-1",
-                      "s3Key": "25a73d95a3788441db6a35734c10281bdbce5707c0a1db6d9d2210ca448d1c5a.zip"
+                      "s3Key": "6ccb8297706b08e7f35e1e71e370f65788845ebb1f59233e1de3e1ee29cb80b5.zip"
                     },
                     "role": {
                       "Fn::GetAtt": [
@@ -1219,7 +1219,7 @@
                     "tags": [
                       {
                         "key": "sst:app",
-                        "value": "ai-arena-demo"
+                        "value": "ai-arena-frontend"
                       },
                       {
                         "key": "sst:stage",
@@ -1242,15 +1242,15 @@
           },
           "site": {
             "id": "site",
-            "path": "dev-ai-arena-demo-WebStack/site",
+            "path": "dev-ai-arena-frontend-WebStack/site",
             "children": {
               "ServerFunctionRole": {
                 "id": "ServerFunctionRole",
-                "path": "dev-ai-arena-demo-WebStack/site/ServerFunctionRole",
+                "path": "dev-ai-arena-frontend-WebStack/site/ServerFunctionRole",
                 "children": {
                   "ImportServerFunctionRole": {
                     "id": "ImportServerFunctionRole",
-                    "path": "dev-ai-arena-demo-WebStack/site/ServerFunctionRole/ImportServerFunctionRole",
+                    "path": "dev-ai-arena-frontend-WebStack/site/ServerFunctionRole/ImportServerFunctionRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.84.0"
@@ -1258,7 +1258,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-WebStack/site/ServerFunctionRole/Resource",
+                    "path": "dev-ai-arena-frontend-WebStack/site/ServerFunctionRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -1296,7 +1296,7 @@
                         "tags": [
                           {
                             "key": "sst:app",
-                            "value": "ai-arena-demo"
+                            "value": "ai-arena-frontend"
                           },
                           {
                             "key": "sst:stage",
@@ -1318,15 +1318,15 @@
               },
               "ServerFunction": {
                 "id": "ServerFunction",
-                "path": "dev-ai-arena-demo-WebStack/site/ServerFunction",
+                "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction",
                 "children": {
                   "AssetReplacerPolicy": {
                     "id": "AssetReplacerPolicy",
-                    "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/AssetReplacerPolicy",
+                    "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/AssetReplacerPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/AssetReplacerPolicy/Resource",
+                        "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/AssetReplacerPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -1375,11 +1375,11 @@
                   },
                   "AssetReplacer": {
                     "id": "AssetReplacer",
-                    "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/AssetReplacer",
+                    "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/AssetReplacer",
                     "children": {
                       "Default": {
                         "id": "Default",
-                        "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/AssetReplacer/Default",
+                        "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/AssetReplacer/Default",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.CfnResource",
                           "version": "2.84.0"
@@ -1393,7 +1393,7 @@
                   },
                   "IServerFunctionBucket": {
                     "id": "IServerFunctionBucket",
-                    "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/IServerFunctionBucket",
+                    "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/IServerFunctionBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.84.0"
@@ -1401,11 +1401,11 @@
                   },
                   "ServerFunction": {
                     "id": "ServerFunction",
-                    "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/ServerFunction",
+                    "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/ServerFunction",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/ServerFunction/Resource",
+                        "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/ServerFunction/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                           "aws:cdk:cloudformation:props": {
@@ -1426,13 +1426,13 @@
                             "environment": {
                               "variables": {
                                 "NEXT_PUBLIC_API_URL": {
-                                  "Fn::ImportValue": "dev-ai-arena-demo-ApiStack:ExportsOutputFnGetAttApiCD79AAA0ApiEndpoint389C4905"
+                                  "Fn::ImportValue": "dev-ai-arena-frontend-ApiStack:ExportsOutputFnGetAttApiCD79AAA0ApiEndpoint389C4905"
                                 },
                                 "NEXT_PUBLIC_REGION": "eu-central-1",
                                 "NEXT_PUBLIC_SITE_URL": "http://localhost:3000",
-                                "SST_APP": "ai-arena-demo",
+                                "SST_APP": "ai-arena-frontend",
                                 "SST_STAGE": "dev",
-                                "SST_SSM_PREFIX": "/sst/ai-arena-demo/dev/"
+                                "SST_SSM_PREFIX": "/sst/ai-arena-frontend/dev/"
                               }
                             },
                             "handler": "index.handler",
@@ -1441,7 +1441,7 @@
                             "tags": [
                               {
                                 "key": "sst:app",
-                                "value": "ai-arena-demo"
+                                "value": "ai-arena-frontend"
                               },
                               {
                                 "key": "sst:stage",
@@ -1458,11 +1458,11 @@
                       },
                       "LogRetention": {
                         "id": "LogRetention",
-                        "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/ServerFunction/LogRetention",
+                        "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/ServerFunction/LogRetention",
                         "children": {
                           "Resource": {
                             "id": "Resource",
-                            "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/ServerFunction/LogRetention/Resource",
+                            "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/ServerFunction/LogRetention/Resource",
                             "constructInfo": {
                               "fqn": "aws-cdk-lib.CfnResource",
                               "version": "2.84.0"
@@ -1476,7 +1476,7 @@
                       },
                       "LogGroup": {
                         "id": "LogGroup",
-                        "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/ServerFunction/LogGroup",
+                        "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/ServerFunction/LogGroup",
                         "constructInfo": {
                           "fqn": "aws-cdk-lib.Resource",
                           "version": "2.84.0"
@@ -1484,11 +1484,11 @@
                       },
                       "Code": {
                         "id": "Code",
-                        "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/ServerFunction/Code",
+                        "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/ServerFunction/Code",
                         "children": {
                           "Stage": {
                             "id": "Stage",
-                            "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/ServerFunction/Code/Stage",
+                            "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/ServerFunction/Code/Stage",
                             "constructInfo": {
                               "fqn": "aws-cdk-lib.AssetStaging",
                               "version": "2.84.0"
@@ -1496,7 +1496,7 @@
                           },
                           "AssetBucket": {
                             "id": "AssetBucket",
-                            "path": "dev-ai-arena-demo-WebStack/site/ServerFunction/ServerFunction/Code/AssetBucket",
+                            "path": "dev-ai-arena-frontend-WebStack/site/ServerFunction/ServerFunction/Code/AssetBucket",
                             "constructInfo": {
                               "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                               "version": "2.84.0"
@@ -1522,19 +1522,19 @@
               },
               "Parameter_url": {
                 "id": "Parameter_url",
-                "path": "dev-ai-arena-demo-WebStack/site/Parameter_url",
+                "path": "dev-ai-arena-frontend-WebStack/site/Parameter_url",
                 "children": {
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-WebStack/site/Parameter_url/Resource",
+                    "path": "dev-ai-arena-frontend-WebStack/site/Parameter_url/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::SSM::Parameter",
                       "aws:cdk:cloudformation:props": {
                         "type": "String",
                         "value": "localhost",
-                        "name": "/sst/ai-arena-demo/dev/NextjsSite/site/url",
+                        "name": "/sst/ai-arena-frontend/dev/NextjsSite/site/url",
                         "tags": {
-                          "sst:app": "ai-arena-demo",
+                          "sst:app": "ai-arena-frontend",
                           "sst:stage": "dev"
                         }
                       }
@@ -1558,15 +1558,15 @@
           },
           "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a": {
             "id": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a",
-            "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a",
+            "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a",
             "children": {
               "Code": {
                 "id": "Code",
-                "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code",
+                "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code",
                 "children": {
                   "Stage": {
                     "id": "Stage",
-                    "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code/Stage",
+                    "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code/Stage",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.AssetStaging",
                       "version": "2.84.0"
@@ -1574,7 +1574,7 @@
                   },
                   "AssetBucket": {
                     "id": "AssetBucket",
-                    "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code/AssetBucket",
+                    "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code/AssetBucket",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_s3.BucketBase",
                       "version": "2.84.0"
@@ -1588,11 +1588,11 @@
               },
               "ServiceRole": {
                 "id": "ServiceRole",
-                "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole",
+                "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole",
                 "children": {
                   "ImportServiceRole": {
                     "id": "ImportServiceRole",
-                    "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/ImportServiceRole",
+                    "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/ImportServiceRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.84.0"
@@ -1600,7 +1600,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource",
+                    "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -1633,7 +1633,7 @@
                         "tags": [
                           {
                             "key": "sst:app",
-                            "value": "ai-arena-demo"
+                            "value": "ai-arena-frontend"
                           },
                           {
                             "key": "sst:stage",
@@ -1649,11 +1649,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy",
+                    "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource",
+                        "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -1697,7 +1697,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "dev-ai-arena-demo-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource",
+                "path": "dev-ai-arena-frontend-WebStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource",
                 "constructInfo": {
                   "fqn": "aws-cdk-lib.CfnResource",
                   "version": "2.84.0"
@@ -1711,7 +1711,7 @@
           },
           "SSTStackOutputNEXT_PUBLIC_SITE_URL": {
             "id": "SSTStackOutputNEXT_PUBLIC_SITE_URL",
-            "path": "dev-ai-arena-demo-WebStack/SSTStackOutputNEXT_PUBLIC_SITE_URL",
+            "path": "dev-ai-arena-frontend-WebStack/SSTStackOutputNEXT_PUBLIC_SITE_URL",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.84.0"
@@ -1719,7 +1719,7 @@
           },
           "SSTStackOutputSSTMetadata": {
             "id": "SSTStackOutputSSTMetadata",
-            "path": "dev-ai-arena-demo-WebStack/SSTStackOutputSSTMetadata",
+            "path": "dev-ai-arena-frontend-WebStack/SSTStackOutputSSTMetadata",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.84.0"
@@ -1727,7 +1727,7 @@
           },
           "BootstrapVersion": {
             "id": "BootstrapVersion",
-            "path": "dev-ai-arena-demo-WebStack/BootstrapVersion",
+            "path": "dev-ai-arena-frontend-WebStack/BootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnParameter",
               "version": "2.84.0"
@@ -1735,7 +1735,7 @@
           },
           "CheckBootstrapVersion": {
             "id": "CheckBootstrapVersion",
-            "path": "dev-ai-arena-demo-WebStack/CheckBootstrapVersion",
+            "path": "dev-ai-arena-frontend-WebStack/CheckBootstrapVersion",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnRule",
               "version": "2.84.0"

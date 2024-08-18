@@ -10,19 +10,25 @@ import AuthNavBar from "./_nav_parts/AuthNavbar";
 
 const navLinks = [
   {
-    title: "RouteTest",
-    path: "/RouteTest",
-    showLoggedIn: true,
-    showLoggedOut: true,
-  },
-  {
     title: "Home",
     path: "/",
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
-    title: "About",
+    title: "Wiki",
+    path: "/",
+    showLoggedIn: true,
+    showLoggedOut: true,
+  },
+  {
+    title: "Ladder",
+    path: "/",
+    showLoggedIn: true,
+    showLoggedOut: true,
+  },
+  {
+    title: "About us",
     path: "/about",
     showLoggedIn: true,
     showLoggedOut: true,
