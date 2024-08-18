@@ -1,3 +1,4 @@
+import { LoginProvider } from "@/_components/providers/LoginProvider";
 import "./globals.css";
 import { Inter } from "next/font/google";
 
@@ -10,9 +11,9 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     <html lang="en">
      
         <body className={`${inter.className} text-center`}>
-  
+        <LoginProvider>
             {children}
-
+    </LoginProvider>
         </body>
   
     </html>
