@@ -22,7 +22,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::171376673452:role/cdk-hnb659fds-deploy-role-171376673452-eu-central-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::171376673452:role/cdk-hnb659fds-cfn-exec-role-171376673452-eu-central-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-171376673452-eu-central-1/bef3a95ced1c129456a77e4e7fbba00a7c4f314c3a8fd75ca17ba8096b0403f8.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-171376673452-eu-central-1/0ab3379f257dac278fe7e65b0d7516ef05933054bb840c929d492433e4f48123.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -101,12 +101,6 @@
             "data": "ApiLambdaGETprivate01176F88"
           }
         ],
-        "/dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/EventInvokeConfig/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ApiLambdaGETprivateEventInvokeConfigCB8D396B"
-          }
-        ],
         "/dev-ai-arena-frontend-ApiStack/Api/Route_GET_--private/Integration_GET_--private/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -141,12 +135,6 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiLambdaGETpublic72680C24"
-          }
-        ],
-        "/dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/EventInvokeConfig/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ApiLambdaGETpublicEventInvokeConfigF4E1320E"
           }
         ],
         "/dev-ai-arena-frontend-ApiStack/Api/Route_GET_--public/Integration_GET_--public/Resource": [

@@ -9,9 +9,9 @@ interface NewsBoxProps {
 
 const NewsBox: React.FC<NewsBoxProps> = ({ title, date, content, videoUrl }) => {
   return (
-    <div className="w-full p-4 border rounded-lg bg-gray-100">
+    <div className="w-full p-4 border rounded-lg ">
       <h2 className="text-xl font-bold mb-2">{title}</h2>
-      <p className="text-sm text-gray-500 mb-4">{date}</p>
+      <p className="text-sm mb-4">{date}</p>
       <p className="mb-4">{content}</p>
       {videoUrl && (
         <video className="w-full h-auto" controls>

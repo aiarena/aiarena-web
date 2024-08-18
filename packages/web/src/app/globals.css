@@ -3,16 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --foreground-rgb: 225, 225, 225;
+  /* Brown/Gray gradient for light mode */
+  --background-start-rgb: 69, 70, 69; /* Brown */
+  --background-end-rgb: 25, 30, 25; /* Gray */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --foreground-rgb: 25, 25, 25;
+    /* Brown/Gray gradient for dark mode */
+    --background-start-rgb: 15, 15, 15; /* Dim Gray */
+    --background-end-rgb: 47, 47, 47;      /* Darker Gray */
   }
 }
 @layer base {
@@ -41,8 +43,9 @@
   }
 }
 
+
 body {
-  color: rgb(var(--foreground-rgb));
+  color: rgb(var(--foreground-rgb)); /* Apply the white text color */
   background: linear-gradient(
       to bottom,
       transparent,

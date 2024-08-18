@@ -363,41 +363,6 @@
                                       ],
                                       "Effect": "Allow",
                                       "Resource": "*"
-                                    },
-                                    {
-                                      "Action": "iot:*",
-                                      "Effect": "Allow",
-                                      "Resource": "*"
-                                    },
-                                    {
-                                      "Action": "s3:*",
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              "arn:",
-                                              {
-                                                "Ref": "AWS::Partition"
-                                              },
-                                              ":s3:::sstbootstrap-eucentral134f82fae-1jt3qw56bbaxs"
-                                            ]
-                                          ]
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              "arn:",
-                                              {
-                                                "Ref": "AWS::Partition"
-                                              },
-                                              ":s3:::sstbootstrap-eucentral134f82fae-1jt3qw56bbaxs/*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
                                     }
                                   ],
                                   "Version": "2012-10-17"
@@ -427,32 +392,6 @@
                       "version": "2.142.1"
                     }
                   },
-                  "Code": {
-                    "id": "Code",
-                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.142.1"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.142.1"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.142.1"
-                    }
-                  },
                   "Resource": {
                     "id": "Resource",
                     "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/Resource",
@@ -463,24 +402,20 @@
                           "x86_64"
                         ],
                         "code": {
-                          "s3Bucket": "cdk-hnb659fds-assets-171376673452-eu-central-1",
-                          "s3Key": "1ea9054797b04ad65b10d37afb9a323bf9821944d73e872c96547f8f6696122d.zip"
+                          "zipFile": "export function placeholder() {}"
                         },
-                        "description": "live",
                         "environment": {
                           "variables": {
-                            "SST_FUNCTION_ID": "c888e1497a3bd1cbd065a10c6a47afdf27abe81f39",
                             "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
                             "SST_APP": "ai-arena-frontend",
                             "SST_STAGE": "dev",
-                            "SST_SSM_PREFIX": "/sst/ai-arena-frontend/dev/",
-                            "SST_DEBUG_IS_API_ROUTE": "1"
+                            "SST_SSM_PREFIX": "/sst/ai-arena-frontend/dev/"
                           }
                         },
                         "ephemeralStorage": {
                           "size": 512
                         },
-                        "handler": "live-lambda.handler",
+                        "handler": "index.placeholder",
                         "memorySize": 1024,
                         "role": {
                           "Fn::GetAtt": [
@@ -507,34 +442,6 @@
                     },
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                      "version": "2.142.1"
-                    }
-                  },
-                  "EventInvokeConfig": {
-                    "id": "EventInvokeConfig",
-                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/EventInvokeConfig",
-                    "children": {
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--private/EventInvokeConfig/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::Lambda::EventInvokeConfig",
-                          "aws:cdk:cloudformation:props": {
-                            "functionName": {
-                              "Ref": "ApiLambdaGETprivate01176F88"
-                            },
-                            "maximumRetryAttempts": 0,
-                            "qualifier": "$LATEST"
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_lambda.CfnEventInvokeConfig",
-                          "version": "2.142.1"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.EventInvokeConfig",
                       "version": "2.142.1"
                     }
                   }
@@ -738,41 +645,6 @@
                                       ],
                                       "Effect": "Allow",
                                       "Resource": "*"
-                                    },
-                                    {
-                                      "Action": "iot:*",
-                                      "Effect": "Allow",
-                                      "Resource": "*"
-                                    },
-                                    {
-                                      "Action": "s3:*",
-                                      "Effect": "Allow",
-                                      "Resource": [
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              "arn:",
-                                              {
-                                                "Ref": "AWS::Partition"
-                                              },
-                                              ":s3:::sstbootstrap-eucentral134f82fae-1jt3qw56bbaxs"
-                                            ]
-                                          ]
-                                        },
-                                        {
-                                          "Fn::Join": [
-                                            "",
-                                            [
-                                              "arn:",
-                                              {
-                                                "Ref": "AWS::Partition"
-                                              },
-                                              ":s3:::sstbootstrap-eucentral134f82fae-1jt3qw56bbaxs/*"
-                                            ]
-                                          ]
-                                        }
-                                      ]
                                     }
                                   ],
                                   "Version": "2012-10-17"
@@ -802,32 +674,6 @@
                       "version": "2.142.1"
                     }
                   },
-                  "Code": {
-                    "id": "Code",
-                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/Code",
-                    "children": {
-                      "Stage": {
-                        "id": "Stage",
-                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/Code/Stage",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.AssetStaging",
-                          "version": "2.142.1"
-                        }
-                      },
-                      "AssetBucket": {
-                        "id": "AssetBucket",
-                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/Code/AssetBucket",
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_s3.BucketBase",
-                          "version": "2.142.1"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
-                      "version": "2.142.1"
-                    }
-                  },
                   "Resource": {
                     "id": "Resource",
                     "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/Resource",
@@ -838,24 +684,20 @@
                           "x86_64"
                         ],
                         "code": {
-                          "s3Bucket": "cdk-hnb659fds-assets-171376673452-eu-central-1",
-                          "s3Key": "1ea9054797b04ad65b10d37afb9a323bf9821944d73e872c96547f8f6696122d.zip"
+                          "zipFile": "export function placeholder() {}"
                         },
-                        "description": "live",
                         "environment": {
                           "variables": {
-                            "SST_FUNCTION_ID": "c8bf35e6d6343fd9e4336f5fc9209693b3eb271b0c",
                             "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
                             "SST_APP": "ai-arena-frontend",
                             "SST_STAGE": "dev",
-                            "SST_SSM_PREFIX": "/sst/ai-arena-frontend/dev/",
-                            "SST_DEBUG_IS_API_ROUTE": "1"
+                            "SST_SSM_PREFIX": "/sst/ai-arena-frontend/dev/"
                           }
                         },
                         "ephemeralStorage": {
                           "size": 512
                         },
-                        "handler": "live-lambda.handler",
+                        "handler": "index.placeholder",
                         "memorySize": 1024,
                         "role": {
                           "Fn::GetAtt": [
@@ -882,34 +724,6 @@
                     },
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
-                      "version": "2.142.1"
-                    }
-                  },
-                  "EventInvokeConfig": {
-                    "id": "EventInvokeConfig",
-                    "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/EventInvokeConfig",
-                    "children": {
-                      "Resource": {
-                        "id": "Resource",
-                        "path": "dev-ai-arena-frontend-ApiStack/Api/Lambda_GET_--public/EventInvokeConfig/Resource",
-                        "attributes": {
-                          "aws:cdk:cloudformation:type": "AWS::Lambda::EventInvokeConfig",
-                          "aws:cdk:cloudformation:props": {
-                            "functionName": {
-                              "Ref": "ApiLambdaGETpublic72680C24"
-                            },
-                            "maximumRetryAttempts": 0,
-                            "qualifier": "$LATEST"
-                          }
-                        },
-                        "constructInfo": {
-                          "fqn": "aws-cdk-lib.aws_lambda.CfnEventInvokeConfig",
-                          "version": "2.142.1"
-                        }
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_lambda.EventInvokeConfig",
                       "version": "2.142.1"
                     }
                   }

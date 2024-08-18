@@ -84,7 +84,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className="w-full bg-slate-500 px-2 text-white dark:bg-gray-900">
+      <nav className="w-full bg-neutral-900 px-2 text-white dark:bg-gray-900">
         <div className="flex justify-between md:p-3 md:flex ">
           
             <Link href="/" className="flex justify-between items-center">

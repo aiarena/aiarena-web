@@ -8,9 +8,9 @@ import NewsBox from "@/_components/_display/NewsBox";
 import PlayerRankingList from "@/_components/_display/PlayerRankingList";
 import TopContributorsList from "@/_components/_display/TopContributorList";
 const players = [
-  { rank: 1, race: "Z", name: "Player1", division: 1, elo: 2400 },
-  { rank: 2, race: "P", name: "Player2", division: 1, elo: 2350 },
-  { rank: 3, race: "T", name: "Player3", division: 2, elo: 2300 }
+  { rank: 1, race: "Z-icon", name: "Player1", division: 1, elo: 2400 },
+  { rank: 2, race: "P-icon", name: "Player2", division: 1, elo: 2350 },
+  { rank: 3, race: "T-icon", name: "Player3", division: 2, elo: 2300 }
   // Add more players as needed
 ];
 
