@@ -41,6 +41,12 @@ export default function Page() {
             >
               Build your first model
             </button>
+            <button
+              onClick={() => handleRedirect('/watch')}
+              className="hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform"
+            >
+              Quickstart
+            </button>
           </div>
         </div>
         
