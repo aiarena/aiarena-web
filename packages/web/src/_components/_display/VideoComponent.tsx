@@ -20,11 +20,29 @@ const VideoComponent = ({ source }: { source: string }) => {
           width: '100%',
           height: '100%',
           objectFit: 'cover',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 1,
+          opacity: 1, // Initial opacity
+          maskImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%)', // For Webkit browsers
+        
         }}
       />
+       {/* Tint overlay with matching fade-out effect */}
+       <div
+        className="absolute inset-0 bg-black pointer-events-none"
+        style={{
+          zIndex: 1,
+          opacity: 0.6,
+          maskImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%)',
+        }}
+      ></div>
           
  {/* Stronger gradient overlay for fade-out effect at the bottom */}
- <div
+ {/* <div
         style={{
           position: 'absolute',
           bottom: 0,
@@ -33,10 +51,11 @@ const VideoComponent = ({ source }: { source: string }) => {
           height: '30%',
           background: 'linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(50, 50, 50, 1) 100%)',
           pointerEvents: 'none',
+          zIndex: 2,
         }}
-      ></div>
+      ></div> */}
       {/* Tint overlay */}
-      <div className="absolute inset-0 bg-black opacity-60 pointer-events-none"></div>
+      {/* <div className="absolute inset-0 bg-black opacity-60 pointer-events-none"></div> */}
 
     {/* Overlay content */}
     <div className="video-overlay absolute inset-0 flex flex-col justify-center items-center text-center text-white px-4">
