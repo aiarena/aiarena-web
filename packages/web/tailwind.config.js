@@ -15,10 +15,32 @@ module.exports = {
       colors: {
         customGreen: 'rgba(97,137,47, 1)',
      
-      }
+      },
+
+      backgroundImage: {
+        'fancy-cushion': "url('/fancy-cushion.png')",
+      },
+      backgroundSize: {
+        '25': '25px',
+      },
+      backgroundRepeat: {
+        'repeat-custom': 'repeat',
+      },
 
 
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.bg-fancy-texture': {
+          'background-image': "url('/fancy-cushion.png')",
+          'background-size': '25px 25px',
+          'background-repeat': 'repeat',
+        },
+      };
+
+      addUtilities(newUtilities, ['responsive', 'hover']);
+    },
+  ],
 }
