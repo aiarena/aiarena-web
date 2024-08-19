@@ -9,7 +9,7 @@ function Page() {
     <>
       <div className="flex flex-col min-h-screen">
         <Navbar />
-        <div className="flex flex-col items-center justify-center flex-grow text-center relative min-h-[40em]">
+        <div className="flex flex-col items-center justify-center flex-grow text-center relative min-h-[60em]">
           <h1 className="text-9xl font-extrabold tracking-widest relative">
             404
             <span className="bg-customGreen px-3 py-1 text-sm font-semibold tracking-normal rounded rotate-6 absolute top-16 left-1/2 transform -translate-x-1/2 whitespace-nowrap">

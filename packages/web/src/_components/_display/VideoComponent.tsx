@@ -80,6 +80,34 @@ const VideoComponent = ({ source }: { source: string }) => {
           >
             Play
           </button>
+
+          <button className="bg-gradient-green-lime text-white font-bold py-2 px-4 rounded">
+            Button
+          </button>
+          <button className="bg-gradient-green-olive text-white font-bold py-2 px-4 rounded">
+            Button
+          </button>
+          <button className="bg-gradient-green-yellow text-white font-bold py-2 px-4 rounded">
+            Button
+          </button>
+          <button className="bg-gradient-experimental-1 text-white font-bold py-2 px-4 rounded">
+            Button
+          </button>
+          <button className="bg-gradient-experimental-2 text-white font-bold py-2 px-4 rounded">
+            Button
+          </button>
+          <button className="bg-gradient-experimental-3 text-white font-bold py-2 px-4 rounded">
+            Button
+          </button>
+          <button className="bg-green-teal-gradient text-white font-bold py-2 px-4 rounded-lg border-2 border-softTeal hover:bg-softTeal">
+  Green to Teal
+</button>
+<button className="bg-green-yellow-gradient text-white font-bold py-2 px-4 rounded-xl border-2 border-mellowYellow hover:bg-mellowYellow">
+  Green to Yellow
+</button>
+<button className="bg-teal-yellow-gradient text-white font-bold py-2 px-4 rounded-lg border-2 border-customGreen hover:bg-customGreen">
+  Teal to Yellow
+</button>
         </div>
       </div>
     </div>
