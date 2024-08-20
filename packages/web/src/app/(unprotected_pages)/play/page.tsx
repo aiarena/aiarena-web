@@ -48,6 +48,7 @@ export default function Page() {
               Quickstart
             </button>
           </div>
+          <p>Super important to show that donating gives you more playtime.</p>
         </div>
         
         {/* Second Box */}

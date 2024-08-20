@@ -40,6 +40,7 @@ function Page() {
               videoUrl="news-video.mp4"
             />
           </div>
+         
           <div className="w-full">
             <PlayerRankingList players={players} />
           </div>
