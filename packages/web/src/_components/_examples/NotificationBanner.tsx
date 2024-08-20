@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 
 type NotificationType = "success" | "error" | "info";
 
@@ -14,7 +14,7 @@ const NotificationSystem: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const addNotification = (message: string, type: NotificationType, timeout = 5000) => {
-    const newNotification: Notification = { id: uuidv4(), message, type, timeout };
+    const newNotification: Notification = { id: "uuidv4()", message, type, timeout };
     setNotifications((prev) => [...prev, newNotification]);
 
     setTimeout(() => {
