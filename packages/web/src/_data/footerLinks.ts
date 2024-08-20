@@ -27,7 +27,7 @@ export interface FooterLink {
       { icon: "/social_icons/github-icon.svg", name: "GitHub", href: "https://github.com/aiarena" , invertIcon: true},
       { icon: "/social_icons/twitch-tile.svg", name: "Twitch", href: "https://www.twitch.tv/aiarenastream" , invertIcon: false},
       { icon: "/social_icons/youtube-icon.svg", name: "Youtube", href: "https://www.youtube.com/channel/UCMlH43XHsq1TacKm5n4Wbiw" , invertIcon: false},
-      { icon: "/social_icons/sc2-check-permissions-before-live.svg", name: "SC2 AI Archive (dead)", href: "/http://archive.sc2ai.net/" , invertIcon: false}
+     
     ],
     services: [
       { icon: "/", name: "Service 1", href: "/service1" , invertIcon: false},
