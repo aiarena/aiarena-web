@@ -11,9 +11,13 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['var(--font-quicksand)', 'sans-serif'],
+       
+        gugi: ['var(--font-gugi)', 'cursive'],
+        
+  
       },
       colors: {
-        customGreen: 'rgba(97,137,47, 1)',
+        customGreen: 'rgba(134, 194, 50, 1)',
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
      
@@ -37,7 +41,7 @@ module.exports = {
 
       // experimenting
       borderColor: {
-        customGreen: 'rgba(97,137,47, 1)',
+        customGreen: 'rgba(134, 194, 50, 1)',
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
       },

@@ -53,18 +53,18 @@ const VideoComponent = ({ source }: { source: string }) => {
 
       {/* Overlay content */}
       <div className="video-overlay absolute inset-0 flex flex-col justify-center items-center text-center text-white px-4">
-        <h1 className="text-4xl font-bold mb-8 flex">
+        <h1 className="text-6xl font-bold mb-8 font-gugi text-customGreen">
           {" "}
           <Image
-            className="pr-2"
+            className="mx-auto pb-6"
             src={"/ai-arena-logo.png"}
             alt="AI-arena-logo"
-            width={50}
+            width={150}
             height={50}
           ></Image>{" "}
           AI Arena
         </h1>
-        <h2 className="text-2xl mb-8">Compete with your AI models</h2>
+        <h2 className="text-2xl mb-8">Welcome to the AI Arena!</h2>
         <div className="flex flex-wrap justify-around w-80">
           <button
             onClick={() => handleRedirect("https://aiarena.net/stream/")}
@@ -81,33 +81,7 @@ const VideoComponent = ({ source }: { source: string }) => {
             Play
           </button>
 
-          <button className="bg-gradient-green-lime text-white font-bold py-2 px-4 rounded">
-            Button
-          </button>
-          <button className="bg-gradient-green-olive text-white font-bold py-2 px-4 rounded">
-            Button
-          </button>
-          <button className="bg-gradient-green-yellow text-white font-bold py-2 px-4 rounded">
-            Button
-          </button>
-          <button className="bg-gradient-experimental-1 text-white font-bold py-2 px-4 rounded">
-            Button
-          </button>
-          <button className="bg-gradient-experimental-2 text-white font-bold py-2 px-4 rounded">
-            Button
-          </button>
-          <button className="bg-gradient-experimental-3 text-white font-bold py-2 px-4 rounded">
-            Button
-          </button>
-          <button className="bg-green-teal-gradient text-white font-bold py-2 px-4 rounded-lg border-2 border-softTeal hover:bg-softTeal">
-  Green to Teal
-</button>
-<button className="bg-green-yellow-gradient text-white font-bold py-2 px-4 rounded-xl border-2 border-mellowYellow hover:bg-mellowYellow">
-  Green to Yellow
-</button>
-<button className="bg-teal-yellow-gradient text-white font-bold py-2 px-4 rounded-lg border-2 border-customGreen hover:bg-customGreen">
-  Teal to Yellow
-</button>
+         
         </div>
       </div>
     </div>
