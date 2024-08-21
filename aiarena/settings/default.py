@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "django_filters",
     "django_select2",
+    "graphene_django",
     "avatar",
     "aiarena.core",
     "aiarena.frontend",
@@ -151,6 +152,10 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 100,
+}
+
+GRAPHENE = {
+    "SCHEMA": "aiarena.schema.schema",
 }
 
 CACHES = {

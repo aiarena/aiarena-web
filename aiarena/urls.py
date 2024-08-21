@@ -25,6 +25,7 @@ import debug_toolbar
 import private_storage.urls
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
+from graphene_django.views import GraphQLView
 from rest_framework import permissions
 
 from aiarena.frontend import views as core_views
@@ -61,6 +62,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("accounts/", include("django.contrib.auth.urls")),
     path("", core_views.Index.as_view(), name="home"),
     path("api/", include("aiarena.api.urls")),
+    path("graphql/", GraphQLView.as_view(graphiql=True)),
     path("results/", core_views.RecentResults.as_view(), name="results"),
     path("arenaclients/", core_views.ArenaClients.as_view(), name="arenaclients"),
     path("arenaclients/<int:pk>/", core_views.ArenaClientView.as_view(), name="arenaclient"),
