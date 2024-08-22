@@ -1,4 +1,5 @@
 "use client"
+import CompetitionData from "@/_components/_display/CompetitionData";
 import Accordion from "@/_components/_examples/Accordion";
 import Card from "@/_components/_examples/Card";
 import HoverCard from "@/_components/_examples/Card";
@@ -15,10 +16,12 @@ import TitleBanner from "@/_components/_examples/TitleBanner";
 import React from "react";
 
 
+
 const ExamplePage: React.FC = () => {
   return (
   <>
     <div className="container mx-auto py-8">
+      <CompetitionData/>
      
       <Accordion title="What is AI Arena?" content="AI Arena is a platform where you can compete with AI models." />
       <Accordion title="How can i get started?" content="AI Arena is a platform where you can compete with AI models." />
@@ -33,9 +36,9 @@ const ExamplePage: React.FC = () => {
          <Card
            title="Amazing Feature"
            description="Discover how this feature can enhance your experience."
-           imageUrl="https://source.unsplash.com/random"
+           imageUrl="/competitions/sc2_1.webp"
          />
-         <Card
+         {/* <Card
            title="Another Great Feature"
            description="Learn more about the benefits of using this feature."
            imageUrl="https://source.unsplash.com/random"
@@ -44,19 +47,19 @@ const ExamplePage: React.FC = () => {
            title="Our Mission"
            description="Understand our mission and vision for the future."
            imageUrl="https://source.unsplash.com/random"
-         />
+         /> */}
        </div>
  
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
          <FeatureCard
            title="Rocket Speed"
            description="Experience unmatched speed and performance."
-           icon={"./icons/excel-icon.svg"}
+           icon={"/icons/excel-icon.svg"}
          />
          <FeatureCard
            title="Community Support"
            description="Join a community of like-minded individuals."
-           icon={"./icons/excel-icon.svg"}
+           icon={"/icons/excel-icon.svg"}
          />
          <StatCard stat="99.9%" description="Uptime Guarantee" />
        </div>
@@ -65,13 +68,13 @@ const ExamplePage: React.FC = () => {
          <ProfileCard
            name="Jane Doe"
            role="Lead Developer"
-           imageUrl="https://source.unsplash.com/1600x900/?portrait"
+           imageUrl="/competitions/sc2_1.webp"
            bio="Jane has over 10 years of experience in full-stack development and is passionate about building scalable web applications."
          />
          <ProfileCard
            name="John Smith"
            role="Product Manager"
-           imageUrl="https://source.unsplash.com/1600x900/?portrait"
+           imageUrl="/competitions/sc2_1.webp"
            bio="John is dedicated to ensuring our products meet the needs of our users and consistently exceed expectations."
          />
        </div>

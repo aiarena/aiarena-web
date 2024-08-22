@@ -18,6 +18,7 @@ module.exports = {
       },
       colors: {
         customGreen: 'rgba(134, 194, 50, 1)',
+        customWild: 'rgba(134, 254, 50, 1)',
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
      
@@ -45,6 +46,7 @@ module.exports = {
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
       },
+      
       borderWidth: {
         '5': '5px',
         '10': '10px',
@@ -60,7 +62,7 @@ module.exports = {
       backgroundRepeat: {
         'repeat-custom': 'repeat',
       },
-
+   
 
     },
   },

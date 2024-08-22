@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Supporters } from "@/_data/footerLinks";
+import WrappedTitle from "@/_components/_display/WrappedTitle";
 
 interface SupportersComponentProps {
   supporters: Supporters[];
@@ -12,11 +13,7 @@ const SupportersComponent: React.FC<SupportersComponentProps> = ({
 }) => {
   return (
     <div className="mb-16 px-8 text-center flex-1 mx-auto">
-  <div className="flex items-center mb-4 justify-center relative">
-          <div className="flex-1 h-[2px] bg-gradient-to-l from-customGreen to-transparent"></div>
-      <h2 className="text-2xl font-bold p-2">Funded by you</h2>
-      <div className="flex-1 h-[2px] bg-gradient-to-r from-customGreen to-transparent"></div>
-      </div>
+     <WrappedTitle title="Funded by You"/>
       <p className="text-lg mb-6">{supporters[0].name}</p>
       <p className="text-lg mb-6">
         Thank you for your support! Your contributions help us keep going.
