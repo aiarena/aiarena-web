@@ -46,7 +46,7 @@ const VideoComponent = ({ source }: { source: string }) => {
           maskImage:
             "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%)",
           WebkitMaskImage:
-            "linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%)", // For Webkit browsers
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%)", // For Webkit browsers
         }}
       />
       <div

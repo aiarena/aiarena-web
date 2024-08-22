@@ -86,3 +86,19 @@ nav .block {
     display: none;
   }
 }
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 0%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.animate-gradientShift {
+  background-size: 200% 100%;
+  animation: gradientShift 5s cubic-bezier(0.66, 0, 0.34, 1) infinite;
+}

@@ -22,8 +22,8 @@ const navLinks = [
     showLoggedOut: true,
   },
   {
-    title: "Competition",
-    path: "/competition",
+    title: "Competitions",
+    path: "/competitions",
     showLoggedIn: true,
     showLoggedOut: true,
   },
@@ -42,6 +42,12 @@ const navLinks = [
   {
     title: "Examples",
     path: "/examples",
+    showLoggedIn: true,
+    showLoggedOut: true,
+  },
+  {
+    title: "ToDo",
+    path: "/todo",
     showLoggedIn: true,
     showLoggedOut: true,
   },
