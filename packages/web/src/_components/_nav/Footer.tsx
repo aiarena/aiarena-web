@@ -6,7 +6,7 @@ import SupportersComponent from "./_footer_parts/Supporters";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="border-white border-1 bg-fancy-texture text-white py-8">
+    <footer className="border-white border-1 bg-fancy-texture text-white pt-8">
       <div className="container mx-auto px-4 flex flex-col md:flex-row md:flex-wrap justify-between items-start">
         
         <ServicesComponent services={footerLinks.services} />
@@ -17,9 +17,9 @@ const Footer: React.FC = () => {
         
       </div>
 
-      <div className="text-center mt-8 text-sm text-gray-400">
-        © {new Date().getFullYear()} AI Arena. All rights reserved.
-      </div>
+      <footer className="p-4 bg-green-teal-gradient text-center">
+      © {new Date().getFullYear()} AI Arena. All rights reserved.
+      </footer>
     </footer>
   );
 };

@@ -55,13 +55,15 @@ export default function CompetitionCard({ competition }: CompetitionCardProps) {
             ))}
           </div> */}
          
-          <div className="mt-4">
-          
-         
+
+
+
+         {/* Pretty good looking progress bar if we set a competition end date.  */}
+          {/* <div className="mt-4">
             <div className="relative pt-1">
               <div className="flex justify-between">
             <p className="mb-1">Started: <br/> {competition.created}</p>
-            {/* <p className="mb-2">Competition Progress</p> */}
+      
             <p className="mb-1">Ending: <br/> {competition.opened}</p>
             </div>
               <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-700">
@@ -72,7 +74,7 @@ export default function CompetitionCard({ competition }: CompetitionCardProps) {
                 ></div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </Link>

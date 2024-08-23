@@ -18,7 +18,7 @@ export default function AuthNavBar() {
 
   return (
     <div className="container flex items-center justify-center p-1">
- {/* {session.status === "authenticated" ? (
+      {/* {session.status === "authenticated" ? (
         <button
           onClick={handleLogout}
           className="bg-red-500 rounded py-1 px-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
@@ -35,39 +35,42 @@ export default function AuthNavBar() {
           Log Out
         </button>
       ) : ( */}
-        <>
-          {/* {session.status === "loading" ? (
+      <>
+        {/* {session.status === "loading" ? (
             <div className="bg-slate-400 rounded py-4 px-8"> </div>
           ) : ( */}
-          {isLoggedIn === true ? (
-           <button
-          onClick={logout}
-          className="bg-red-500 rounded py-1 px-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-        >
-          Log Out
-        </button>
+        {isLoggedIn === true ? (
+          <button
+            onClick={logout}
+            className="bg-red-500 rounded py-1 px-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+          >
+            Log Out
+          </button>
         ) : (
-            <div className="mt-1">
-              <Link href="/signup">
-                <span className="bg-green-500 m-2 rounded py-1 px-2">
-                  Sign Up
-                </span>
-              </Link>
-              {/* <Link href="/auth/signin">
+          <div className="mt-1">
+            <Link href="/login">
+              <span className="bg-customGreen m-2 rounded py-1 px-2">
+                Sign Up
+              </span>
+            </Link>
+            {/* <Link href="/auth/signin">
                 <span className="bg-green-500 m-2 rounded py-1 px-2">
                   Log In
                 </span>
               </Link> */}
-             
-              <span
+
+            {/* <span
           onClick={login}
           className="bg-green-500 m-2 rounded py-1 px-2 cursor-pointer"
         >
           Log in
-        </span>
-            </div>
-          )}
-        </>
+        </span> */}
+            <Link href="/login">
+              <span className="bg-customGreen m-2 rounded py-1 px-2">Log in</span>
+            </Link>
+          </div>
+        )}
+      </>
       {/* )} */}
     </div>
   );
