@@ -42,6 +42,7 @@ router.register(
 router.register(r"results", publicapi_views.ResultViewSet, basename="api_result")
 router.register(r"rounds", publicapi_views.RoundViewSet, basename="api_round")
 router.register(r"users", publicapi_views.UserViewSet, basename="api_user")
+router.register(r"request-match", publicapi_views.MatchRequestViewSet, basename="api_request_match")
 
 # stream
 router.register(r"stream/next-replay", stream_views.StreamNextReplayViewSet, basename="api_stream_nextreplay")
