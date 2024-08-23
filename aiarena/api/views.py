@@ -1044,7 +1044,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
 
 
-class MatchRequestViewSet(viewsets.ViewSet):
+class MatchRequestsViewSet(viewsets.ViewSet):
     """
     Match request view
     """
@@ -1052,6 +1052,7 @@ class MatchRequestViewSet(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     @swagger_auto_schema(
+        method="post",
         request_body=RequestMatchSerializer,
         responses={
             201: openapi.Response(
@@ -1067,7 +1068,8 @@ class MatchRequestViewSet(viewsets.ViewSet):
             400: "Bad Request",
         },
     )
-    def create(self, request):
+    @action(detail=False, methods=["post"])
+    def request_single(self, request):
         """
         Request a match between two bots.
         """
