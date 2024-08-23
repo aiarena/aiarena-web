@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import IntegrityError, transaction
-from django.db.models import F, Prefetch
+from django.db.models import Prefetch
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -40,17 +40,23 @@ class UserProfile(LoginRequiredMixin, DetailView):
         context[
             "max_active_active_competition_participations_count"
         ] = self.request.user.get_active_competition_participations_limit_display()
-        context["requested_matches"] = (
-            Match.objects.filter(requested_by=self.object, result__isnull=True)
-            .order_by(F("started").asc(nulls_last=True), F("id").asc())
+        requested_matches = (
+            Match.objects.filter(requested_by=self.object)
             .prefetch_related(
                 Prefetch("map"),
                 Prefetch(
                     "matchparticipation_set",
-                    MatchParticipation.objects.all().prefetch_related("bot"),
+                    MatchParticipation.objects.select_related("bot"),
                     to_attr="participants",
                 ),
             )
+            .select_related("result")
+        )
+        context["requested_matches_in_progress"] = list(
+            requested_matches.filter(result__isnull=True).order_by("created")
+        )
+        context["requested_matches_finished"] = list(
+            requested_matches.filter(result__isnull=False).order_by("-started")[:50]
         )
         return context
 

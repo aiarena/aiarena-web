@@ -1045,6 +1045,12 @@ input[type=text], input[type=password], input[type=email], input[type=number], i
     margin: 10px 0 10px 0;
 }
 
+.profile-cancel-matches-button:disabled {
+    background-color: #808080;
+    color: #A9A9A9;
+    cursor: not-allowed;
+}
+
 #discord-link-button:hover {
     background-color: #86c232;
 }
