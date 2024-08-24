@@ -125,3 +125,18 @@ def timestamp_ms():
 
 def monitoring_minute_key(minutes_from_now=0):
     return int(time.time() // 60 + minutes_from_now) * 60
+
+
+def camel_case(snake_str):
+    """
+    Convert snake_case to camelCase.
+    Borrowed from https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase
+    """
+
+    path_parts = snake_str.split(".")
+    in_camel = []
+    for part in path_parts:
+        components = part.split("_")
+        in_camel.append(components[0] + "".join(x.title() for x in components[1:]))
+
+    return ".".join(in_camel)
