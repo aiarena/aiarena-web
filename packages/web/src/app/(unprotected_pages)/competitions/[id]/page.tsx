@@ -8,6 +8,8 @@ import ToggleDisplay from "@/_components/_display/ToggleDisplay";
 import MapDisplay from "@/_components/_display/MapDisplay";
 import VideoComponent from "@/_components/_display/VideoBanner";
 import VideoPlayer from "@/_components/_display/VideoPlayer";
+
+
 // Types
 interface Participant {
   rank: number;
@@ -55,15 +57,15 @@ const mockCompetitions: CompetitionsData = competitionsData;
 
 export default function CompetitionDetail() {
   const [competition, setCompetition] = useState<Competition | null>(null);
-  const router = useRouter();
-  const { id } = { id: "1" };
+  // const router = useRouter();
+  // const { id } = { id: "1" };
 
   useEffect(() => {
-    if (id) {
-      const competitionData = mockCompetitions[id as string];
+    
+      const competitionData = mockCompetitions[1];
       setCompetition(competitionData);
-    }
-  }, [id]);
+    
+  }, []);
 
   if (!competition) {
     return <div>Loading...</div>;
