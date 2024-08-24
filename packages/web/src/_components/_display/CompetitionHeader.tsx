@@ -12,7 +12,7 @@ export default function CompetitionHeader({
   status,
 }: CompetitionHeaderProps) {
   return (
-    <div className="relative w-full h-34 md:h-64 lg:h-72">
+    <div className="relative w-full h-36 md:h-36 lg:h-36">
       <Image
         src={imageUrl}
         alt={name}
