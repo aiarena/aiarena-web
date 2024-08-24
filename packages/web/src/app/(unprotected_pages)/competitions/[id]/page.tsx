@@ -60,12 +60,12 @@ export default function CompetitionDetail() {
   // const router = useRouter();
   // const { id } = { id: "1" };
 
-  useEffect(() => {
+  // useEffect(() => {
     
-      const competitionData = mockCompetitions[1];
-      setCompetition(competitionData);
+  //     const competitionData = mockCompetitions[1];
+  //     setCompetition(competitionData);
     
-  }, []);
+  // }, []);
 
   if (!competition) {
     return <div>Loading...</div>;
@@ -148,11 +148,11 @@ export default function CompetitionDetail() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <CompetitionHeader
+      {/* <CompetitionHeader
         name={competition.name}
         imageUrl={competition.imageUrl}
         status={competition.opened}
-      />
+      /> */}
 
       {/* Main Content Section */}
       <div className="px-4 sm:px-6 lg:px-8 max-w-9xl mx-auto space-y-6">
@@ -183,10 +183,10 @@ export default function CompetitionDetail() {
                   key={index}
                   className="flex-none w-28 h-28"
                 >
-                  <MapDisplay
+                  {/* <MapDisplay
                     mapName={mapName}
                     imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
-                  />
+                  /> */}
                 </div>
               ))}
             </div>
@@ -198,7 +198,7 @@ export default function CompetitionDetail() {
               Live Stream
             </h2>
             <div className="relative ">
-              <VideoPlayer
+              {/* <VideoPlayer
                 src="/ai-banner.mp4" // Local or hosted video file
                 poster="/images/video-poster.jpg" // Optional poster image
                 alt="Sample video demonstrating the AI competition."
@@ -206,7 +206,7 @@ export default function CompetitionDetail() {
                 autoPlay={true}
                 loop={true}
                 muted={true}
-              />
+              /> */}
             </div>
           </div>
         </div>
