@@ -223,7 +223,7 @@ nav .block {
     color: rgba(154, 210, 70, 1); 
   }
 }
-/* 
+
 .animate-sine-wave {
   animation: sine-wave 5s ease-in-out infinite;
 }
@@ -262,7 +262,7 @@ nav .block {
   );
   clip-path: polygon(0% 100%, 20% 50%, 80% 50%, 100% 0%);
 }
-
+/* 
 .dividing-line1 {
   position: relative;
   width: 100%;
