@@ -74,7 +74,7 @@ function Navbar() {
   };
 
   const handleWindowResize = () => {
-    console.log("resize");
+    console.log("resized screen");
     setNavbar(false);
     document.body.style.overflow = "unset";
   };
