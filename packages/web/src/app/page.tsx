@@ -1,6 +1,6 @@
 "use client";
 import Navbar from "@/_components/_nav/Navbar";
-import VideoComponent from "@/_components/_display/VideoBanner";
+import VideoBanner from "@/_components/_display/VideoBanner";
 import Footer from "@/_components/_nav/Footer";
 import NewsBox from "@/_components/_display/NewsBox";
 import PlayerRankingList from "@/_components/_display/PlayerRankingList";
@@ -86,9 +86,14 @@ export default function Page() {
     <div className="flex flex-col min-h-screen font-sans">
       <Navbar />
       <main className="flex-grow bg-fancy-texture text-white">
-        <VideoComponent source="ai-banner.mp4" />
+        <VideoBanner source="ai-banner.mp4" />
         <div className="pt-20">
-          <TitleBanner title="Some buttons" />
+          {/* <TitleBanner title="Some buttons" /> */}
+          <div className="dividing-line"></div>
+          <br/>
+          <br/>
+        
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 py-8">
             {news.length > 0 && (
               <div className="w-full">

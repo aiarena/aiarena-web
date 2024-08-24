@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const VideoComponent = ({ source }: { source: string }) => {
+const VideoBanner = ({ source }: { source: string }) => {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -61,7 +61,7 @@ const VideoComponent = ({ source }: { source: string }) => {
         }}
       ></div>
       <div className="video-overlay absolute inset-0 flex flex-col justify-center items-center text-center text-white px-4">
-        <h1 className="text-6xl font-bold mb-8 font-gugi text-customGreen">
+        <h1 className="text-6xl font-bold mb-8 font-gugi text-customGreen ">
           <Image
             className="mx-auto pb-6"
             src={"/ai-arena-logo.png"}
@@ -91,7 +91,7 @@ const VideoComponent = ({ source }: { source: string }) => {
   );
 };
 
-export default VideoComponent;
+export default VideoBanner;
 
 // const VideoComponent = ({ source }: { source: string }) => {
 //   const router = useRouter();
