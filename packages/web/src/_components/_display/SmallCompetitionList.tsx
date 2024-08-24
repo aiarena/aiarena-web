@@ -1,15 +1,32 @@
 import { useState, useEffect } from 'react';
 import { Competition } from '@/types';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface SmallCompetitionListProps {
   competitions: Competition[];
 }
 
+const getDivisionImage = (divisionNum: number): string => {
+  switch (divisionNum) {
+    case 1:
+      return '/bot-icons/diamond.png';
+    case 2:
+      return '/bot-icons/silver.png';
+    case 3:
+      return '/bot-icons/bronze.png';
+    default:
+      return '/bot-icons/bronze.png'; // Fallback image for other divisions
+  }
+};
+
+
 export default function SmallCompetitionList({ competitions }: SmallCompetitionListProps) {
   const [selectedCompetition, setSelectedCompetition] = useState<string | null>(null);
-
+  const router = useRouter();
   useEffect(() => {
+    console.log(competitions)
     if (competitions.length > 0) {
       setSelectedCompetition(competitions[0].node.name);
     }
@@ -18,6 +35,10 @@ export default function SmallCompetitionList({ competitions }: SmallCompetitionL
   if (!selectedCompetition) {
     return <div className="text-center text-white">No competitions available.</div>;
   }
+
+  const handleRowClick = (participantName: string) => {
+    router.push(`/participant/${participantName}`);
+  };
 
   return (
     <div className="max-w-2xl mx-auto mt-8">
@@ -53,14 +74,21 @@ export default function SmallCompetitionList({ competitions }: SmallCompetitionL
                     {competition.node.participants.edges.map((participant, idx) => (
                       <tr
                         key={idx}
+                        onClick={() => handleRowClick(participant.node.bot.name)}
                         className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
                       >
                         <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition">
-                          <Link href={`/participant/${participant.node.bot.name}`}>
-                            {participant.node.bot.name}
-                          </Link>
+                          {participant.node.bot.name}
                         </td>
-                        <td className="px-4 py-2">{participant.node.divisionNum}</td>
+                        <td className="px-4 py-2 flex items-center">
+                          <Image
+                            width={40}
+                            height={40}
+                            src={getDivisionImage(participant.node.divisionNum)}
+                            alt={`Division ${participant.node.divisionNum}`}
+                            className="w-6 h-6 mr-2"
+                          />
+                        </td>
                         <td className="px-4 py-2">{participant.node.elo}</td>
                         <td className="px-4 py-2">{participant.node.trend}</td>
                       </tr>

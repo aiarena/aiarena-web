@@ -27,7 +27,9 @@ const ExamplePage: React.FC = () => {
       <Accordion title="How can i get started?" content="AI Arena is a platform where you can compete with AI models." />
    
       <ProgressBar percentage={75} />
+      <div className="circular-gradient-shadow">
   
+</div>
     </div>
        <div className="container mx-auto py-8 space-y-8">
        <TitleBanner title="Welcome to Our Platform" subtitle="Explore the amazing features we offer" />
