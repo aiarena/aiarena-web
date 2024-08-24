@@ -20,10 +20,10 @@ const ToDoPage: React.FC = () => {
             <p>-There has to be a way to bypass the twitch commercial.</p>
           </li>
           <li>
-            <p></p>
+            <p>- Implement SSR & GQL db</p>
           </li>
           <li>
-            <p></p>
+          <p>- Addinng content shift guards for hydrated content</p>
           </li>
 
         </ul>

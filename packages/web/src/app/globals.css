@@ -98,7 +98,91 @@ nav .block {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Fancy Effects  */
+
+
+
+
 .animate-gradientShift {
   background-size: 200% 100%;
   animation: gradientShift 5s cubic-bezier(0.66, 0, 0.34, 1) infinite;
+}
+
+
+
+
+
+
+.circular-gradient-shadow {
+  width: 200px;
+  height: 200px;
+  position: relative;
+  margin: 50px auto;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(134, 194, 50, 1), rgba(134, 254, 50, 1));
+  box-shadow: 0 0 20px rgba(134, 254, 50, 0.5);
+  animation: rotate-gradient 4s linear infinite, pulse 1s ease-in-out infinite;
+}
+
+.circular-gradient-shadow::before {
+  content: '';
+  position: absolute;
+  top: -22px;
+  left: -20px;
+  right: -20px;
+  bottom: -22px;
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(134, 254, 50, 0.5);
+  animation: rotate-shadow 2s linear infinite reverse, pulse-shadow 2s ease-in-out infinite;
+}
+
+@keyframes rotate-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes rotate-shadow {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(134, 254, 50, 0.5);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(134, 254, 50, 0.7);
+  }
+}
+
+@keyframes pulse-shadow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(134, 254, 50, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(134, 254, 50, 0.7);
+  }
 }

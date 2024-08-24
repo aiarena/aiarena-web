@@ -1,6 +1,6 @@
 "use client";
 import Navbar from "@/_components/_nav/Navbar";
-import VideoComponent from "@/_components/_display/VideoComponent";
+import VideoComponent from "@/_components/_display/VideoBanner";
 import Footer from "@/_components/_nav/Footer";
 import NewsBox from "@/_components/_display/NewsBox";
 import PlayerRankingList from "@/_components/_display/PlayerRankingList";

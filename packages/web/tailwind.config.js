@@ -26,6 +26,8 @@ module.exports = {
 
       backgroundImage: {
         'fancy-cushion': "url('/fancy-cushion.png')",
+        'gradient-green1': 'linear-gradient(90deg, rgba(134, 194, 50, 1) 0%, rgba(50, 120, 30, 1) 100%)',
+
 
         // Experimenting
         'gradient-green-lime': 'linear-gradient(90deg, rgba(97,137,47, 1) 0%, rgba(168,208,80, 1) 100%)',
@@ -45,6 +47,9 @@ module.exports = {
         customGreen: 'rgba(134, 194, 50, 1)',
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
+      },
+      maxWidth: {
+        '9xl': '96rem',
       },
       
       borderWidth: {

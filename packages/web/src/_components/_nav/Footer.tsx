@@ -17,7 +17,7 @@ const Footer: React.FC = () => {
         
       </div>
 
-      <footer className="p-4 bg-green-teal-gradient text-center">
+      <footer className="p-4 bg-gradient-green1 text-center">
       © {new Date().getFullYear()} AI Arena. All rights reserved.
       </footer>
     </footer>
