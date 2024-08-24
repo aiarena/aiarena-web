@@ -32,34 +32,35 @@ const ExamplePage: React.FC = () => {
 
         <ProgressBar percentage={75} />
         <div className="circular-gradient-shadow"></div>
-        <div className=" p-10 rounded-xl shadow-2xl mb-12 border-4  border-gray-300 animate-sine-wave bg-gradient-to-br from-black via-[rgba(0,194,50,0.5)] via-190% to-[rgba(0,0,0,1)]">
-          <h1 className="flex">
-            An example of&nbsp;<b className="animate-sine-wave-text"> SHINY </b>
-            &nbsp;text.
+        <div className="p-6 md:p-10 rounded-xl shadow-2xl mb-12 border-4 border-gray-300 animate-sine-wave bg-gradient-to-br from-black via-[rgba(0,194,50,0.5)] via-70% to-[rgba(0,0,0,1)] overflow-hidden">
+          <h1 className="flex flex-wrap">
+            An example of&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
+            text.
           </h1>
-          <p className="flex">
-            With a &nbsp;<b className="animate-sine-wave-text"> SHINY </b>&nbsp;
+          <p className="flex flex-wrap">
+            With a&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
             Box.
           </p>
         </div>
-        <div className=" p-10 rounded-xl shadow-2xl mb-12 border-4  border-gray-300 animate-sine-wave bg-gradient-to-br from-black to-[rgba(134,194,50,1)]">
-          <h1 className="flex">
-            Another example of&nbsp;
-            <b className="animate-sine-wave-text"> SHINY </b>&nbsp;text.
+        <div className="p-6 md:p-10 rounded-xl shadow-2xl mb-12 border-4 border-gray-300 animate-sine-wave bg-gradient-to-br from-black to-[rgba(134,194,50,1)] overflow-hidden">
+          <h1 className="flex flex-wrap">
+          An example of&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
+          text.
           </h1>
-          <p className="flex">
-            With another &nbsp;<b className="animate-sine-wave-text"> SHINY </b>
-            &nbsp; Box.
+          <p className="flex flex-wrap">
+          With a&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
+            Box.
           </p>
         </div>
-        <div className=" p-10 rounded-xl shadow-2xl mb-12 border-4  border-gray-300 animate-sine-wave bg-gradient-to-br from-black to-[rgba(0,0,0,0)]">
-          <h1 className="flex">
-            And another example of&nbsp;
-            <b className="animate-sine-wave-text"> SHINY </b>&nbsp;text.
+
+        <div className="p-6 md:p-10 rounded-xl shadow-2xl mb-12 border-4 border-gray-300 animate-sine-wave bg-gradient-to-br from-black to-transparent overflow-hidden">
+          <h1 className="flex flex-wrap">
+          An example of&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
+          text.
           </h1>
-          <p className="flex">
-            With another &nbsp;<b className="animate-sine-wave-text"> SHINY </b>
-            &nbsp; Box.
+          <p className="flex flex-wrap">
+          With a&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
+            Box.
           </p>
         </div>
         <div className="dividing-line1"></div>
