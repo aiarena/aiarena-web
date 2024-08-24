@@ -17,7 +17,7 @@ interface CompetitionCardProps {
 export default function CompetitionCard({ competition }: CompetitionCardProps) {
   return (
     <Link
-      href={`/competitions/${1}`} // Assuming each competition has a unique ID or URL
+      href={`/competition/${1}`} // Assuming each competition has a unique ID or URL
       className="block bg-gray-900 text-white shadow-lg rounded-lg overflow-hidden hover:bg-gray-800 transition transform hover:scale-105"
     >
       <div className="flex">
