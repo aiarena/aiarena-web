@@ -8,12 +8,19 @@
 2. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
 
 3. Install PostgreSQL and create a Database and a User who can access it  
-    Using SQL:
+    * If you use Docker, run:
     ```
-    create database aiarena;
-    create user aiarena with encrypted password 'aiarena';
+    docker run --name aiarena-web-postgres -p 5432:5432 -e POSTGRES_PASSWORD=aiarena -d postgres:15.5
+    docker exec -i aiarena-web-postgres psql -U postgres -c "create user aiarena with encrypted password 'aiarena' createdb"
+    docker exec -i aiarena-web-postgres psql -U postgres -c "create database aiarena with owner aiarena"
+    docker exec -i aiarena-web-postgres psql -U postgres -c "grant all privileges on database aiarena to aiarena"
+    ```
+
+    * Otherwise, connect to your PostgreSQL installation with `psql -U postgres` and call:
+    ```
+    create user aiarena with encrypted password 'aiarena' createdb;
+    create database aiarena with owner aiarena;
     grant all privileges on database aiarena to aiarena;
-    alter user aiarena createdb; -- if you want to be able to run tests
     ```
 
 4. Install python modules
@@ -28,7 +35,7 @@
     If you need to configure different credentials, make a copy of the `/aiarena/example-dev-env.py` file as 
     `/aiarena/env.py` and update the relevant details
 
-6. Initialize Website DB:
+6. Initialize Website DB. Set environment variable `DJANGO_ENVIRONMENT` to `DEVELOPMENT` and then run:
     ```
     python manage.py migrate
     ```
@@ -55,7 +62,7 @@
            ```
         2. Run Redis, this command uses Docker's port forwarding to let the django server access the container. 
            ```
-           docker run --name my-redis-container -p 6379:6379 -d redis
+           docker run --name aiarena-web-redis -p 6379:6379 -d redis
            ```
      * You can also install Redis on your machine by following the instructions [here](https://redis.io/download)
 

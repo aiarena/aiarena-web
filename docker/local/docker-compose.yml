@@ -12,7 +12,7 @@ services:
       - aiarena-redis-data:/data
 
   aiarena-db:
-    image: postgres:11.18-bullseye
+    image: postgres:15.5
     container_name: aiarena-db
     restart: unless-stopped
     env_file:
