@@ -407,6 +407,8 @@ nav .block {
   clip-path: polygon(0% 100%, 100% 0%, 100% 100%, 0% 100%);
 }
 
+/* path in string seems to cause error with tailwind. */
+/* 
 .dividing-line10 {
   position: relative;
   width: 100%;
@@ -423,4 +425,4 @@ nav .block {
      L 100 100 
      L 0 100 Z"
   );
-}
+} */
