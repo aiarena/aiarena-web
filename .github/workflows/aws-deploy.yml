@@ -45,7 +45,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres:12.13
+        image: postgres:15.5
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: aiarena
@@ -79,7 +79,7 @@ jobs:
         env:
           PORT: ${{ job.services.postgres.ports[5432] }}
         run: |
-          PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
+          PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
       - name: Run Tests
         if:  ${{ !inputs.skip_tests }}
         env:
@@ -101,7 +101,7 @@ jobs:
     services:
       postgres:
         # Docker Hub image
-        image: postgres:12.13
+        image: postgres:15.5
         # Provide the password for postgres
         env:
           POSTGRES_PASSWORD: aiarena
@@ -137,7 +137,7 @@ jobs:
         env:
           PORT: ${{ job.services.postgres.ports[5432] }}
         run: |
-          PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
+          PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
       - name: Run Tests
         if:  ${{ !inputs.skip_tests }}
         env:
