@@ -41,7 +41,7 @@ export default function SmallCompetitionList({ competitions }: SmallCompetitionL
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-8">
+    <div className="mx-auto mt-8">
       <div className="flex justify-center space-x-4 mb-6">
         {competitions.map((competition, index) => (
           <button
@@ -55,50 +55,52 @@ export default function SmallCompetitionList({ competitions }: SmallCompetitionL
         ))}
       </div>
 
-      <div className="bg-gray-800 shadow rounded-lg p-6 text-white">
-        {competitions.map(
-          (competition, index) =>
-            selectedCompetition === competition.node.name && (
-              <div key={index}>
-                <h2 className="text-2xl font-bold mb-4 text-customGreen">{competition.node.name}</h2>
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-gray-700">
-                      <th className="px-4 py-2">Name</th>
-                      <th className="px-4 py-2">Division</th>
-                      <th className="px-4 py-2">Elo</th>
-                      <th className="px-4 py-2">Trend</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {competition.node.participants.edges.map((participant, idx) => (
-                      <tr
-                        key={idx}
-                        onClick={() => handleRowClick(participant.node.bot.name)}
-                        className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
-                      >
-                        <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition">
-                          {participant.node.bot.name}
-                        </td>
-                        <td className="px-4 py-2 flex items-center">
-                          <Image
-                            width={40}
-                            height={40}
-                            src={getDivisionImage(participant.node.divisionNum)}
-                            alt={`Division ${participant.node.divisionNum}`}
-                            className="w-6 h-6 mr-2"
-                          />
-                        </td>
-                        <td className="px-4 py-2">{participant.node.elo}</td>
-                        <td className="px-4 py-2">{participant.node.trend}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )
-        )}
-      </div>
+      <div className="bg-gray-800 shadow rounded-lg p-6 text-white w-full">
+  {competitions.map(
+    (competition, index) =>
+      selectedCompetition === competition.node.name && (
+        <div key={index}>
+          <h2 className="text-2xl font-bold mb-4 text-customGreen">{competition.node.name}</h2>
+          <div className="overflow-hidden">
+            <table className="w-full table-fixed text-left">
+              <thead>
+                <tr className="bg-gray-700">
+                  <th className="px-4 py-2 truncate">Name</th>
+                  <th className="px-4 py-2 truncate">Division</th>
+                  <th className="px-4 py-2 truncate">Elo</th>
+                  <th className="px-4 py-2 truncate">Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                {competition.node.participants.edges.map((participant, idx) => (
+                  <tr
+                    key={idx}
+                    onClick={() => handleRowClick(participant.node.bot.name)}
+                    className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
+                  >
+                    <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition truncate">
+                      {participant.node.bot.name}
+                    </td>
+                    <td className="px-4 py-2 flex items-center truncate">
+                      <Image
+                        width={40}
+                        height={40}
+                        src={getDivisionImage(participant.node.divisionNum)}
+                        alt={`Division ${participant.node.divisionNum}`}
+                        className="w-6 h-6 mr-2"
+                      />
+                    </td>
+                    <td className="px-4 py-2 truncate">{participant.node.elo}</td>
+                    <td className="px-4 py-2 truncate">{participant.node.trend}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )
+  )}
+</div>
     </div>
   );
 }

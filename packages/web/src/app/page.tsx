@@ -94,21 +94,21 @@ export default function Page() {
           <br/>
         
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 py-8">
-            {news.length > 0 && (
-              <div className="w-full">
-                <NewsBox
-                  title={news[0].node.title}
-                  date={new Date(news[0].node.created).toLocaleDateString()}
-                  content="Latest updates from the community."
-                  videoUrl={news[0].node.ytLink}
-                />
-              </div>
-            )}
-            <div className="w-full">
-              <SmallCompetitionList competitions={competitions} />
-            </div>
-          </div>
+          <div className="flex flex-wrap gap-4 px-4 py-8">
+  {news.length > 0 && (
+    <div className="flex-grow flex-shrink-0 basis-[300px] min-w-0">
+      <NewsBox
+        title={news[0].node.title}
+        date={new Date(news[0].node.created).toLocaleDateString()}
+        content="Latest updates from the community."
+        videoUrl={news[0].node.ytLink}
+      />
+    </div>
+  )}
+  <div className="flex-grow flex-shrink-0 basis-[300px] min-w-0">
+    <SmallCompetitionList competitions={competitions} />
+  </div>
+</div>
         </div>
       </main>
       <Footer />
