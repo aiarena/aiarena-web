@@ -70,7 +70,6 @@ export default function Page() {
   if (!competition) {
     return <div>Loading...</div>;
   }
-
   const renderRankings = (
     <div>
       {Object.entries(competition.rankings).map(
@@ -79,48 +78,51 @@ export default function Page() {
             <h3 className="text-2xl font-bold mb-4 text-customGreen">
               {division.replace(/division/, "Division ")}
             </h3>
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-gray-700">
-                  <th className="px-4 py-2">Rank</th>
-                  <th className="px-4 py-2">Name</th>
-                  <th className="px-4 py-2">Race</th>
-                  <th className="px-4 py-2">Author</th>
-                  <th className="px-4 py-2">Type</th>
-                  <th className="px-4 py-2">Win %</th>
-                  <th className="px-4 py-2">ELO</th>
-                  <th className="px-4 py-2">Trend</th>
-                </tr>
-              </thead>
-              <tbody>
-                {participants.map((participant: Participant, idx: number) => (
-                  <tr
-                    key={idx}
-                    className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
-                  >
-                    <td className="px-4 py-2">{participant.rank}</td>
-                    <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition">
-                      {participant.name}
-                    </td>
-                    <td className="px-4 py-2">{participant.race}</td>
-                    <td className="px-4 py-2">{participant.author}</td>
-                    <td className="px-4 py-2">{participant.type}</td>
-                    <td className="px-4 py-2">{participant.winRate}%</td>
-                    <td className="px-4 py-2">{participant.elo}</td>
-                    <td className="px-4 py-2">{participant.trend}</td>
+            <div className="overflow-hidden">
+              <table className="w-full table-fixed text-left">
+                <thead>
+                  <tr className="bg-gray-700">
+                    <th className="px-4 py-2 truncate">Rank</th>
+                    <th className="px-4 py-2 truncate">Name</th>
+                    <th className="px-4 py-2 truncate">Race</th>
+                    <th className="px-4 py-2 truncate">Author</th>
+                    <th className="px-4 py-2 truncate">Type</th>
+                    <th className="px-4 py-2 truncate">Win %</th>
+                    <th className="px-4 py-2 truncate">ELO</th>
+                    <th className="px-4 py-2 truncate">Trend</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {participants.map((participant: Participant, idx: number) => (
+                    <tr
+                      key={idx}
+                      className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
+                    >
+                      <td className="px-4 py-2 truncate">{participant.rank}</td>
+                      <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition truncate">
+                        {participant.name}
+                      </td>
+                      <td className="px-4 py-2 truncate">{participant.race}</td>
+                      <td className="px-4 py-2 truncate">{participant.author}</td>
+                      <td className="px-4 py-2 truncate">{participant.type}</td>
+                      <td className="px-4 py-2 truncate">{participant.winRate}%</td>
+                      <td className="px-4 py-2 truncate">{participant.elo}</td>
+                      <td className="px-4 py-2 truncate">{participant.trend}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )
       )}
     </div>
   );
+  
 
   const renderRounds = (
     <div>
-      <table className="w-full text-left">
+      <table className="w-full text-left ">
         <thead>
           <tr className="bg-gray-700">
             <th className="px-4 py-2">Round #</th>
