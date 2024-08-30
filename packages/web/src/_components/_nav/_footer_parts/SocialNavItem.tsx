@@ -10,7 +10,7 @@ interface SocialComponentProps {
 const SocialComponent: React.FC<SocialComponentProps> = ({ links }) => {
   return (
     <div className="mb-16 px-8 text-center flex-1 mx-auto  w-full">
-        <WrappedTitle title="Communities"/>
+      <WrappedTitle title="Communities" />
       <ul className="space-y-2 flex flex-col items-center">
         {links.map((link) => (
           <FooterNavItem

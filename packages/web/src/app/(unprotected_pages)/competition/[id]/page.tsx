@@ -202,7 +202,7 @@ export default function Page() {
             </h2>
             <div className="relative ">
               <VideoPlayer
-                src="/ai-banner.mp4" // Local or hosted video file
+                src="/videos/ai-banner.mp4" // Local or hosted video file
                 poster="/images/video-poster.jpg" // Optional poster image
                 alt="Sample video demonstrating the AI competition."
                 controls={true}

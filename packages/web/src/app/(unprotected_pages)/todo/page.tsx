@@ -11,19 +11,13 @@ const ToDoPage: React.FC = () => {
 
         <ul>
           <li>
-            <p>-AI arena logo in webp or as vector</p>
-          </li>
-          <li>
-            <p>-Convert all images to webp</p>
-          </li>
-          <li>
             <p>-There has to be a way to bypass the twitch commercial.</p>
           </li>
           <li>
             <p>- Implement SSR & GQL db</p>
           </li>
           <li>
-          <p>- Addinng content shift guards for hydrated content</p>
+          <p>- Adding content shift guards for hydrated content</p>
           </li>
 
         </ul>
