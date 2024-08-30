@@ -21,6 +21,7 @@ module.exports = {
         customWild: 'rgba(134, 254, 50, 1)',
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
+        darken: 'rgba(0, 0, 0, 0.3)',
    
         oldBg0: 'rgb(39,40,48)',
         oldBg1: 'rgb(43,44,52)',
