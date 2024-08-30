@@ -6,7 +6,7 @@ import SupportersComponent from "./_footer_parts/Supporters";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="border-white border-1 bg-oldBg2 text-white pt-8">
+    <footer className="border-white border-1  text-white pt-8">
       <div className="container mx-auto px-4 flex flex-col md:flex-row md:flex-wrap justify-between items-start">
         
         <ServicesComponent services={footerLinks.services} />

@@ -83,9 +83,9 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen font-sans">
+    <div className="flex flex-col min-h-screen font-sans bg-background-texture">
       <Navbar />
-      <main className="flex-grow bg-background-texture text-white">
+      <main className="flex-grow bg-darken text-white">
         <VideoBanner source="./videos/ai-banner.mp4" />
         <div className="dividing-line"></div>
         <div className="pt-20">
