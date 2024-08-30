@@ -96,7 +96,7 @@ function Navbar() {
           
             <Link href="/" className="flex justify-between items-center">
 
-            <Image className="pr-2" src={"/ai-arena-logo.png"} alt="AI-arena-logo" width={50} height={50}></Image>
+            <Image className="pr-2 invert" src={"/assets_logo/ai-arena-logo.svg"} alt="AI-arena-logo" width={50} height={50}></Image>
               <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0">
                 {navbarTitle.title}
               </h2>

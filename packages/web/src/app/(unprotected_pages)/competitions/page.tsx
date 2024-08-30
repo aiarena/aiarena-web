@@ -25,7 +25,7 @@ const mockData = {
       topPlayers: ["PlayerA", "PlayerB", "PlayerC"],
       participants: 100,
       totalGames: 900,
-      imageUrl: "/competitions/sc2.jpg", // Placeholder image URL
+      imageUrl: "/competitions/sc2.webp", // Placeholder image URL
     },
   ],
   closedCompetitions: [

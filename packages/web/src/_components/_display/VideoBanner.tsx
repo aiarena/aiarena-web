@@ -19,7 +19,8 @@ const VideoBanner = ({ source }: { source: string }) => {
   };
 
   return (
-    <div
+    <div className="bg-oldBg0"
+    // <div className="bg-fancy-texture"
       style={{
         width: "100%",
         height: "85vh",
@@ -55,16 +56,16 @@ const VideoBanner = ({ source }: { source: string }) => {
           zIndex: 1,
           opacity: 0.6,
           maskImage:
-            "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%)",
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 1) 100%)",
           WebkitMaskImage:
-            "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%)",
+            "linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 1) 100%)",
         }}
       ></div>
-      <div className="video-overlay absolute inset-0 flex flex-col justify-center items-center text-center text-white px-4">
+      <div className="video-overlay absolute inset-0 flex flex-col justify-center items-center text-center text-white px-4 ">
         <h1 className="text-6xl font-bold mb-8 font-gugi text-customGreen ">
           <Image
-            className="mx-auto pb-6"
-            src={"/ai-arena-logo.png"}
+            className="mx-auto pb-6 invert"
+            src={"/assets_logo/ai-arena-logo.svg"}
             alt="AI-arena-logo"
             width={150}
             height={50}

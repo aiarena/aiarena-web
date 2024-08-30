@@ -21,11 +21,16 @@ module.exports = {
         customWild: 'rgba(134, 254, 50, 1)',
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
+   
+        oldBg0: 'rgb(39,40,48)',
+        oldBg1: 'rgb(43,44,52)',
+        oldBg2: 'rgb(48,51,59)',
      
       },
 
       backgroundImage: {
-        'fancy-cushion': "url('/fancy-cushion.png')",
+        // 'fancy-cushion': "url('./backgrounds/fancy-cushion.png')",
+        // 'fancy-background': "url('/fancy-cushion.png')",
         'gradient-green1': 'linear-gradient(90deg, rgba(134, 194, 50, 1) 0%, rgba(50, 120, 30, 1) 100%)',
 
 
@@ -75,8 +80,14 @@ module.exports = {
     function ({ addUtilities }) {
       const newUtilities = {
         '.bg-fancy-texture': {
-          'background-image': "url('/fancy-cushion.png')",
-          'background-size': '25px 25px',
+          'background-image': "url('/backgrounds/fancy-cushion.png')",
+          'background-size': '50px 50px',
+          'background-repeat': 'repeat',
+        },
+
+        '.bg-background-texture': {
+          'background-image': "url('/backgrounds/background.gif')",
+
           'background-repeat': 'repeat',
         },
       };

@@ -21,7 +21,7 @@ export default function Page() {
           <div className="mb-4 relative">
             <Image
               alt="How to Get Started"
-              src="/adj_1_1.png"
+              src="/demo_assets/adj_1_1.png"
               height={500}
               width={500}
               className="w-full h-auto rounded-lg"
@@ -57,7 +57,7 @@ export default function Page() {
           <div className="mb-4 relative">
             <Image
               alt="Already Have a Model?"
-              src="/adj_2_1.png"
+              src="/demo_assets/adj_2_1.png"
               height={500}
               width={500}
               className="w-full h-auto rounded-lg"
