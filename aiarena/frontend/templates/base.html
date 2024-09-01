@@ -4,6 +4,12 @@
 {% with public_banner_message=config.PUBLIC_BANNER_MESSAGE discord_invite_link=config.DISCORD_INVITE_LINK patreon_link=config.PATREON_LINK logged_in_banner_message=config.LOGGED_IN_BANNER_MESSAGE    project_finance_link=config.PROJECT_FINANCE_LINK    admin_cluster_link=config.ADMIN_CLUSTER_LINK    admin_webstats_link=config.ADMIN_WEBSTATS_LINK    github_link=config.GITHUB_LINK    twitch_link=config.TWITCH_LINK     youtube_link=config.YOUTUBE_LINK    %}
 <head>
     {% load static %}
+    <title>{% block title %}AI Arena{% endblock %}</title>
+    <meta name="description" content="A StarCraft 2 AI versus AI competition">
+    <meta name=”robots” content="index, follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+
     <link rel="stylesheet" href="{% static "style.css" %}?v={{ style_md5 }}">
     <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
     <link href="https://fonts.googleapis.com/css?family=Gugi&display=swap" rel="stylesheet">
@@ -11,10 +17,6 @@
           rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Cutive+Mono&display=swap" rel="stylesheet">
-
-
-    <title>{% block title %}AI Arena{% endblock %}</title>
-
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-153791853-1"></script>
