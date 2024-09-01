@@ -1,0 +1,13 @@
+
+{
+  "extends": "@tsconfig/node16/tsconfig.json",
+  "exclude": ["packages"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*.js", "*.jsx", "*.ts", "*.tsx"]
+    },  
+    "moduleResolution": "Node16",
+  }
+}
+

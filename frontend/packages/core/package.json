@@ -1,0 +1,19 @@
+{
+  "name": "@ai-arena-frontend/core",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "sst bind vitest",
+    "typecheck": "tsc -noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.1",
+    "sst": "2.43.5",
+    "vitest": "^0.33.0"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "^3.21.4"
+  }
+}
