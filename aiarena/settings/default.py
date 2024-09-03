@@ -156,6 +156,7 @@ REST_FRAMEWORK = {
 
 GRAPHENE = {
     "SCHEMA": "aiarena.schema.schema",
+    "SCHEMA_OUTPUT": "frontend/packages/web/schema.graphql",
 }
 
 CACHES = {

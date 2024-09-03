@@ -26,3 +26,5 @@ cloudformation-default.yaml
 test-results/
 
 testtest11.py
+
+frontend/packages/web/schema.graphql
