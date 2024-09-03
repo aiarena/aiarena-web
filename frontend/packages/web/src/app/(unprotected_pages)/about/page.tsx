@@ -1,9 +1,38 @@
 "use client";
 import React from "react";
+import { graphql } from "relay-runtime";
+import {useLazyLoadQuery} from "react-relay";
+
+
+export function nodes(connection: { edges: any; }) {
+  const edges = connection ? connection.edges || connection : [];
+  // @ts-ignore
+  return edges.map((n) => n.node);
+}
+
 
 function Page() {
+  const data = useLazyLoadQuery(
+    graphql`
+      query pageAboutQuery {
+        news(last: 5) {
+          edges {
+            node {
+              id
+              title
+              text
+            }
+          }
+        }
+      }
+    `,
+    {},
+  );
+
   return (
     <>
+      {nodes(data.news).map((newsItem) => <div key={newsItem.id}>{newsItem.title}</div>)}
+
       <div className="text-center">
         <h1 className="text-4xl font-bold">What is AI Arena?</h1>
         <p className="text-lg mt-4">
