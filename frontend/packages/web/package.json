@@ -7,7 +7,8 @@
     "dev": "sst bind next dev",
     "build": "sst bind next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "relay": "relay-compiler --watch"
   },
   "dependencies": {
     "@types/node": "20.3.3",
@@ -24,6 +25,8 @@
     "postcss": "8.4.24",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-relay": "^17.0.0",
+    "relay-runtime": "^17.0.0",
     "sst": "2.43.5",
     "swr": "^2.2.0",
     "tailwindcss": "3.3.2",
@@ -32,6 +35,16 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.3",
     "@types/react": "18.3.1",
-    "encoding": "^0.1.13"
+    "@types/react-relay": "^16.0.6",
+    "@types/relay-runtime": "^17.0.4",
+    "babel-plugin-relay": "^17.0.0",
+    "encoding": "^0.1.13",
+    "graphql": "^16.9.0",
+    "relay-compiler": "^17.0.0"
+  },
+  "relay":  {
+    "src": "./src",
+    "schema": "./schema.graphql",
+    "language": "typescript"
   }
 }

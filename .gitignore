@@ -28,3 +28,4 @@ test-results/
 testtest11.py
 
 frontend/packages/web/schema.graphql
+frontend/**/__generated__

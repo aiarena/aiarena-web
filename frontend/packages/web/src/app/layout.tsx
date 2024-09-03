@@ -4,6 +4,8 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { Quicksand } from "next/font/google";
 import { Gugi } from "next/font/google";
+import RelayEnvironment from "@/_lib/RelayEnvironment";
+import { RelayEnvironmentProvider } from "react-relay";
 
 const inter = Inter({ subsets: ["latin"] });
 const quicksand = Quicksand({
@@ -17,9 +19,11 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`${quicksand.variable} ${gugi.variable} font-sans text-center `}>
-        <LoginProvider>
-          {children}
-        </LoginProvider>
+        <RelayEnvironmentProvider environment={RelayEnvironment}>
+            <LoginProvider>
+              {children}
+            </LoginProvider>
+        </RelayEnvironmentProvider>
       </body>
     </html>
   );
