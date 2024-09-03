@@ -21,6 +21,7 @@ function Page() {
               id
               title
               text
+              ytLink
             }
           }
         }

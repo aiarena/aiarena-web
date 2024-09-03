@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "devdebug": "next dev",
-    "dev": "sst bind next dev",
-    "build": "sst bind next build",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "relay": "relay-compiler --watch"
