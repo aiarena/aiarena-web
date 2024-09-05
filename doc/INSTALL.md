@@ -32,8 +32,7 @@
 5. Modify the Website config to use your Database.  
     If you are using a standard postgres setup at localhost:5432 and step 3's SQL script, then you can skip this step -
     the credentials will already be configured.  
-    If you need to configure different credentials, make a copy of the `/aiarena/example-dev-env.py` file as 
-    `/aiarena/env.py` and update the relevant details
+    If you need to configure different credentials, make a copy `aiarena-web/aiarena/settings/local_example.py` named `local.py` and you can modify the database settings there.
 
 6. Initialize Website DB. Set environment variable `DJANGO_ENVIRONMENT` to `DEVELOPMENT` and then run:
     ```
