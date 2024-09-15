@@ -13,7 +13,7 @@ import Navbar from "@/_components/_nav/Navbar";
 function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-background-texture">
         <Navbar />
 
         <main className="flex-grow  bg-darken">{children}</main>
