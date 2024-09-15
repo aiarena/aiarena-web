@@ -16,7 +16,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex flex-col min-h-screen bg-background-texture">
         <Navbar />
 
-        <main className="flex-grow bg-darken">{children}</main>
+        <main className="flex-grow  bg-darken">{children}</main>
 
         <Footer />
       </div>

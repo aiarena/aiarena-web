@@ -29,13 +29,13 @@ export default function Page() {
 
 
     return (
-        <div className="flex flex-col min-h-screen font-sans bg-background-texture">
+        <div className="flex flex-col min-h-screen font-sans">
             <Navbar/>
             <main className="flex-grow bg-darken text-white">
                 <VideoBanner source="./videos/ai-banner.mp4"/>
                 <div className="dividing-line"></div>
                 <div className="pt-20 pb-20 px-1">
-          <LatestNews newsData={newsData}/>
+                    <LatestNews newsData={newsData}/>
                     {/*<div className="flex flex-wrap gap-4 px-4 py-8 justify-around">*/}
 
 
