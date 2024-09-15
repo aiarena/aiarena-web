@@ -113,6 +113,7 @@ function Navbar() {
                     src="/cross.svg"
                     width={25}
                     height={25}
+
                     alt="close"
                     className="invert"
                   />
