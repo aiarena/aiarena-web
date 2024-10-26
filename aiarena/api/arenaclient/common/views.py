@@ -378,7 +378,7 @@ class SetArenaClientStatusViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
 def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
     """
     Checks to see whether the last X results for a participant are crashes and, if so, disables the bot
-    and sends an alert to the bot author
+    and sends an alert to the bot author.
     :param triggering_participant: The participant who triggered this check and whose bot we should run the check for.
     :return:
     """
@@ -386,13 +386,17 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
     if config.BOT_CONSECUTIVE_CRASH_LIMIT < 1:
         return  # Check is disabled
 
-    if not triggering_participant.bot.competition_participations.filter(active=True).exists():
-        return  # No use running the check - bot is already inactive.
-
     # Get recent match participation records for this bot
     recent_participations = MatchParticipation.objects.filter(
         bot=triggering_participant.bot, match__result__isnull=False
     ).order_by("-match__result__created")[: config.BOT_CONSECUTIVE_CRASH_LIMIT]
+
+    if not triggering_participant.bot.competition_participations.filter(active=True).exists():
+        last_participation = recent_participations[-1]
+        # check if bot was updated since last match, which crashed
+        if last_participation.crashed and last_participation.match.started < triggering_participant.bot.bot_zip_updated:
+            Bots.enable(triggering_participant.bot, last_participation.match.round.competition)
+        return  # No use running the check - bot is already inactive.
 
     # if there's not enough participations yet, then exit without action
     if recent_participations.count() < config.BOT_CONSECUTIVE_CRASH_LIMIT:
@@ -410,4 +414,4 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
 
     # If we get to here, all the results were crashes, so take action
     # REMOVED UNTIL WE DECIDE TO USE THIS
-    # Bots.disable_and_send_crash_alert(triggering_participant.bot)
+    Bots.disable_and_send_crash_alert(triggering_participant.bot)
