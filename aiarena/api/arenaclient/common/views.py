@@ -395,7 +395,7 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
         last_participation = recent_participations[-1]
         # check if bot was updated since last match, which crashed
         if last_participation.crashed and last_participation.match.started < triggering_participant.bot.bot_zip_updated:
-            Bots.enable(triggering_participant.bot, last_participation.match.round.competition)
+            triggering_participant.bot.competition_participations.filter(competition=last_participation.match.round.competition).update(active=True)
         return  # No use running the check - bot is already inactive.
 
     # if there's not enough participations yet, then exit without action
