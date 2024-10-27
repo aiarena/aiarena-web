@@ -101,7 +101,6 @@ class WebTask(BaseTask):
             "environment": [],
             "essential": True,
             "image": "fholzer/nginx-brotli:v1.26.2",
-            "links": [code_container],
             "memory": 32,
             "mountPoints": [
                 {
