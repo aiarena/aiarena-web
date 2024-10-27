@@ -118,6 +118,15 @@ class WebTask(BaseTask):
             "linuxParameters": {
                 "initProcessEnabled": True,
             },
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": f"awslogs-{self.family}-nginx",
+                    "awslogs-region": AWS_REGION,
+                    "awslogs-stream-prefix": f"awslogs-{self.family}",
+                },
+            },
             "entryPoint": ["/bin/sh", "-c"],
             "command": command.split(" "),
         }
