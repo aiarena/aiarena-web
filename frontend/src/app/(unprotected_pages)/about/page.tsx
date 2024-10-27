@@ -2,19 +2,11 @@
 import React from "react";
 import { graphql } from "relay-runtime";
 import {useLazyLoadQuery} from "react-relay";
-import { pageAboutQuery } from "./__generated__/pageAboutQuery.graphql";
+import {nodes} from "@/_lib/relayHelpers";
 
-
-// Utility to extract nodes safely from the connection
-export function nodes<T>(connection: { edges: ReadonlyArray<{ node: T | null | undefined } | null | undefined> } | null | undefined): T[] {
-  if (!connection || !connection.edges) return [];
-  return connection.edges
-    .filter((edge): edge is { node: T } => edge !== null && edge !== undefined && edge.node !== null && edge.node !== undefined)
-    .map((edge) => edge.node);
-}
 
 function Page() {
-  const data = useLazyLoadQuery<pageAboutQuery>(
+  const data = useLazyLoadQuery(
       graphql`
         query pageAboutQuery {
           news(last: 5) {

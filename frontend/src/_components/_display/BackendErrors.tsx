@@ -1,8 +1,23 @@
-import PropTypes from "prop-types";
 import React from "react";
 import Alert from "@/_components/_display/Alert";
 
-function getMessageList({ formErrors, graphqlErrors, failError }) {
+interface BackendErrorsProps {
+  formErrors: {
+    messages: string[];
+    field: string;
+  }[],
+  graphqlErrors: {
+    message: string;
+  }[],
+  failError: string | null;
+}
+
+export default function BackendErrors({
+  formErrors = [],
+  graphqlErrors = [],
+  failError = null,
+  ...props
+}: BackendErrorsProps) {
   const formMessages =
     formErrors?.map((error) => {
       const messages = error.messages.join("; ");
@@ -16,20 +31,7 @@ function getMessageList({ formErrors, graphqlErrors, failError }) {
   const graphqlMessages = graphqlErrors?.map((error) => error.message) || [];
   const failMessages = failError ? [`Something went wrong :(`] : [];
 
-  return [...formMessages, ...graphqlMessages, ...failMessages];
-}
-
-export default function BackendErrors({
-  formErrors = [],
-  graphqlErrors = [],
-  failError = null,
-  ...props
-}) {
-  const finalMessages = getMessageList({
-    formErrors,
-    graphqlErrors,
-    failError,
-  });
+  const finalMessages = [...formMessages, ...graphqlMessages, ...failMessages];
 
   if (!finalMessages.length) {
     return null;
@@ -39,9 +41,3 @@ export default function BackendErrors({
 
   return <Alert message={message} />;
 }
-
-BackendErrors.propTypes = {
-  formErrors: PropTypes.array,
-  graphqlErrors: PropTypes.array,
-  failError: PropTypes.object,
-};

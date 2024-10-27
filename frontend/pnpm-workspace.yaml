@@ -1,4 +1,0 @@
-packages:
-  - "packages/web"
-  - "packages/functions"
-  - "packages/core"
