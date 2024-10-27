@@ -141,14 +141,14 @@ class WebTask(BaseTask):
                 env,
                 self.convert_port_to_mapping([[DJANGO_PORT, DJANGO_PORT]]),
                 name=UWSGI_CONTAINER_NAME,
-                entrypoint="/app/uwsgi.sh",
+                command="/app/aiarena/uwsgi.sh",
             ),
             self.nginx_container(
                 env,
                 self.convert_port_to_mapping([[WEB_PORT, WEB_PORT]]),
                 code_container=UWSGI_CONTAINER_NAME,
                 name=NGINX_CONTAINER_NAME,
-                command="/app/nginx.sh",
+                command="/app/aiarena/nginx.sh",
             ),
         ]
 
