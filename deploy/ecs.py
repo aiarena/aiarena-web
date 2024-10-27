@@ -58,6 +58,10 @@ class Task:
             self.code_container(env, ports),
         ]
 
+    @staticmethod
+    def convert_port_to_mapping(port_list):
+        return [{"hostPort": host_port, "containerPort": container_port} for (host_port, container_port) in port_list]
+
     def as_dict(self, environment):
         from deploy.aws import physical_name
         from deploy.settings import AWS_ACCOUNT_ID, PROJECT_NAME
@@ -68,14 +72,13 @@ class Task:
         )
 
         env = [{"name": k, "value": v} for k, v in environment.items()]
-        ports = [{"hostPort": host_port, "containerPort": container_port} for (host_port, container_port) in self.ports]
         return {
             "cpu": self.cpu,
             "memory": self.memory,
             "family": self.family,
             "taskRoleArn": role_arn,
             "executionRoleArn": execution_role_arn,
-            "containerDefinitions": self.containers(env, ports),
+            "containerDefinitions": self.containers(env, self.convert_port_to_mapping(self.ports)),
             "volumes": self.volumes or [],
             "requiresCompatibilities": self.requires_compatibilities,
             "networkMode": "awsvpc",

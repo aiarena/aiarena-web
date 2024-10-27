@@ -139,13 +139,13 @@ class WebTask(BaseTask):
         return [
             self.code_container(
                 env,
-                [DJANGO_PORT, DJANGO_PORT],
+                self.convert_port_to_mapping([[DJANGO_PORT, DJANGO_PORT]]),
                 name=UWSGI_CONTAINER_NAME,
                 entrypoint="/app/uwsgi.sh",
             ),
             self.nginx_container(
                 env,
-                ports,
+                self.convert_port_to_mapping([[WEB_PORT, WEB_PORT]]),
                 code_container=UWSGI_CONTAINER_NAME,
                 name=NGINX_CONTAINER_NAME,
                 command="/app/nginx.sh",
@@ -183,7 +183,6 @@ SERVICES = [
         count=4,
         task=WebTask(
             family="websiteTask",
-            ports=[(WEB_PORT, WEB_PORT)],
             command="",
         ),
         container_port=WEB_PORT,
