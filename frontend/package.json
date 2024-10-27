@@ -20,7 +20,7 @@
     "http-proxy": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
     "next": "14.2.5",
-    "postcss": "8.4.24",
+    "postcss": "8.4.47",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-relay": "^17.0.0",
