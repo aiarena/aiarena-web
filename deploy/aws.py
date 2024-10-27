@@ -577,7 +577,6 @@ class ApplicationUpdater:
                 "containerName": match.container_name,
                 "containerPort": match.container_port,
             }
-            conf["role"] = self.roles[match.role_name]
 
         grace = match.health_check_grace_sec
         if grace is not None:
