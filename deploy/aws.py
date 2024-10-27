@@ -483,11 +483,9 @@ class ApplicationUpdater:
             return None
 
         role = None
-        port = None
         target_group = None
         if details["loadBalancers"]:
             balancer_details = details["loadBalancers"][0]
-            port = balancer_details["containerPort"]
             role = details["roleArn"].split("/")[-1]
             target_group = balancer_details.get("targetGroupArn")
 
@@ -497,15 +495,6 @@ class ApplicationUpdater:
                 "role",
                 role,
                 self.roles.get(match.role_name),
-            )
-            return None
-
-        if port != match.container_port:
-            self.explain_service_re_create(
-                service_name,
-                "port",
-                port,
-                match.container_port,
             )
             return None
 
@@ -580,6 +569,15 @@ class ApplicationUpdater:
 
         if match.add_network_configuration:
             conf["network-configuration"] = get_network_configuration()
+
+        if match.container_port is not None:
+            target_group = self.target_group_arns[match.target_group]
+            conf["load-balancers"] = {
+                "targetGroupArn": target_group,
+                "containerName": match.container_name,
+                "containerPort": match.container_port,
+            }
+            conf["role"] = self.roles[match.role_name]
 
         grace = match.health_check_grace_sec
         if grace is not None:
