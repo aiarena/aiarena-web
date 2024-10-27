@@ -113,7 +113,6 @@ class WebTask(BaseTask):
             "volumesFrom": [
                 {"sourceContainer": code_container, "readOnly": False},
             ],
-            "hostname": hostname or name,
             "portMappings": ports,
             "linuxParameters": {
                 "initProcessEnabled": True,
