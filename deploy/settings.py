@@ -140,7 +140,7 @@ class WebTask(BaseTask):
         return [
             self.code_container(
                 env,
-                ports,
+                (),
                 name=UWSGI_CONTAINER_NAME,
                 entrypoint="/app/uwsgi.sh",
             ),
