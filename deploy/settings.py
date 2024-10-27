@@ -11,8 +11,8 @@ PROJECT_PATH = Path(__file__).parent.parent
 
 PROJECT_ID = 83
 
-DJANGO_PORT = PROJECT_ID * 100 + 1
-NGINX_PORT = PROJECT_ID * 100 + 11
+WEB_PORT = PROJECT_ID * 100 + 1
+DJANGO_PORT = PROJECT_ID * 100 + 11
 
 IMAGES: dict[str, Path] = {
     "env": PROJECT_PATH / "docker/Dockerfile",
@@ -183,10 +183,10 @@ SERVICES = [
         count=4,
         task=WebTask(
             family="websiteTask",
-            ports=[(NGINX_PORT, NGINX_PORT)],
+            ports=[(WEB_PORT, WEB_PORT)],
             command="",
         ),
-        container_port=NGINX_PORT,
+        container_port=WEB_PORT,
         container_name=NGINX_CONTAINER_NAME,
         health_check_grace_sec=120,
         health_check_failed_count=2,
