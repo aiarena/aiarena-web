@@ -20,6 +20,7 @@ IMAGES: dict[str, Path] = {
 }
 
 UWSGI_CONTAINER_NAME = "aiarena-uwsgi"
+NGINX_CONTAINER_NAME = "nginx"
 
 DB_NAME = "aiarena"
 PRODUCTION_DB_USER = "aiarena"
@@ -92,6 +93,36 @@ class WebTask(BaseTask):
     default_cpu = "256"
     default_memory = "1024"
 
+    # noinspection PyUnusedLocal
+    def nginx_container(self, env, ports, code_container, name, command=None, hostname=None):
+        return {
+            "name": name,
+            "cpu": 64,
+            "environment": [],
+            "essential": True,
+            "image": "fholzer/nginx-brotli:v1.26.2",
+            "links": [code_container],
+            "memory": 32,
+            "mountPoints": [
+                {
+                    "containerPath": volume["host"]["sourcePath"],
+                    "readOnly": False,
+                    "sourceVolume": volume["name"],
+                }
+                for volume in (self.volumes or [])
+            ],
+            "volumesFrom": [
+                {"sourceContainer": code_container, "readOnly": False},
+            ],
+            "hostname": hostname or name,
+            "portMappings": ports,
+            "linuxParameters": {
+                "initProcessEnabled": True,
+            },
+            "entryPoint": ["/bin/sh", "-c"],
+            "command": command.split(" "),
+        }
+
     def code_container(self, *args, **kwargs):
         container = super().code_container(*args, **kwargs)
         container["logConfiguration"] = {
@@ -111,8 +142,14 @@ class WebTask(BaseTask):
                 env,
                 ports,
                 name=UWSGI_CONTAINER_NAME,
-                command="unitd --no-daemon --control unix:/var/run/control.unit.sock",
-                entrypoint="/usr/local/bin/docker-entrypoint.sh",
+                entrypoint="/app/uwsgi.sh",
+            ),
+            self.nginx_container(
+                env,
+                ports,
+                code_container=UWSGI_CONTAINER_NAME,
+                name=NGINX_CONTAINER_NAME,
+                command="/app/nginx.sh",
             ),
         ]
 
@@ -151,7 +188,7 @@ SERVICES = [
             command="",
         ),
         container_port=WEB_PORT,
-        container_name=UWSGI_CONTAINER_NAME,
+        container_name=NGINX_CONTAINER_NAME,
         health_check_grace_sec=120,
         health_check_failed_count=2,
     ),
