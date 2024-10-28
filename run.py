@@ -2,7 +2,7 @@
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import click
@@ -292,7 +292,7 @@ def production_backup():
     cluster_id, task_id = _find_first_task_id()
 
     # Make a DB backup on that server
-    now = datetime.utcnow().replace(microsecond=0)
+    now = datetime.now(timezone.utc).replace(microsecond=0)
     filename = "{}_{}.dump".format(
         DB_NAME,
         now.isoformat("_").replace(":", "-"),
