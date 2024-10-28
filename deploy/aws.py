@@ -204,11 +204,23 @@ def cluster_services(cluster):
 
 def service_tasks(cluster, service):
     arn_list = cli("ecs list-tasks", {"cluster": cluster, "service-name": service})["taskArns"]
-    return [task_arn.split("/")[-1] for task_arn in arn_list]
+    tasks = cli(
+        "ecs describe-tasks",
+        {
+            "cluster": cluster,
+            "tasks": arn_list,
+        },
+    )["tasks"]
+    for task in tasks:
+        task["id"] = task["taskArn"].split("/")[-1]
+    return {task["id"]: task for task in tasks}
 
 
-def execute_command(cluster_id, task_id, command: str, interactive=True):
+def execute_command(cluster_id, task_id, command: str, container_name=None, interactive=True):
     conf = {"cluster": cluster_id, "task": task_id, "command": f'"{command}"'}
+
+    if container_name:
+        conf["container"] = container_name
 
     if interactive:
         conf["interactive"] = ""
@@ -221,25 +233,37 @@ def execute_command(cluster_id, task_id, command: str, interactive=True):
     )
 
 
-def connect_to_ecs_task(cluster_id, task_id):
+def connect_to_ecs_task(cluster_id, task_id, container_name=None):
     while True:
         tasks = cli(
             "ecs describe-tasks",
             {"cluster": cluster_id, "tasks": task_id},
         )["tasks"]
 
-        task_last_status = tasks[0]["lastStatus"]
+        task = tasks[0]
+        task_last_status = task["lastStatus"]
         if task_last_status == "RUNNING":
             break
 
         echo(f"Task {task_id} has status {task_last_status}, waiting 10s for RUNNING status ")
         time.sleep(10)
 
-    echo(f"Connecting to task_id = {task_id}")
+    if len(task["containers"]) > 1 and not container_name:
+        raise ValueError(
+            "Cannot connect to task because it has more than one container and container_name wasn't specified",
+        )
+
+    echo(f"Connecting to task_id = {task_id}" + f", container = {container_name}" if container_name else "")
     attempts = 10
     while attempts > 0:
         try:
-            execute_command(cluster_id, task_id, "/bin/bash", interactive=True)
+            execute_command(
+                cluster_id,
+                task_id,
+                "/bin/bash",
+                container_name=container_name,
+                interactive=True,
+            )
         except RuntimeError:
             echo("Execute agent not running yet, re-trying in 10s")
             time.sleep(10)
