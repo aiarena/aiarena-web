@@ -273,7 +273,7 @@ def production_attach_to_task(task_id):
 def backup_cmd(**kwargs):
     # Avoid leaking the PGPASSWORD in GitHub Actions output
     # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#masking-a-value-in-a-log
-    echo("::add-mask::{password}".format(**kwargs))
+    print("::add-mask::{password}".format(**kwargs))
     command = "PGPASSWORD={password} pg_dump -U {user} -h {host} {db} -Fc -f {filename}".format(**kwargs)
     return f"bash -c '{command}'"
 
