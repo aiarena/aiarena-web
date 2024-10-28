@@ -547,12 +547,12 @@ class ApplicationUpdater:
         echo(f"Service created: {service_name}")
 
     def update_service(self, cluster_id, service_name, match, environment):
-        if self.dry_run:
-            echo(f"Would have updated service {service_name}")
-            return
-
         echo(f"Updating service: {service_name}")
-        register_task(match.task.as_dict(environment))
+        if self.dry_run:
+            conf_json = json.dumps(match.task.as_dict(environment), indent=2)
+            echo(f"Would have updated {service_name} task with conf:\n{conf_json}\n\n")
+        else:
+            register_task(match.task.as_dict(environment))
         conf = {
             "service": service_name,
             "cluster": cluster_id,
@@ -582,8 +582,12 @@ class ApplicationUpdater:
         if grace is not None:
             conf["health-check-grace-period-seconds"] = grace
 
-        cli("ecs update-service", conf)
-        echo(f"Service updated: {service_name}")
+        if self.dry_run:
+            conf_json = json.dumps(conf, indent=2)
+            echo(f"Would have updated service {service_name} with conf:\n{conf_json}\n\n")
+        else:
+            cli("ecs update-service", conf)
+            echo(f"Service updated: {service_name}")
 
     def remove_service(self, cluster_id, service_name):
         if self.dry_run:
