@@ -204,11 +204,23 @@ def cluster_services(cluster):
 
 def service_tasks(cluster, service):
     arn_list = cli("ecs list-tasks", {"cluster": cluster, "service-name": service})["taskArns"]
-    return [task_arn.split("/")[-1] for task_arn in arn_list]
+    tasks = cli(
+        "ecs describe-tasks",
+        {
+            "cluster": cluster,
+            "tasks": arn_list,
+        },
+    )["tasks"]
+    for task in tasks:
+        task["id"] = task["taskArn"].split("/")[-1]
+    return {task["id"]: task for task in tasks}
 
 
-def execute_command(cluster_id, task_id, command: str, interactive=True):
+def execute_command(cluster_id, task_id, command: str, container_name=None, interactive=True):
     conf = {"cluster": cluster_id, "task": task_id, "command": f'"{command}"'}
+
+    if container_name:
+        conf["container"] = container_name
 
     if interactive:
         conf["interactive"] = ""
@@ -221,25 +233,37 @@ def execute_command(cluster_id, task_id, command: str, interactive=True):
     )
 
 
-def connect_to_ecs_task(cluster_id, task_id):
+def connect_to_ecs_task(cluster_id, task_id, container_name=None):
     while True:
         tasks = cli(
             "ecs describe-tasks",
             {"cluster": cluster_id, "tasks": task_id},
         )["tasks"]
 
-        task_last_status = tasks[0]["lastStatus"]
+        task = tasks[0]
+        task_last_status = task["lastStatus"]
         if task_last_status == "RUNNING":
             break
 
         echo(f"Task {task_id} has status {task_last_status}, waiting 10s for RUNNING status ")
         time.sleep(10)
 
-    echo(f"Connecting to task_id = {task_id}")
+    if len(task["containers"]) > 1 and not container_name:
+        raise ValueError(
+            "Cannot connect to task because it has more than one container and container_name wasn't specified",
+        )
+
+    echo(f"Connecting to task_id = {task_id}" + f", container = {container_name}" if container_name else "")
     attempts = 10
     while attempts > 0:
         try:
-            execute_command(cluster_id, task_id, "/bin/bash", interactive=True)
+            execute_command(
+                cluster_id,
+                task_id,
+                "/bin/bash",
+                container_name=container_name,
+                interactive=True,
+            )
         except RuntimeError:
             echo("Execute agent not running yet, re-trying in 10s")
             time.sleep(10)
@@ -483,11 +507,9 @@ class ApplicationUpdater:
             return None
 
         role = None
-        port = None
         target_group = None
         if details["loadBalancers"]:
             balancer_details = details["loadBalancers"][0]
-            port = balancer_details["containerPort"]
             role = details["roleArn"].split("/")[-1]
             target_group = balancer_details.get("targetGroupArn")
 
@@ -497,15 +519,6 @@ class ApplicationUpdater:
                 "role",
                 role,
                 self.roles.get(match.role_name),
-            )
-            return None
-
-        if port != match.container_port:
-            self.explain_service_re_create(
-                service_name,
-                "port",
-                port,
-                match.container_port,
             )
             return None
 
@@ -558,12 +571,12 @@ class ApplicationUpdater:
         echo(f"Service created: {service_name}")
 
     def update_service(self, cluster_id, service_name, match, environment):
-        if self.dry_run:
-            echo(f"Would have updated service {service_name}")
-            return
-
         echo(f"Updating service: {service_name}")
-        register_task(match.task.as_dict(environment))
+        if self.dry_run:
+            conf_json = json.dumps(match.task.as_dict(environment), indent=2)
+            echo(f"Would have updated {service_name} task with conf:\n{conf_json}\n\n")
+        else:
+            register_task(match.task.as_dict(environment))
         conf = {
             "service": service_name,
             "cluster": cluster_id,
@@ -581,12 +594,24 @@ class ApplicationUpdater:
         if match.add_network_configuration:
             conf["network-configuration"] = get_network_configuration()
 
+        if match.container_port is not None:
+            target_group = self.target_group_arns[match.target_group]
+            conf["load-balancers"] = {
+                "targetGroupArn": target_group,
+                "containerName": match.container_name,
+                "containerPort": match.container_port,
+            }
+
         grace = match.health_check_grace_sec
         if grace is not None:
             conf["health-check-grace-period-seconds"] = grace
 
-        cli("ecs update-service", conf)
-        echo(f"Service updated: {service_name}")
+        if self.dry_run:
+            conf_json = json.dumps(conf, indent=2)
+            echo(f"Would have updated service {service_name} with conf:\n{conf_json}\n\n")
+        else:
+            cli("ecs update-service", conf)
+            echo(f"Service updated: {service_name}")
 
     def remove_service(self, cluster_id, service_name):
         if self.dry_run:

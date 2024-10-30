@@ -1,0 +1,7 @@
+private-media
+media
+logs
+backup
+venv
+frontend/node_modules
+.git

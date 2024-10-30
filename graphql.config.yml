@@ -1,1 +1,1 @@
-schema: frontend/packages/web/schema.graphql
+schema: frontend/schema.graphql

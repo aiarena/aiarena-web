@@ -37,3 +37,4 @@ sentry-sdk[django]==1.32.0
 six==1.16.0
 wheel==0.38.4
 wiki==0.11.1
+uwsgi==2.0.28

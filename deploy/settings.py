@@ -12,6 +12,7 @@ PROJECT_PATH = Path(__file__).parent.parent
 PROJECT_ID = 83
 
 WEB_PORT = PROJECT_ID * 100 + 1
+DJANGO_PORT = PROJECT_ID * 100 + 11
 
 IMAGES: dict[str, Path] = {
     "env": PROJECT_PATH / "docker/Dockerfile",
@@ -20,6 +21,7 @@ IMAGES: dict[str, Path] = {
 }
 
 UWSGI_CONTAINER_NAME = "aiarena-uwsgi"
+NGINX_CONTAINER_NAME = "nginx"
 
 DB_NAME = "aiarena"
 PRODUCTION_DB_USER = "aiarena"
@@ -92,6 +94,43 @@ class WebTask(BaseTask):
     default_cpu = "256"
     default_memory = "1024"
 
+    # noinspection PyUnusedLocal
+    def nginx_container(self, env, ports, code_container, name, command=None, hostname=None):
+        return {
+            "name": name,
+            "cpu": 64,
+            "environment": [],
+            "essential": True,
+            "image": "fholzer/nginx-brotli:v1.26.2",
+            "memory": 32,
+            "mountPoints": [
+                {
+                    "containerPath": volume["host"]["sourcePath"],
+                    "readOnly": False,
+                    "sourceVolume": volume["name"],
+                }
+                for volume in (self.volumes or [])
+            ],
+            "volumesFrom": [
+                {"sourceContainer": code_container, "readOnly": False},
+            ],
+            "portMappings": ports,
+            "linuxParameters": {
+                "initProcessEnabled": True,
+            },
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-create-group": "true",
+                    "awslogs-group": f"awslogs-{self.family}-nginx",
+                    "awslogs-region": AWS_REGION,
+                    "awslogs-stream-prefix": f"awslogs-{self.family}",
+                },
+            },
+            "entryPoint": ["/bin/sh", "-c"],
+            "command": command.split(" "),
+        }
+
     def code_container(self, *args, **kwargs):
         container = super().code_container(*args, **kwargs)
         container["logConfiguration"] = {
@@ -109,10 +148,16 @@ class WebTask(BaseTask):
         return [
             self.code_container(
                 env,
-                ports,
+                self.convert_port_to_mapping([[DJANGO_PORT, DJANGO_PORT]]),
                 name=UWSGI_CONTAINER_NAME,
-                command="unitd --no-daemon --control unix:/var/run/control.unit.sock",
-                entrypoint="/usr/local/bin/docker-entrypoint.sh",
+                command="/app/aiarena/uwsgi.sh",
+            ),
+            self.nginx_container(
+                env,
+                self.convert_port_to_mapping([[WEB_PORT, WEB_PORT]]),
+                code_container=UWSGI_CONTAINER_NAME,
+                name=NGINX_CONTAINER_NAME,
+                command="/app/aiarena/nginx.sh",
             ),
         ]
 
@@ -147,11 +192,10 @@ SERVICES = [
         count=4,
         task=WebTask(
             family="websiteTask",
-            ports=[(WEB_PORT, WEB_PORT)],
             command="",
         ),
         container_port=WEB_PORT,
-        container_name=UWSGI_CONTAINER_NAME,
+        container_name=NGINX_CONTAINER_NAME,
         health_check_grace_sec=120,
         health_check_failed_count=2,
     ),

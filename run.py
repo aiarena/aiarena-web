@@ -2,7 +2,7 @@
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import click
@@ -19,6 +19,7 @@ from deploy.settings import (
     PROJECT_NAME,
     PROJECT_PATH,
     SERVICES,
+    UWSGI_CONTAINER_NAME,
 )
 from deploy.utils import echo, env_as_cli_args, run, timing
 
@@ -245,7 +246,7 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
     )
     task_id = result["tasks"][0]["taskArn"].split("/")[-1]
 
-    aws.connect_to_ecs_task(cluster_id, task_id)
+    aws.connect_to_ecs_task(cluster_id, task_id, container_name)
 
     if not dont_kill_on_disconnect:
         aws.cli(
@@ -258,19 +259,47 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
 
 @cli.command(help="Get a secure connection to a running ECS task")
 @click.option("--task-id")
-def production_attach_to_task(task_id):
+@click.option("--container-name")
+def production_attach_to_task(task_id, container_name):
     clusters = aws.all_clusters()
     cluster_id = questionary.select("First, choose an ECS cluster", clusters).unsafe_ask()
-    if not task_id:
-        services = aws.cluster_services(cluster_id)
-        service_id = questionary.select("Then, pick the service", services).unsafe_ask()
-        tasks = aws.service_tasks(cluster_id, service_id)
-        task_id = questionary.select("Finally, select the task ID", tasks).unsafe_ask()
 
-    aws.connect_to_ecs_task(cluster_id, task_id)
+    services = aws.cluster_services(cluster_id)
+    service_id = questionary.select("Then, pick the service", services).unsafe_ask()
+
+    tasks = aws.service_tasks(cluster_id, service_id)
+    if task_id and task_id not in tasks:
+        raise ValueError(f"Task with --task-id={task_id} does not exist")
+
+    if task_id:
+        task = tasks[task_id]
+    else:
+        task = questionary.select(
+            "Select the task ID",
+            [
+                questionary.Choice(
+                    title=task_id,
+                    value=task,
+                )
+                for task_id, task in tasks.items()
+            ],
+        ).unsafe_ask()
+        task_id = task["id"]
+
+    if len(task["containers"]) > 1 and not container_name:
+        container_name = questionary.select(
+            "Task has multiple containers, select the container to connect to",
+            [container["name"] for container in task["containers"]],
+        ).unsafe_ask()
+
+    aws.connect_to_ecs_task(cluster_id, task_id, container_name)
 
 
 def backup_cmd(**kwargs):
+    # Avoid leaking the PGPASSWORD in GitHub Actions output.
+    #  Use print instead of echo since echo adds a prefix and breaks the command.
+    print("::add-mask::{password}".format(**kwargs))  # noqa
+
     command = "PGPASSWORD={password} pg_dump -U {user} -h {host} {db} -Fc -f {filename}".format(**kwargs)
     return f"bash -c '{command}'"
 
@@ -281,18 +310,18 @@ def _find_first_task_id():
     services = aws.cluster_services(cluster_id)
     service_id = [service for service in services if "webService" in service][0]
     tasks = aws.service_tasks(cluster_id, service_id)
-    task_id = tasks[0]
-    return cluster_id, task_id
+    task_id = list(tasks.values())[0]["id"]
+    return cluster_id, task_id, UWSGI_CONTAINER_NAME
 
 
 @cli.command(help="Make a production DB backup and upload it to S3")
 @timing
 def production_backup():
     # Pick one of production servers
-    cluster_id, task_id = _find_first_task_id()
+    cluster_id, task_id, container_name = _find_first_task_id()
 
     # Make a DB backup on that server
-    now = datetime.utcnow().replace(microsecond=0)
+    now = datetime.now(timezone.utc).replace(microsecond=0)
     filename = "{}_{}.dump".format(
         DB_NAME,
         now.isoformat("_").replace(":", "-"),
@@ -307,13 +336,25 @@ def production_backup():
     )
 
     echo(f"Making backup on task_id == {task_id}...")
-    aws.execute_command(cluster_id, task_id, backup_command, interactive=True)
+    aws.execute_command(
+        cluster_id,
+        task_id,
+        backup_command,
+        container_name=container_name,
+        interactive=True,
+    )
 
     # Move the backup to S3
     bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
 
     echo("Uploading to S3...")
-    aws.execute_command(cluster_id, task_id, f"aws s3 mv {backup_file} s3://{bucket}/", interactive=True)
+    aws.execute_command(
+        cluster_id,
+        task_id,
+        f"aws s3 mv {backup_file} s3://{bucket}/",
+        container_name=container_name,
+        interactive=True,
+    )
 
 
 def _confirm_restore(filename):
