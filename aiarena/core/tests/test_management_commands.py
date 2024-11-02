@@ -213,12 +213,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
                 "json", Ladders.get_competition_last_round_participants(competition)
             )
 
-            # make sure it matches the known working method
-            pre_finalization_ranks_legacy = serializers.serialize(
-                "json", Ladders.get_competition_last_round_participants_legacy(competition)
-            )
-            self.assertEqual(_sort_json(pre_finalization_ranks), _sort_json(pre_finalization_ranks_legacy))
-
             # fake competition closure
             competition.status = "closed"
             competition.save()
@@ -231,12 +225,6 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
                 "json", Ladders.get_competition_last_round_participants(competition)
             )
             self.assertEqual(pre_finalization_ranks, post_finalization_ranks)
-
-            # make sure it matches the known working method
-            post_finalization_ranks_legacy = serializers.serialize(
-                "json", Ladders.get_competition_last_round_participants_legacy(competition)
-            )
-            self.assertEqual(_sort_json(post_finalization_ranks), _sort_json(post_finalization_ranks_legacy))
 
             out = StringIO()
             call_command("finalizecompetition", "--competitionid", competition.id, stdout=out)

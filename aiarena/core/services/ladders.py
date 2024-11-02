@@ -40,26 +40,6 @@ class Ladders:
             )
         return participants if amount is None else participants[:amount]
 
-    # TODO: remove after the new one is known working
-    @staticmethod
-    def get_competition_last_round_participants_legacy(competition: Competition, amount=None):
-        # only return SeasonParticipations that are included in the most recent round
-        last_round = Ladders.get_most_recent_round(competition)
-        if last_round is None:
-            return CompetitionParticipation.objects.filter(competition=competition)
-        bot_ids = (
-            Match.objects.select_related("match_participation")
-            .filter(round=last_round)
-            .values("matchparticipation__bot__id")
-            .distinct()
-        )
-
-        participants = Ladders._get_competition_participants(competition).filter(
-            bot__id__in=bot_ids, division_num__gte=CompetitionParticipation.MIN_DIVISION
-        )
-
-        return participants if amount is None else participants[:amount]
-
     @staticmethod
     def get_competition_last_round_participants(competition: Competition, amount=None):
         participants = Ladders._get_competition_participants(competition).filter(
