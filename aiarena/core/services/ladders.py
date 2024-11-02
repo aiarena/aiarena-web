@@ -2,7 +2,7 @@ import logging
 
 from django.db.models import Case, Max, When
 
-from aiarena.core.models import Competition, CompetitionParticipation, Match, Round
+from aiarena.core.models import Competition, CompetitionParticipation, Round
 
 
 logger = logging.getLogger(__name__)
