@@ -5,7 +5,7 @@
     git clone <GIT_URL>
     ```
 
-2. Install python 3.7 64 bit (these instructions might not work with 32 bit). We suggest using a virtual environment if you know how.
+2. Install python 3.12. We suggest using a virtual environment if you know how.
 
 3. Install PostgreSQL and create a Database and a User who can access it  
     * If you use Docker, run:
