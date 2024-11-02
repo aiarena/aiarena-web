@@ -32,10 +32,7 @@ class CompetitionDetail(DetailView):
         context["round_list"] = rounds
         context["round_page_range"] = restrict_page_range(paginator.num_pages, rounds.number)
 
-        if self.object.status == "closed":
-            all_participants = Ladders.get_competition_last_round_participants(self.object)
-        else:
-            all_participants = Ladders.get_competition_ranked_participants(self.object, include_placements=True)
+        all_participants = Ladders.get_competition_display_full_rankings(self.object)
         all_participants = all_participants.prefetch_related(
             Prefetch(
                 "bot",

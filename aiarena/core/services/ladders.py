@@ -31,7 +31,21 @@ class Ladders:
         )
 
     @staticmethod
+    def get_competition_display_full_rankings(competition: Competition):
+        """
+        Get the participants for a competition for the purpose of displaying a full rankings list.
+        """
+        if competition.status == "closed":
+            all_participants = Ladders.get_competition_last_round_participants(competition)
+        else:
+            all_participants = Ladders.get_competition_ranked_participants(competition, include_placements=True)
+        return all_participants
+
+    @staticmethod
     def get_competition_ranked_participants(competition: Competition, amount=None, include_placements=False):
+        """
+        Get raw ranked participants for a competition, with optional amount and whether to include placements.
+        """
         participants = Ladders._get_competition_participants(competition).filter(active=True)
         if not include_placements:
             # Keep those out of placement and have a division
