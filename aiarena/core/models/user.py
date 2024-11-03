@@ -45,9 +45,6 @@ class User(AbstractUser, LockableModelMixin):
     sync_patreon_status = models.BooleanField(default=True, blank=True)
     note = models.TextField(blank=True, null=True)
 
-    # permissions
-    can_request_games_for_another_authors_bot = models.BooleanField(default=False, blank=True)
-
     @cached_property
     def get_absolute_url(self):
         if self.type == "WEBSITE_USER":

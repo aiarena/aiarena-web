@@ -499,7 +499,6 @@ class ServiceUserAdmin(admin.ModelAdmin):
         "extra_active_competition_participations",
         "extra_periodic_match_requests",
         "receive_email_comms",
-        "can_request_games_for_another_authors_bot",
     )
     list_filter = (
         "last_login",
@@ -508,7 +507,6 @@ class ServiceUserAdmin(admin.ModelAdmin):
         "is_active",
         "date_joined",
         "receive_email_comms",
-        "can_request_games_for_another_authors_bot",
     )
     raw_id_fields = ("groups", "user_permissions")
 
@@ -555,7 +553,6 @@ class UserAdmin(admin.ModelAdmin):
         "extra_active_competition_participations",
         "extra_periodic_match_requests",
         "receive_email_comms",
-        "can_request_games_for_another_authors_bot",
     )
     list_filter = (
         "last_login",
@@ -564,7 +561,6 @@ class UserAdmin(admin.ModelAdmin):
         "is_active",
         "date_joined",
         "receive_email_comms",
-        "can_request_games_for_another_authors_bot",
     )
     raw_id_fields = ("groups", "user_permissions")
 
@@ -589,7 +585,6 @@ class WebsiteUserAdmin(admin.ModelAdmin):
         "extra_active_competition_participations",
         "extra_periodic_match_requests",
         "receive_email_comms",
-        "can_request_games_for_another_authors_bot",
         "single_use_match_requests",
     )
     list_filter = (
@@ -599,6 +594,5 @@ class WebsiteUserAdmin(admin.ModelAdmin):
         "is_active",
         "date_joined",
         "receive_email_comms",
-        "can_request_games_for_another_authors_bot",
     )
     raw_id_fields = ("groups", "user_permissions")
