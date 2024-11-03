@@ -351,7 +351,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 BotStatistics(sp1).update_stats_based_on_result(result, sp2)
                 BotStatistics(sp2).update_stats_based_on_result(result, sp1)
 
-                if result.is_crash_or_timeout_or_init_error:
+                if result.is_crash_or_timeout:
                     run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
 
         headers = self.get_success_headers(serializer.data)
