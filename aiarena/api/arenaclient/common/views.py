@@ -386,14 +386,14 @@ def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
     if config.BOT_CONSECUTIVE_CRASH_LIMIT < 1:
         return  # Check is disabled
 
+    if not triggering_participation.bot.competition_participations.filter(active=True).exists():
+        return  # No use running the check - bot is already inactive.
+
     # Get recent match participation records for this bot since its last update
     recent_participations = MatchParticipation.objects.filter(
         bot=triggering_participation.bot, match__result__isnull=False,
         match__started__gt=F("bot__bot_zip_updated")
     ).order_by("-match__result__created")[: config.BOT_CONSECUTIVE_CRASH_LIMIT]
-
-    if not triggering_participation.bot.competition_participations.filter(active=True).exists():
-        return  # No use running the check - bot is already inactive.
 
     # if there's not enough participations yet, then exit without action
     if recent_participations.count() < config.BOT_CONSECUTIVE_CRASH_LIMIT:
