@@ -194,7 +194,7 @@ CONSTANCE_CONFIG = {
         "Whether to reissue previously assigned unfinished matches " "when an arena client requests a match.",
     ),
     "BOT_CONSECUTIVE_CRASH_LIMIT": (
-        0,
+        10,
         "The number of consecutive crashes after which a bot crash alert is triggered. "
         "Any value below 1 will disable this check. Default: 0",
     ),
