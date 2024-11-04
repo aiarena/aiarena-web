@@ -1,6 +1,6 @@
 -r requirements.LOCAL.txt
 -r requirements.txt
-Werkzeug==3.0.3
+Werkzeug==3.0.6
 black==23.7.0
 coverage==7.4.0
 django-constance[database]==3.1.0
