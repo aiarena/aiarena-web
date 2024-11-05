@@ -688,6 +688,7 @@ Resources:
       Path: "/"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
       Policies:
         - PolicyName: enable-ssm-to-container
           PolicyDocument:
@@ -703,6 +704,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - kms:Decrypt
+                  - kms:GenerateDataKey
                 Resource: "*"
         - PolicyName: allow-logging
           PolicyDocument:
