@@ -1,11 +1,15 @@
 /** @type {import('next').NextConfig} */
 
+const isDev = process.env.NODE_ENV === 'development';
+
 const nextConfig = {
+  assetPrefix: isDev ? undefined : 'https://aiarena.net/static/',
+
   async rewrites() {
     // In development, we launch the Django app on localhost:8000, and the Next.js app on localhost:3000, which
     // introduces CORS issues. To be able to make requests to the same origin, we proxy our graphql endpoint, so that
     // it's available from localhost:3000.
-    if (process.env.NODE_ENV === 'development') {
+    if (isDev) {
       return [
         {
           source: '/graphql',
@@ -20,7 +24,7 @@ const nextConfig = {
   },
 
   env: {
-    API_URL: process.env.NODE_ENV === 'development' ? 'http://localhost:8000' : 'https://aiarena.net',
+    API_URL: isDev ? 'http://localhost:8000' : 'https://aiarena.net',
   },
 
   output: 'standalone',

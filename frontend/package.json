@@ -6,7 +6,8 @@
     "devdebug": "next dev",
     "start": "next start",
     "lint": "next lint",
-    "relay": "relay-compiler --watch"
+    "relay": "relay-compiler --watch",
+    "build": "next build"
   },
   "dependencies": {
     "@types/node": "20.3.3",
