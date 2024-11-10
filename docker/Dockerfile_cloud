@@ -11,7 +11,7 @@ RUN python /app/manage.py collectstatic --noinput --clear
 WORKDIR frontend
 RUN npm ci && \
     npm run build && \
-    cp -r public .next/standalone/ &&  # Will be served by NextJS itself \
-    cp -r .next/static staticfiles/_next/static  # Will be picked up by Django staticfiles collection and served by Nginx
+    cp -r public .next/standalone/ && \
+    cp -r .next/static staticfiles/_next/static
 
 VOLUME /app
