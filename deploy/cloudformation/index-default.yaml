@@ -785,6 +785,46 @@ Resources:
       ImageScanningConfiguration:
         scanOnPush: 'true'
 
+  ECRRepositoryFrontend:
+    Type: AWS::ECR::Repository
+    Properties:
+      LifecyclePolicy:
+        LifecyclePolicyText: |
+          {
+            "rules": [
+              {
+                "rulePriority": 10,
+                "description": "Purge untagged images",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 2
+                },
+                "action": {
+                  "type": "expire"
+                }
+              },
+              {
+                "action": {
+                  "type": "expire"
+                },
+                "selection": {
+                  "countType": "imageCountMoreThan",
+                  "countNumber": 3,
+                  "tagStatus": "tagged",
+                  "tagPrefixList": [
+                    "build-"
+                  ]
+                },
+                "description": "Remove temporary build images",
+                "rulePriority": 11
+              }
+            ]
+          }
+      RepositoryName: !format "{project_name}/frontend"
+      ImageScanningConfiguration:
+        scanOnPush: 'true'
+
   DeployRole:
     Type: AWS::IAM::Role
     Properties:
