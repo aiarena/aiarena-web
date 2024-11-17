@@ -3,6 +3,8 @@
 const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig = {
+  assetPrefix: isDev ? undefined : 'https://aiarena.net/new-frontend/',
+
   async rewrites() {
     // In development, we launch the Django app on localhost:8000, and the Next.js app on localhost:3000, which
     // introduces CORS issues. To be able to make requests to the same origin, we proxy our graphql endpoint, so that
