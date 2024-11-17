@@ -78,7 +78,7 @@ def build_image(
     else:
         args = ""
     if arch:
-        platform = f"--platform={arch}"
+        platform = f"--platform=linux/{arch}"
     else:
         platform = ""
     cli(f"build --force-rm {args} {platform} {extra_args} {image_tags} -f {path} .")
