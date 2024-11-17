@@ -8,10 +8,4 @@ RUN pip install -r /srv/requirements.PRODUCTION.txt
 
 RUN python /app/manage.py collectstatic --noinput --clear
 
-WORKDIR frontend
-RUN npm ci && \
-    npm run build && \
-    cp -r public .next/standalone/ && \
-    cp -r .next/static staticfiles/_next/static
-
 VOLUME /app
