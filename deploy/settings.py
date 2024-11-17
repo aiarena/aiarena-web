@@ -139,7 +139,7 @@ class WebTask(BaseTask):
     def nextjs_container(self, env, ports, name, command=None):
         return {
             "name": name,
-            "environment": env,
+            "environment": [],
             "essential": True,
             "image": image_url.format(image="frontend"),
             "portMappings": ports,
