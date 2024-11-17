@@ -132,20 +132,23 @@ def prepare_images():
 
     docker.build_image("env", arch=docker.ARCH_AMD64)
 
-    base_tag = f"build-{build_number}"
-
-    tag_amd64 = f"{base_tag}-{docker.ARCH_AMD64}"
+    cloud_tag = f"cloud-{build_number}-{docker.ARCH_AMD64}"
     docker.build_image(
         "cloud",
-        tag=tag_amd64,
+        tag=cloud_tag,
         arch=docker.ARCH_AMD64,
         build_args={"SECRET_KEY": "temporary-secret-key"},  # Does not stay in the image, just for build
     )
 
-    docker.build_image("frontend", arch=docker.ARCH_AMD64)
+    frontend_tag = f"frontend-{build_number}-{docker.ARCH_AMD64}"
+    docker.build_image(
+        "frontend",
+        tag=cloud_tag,
+        arch=docker.ARCH_AMD64,
+    )
 
-    cloud_images = aws.push_images("cloud", [tag_amd64])
-    frontend_images = aws.push_images("frontend", [tag_amd64])
+    cloud_images = aws.push_images("cloud", [cloud_tag])
+    frontend_images = aws.push_images("frontend", [frontend_tag])
     set_github_actions_output(
         "images",
         json.dumps(
