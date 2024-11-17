@@ -81,14 +81,11 @@ module.exports = {
     function ({ addUtilities }) {
       const newUtilities = {
         '.bg-fancy-texture': {
-          'background-image': "url('/backgrounds/fancy-cushion.png')",
           'background-size': '50px 50px',
           'background-repeat': 'repeat',
         },
 
         '.bg-background-texture': {
-          'background-image': "url('/backgrounds/background.gif')",
-
           'background-repeat': 'repeat',
         },
       };

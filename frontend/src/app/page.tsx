@@ -32,7 +32,7 @@ export default function Page() {
         <div className="flex flex-col min-h-screen font-sans">
             <Navbar/>
             <main className="flex-grow bg-darken text-white">
-                <VideoBanner source="./videos/ai-banner.mp4"/>
+                <VideoBanner source={`${process.env.PUBLIC_PREFIX}/videos/ai-banner.mp4`}/>
                 <div className="dividing-line"></div>
                 <div className="pt-20 pb-20 px-1">
                     <LatestNews newsData={newsData}/>
@@ -85,7 +85,10 @@ export default function Page() {
 //   <div className="flex flex-col min-h-screen font-sans">
 //       <Navbar />
 
-//       <main className="flex-grow bg-fancy-texture text-white">
+//       <main
+//         className="flex-grow bg-fancy-texture text-white"
+//         style={{ backgroundImage: `url('${process.env.PUBLIC_PREFIX}/backgrounds/fancy-cushion.png')` }}
+//       >
 
 //         <VideoComponent source= {"ai-banner.mp4"}/>
 

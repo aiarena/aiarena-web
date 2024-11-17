@@ -19,7 +19,10 @@ const gugi = Gugi({subsets: ['latin'], weight: '400', variable: '--font-gugi'});
 function RootLayout({children}: { children: React.ReactNode }) {
     return (
         <html lang="en">
-        <body className={`${quicksand.variable} ${gugi.variable} font-sans text-center  bg-background-texture`}>
+        <body
+          className={`${quicksand.variable} ${gugi.variable} font-sans text-center  bg-background-texture`}
+          style={{ backgroundImage: `url('${process.env.PUBLIC_PREFIX}/backgrounds/background.gif')` }}
+        >
         <RelayEnvironmentProvider environment={RelayEnvironment}>
             <LoginProvider>
                 <UserProvider>

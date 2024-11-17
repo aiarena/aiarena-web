@@ -25,6 +25,7 @@ const nextConfig = {
 
   env: {
     API_URL: isDev ? 'http://localhost:8000' : 'https://aiarena.net',
+    PUBLIC_PREFIX: isDev ? '.' : '/new-frontend',
   },
 
   output: 'standalone',

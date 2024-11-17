@@ -78,7 +78,7 @@ const VideoBanner = ({ source }: { source: string }) => {
         <h1 className="text-6xl font-bold mb-8 font-gugi text-customGreen">
           <Image
             className="mx-auto pb-6 invert"
-            src={"/assets_logo/ai-arena-logo.svg"}
+            src={`${process.env.PUBLIC_PREFIX}/assets_logo/ai-arena-logo.svg`}
             alt="AI-arena-logo"
             width={150}
             height={50}

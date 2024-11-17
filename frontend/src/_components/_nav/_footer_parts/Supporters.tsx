@@ -23,7 +23,7 @@ const SupportersComponent: React.FC<SupportersComponentProps> = ({
           <div className="flex items-center">
             <Image
               alt="Excel-Icon"
-              src={"/icons/excel-icon.svg"}
+              src={`${process.env.PUBLIC_PREFIX}/icons/excel-icon.svg`}
               height={35}
               width={35}
               className="pr-2"

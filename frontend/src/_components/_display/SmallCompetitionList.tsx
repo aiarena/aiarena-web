@@ -11,13 +11,13 @@ interface SmallCompetitionListProps {
 const getDivisionImage = (divisionNum: number): string => {
   switch (divisionNum) {
     case 1:
-      return '/bot-icons/diamond.png';
+      return `${process.env.PUBLIC_PREFIX}/bot-icons/diamond.png`;
     case 2:
-      return '/bot-icons/silver.png';
+      return `${process.env.PUBLIC_PREFIX}/bot-icons/silver.png`;
     case 3:
-      return '/bot-icons/bronze.png';
+      return `${process.env.PUBLIC_PREFIX}/bot-icons/bronze.png`;
     default:
-      return '/bot-icons/bronze.png'; // Fallback image for other divisions
+      return `${process.env.PUBLIC_PREFIX}/bot-icons/bronze.png`;
   }
 };
 

@@ -188,7 +188,7 @@ export default function Page() {
                 >
                   <MapDisplay
                     mapName={mapName}
-                    imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
+                    imageUrl={`${process.env.PUBLIC_PREFIX}/maps/oceanborn.jpg`} // Static image for demonstration
                   />
                 </div>
               ))}
@@ -202,7 +202,7 @@ export default function Page() {
             </h2>
             <div className="relative ">
               <VideoPlayer
-                src="/videos/ai-banner.mp4" // Local or hosted video file
+                src={`${process.env.PUBLIC_PREFIX}/videos/ai-banner.mp4`} // Local or hosted video file
                 poster="/images/video-poster.jpg" // Optional poster image
                 alt="Sample video demonstrating the AI competition."
                 controls={true}
