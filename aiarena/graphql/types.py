@@ -97,7 +97,7 @@ class CompetitionType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_participants(root: models.Competition, info, **args):
-        return Ladders.get_competition_ranked_participants(root, include_placements=True).calculate_trend(root)
+        return Ladders.get_competition_display_full_rankings(root).calculate_trend(root)
 
 
 class NewsType(DjangoObjectTypeWithUID):
