@@ -19,6 +19,7 @@ IMAGES: dict[str, Path] = {
     "env": PROJECT_PATH / "docker/Dockerfile",
     "cloud": PROJECT_PATH / "docker/Dockerfile_cloud",
     "dev": PROJECT_PATH / "docker/Dockerfile_dev",
+    "frontend": PROJECT_PATH / "docker/Dockerfile_frontend",
 }
 
 UWSGI_CONTAINER_NAME = "aiarena-uwsgi"
@@ -44,6 +45,18 @@ MAINTENANCE_MODE = str_to_bool(os.environ.get("MAINTENANCE_MODE", "False"))
 # Enable "Container Insights" for the ECS cluster.
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ContainerInsights.html
 CONTAINER_INSIGHTS = False
+
+
+def get_log_configuration(family, group_suffix):
+    return {
+        "logDriver": "awslogs",
+        "options": {
+            "awslogs-create-group": "true",
+            "awslogs-group": f"awslogs-{family}-{group_suffix}",
+            "awslogs-region": AWS_REGION,
+            "awslogs-stream-prefix": f"awslogs-{family}",
+        },
+    }
 
 
 class BaseService(Service):
@@ -120,30 +133,28 @@ class WebTask(BaseTask):
             "linuxParameters": {
                 "initProcessEnabled": True,
             },
-            "logConfiguration": {
-                "logDriver": "awslogs",
-                "options": {
-                    "awslogs-create-group": "true",
-                    "awslogs-group": f"awslogs-{self.family}-nginx",
-                    "awslogs-region": AWS_REGION,
-                    "awslogs-stream-prefix": f"awslogs-{self.family}",
-                },
-            },
+            "logConfiguration": get_log_configuration(self.family, "nginx"),
+            "entryPoint": ["/bin/sh", "-c"],
+            "command": command.split(" "),
+        }
+
+    def nextjs_container(self, env, ports, name, command=None):
+        return {
+            "name": name,
+            "cpu": 256,
+            "environment": env,
+            "essential": True,
+            "image": image_url.format(image="frontend"),
+            "memory": 1024,
+            "portMappings": ports,
+            "logConfiguration": get_log_configuration(self.family, "nextjs"),
             "entryPoint": ["/bin/sh", "-c"],
             "command": command.split(" "),
         }
 
     def code_container(self, *args, **kwargs):
         container = super().code_container(*args, **kwargs)
-        container["logConfiguration"] = {
-            "logDriver": "awslogs",
-            "options": {
-                "awslogs-create-group": "true",
-                "awslogs-group": f"awslogs-{self.family}",
-                "awslogs-region": AWS_REGION,
-                "awslogs-stream-prefix": f"awslogs-{self.family}",
-            },
-        }
+        container["logConfiguration"] = get_log_configuration(self.family, "django")
         return container
 
     def containers(self, env, ports):
@@ -154,11 +165,11 @@ class WebTask(BaseTask):
                 name=UWSGI_CONTAINER_NAME,
                 command="/app/aiarena/uwsgi.sh",
             ),
-            self.code_container(
+            self.nextjs_container(
                 env,
                 self.convert_port_to_mapping([[NEXTJS_PORT, NEXTJS_PORT]]),
                 name=NEXTJS_CONTAINER_NAME,
-                command="/app/aiarena/nextjs.sh",
+                command="node server.js",
             ),
             self.nginx_container(
                 env,
@@ -177,15 +188,7 @@ class CeleryTask(BaseTask):
 
     def code_container(self, *args, **kwargs):
         config = super().code_container(*args, **kwargs)
-        config["logConfiguration"] = {
-            "logDriver": "awslogs",
-            "options": {
-                "awslogs-create-group": "true",
-                "awslogs-group": f"awslogs-{self.family}",
-                "awslogs-region": AWS_REGION,
-                "awslogs-stream-prefix": f"awslogs-{self.family}",
-            },
-        }
+        config["logConfiguration"] = get_log_configuration(self.family, "celery")
         config["stopTimeout"] = 120
         return config
 

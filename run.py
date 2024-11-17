@@ -142,10 +142,18 @@ def prepare_images():
         build_args={"SECRET_KEY": "temporary-secret-key"},  # Does not stay in the image, just for build
     )
 
+    docker.build_image("frontend", arch=docker.ARCH_AMD64)
+
     cloud_images = aws.push_images("cloud", [tag_amd64])
+    frontend_images = aws.push_images("frontend", [tag_amd64])
     set_github_actions_output(
         "images",
-        json.dumps({"cloud_images": cloud_images}),
+        json.dumps(
+            {
+                "cloud_images": cloud_images,
+                "frontend_images": frontend_images,
+            }
+        ),
     )
 
     docker.remove_unused_local_images()
@@ -157,6 +165,7 @@ def ecs():
     environment, build_number = deploy_environment()
     images = json.loads(os.environ.get("PREPARED_IMAGES"))
 
+    aws.push_manifest("frontend", "latest", images["frontend_images"])
     aws.push_manifest("cloud", "latest", images["cloud_images"])
 
     # Prepare different environment with root db user for migrations. This is
