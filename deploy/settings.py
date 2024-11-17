@@ -113,11 +113,9 @@ class WebTask(BaseTask):
     def nginx_container(self, env, ports, code_container, name, command=None, hostname=None):
         return {
             "name": name,
-            "cpu": 64,
             "environment": [],
             "essential": True,
             "image": "fholzer/nginx-brotli:v1.26.2",
-            "memory": 32,
             "mountPoints": [
                 {
                     "containerPath": volume["host"]["sourcePath"],
@@ -141,11 +139,9 @@ class WebTask(BaseTask):
     def nextjs_container(self, env, ports, name, command=None):
         return {
             "name": name,
-            "cpu": 256,
             "environment": env,
             "essential": True,
             "image": image_url.format(image="frontend"),
-            "memory": 1024,
             "portMappings": ports,
             "logConfiguration": get_log_configuration(self.family, "nextjs"),
             "entryPoint": ["/bin/sh", "-c"],
