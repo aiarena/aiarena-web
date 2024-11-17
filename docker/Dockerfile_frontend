@@ -45,8 +45,5 @@ USER nextjs
 EXPOSE 8312
 
 ENV PORT=8312
-
-# server.js is created by next build from the standalone output
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output
-ENV HOSTNAME="127.0.0.1"
+ENV HOSTNAME="localhost"
 CMD ["node", "server.js"]
