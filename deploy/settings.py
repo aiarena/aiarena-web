@@ -136,7 +136,7 @@ class WebTask(BaseTask):
             "command": command.split(" "),
         }
 
-    def nextjs_container(self, env, ports, name, command=None):
+    def nextjs_container(self, env, ports, name):
         return {
             "name": name,
             "environment": [],
@@ -144,8 +144,6 @@ class WebTask(BaseTask):
             "image": image_url.format(image="frontend"),
             "portMappings": ports,
             "logConfiguration": get_log_configuration(self.family, "nextjs"),
-            "entryPoint": ["/bin/sh", "-c"],
-            "command": command.split(" "),
         }
 
     def code_container(self, *args, **kwargs):
@@ -165,7 +163,6 @@ class WebTask(BaseTask):
                 env,
                 self.convert_port_to_mapping([[NEXTJS_PORT, NEXTJS_PORT]]),
                 name=NEXTJS_CONTAINER_NAME,
-                command="node server.js",
             ),
             self.nginx_container(
                 env,
