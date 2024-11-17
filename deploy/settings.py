@@ -141,7 +141,7 @@ class WebTask(BaseTask):
             "name": name,
             "environment": [
                 {"name": "HOSTNAME", "value": "localhost"},
-                {"name": "PORT", "value": NEXTJS_PORT},
+                {"name": "PORT", "value": str(NEXTJS_PORT)},
             ],
             "essential": True,
             "image": image_url.format(image="frontend"),
