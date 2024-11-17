@@ -91,6 +91,19 @@ def cloudformation():
     echo("OK")
 
 
+def build_graphql_schema(env: dict | None = None, img="dev"):
+    # Run schema generation without build number, since, if it is present,
+    # local.py is checked, which we do not have in the env image.
+    env_without_build_number = (env or {}).copy()
+    env_without_build_number.pop("BUILD_NUMBER", None)
+    args = env_as_cli_args(env_without_build_number)
+    app_dir = Path.cwd()
+    manage_py_cmd = "python -B /app/manage.py"
+    docker.cli(
+        f'run --rm {args} -v {app_dir}:/app {PROJECT_NAME}/{img} bash -c "{manage_py_cmd} graphql_schema"',
+    )
+
+
 def deploy_environment():
     try:
         REDIS_CACHE_DB = int(os.environ.get("BUILD_NUMBER", "")) % 5 + 5
@@ -131,6 +144,15 @@ def prepare_images():
     echo(f"Build number: {build_number}")
 
     docker.build_image("env", arch=docker.ARCH_AMD64)
+    docker.build_image("dev", arch=docker.ARCH_AMD64)
+    build_graphql_schema(environment, img="dev")
+
+    frontend_tag = f"frontend-{build_number}-{docker.ARCH_AMD64}"
+    docker.build_image(
+        "frontend",
+        tag=frontend_tag,
+        arch=docker.ARCH_AMD64,
+    )
 
     cloud_tag = f"cloud-{build_number}-{docker.ARCH_AMD64}"
     docker.build_image(
@@ -138,13 +160,6 @@ def prepare_images():
         tag=cloud_tag,
         arch=docker.ARCH_AMD64,
         build_args={"SECRET_KEY": "temporary-secret-key"},  # Does not stay in the image, just for build
-    )
-
-    frontend_tag = f"frontend-{build_number}-{docker.ARCH_AMD64}"
-    docker.build_image(
-        "frontend",
-        tag=cloud_tag,
-        arch=docker.ARCH_AMD64,
     )
 
     cloud_images = aws.push_images("cloud", [cloud_tag])

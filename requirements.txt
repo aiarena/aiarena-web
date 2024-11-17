@@ -7,6 +7,7 @@ confusable-homoglyphs==3.2.0
 django-appconf==1.0.5
 django-avatar==8.0.0
 django-bootstrap-form==3.4
+django-constance[redis]==3.1.0
 django-debug-toolbar==3.2.2
 django-dirtyfields==1.9.3
 django-discord-bind @ git+https://github.com/aiarena/django-discord-bind.git@6c987450c2573ae73537d4ea89ec76679c0418f2
@@ -33,8 +34,9 @@ pandas==2.2.2
 pinax-theme-bootstrap==8.0.1
 psycopg2-binary==2.9.9
 pytz==2022.7.1
+redis==5.0.1
 sentry-sdk[django]==1.32.0
 six==1.16.0
+uwsgi==2.0.28
 wheel==0.38.4
 wiki==0.11.1
-uwsgi==2.0.28
