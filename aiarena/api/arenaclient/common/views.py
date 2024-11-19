@@ -410,5 +410,4 @@ def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
     BotCrashLimitAlert.objects.create(triggering_match_participation=triggering_participation)
 
     # If we get to here, all the results were crashes, so take action
-    # REMOVED UNTIL WE DECIDE TO USE THIS
     Bots.disable_and_send_crash_alert(triggering_participation.bot)

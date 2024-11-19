@@ -194,9 +194,13 @@ CONSTANCE_CONFIG = {
         "Whether to reissue previously assigned unfinished matches " "when an arena client requests a match.",
     ),
     "BOT_CONSECUTIVE_CRASH_LIMIT": (
-        10,
+        0,
         "The number of consecutive crashes after which a bot crash alert is triggered. "
         "Any value below 1 will disable this check. Default: 0",
+    ),
+    "ADMIN_EMAIL": (
+        "admin@aiarena.net",
+        "Address for sending an email to site admin."
     ),
     "MAX_USER_BOT_COUNT": (20, "Maximum bots a user can have uploaded."),
     "DEBUG_LOGGING_ENABLED": (
