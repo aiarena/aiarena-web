@@ -1,5 +1,6 @@
-import pytest
 from django.conf import settings
+
+import pytest
 
 from aiarena.core.utils import parse_tags
 
@@ -31,8 +32,10 @@ from aiarena.core.utils import parse_tags
         # Test empty tags are removed
         ("tag1,,tag2", ["tag1", "tag2"]),
         # Test tag limit per match
-        (",".join([f"tag{i}" for i in range(settings.MATCH_TAG_PER_MATCH_LIMIT + 1)]),
-         [f"tag{i}" for i in range(settings.MATCH_TAG_PER_MATCH_LIMIT)]),
+        (
+            ",".join([f"tag{i}" for i in range(settings.MATCH_TAG_PER_MATCH_LIMIT + 1)]),
+            [f"tag{i}" for i in range(settings.MATCH_TAG_PER_MATCH_LIMIT)],
+        ),
     ],
 )
 def test_parse_tags(input_tags, expected):
