@@ -1,22 +1,35 @@
 <div id="tagsinput-div" class="flex-row-half" style="width: 95%">
     {{ form.tags.errors }}
-    <label for="{{ filter.form.tags.id_for_label }}">Tags (comma separated, max 32 tags at 32 chars each, accepts a-z, 0-9, space and _)</label>
+    <label for="{{ filter.form.tags.id_for_label }}">Tags (comma separated, max {{ settings.maxTags }} tags at {{ settings.maxChars }} chars each, accepts a-z, 0-9, space, _, : and -)</label>
     {{ form.tags }}
 </div>
+
+<!-- Embed settings into a script tag -->
+<script id="tag-settings" type="application/json">
+    {
+        "maxTags": {{ MAX_TAGS_ALLOWED }},
+        "maxChars": {{ MAX_TAG_CHARACTERS }},
+        "allowedRegex": "{{ ALLOWED_TAGS_REGEX }}"
+    }
+</script>
+
 <script>
+    const settings = JSON.parse(document.getElementById("tag-settings").textContent);
+    
     // Prevent tags from being added if they don't follow the rules
     $('#tagsinput-div :input').on('beforeItemAdd', function(event) {
+        const regex = new RegExp(settings.allowedRegex);
         // check tag contents
-        if (!/^[a-z0-9 _]+$/.test(event.item)) {
+        if (!regex.test(event.item)) {
             // Cancel current event
             event.cancel = true;
             // Sanitize input and start a new add event
-            $(this).tagsinput('add', event.item.toLowerCase().replace(/[^a-z0-9 _]+/g, ""));
+            $(this).tagsinput('add', event.item.toLowerCase().replace(new RegExp('[^' + settings.allowedRegex + ']', "g"), ""));
         }
     });
 
     $('#tagsinput-div :input').tagsinput({
-        maxChars: 32,
-        maxTags: 32
+        maxChars: settings.maxChars,
+        maxTags: settings.maxTags
     });
 </script>

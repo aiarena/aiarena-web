@@ -41,3 +41,10 @@ def md5(fname):
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
+
+def settings_context(request):
+    return {
+        'MATCH_TAG_REGEX': settings.MATCH_TAG_REGEX,
+        'MATCH_TAG_LENGTH_LIMIT': settings.MATCH_TAG_LENGTH_LIMIT,
+        'MATCH_TAG_PER_MATCH_LIMIT': settings.MATCH_TAG_PER_MATCH_LIMIT,
+    }
