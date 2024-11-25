@@ -487,7 +487,7 @@ SITE_PROTOCOL = "https"
 ROBOTS_USE_HOST = False
 
 # Match Tag Constants
-MATCH_TAG_REGEX = r"[^a-z0-9 _]"
+MATCH_TAG_REGEX = r"[^a-z0-9 _:-]"
 MATCH_TAG_LENGTH_LIMIT = 32
 MATCH_TAG_PER_MATCH_LIMIT = 32
 
