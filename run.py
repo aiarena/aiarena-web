@@ -426,7 +426,7 @@ def restore_backup(filename, s3, quiet):
             return
         local_file = PROJECT_PATH / "backup" / filename
         echo(f"Downloading: S3 -> ./backup/{filename}")
-        aws.cli(f"s3 cp s3://{bucket}/{filename} {local_file}")
+        aws.cli(f"s3 cp s3://{bucket}/{filename} {local_file}", parse_output=False)
     else:
         if filename:
             # Allow providing absolute and relative path, not just filename,
