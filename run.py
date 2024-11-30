@@ -460,7 +460,7 @@ def restore_backup(filename, s3, quiet):
     run(f"createdb -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
 
     echo("Restoring DB backup...")
-    run(f"pg_restore -U {DB_USER} -d {DB_NAME} ./backup/{filename}", env={"PGPASSWORD": DB_PASSWORD})
+    run(f"pg_restore -U {DB_USER} -d {DB_NAME} --no-acl ./backup/{filename}", env={"PGPASSWORD": DB_PASSWORD})
 
     echo("Done.")
 
