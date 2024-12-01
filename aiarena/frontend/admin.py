@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import admin, messages
 from django.http import HttpResponseRedirect
+from django.utils.safestring import mark_safe
 
 from wiki.editors import getEditor
 from wiki.models import ArticleRevision
@@ -529,8 +530,17 @@ class TrophyAdmin(admin.ModelAdmin):
 
 @admin.register(TrophyIcon)
 class TrophyIconAdmin(admin.ModelAdmin):
-    list_display = ("id", "name", "image")
+    list_display = ("id", "name", "image", "image_preview")
     search_fields = ("name",)
+    readonly_fields = ("image_preview",)
+
+    def image_preview(self, obj):
+        """
+        Used to display the image in the admin panel
+        """
+        return mark_safe('<img src="%s" width="150" height="150" />' % (obj.image.url))
+
+    image_preview.short_description = "Preview"
 
 
 @admin.register(User)
