@@ -4,7 +4,7 @@ from wsgiref.util import FileWrapper
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Prefetch, Sum
+from django.db.models import Prefetch, Sum, F
 from django.http import HttpResponse
 
 from constance import config
@@ -22,7 +22,7 @@ from aiarena.core.models import (
     Tag,
 )
 from aiarena.core.permissions import IsArenaClient, IsArenaClientOrAdminUser
-from aiarena.core.services import BotStatistics
+from aiarena.core.services import BotStatistics, Bots
 from aiarena.core.utils import parse_tags
 
 from .ac_coordinator import ACCoordinator
@@ -375,10 +375,10 @@ class SetArenaClientStatusViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
         serializer.save(arenaclient=self.request.user.arenaclient)
 
 
-def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
+def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
     """
     Checks to see whether the last X results for a participant are crashes and, if so, disables the bot
-    and sends an alert to the bot author
+    and sends an alert to the bot author.
     :param triggering_participant: The participant who triggered this check and whose bot we should run the check for.
     :return:
     """
@@ -386,12 +386,13 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
     if config.BOT_CONSECUTIVE_CRASH_LIMIT < 1:
         return  # Check is disabled
 
-    if not triggering_participant.bot.competition_participations.filter(active=True).exists():
+    if not triggering_participation.bot.competition_participations.filter(active=True).exists():
         return  # No use running the check - bot is already inactive.
 
-    # Get recent match participation records for this bot
+    # Get recent match participation records for this bot since its last update
     recent_participations = MatchParticipation.objects.filter(
-        bot=triggering_participant.bot, match__result__isnull=False
+        bot=triggering_participation.bot, match__result__isnull=False,
+        match__started__gt=F("bot__bot_zip_updated")
     ).order_by("-match__result__created")[: config.BOT_CONSECUTIVE_CRASH_LIMIT]
 
     # if there's not enough participations yet, then exit without action
@@ -406,8 +407,7 @@ def run_consecutive_crashes_check(triggering_participant: MatchParticipation):
             return
 
     # Log a crash alert
-    BotCrashLimitAlert.objects.create(triggering_match_participation=triggering_participant)
+    BotCrashLimitAlert.objects.create(triggering_match_participation=triggering_participation)
 
     # If we get to here, all the results were crashes, so take action
-    # REMOVED UNTIL WE DECIDE TO USE THIS
-    # Bots.disable_and_send_crash_alert(triggering_participant.bot)
+    Bots.disable_and_send_crash_alert(triggering_participation.bot)
