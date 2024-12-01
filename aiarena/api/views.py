@@ -1078,10 +1078,9 @@ class MatchRequestsViewSet(viewsets.ViewSet):
             bot1 = serializer.validated_data["bot1"]
             bot2 = serializer.validated_data["bot2"]
             map_instance = serializer.validated_data.get("map")
-            game_mode = serializer.validated_data.get("game_mode")
 
             try:
-                match = MatchRequests.request_match(request.user, bot1, bot2, map_instance, game_mode)
+                match = MatchRequests.request_match(request.user, bot1, bot2, map_instance)
                 return Response(
                     {"message": "Match requested successfully", "match_id": match.id}, status=status.HTTP_201_CREATED
                 )

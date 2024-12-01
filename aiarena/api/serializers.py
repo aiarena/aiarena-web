@@ -49,5 +49,4 @@ class LoginSerializer(serializers.Serializer):
 class RequestMatchSerializer(serializers.Serializer):
     bot1 = serializers.PrimaryKeyRelatedField(queryset=Bot.objects.all())
     bot2 = serializers.PrimaryKeyRelatedField(queryset=Bot.objects.all())
-    map = serializers.PrimaryKeyRelatedField(queryset=Map.objects.all(), required=False)
-    game_mode = serializers.PrimaryKeyRelatedField(queryset=GameMode.objects.all(), required=False)
+    map = serializers.PrimaryKeyRelatedField(queryset=Map.objects.all())
