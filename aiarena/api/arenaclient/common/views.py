@@ -4,7 +4,7 @@ from wsgiref.util import FileWrapper
 from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
-from django.db.models import Prefetch, Sum, F
+from django.db.models import F, Prefetch, Sum
 from django.http import HttpResponse
 
 from constance import config
@@ -22,7 +22,7 @@ from aiarena.core.models import (
     Tag,
 )
 from aiarena.core.permissions import IsArenaClient, IsArenaClientOrAdminUser
-from aiarena.core.services import BotStatistics, Bots
+from aiarena.core.services import Bots, BotStatistics
 from aiarena.core.utils import parse_tags
 
 from .ac_coordinator import ACCoordinator
@@ -390,8 +390,7 @@ def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
 
     # Get recent match participation records for this bot since its last update
     recent_participations = MatchParticipation.objects.filter(
-        bot=triggering_participation.bot, match__result__isnull=False,
-        match__started__gt=F("bot__bot_zip_updated")
+        bot=triggering_participation.bot, match__result__isnull=False, match__started__gt=F("bot__bot_zip_updated")
     ).order_by("-match__result__created")[: config.BOT_CONSECUTIVE_CRASH_LIMIT]
 
     # if there's not enough participations yet, then exit without action

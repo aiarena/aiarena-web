@@ -198,10 +198,7 @@ CONSTANCE_CONFIG = {
         "The number of consecutive crashes after which a bot crash alert is triggered. "
         "Any value below 1 will disable this check. Default: 0",
     ),
-    "ADMIN_EMAIL": (
-        "admin@aiarena.net",
-        "Address for sending an email to site admin."
-    ),
+    "ADMIN_EMAIL": ("admin@aiarena.net", "Address for sending an email to site admin."),
     "MAX_USER_BOT_COUNT": (20, "Maximum bots a user can have uploaded."),
     "DEBUG_LOGGING_ENABLED": (
         False,
