@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class Bots:
     @staticmethod
-    def disable_and_send_crash_alert(bot: Bot):
+    def send_crash_alert(bot: Bot):
         # Can uncomment this if the emails show it isn't wrongly flagging bots
         # bot.competition_participations.update(active=False)
         try:

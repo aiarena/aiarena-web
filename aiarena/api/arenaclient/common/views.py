@@ -377,8 +377,7 @@ class SetArenaClientStatusViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
 
 def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
     """
-    Checks to see whether the last X results for a participant are crashes and, if so, disables the bot
-    and sends an alert to the bot author.
+    Checks to see whether the last X results for a participant are crashes and, if so, sends an alert.
     :param triggering_participant: The participant who triggered this check and whose bot we should run the check for.
     :return:
     """
@@ -410,4 +409,4 @@ def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
     BotCrashLimitAlert.objects.create(triggering_match_participation=triggering_participation)
 
     # If we get to here, all the results were crashes, so take action
-    Bots.disable_and_send_crash_alert(triggering_participation.bot)
+    Bots.send_crash_alert(triggering_participation.bot)
