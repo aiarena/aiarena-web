@@ -260,7 +260,9 @@ class CompetitionAdmin(admin.ModelAdmin):
             if obj.status == "closed":
                 self.message_user(request, "This competition is now closed.")
             else:
-                self.message_user(request, "This competition cannot be closed. Are there active rounds?", level=messages.ERROR)
+                self.message_user(
+                    request, "This competition cannot be closed. Are there active rounds?", level=messages.ERROR
+                )
             return HttpResponseRedirect(".")
         return super().response_change(request, obj)
 
