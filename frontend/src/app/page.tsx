@@ -6,52 +6,63 @@ import NewsBox from "@/_components/_display/NewsBox";
 import PlayerRankingList from "@/_components/_display/PlayerRankingList";
 import TopContributorsList from "@/_components/_display/TopContributorList";
 import TitleBanner from "@/_components/_examples/TitleBanner";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import SmallCompetitionList from "@/_components/_display/SmallCompetitionList";
-import {ApiResponse, Competition, News} from "@/types";
-import {useLazyLoadQuery} from "react-relay";
-import {graphql} from "relay-runtime";
+import { ApiResponse, Competition, News } from "@/types";
+import { useLazyLoadQuery } from "react-relay";
+import { graphql } from "relay-runtime";
 
-import {useNews} from "@/_components/_hooks/useNews";
-import {useCompetitions} from "@/_components/_hooks/useCompetitions";
-import {useBots} from "@/_components/_hooks/useBots";
+import { useNews } from "@/_components/_hooks/useNews";
+import { useCompetitions } from "@/_components/_hooks/useCompetitions";
+import { useBots } from "@/_components/_hooks/useBots";
 import LatestNews from "@/_components/_display/LatestNews";
-
+import { ImageOverlayWrapper } from "@/_components/_display/ImageOverlayWrapper";
 
 export default function Page() {
-    const [competitions, setCompetitions] = useState<Competition[]>([]);
-    const [news, setNews] = useState<News[]>([]);
-    const [error, setError] = useState<string | null>(null);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [news, setNews] = useState<News[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-    const newsData = useNews();
-    // const competitionData = useCompetitions();
-    // const botData = useBots()
+  const newsData = useNews();
+  // const competitionData = useCompetitions();
+  // const botData = useBots()
 
+  return (
+    <div className="flex flex-col min-h-screen font-sans">
+      <Navbar />
+      <main className="flex-grow bg-darken text-white">
+        <VideoBanner
+          source={`${process.env.PUBLIC_PREFIX}/videos/ai-banner.mp4`}
+        />
+        <div className="dividing-line"></div>
+        <div className="pt-20 pb-20 px-1">
+          {/* <LatestNews newsData={newsData}/> */}
+          {/*<div className="flex flex-wrap gap-4 px-4 py-8 justify-around">*/}
 
-    return (
-        <div className="flex flex-col min-h-screen font-sans">
-            <Navbar/>
-            <main className="flex-grow bg-darken text-white">
-                <VideoBanner source={`${process.env.PUBLIC_PREFIX}/videos/ai-banner.mp4`}/>
-                <div className="dividing-line"></div>
-                <div className="pt-20 pb-20 px-1">
-                    <LatestNews newsData={newsData}/>
-                    {/*<div className="flex flex-wrap gap-4 px-4 py-8 justify-around">*/}
+          {/*    <LatestNews newsData={newsData}/>*/}
 
-
-                    {/*    <LatestNews newsData={newsData}/>*/}
-
-                    {/*    <div className="flex-grow flex-shrink-0 basis-[300px] min-w-0">*/}
-                    {/*        <SmallCompetitionList competitions={botData }/>*/}
-                    {/*    </div>*/}
-                    {/*</div>*/}
-                </div>
-            </main>
-            <Footer/>
+          {/*    <div className="flex-grow flex-shrink-0 basis-[300px] min-w-0">*/}
+          {/*        <SmallCompetitionList competitions={botData }/>*/}
+          {/*    </div>*/}
+          {/*</div>*/}
         </div>
-    );
-}
 
+        <ImageOverlayWrapper
+          imageUrl={`/${process.env.PUBLIC_PREFIX}/demo_assets/demo-news.webp`}
+          alt="Space Background"
+          sectionDivider={true}
+          sectionDividerDarken={2}
+          blurAmount="blur-sm"
+          opacityAmount="opacity-80"
+        >
+          {/* hi */}
+          <LatestNews newsData={newsData} />
+        </ImageOverlayWrapper>
+      </main>
+      <Footer />
+    </div>
+  );
+}
 
 // "use client";
 // import React, { useEffect } from "react";
@@ -78,7 +89,6 @@ export default function Page() {
 // ];
 
 // function Page() {
-
 
 //   return (
 //     <>
@@ -113,7 +123,6 @@ export default function Page() {
 //           </div>
 //         </div>
 //         </div>
-
 
 //       </main>
 

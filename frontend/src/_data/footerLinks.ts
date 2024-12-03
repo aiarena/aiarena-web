@@ -38,10 +38,9 @@ export interface FooterLink {
       { icon: "M12 11c0-1.104-.896-2-2-2s-2 .896-2 2 .896 2 2 2 2-.896 2-2z", href: "/facebook" },
       { icon: "M12 11c0-1.104-.896-2-2-2s-2 .896-2 2 .896 2 2 2 2-.896 2-2z", href: "/instagram" },
       { icon: "M12 11c0-1.104-.896-2-2-2s-2 .896-2 2 .896 2 2 2 2-.896 2-2z", href: "/twitter" }
-    
     ],
     topSupporters: [
-      {name: "Latest Supporter"},
+      {name: "Latest Supporter Name"},
     ]
   };
   

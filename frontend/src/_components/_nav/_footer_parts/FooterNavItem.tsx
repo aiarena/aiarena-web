@@ -15,7 +15,7 @@ const FooterNavItem: React.FC<FooterNavItemProps> = ({ icon, href, name,invertIc
       <div className="flex ">
       <Link href={href} className="hover:underline">
       <div className="flex ">
-       <Image src={icon} alt={name + "-Icon"} width={25} height={20} className={`mr-2 ${invertIcon ? "invert" : ""}`}/>
+       <Image src={icon} alt={name + "-Icon"} width={24} height={24} className={`mr-2 w-6 h-6 ${invertIcon ? "invert" : ""}`}/>
         {name}
         </div>
       </Link>

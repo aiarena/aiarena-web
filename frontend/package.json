@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dev": "next dev",
     "devdebug": "next dev",
     "start": "next start",
     "lint": "next lint",
-    "relay": "relay-compiler --watch",
+    "relay": "relay-compiler",
     "build": "relay-compiler && next build"
   },
   "dependencies": {
