@@ -16,7 +16,7 @@ const SupportersComponent: React.FC<SupportersComponentProps> = ({
      <WrappedTitle title="Funded by You"/>
       <p className="text-lg mb-6">{supporters[0].name}</p>
       <p className="text-lg mb-6">
-        Thank you for your support! Your contributions help us keep going.
+        Thank you for your support! <br/> Your contributions help us keep going.
       </p>
       <div className="flex justify-center">
         <Link href="https://docs.google.com/spreadsheets/d/1wm_oZYPZv6t8urGtOCJ1yFtYjq-9WBixJQqaXQ7kiNc/edit?gid=1303247903#gid=1303247903">
