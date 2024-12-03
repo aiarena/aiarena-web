@@ -1,10 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-
-const CustomHighlightVar = 'rgba(154, 255, 70, 1)';
-
-const CustomPrimaryVar = 'rgba(134, 194, 50, 1)';
-
-
 module.exports = {
   darkMode: 'class',
   
@@ -17,15 +11,13 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['var(--font-quicksand)', 'sans-serif'],
+       
         gugi: ['var(--font-gugi)', 'cursive'],
+        
+  
       },
       colors: {
-        customGreen: CustomPrimaryVar,   
-        customGreenHighlight1: 'rgba(255, 255, 0, 1)',                 
-        customGreenDarken1: 'rgba(104, 144, 20, 1)', 
-        customGreenDarken2: 'rgba(84, 110, 15, 1)',    
-        customGreenDarken3: 'rgba(64, 84, 5, 1)',      
-        customGreenDarken9: 'rgba(0, 0, 0, 1)',      
+        customGreen: 'rgba(134, 194, 50, 1)',
         customWild: 'rgba(134, 254, 50, 1)',
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
@@ -99,14 +91,6 @@ module.exports = {
       };
 
       addUtilities(newUtilities, ['responsive', 'hover']);
-    },
-    
-    function ({ addBase }) {
-      addBase({
-        ':root': {
-          '--customGreenHighlight1': CustomHighlightVar,
-        },
-      });
     },
   ],
 }
