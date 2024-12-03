@@ -15,7 +15,7 @@ from constance import config
 
 from aiarena import settings
 from aiarena.core.models.mixins import LockableModelMixin
-
+from aiarena.core.services.supporters import SupporterBenefits
 
 logger = logging.getLogger(__name__)
 
@@ -66,28 +66,12 @@ class User(AbstractUser, LockableModelMixin):
             f'<a href="{self.get_absolute_url}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>'
         )
 
-    BOTS_LIMIT_MAP = {
-        "none": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
-        "bronze": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
-        "silver": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
-        "gold": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
-        "platinum": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
-        "diamond": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER,
-    }
-
     def get_active_bots_limit(self):
-        limit = self.BOTS_LIMIT_MAP[self.patreon_level]
-        if limit is None:
-            return None  # no limit
-        else:
-            return limit + self.extra_active_competition_participations
+        return SupporterBenefits.get_bot_limit(self)
 
     def get_active_competition_participations_limit_display(self):
-        limit = self.BOTS_LIMIT_MAP[self.patreon_level]
-        if limit is None:
-            return "unlimited"  # no limit
-        else:
-            return limit + self.extra_active_competition_participations
+        limit = SupporterBenefits.get_bot_limit(self)
+        return "unlimited" if limit is None else limit
 
     REQUESTED_MATCHES_LIMIT_MAP = {
         "none": settings.MATCH_REQUEST_LIMIT_FREE_TIER,
