@@ -2,6 +2,7 @@ from django.conf import settings
 
 from aiarena.core.models import User
 
+
 BOTS_LIMIT_MAP = {
     "none": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
     "bronze": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,

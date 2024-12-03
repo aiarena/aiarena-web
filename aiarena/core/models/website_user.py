@@ -5,8 +5,9 @@ from django.utils import timezone
 
 from constance import config
 
-from .user import User
 from ..services.supporter_benefits import SupporterBenefits
+from .user import User
+
 
 logger = logging.getLogger(__name__)
 

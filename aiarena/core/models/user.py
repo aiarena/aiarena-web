@@ -17,6 +17,7 @@ from aiarena import settings
 from aiarena.core.models.mixins import LockableModelMixin
 from aiarena.core.services.supporters import SupporterBenefits
 
+
 logger = logging.getLogger(__name__)
 
 
