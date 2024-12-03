@@ -73,21 +73,14 @@ class User(AbstractUser, LockableModelMixin):
         limit = SupporterBenefits.get_bot_limit(self)
         return "unlimited" if limit is None else limit
 
-    REQUESTED_MATCHES_LIMIT_MAP = {
-        "none": settings.MATCH_REQUEST_LIMIT_FREE_TIER,
-        "bronze": settings.MATCH_REQUEST_LIMIT_BRONZE_TIER,
-        "silver": settings.MATCH_REQUEST_LIMIT_SILVER_TIER,
-        "gold": settings.MATCH_REQUEST_LIMIT_GOLD_TIER,
-        "platinum": settings.MATCH_REQUEST_LIMIT_PLATINUM_TIER,
-        "diamond": settings.MATCH_REQUEST_LIMIT_DIAMOND_TIER,
-    }
-
     @property
     def requested_matches_limit(self):
-        return self.REQUESTED_MATCHES_LIMIT_MAP[self.patreon_level] + self.extra_periodic_match_requests
+        # TODO: This is a duplicate of the method in WebsiteUser. Refactor to use the same method.
+        return SupporterBenefits.get_requested_matches_limit(self)
 
     @property
     def match_request_count_left(self):
+        # TODO: This is a duplicate of the method in WebsiteUser. Refactor to use the same method.
         from .match import Match
         from .result import Result
 

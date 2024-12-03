@@ -6,7 +6,7 @@ from django.utils import timezone
 from constance import config
 
 from .user import User
-
+from ..services.supporter_benefits import SupporterBenefits
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +21,12 @@ class WebsiteUser(User):
 
     @property
     def requested_matches_limit(self):
-        return self.REQUESTED_MATCHES_LIMIT_MAP[self.patreon_level] + self.extra_periodic_match_requests
+        # TODO: This is a duplicate of the method in User. Refactor to use the same method.
+        return SupporterBenefits.get_requested_matches_limit(self)
 
     @property
     def match_request_count_left(self):
+        # TODO: This is a duplicate of the method in User. Refactor to use the same method.
         from .match import Match
         from .result import Result
 
