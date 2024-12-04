@@ -7,7 +7,7 @@
     "devdebug": "next dev",
     "start": "next start",
     "lint": "next lint",
-    "relay": "relay-compiler",
+    "relay": "relay-compiler --watch",
     "build": "relay-compiler && next build"
   },
   "dependencies": {
