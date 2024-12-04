@@ -4,11 +4,16 @@ from django.db import transaction
 
 from aiarena.core.models import (
     Map,
-    WebsiteUser, User,
+    User,
+    WebsiteUser,
 )
 from aiarena.core.models.game_mode import GameMode
-from aiarena.core.services.internal.match_requests import handle_request_match, handle_request_matches, \
-    get_user_match_request_count_left
+from aiarena.core.services.internal.match_requests import (
+    get_user_match_request_count_left,
+    handle_request_match,
+    handle_request_matches,
+)
+
 
 logger = logging.getLogger(__name__)
 

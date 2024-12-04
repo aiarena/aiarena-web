@@ -139,8 +139,8 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['match_request_count_left'] = MatchRequests.get_user_match_request_count_left(self.request.user)
-        context['requested_matches_limit'] = SupporterBenefits.get_requested_matches_limit(self.request.user)
+        context["match_request_count_left"] = MatchRequests.get_user_match_request_count_left(self.request.user)
+        context["requested_matches_limit"] = SupporterBenefits.get_requested_matches_limit(self.request.user)
         return context
 
     def form_valid(self, form):

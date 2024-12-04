@@ -40,7 +40,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
         context["max_user_bot_count"] = config.MAX_USER_BOT_COUNT
         context[
             "max_active_active_competition_participations_count"
-        ] =SupporterBenefits.get_active_competition_participations_limit_display(self.request.user)
+        ] = SupporterBenefits.get_active_competition_participations_limit_display(self.request.user)
         requested_matches = (
             Match.objects.filter(requested_by=self.object)
             .prefetch_related(
