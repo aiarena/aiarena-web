@@ -14,6 +14,7 @@ from discord_bind.models import DiscordUser
 from rest_framework.authtoken.models import Token
 
 from aiarena.core.models import Bot, Match, MatchParticipation, User
+from aiarena.core.services import SupporterBenefits
 from aiarena.core.services.internal.matches import CancelResult, cancel
 from aiarena.patreon.models import PatreonAccountBind
 
@@ -39,7 +40,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
         context["max_user_bot_count"] = config.MAX_USER_BOT_COUNT
         context[
             "max_active_active_competition_participations_count"
-        ] = self.request.user.get_active_competition_participations_limit_display()
+        ] =SupporterBenefits.get_active_competition_participations_limit_display(self.request.user)
         requested_matches = (
             Match.objects.filter(requested_by=self.object)
             .prefetch_related(

@@ -11,9 +11,9 @@
                 <h3>You have reached your match request limit.</h3>
             {% endif %}
 
-            <p>Match request limit: {{ user.requested_matches_limit }}
+            <p>Match request limit: {{ requested_matches_limit }}
                 per {{ config.REQUESTED_MATCHES_LIMIT_PERIOD|smooth_timedelta }}</p>
-            <p>Match requests left: {{ user.match_request_count_left }}</p>
+            <p>Match requests left: {{ match_request_count_left }}</p>
 
             <form method="post" style="font-size: 16px;" action="{% url "requestmatch" %}"
                   enctype="multipart/form-data">

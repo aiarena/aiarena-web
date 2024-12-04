@@ -11,10 +11,8 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from constance import config
 
 from aiarena.core.models.mixins import LockableModelMixin
-from aiarena.core.services.supporter_benefits import SupporterBenefits
 
 
 logger = logging.getLogger(__name__)
@@ -64,38 +62,6 @@ class User(AbstractUser, LockableModelMixin):
         limit = 20
         return mark_safe(
             f'<a href="{self.get_absolute_url}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>'
-        )
-
-    def get_active_bots_limit(self):
-        return SupporterBenefits.get_bot_limit(self)
-
-    def get_active_competition_participations_limit_display(self):
-        limit = SupporterBenefits.get_bot_limit(self)
-        return "unlimited" if limit is None else limit
-
-    @property
-    def requested_matches_limit(self):
-        # TODO: This is a duplicate of the method in WebsiteUser. Refactor to use the same method.
-        return SupporterBenefits.get_requested_matches_limit(self)
-
-    @property
-    def match_request_count_left(self):
-        # TODO: This is a duplicate of the method in WebsiteUser. Refactor to use the same method.
-        from .match import Match
-        from .result import Result
-
-        return (
-            self.requested_matches_limit
-            - Match.objects.only("id")
-            .filter(requested_by=self, created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD)
-            .count()
-            + Result.objects.only("id")
-            .filter(
-                submitted_by=self,
-                type="MatchCancelled",
-                created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD,
-            )
-            .count()
         )
 
     @property

@@ -24,7 +24,7 @@ REQUESTED_MATCHES_LIMIT_MAP = {
 
 class SupporterBenefits:
     @staticmethod
-    def get_bot_limit(user: User):
+    def get_active_bots_limit(user: User):
         limit = BOTS_LIMIT_MAP[user.patreon_level]
         if limit is None:
             return None  # no limit
@@ -34,3 +34,8 @@ class SupporterBenefits:
     @staticmethod
     def get_requested_matches_limit(user: User):
         return REQUESTED_MATCHES_LIMIT_MAP[user.patreon_level] + user.extra_periodic_match_requests
+
+    @staticmethod
+    def get_active_competition_participations_limit_display(user: User):
+        limit = SupporterBenefits.get_active_bots_limit(user)
+        return "unlimited" if limit is None else limit
