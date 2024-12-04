@@ -13,7 +13,6 @@ from django.utils.translation import gettext_lazy as _
 
 from constance import config
 
-from aiarena import settings
 from aiarena.core.models.mixins import LockableModelMixin
 from aiarena.core.services.supporters import SupporterBenefits
 
