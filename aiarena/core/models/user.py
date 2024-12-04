@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from constance import config
 
 from aiarena.core.models.mixins import LockableModelMixin
-from aiarena.core.services.supporters import SupporterBenefits
+from aiarena.core.services.supporter_benefits import SupporterBenefits
 
 
 logger = logging.getLogger(__name__)
