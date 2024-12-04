@@ -17,6 +17,41 @@ import {useCompetitions} from "@/_components/_hooks/useCompetitions";
 import {useBots} from "@/_components/_hooks/useBots";
 import LatestNews from "@/_components/_display/LatestNews";
 
+const tasks = [
+    {
+      imageUrl: "/icons/wrench-hammer.svg",
+      backgroundImage: "/demo_assets/demo_build.webp",
+      title: "Create Your Own Bot",
+      description:
+        "Create a bot using one of our tutorials. Start developing your own bot today!",
+      buttonText: "Create",
+      buttonUrl: "/create-bot",
+      bgImageAlt: "Alt",
+     
+    },
+    {
+      imageUrl: "/icons/mouse.svg",
+      backgroundImage: "/demo_assets/demo_play.webp",
+      title: "Play Against SC2 Bots",
+      description:
+        "Play against SC2 bots and test your skills. Discover new strategies to improve your gameplay!",
+      buttonText: "Play",
+      buttonUrl: "/play-bot",
+      bgImageAlt: "Alt",
+      
+    },
+    {
+      imageUrl: "/icons/trophy.svg",
+      backgroundImage: "/demo_assets/demo_compete.webp",
+      title: "Compete On The Ladder",
+      description:
+        "Compete against other bots on our 24/7 bot ladder. Win achievements and get featured in our tournaments.",
+      buttonText: "Competitions",
+      buttonUrl: "/competitions",
+      bgImageAlt: "Alt",
+      
+    },
+  ];
 
 export default function Page() {
     const [competitions, setCompetitions] = useState<Competition[]>([]);
@@ -29,7 +64,7 @@ export default function Page() {
 
 
     return (
-        <div className="flex flex-col min-h-screen font-sans">
+        <div className="flex flex-col min-h-screen font-sans ">
             <Navbar/>
             <main className="flex-grow bg-darken text-white">
                 <VideoBanner source={`${process.env.PUBLIC_PREFIX}/videos/ai-banner.mp4`}/>

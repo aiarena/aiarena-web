@@ -1,4 +1,11 @@
 /** @type {import('tailwindcss').Config} */
+
+// customGreenDarken2: 'rgba(84, 110, 255, 1)',  
+
+const CustomHighlightVar = 'rgba(154, 255, 70, 1)';
+const CustomPrimaryVar = 'rgba(134, 194, 50, 1)';
+
+
 module.exports = {
   darkMode: 'class',
   
@@ -11,13 +18,17 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['var(--font-quicksand)', 'sans-serif'],
-       
         gugi: ['var(--font-gugi)', 'cursive'],
         
   
       },
       colors: {
-        customGreen: 'rgba(134, 194, 50, 1)',
+        customGreen: CustomPrimaryVar,   
+        customGreenHighlight1: 'rgba(255, 255, 0, 1)',                 
+        customGreenDarken1: 'rgba(104, 144, 20, 1)', 
+        customGreenDarken2: 'rgba(84, 110, 15, 1)',    
+        customGreenDarken3: 'rgba(64, 84, 5, 1)',      
+        customGreenDarken9: 'rgba(0, 0, 0, 1)',      
         customWild: 'rgba(134, 254, 50, 1)',
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
@@ -34,7 +45,6 @@ module.exports = {
         // 'fancy-background': "url('/fancy-cushion.png')",
         'gradient-green1': 'linear-gradient(90deg, rgba(134, 194, 50, 1) 0%, rgba(50, 120, 30, 1) 100%)',
 
-
         // Experimenting
         'gradient-green-lime': 'linear-gradient(90deg, rgba(97,137,47, 1) 0%, rgba(168,208,80, 1) 100%)',
         'gradient-green-olive': 'linear-gradient(90deg, rgba(97,137,47, 1) 0%, rgba(56,90,30, 1) 100%)',
@@ -48,7 +58,7 @@ module.exports = {
       },
 
 
-      // experimenting
+
       borderColor: {
         customGreen: 'rgba(134, 194, 50, 1)',
         softTeal: '#32B3A4',
@@ -66,7 +76,6 @@ module.exports = {
         'xl': '1rem',
         '2xl': '2rem',
       },
-      // experimenting^
       backgroundSize: {
         '25': '25px',
       },
@@ -84,13 +93,20 @@ module.exports = {
           'background-size': '50px 50px',
           'background-repeat': 'repeat',
         },
-
         '.bg-background-texture': {
+          'background-image': "url('/backgrounds/background.gif')",
           'background-repeat': 'repeat',
         },
       };
-
       addUtilities(newUtilities, ['responsive', 'hover']);
+    },
+
+    function ({ addBase }) {
+      addBase({
+        ':root': {
+          '--customGreenHighlight1': CustomHighlightVar,
+        },
+      });
     },
   ],
 }

@@ -7,7 +7,6 @@ import MobileNavitem from "./_nav_parts/MobileNavItem";
 import MobileNavItem from "./_nav_parts/MobileNavItem";
 import AuthNavBar from "./_nav_parts/AuthNavbar";
 
-
 const navLinks = [
   {
     title: "Home",
@@ -51,9 +50,6 @@ const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
   },
- 
-
-
 ];
 
 const navbarTitle = {
@@ -75,6 +71,14 @@ function Navbar() {
 
   const handleWindowResize = () => {
     console.log("resized screen");
+    if (window.innerWidth >= 760) {
+      // Only close the navbar on larger screens
+      setNavbar(false);
+      document.body.style.overflow = "unset";
+    }
+  };
+
+  const handleMobileNavItemClick = () => {
     setNavbar(false);
     document.body.style.overflow = "unset";
   };
@@ -91,18 +95,20 @@ function Navbar() {
 
   return (
     <>
-      <nav className="w-full bg-neutral-900 px-2 text-white dark:bg-gray-900 font-sans">
+      <nav className="w-full bg-neutral-900 px-2 text-white dark:bg-gray-900 font-sans sticky top-0 z-50">
         <div className="flex justify-between md:p-3 md:flex ">
-          
-            <Link href="/" className="flex justify-between items-center">
-
-            <Image className="pr-2 invert" src={`${process.env.PUBLIC_PREFIX}/assets_logo/ai-arena-logo.svg`} alt="AI-arena-logo" width={50} height={50}></Image>
-              <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0">
-                {navbarTitle.title}
-              </h2>
-           
-            </Link>
-       
+          <Link href="/" className="flex justify-between items-center">
+            <Image
+              className="pr-2 invert h-[auto] w-12"
+              src={"/assets_logo/ai-arena-logo.svg"}
+              alt="AI-arena-logo"
+              width={48}
+              height={48}
+            ></Image>
+            <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0 pb-5">
+              {navbarTitle.title}
+            </h2>
+          </Link>
 
           {/* Phone */}
           <div className="md:hidden py-4">
@@ -110,47 +116,43 @@ function Navbar() {
               {navbar ? (
                 <div>
                   <Image
-                    src={`${process.env.PUBLIC_PREFIX}/cross.svg`}
-                    width={25}
-                    height={25}
-
+                    src="/cross.svg"
+                    width={24}
+                    height={24}
                     alt="close"
-                    className="invert"
+                    className="invert w-6 h-6"
                   />
                 </div>
               ) : (
                 <Image
-                  src={`${process.env.PUBLIC_PREFIX}/menu.svg`}
-                  width={25}
-                  height={25}
+                  src="/menu.svg"
+                  width={24}
+                  height={24}
                   alt="menu"
-                  className="invert"
+                  className="invert w-6 h-6"
                 />
               )}
             </button>
           </div>
-
           {/* pc nav */}
-          <div className="hidden md:block">
-            <ul className="flex">
-              {navLinks.map((link, index) => (
-                <div key={index}>
-                  { 
-                    <NavItem
-                      key={index}
-                      href={link.path}
-                      onClick={handleWindowResize}
-                    >
+          <div className="ml-40 hidden md:flex justify-between">
+            {/* Container for Nav Items */}
+            <div className="flex flex-col">
+              <ul className="flex flex-wrap">
+                {navLinks.map((link, index) => (
+                  <div key={index} className="block">
+                    <NavItem href={link.path} onClick={handleWindowResize}>
                       {link.title}
                     </NavItem>
-                  }
-                </div>
-              ))}
-              <li>
-                <AuthNavBar />
-                
-              </li>
-            </ul>
+                  </div>
+                ))}
+              </ul>
+            </div>
+
+            {/* Auth NavBar stays top-right */}
+            <div className="ml-auto">
+              <AuthNavBar />
+            </div>
           </div>
         </div>
         {navbar === true ? (
@@ -162,25 +164,20 @@ function Navbar() {
                     <MobileNavItem
                       key={index}
                       href={link.path}
-                      onClick={handleWindowResize}
+                      onClick={handleMobileNavItemClick}
                     >
                       {link.title}
                     </MobileNavItem>
                   }
                 </div>
               ))}
-              
+
               <li>
                 <AuthNavBar />
-              
               </li>
-            
-         
             </ul>
-     
           </div>
         ) : null}
-        
       </nav>
     </>
   );
