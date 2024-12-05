@@ -27,3 +27,7 @@ class CompetitionParticipationUpdate(SuccessMessageMixin, LoginRequiredMixin, Up
 
     def get_success_url(self):
         return reverse("bot_competitions", kwargs={"pk": self.kwargs["bot_id"]})
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.filter(bot__user=self.request.user)
