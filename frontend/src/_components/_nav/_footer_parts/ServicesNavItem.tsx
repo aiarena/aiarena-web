@@ -17,10 +17,12 @@ const ServicesComponent: React.FC<ServicesComponentProps> = ({ services }) => {
         <p>Im not really sure what to put here...</p>
         <p> Maybe list games?</p>
         <li>
-          <Link href={"Apokerpage"}> Starcraft 2 </Link>
+          {/* <Link href={"Apokerpage"}> Starcraft 2 </Link> */}
+          <p>Game1</p>
         </li>
         <li>
-          <Link href={"Apokerpage"}>Poker</Link>
+          {/* <Link href={"Apokerpage"}>Poker</Link> */}
+          <p>Game2</p>
         </li>
       </ul>
     </div>
