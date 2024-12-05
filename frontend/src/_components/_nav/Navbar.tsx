@@ -34,6 +34,18 @@ const navLinks = [
     showLoggedOut: true,
   },
   {
+    title: "Status",
+    path: `${getPublicPrefix()}/status`,
+    showLoggedIn: true,
+    showLoggedOut: true,
+  },
+  {
+    title: "Bots",
+    path: `${getPublicPrefix()}/bots`,
+    showLoggedIn: true,
+    showLoggedOut: true,
+  },
+  {
     title: "Profile",
     path: `${getPublicPrefix()}/profile`,
     showLoggedIn: true,

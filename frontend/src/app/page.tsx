@@ -29,7 +29,7 @@ const tasks = [
     description:
       "Create a bot using one of our tutorials. Start developing your own bot today!",
     buttonText: "Create",
-    buttonUrl: "/create-bot",
+    buttonUrl: `${getPublicPrefix()}/create-bot`,
     bgImageAlt: "Alt",
   },
   {
@@ -38,7 +38,7 @@ const tasks = [
     description:
       "Play against SC2 bots and test your skills. Discover new strategies to improve your gameplay!",
     buttonText: "Play",
-    buttonUrl: "/play-bot",
+    buttonUrl: `${getPublicPrefix()}/play-bot`,
     bgImageAlt: "Alt",
   },
   {
@@ -47,7 +47,7 @@ const tasks = [
     description:
       "Compete against other bots on our 24/7 bot ladder. Win achievements and get featured in our tournaments.",
     buttonText: "Competitions",
-    buttonUrl: "/competitions",
+    buttonUrl: `${getPublicPrefix()}/competitions`,
     bgImageAlt: "Alt",
   },
 ];

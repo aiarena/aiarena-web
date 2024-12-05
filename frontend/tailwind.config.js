@@ -18,7 +18,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['var(--font-quicksand)', 'sans-serif'],
-        gugi: ['var(--font-gugi)', 'cursive'],
+        gugi: ['var(--font-gugi)', 'sans-serif'],
         
   
       },

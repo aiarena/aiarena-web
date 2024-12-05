@@ -17,7 +17,7 @@ function RootLayout({children}: { children: React.ReactNode }) {
         <html lang="en">
         <body
           className={`${quicksand.variable} ${gugi.variable} font-sans text-center  bg-background-texture`}
-          style={{ backgroundImage: `url('${process.env.PUBLIC_PREFIX}/backgrounds/background.gif')` }}
+        //   style={{ backgroundImage: `url('${process.env.PUBLIC_PREFIX}/backgrounds/background.gif')` }}
         >
         <RelayEnvironmentProvider environment={RelayEnvironment}>
             <LoginProvider>
