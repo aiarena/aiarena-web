@@ -13,6 +13,7 @@ import StatCard from "@/_components/_examples/StatCard";
 import StatsOverview from "@/_components/_examples/StatsOverview";
 import TestimonialsCarousel from "@/_components/_examples/TestimonalsCarousel";
 import TitleBanner from "@/_components/_examples/TitleBanner";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import React from "react";
 
 const ExamplePage: React.FC = () => {
@@ -104,7 +105,7 @@ const ExamplePage: React.FC = () => {
           <Card
             title="Amazing Feature"
             description="Discover how this feature can enhance your experience."
-            imageUrl={`${process.env.PUBLIC_PREFIX}/competitions/sc2_1.webp`}
+            imageUrl={`${getPublicPrefix()}/competitions/sc2_1.webp`}
           />
           {/* <Card
            title="Another Great Feature"
@@ -122,12 +123,12 @@ const ExamplePage: React.FC = () => {
           <FeatureCard
             title="Rocket Speed"
             description="Experience unmatched speed and performance."
-            icon={`${process.env.PUBLIC_PREFIX}/icons/excel-icon.svg`}
+            icon={`${getPublicPrefix()}/icons/excel-icon.svg`}
           />
           <FeatureCard
             title="Community Support"
             description="Join a community of like-minded individuals."
-            icon={`${process.env.PUBLIC_PREFIX}/icons/excel-icon.svg`}
+            icon={`${getPublicPrefix()}/icons/excel-icon.svg`}
           />
           <StatCard stat="99.9%" description="Uptime Guarantee" />
         </div>
@@ -136,13 +137,13 @@ const ExamplePage: React.FC = () => {
           <ProfileCard
             name="Jane Doe"
             role="Lead Developer"
-            imageUrl={`${process.env.PUBLIC_PREFIX}/competitions/sc2_1.webp`}
+            imageUrl={`${getPublicPrefix()}/competitions/sc2_1.webp`}
             bio="Jane has over 10 years of experience in full-stack development and is passionate about building scalable web applications."
           />
           <ProfileCard
             name="John Smith"
             role="Product Manager"
-            imageUrl={`${process.env.PUBLIC_PREFIX}/competitions/sc2_1.webp`}
+            imageUrl={`${getPublicPrefix()}/competitions/sc2_1.webp`}
             bio="John is dedicated to ensuring our products meet the needs of our users and consistently exceed expectations."
           />
         </div>

@@ -20,10 +20,11 @@ import Image from "next/image";
 import InitiationHeroTasks from "@/_components/_display/InitiationHeroTasks";
 import { ImageOverlayWrapper } from "@/_components/_display/ImageOverlayWrapper";
 import DiscordInviteCard from "@/_components/_display/DiscordInviteCard";
+import { getPublicPrefix  } from "@/_lib/getPublicPrefix";
 
 const tasks = [
   {
-    backgroundImage: `/${process.env.PUBLIC_PREFIX}/demo_assets/demo_build.webp`,
+    backgroundImage: `${getPublicPrefix()}/demo_assets/demo_build.webp`,
     title: "Create Your Own Bot",
     description:
       "Create a bot using one of our tutorials. Start developing your own bot today!",
@@ -32,7 +33,7 @@ const tasks = [
     bgImageAlt: "Alt",
   },
   {
-    backgroundImage: `/${process.env.PUBLIC_PREFIX}/demo_assets/demo_play.webp`,
+    backgroundImage: `${getPublicPrefix()}/demo_assets/demo_play.webp`,
     title: "Play Against SC2 Bots",
     description:
       "Play against SC2 bots and test your skills. Discover new strategies to improve your gameplay!",
@@ -41,7 +42,7 @@ const tasks = [
     bgImageAlt: "Alt",
   },
   {
-    backgroundImage: `/${process.env.PUBLIC_PREFIX}/demo_assets/demo_compete.webp`,
+    backgroundImage: `${getPublicPrefix()}/demo_assets/demo_compete.webp`,
     title: "Compete On The Ladder",
     description:
       "Compete against other bots on our 24/7 bot ladder. Win achievements and get featured in our tournaments.",
@@ -63,12 +64,12 @@ export default function Page() {
       <Navbar />
       <main className="flex-grow bg-darken text-white">
         <VideoBanner
-          source={`${process.env.PUBLIC_PREFIX}/videos/ai-banner.mp4`}
+          source={`${getPublicPrefix()}/videos/ai-banner.mp4`}
         >
           <div className="mt-32 text-6xl font-bold mb-8 font-gugi text-customGreen">
             <Image
               className="mx-auto pb-6 invert h-40 w-40 "
-              src={`${process.env.PUBLIC_PREFIX}/assets_logo/ai-arena-logo.svg`}
+              src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
               alt="AI-arena-logo"
               width={10}
               height={10}
@@ -87,7 +88,7 @@ export default function Page() {
           <div className="rounded-lg rounded-lg">
             <ImageOverlayWrapper
             //   imageUrl={`${process.env.PUBLIC_PREFIX}/social_icons/discord-icon.svg`}
-              imageUrl={`/${process.env.PUBLIC_PREFIX}/generated_assets/dall_e_bg_2.webp`}
+              imageUrl={`${getPublicPrefix()}/generated_assets/dall_e_bg_2.webp`}
               alt="Discord background"
               sectionDivider={true}
               sectionDividerDarken={2}
@@ -102,7 +103,7 @@ export default function Page() {
                     description="Join the AI Arena discord community"
                     memberCount={2500}
                     onlineCount={450}
-                    serverImageUrl={`${process.env.PUBLIC_PREFIX}/social_icons/discord-icon.svg`}
+                    serverImageUrl={`${getPublicPrefix()}/social_icons/discord-icon.svg`}
                   />
                 </div>
               </div>
@@ -111,7 +112,7 @@ export default function Page() {
         </div>
 
         <ImageOverlayWrapper
-          imageUrl={`/${process.env.PUBLIC_PREFIX}/demo_assets/demo-news.webp`}
+          imageUrl={`${getPublicPrefix()}/demo_assets/demo-news.webp`}
           alt="Space Background"
           sectionDivider={true}
           sectionDividerDarken={2}

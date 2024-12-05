@@ -1,6 +1,7 @@
 import CompetitionCard from "@/_components/_display/CompetitionCard";
 import ClosedCompetitionList from "@/_components/_display/CompetitionList";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 
 const mockData = {
@@ -14,7 +15,7 @@ const mockData = {
       topPlayers: ["Player1", "Player2", "Player3"],
       participants: 150,
       totalGames: 1200,
-      imageUrl: `${process.env.PUBLIC_PREFIX}/competitions/sc2_1.webp`, // Placeholder image URL
+      imageUrl: `${getPublicPrefix()}/competitions/sc2_1.webp`, // Placeholder image URL
     },
     {
       name: "Sc2 AI Arena Micro Ladder",
@@ -25,7 +26,7 @@ const mockData = {
       topPlayers: ["PlayerA", "PlayerB", "PlayerC"],
       participants: 100,
       totalGames: 900,
-      imageUrl: `${process.env.PUBLIC_PREFIX}/competitions/sc2.webp`, // Placeholder image URL
+      imageUrl: `${getPublicPrefix()}/competitions/sc2.webp`, // Placeholder image URL
     },
   ],
   closedCompetitions: [

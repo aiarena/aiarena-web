@@ -6,11 +6,12 @@ import NavItem from "./_nav_parts/NavItem";
 import MobileNavitem from "./_nav_parts/MobileNavItem";
 import MobileNavItem from "./_nav_parts/MobileNavItem";
 import AuthNavBar from "./_nav_parts/AuthNavbar";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 const navLinks = [
   {
     title: "Home",
-    path: "/",
+    path: `${getPublicPrefix()}`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
@@ -22,31 +23,31 @@ const navLinks = [
   },
   {
     title: "Competitions",
-    path: "/new-frontend/competitions",
+    path: `${getPublicPrefix()}/competitions`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
     title: "About us",
-    path: "/new-frontend/about",
+    path: `${getPublicPrefix()}/about`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
     title: "Profile",
-    path: "/new-frontend/profile",
+    path: `${getPublicPrefix()}/profile`,
     showLoggedIn: true,
     showLoggedOut: false,
   },
   {
     title: "Examples",
-    path: "/new-frontend/examples",
+    path: `${getPublicPrefix()}/examples`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
     title: "ToDo",
-    path: "/new-frontend/todo",
+    path: `${getPublicPrefix()}/todo`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
@@ -100,7 +101,7 @@ function Navbar() {
           <Link href={navLinks[0].path} className="flex justify-between items-center">
             <Image
               className="pr-2 invert h-[auto] w-12"
-              src={`${process.env.PUBLIC_PREFIX}/assets_logo/ai-arena-logo.svg`}
+              src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
               alt="AI-arena-logo"
               width={48}
               height={48}
