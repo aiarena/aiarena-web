@@ -17,7 +17,7 @@ interface DiscordInviteCardProps {
   serverImageUrl,
 }) => {
   return (
-    <div className="shadow-[0_5px_155px_5px_rgba(88,101,242,0.9)] bg-gray-800 text-white p-6 rounded-lg shadow-lg max-w-[40em] mx-auto  lg:flex lg:justify-center lg:items-center lg:p-10  border border-indigo-500
+    <div className="shadow-customDiscord bg-gray-800 text-white p-6 rounded-lg shadow-lg max-w-[40em] mx-auto  lg:flex lg:justify-center lg:items-center lg:p-10  border border-indigo-500
 ">
       <div className="flex flex-col md:flex-row items-center gap-8 lg:justify-center">
         {/* Server Image */}
