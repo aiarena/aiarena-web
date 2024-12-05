@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import competitionsData from "@/_data/mockCompetiton.json"; // Adjust path as necessary
+import competitionsData from "@/_data/mockCompetiton.json";
 import CompetitionHeader from "@/_components/_display/CompetitionHeader";
 import ToggleDisplay from "@/_components/_display/ToggleDisplay";
 import MapDisplay from "@/_components/_display/MapDisplay";
@@ -158,12 +158,12 @@ export default function Page() {
       />
 
       {/* Main Content Section */}
-      <div className="px-4 sm:px-6 lg:px-8 max-w-9xl mx-auto space-y-6">
+      <div className=" px-4 sm:px-6 lg:px-8 max-w-9xl mx-auto space-y-6">
         {/* Competition Details and About Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Basic Info */}
-          <div className="bg-gray-900 p-6 rounded-lg shadow-md">
-            <h3 className="text-2xl font-semibold text-customGreen mb-4">
+          <div className="border-gray-800 border-2 bg-gray-900 p-6 rounded-lg shadow-md">
+            <h3 className=" text-2xl font-semibold text-customGreen mb-4">
               Competition Details
             </h3>
             <div className="space-y-2 text-white">
@@ -188,7 +188,7 @@ export default function Page() {
                 >
                   <MapDisplay
                     mapName={mapName}
-                    imageUrl={`${process.env.PUBLIC_PREFIX}/maps/oceanborn.jpg`} // Static image for demonstration
+                    imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
                   />
                 </div>
               ))}
@@ -196,13 +196,13 @@ export default function Page() {
           </div>
 
           {/* Live Stream Section */}
-          <div className="bg-gray-800 p-6 rounded-lg shadow-md lg:col-span-2">
+          <div className="border-gray-700 border-2 bg-gray-800 p-6 rounded-lg shadow-md lg:col-span-2">
             <h2 className="text-3xl font-bold text-customGreen mb-4">
               Live Stream
             </h2>
             <div className="relative ">
               <VideoPlayer
-                src={`${process.env.PUBLIC_PREFIX}/videos/ai-banner.mp4`} // Local or hosted video file
+                src="/videos/ai-banner.mp4" // Local or hosted video file
                 poster="/images/video-poster.jpg" // Optional poster image
                 alt="Sample video demonstrating the AI competition."
                 controls={true}

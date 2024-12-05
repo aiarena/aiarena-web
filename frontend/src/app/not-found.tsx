@@ -21,7 +21,7 @@ function Page() {
           </p>
           <Link href="/">
             <span className="hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform">
-              Go Home
+              Back to Home
             </span>
           </Link>
         </div>
