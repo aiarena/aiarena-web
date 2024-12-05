@@ -78,7 +78,7 @@ export default function Page() {
               AI Arena
             </h1>
           </div>
-          <h2 className="text-2xl mb-48">Welcome to the AI Arena! {process.env.PUBLIC_PREFIX}</h2>
+          <h2 className="text-2xl mb-48">Welcome to the AI Arena! :{`${getPublicPrefix()}/demo_assets/demo_compete.webp`}:</h2>
           <div className="mb-32">
             <InitiationHeroTasks tasks={tasks} />
           </div>
