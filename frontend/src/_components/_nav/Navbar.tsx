@@ -11,7 +11,7 @@ import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 const navLinks = [
   {
     title: "Home",
-    path: `${getPublicPrefix()}`,
+    path: `${getPublicPrefix()}/`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
