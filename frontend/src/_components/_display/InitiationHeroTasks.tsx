@@ -3,7 +3,7 @@ import HeroTask from "./HeroTask";
 
 interface InitiationHeroTasksProps {
   tasks: {
-    imageUrl: string;
+   
     backgroundImage: string;
     title: string;
     description: string;
@@ -21,7 +21,7 @@ const InitiationHeroTasks: React.FC<InitiationHeroTasksProps> = ({ tasks }) => {
         <div key={index} className="flex-shrink  ">
           <HeroTask
           backgroundImage={task.backgroundImage}
-            imageUrl={task.imageUrl}
+          
             title={task.title}
             description={task.description}
             buttonText={task.buttonText}
