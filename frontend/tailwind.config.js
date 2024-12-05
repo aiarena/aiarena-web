@@ -82,7 +82,9 @@ module.exports = {
       backgroundRepeat: {
         'repeat-custom': 'repeat',
       },
-   
+      boxShadow: {
+        customDiscord: '0 5px 155px 5px rgba(88,101,242,0.9)', 
+      },
 
     },
   },

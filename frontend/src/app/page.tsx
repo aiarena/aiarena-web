@@ -102,7 +102,7 @@ export default function Page() {
                     description="Join the AI Arena discord community"
                     memberCount={2500}
                     onlineCount={450}
-                    serverImageUrl={`/social_icons/discord-icon.svg`}
+                    serverImageUrl={`${getPublicPrefix()}/social_icons/discord-icon.svg`}
                   />
                 </div>
               </div>
