@@ -20,7 +20,7 @@ import Image from "next/image";
 import InitiationHeroTasks from "@/_components/_display/InitiationHeroTasks";
 import { ImageOverlayWrapper } from "@/_components/_display/ImageOverlayWrapper";
 import DiscordInviteCard from "@/_components/_display/DiscordInviteCard";
-import { getPublicPrefix  } from "@/_lib/getPublicPrefix";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 const tasks = [
   {
@@ -63,9 +63,7 @@ export default function Page() {
     <div className="flex flex-col min-h-screen font-sans bg-background-texture">
       <Navbar />
       <main className="flex-grow bg-darken text-white">
-        <VideoBanner
-          source={`${getPublicPrefix()}/videos/ai-banner.mp4`}
-        >
+        <VideoBanner source={`${getPublicPrefix()}/videos/ai-banner.mp4`}>
           <div className="mt-32 text-6xl font-bold mb-8 font-gugi text-customGreen">
             <Image
               className="mx-auto pb-6 invert h-40 w-40 "
@@ -78,16 +76,32 @@ export default function Page() {
               AI Arena
             </h1>
           </div>
-          <h2 className="text-2xl mb-48">Welcome to the AI Arena! :{`${getPublicPrefix()}/demo_assets/demo_compete.webp`}:</h2>
+          <h2 className="text-2xl mb-48">
+            Welcome to the AI Arena! :
+            {`${getPublicPrefix()}/demo_assets/demo_compete.webp`}:
+          </h2>
           <div className="mb-32">
             <InitiationHeroTasks tasks={tasks} />
           </div>
         </VideoBanner>
-
+        <Image
+          className="pr-2 h-[auto] w-24"
+          src={`${getPublicPrefix()}/demo_assets/demo_compete.webp`}
+          alt="AI-arena-logo"
+          width={408}
+          height={408}
+        ></Image>
+        <Image
+          className="pr-2 invert h-[auto] w-24"
+          src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
+          alt="AI-arena-logo"
+          width={408}
+          height={408}
+        ></Image>
         <div className="lg:space-x-4 lg:space-y-0">
           <div className="rounded-lg rounded-lg">
             <ImageOverlayWrapper
-            //   imageUrl={`${process.env.PUBLIC_PREFIX}/social_icons/discord-icon.svg`}
+              //   imageUrl={`${process.env.PUBLIC_PREFIX}/social_icons/discord-icon.svg`}
               imageUrl={`${getPublicPrefix()}/generated_assets/dall_e_bg_2.webp`}
               alt="Discord background"
               sectionDivider={true}
