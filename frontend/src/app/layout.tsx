@@ -11,12 +11,6 @@ import { quicksand, gugi } from "@/_styles/fonts"; // Adjust the path as necessa
 
 
 const inter = Inter({subsets: ["latin"]});
-// const quicksand = Quicksand({
-//     subsets: ['latin'],
-//     weight: ['300', '400', '500', '600', '700'],
-//     variable: '--font-quicksand',
-// });
-// const gugi = Gugi({subsets: ['latin'], weight: '400', variable: '--font-gugi'});
 
 function RootLayout({children}: { children: React.ReactNode }) {
     return (
