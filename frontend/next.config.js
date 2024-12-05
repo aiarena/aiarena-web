@@ -29,7 +29,10 @@ const nextConfig = {
   },
 
   output: 'standalone',
-
+  images: {
+    loader: 'default',
+    path: isDev ? '/_next/image' : 'https://aiarena.net/new-frontend/_next/image',
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
