@@ -24,7 +24,7 @@ const HeroTask: React.FC<HeroTaskProps> = ({
   alt,
 }) => {
   return (
-    <div className="block items-start bg-gray-800 text-white mb-6 transition-transform transform border border-gray-900 max-w-[30em] min-h-[20em] rounded-lg">
+    <div className="block items-start bg-customBackgroundColor1 text-white mb-6 transition-transform transform border border-gray-900 max-w-[30em] min-h-[20em] rounded-lg">
       <div className="relative w-full max-w-[479px] h-[150px] bg-black overflow-hidden border border-gray-600 rounded-t-lg">
         {/* Background Image */}
         <Image
@@ -48,8 +48,8 @@ const HeroTask: React.FC<HeroTaskProps> = ({
 
       <div className="flex-grow pt-4">
         <h3 className="text-xl font-bold mb-2 text-customGreen">{title}</h3>
-        <p className="text-base mb-4">{description}</p>
-        <div className="space-x-4 p-4 mb-auto">
+        <p className="text-base  px-6">{description}</p>
+        <div className="space-x-4 p-6 mb-auto">
           <MainButton href={buttonUrl} text={buttonText} />
         </div>
       </div>

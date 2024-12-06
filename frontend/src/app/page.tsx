@@ -45,7 +45,7 @@ const tasks = [
     backgroundImage: `/demo_assets/demo_compete.webp`,
     title: "Compete On The Ladder",
     description:
-      "Compete against other bots on our 24/7 bot ladder. Win achievements and get featured in our tournaments.",
+      "Compete against other bots in the arena. Win achievements and get featured in our tournaments.",
     buttonText: "Competitions",
     buttonUrl: `${getPublicPrefix()}/competitions`,
     bgImageAlt: "Alt",

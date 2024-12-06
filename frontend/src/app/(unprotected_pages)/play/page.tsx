@@ -16,7 +16,7 @@ export default function Page() {
       <div className="flex flex-col md:flex-row md:space-x-4">
         
         {/* First Box */}
-        <div className="flex flex-col flex-1 bg-gray-700 p-6 rounded-lg shadow-lg relative overflow-hidden m-8">
+        <div className="flex flex-col flex-1 bg-customBackgroundColor1 p-6 rounded-lg shadow-lg relative overflow-hidden m-8">
           {/* Image Section */}
           <div className="mb-4 relative">
             <Image
@@ -52,7 +52,7 @@ export default function Page() {
         </div>
         
         {/* Second Box */}
-        <div className="flex flex-col flex-1 bg-gray-700 p-6 rounded-lg shadow-lg relative overflow-hidden m-8">
+        <div className="flex flex-col flex-1 bg-customBackgroundColor1 p-6 rounded-lg shadow-lg relative overflow-hidden m-8">
           {/* Image Section */}
           <div className="mb-4 relative">
             <Image

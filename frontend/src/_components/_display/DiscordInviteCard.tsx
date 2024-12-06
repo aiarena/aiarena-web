@@ -17,12 +17,12 @@ interface DiscordInviteCardProps {
   serverImageUrl,
 }) => {
   return (
-    <div className="shadow-customDiscord bg-gray-800 text-white p-6 rounded-lg max-w-[40em] mx-auto  lg:flex lg:justify-center lg:items-center lg:p-10  border border-indigo-500
+    <div className="shadow-customDiscord bg-customBackgroundColor1 text-white p-6 rounded-lg max-w-[40em] mx-auto  lg:flex lg:justify-center lg:items-center lg:p-10  border border-indigo-500
 ">
       <div className="flex flex-col md:flex-row items-center gap-8 lg:justify-center">
         {/* Server Image */}
         {serverImageUrl && (
-          <div className="flex-shrink-0 w-24 h-24 md:w-32 md:h-32 lg:w-48 lg:h-48">
+          <div className="flex-shrink-0 w-24 h-24 md:w-32 md:h-32 lg:w-36 lg:h-36">
             <Image
               width={160}
               height={160}
@@ -30,6 +30,7 @@ interface DiscordInviteCardProps {
               alt={`${serverName} Server`}
               className="rounded-full w-auto h-auto"
             />
+           
           </div>
         )}
         

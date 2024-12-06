@@ -37,7 +37,7 @@ const LatestNews: React.FC<LatestNewsProps> = ({ newsData }) => {
   const currentNewsItem = newsData[currentIndex];
 
   return (
-    <div className="m-2  my-16 border border-gray-600 bg-gray-800 rounded-lg flex flex-col items-center gap-2 px-4 py-4 h-full md:max-w-[90%]">
+    <div className="m-2  my-16 border border-gray-600 bg-customBackgroundColor1 rounded-lg flex flex-col items-center gap-2 px-4 py-4 h-full md:max-w-[90%]">
       <div className="flex w-full justify-center items-center mb-2">
         <div className="flex-1 h-[2px] bg-gradient-to-l from-customGreen to-transparent"></div>
         <h2 className="font-bold mb-0 text-center px-4">News</h2>

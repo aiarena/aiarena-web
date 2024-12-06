@@ -71,7 +71,7 @@ const SubscriptionComparisonTable = () => {
     <div className="max-w-7xl mx-auto p-6">
       {/* For large screens */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full border-collapse border-gray-700 text-white">
+        <table className="min-w-full border-collapse border-gray-800 text-white">
           <thead>
             <tr className="h-12 bg-transparent">
               <th className="px-4 py-2"></th>
@@ -93,7 +93,7 @@ const SubscriptionComparisonTable = () => {
               {subscriptionPlans.map((plan) => (
                 <th
                   key={plan.tier}
-                  className="px-4 py-2 text-center border border-gray-700 bg-gray-800"
+                  className="px-4 py-2 text-center border border-gray-700 bg-customBackgroundColor1D1"
                 >
                   {plan.tier}
                 </th>
@@ -103,7 +103,7 @@ const SubscriptionComparisonTable = () => {
           <tbody>
             {Object.keys(attributeLabels).map((attribute) => (
               <tr key={attribute}>
-                <td className="px-4 py-2 text-left font-semibold bg-gray-900">
+                <td className="px-4 py-2 text-left font-semibold bg-customBackgroundColor1D1">
                   {attributeLabels[attribute as PlanAttributeKey]}
                 </td>
                 {subscriptionPlans.map((plan) => (

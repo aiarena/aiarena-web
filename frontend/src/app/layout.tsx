@@ -11,7 +11,6 @@
 // import Head from "next/head";
 // import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
-
 // const inter = Inter({subsets: ["latin"]});
 // export const metadata = {
 //     title: 'My Application',
@@ -34,7 +33,6 @@
 //       ],
 //     },
 //   };
-  
 
 // function RootLayout({children}: { children: React.ReactNode }) {
 //     const faviconUrl = `${getPublicPrefix}/assets_logo/img/favicon.ico`;
@@ -62,33 +60,53 @@
 
 // export default RootLayout;
 
-import './globals.css';
-import { Inter } from 'next/font/google';
-import { quicksand, gugi } from '@/_styles/fonts'; // Adjust the path as necessary
-import { getPublicPrefix } from '@/_lib/getPublicPrefix';
-import ClientWrapper from '@/_components/providers/ClientWrapper';
+import "./globals.css";
+import { Inter } from "next/font/google";
+import { quicksand, gugi } from "@/_styles/fonts"; // Adjust the path as necessary
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import ClientWrapper from "@/_components/providers/ClientWrapper";
+import BackgroundTexture from "@/_components/_display/BackgroundTexture";
 
-
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: 'AI Arena',
-  description: 'The Arena for AI!',
+  title: "AI Arena",
+  description: "The Arena for AI!",
   icons: {
-    icon: '/favicon.ico', // Default favicon
-    shortcut: '/favicon.ico', // Browser shortcut icon
+    icon: "/favicon.ico", // Default favicon
+    shortcut: "/favicon.ico", // Browser shortcut icon
     apple: `${getPublicPrefix()}/assets_logo/img/ai-arena-logo.png`, // Apple touch icon
     other: [
-      { rel: 'icon', type: 'image/png', sizes: '32x32', url: `${getPublicPrefix()}/assets_logo/img/ai-arena-logo.png` },
-      { rel: 'icon', type: 'image/svg+xml', url: `${getPublicPrefix()}/assets_logo/ai-arena-logo.svg` },
-      { rel: 'icon', media: '(prefers-color-scheme: dark)', url: `${getPublicPrefix()}/assets_logo/ai_arena_logo_icon_03_4BF_icon.ico` },
-      { rel: 'icon', media: '(prefers-color-scheme: light)', url: `${getPublicPrefix()}/assets_logo/ai_arena_logo_icon_03_9mn_icon.ico` },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        url: `${getPublicPrefix()}/assets_logo/img/ai-arena-logo.png`,
+      },
+      {
+        rel: "icon",
+        type: "image/svg+xml",
+        url: `${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`,
+      },
+      {
+        rel: "icon",
+        media: "(prefers-color-scheme: dark)",
+        url: `${getPublicPrefix()}/assets_logo/ai_arena_logo_icon_03_4BF_icon.ico`,
+      },
+      {
+        rel: "icon",
+        media: "(prefers-color-scheme: light)",
+        url: `${getPublicPrefix()}/assets_logo/ai_arena_logo_icon_03_9mn_icon.ico`,
+      },
     ],
-
   },
 };
 
-export default function ServerLayout({ children }: { children: React.ReactNode }) {
+export default function ServerLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const faviconUrl = `${getPublicPrefix()}/assets_logo/img/favicon.ico`;
 
   return (
@@ -96,8 +114,12 @@ export default function ServerLayout({ children }: { children: React.ReactNode }
       <head>
         <link rel="icon" href={faviconUrl} sizes="any" />
       </head>
-      <body className={`${quicksand.variable} ${gugi.variable} font-sans text-center bg-background-texture`}>
-        <ClientWrapper>{children}</ClientWrapper>
+      <body
+        className={`${quicksand.variable} ${gugi.variable} font-sans text-center`}
+      >
+        <BackgroundTexture>
+          <ClientWrapper>{children}</ClientWrapper>
+        </BackgroundTexture>
       </body>
     </html>
   );

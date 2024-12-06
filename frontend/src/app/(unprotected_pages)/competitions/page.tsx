@@ -75,10 +75,10 @@ export default function Page() {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-4xl font-bold mb-10 text-customGreen">Competitions Overview</h1>
+      <h1 className="text-4xl font-bold mb-10 text-customGreen font-gugi">The Arena</h1>
       
       <section className="mb-16">
-       <WrappedTitle title="Open Competitons"/>
+       <WrappedTitle title="Open Competitions"/>
         <div className="space-y-8 mt-8">
           {mockData.activeCompetitions.map((comp, index) => (
             <CompetitionCard key={index} competition={comp} />
@@ -87,7 +87,7 @@ export default function Page() {
       </section>
 
       <section>
-      <WrappedTitle title="Closed Competitons"/>
+      <WrappedTitle title="Closed Competitions"/>
         <ClosedCompetitionList competitions={mockData.closedCompetitions} />
       </section>
     </div>
