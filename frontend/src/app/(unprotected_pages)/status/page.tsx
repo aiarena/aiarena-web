@@ -25,7 +25,7 @@ const ActivityFeed = () => {
   ];
 
   return (
-    <div className="bg-gray-900 p-4 rounded-md">
+    <div className="bg-gray-800 p-4 rounded-md">
       <WrappedTitle title="Activity Feed" />
       <ul className="space-y-2">
         {activities.map((activity, index) => (
@@ -43,7 +43,7 @@ const ActivityFeed = () => {
 
 const UptimeGraph = ({ title }: { title: string }) => {
   return (
-    <div className="bg-gray-900 p-4 rounded-md">
+    <div className="bg-gray-800 p-4 rounded-md">
       <WrappedTitle title={title} />
       <div className="h-40 bg-gray-700 flex items-center justify-center text-gray-300 mb-2">
         [Graph Placeholder]
@@ -55,7 +55,7 @@ const UptimeGraph = ({ title }: { title: string }) => {
 
 const Stats = () => {
   return (
-    <div className="bg-gray-900 p-4 rounded-md">
+    <div className="bg-customBackgroundColor1 p-4 rounded-md">
       <WrappedTitle title="Stats" />
       <ul className="space-y-2 text-gray-300">
         <li>
@@ -88,7 +88,7 @@ const Stats = () => {
 
 const Thanks = () => {
   return (
-    <div className="bg-gray-900 mt-8 mb-8 p-4 rounded-md">
+    <div className="bg-gray-800 mt-8 mb-8 p-4 rounded-md">
       <WrappedTitle title="Thank you" />
       Thank you Spacemen for supporting AI arena!
       <p>Heart icon</p>
@@ -98,7 +98,7 @@ const Thanks = () => {
 
 const HomePage = () => {
   return (
-    <div className="bg-gray-800 min-h-screen p-8">
+    <div className=" min-h-screen p-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="col-span-1 md:col-span-2">
           <ActivityFeed />

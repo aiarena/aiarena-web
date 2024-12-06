@@ -125,20 +125,20 @@ function Navbar() {
 
           {/* Phone */}
           <div className="md:hidden py-4">
-            <button className="py-3 rounded-md" onClick={() => handleMenu()}>
+            <button className="py-3 rounded-md pr-4" onClick={() => handleMenu()}>
               {navbar ? (
                 <div>
                   <Image
-                    src="/cross.svg"
+                    src={`${getPublicPrefix()}/icons/cross.svg`}
                     width={24}
                     height={24}
-                    alt="close"
+                    alt="Close menu"
                     className="invert w-6 h-6"
                   />
                 </div>
               ) : (
                 <Image
-                  src="/menu.svg"
+                  src={`${getPublicPrefix()}/icons/menu.svg`}
                   width={24}
                   height={24}
                   alt="menu"
