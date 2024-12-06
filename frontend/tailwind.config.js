@@ -4,7 +4,7 @@
 
 const CustomHighlightVar = 'rgba(154, 255, 70, 1)';
 const CustomPrimaryVar = 'rgba(134, 194, 50, 1)';
-
+const CustomBackgroundColorVar = 'rgba(134, 194, 50, 1)';
 
 module.exports = {
   darkMode: 'class',
@@ -24,6 +24,7 @@ module.exports = {
       },
       colors: {
         customGreen: CustomPrimaryVar,   
+        customBackgroundColor1: 'rgba(255,255,255,1)',
         customGreenHighlight1: 'rgba(255, 255, 0, 1)',                 
         customGreenDarken1: 'rgba(104, 144, 20, 1)', 
         customGreenDarken2: 'rgba(84, 110, 15, 1)',    

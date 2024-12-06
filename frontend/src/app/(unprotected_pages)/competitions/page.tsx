@@ -15,7 +15,7 @@ const mockData = {
       topPlayers: ["Player1", "Player2", "Player3"],
       participants: 150,
       totalGames: 1200,
-      imageUrl: `${getPublicPrefix()}/competitions/sc2_1.webp`, // Placeholder image URL
+      imageUrl: `/competitions/sc2_1.webp`, // Placeholder image URL
     },
     {
       name: "Sc2 AI Arena Micro Ladder",
@@ -26,7 +26,7 @@ const mockData = {
       topPlayers: ["PlayerA", "PlayerB", "PlayerC"],
       participants: 100,
       totalGames: 900,
-      imageUrl: `${getPublicPrefix()}/competitions/sc2.webp`, // Placeholder image URL
+      imageUrl: `/competitions/sc2.webp`, // Placeholder image URL
     },
   ],
   closedCompetitions: [

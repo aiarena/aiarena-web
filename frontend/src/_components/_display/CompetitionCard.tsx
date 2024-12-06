@@ -1,3 +1,4 @@
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -17,14 +18,14 @@ interface CompetitionCardProps {
 export default function CompetitionCard({ competition }: CompetitionCardProps) {
   return (
     <Link
-      href={`/competitions/${1}`} // Assuming each competition has a unique ID or URL
+      href={`${getPublicPrefix()}/competitions/${1}`} // Assuming each competition has a unique ID or URL
       className="block bg-gray-900 text-white shadow-lg rounded-lg overflow-hidden hover:bg-gray-800 transition transform hover:scale-105"
     >
       <div className="flex">
         <div className="w-1/3">
         <Image
-            width={1920}
-            height={1080}
+            width={411}
+            height={231}
             src={competition.imageUrl}
             alt={competition.name}
             className="object-cover h-full"
