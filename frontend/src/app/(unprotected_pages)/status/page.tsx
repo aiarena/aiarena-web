@@ -25,7 +25,7 @@ const ActivityFeed = () => {
   ];
 
   return (
-    <div className="bg-gray-800 p-4 rounded-md">
+    <div className="bg-customBackgroundColor1 p-4 rounded-md">
       <WrappedTitle title="Activity Feed" />
       <ul className="space-y-2">
         {activities.map((activity, index) => (
@@ -43,7 +43,7 @@ const ActivityFeed = () => {
 
 const UptimeGraph = ({ title }: { title: string }) => {
   return (
-    <div className="bg-gray-800 p-4 rounded-md">
+    <div className="bg-customBackgroundColor1 p-4 rounded-md">
       <WrappedTitle title={title} />
       <div className="h-40 bg-gray-700 flex items-center justify-center text-gray-300 mb-2">
         [Graph Placeholder]
@@ -88,7 +88,7 @@ const Stats = () => {
 
 const Thanks = () => {
   return (
-    <div className="bg-gray-800 mt-8 mb-8 p-4 rounded-md">
+    <div className="bg-customBackgroundColor1 mt-8 mb-8 p-4 rounded-md">
       <WrappedTitle title="Thank you" />
       Thank you Spacemen for supporting AI arena!
       <p>Heart icon</p>

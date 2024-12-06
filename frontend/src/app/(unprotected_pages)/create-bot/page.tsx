@@ -220,7 +220,7 @@ const Page = () => {
       index % 2 === 1 ? (
         <code
           key={index}
-          className="bg-gray-800 text-customGreen px-2 ml-2 py-1 rounded-md font-mono text-base align-middle"
+          className="bg-customBackgroundColor1 text-customGreen px-2 ml-2 py-1 rounded-md font-mono text-base align-middle"
         >
           {part}
         </code>
@@ -232,7 +232,7 @@ const Page = () => {
 
   return (
     <ArticleWrapper>
-      <div className="min-h-screen bg-slate-700 text-gray-200 p-6">
+      <div className="min-h-screen bg-customBackgroundColor1 text-gray-200 p-6">
         <header className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-customGreen">
             AI Arena Bot Builder

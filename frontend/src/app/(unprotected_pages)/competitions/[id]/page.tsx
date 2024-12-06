@@ -162,7 +162,7 @@ export default function Page() {
         {/* Competition Details and About Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Basic Info */}
-          <div className="border-gray-800 border-2 bg-gray-900 p-6 rounded-lg shadow-md">
+          <div className="border-gray-800 border-2 bg-customBackgroundColor1D1 p-6 rounded-lg shadow-md">
             <h3 className=" text-2xl font-semibold text-customGreen mb-4">
               Competition Details
             </h3>
@@ -196,7 +196,7 @@ export default function Page() {
           </div>
 
           {/* Live Stream Section */}
-          <div className="border-gray-700 border-2 bg-gray-800 p-6 rounded-lg shadow-md lg:col-span-2">
+          <div className="border-gray-700 border-2 bg-customBackgroundColor1  p-6 rounded-lg shadow-md lg:col-span-2">
             <h2 className="text-3xl font-bold text-customGreen mb-4">
               Live Stream
             </h2>

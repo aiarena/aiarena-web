@@ -18,7 +18,7 @@ const Page = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-700 text-gray-200 p-6">
+    <div className="min-h-screen bg-customBackgroundColor1 text-gray-200 p-6">
       some minimal py-sc2 install
     </div>
   );

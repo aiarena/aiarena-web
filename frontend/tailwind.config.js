@@ -2,9 +2,17 @@
 
 // customGreenDarken2: 'rgba(84, 110, 255, 1)',  
 
+
 const CustomHighlightVar = 'rgba(154, 255, 70, 1)';
 const CustomPrimaryVar = 'rgba(134, 194, 50, 1)';
 const CustomBackgroundColorVar = 'rgba(134, 194, 50, 1)';
+
+
+// customBackgroundColor1: 'rgba(45,50,59,1)',
+// customBackgroundColor1D1: 'rgba(40,45,55,1)',
+
+
+// 17 24 39
 
 module.exports = {
   darkMode: 'class',
@@ -24,7 +32,11 @@ module.exports = {
       },
       colors: {
         customGreen: CustomPrimaryVar,   
-        customBackgroundColor1: 'rgba(255,255,255,1)',
+        
+        customBackgroundColor1: 'rgba(42,48,57,1)',
+        customBackgroundColor1D1: 'rgba(17,24,39,1)',
+        customBackgroundColor1L1: 'rgba(60,61,79,1)',
+
         customGreenHighlight1: 'rgba(255, 255, 0, 1)',                 
         customGreenDarken1: 'rgba(104, 144, 20, 1)', 
         customGreenDarken2: 'rgba(84, 110, 15, 1)',    
@@ -96,10 +108,10 @@ module.exports = {
           'background-size': '50px 50px',
           'background-repeat': 'repeat',
         },
-        '.bg-background-texture': {
-          'background-image': "url('/backgrounds/background.gif')",
-          'background-repeat': 'repeat',
-        },
+        // '.bg-background-texture': {
+        //   'background-image': `url('${getPublicPrefix()}/backgrounds/background.gif')`,
+        //   'background-repeat': 'repeat',
+        // },
       };
       addUtilities(newUtilities, ['responsive', 'hover']);
     },
