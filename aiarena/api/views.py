@@ -42,7 +42,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.permissions import IsServiceOrAdminUser
-from aiarena.core.services import MatchRequests
+from aiarena.core.services import MatchRequests, SupporterBenefits
 from aiarena.patreon.models import PatreonUnlinkedDiscordUID
 
 
@@ -1073,6 +1073,11 @@ class MatchRequestsViewSet(viewsets.ViewSet):
         """
         Request a match between two bots.
         """
+
+        allowed, reject_message = SupporterBenefits.can_request_match_via_api(request.user)
+        if not allowed:
+            return Response({"message": reject_message}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = RequestMatchSerializer(data=request.data)
         if serializer.is_valid():
             bot1 = serializer.validated_data["bot1"]
