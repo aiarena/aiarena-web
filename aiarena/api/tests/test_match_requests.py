@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from aiarena.core.models import Map, Match, WebsiteUser
+from aiarena.core.models import Map, Match
 from aiarena.core.tests.test_mixins import MatchReadyMixin
 
 
