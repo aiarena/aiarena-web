@@ -1076,7 +1076,7 @@ class MatchRequestsViewSet(viewsets.ViewSet):
 
         allowed, reject_message = SupporterBenefits.can_request_match_via_api(request.user)
         if not allowed:
-            return Response({"message": reject_message}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": reject_message}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = RequestMatchSerializer(data=request.data)
         if serializer.is_valid():
