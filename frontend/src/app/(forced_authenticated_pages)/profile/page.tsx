@@ -6,6 +6,7 @@ import {useUserContext} from "@/_components/providers/UserProvider";
 import { useEffect, useState } from "react";
 import TabNavigation from '@/_components/_nav/TabNav';
 import BotOverview from '@/_components/_display/BotOverview';
+import { getPublicPrefix } from '@/_lib/getPublicPrefix';
 
 export default function Page() {
 
@@ -22,7 +23,7 @@ export default function Page() {
 
   useEffect(() => {
     if(user === null && fetching == false) {
-      router.push("/");
+      router.push(getPublicPrefix());
     }
     console.log(user, fetching)    
   }, [user, fetching, router])
