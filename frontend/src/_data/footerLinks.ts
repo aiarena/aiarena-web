@@ -1,3 +1,5 @@
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+
 export interface FooterLink {
   icon: string;
     name: string;
@@ -22,11 +24,11 @@ export interface FooterLink {
   
   export const footerLinks: FooterLinks = {
     socialLinks: [
-      { icon: `${process.env.PUBLIC_PREFIX}/social_icons/discord-icon.svg`, name: "Discord", href: "https://discord.com/invite/Emm5Ztz", invertIcon: false},
-      { icon: `${process.env.PUBLIC_PREFIX}/social_icons/patreon-icon.svg`, name: "Patreon", href: "https://www.patreon.com/aiarena" , invertIcon: true},
-      { icon: `${process.env.PUBLIC_PREFIX}/social_icons/github-icon.svg`, name: "GitHub", href: "https://github.com/aiarena" , invertIcon: true},
-      { icon: `${process.env.PUBLIC_PREFIX}/social_icons/twitch-tile.svg`, name: "Twitch", href: "https://www.twitch.tv/aiarenastream" , invertIcon: false},
-      { icon: `${process.env.PUBLIC_PREFIX}/social_icons/youtube-icon.svg`, name: "Youtube", href: "https://www.youtube.com/channel/UCMlH43XHsq1TacKm5n4Wbiw" , invertIcon: false},
+      { icon: `${getPublicPrefix()}/social_icons/discord-icon.svg`, name: "Discord", href: "https://discord.com/invite/Emm5Ztz", invertIcon: false},
+      { icon: `${getPublicPrefix()}/social_icons/patreon-icon.svg`, name: "Patreon", href: "https://www.patreon.com/aiarena" , invertIcon: true},
+      { icon: `${getPublicPrefix()}/social_icons/github-icon.svg`, name: "GitHub", href: "https://github.com/aiarena" , invertIcon: true},
+      { icon: `${getPublicPrefix()}/social_icons/twitch-tile.svg`, name: "Twitch", href: "https://www.twitch.tv/aiarenastream" , invertIcon: false},
+      { icon: `${getPublicPrefix()}/social_icons/youtube-icon.svg`, name: "Youtube", href: "https://www.youtube.com/channel/UCMlH43XHsq1TacKm5n4Wbiw" , invertIcon: false},
      
     ],
     services: [

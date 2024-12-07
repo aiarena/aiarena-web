@@ -27,6 +27,7 @@ interface FilterableListProps<T> {
     renderRow: (item: T, index: number) => React.ReactNode;
     resultsPerPage?: number;
     fieldLabels?: { [key: string]: string };  // Also change fieldLabels to accept any string
+   
   }
 
 export default function FilterableList<T>({
@@ -36,6 +37,7 @@ export default function FilterableList<T>({
   renderRow,
   resultsPerPage: initialResultsPerPage = 10,
   fieldLabels = {}, // Default to an empty object if no fieldLabels are provided
+ 
 }: FilterableListProps<T>) {
     const [sortField, setSortField] = useState<string>(fields[0]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -59,6 +61,19 @@ export default function FilterableList<T>({
 //     }
 //   };
 
+
+
+  // Utility to determine visibility class based on responsive config
+  // const getResponsiveClass = (className: string): string => {
+  //   return Object.keys(responsive)
+  //     .map((bp) =>
+  //       responsive[bp].some((field) => `display-${bp}` === className)
+  //         ? `${bp}:block`
+  //         : `${bp}:hidden`
+  //     )
+  //     .join(" ");
+  // };
+
   // Sorting logic
   const handleSort = (field: string) => {
     if (field === sortField) {
@@ -77,6 +92,12 @@ export default function FilterableList<T>({
     }));
     setCurrentPage(1); // Reset to page 1 on filter change
   };
+
+
+
+
+
+  
 
   // Reset pagination to page 1 whenever search or filters change
   //   useEffect(() => {
@@ -426,8 +447,8 @@ const filteredData = data.filter((item) => {
         </div>
       )}
 
-      {/* Sorting Fields */}
-      <div className="grid grid-cols-4 gap-4 text-white mb-4">
+      {/* Sorting Header Fields */}
+      <div    className={`grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  gap-4 text-white mb-4 font-bold`}>
         {fields.map((field, index) => (
           <button
             key={index}

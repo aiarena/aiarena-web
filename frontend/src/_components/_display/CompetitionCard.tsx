@@ -5,17 +5,18 @@ import Link from "next/link";
 interface CompetitionCardProps {
   competition: {
     name: string;
-    created: string;
-    opened: string;
-    status: string;
-    progress: number;
-    topPlayers: string[];
-    participants: number;
-    totalGames: number;
-    imageUrl: string;
+    dateCreated: string;
+    // opened: string;
+    // status: string;
+    // progress: number;
+    // topPlayers: string[];
+    // participants: number;
+    // totalGames: number;
+    // imageUrl: string;
   };
+  imageUrl: string;
 }
-export default function CompetitionCard({ competition }: CompetitionCardProps) {
+export default function CompetitionCard({ competition, imageUrl }: CompetitionCardProps) {
   return (
     <Link
       href={`${getPublicPrefix()}/competitions/${1}`} // Assuming each competition has a unique ID or URL
@@ -24,20 +25,19 @@ export default function CompetitionCard({ competition }: CompetitionCardProps) {
       <div className="flex">
         <div className="w-1/3">
         <Image
+            src={imageUrl}
+            alt={competition.name}
             width={411}
             height={231}
-            src={competition.imageUrl}
-            alt={competition.name}
-            className="object-cover h-full"
-            // style={{ height: '180px' }} // Adjusted height
+            className="object-cover w-full h-full"
           />
         </div>
         <div className="w-2/3 p-4 flex flex-col justify-between">
         <div className="flex justify-between">
           <h3 className="text-2xl font-bold mb-2 ml-0">{competition.name}</h3>
           <div className="pl-2 pb-2">
-          <p>Total Games: {competition.totalGames}</p>
-          <p className="mb-1">Bots: {competition.participants}</p>
+          {/* <p>Total Games: {competition.totalGames}</p>
+          <p className="mb-1">Bots: {competition.participants}</p> */}
          
           </div>
           </div>
