@@ -4,6 +4,8 @@ import { useSignOut } from '@/_components/_hooks/useSignOut'; // Assuming your h
 import { useRouter } from 'next/navigation';
 import {useUserContext} from "@/_components/providers/UserProvider";
 import { useEffect, useState } from "react";
+import TabNavigation from '@/_components/_nav/TabNav';
+import BotOverview from '@/_components/_display/BotOverview';
 
 export default function Page() {
 
@@ -26,14 +28,35 @@ export default function Page() {
   }, [user, fetching, router])
   
 
+  // <p>Logged in as {user?.id}</p>
+  // <button onClick={handleSignOut} disabled={isSigningOut} className={"bg-red-500"}>
+  //   {isSigningOut ? "Signing Out..." : "Log Out"}
+  // </button>
+
+
   return (
-    <div className="text-center">
-      <h1 className="text-4xl font-bold">Display a JWT authorized profile</h1>
-      <p className="text-lg mt-4">Protected Page!</p>
-      <p>Logged in as {user?.id}</p>
-      <button onClick={handleSignOut} disabled={isSigningOut} className={"bg-red-500"}>
-        {isSigningOut ? "Signing Out..." : "Log Out"}
-      </button>
+    <div className="min-h-screen bg-gray-800">
+      <div className=" mx-auto py-8 px-4">
+
+        {/* Navigation Tabs */}
+        <TabNavigation
+          tabs={[
+            { name: 'Bots', href: '', active: true },
+            { name: 'Achievements', href: '#competition-table' },
+            { name: 'Settings', href: '#settings' },
+          ]}
+        />
+
+        {/* Bot Overview Section */}
+        <div id="bot-overview" className="mt-8">
+          <BotOverview/>
+        </div>
+
+        {/* Competition Table Section */}
+        {/* <div id="competition-table" className="mt-8">
+          <CompetitionTable />
+        </div> */}
+      </div>
     </div>
   );
-}
+};
