@@ -2,6 +2,8 @@ from django.contrib.auth import authenticate
 
 from rest_framework import serializers
 
+from aiarena.core.models import Bot, Map
+
 
 # From: https://www.guguweb.com/2022/01/23/django-rest-framework-authentication-the-easy-way/
 
@@ -42,3 +44,9 @@ class LoginSerializer(serializers.Serializer):
         # It will be used in the view.
         attrs["user"] = user
         return attrs
+
+
+class RequestMatchSerializer(serializers.Serializer):
+    bot1 = serializers.PrimaryKeyRelatedField(queryset=Bot.objects.all())
+    bot2 = serializers.PrimaryKeyRelatedField(queryset=Bot.objects.all())
+    map = serializers.PrimaryKeyRelatedField(queryset=Map.objects.all())
