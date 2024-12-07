@@ -48,6 +48,12 @@ export default function ClosedCompetitionList({
     "dateCreated": "Date Created",
     "status": "Status", 
   }}
+  fieldClasses={{
+    // "name": "Competition Name",
+    "dateCreated": "hidden sm:block", 
+    "status": "hidden md:block", 
+  }}
+  
   filters={[
     {
       type: "search",
@@ -65,8 +71,8 @@ export default function ClosedCompetitionList({
     >
       <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  gap-4 w-full">
       <span className="text-left font-semibold text-customGreen">{item.name}</span>
-      <span className="text-left text-gray-200">{formatDate(item.dateCreated)}</span>
-      <span className="text-left text-gray-200">{item.status}</span>
+      <span className="hidden sm:block text-left text-gray-200">{formatDate(item.dateCreated)}</span>
+      <span className="hidden md:block text-left text-gray-200">{item.status}</span>
     </div>
     
     </Link>
