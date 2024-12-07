@@ -48,11 +48,11 @@ export default function Page() {
       href={`/bot/${item.id}`}
       className="block p-4 hover:bg-gray-800 rounded transition flex justify-between items-center shadow-md border border-gray-700"
     >
-      <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  gap-4 w-full">
-      <span  className="text-left font-semibold text-customGreen">{item.name}</span>
-      <span className="text-left text-gray-200">{formatDate(item.created)}</span>
-      <span  className="hidden md:block text-left text-gray-200">{item.type}</span>
-      <span  className=" hidden sm:block text-left text-gray-200">{item.user.username}</span>
+      <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
+      <span  className="text-left font-semibold text-customGreen  truncate">{item.name}</span>
+      <span className="text-left text-gray-200  truncate">{formatDate(item.created)}</span>
+      <span  className="hidden md:block text-left text-gray-200  truncate">{item.type}</span>
+      <span  className=" hidden sm:block text-left text-gray-200  truncate">{item.user.username}</span>
     </div>
     </Link>
   )}

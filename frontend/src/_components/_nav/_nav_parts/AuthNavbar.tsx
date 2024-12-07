@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 export default function AuthNavBar() {
 
   const router = useRouter(); // Next.js router for navigation
-  const { user, setUser } = useUserContext();
+  const { user, setUser, fetching } = useUserContext();
   const [signOut, isSigningOut] = useSignOut();
 
   const handleSignOut = () => {
@@ -22,6 +22,14 @@ export default function AuthNavBar() {
     setUser(null);
     router.push("/"); // Redirect to /profile after sign out
   };
+
+  if (fetching) {
+    return (
+      <div className="container flex items-center justify-center p-1 ">
+        <span className="py-1 px-2 text-gray-500">Loading</span>
+      </div>
+    );
+  }
 
   return (
     <div className="container flex items-center justify-center p-1">

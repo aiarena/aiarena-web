@@ -14,7 +14,7 @@ function NavItem({ href, children, onClick }: NavItemProps) {
   const isActive = pathname === href;
 
   return (
-    <li className="text-l p-2  text-center">
+    <div className="text-l p-2  text-center">
       <Link
         className={` hover:text-slate-300 text-white ${
           isActive ? "font-bold" : ""
@@ -24,7 +24,7 @@ function NavItem({ href, children, onClick }: NavItemProps) {
       >
         {children}
       </Link>
-    </li>
+    </div>
   );
 }
 

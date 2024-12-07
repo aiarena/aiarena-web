@@ -19,9 +19,9 @@ function MobileNavItem({ href, children, onClick }: NavItemProps) {
       href={href}
       onClick={onClick}
     >
-      <li className="cursor-pointer text-xl px-6 text-center py-5 hover:bg-white md:hover:bg-transparent hover:text-black">
+      <div className="cursor-pointer text-xl px-6 text-center py-5 hover:bg-white md:hover:bg-transparent hover:text-black">
         {children}
-      </li>
+      </div>
     </Link>
   );
 }

@@ -16,7 +16,9 @@ export interface User {
 interface UserContextType {
   user: User | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  fetching: boolean; // Add fetching state
 }
+
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
@@ -25,19 +27,23 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 // Create a provider component
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [fetching, setFetching] = useState(true); // Initialize fetching to true
 
-  // Fetch user data only once
+  // Fetch user data only once  
   const fetchedUser = useUser();
 
   // Update the user state if the data is fetched successfully
- useEffect(() => {
-    if (!user && fetchedUser) {
-      setUser(fetchedUser); // Only set user if it hasn't been set yet
+  useEffect(() => {
+    if (fetchedUser) {
+      setUser(fetchedUser); // Set the user data
+      setFetching(false); // Set fetching to false after fetching is complete
+    } else if (!fetchedUser) {
+      setFetching(false); // If no user is fetched, set fetching to false
     }
   }, [fetchedUser]);
 
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, fetching }}>
       {children}
     </UserContext.Provider>
   );
