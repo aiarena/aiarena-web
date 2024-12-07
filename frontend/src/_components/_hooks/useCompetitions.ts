@@ -31,7 +31,7 @@ export const useCompetitions = () => {
   const data = useLazyLoadQuery(
     graphql`
       query useCompetitionsQuery {
-        competitions(last:5) {
+        competitions(last:20) {
           edges {
             node {
               id
