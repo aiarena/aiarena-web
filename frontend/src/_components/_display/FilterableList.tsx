@@ -450,7 +450,7 @@ const filteredData = data.filter((item) => {
       )}
 
       {/* Sorting Header Fields */}
-      <div    className={`grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  gap-4 text-white mb-4 font-bold`}>
+      <div    className={`grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))] text-white mb-4 font-bold`}>
         {fields.map((field, index) => (
           <button
             key={index}

@@ -7,6 +7,8 @@ import MobileNavitem from "./_nav_parts/MobileNavItem";
 import MobileNavItem from "./_nav_parts/MobileNavItem";
 import AuthNavBar from "./_nav_parts/AuthNavbar";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import { usePathname } from "next/navigation";
+
 
 const navLinks = [
   {
@@ -23,43 +25,43 @@ const navLinks = [
   },
   {
     title: "Competitions",
-    path: `${getPublicPrefix()}/competitions`,
+    path: `${getPublicPrefix()}/competitions/`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
     title: "About us",
-    path: `${getPublicPrefix()}/about`,
+    path: `${getPublicPrefix()}/about/`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
     title: "Status",
-    path: `${getPublicPrefix()}/status`,
+    path: `${getPublicPrefix()}/status/`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
     title: "Bots",
-    path: `${getPublicPrefix()}/bots`,
+    path: `${getPublicPrefix()}/bots/`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
     title: "Profile",
-    path: `${getPublicPrefix()}/profile`,
+    path: `${getPublicPrefix()}/profile/`,
     showLoggedIn: true,
     showLoggedOut: false,
   },
   {
     title: "Examples",
-    path: `${getPublicPrefix()}/examples`,
+    path: `${getPublicPrefix()}/examples/`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
   {
     title: "ToDo",
-    path: `${getPublicPrefix()}/todo`,
+    path: `${getPublicPrefix()}/todo/`,
     showLoggedIn: true,
     showLoggedOut: true,
   },
@@ -71,6 +73,8 @@ const navbarTitle = {
 
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
+  const router = usePathname();
+
 
   const handleMenu = () => {
     if (navbar === true) {
@@ -153,11 +157,16 @@ function Navbar() {
             <div className="flex flex-col">
               <ul className="flex flex-wrap">
                 {navLinks.map((link, index) => (
-                  <div key={index} className="block">
+              <li
+              key={index}
+              className={`pb-2 ${
+                router === `${link.path}` ? "border-b-2 border-customGreen" : ""
+              }`}
+            >
                     <NavItem href={link.path} onClick={handleWindowResize}>
                       {link.title}
                     </NavItem>
-                  </div>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -172,7 +181,12 @@ function Navbar() {
           <div className={` md block ${navbar ? "block" : "hidden"}`}>
             <ul className="md:h-auto md:flex mt-8 h-screen">
               {navLinks.map((link, index) => (
-                <div key={index}>
+                     <li
+                     key={index}
+                     className={`${
+                      router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""
+                     }`}
+                   >
                   {
                     <MobileNavItem
                       key={index}
@@ -182,7 +196,7 @@ function Navbar() {
                       {link.title}
                     </MobileNavItem>
                   }
-                </div>
+                </li>
               ))}
 
               <li>
