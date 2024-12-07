@@ -27,7 +27,7 @@ interface FilterableListProps<T> {
     renderRow: (item: T, index: number) => React.ReactNode;
     resultsPerPage?: number;
     fieldLabels?: { [key: string]: string };  // Also change fieldLabels to accept any string
-   
+    fieldClasses?: { [key: string]: string };
   }
 
 export default function FilterableList<T>({
@@ -37,7 +37,7 @@ export default function FilterableList<T>({
   renderRow,
   resultsPerPage: initialResultsPerPage = 10,
   fieldLabels = {}, // Default to an empty object if no fieldLabels are provided
- 
+  fieldClasses = {},
 }: FilterableListProps<T>) {
     const [sortField, setSortField] = useState<string>(fields[0]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -363,6 +363,8 @@ const filteredData = data.filter((item) => {
     }
   };
 
+  const getClassName = (field: string) => fieldClasses[field] || ""; 
+
   return (
     <div className="flex flex-col p-4 bg-gray-900">
       {/* Filter button */}
@@ -452,7 +454,9 @@ const filteredData = data.filter((item) => {
         {fields.map((field, index) => (
           <button
             key={index}
-            className="text-left font-bold text-lg text-customGreen hover:text-gray-400"
+            className={`text-left font-bold text-lg text-customGreen hover:text-gray-400 ${getClassName(
+              field
+            )}`}
             onClick={() => handleSort(field)}
           >
             {fieldLabels[field]
