@@ -27,7 +27,7 @@ const nextConfig = {
     API_URL: isDev ? 'http://localhost:8000' : 'https://aiarena.net',
     PUBLIC_PREFIX: isDev ? '.' : '/new-frontend',
   },
-
+  trailingSlash: true,
   output: 'standalone',
   images: {
     loader: 'default',

@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Supporters } from "@/_data/footerLinks";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 interface SupportersComponentProps {
   supporters: Supporters[];
@@ -23,7 +24,7 @@ const SupportersComponent: React.FC<SupportersComponentProps> = ({
           <div className="flex items-center">
             <Image
               alt="Excel-Icon"
-              src={`${process.env.PUBLIC_PREFIX}/icons/excel-icon.svg`}
+              src={`${getPublicPrefix()}/icons/excel-icon.svg`}
               height={35}
               width={35}
               className="pr-2"
