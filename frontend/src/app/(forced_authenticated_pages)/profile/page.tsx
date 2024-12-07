@@ -35,15 +35,17 @@ export default function Page() {
 
 
   return (
-    <div className="min-h-screen bg-gray-800">
-      <div className=" mx-auto py-8 px-4">
+    <div className="min-h-screen  justify-center flex ">
+      <div className=" mx-auto py-8 px-4 max-w-8xl bg-gray-800">
 
         {/* Navigation Tabs */}
         <TabNavigation
           tabs={[
             { name: 'Bots', href: '', active: true },
             { name: 'Achievements', href: '#competition-table' },
+            { name: 'Requested Matches', href: '#competition-table' },
             { name: 'Settings', href: '#settings' },
+
           ]}
         />
 

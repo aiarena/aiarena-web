@@ -13,12 +13,19 @@ interface ActiveCompetition {
   rank: string;
 }
 
+interface Trophy {
+    title: string;
+    image: string;
+}
+
+
 interface Bot {
   id: string;
   name: string;
   race: string;
   created: string;
   lastUpdated: string;
+  trophies?: Trophy[]
   activeCompetitions: ActiveCompetition[];
 }
 
@@ -30,6 +37,13 @@ const BotOverview: React.FC = () => {
         race: "Zerg",
         created: "09. Sept. 2024 - 16:17:37",
         lastUpdated: "10. Sept. 2024 - 02:34:06",
+        trophies: [
+            { title: "SC2 AI Arena Season 1 - Top 10", image: "elite.webp" },
+            { title: "1st Place - SC2 AI Arena Season 2", image: "titan.webp" },
+            { title: "3rd Place - SC2 AI Arena Season 3", image: "optimizer.webp" },
+            { title: "1st Place - ESChamp ProBots 2021 Season 2", image: "elite.webp" },
+            { title: "1st Place - ESChamp ProBots 2022 Season 1", image: "elite.webp" },
+          ],
         activeCompetitions: [
           {
             name: "Positive_Null - Sc2 AI Arena 2024 Pre-Season 3",
@@ -133,16 +147,13 @@ const BotOverview: React.FC = () => {
       },
     
   ];
-
   return (
-    <div className="bg-customBackgroundColor1 p-6 border border-gray-700 ">
+    <div className="bg-customBackgroundColor1 p-6 border border-gray-700">
       <div className="flex justify-between">
-        <button className="bg-customGreen">
-          Sort Filter select open button
-        </button>
+        <button className="bg-customGreen">Sort Filter select open button</button>
         <h2 className="text-2xl font-bold text-customGreen mb-4">Your Bots</h2>
         <div>
-          <input /> <button>Search! </button>
+          <input /> <button>Search!</button>
         </div>
       </div>
       <div className="space-y-12">
@@ -155,9 +166,7 @@ const BotOverview: React.FC = () => {
             <div className="p-4 border-b border-gray-600 bg-gray-900 flex items-center justify-between rounded-t-lg">
               {/* Left Section (Name and Race) */}
               <div className="flex flex-col">
-                <h3 className="font-bold text-lg text-customGreen">
-                  {bot.name}
-                </h3>
+                <h3 className="font-bold text-lg text-customGreen">{bot.name}</h3>
                 <p className="text-sm text-gray-400">
                   <span className="font-bold">Race:</span> {bot.race}
                 </p>
@@ -169,8 +178,7 @@ const BotOverview: React.FC = () => {
                   <span className="font-bold">Created:</span> {bot.created}
                 </p>
                 <p>
-                  <span className="font-bold">Last Updated:</span>{" "}
-                  {bot.lastUpdated}
+                  <span className="font-bold">Last Updated:</span> {bot.lastUpdated}
                 </p>
               </div>
 
@@ -179,6 +187,36 @@ const BotOverview: React.FC = () => {
                 Edit Bot
               </button>
             </div>
+
+            {/* Trophies Section */}
+            {bot.trophies && bot.trophies.length > 0 ? (
+              <div className="p-4 border-b border-gray-600 bg-gray-700">
+                <h4 className="text-lg font-bold text-customGreen mb-2">Trophies</h4>
+                <div className="overflow-x-auto whitespace-nowrap space-x-4 flex">
+                  {bot.trophies.map((trophy, index) => (
+                    <div
+                      key={index}
+                      className="flex-shrink-0 flex items-center bg-gray-800 p-3 border border-gray-600 rounded-md"
+                    >
+                      <div className="w-12 h-12 relative mr-2">
+                        <Image
+                          src={`${getPublicPrefix()}/demo_assets/${trophy.image}`}
+                          alt={trophy.title}
+                          layout="fill"
+                          objectFit="contain"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-300">{trophy.title}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 border-b border-gray-600 bg-gray-700">
+                <h4 className="text-lg font-bold text-customGreen mb-2">Trophies</h4>
+                <p className="text-sm text-gray-400">This bot has no trophies yet.</p>
+              </div>
+            )}
 
             {/* Active Competitions */}
             <div className="p-4">
@@ -189,66 +227,21 @@ const BotOverview: React.FC = () => {
                 {bot.activeCompetitions.map((comp, index) => (
                   <div
                     key={index}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start bg-gray-700 p-4 border border-gray-600 rounded-lg hover:bg-gray-600 transition cursor-pointer"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start bg-gray-700 p-4 border border-gray-600 rounded-lg hover:bg-gray-600 transition cursor-pointer"
                   >
-                    {/* Rank Section */}
-                    <div className="flex flex-col items-center">
-                    <p className="font-semibold text-indigo-400 text-left pb-2">
-                        {comp.name}
-                      </p>
-                      <div className="w-32 h-32 relative overflow-hidden ">
-                        <Image
-                          src={`${getPublicPrefix()}/demo_assets/${
-                            comp.rank
-                          }.webp`}
-                          alt="Rank Icon"
-                          layout="fill"
-                          objectFit="contain"
-                        />
-                      </div>
-                      <div className="flex gap-4">
-                        <span className="font-bold">
-                          Current ELO: {comp.currentELO}
-                        </span>
-
-                        <span className="font-bold">
-                          Highest ELO: {comp.highestELO}
-                        </span>
-                      </div>
-                    
-                     
-                    </div>
-
                     {/* Competition Info */}
                     <div>
-                
-                      <ul className="text-sm text-gray-300 mt-1">
+                      <p className="text-sm font-semibold text-indigo-400 mb-1">
+                        {comp.name}
+                      </p>
+                      <ul className="text-xs text-gray-300">
                         <li>
-                          <span className="font-bold">Matches:</span>{" "}
-                          {comp.matches}
+                          <span className="font-bold">Matches:</span> {comp.matches}
                         </li>
                         <li>
                           <span className="font-bold">Win/Loss:</span>{" "}
-                          <span className="text-customGreen">
-                            {comp.winRate}
-                          </span>{" "}
-                          / {comp.lossRate}
-                        </li>
-                        <li>
-                          <span className="font-bold">Crashes:</span>{" "}
-                          <span className="text-red-500">{comp.crashes}</span>
-                        </li>
-                        <li>
-                          <span className="font-bold">Crashes:</span>{" "}
-                          <span className="text-red-500">{comp.crashes}</span>
-                        </li>
-                        <li>
-                          <span className="font-bold">Crashes:</span>{" "}
-                          <span className="text-red-500">{comp.crashes}</span>
-                        </li>
-                        <li>
-                          <span className="font-bold">Crashes:</span>{" "}
-                          <span className="text-red-500">{comp.crashes}</span>
+                          <span className="text-customGreen">{comp.winRate}</span> /{" "}
+                          {comp.lossRate}
                         </li>
                         <li>
                           <span className="font-bold">Crashes:</span>{" "}
@@ -256,16 +249,15 @@ const BotOverview: React.FC = () => {
                         </li>
                       </ul>
                     </div>
-                    
 
-                    {/* ELO Graph */}
-                    <div className="relative h-40 bg-gradient-to-r rounded-md overflow-hidden">
-                      <Image
-                        src={`${getPublicPrefix()}/demo_assets/demograph.png`}
-                        alt="A demo Graph"
-                        layout="fill"
-                        objectFit="cover"
-                      />
+                    {/* ELO Details */}
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold">
+                        Current ELO: {comp.currentELO}
+                      </span>
+                      <span className="text-xs font-bold">
+                        Highest ELO: {comp.highestELO}
+                      </span>
                     </div>
                   </div>
                 ))}
