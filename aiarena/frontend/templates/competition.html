@@ -53,9 +53,9 @@
                     </tr>
                     </thead>
                     <tbody>
-                        {% for map_name in map_names %}
+                        {% for map in maps %}
                             <tr>
-                                <td>{{ map_name }}</td>
+                                <td><a href="{{ map.file.url }}">{{ map.name }}</a></td>
                             </tr>
                         {% endfor %}
                     </tbody>
