@@ -134,7 +134,7 @@ class TestingClient:
         assert response.status_code == 302 and response.url == reverse("admin:core_arenaclient_changelist")
         return ArenaClient.objects.get(username=username)
 
-    def create_game(self, name: str) -> Game:
+    def create_game(self, name: str, map_file_extension: str) -> Game:
         if Game.objects.filter(name=name).exists():
             raise Exception("That already exists!")
 
@@ -143,6 +143,7 @@ class TestingClient:
             url,
             {
                 "name": name,
+                "map_file_extension": map_file_extension,
             },
         )
 

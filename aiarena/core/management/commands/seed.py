@@ -98,7 +98,7 @@ class Command(BaseCommand):
 
         ac_client = AcApiTestingClient(api_token=Token.objects.first().key)
 
-        game = client.create_game("StarCraft II")
+        game = client.create_game("StarCraft II", ".SC2Map")
         gamemode = client.create_gamemode("Melee", game.id)
 
         protoss, terran, zerg = create_game_races()

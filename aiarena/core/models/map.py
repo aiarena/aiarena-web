@@ -6,7 +6,11 @@ from aiarena.core.utils import obtain_s3_filehash_or_default
 
 
 def map_file_upload_to(instance, filename):
-    return "/".join(["maps", instance.name])
+    name = instance.name
+    extension = instance.game_mode.game.map_file_extension
+    if not name.endswith(extension):
+        name = name + extension
+    return "/".join(["maps", name])
 
 
 class Map(models.Model):
