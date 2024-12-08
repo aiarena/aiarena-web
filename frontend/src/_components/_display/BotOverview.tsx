@@ -1,6 +1,7 @@
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Image from "next/image";
 import React from "react";
+import MainButton from "../_props/MainButton";
 
 interface ActiveCompetition {
   name: string;
@@ -150,23 +151,33 @@ const BotOverview: React.FC = () => {
   return (
     <div className="bg-customBackgroundColor1 p-6 border border-gray-700">
       <div className="flex justify-between">
-        <button className="bg-customGreen">Sort Filter select open button</button>
+      <button
+        onClick={() => console.log("Click!")}
+        className="mb-4 bg-customGreen text-white p-2 rounded hover:bg-customGreenDarken1 w-[4em]"
+      >
+        {/* {showFilterMenu ? "Hide Filters" : "Show Filters"} */}
+        Show Filters
+      </button>
+       
         <h2 className="text-2xl font-bold text-customGreen mb-4">Your Bots</h2>
         <div>
-          <input /> <button>Search!</button>
+        <MainButton href="" text="Upload Bot"/>
         </div>
       </div>
       <div className="space-y-12">
         {bots.map((bot) => (
           <div
             key={bot.id}
-            className="border rounded-lg bg-gray-800 text-white shadow-md border-indigo-500"
+            className="border rounded-lg bg-gray-800 text-white shadow-md border-indigo-500 shadow shadow-black"
           >
             {/* Header */}
             <div className="p-4 border-b border-gray-600 bg-gray-900 flex items-center justify-between rounded-t-lg">
               {/* Left Section (Name and Race) */}
               <div className="flex flex-col">
                 <h3 className="font-bold text-lg text-customGreen">{bot.name}</h3>
+                <p className="text-sm text-gray-400">
+                  <span className="font-bold">Game:</span> Starcraft II
+                </p>
                 <p className="text-sm text-gray-400">
                   <span className="font-bold">Race:</span> {bot.race}
                 </p>
@@ -227,7 +238,7 @@ const BotOverview: React.FC = () => {
                 {bot.activeCompetitions.map((comp, index) => (
                   <div
                     key={index}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start bg-gray-700 p-4 border border-gray-600 rounded-lg hover:bg-gray-600 transition cursor-pointer"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start bg-gray-700 p-4 border border-gray-600 rounded-lg hover:bg-gray-600 transition cursor-pointer shadow shadow-black"
                   >
                     {/* Competition Info */}
                     <div>

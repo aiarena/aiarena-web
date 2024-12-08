@@ -233,7 +233,7 @@ const filteredData = data.filter((item) => {
             onClick={() => setCurrentPage(page)}
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === page
-                ? "bg-customGreen text-white"
+                ? "shadow shadow-black bg-customGreen text-white"
                 : "bg-gray-700 hover:bg-gray-600 text-white"
             }`}
           >
@@ -366,11 +366,11 @@ const filteredData = data.filter((item) => {
   const getClassName = (field: string) => fieldClasses[field] || ""; 
 
   return (
-    <div className="flex flex-col p-4 bg-gray-900">
+    <div className="flex flex-col p-4 bg-customBackgroundColor1">
       {/* Filter button */}
       <button
         onClick={() => setShowFilterMenu(!showFilterMenu)}
-        className="mb-4 bg-customGreen text-white p-2 rounded hover:bg-customGreenDarken1 w-[4em]"
+        className="shadow shadow-black mb-4 bg-customGreen text-white p-2 rounded hover:bg-customGreenDarken1 w-[4em]"
       >
         {showFilterMenu ? "Hide Filters" : "Show Filters"}
       </button>
@@ -468,7 +468,7 @@ const filteredData = data.filter((item) => {
 
       {/* Data Rows */}
       <div
-        className="flex-grow mb-4"
+        className="flex-grow mb-4 "
         style={{ minHeight: `${pageSize * 56}px` }}
       >
         <ul className="text-white">
@@ -477,7 +477,7 @@ const filteredData = data.filter((item) => {
             //   {renderRow(item, index)}
             // </li>
             item ? (
-              <li key={index} className="mb-2 h-14">
+              <li key={index} className="mb-2 h-14 shadow shadow-black bg-customBackgroundColor3D1">
                 {renderRow(item, index)}
               </li>
             ) : (
@@ -502,12 +502,12 @@ const filteredData = data.filter((item) => {
           className={`px-3 py-1 rounded mx-1 ${
             currentPage === 1
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-              : "bg-customGreen text-white"
+              : "shadow shadow-black bg-customGreen text-white"
           }`}
         >
           {"<"}
         </button>
-        <div className="hidden md:block">{renderPagination()}</div>
+        <div className="hidden md:block ">{renderPagination()}</div>
         <div className="block md:hidden">
           <input
             className="w-12 text-black m-2 text-center"
@@ -525,7 +525,7 @@ const filteredData = data.filter((item) => {
           className={`px-3 py-1 rounded mx-1 ${
             currentPage === totalPages
               ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-              : "bg-customGreen text-white"
+              : "shadow shadow-black bg-customGreen text-white"
           }`}
         >
           {">"}

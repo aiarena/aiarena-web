@@ -54,7 +54,7 @@ export default function MainButton({ href, text }: MainButtonProps) {
       <div className="relative inline-block">
         <button
           onClick={() => handleRedirect(href)}
-          className={`relative z-10 hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform`}
+          className={`shadow shadow-black relative z-10 hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform`}
         //   disabled={isLoading}
 
         >

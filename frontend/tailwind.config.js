@@ -34,8 +34,17 @@ module.exports = {
         customGreen: CustomPrimaryVar,   
         
         customBackgroundColor1: 'rgba(42,48,57,1)',
-        customBackgroundColor1D1: 'rgba(17,24,39,1)',
+        customBackgroundColor1D1: 'rgba(30,37,50,1)',
         customBackgroundColor1L1: 'rgba(60,61,79,1)',
+
+        customBackgroundColor2: 'rgba(50,55,65,1)',   // Slightly brighter than customBackgroundColor1
+        customBackgroundColor2D1: 'rgba(25,30,40,1)', // Darker than customBackgroundColor1D1
+        customBackgroundColor2L1: 'rgba(70,75,85,1)', // Lighter version for a softer feel
+        customBackgroundColor3: 'rgba(45,50,60,1)',   // Neutral shade for balanced sections
+        customBackgroundColor3D1: 'rgba(20,25,35,1)', // Darker, muted variant for dramatic sections
+        customBackgroundColor3L1: 'rgba(65,70,80,1)', // Softer, lighter variant
+
+
 
         customGreenHighlight1: 'rgba(255, 255, 0, 1)',                 
         customGreenDarken1: 'rgba(104, 144, 20, 1)', 
