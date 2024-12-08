@@ -7,6 +7,7 @@ import MobileNavitem from "./_nav_parts/MobileNavItem";
 import MobileNavItem from "./_nav_parts/MobileNavItem";
 import AuthNavBar from "./_nav_parts/AuthNavbar";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import { usePathname } from "next/navigation";
 
 
 const navLinks = [
@@ -72,6 +73,7 @@ const navbarTitle = {
 
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
+  const router = usePathname();
 
 
   const handleMenu = () => {
@@ -157,9 +159,11 @@ function Navbar() {
                 {navLinks.map((link, index) => (
               <li
               key={index}
-           
+              className={`pb-2`}
             >
-                    <NavItem href={link.path} onClick={handleWindowResize}>
+                    <NavItem href={link.path} onClick={handleWindowResize} className={`${
+                router === `${link.path}` ? "border-b-2 border-customGreen" : ""
+              }`}>
                       {link.title}
                     </NavItem>
                   </li>
@@ -179,13 +183,16 @@ function Navbar() {
               {navLinks.map((link, index) => (
                      <li
                      key={index}
-                    
+                     className={`${
+                      router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""
+                     }`}
                    >
                   {
                     <MobileNavItem
                       key={index}
                       href={link.path}
                       onClick={handleMobileNavItemClick}
+                      className={router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""}
                     >
                       {link.title}
                     </MobileNavItem>
