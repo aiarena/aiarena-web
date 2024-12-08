@@ -20,7 +20,7 @@ export default function CompetitionCard({ competition, imageUrl }: CompetitionCa
   return (
     <Link
       href={`${getPublicPrefix()}/competitions/${1}`} // Assuming each competition has a unique ID or URL
-      className="block bg-customBackgroundColor1 text-white shadow-lg rounded-lg overflow-hidden hover:bg-customBackgroundColor1D1 transition transform hover:scale-105 border border-slate-700"
+      className="shadow shadow-black block bg-customBackgroundColor1 text-white shadow-lg rounded-lg overflow-hidden hover:bg-customBackgroundColor1D1 transition transform hover:scale-105 border border-slate-700"
     >
       <div className="flex">
         <div className="w-1/3">

@@ -65,11 +65,11 @@ const LatestNews: React.FC<LatestNewsProps> = ({ newsData }) => {
           disabled={currentIndex === 0}
           className={`
             
-            hidden lg:block
+            hidden lg:block 
             ${
               currentIndex === 0
                 ? "bg-gray-400 text-gray-300 border-gray-400 hover:border-4 border-4 "
-                : "hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white"
+                : "shadow shadow-black hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white"
             } font-semibold py-2 px-2 rounded-full shadow-lg transition duration-300 ease-in-out transform`}
         >
           <svg
@@ -94,11 +94,11 @@ const LatestNews: React.FC<LatestNewsProps> = ({ newsData }) => {
           onClick={handleNext}
           disabled={currentIndex === newsData.length - 1}
           className={`
-           hidden lg:block
+           hidden lg:block 
             ${
               currentIndex === newsData.length - 1
                 ? "bg-gray-400 text-gray-300 border-gray-400 hover:border-4 border-4 "
-                : "hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white"
+                : "shadow shadow-black hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white"
             } font-semibold py-2 px-2 rounded-full shadow-lg transition duration-300 ease-in-out transform`}
         >
           <svg
@@ -123,8 +123,8 @@ const LatestNews: React.FC<LatestNewsProps> = ({ newsData }) => {
           <button
             key={index}
             onClick={() => handleDotClick(index)}
-            className={`w-3 h-3 rounded-full mx-1 transition duration-300 ${
-              currentIndex === index ? "bg-customGreen" : "bg-gray-400"
+            className={` w-6 h-3 rounded-full mx-1 transition duration-300 ${
+              currentIndex === index ? "bg-customGreen shadow shadow-black" : "bg-gray-400"
             }`}
           ></button>
         ))}

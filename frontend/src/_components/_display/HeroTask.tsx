@@ -24,7 +24,7 @@ const HeroTask: React.FC<HeroTaskProps> = ({
   alt,
 }) => {
   return (
-    <div className="block items-start bg-customBackgroundColor1 text-white mb-6 transition-transform transform border border-gray-900 max-w-[30em] min-h-[20em] rounded-lg">
+    <div className="shadow shadow-black block items-start bg-customBackgroundColor1 text-white mb-6 transition-transform transform border border-gray-900 max-w-[30em] min-h-[20em] rounded-lg">
       <div className="relative w-full max-w-[479px] h-[150px] bg-black overflow-hidden border border-gray-600 rounded-t-lg">
         {/* Background Image */}
         <Image

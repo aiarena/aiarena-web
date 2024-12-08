@@ -178,33 +178,35 @@ function Navbar() {
           </div>
         </div>
         {navbar === true ? (
-          <div className={` md block ${navbar ? "block" : "hidden"}`}>
-            <ul className="md:h-auto md:flex mt-8 h-screen">
-              {navLinks.map((link, index) => (
-                     <li
-                     key={index}
-                     className={`${
-                      router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""
-                     }`}
-                   >
-                  {
-                    <MobileNavItem
-                      key={index}
-                      href={link.path}
-                      onClick={handleMobileNavItemClick}
-                      className={router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""}
-                    >
-                      {link.title}
-                    </MobileNavItem>
+          <div className={`md:block ${navbar ? "block" : "hidden"}`}>
+          <ul
+           className="md:h-auto md:flex mt-8 h-screen max-h-[calc(100vh-7rem)] overflow-y-auto"
+          >
+            {navLinks.map((link, index) => (
+              <li
+                key={index}
+                className={`${
+                  router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""
+                }`}
+              >
+                <MobileNavItem
+                  key={index}
+                  href={link.path}
+                  onClick={handleMobileNavItemClick}
+                  className={
+                    router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""
                   }
-                </li>
-              ))}
-
-              <li>
-                <AuthNavBar />
+                >
+                  {link.title}
+                </MobileNavItem>
               </li>
-            </ul>
-          </div>
+            ))}
+        
+            <li className="flex justify-center pb-10">
+              <AuthNavBar />
+            </li>
+          </ul>
+        </div>
         ) : null}
       </nav>
     </>

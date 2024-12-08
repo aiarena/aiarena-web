@@ -1,6 +1,7 @@
 "use client"
 import CompetitionCard from "@/_components/_display/CompetitionCard";
 import ClosedCompetitionList from "@/_components/_display/CompetitionList";
+import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import { useCompetitions } from "@/_components/_hooks/useCompetitions";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
@@ -95,6 +96,7 @@ export default function Page() {
   };
 
   return (
+    <>
     <div className="max-w-7xl mx-auto p-6">
       <h1 className="text-4xl font-bold mb-10 text-customGreen font-gugi">The Arena</h1>
 
@@ -122,5 +124,7 @@ export default function Page() {
         )}
       </section>
     </div>
+    <PreFooterSpacer/>
+    </>
   );
 }

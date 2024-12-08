@@ -8,7 +8,7 @@ const Accordion: React.FC<{ title: string; content: string }> = ({ title, conten
   };
 
   return (
-    <div className="border-b mb-4">
+    <div className="border border-customGreen mb-4 bg-customBackgroundColor1D1 rounded-lg shadow shadow-black">
       <button
         className="w-full text-left p-4 text-lg font-semibold"
         onClick={toggleAccordion}
@@ -16,7 +16,7 @@ const Accordion: React.FC<{ title: string; content: string }> = ({ title, conten
         {title}
         <span className="float-right">{isOpen ? "-" : "+"}</span>
       </button>
-      {isOpen && <div className="p-4 ">{content}</div>}
+      {isOpen && <div className="p-4 cursor-pointer"  onClick={toggleAccordion}>{content}</div>}
     </div>
   );
 };
