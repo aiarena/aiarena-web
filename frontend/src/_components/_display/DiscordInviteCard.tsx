@@ -1,3 +1,4 @@
+import { getFeatureFlags } from "@/_data/featureFlags";
 import Image from "next/image";
 import React from "react";
 
@@ -16,6 +17,8 @@ interface DiscordInviteCardProps {
   onlineCount,
   serverImageUrl,
 }) => {
+  const discordData = getFeatureFlags().heroDiscordUsersInfo;
+
   return (
     <div className="shadow-customDiscord bg-customBackgroundColor1 text-white p-6 rounded-lg max-w-[40em] mx-auto  lg:flex lg:justify-center lg:items-center lg:p-10  border border-indigo-500
 ">
@@ -38,14 +41,18 @@ interface DiscordInviteCardProps {
         <div className="flex-grow text-center lg:text-center">
           <h2 className="text-3xl font-bold mb-4 text-customGreen font-gugi">{serverName}</h2>
           <p className="text-gray-400 mb-6 text-sm lg:text-xl lg:mb-8">{description}</p>
+          {discordData ? 
           <div className="flex justify-center gap-6 mb-6">
+           
             <div className="text-green-400">
               <strong>{onlineCount}</strong> Online
             </div>
             <div className="text-gray-300">
               <strong>{memberCount}</strong> Members
             </div>
+        
           </div>
+     : null }       
           <a
             href={inviteUrl}
             target="_blank"

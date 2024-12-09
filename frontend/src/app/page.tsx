@@ -21,6 +21,8 @@ import InitiationHeroTasks from "@/_components/_display/InitiationHeroTasks";
 import { ImageOverlayWrapper } from "@/_components/_display/ImageOverlayWrapper";
 import DiscordInviteCard from "@/_components/_display/DiscordInviteCard";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import { getFeatureFlags } from "@/_data/featureFlags";
+import MainButton from "@/_components/_props/MainButton";
 
 const tasks = [
   {
@@ -56,6 +58,7 @@ export default function Page() {
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [news, setNews] = useState<News[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const heroTasks = getFeatureFlags().heroTasks;
 
   const newsData = useNews();
 
@@ -76,12 +79,14 @@ export default function Page() {
               AI Arena
             </h1>
           </div>
-          <h2 className="text-2xl mb-48">
-            Welcome to the AI Arena!
-          </h2>
-          <div className="mb-32">
-            <InitiationHeroTasks tasks={tasks} />
-          </div>
+          <h2 className="text-2xl mb-12">Welcome to the AI Arena!</h2>
+          {heroTasks ? (
+            <div className="mb-32 mt-36">
+              <InitiationHeroTasks tasks={tasks} />
+            </div>
+          ) : (
+            <MainButton href={`${getPublicPrefix()}/login/`} text="Login" />
+          )}
         </VideoBanner>
         <div className="lg:space-x-4 lg:space-y-0">
           <div className="rounded-lg rounded-lg">
@@ -90,7 +95,7 @@ export default function Page() {
               imageUrl={`/generated_assets/dall_e_bg_2.webp`}
               alt="Discord background"
               sectionDivider={true}
-              sectionDividerDarken={2}
+              sectionDividerDarken={5}
               blurAmount="blur-md"
               opacityAmount="opacity-70"
             >
@@ -114,7 +119,7 @@ export default function Page() {
           imageUrl={`/demo_assets/demo-news.webp`}
           alt="Space Background"
           sectionDivider={true}
-          sectionDividerDarken={2}
+          sectionDividerDarken={5}
           blurAmount="blur-sm"
           opacityAmount="opacity-80"
         >

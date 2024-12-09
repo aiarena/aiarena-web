@@ -10,9 +10,7 @@ import { useSignOut } from "@/_components/_hooks/useSignOut";
 import { useUserContext } from "@/_components/providers/UserProvider";
 import { useRouter } from "next/navigation";
 
-
 export default function AuthNavBar() {
-
   const router = useRouter(); // Next.js router for navigation
   const { user, setUser, fetching } = useUserContext();
   const [signOut, isSigningOut] = useSignOut();
@@ -50,7 +48,7 @@ export default function AuthNavBar() {
 
           <Link href="/login">
             <span className="bg-customGreen m-2 rounded py-1 px-2 whitespace-nowrap">
-              Log in
+              Login
             </span>
           </Link>
         </div>
