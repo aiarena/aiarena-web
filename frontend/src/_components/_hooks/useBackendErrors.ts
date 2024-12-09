@@ -1,9 +1,9 @@
 import React from 'react';
-
-export default function useBackendErrors(mutationName) {
+// I want types for this
+export default function useBackendErrors(mutationName : any) {
   const [backendErrors, setBackendErrors] = React.useState({});
 
-  const handleMutationCompleted = (data, errors) => {
+  const handleMutationCompleted = (data : any, errors : any) => {
     if (errors?.length || data[mutationName]?.errors?.length) {
       setBackendErrors({
         formErrors: data[mutationName]?.errors,
@@ -28,7 +28,7 @@ export default function useBackendErrors(mutationName) {
 
     return true;
   };
-  const handleMutationError = (error) => {
+  const handleMutationError = (error : any) => {
     // eslint-disable-next-line no-console
     console.error(error);
     setBackendErrors({ failError: true });

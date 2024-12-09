@@ -26,9 +26,12 @@
 
 import { useLazyLoadQuery, graphql } from 'react-relay';
 import { nodes } from "@/_lib/relayHelpers";
+import {getNodes} from "@/_lib/relayHelpers";
+import { useCompetitionsQuery } from './__generated__/useCompetitionsQuery.graphql';
+
 
 export const useCompetitions = () => {
-  const data = useLazyLoadQuery(
+  const data = useLazyLoadQuery<useCompetitionsQuery>(
     graphql`
       query useCompetitionsQuery {
         competitions(last:20) {
@@ -44,7 +47,17 @@ export const useCompetitions = () => {
         }
       }
     `,
-    { }
+    {}
   );
-  return nodes(data.competitions);
+  
+  const competitionNodes = getNodes(data.competitions)
+
+   // Transform into a sanitized shape
+   return competitionNodes.map((node) => ({
+    id: node.id,
+    dateCreated: String(node.dateCreated), // Ensure string
+    name: node.name || "", // Fallback for title
+    type: node.type || "", // Fallback for text
+    status: node.status || "", // Convert null to undefined
+  }));
 };

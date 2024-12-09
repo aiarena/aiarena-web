@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react';
 
 interface ArticleWrapperProps {
   children: ReactNode;
-  className: string;
+  className?: string;
 }
 
 export default function ArticleWrapper({ children, className }: ArticleWrapperProps) {
