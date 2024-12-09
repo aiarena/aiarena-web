@@ -8,7 +8,7 @@ import ToggleDisplay from "@/_components/_display/ToggleDisplay";
 import MapDisplay from "@/_components/_display/MapDisplay";
 import VideoComponent from "@/_components/_display/VideoBanner";
 import VideoPlayer from "@/_components/_display/VideoPlayer";
-
+import { getFeatureFlags } from "@/_data/featureFlags";
 
 // Types
 interface Participant {
@@ -60,11 +60,11 @@ export default function Page() {
   const router = useRouter();
   const { id } = { id: "1" };
 
+  const featureFlags = getFeatureFlags();
+
   useEffect(() => {
-    
-      const competitionData = mockCompetitions[1];
-      setCompetition(competitionData);
-    
+    const competitionData = mockCompetitions[1];
+    setCompetition(competitionData);
   }, []);
 
   if (!competition) {
@@ -103,11 +103,17 @@ export default function Page() {
                         {participant.name}
                       </td>
                       <td className="px-4 py-2 truncate">{participant.race}</td>
-                      <td className="px-4 py-2 truncate">{participant.author}</td>
+                      <td className="px-4 py-2 truncate">
+                        {participant.author}
+                      </td>
                       <td className="px-4 py-2 truncate">{participant.type}</td>
-                      <td className="px-4 py-2 truncate">{participant.winRate}%</td>
+                      <td className="px-4 py-2 truncate">
+                        {participant.winRate}%
+                      </td>
                       <td className="px-4 py-2 truncate">{participant.elo}</td>
-                      <td className="px-4 py-2 truncate">{participant.trend}</td>
+                      <td className="px-4 py-2 truncate">
+                        {participant.trend}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -118,7 +124,6 @@ export default function Page() {
       )}
     </div>
   );
-  
 
   const renderRounds = (
     <div>
@@ -148,7 +153,6 @@ export default function Page() {
     </div>
   );
   return (
-  
     <div className="space-y-6">
       {/* Header Section */}
       <CompetitionHeader
@@ -176,42 +180,60 @@ export default function Page() {
               official maps and standard melee rules. It rigorously tests
               strategy, micro, resource management, and decision-making.
             </p>
-
-            <h3 className="text-2xl font-semibold text-customGreen my-4">
-              Maps
-            </h3>
-            <div className="flex flex-wrap justify-center gap-4">
-              {competition.maps.map((mapName, index) => (
-                <div
-                  key={index}
-                  className="flex-none w-28 h-28"
-                >
-                  <MapDisplay
-                    mapName={mapName}
-                    imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
-                  />
+            {featureFlags.competitionMaps && featureFlags.competitionVideo ? (
+              <div className="pt-4">
+                <h3 className="text-2xl font-semibold text-customGreen my-4">
+                  Maps
+                </h3>
+                <div className="flex flex-wrap justify-center gap-4">
+                  {competition.maps.map((mapName, index) => (
+                    <div key={index} className="flex-none w-28 h-28">
+                      <MapDisplay
+                        mapName={mapName}
+                        imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : null}
           </div>
+          {featureFlags.competitionMaps && !featureFlags.competitionVideo ? (
+            <div className="border-gray-700 border-2 bg-customBackgroundColor1  rounded-lg shadow-md lg:col-span-2">
+              <h3 className=" text-2xl font-semibold text-customGreen my-4">
+                Maps
+              </h3>
+              <div className="flex flex-wrap justify-center gap-4">
+                {competition.maps.map((mapName, index) => (
+                  <div key={index} className="flex-none w-28 h-28">
+                    <MapDisplay
+                      mapName={mapName}
+                      imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
-          {/* Live Stream Section */}
-          <div className="border-gray-700 border-2 bg-customBackgroundColor1  p-6 rounded-lg shadow-md lg:col-span-2">
-            <h2 className="text-3xl font-bold text-customGreen mb-4">
-              Live Stream
-            </h2>
-            <div className="relative ">
-              <VideoPlayer
-                src="/videos/ai-banner.mp4" // Local or hosted video file
-                poster="/images/video-poster.jpg" // Optional poster image
-                alt="Sample video demonstrating the AI competition."
-                controls={true}
-                autoPlay={true}
-                loop={true}
-                muted={true}
-              />
+          {featureFlags.competitionVideo ? (
+            <div className="border-gray-700 border-2 bg-customBackgroundColor1  p-6 rounded-lg shadow-md lg:col-span-2">
+              <h2 className="text-3xl font-bold text-customGreen mb-4">
+                Live Stream
+              </h2>
+              <div className="relative ">
+                <VideoPlayer
+                  src="/videos/ai-banner.mp4" // Local or hosted video file
+                  poster="/images/video-poster.jpg" // Optional poster image
+                  alt="Sample video demonstrating the AI competition."
+                  controls={true}
+                  autoPlay={true}
+                  loop={true}
+                  muted={true}
+                />
+              </div>
             </div>
-          </div>
+          ) : null}
         </div>
 
         {/* Toggle Display Section */}

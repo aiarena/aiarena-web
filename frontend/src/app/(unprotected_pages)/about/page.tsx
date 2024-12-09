@@ -42,9 +42,7 @@ const AboutUs = () => {
 
       {/* Getting Started Guide */}
       <section className="py-12 bg-customBackgroundColor3">
-        <h2 className="text-3xl text-customGreen font-semibold text-center mb-6">
-          Common Questions
-        </h2>
+   
         <div className="max-w-2xl mx-auto">
           <Accordion
             title="How can I get started with AI Arena?"

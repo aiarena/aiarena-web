@@ -1,7 +1,8 @@
 import { useLazyLoadQuery, graphql } from 'react-relay';
+import { useUserQuery } from './__generated__/useUserQuery.graphql';
 
 export const useUser = () => {
-  const data = useLazyLoadQuery(
+  const data = useLazyLoadQuery<useUserQuery>(
     graphql`
       query useUserQuery {
         viewer {
@@ -17,3 +18,5 @@ export const useUser = () => {
   );
   return data.viewer;
 };
+
+

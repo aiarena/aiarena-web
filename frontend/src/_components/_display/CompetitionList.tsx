@@ -4,15 +4,14 @@ import Link from "next/link";
 import FilterableList from "./FilterableList";
 import { formatDate } from "@/_lib/dateUtils";
 
-interface ClosedCompetition {
-  name: string;
-  dateCreated: string;
-  opened: string;
-  status: string;
-}
-
+// Props inferred from Relay data
 interface ClosedCompetitionListProps {
-  competitions: ClosedCompetition[];
+  competitions: {
+    id: string;
+    name: string;
+    dateCreated: string;
+    status: string;
+  }[];
 }
 
 export default function ClosedCompetitionList({

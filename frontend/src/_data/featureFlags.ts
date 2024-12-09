@@ -28,7 +28,7 @@ export function getFeatureFlags(): FeatureFlags {
     statusServerStatus: false,
     statusPage: true,
     botsPage: false,
-    competitionMaps: false,
+    competitionMaps: true,
     competitionVideo: false,
     supporters:false,
     examples:false,

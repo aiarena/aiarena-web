@@ -1,8 +1,10 @@
 import { useMutation, graphql } from 'react-relay';
 import { useState } from 'react';
 
+import { useSignOutMutation } from './__generated__/useSignOutMutation.graphql';
+
 export const useSignOut = (): [() => void, boolean, string | null] => {
-  const [commit, isInFlight] = useMutation(
+  const [commit, isInFlight] = useMutation<useSignOutMutation>(
     graphql`
       mutation useSignOutMutation {
         signOut {
@@ -20,10 +22,11 @@ export const useSignOut = (): [() => void, boolean, string | null] => {
   const signOut = () => {
     commit({
       variables: {}, // No variables needed for sign out mutation
-      onCompleted: (response) => {
+      onCompleted: (response: useSignOutMutation['response']) => {
         const errors = response?.signOut?.errors;
         if (errors && errors.length > 0) {
-          setError(errors[0].messages[0]); // Handle and display error
+          const firstErrorMessage = errors[0]?.messages?.[0] ?? 'An unknown error occurred.';
+          setError(firstErrorMessage); // Handle and display the first error message
         } else {
           setError(null); // Clear error on success
         }
