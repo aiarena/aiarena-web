@@ -6,6 +6,8 @@ import Image from "next/image";
 import React from "react";
 import mockUptimeData from "@/_data/mockUptime.json";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
+import { notFound } from "next/navigation"; // Import the notFound function
+import { getFeatureFlags }from "@/_data/featureFlags"
 
 const ActivityFeed = () => {
   const activities = [
@@ -26,10 +28,8 @@ const ActivityFeed = () => {
     { time: "3d ago", event: "Bot SharkbotTest was updated." },
   ];
 
-
-
   return (
-    <div className="bg-customBackgroundColor1 p-4 rounded-md">
+    <div className="bg-customBackgroundColor1 p-4 rounded-md shadow shadow-black ">
       <WrappedTitle title="Activity Feed" />
       <ul className="space-y-2">
         {activities.map((activity, index) => (
@@ -53,13 +53,13 @@ const UptimeGraph = ({
   data: { hour: string; uptime: number }[];
 }) => {
   return (
-    <div className="bg-customBackgroundColor1 p-4 rounded-md">
+    <div className="shadow shadow-black bg-customBackgroundColor1 p-4 rounded-md">
       <WrappedTitle title={title} />
-      <div className="h-40 bg-customBackgroundColor1D1 flex items-end justify-between text-gray-300 mb-2 p-2">
+      <div className="h-40 bg-customBackgroundColor1D1  flex items-end justify-between text-gray-300 mb-2 p-2">
         {data.map((entry, index) => (
           <div
             key={index}
-            className="w-2 bg-[rgb(70,120,20,1)]"
+            className="w-2 bg-customGreen brightness-75"
             style={{
               height: `${entry.uptime}%`,
               transition: "height 0.3s ease",
@@ -74,7 +74,7 @@ const UptimeGraph = ({
 };
 const Stats = () => {
   return (
-    <div className="bg-customBackgroundColor1 p-4 rounded-md">
+    <div className="bg-customBackgroundColor1 p-4 rounded-md shadow shadow-black ">
       <WrappedTitle title="Stats" />
       <ul className="space-y-2 text-gray-300">
         <li>
@@ -107,7 +107,7 @@ const Stats = () => {
 
 const Thanks = () => {
   return (
-    <div className="bg-customBackgroundColor1 mt-8 mb-8 p-4 rounded-md">
+    <div className="bg-customBackgroundColor1 mt-8 mb-8 p-4 rounded-md shadow shadow-black ">
       <WrappedTitle title="Thank you" />
       Thank you Spacemen for supporting AI arena!
       <p>Heart icon</p>
@@ -115,28 +115,48 @@ const Thanks = () => {
   );
 };
 
-const HomePage = () => {  
+const HomePage = () => {
+  const  statusPage = getFeatureFlags().statusPage 
+  const  serverStatus = getFeatureFlags().statusServerStatus
+  const  supporters = getFeatureFlags().supporters
+
+
+  if (!statusPage) {
+    notFound()
+    return null
+  }
+
   const uptimeData = mockUptimeData;
   return (
     <>
-    <div className=" min-h-screen max-w-7xl m-auto pt-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="col-span-1 md:col-span-2">
-          <ActivityFeed />
-        </div>
-        <div>
-          <Stats />
-          <Thanks />
-        </div>
-      </div>
+      <div className=" min-h-screen max-w-7xl m-auto pt-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="col-span-1 md:col-span-2">
+            <ActivityFeed />
+          </div>
+          <div>
+            <Stats />
+            {supporters?
+            <Thanks /> : null}
 
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {uptimeData.map((server) => (
-           <UptimeGraph key={server.serverName} title={server.serverName} data={server.data} />
-        ))}
+          </div>
+        </div>
+        {
+
+          serverStatus ? 
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {uptimeData.map((server) => (
+            <UptimeGraph
+              key={server.serverName}
+              title={server.serverName}
+              data={server.data}
+            />
+          ))}
+        </div>
+        : null
+        }
       </div>
-    </div>
-    <PreFooterSpacer/>
+      <PreFooterSpacer />
     </>
   );
 };

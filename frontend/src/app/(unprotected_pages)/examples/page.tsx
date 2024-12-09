@@ -13,10 +13,18 @@ import StatCard from "@/_components/_examples/StatCard";
 import StatsOverview from "@/_components/_examples/StatsOverview";
 import TestimonialsCarousel from "@/_components/_examples/TestimonalsCarousel";
 import TitleBanner from "@/_components/_examples/TitleBanner";
+import { getFeatureFlags } from "@/_data/featureFlags";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import { notFound } from "next/navigation";
 import React from "react";
 
 const ExamplePage: React.FC = () => {
+  const examples = getFeatureFlags().examples;
+  if (!examples) {
+    notFound();
+    return false;
+  }
+
   return (
     <>
       <div className="container mx-auto py-8">
@@ -35,7 +43,8 @@ const ExamplePage: React.FC = () => {
         <div className="circular-gradient-shadow"></div>
         <div className="p-6 md:p-10 rounded-xl shadow-2xl mb-12 border-4 border-gray-300 animate-sine-wave bg-gradient-to-br from-black via-[rgba(0,194,50,0.5)] via-70% to-[rgba(0,0,0,1)] overflow-hidden">
           <h1 className="flex flex-wrap">
-            An example of&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
+            An example of&nbsp;
+            <b className="animate-sine-wave-text">SHINY&nbsp;</b>
             text.
           </h1>
           <p className="flex flex-wrap">
@@ -45,22 +54,24 @@ const ExamplePage: React.FC = () => {
         </div>
         <div className="p-6 md:p-10 rounded-xl shadow-2xl mb-12 border-4 border-gray-300 animate-sine-wave bg-gradient-to-br from-black to-[rgba(134,194,50,1)] overflow-hidden">
           <h1 className="flex flex-wrap">
-          An example of&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
-          text.
+            An example of&nbsp;
+            <b className="animate-sine-wave-text">SHINY&nbsp;</b>
+            text.
           </h1>
           <p className="flex flex-wrap">
-          With a&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
+            With a&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
             Box.
           </p>
         </div>
 
         <div className="p-6 md:p-10 rounded-xl shadow-2xl mb-12 border-4 border-gray-300 animate-sine-wave bg-gradient-to-br from-black to-transparent overflow-hidden">
           <h1 className="flex flex-wrap">
-          An example of&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
-          text.
+            An example of&nbsp;
+            <b className="animate-sine-wave-text">SHINY&nbsp;</b>
+            text.
           </h1>
           <p className="flex flex-wrap">
-          With a&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
+            With a&nbsp;<b className="animate-sine-wave-text">SHINY&nbsp;</b>
             Box.
           </p>
         </div>

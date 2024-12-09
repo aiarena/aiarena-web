@@ -10,7 +10,7 @@ const EthernetStatusDots: React.FC = () => {
         }}
       ></div>
       <div
-        className="w-2 h-2 bg-green-500 rounded-full"
+        className="w-2 h-2 bg-customGreen brightness-90 rounded-full"
         style={{
           animation: 'blinkGreen 0.5s infinite ease-in-out',
         }}

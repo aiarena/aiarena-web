@@ -8,7 +8,8 @@ import MobileNavItem from "./_nav_parts/MobileNavItem";
 import AuthNavBar from "./_nav_parts/AuthNavbar";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { usePathname } from "next/navigation";
-
+import { getFeatureFlags } from "@/_data/featureFlags";
+import { useUserContext } from "../providers/UserProvider";
 
 const navLinks = [
   {
@@ -16,54 +17,56 @@ const navLinks = [
     path: `${getPublicPrefix()}/`,
     showLoggedIn: true,
     showLoggedOut: true,
+    featureFlag: null,
   },
   {
     title: "Wiki",
     path: "https://aiarena.net/wiki/",
     showLoggedIn: true,
     showLoggedOut: true,
+    featureFlag: null,
   },
   {
     title: "Competitions",
     path: `${getPublicPrefix()}/competitions/`,
     showLoggedIn: true,
     showLoggedOut: true,
+    featureFlag: null,
   },
   {
     title: "About us",
     path: `${getPublicPrefix()}/about/`,
     showLoggedIn: true,
     showLoggedOut: true,
+    featureFlag: null,
   },
   {
     title: "Status",
     path: `${getPublicPrefix()}/status/`,
     showLoggedIn: true,
     showLoggedOut: true,
+    featureFlag: getFeatureFlags().statusPage,
   },
   {
     title: "Bots",
     path: `${getPublicPrefix()}/bots/`,
     showLoggedIn: true,
     showLoggedOut: true,
+    featureFlag: getFeatureFlags().botsPage,
   },
   {
     title: "Profile",
     path: `${getPublicPrefix()}/profile/`,
     showLoggedIn: true,
     showLoggedOut: false,
+    featureFlag: null,
   },
   {
     title: "Examples",
     path: `${getPublicPrefix()}/examples/`,
     showLoggedIn: true,
     showLoggedOut: true,
-  },
-  {
-    title: "ToDo",
-    path: `${getPublicPrefix()}/todo/`,
-    showLoggedIn: true,
-    showLoggedOut: true,
+    featureFlag: getFeatureFlags().examples,
   },
 ];
 
@@ -74,7 +77,7 @@ const navbarTitle = {
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
   const router = usePathname();
-
+  const { user } = useUserContext();
 
   const handleMenu = () => {
     if (navbar === true) {
@@ -114,7 +117,10 @@ function Navbar() {
     <>
       <nav className="w-full bg-neutral-900 px-2 text-white dark:bg-gray-900 font-sans sticky top-0 z-50">
         <div className="flex justify-between md:p-3 md:flex ">
-          <Link href={`${getPublicPrefix()}`} className="flex justify-between items-center">
+          <Link
+            href={`${getPublicPrefix()}`}
+            className="flex justify-between items-center"
+          >
             <Image
               className="pr-2 invert h-[auto] w-12"
               src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
@@ -129,7 +135,10 @@ function Navbar() {
 
           {/* Phone */}
           <div className="md:hidden py-4">
-            <button className="py-3 rounded-md pr-4" onClick={() => handleMenu()}>
+            <button
+              className="py-3 rounded-md pr-4"
+              onClick={() => handleMenu()}
+            >
               {navbar ? (
                 <div>
                   <Image
@@ -156,18 +165,29 @@ function Navbar() {
             {/* Container for Nav Items */}
             <div className="flex flex-col">
               <ul className="flex flex-wrap">
-                {navLinks.map((link, index) => (
-              <li
-              key={index}
-              className={`pb-2`}
-            >
-                    <NavItem href={link.path} onClick={handleWindowResize} className={`${
-                router === `${link.path}` ? "border-b-2 border-customGreen" : ""
-              }`}>
-                      {link.title}
-                    </NavItem>
-                  </li>
-                ))}
+                {navLinks
+                  .filter((link) => {
+                    // Filter logic: featureFlag is not explicitly false and user visibility is respected
+                    if (link.featureFlag === false) return false;
+                    if (user && link.showLoggedIn) return true;
+                    if (!user && link.showLoggedOut) return true;
+                    return false;
+                  })
+                  .map((link, index) => (
+                    <li key={index} className={`pb-2`}>
+                      <NavItem
+                        href={link.path}
+                        onClick={handleWindowResize}
+                        className={`${
+                          router === `${link.path}`
+                            ? "border-b-2 border-customGreen"
+                            : ""
+                        }`}
+                      >
+                        {link.title}
+                      </NavItem>
+                    </li>
+                  ))}
               </ul>
             </div>
 
@@ -179,34 +199,44 @@ function Navbar() {
         </div>
         {navbar === true ? (
           <div className={`md:block ${navbar ? "block" : "hidden"}`}>
-          <ul
-           className="md:h-auto md:flex mt-8 h-screen max-h-[calc(100vh-7rem)] overflow-y-auto"
-          >
-            {navLinks.map((link, index) => (
-              <li
-                key={index}
-                className={`${
-                  router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""
-                }`}
-              >
-                <MobileNavItem
-                  key={index}
-                  href={link.path}
-                  onClick={handleMobileNavItemClick}
-                  className={
-                    router === `${link.path}` ? "border-b-2 border-t-2 border-customGreen" : ""
-                  }
-                >
-                  {link.title}
-                </MobileNavItem>
+            <ul className="md:h-auto md:flex mt-8 h-screen max-h-[calc(100vh-7rem)] overflow-y-auto">
+              {navLinks
+                .filter((link) => {
+                  // Filter logic: featureFlag is not explicitly false and user visibility is respected
+                  if (link.featureFlag === false) return false;
+                  if (user && link.showLoggedIn) return true;
+                  if (!user && link.showLoggedOut) return true;
+                  return false;
+                })
+                .map((link, index) => (
+                  <li
+                    key={index}
+                    className={`${
+                      router === `${link.path}`
+                        ? "border-b-2 border-t-2 border-customGreen"
+                        : ""
+                    }`}
+                  >
+                    <MobileNavItem
+                      key={index}
+                      href={link.path}
+                      onClick={handleMobileNavItemClick}
+                      className={
+                        router === `${link.path}`
+                          ? "border-b-2 border-t-2 border-customGreen"
+                          : ""
+                      }
+                    >
+                      {link.title}
+                    </MobileNavItem>
+                  </li>
+                ))}
+
+              <li className="flex justify-center pb-10">
+                <AuthNavBar />
               </li>
-            ))}
-        
-            <li className="flex justify-center pb-10">
-              <AuthNavBar />
-            </li>
-          </ul>
-        </div>
+            </ul>
+          </div>
         ) : null}
       </nav>
     </>

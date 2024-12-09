@@ -9,7 +9,7 @@ interface ImageOverlayWrapperProps {
   alt: string;
   sectionDivider?: boolean;
   sectionDividerText?: string;
-  sectionDividerDarken?: 1 | 2 | 3 | 9;
+  sectionDividerDarken?: 1 | 2 | 3 | 5 | 9;
   blurAmount?: string; // Optional: Control blur level
   opacityAmount?: string; // Optional: Control opacity level
   paddingY?: string; // Optional: Control Y-axis padding

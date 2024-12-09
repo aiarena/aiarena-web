@@ -17,7 +17,7 @@ const AboutUs = () => {
     <>
     <ArticleWrapper className="bg-customBackgroundColor2 text-white">
       {/* AI Arena Overview */}
-      <section className="py-12 bg-customBackgroundColor2D1">
+      <section className="py-12 bg-customBackgroundColor2D1 ">
         <h1 className="text-4xl text-customGreen font-bold text-center mb-8">
           What is <span className="font-gugi">AI Arena</span>?
         </h1>

@@ -5,6 +5,11 @@
 
 const CustomHighlightVar = 'rgba(154, 255, 70, 1)';
 const CustomPrimaryVar = 'rgba(134, 194, 50, 1)';
+// const CustomPrimaryVar = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(
+//     Math.random() * 256
+//   )}, ${Math.floor(Math.random() * 256)}, 1)`;
+
+
 const CustomBackgroundColorVar = 'rgba(134, 194, 50, 1)';
 
 
@@ -46,7 +51,8 @@ module.exports = {
 
 
 
-        customGreenHighlight1: 'rgba(255, 255, 0, 1)',                 
+        customGreenHighlight1: 'rgba(255, 255, 0, 1)',       
+        // customGreenHighlight1: 'rgba(0, 0, 255, 1)',           
         customGreenDarken1: 'rgba(104, 144, 20, 1)', 
         customGreenDarken2: 'rgba(84, 110, 15, 1)',    
         customGreenDarken3: 'rgba(64, 84, 5, 1)',      
@@ -82,7 +88,7 @@ module.exports = {
 
 
       borderColor: {
-        customGreen: 'rgba(134, 194, 50, 1)',
+        customGreen: CustomPrimaryVar, 
         softTeal: '#32B3A4',
         mellowYellow: '#F5A623',
       },

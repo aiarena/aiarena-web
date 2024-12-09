@@ -8,11 +8,19 @@ import WrappedTitle from "@/_components/_display/WrappedTitle";
 import mockBots from "@/_data/mockBots.json";
 import { formatDate } from "@/_lib/dateUtils";
 import Link from "next/link";
-
+import {getFeatureFlags} from "@/_data/featureFlags"
+import { notFound } from "next/navigation"; 
 
 
 export default function Page() {
+  const botsPage = getFeatureFlags().botsPage
+  if (!botsPage) {
+    notFound();
+    return null; 
+  }
+
   return (
+    
     <>
   
   <FilterableList
