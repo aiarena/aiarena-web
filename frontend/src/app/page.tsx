@@ -23,7 +23,6 @@ import DiscordInviteCard from "@/_components/_display/DiscordInviteCard";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import MainButton from "@/_components/_props/MainButton";
-import HeroLoader from "@/_components/_display/HeroLoader";
 
 const tasks = [
   {
@@ -60,28 +59,27 @@ export default function Page() {
   const [news, setNews] = useState<News[]>([]);
   const [error, setError] = useState<string | null>(null);
   const heroTasks = getFeatureFlags().heroTasks;
-  const [loadingComplete, setLoadingComplete] = useState(false);
+
   const newsData = useNews();
 
   return (
     <>
- {!loadingComplete && (
-    <HeroLoader onLoadingComplete={() => setLoadingComplete(true)} />
-  )}
+
     <div className="flex flex-col min-h-screen font-sans bg-background-texture">
       <Navbar />
   
       <main className="flex-grow bg-darken text-white">
         
         <VideoBanner source={`${getPublicPrefix()}/videos/ai-banner.mp4`}>
-          <div className="mt-32 text-6xl font-bold mb-8 font-gugi text-customGreen">
-            {/* <Image
-              className="mx-auto pb-6 invert h-40 w-40 "
+        
+          <div className="text-6xl font-bold font-gugi text-customGreen">
+            <Image
+              className="m-auto pb-6 invert h-40 w-40 "
               src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
               alt="AI-arena-logo"
               width={10}
               height={10}
-            /> */}
+            />
             <h1 className="font-bold font-gugi text-customGreen text-6xl pt-8">
               AI Arena
             </h1>
@@ -95,6 +93,7 @@ export default function Page() {
           ) : (
             <MainButton href={`${getPublicPrefix()}/login/`} text="Login" />
           )}
+        
         </VideoBanner>
         <div className="lg:space-x-4 lg:space-y-0">
           <div className="rounded-lg rounded-lg">
