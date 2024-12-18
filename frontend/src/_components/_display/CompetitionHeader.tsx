@@ -23,7 +23,10 @@ export default function CompetitionHeader({
       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div className="text-center text-white px-4">
           <h1 className="text-3xl md:text-5xl font-bold">{name}</h1>
-          <p className="text-lg md:text-2xl mt-2"><b>Opened: </b>{status}</p>
+          <p className="text-lg md:text-2xl mt-2">
+            <b>Status: </b>
+            {status}
+          </p>
         </div>
       </div>
     </div>

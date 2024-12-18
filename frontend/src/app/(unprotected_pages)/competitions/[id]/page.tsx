@@ -9,6 +9,7 @@ import MapDisplay from "@/_components/_display/MapDisplay";
 import VideoComponent from "@/_components/_display/VideoBanner";
 import VideoPlayer from "@/_components/_display/VideoPlayer";
 import { getFeatureFlags } from "@/_data/featureFlags";
+import { useCompetition } from "@/_components/_hooks/useCompetition";
 
 // Types
 interface Participant {
@@ -55,28 +56,48 @@ interface CompetitionsData {
 
 const mockCompetitions: CompetitionsData = competitionsData;
 
-export default function Page() {
-  const [competition, setCompetition] = useState<Competition | null>(null);
+interface CompetitionPageProps {
+  params: {
+    id: string;
+  }
+}
+
+export default function Page({ params } : CompetitionPageProps) {
+  // const [competition, setCompetition] = useState<Competition | null>(null);
+  const compData = useCompetition(params.id); // Fetch competitions from the hook
+  console.log(compData);
+  console.log(params)
   const router = useRouter();
   const { id } = { id: "1" };
 
   const featureFlags = getFeatureFlags();
 
-  useEffect(() => {
-    const competitionData = mockCompetitions[1];
-    setCompetition(competitionData);
-  }, []);
+  // useEffect(() => {
+  //   const competitionData = mockCompetitions[1];
+  //   setCompetition(competitionData);
+  // }, []);
 
-  if (!competition) {
+  if (!compData) {
     return <div>Loading...</div>;
   }
   const renderRankings = (
     <div>
-      {Object.entries(competition.rankings).map(
-        ([division, participants], divisionIdx) => (
-          <div key={divisionIdx} className="mb-6">
+      {(() => {
+        // Group participants by divisionNum
+        const divisions = compData.participants.reduce((acc, participant) => {
+          const division = participant.divisionNum;
+          if (!acc[division]) {
+            acc[division] = [];
+          }
+          acc[division].push(participant);
+          return acc;
+        }, {} as Record<number, typeof compData.participants>);
+  
+        // Render each division
+        return Object.entries(divisions).map(([divisionNum, participants]) => (
+          <div key={divisionNum} className="mb-6">
             <h3 className="text-2xl font-bold mb-4 text-customGreen">
-              {division.replace(/division/, "Division ")}
+              Division {divisionNum}
             </h3>
             <div className="overflow-hidden">
               <table className="w-full table-fixed text-left">
@@ -84,35 +105,33 @@ export default function Page() {
                   <tr className="bg-gray-700">
                     <th className="px-4 py-2 truncate">Rank</th>
                     <th className="px-4 py-2 truncate">Name</th>
-                    <th className="px-4 py-2 truncate">Race</th>
-                    <th className="px-4 py-2 truncate">Author</th>
                     <th className="px-4 py-2 truncate">Type</th>
-                    <th className="px-4 py-2 truncate">Win %</th>
                     <th className="px-4 py-2 truncate">ELO</th>
                     <th className="px-4 py-2 truncate">Trend</th>
+                    {/* <th className="px-4 py-2 truncate">Author</th> */}
+                    <th className="px-4 py-2 truncate">Patreon Level</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {participants.map((participant: Participant, idx: number) => (
+                  {participants.map((participant, idx) => (
                     <tr
-                      key={idx}
+                      key={participant.id}
                       className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
                     >
-                      <td className="px-4 py-2 truncate">{participant.rank}</td>
+                      <td className="px-4 py-2 truncate">{idx + 1}</td>
                       <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition truncate">
-                        {participant.name}
+                        {participant.bot?.name || "Unknown"}
                       </td>
-                      <td className="px-4 py-2 truncate">{participant.race}</td>
                       <td className="px-4 py-2 truncate">
-                        {participant.author}
-                      </td>
-                      <td className="px-4 py-2 truncate">{participant.type}</td>
-                      <td className="px-4 py-2 truncate">
-                        {participant.winRate}%
+                        {participant.bot?.type || "N/A"}
                       </td>
                       <td className="px-4 py-2 truncate">{participant.elo}</td>
+                      <td className={`px-4 py-2 truncate ${participant && participant.trend && participant.trend > 0 ? "text-green-500" : ""} ${participant && participant.trend && participant.trend < 0 ? "text-red-500" : ""}`}>{participant.trend}</td>
+                      {/* <td className="px-4 py-2 truncate">
+                        {participant.bot?.user?.email || "N/A"}
+                      </td> */}
                       <td className="px-4 py-2 truncate">
-                        {participant.trend}
+                        {participant.bot?.user?.patreonLevel || 0}
                       </td>
                     </tr>
                   ))}
@@ -120,10 +139,11 @@ export default function Page() {
               </table>
             </div>
           </div>
-        )
-      )}
+        ));
+      })()}
     </div>
   );
+  
 
   const renderRounds = (
     <div>
@@ -136,7 +156,7 @@ export default function Page() {
           </tr>
         </thead>
         <tbody>
-          {competition.rounds.map((round, idx) => (
+          {/* {competition.rounds.map((round, idx) => (
             <tr
               key={idx}
               className="border-t border-gray-600 hover:bg-gray-700 transition"
@@ -147,7 +167,7 @@ export default function Page() {
                 {round.finishedAt ? round.finishedAt : "Ongoing"}
               </td>
             </tr>
-          ))}
+          ))} */}
         </tbody>
       </table>
     </div>
@@ -156,9 +176,9 @@ export default function Page() {
     <div className="space-y-6">
       {/* Header Section */}
       <CompetitionHeader
-        name={competition.name}
-        imageUrl={competition.imageUrl}
-        status={competition.opened}
+        name={compData.name}
+        imageUrl={"/competitions/sc2_1.webp"}
+        status={compData.status}
       />
 
       {/* Main Content Section */}
@@ -186,14 +206,14 @@ export default function Page() {
                   Maps
                 </h3>
                 <div className="flex flex-wrap justify-center gap-4">
-                  {competition.maps.map((mapName, index) => (
+                  {/* {competition.maps.map((mapName, index) => (
                     <div key={index} className="flex-none w-28 h-28">
                       <MapDisplay
                         mapName={mapName}
                         imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
                       />
                     </div>
-                  ))}
+                  ))} */}
                 </div>
               </div>
             ) : null}
@@ -204,14 +224,14 @@ export default function Page() {
                 Maps
               </h3>
               <div className="flex flex-wrap justify-center gap-4">
-                {competition.maps.map((mapName, index) => (
+                {/* {competition.maps.map((mapName, index) => (
                   <div key={index} className="flex-none w-28 h-28">
                     <MapDisplay
                       mapName={mapName}
                       imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
                     />
                   </div>
-                ))}
+                ))} */}
               </div>
             </div>
           ) : null}

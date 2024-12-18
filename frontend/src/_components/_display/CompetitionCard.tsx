@@ -3,7 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface CompetitionCardProps {
+
   competition: {
+    id:string;
     name: string;
     dateCreated: string;
     // opened: string;
@@ -19,7 +21,7 @@ interface CompetitionCardProps {
 export default function CompetitionCard({ competition, imageUrl }: CompetitionCardProps) {
   return (
     <Link
-      href={`${getPublicPrefix()}/competitions/${1}`} // Assuming each competition has a unique ID or URL
+      href={`${getPublicPrefix()}/competitions/${competition.id}`} // Assuming each competition has a unique ID or URL
       className="shadow shadow-black block bg-customBackgroundColor1 text-white shadow-lg rounded-lg overflow-hidden hover:bg-customBackgroundColor1D1 transition transform hover:scale-105 border border-slate-700"
     >
       <div className="flex">
