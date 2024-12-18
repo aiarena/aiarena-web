@@ -2,10 +2,12 @@
 import { useUserContext } from "@/_components/providers/UserProvider";
 import { useSignOut } from "@/_components/_hooks/useSignOut";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TabNavigation from "@/_components/_nav/TabNav";
-import BotOverview from "@/_components/_display/BotOverview";
+import ProfileBotOverviewList from "@/_components/_display/ProfileBotOverviewList";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
+import SettingsProfileSection from "@/_components/_display/_profile/SettingsProfileSection";
+import RequestMatchesSection from "@/_components/_display/_profile/RequestMatchSection";
 
 export default function Page() {
   const [signOut] = useSignOut();
@@ -13,11 +15,13 @@ export default function Page() {
   const { user, setUser, fetching } = useUserContext();
   const [activeTab, setActiveTab] = useState("Bots");
 
-  useEffect(() => {
-    if (user === null && fetching === false) {
-      router.push("/");
-    }
-  }, [user, fetching, router]);
+  if (user === null && fetching === false) {
+    router.push("/");
+    return null;
+  }
+  if (user === null) {
+    return;
+  }
 
   return (
     <>
@@ -27,7 +31,7 @@ export default function Page() {
           <TabNavigation
             tabs={[
               { name: "Bots", href: "#bot-overview" },
-              { name: "Achievements", href: "#achievements" },
+              // { name: "Achievements", href: "#achievements" },
               { name: "Requested Matches", href: "#matches" },
               { name: "Settings", href: "#settings" },
             ]}
@@ -39,34 +43,19 @@ export default function Page() {
           <div className="mt-8">
             {activeTab === "Bots" && (
               <div id="bot-overview">
-                <BotOverview />
-              </div>
-            )}
-
-            {activeTab === "Achievements" && (
-              <div id="achievements">
-                <h2 className="text-2xl font-semibold text-white mb-4">
-                  Achievements
-                </h2>
-                <p>Achievements Content</p>
+                <ProfileBotOverviewList />
               </div>
             )}
 
             {activeTab === "Requested Matches" && (
               <div id="matches">
-                <h2 className="text-2xl font-semibold text-white mb-4">
-                  Requested Matches
-                </h2>
-                <p>Requested Matches Content</p>
+                <RequestMatchesSection />
               </div>
             )}
 
             {activeTab === "Settings" && (
-              <div id="settings">
-                <h2 className="text-2xl font-semibold text-white mb-4">
-                  Settings
-                </h2>
-                <p>Settings Content</p>
+              <div id="settigns">
+                <SettingsProfileSection user={user} />
               </div>
             )}
           </div>

@@ -127,26 +127,27 @@ nav .block {
 
 
 .circular-gradient-shadow {
-  width: 200px;
-  height: 200px;
+  width: 15px;
+  height: 15px;
   position: relative;
-  margin: 50px auto;
-  border-radius: 50%;
-  background: linear-gradient(90deg, rgba(134, 194, 50, 1), rgba(134, 254, 50, 1));
-  box-shadow: 0 0 20px rgba(134, 254, 50, 0.5);
-  animation: rotate-gradient 4s linear infinite, pulse 1s ease-in-out infinite;
+  margin: 5px auto;
+  border-radius: 100%;
+  background:rgb(134, 254, 50);
+  /* background: linear-gradient(180deg, rgba(134, 254, 50, 1), rgba(134, 254, 50, 1)); */
+  box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
+  animation: rotate-gradient 4s linear infinite, pulse 2s ease-in-out infinite;
 }
 
 .circular-gradient-shadow::before {
   content: '';
   position: absolute;
-  top: -22px;
-  left: -20px;
-  right: -20px;
-  bottom: -22px;
-  border-radius: 50%;
-  box-shadow: 0 0 20px rgba(134, 254, 50, 0.5);
-  animation: rotate-shadow 2s linear infinite reverse, pulse-shadow 2s ease-in-out infinite;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 100%;
+  box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
+  animation: rotate-shadow 4s linear infinite reverse, pulse-shadow 4s ease-in-out infinite;
 }
 
 @keyframes rotate-gradient {
@@ -170,20 +171,20 @@ nav .block {
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 20px rgba(134, 254, 50, 0.5);
+    box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
   }
   50% {
     transform: scale(1.1);
-    box-shadow: 0 0 30px rgba(134, 254, 50, 0.7);
+    box-shadow: 0 0 8px rgba(134, 254, 50, 0.7);
   }
 }
 
 @keyframes pulse-shadow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(134, 254, 50, 0.5);
+    box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
   }
   50% {
-    box-shadow: 0 0 30px rgba(134, 254, 50, 0.7);
+    box-shadow: 0 0 1px rgba(134, 254, 50, 0.7);
   }
 }
 

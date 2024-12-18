@@ -3,9 +3,10 @@ import React from 'react';
 interface SectionDividerProps {
   title?: string;
   darken?: 1 | 2 | 3 | 9; // Optional prop for darken, with values 1, 2, or 3
+  className?: string;
 }
 
-const SectionDivider = ({ title, darken }: SectionDividerProps) => {
+const SectionDivider = ({ title, darken, className }: SectionDividerProps) => {
   // Determine the background class based on the darken prop
   const bgClass = {
     1: 'brightness-100',
@@ -20,7 +21,7 @@ const SectionDivider = ({ title, darken }: SectionDividerProps) => {
   }[darken || 1]; // Default to bg-customGreenDarken1 if no darken value is provided
 
   return (
-    <div className="relative w-full">
+    <div className={`relative w-full ${className} `}>
       {/* Full-width line */}
       <div className={`absolute left-0 w-full h-[2px] shadow shadow-black bg-customGreen  ${bgClass}`}></div>
 
