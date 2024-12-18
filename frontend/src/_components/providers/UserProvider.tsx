@@ -8,7 +8,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-   patreonLevel?: string;
+  patreonLevel?: string;
   dateJoined?: string;
 }
 
@@ -40,6 +40,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } else if (!fetchedUser) {
       setFetching(false); // If no user is fetched, set fetching to false
     }
+    console.log(fetchedUser)
   }, [fetchedUser]);
 
   return (

@@ -118,7 +118,7 @@ function Navbar() {
       <nav className="w-full bg-neutral-900 px-2 text-white dark:bg-gray-900 font-sans sticky top-0 z-50">
         <div className="flex justify-between md:p-3 md:flex ">
           <Link
-            href={`${getPublicPrefix()}`}
+            href={navLinks[0].path}
             className="flex justify-between items-center"
           >
             <Image

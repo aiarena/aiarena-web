@@ -1,6 +1,7 @@
 import { getFeatureFlags } from "@/_data/featureFlags";
 import Image from "next/image";
 import React from "react";
+import MainButton from "../_props/MainButton";
 
 interface DiscordInviteCardProps {
   serverName: string;
@@ -52,8 +53,10 @@ interface DiscordInviteCardProps {
             </div>
         
           </div>
-     : null }       
-          <a
+     : null }  
+     <MainButton text=" Join Server" href="inviteUrl"/>
+       
+          {/* <a
             href={inviteUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -61,7 +64,7 @@ interface DiscordInviteCardProps {
           
           >
             Join Server
-          </a>
+          </a> */}
         </div>
       </div>
     </div>
