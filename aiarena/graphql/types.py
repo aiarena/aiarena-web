@@ -80,6 +80,7 @@ class CompetitionType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.Competition
         fields = [
+            "id",
             "name",
             "type",
             "game_mode",
@@ -88,7 +89,7 @@ class CompetitionType(DjangoObjectTypeWithUID):
             "date_closed",
             "status",
         ]
-        filter_fields = ["status"]
+        filter_fields = ["status", "id"]
         connection_class = CountingConnection
 
     @staticmethod
