@@ -16,9 +16,9 @@ updates:
     groups:
       minor-and-patch:
         update-types:
-          - "semver:minor"
-          - "semver:patch"
+          - "minor"
+          - "patch"
 
       major-updates:
         update-types:
-          - "semver:major"
+          - "major"
