@@ -1,7 +1,16 @@
 version: 2
 updates:
+
+  # Python dependencies
 - package-ecosystem: pip
   directory: "/pip"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+
+  # Frontend dependencies
+- package-ecosystem: npm
+  directory: "/frontend" 
   schedule:
     interval: daily
   open-pull-requests-limit: 10
