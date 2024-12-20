@@ -36,7 +36,7 @@
     "@types/react": "18.3.1",
     "@types/react-relay": "^16.0.6",
     "@types/relay-runtime": "^17.0.4",
-    "babel-plugin-relay": "^17.0.0",
+    "babel-plugin-relay": "^18.2.0",
     "encoding": "^0.1.13",
     "graphql": "^16.9.0",
     "relay-compiler": "^17.0.0"
