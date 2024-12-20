@@ -9,7 +9,7 @@ django-sslserver==0.22
 jsonschema==4.17.3
 pre-commit==3.3.3
 ruff==0.0.264
-pytest==8.2.1
+pytest==8.3.4
 pytest-django==4.8.0
 pytest-playwright==0.5.0
 pytest-xdist==3.6.1
