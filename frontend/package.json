@@ -39,7 +39,7 @@
     "babel-plugin-relay": "^17.0.0",
     "encoding": "^0.1.13",
     "graphql": "^16.10.0",
-    "relay-compiler": "^17.0.0"
+    "relay-compiler": "^18.2.0"
   },
   "relay":  {
     "src": "./src",
