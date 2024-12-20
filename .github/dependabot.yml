@@ -6,17 +6,6 @@ updates:
     schedule:
       interval: daily
     open-pull-requests-limit: 10
-    groups:
-      # Group all minor and patch updates
-      minor-and-patch:
-        update-types:
-          - "semver:minor"
-          - "semver:patch"
-
-      # Group major updates
-      major-updates:
-        update-types:
-          - "semver:major"
 
   # Frontend dependencies
   - package-ecosystem: npm
@@ -25,13 +14,11 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     groups:
-      # Group all minor and patch updates
       minor-and-patch:
         update-types:
           - "semver:minor"
           - "semver:patch"
 
-      # Group major updates
       major-updates:
         update-types:
           - "semver:major"
