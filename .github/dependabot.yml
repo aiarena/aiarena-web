@@ -17,7 +17,7 @@ updates:
     groups:
       security-updates:
         patterns:
-          - dependency-name: "*"
+          - "*"
 
   # Frontend dependencies all updates grouped by major/minor
   # - package-ecosystem: npm
