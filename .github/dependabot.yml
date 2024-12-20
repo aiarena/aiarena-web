@@ -12,8 +12,7 @@ updates:
     directory: "/frontend"
     schedule:
       interval: daily
-    open-pull-requests-limit: 10
-    security-only: true
+    open-pull-requests-limit: 0
 
   # Frontend dependencies all updates grouped by major/minor
   # - package-ecosystem: npm
