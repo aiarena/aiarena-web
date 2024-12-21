@@ -15,6 +15,7 @@ updates:
     open-pull-requests-limit: 10
     groups:
       security-updates:
+        applies-to: security-updates
         patterns:
           - "*"
 
