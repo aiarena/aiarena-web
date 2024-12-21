@@ -7,14 +7,14 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
 
- - package-ecosystem: npm
+  # Frontend dependencies (security updates grouped)
+  - package-ecosystem: npm
     directory: "/frontend"
     schedule:
       interval: daily
     open-pull-requests-limit: 10
     groups:
       security-updates:
-        applies-to: security-updates
         patterns:
           - "*"
         labels:
