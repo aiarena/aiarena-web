@@ -17,9 +17,6 @@ updates:
       security-updates:
         patterns:
           - "*"
-        labels:
-          - "security"
-          - "grouped"
 
   # Frontend dependencies (security updates grouped)
   # - package-ecosystem: npm
