@@ -526,22 +526,28 @@ class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet
 
     @action(detail=True, methods=["GET"], name="Download a bot's zip file", url_path="zip")
     def download_zip(self, request, *args, **kwargs):
-        bot = Bot.objects.get(id=kwargs["pk"])
-        if bot.can_download_bot_zip(request.user):
-            response = HttpResponse(FileWrapper(bot.bot_zip), content_type="application/zip")
-            response["Content-Disposition"] = f'inline; filename="{bot.name}.zip"'
-            return response
-        else:
+        try:
+            bot = Bot.objects.get(id=kwargs["pk"])
+            if bot.can_download_bot_zip(request.user):
+                response = HttpResponse(FileWrapper(bot.bot_zip), content_type="application/zip")
+                response["Content-Disposition"] = f'inline; filename="{bot.name}.zip"'
+                return response
+            else:
+                raise Http404()
+        except Bot.DoesNotExist:
             raise Http404()
 
     @action(detail=True, methods=["GET"], name="Download a bot's data file", url_path="data")
     def download_data(self, request, *args, **kwargs):
-        bot = Bot.objects.get(id=kwargs["pk"])
-        if bot.can_download_bot_data(request.user):
-            response = HttpResponse(FileWrapper(bot.bot_data), content_type="application/zip")
-            response["Content-Disposition"] = f'inline; filename="{bot.name}_data.zip"'
-            return response
-        else:
+        try:
+            bot = Bot.objects.get(id=kwargs["pk"])
+            if bot.can_download_bot_data(request.user):
+                response = HttpResponse(FileWrapper(bot.bot_data), content_type="application/zip")
+                response["Content-Disposition"] = f'inline; filename="{bot.name}_data.zip"'
+                return response
+            else:
+                raise Http404()
+        except Bot.DoesNotExist:
             raise Http404()
 
 
