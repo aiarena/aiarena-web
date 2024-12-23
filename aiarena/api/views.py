@@ -526,6 +526,10 @@ class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet
 
     @action(detail=True, methods=["GET"], name="Download a bot's zip file", url_path="zip")
     def download_zip(self, request, *args, **kwargs):
+        """
+        Download a bot's zip file.
+        TODO: this is a defunct feature. Downloads should be via AWS S3. Ideally this should be cleaned up.
+        """
         try:
             bot = Bot.objects.get(id=kwargs["pk"])
             if bot.can_download_bot_zip(request.user):
@@ -539,6 +543,10 @@ class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet
 
     @action(detail=True, methods=["GET"], name="Download a bot's data file", url_path="data")
     def download_data(self, request, *args, **kwargs):
+        """
+        Download a bot's data file.
+        TODO: this is a defunct feature. Downloads should be via AWS S3. Ideally this should be cleaned up.
+        """
         try:
             bot = Bot.objects.get(id=kwargs["pk"])
             if bot.can_download_bot_data(request.user):
