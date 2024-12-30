@@ -5,8 +5,6 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from aiarena.core import models
 from aiarena.core.services import Ladders
-from aiarena.core.models import website_user
-
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
