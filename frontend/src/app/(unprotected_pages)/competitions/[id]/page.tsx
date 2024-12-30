@@ -10,6 +10,7 @@ import VideoComponent from "@/_components/_display/VideoBanner";
 import VideoPlayer from "@/_components/_display/VideoPlayer";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import { useCompetition } from "@/_components/_hooks/useCompetition";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 // Types
 interface Participant {
@@ -59,14 +60,24 @@ const mockCompetitions: CompetitionsData = competitionsData;
 interface CompetitionPageProps {
   params: {
     id: string;
-  }
+  };
 }
 
-export default function Page({ params } : CompetitionPageProps) {
+// Mapping for Patreon icons
+const patreonIcons: Record<string, string> = {
+  BRONZE: "bronze.png",
+  SILVER: "silver.png",
+  GOLD: "gold.png",
+  PLATINUM: "platinum.png",
+  DIAMOND: "diamond.png",
+  // Add other levels as needed
+};
+
+export default function Page({ params }: CompetitionPageProps) {
   // const [competition, setCompetition] = useState<Competition | null>(null);
-  const compData = useCompetition(params.id); // Fetch competitions from the hook
-  console.log(compData);
-  console.log(params)
+  const competition = useCompetition(params.id); // Fetch competitions from the hook
+  console.log(competition);
+  console.log(params);
   const router = useRouter();
   const { id } = { id: "1" };
 
@@ -77,22 +88,26 @@ export default function Page({ params } : CompetitionPageProps) {
   //   setCompetition(competitionData);
   // }, []);
 
-  if (!compData) {
-    return <div>Loading...</div>;
+  if (!competition) {
+    // This block is removed to let errors propagate
+    throw new Error("Competition data is missing.");
   }
   const renderRankings = (
     <div>
       {(() => {
         // Group participants by divisionNum
-        const divisions = compData.participants.reduce((acc, participant) => {
-          const division = participant.divisionNum;
-          if (!acc[division]) {
-            acc[division] = [];
-          }
-          acc[division].push(participant);
-          return acc;
-        }, {} as Record<number, typeof compData.participants>);
-  
+        const divisions = competition.participants.reduce(
+          (acc, participant) => {
+            const division = participant.divisionNum;
+            if (!acc[division]) {
+              acc[division] = [];
+            }
+            acc[division].push(participant);
+            return acc;
+          },
+          {} as Record<number, typeof competition.participants>
+        );
+
         // Render each division
         return Object.entries(divisions).map(([divisionNum, participants]) => (
           <div key={divisionNum} className="mb-6">
@@ -105,36 +120,63 @@ export default function Page({ params } : CompetitionPageProps) {
                   <tr className="bg-gray-700">
                     <th className="px-4 py-2 truncate">Rank</th>
                     <th className="px-4 py-2 truncate">Name</th>
+                    <th className="px-4 py-2 truncate">Author</th>
                     <th className="px-4 py-2 truncate">Type</th>
                     <th className="px-4 py-2 truncate">ELO</th>
                     <th className="px-4 py-2 truncate">Trend</th>
-                    {/* <th className="px-4 py-2 truncate">Author</th> */}
                     <th className="px-4 py-2 truncate">Patreon Level</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {participants.map((participant, idx) => (
-                    <tr
-                      key={participant.id}
-                      className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
-                    >
-                      <td className="px-4 py-2 truncate">{idx + 1}</td>
-                      <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition truncate">
-                        {participant.bot?.name || "Unknown"}
-                      </td>
-                      <td className="px-4 py-2 truncate">
-                        {participant.bot?.type || "N/A"}
-                      </td>
-                      <td className="px-4 py-2 truncate">{participant.elo}</td>
-                      <td className={`px-4 py-2 truncate ${participant && participant.trend && participant.trend > 0 ? "text-green-500" : ""} ${participant && participant.trend && participant.trend < 0 ? "text-red-500" : ""}`}>{participant.trend}</td>
-                      {/* <td className="px-4 py-2 truncate">
-                        {participant.bot?.user?.email || "N/A"}
-                      </td> */}
-                      <td className="px-4 py-2 truncate">
-                        {participant.bot?.user?.patreonLevel || 0}
-                      </td>
-                    </tr>
-                  ))}
+                  {participants.map((participant, idx) => {
+                    const patreonLevel =
+                      participant.bot?.user?.patreonLevel || "NONE";
+                    const iconSrc = patreonIcons[patreonLevel];
+
+                    return (
+                      <tr
+                        key={participant.id}
+                        className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
+                      >
+                        <td className="px-4 py-2 truncate">{idx + 1}</td>
+                        <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition truncate">
+                          {participant.bot?.name || "Unknown"}
+                        </td>
+                        <td className="px-4 py-2 font-semibold transition truncate">
+                          {participant.bot?.user?.username || "Unknown"}
+                        </td>
+                        <td className="px-4 py-2 truncate">
+                          {participant.bot?.type || "N/A"}
+                        </td>
+                        <td className="px-4 py-2 truncate">
+                          {participant.elo}
+                        </td>
+                        <td
+                          className={`px-4 py-2 truncate ${
+                            participant?.trend && participant?.trend > 0
+                              ? "text-green-500"
+                              : ""
+                          } ${
+                            participant?.trend && participant?.trend < 0
+                              ? "text-red-500"
+                              : ""
+                          }`}
+                        >
+                          {participant.trend}
+                        </td>
+                        <td className="px-4 py-2 truncate">
+                          {iconSrc ? (
+                            <Image
+                              src={`/bot-icons/${iconSrc}`}
+                              width={20}
+                              height={20}
+                              alt={`${patreonLevel} Patreon Level`}
+                            />
+                          ) : null}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -143,11 +185,10 @@ export default function Page({ params } : CompetitionPageProps) {
       })()}
     </div>
   );
-  
 
   const renderRounds = (
     <div>
-      <table className="w-full text-left ">
+      <table className="w-full text-left">
         <thead>
           <tr className="bg-gray-700">
             <th className="px-4 py-2">Round #</th>
@@ -156,29 +197,34 @@ export default function Page({ params } : CompetitionPageProps) {
           </tr>
         </thead>
         <tbody>
-          {/* {competition.rounds.map((round, idx) => (
+          {competition.rounds.map((round, idx) => (
             <tr
               key={idx}
               className="border-t border-gray-600 hover:bg-gray-700 transition"
             >
-              <td className="px-4 py-2">{round.roundNumber}</td>
-              <td className="px-4 py-2">{round.startedAt}</td>
+              <td className="px-4 py-2">{round.number}</td>
               <td className="px-4 py-2">
-                {round.finishedAt ? round.finishedAt : "Ongoing"}
+                {new Date(round.started).toLocaleString()}
+              </td>
+              <td className="px-4 py-2">
+                {round.finished
+                  ? new Date(round.finished).toLocaleString()
+                  : "Ongoing"}
               </td>
             </tr>
-          ))} */}
+          ))}
         </tbody>
       </table>
     </div>
   );
+
   return (
     <div className="space-y-6">
       {/* Header Section */}
       <CompetitionHeader
-        name={compData.name}
+        name={competition.name}
         imageUrl={"/competitions/sc2_1.webp"}
-        status={compData.status}
+        status={competition.status}
       />
 
       {/* Main Content Section */}
@@ -200,23 +246,23 @@ export default function Page({ params } : CompetitionPageProps) {
               official maps and standard melee rules. It rigorously tests
               strategy, micro, resource management, and decision-making.
             </p>
-            {featureFlags.competitionMaps && featureFlags.competitionVideo ? (
+            {/* {featureFlags.competitionMaps ? (
               <div className="pt-4">
                 <h3 className="text-2xl font-semibold text-customGreen my-4">
                   Maps
                 </h3>
                 <div className="flex flex-wrap justify-center gap-4">
-                  {/* {competition.maps.map((mapName, index) => (
+                  {competition.maps.map((mapName, index) => (
                     <div key={index} className="flex-none w-28 h-28">
                       <MapDisplay
                         mapName={mapName}
                         imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
                       />
                     </div>
-                  ))} */}
+                  ))}
                 </div>
               </div>
-            ) : null}
+            ) : null} */}
           </div>
           {featureFlags.competitionMaps && !featureFlags.competitionVideo ? (
             <div className="border-gray-700 border-2 bg-customBackgroundColor1  rounded-lg shadow-md lg:col-span-2">
@@ -224,14 +270,15 @@ export default function Page({ params } : CompetitionPageProps) {
                 Maps
               </h3>
               <div className="flex flex-wrap justify-center gap-4">
-                {/* {competition.maps.map((mapName, index) => (
-                  <div key={index} className="flex-none w-28 h-28">
+                {competition.maps.map((map, index) => (
+                  <div key={map.id} className="flex-none w-28 h-28">
                     <MapDisplay
-                      mapName={mapName}
-                      imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
+                      mapName={map.name}
+                      imageUrl={`/${map.file}.webp`} // Assuming images are named based on file paths
+                      
                     />
                   </div>
-                ))} */}
+                ))}
               </div>
             </div>
           ) : null}

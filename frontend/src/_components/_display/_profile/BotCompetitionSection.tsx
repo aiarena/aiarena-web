@@ -10,8 +10,7 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
     useState(false);
 
-  const hasCompetitions =
-    bot?.activeCompetitions && bot.activeCompetitions.length !== 0;
+    const hasCompetitions = (bot.activeCompetitions || []).length > 0;
 
   return (
     <div className="p-2">
@@ -23,8 +22,8 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
       >
         {hasCompetitions ? (
           <h4 className="text-left pt-2 text-sm font-semibold text-gray-300">
-            {`${bot.activeCompetitions.length}`} Active{" "}
-            {bot.activeCompetitions.length === 1
+            {`${bot?.activeCompetitions?.length}`} Active{" "}
+            {bot?.activeCompetitions?.length === 1
               ? "Competition"
               : "Competitions"}
           </h4>

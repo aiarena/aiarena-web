@@ -11,9 +11,9 @@ interface TrophiesModalProps {
 
 export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalProps) {
   const [biography, setBiography] = useState(bot.biography || "");
-  const [isZipPublic, setIsZipPublic] = useState(bot.isZipPublic || false);
-  const [isDataPublic, setIsDataPublic] = useState(bot.isDataPublic || false);
-  const [isDataEnabled, setIsDataEnabled] = useState(bot.isDataEnabled || false);
+  // const [botZipUpdated, setBotZipUpdated] = useState(bot.botZipUpdated || false);
+  const [botDataPubliclyDownloadable, setBotDataPubliclyDownloadable] = useState(bot.botDataPubliclyDownloadable || false);
+  const [botDataEnabled, setBotDataEnabled] = useState(bot.botDataEnabled || false);
 
   const handleSaveBiography = () => {
     console.log("Biography saved:", biography);
@@ -50,20 +50,20 @@ export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalPro
         >
           Upload Bot Zip
         </button>
-        <div className="flex items-center mt-2">
+        {/* <div className="flex items-center mt-2">
           <input
             type="checkbox"
-            checked={isZipPublic}
-            onChange={() => setIsZipPublic(!isZipPublic)}
+            checked={botZipUpdated}
+            onChange={() => setBotZipUpdated(!botZipUpdated)}
             className="mr-2"
           />
           <label className="text-gray-300">Mark Bot Zip Publicly Downloadable</label>
-        </div>
+        </div> */}
         <div className="flex items-center mt-2">
           <input
             type="checkbox"
-            checked={isDataPublic}
-            onChange={() => setIsDataPublic(!isDataPublic)}
+            checked={botDataPubliclyDownloadable}
+            onChange={() => setBotDataPubliclyDownloadable(!botDataPubliclyDownloadable)}
             className="mr-2"
           />
           <label className="text-gray-300">Mark Bot Data Publicly Downloadable</label>
@@ -71,8 +71,8 @@ export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalPro
         <div className="flex items-center mt-2">
           <input
             type="checkbox"
-            checked={isDataEnabled}
-            onChange={() => setIsDataEnabled(!isDataEnabled)}
+            checked={botDataEnabled}
+            onChange={() => setBotDataEnabled(!botDataEnabled)}
             className="mr-2"
           />
           <label className="text-gray-300">Enable Bot Data</label>

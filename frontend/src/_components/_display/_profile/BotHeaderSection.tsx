@@ -3,11 +3,10 @@ import Image from "next/image";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import TrophiesModal from "@/_components/_display/_profile/BotTrophiesModal";
 import SettingsModal from "@/_components/_display/_profile/BotSettingsModal";
-
+import { formatDate } from "@/_lib/dateUtils";
 import { ProfileBotProps } from "@/_components/_display/ProfileBot";
 
-export default function BotHeaderSection({ bot } : ProfileBotProps) {
-
+export default function BotHeaderSection({ bot }: ProfileBotProps) {
   const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
 
@@ -38,7 +37,7 @@ export default function BotHeaderSection({ bot } : ProfileBotProps) {
           </div>
 
           {/* Settings Button */}
-       
+
           <div
             className="cursor-pointer hover:bg-slate-700 py-1 px-2 ml-2 flex justify-center rounded-md border-slate-700 border"
             onClick={() => setSettingsModalOpen(true)}
@@ -50,33 +49,41 @@ export default function BotHeaderSection({ bot } : ProfileBotProps) {
               height={20}
               className="invert"
             />
-               
           </div>
-       
-            
         </div>
 
-   
         <div className="justify-between flex">
           {/* Left List */}
-        {/* Bot Details */}
-        <div>
-        <p className="text-sm text-gray-400">
-          <span className="font-bold">Game:</span> Starcraft II
-        </p>
-        
-        <p className="text-sm text-gray-400">
-          <span className="font-bold">Race:</span> {bot.race}
-        </p>
-        <p className="text-sm text-gray-400">
-          <span className="font-bold">Last Updated:</span> {bot.lastUpdated}
-        </p>
-      </div>
-      {/* Right list */}
-      <div> <button className="mt-2 text-customGreen underline">Activity log</button>
-      
-      </div>
-      </div>
+          {/* Bot Details */}
+          <div>
+            <p className="text-sm text-gray-400">
+              <span className="font-bold">Game:</span> Starcraft II
+            </p>
+            {bot.race && (
+              <p className="text-sm text-gray-400">
+                <span className="font-bold">Race:</span> {bot.race}
+              </p>
+            )}
+              {bot.type && (
+              <p className="text-sm text-gray-400">
+                <span className="font-bold">Type:</span> {bot.type}
+              </p>
+            )}
+            {bot.botZipUpdated && (
+              <p className="text-sm text-gray-400">
+                <span className="font-bold">Zip Updated:</span>{" "}
+                {formatDate(bot.botZipUpdated)}
+              </p>
+            )}
+          </div>
+          {/* Right list */}
+          <div>
+            {" "}
+            <button className="mt-2 text-customGreen underline">
+              Activity log
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Modals */}

@@ -8,12 +8,16 @@ import ProfileBotOverviewList from "@/_components/_display/ProfileBotOverviewLis
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import SettingsProfileSection from "@/_components/_display/_profile/SettingsProfileSection";
 import RequestMatchesSection from "@/_components/_display/_profile/RequestMatchSection";
+import { useUserBots } from "@/_components/_hooks/useUserBot";
 
 export default function Page() {
   const [signOut] = useSignOut();
   const router = useRouter();
   const { user, setUser, fetching } = useUserContext();
   const [activeTab, setActiveTab] = useState("Bots");
+
+  const userBots = useUserBots(user?.id || null);
+  console.log("userbots,", userBots)
 
   if (user === null && fetching === false) {
     router.push("/");
@@ -43,13 +47,16 @@ export default function Page() {
           <div className="mt-8">
             {activeTab === "Bots" && (
               <div id="bot-overview">
-                <ProfileBotOverviewList />
+                  <ProfileBotOverviewList bots={userBots} activeBotsLimit = {user.activeBotsLimit} />
               </div>
             )}
 
             {activeTab === "Requested Matches" && (
               <div id="matches">
-                <RequestMatchesSection />
+                  <RequestMatchesSection
+                  requestMatchesCountLeft={user?.requestMatchesCountLeft}
+                  requestMatchesLimit={user?.requestMatchesLimit}
+                />
               </div>
             )}
 

@@ -36,7 +36,7 @@ export default function JoinCompetitionModal({ bot, competitions, isOpen, onClos
     <Modal onClose={onClose} title="Competitions">
       <div className="space-y-4">
         <h4 className="text-lg text-gray-300">Available Competitions</h4>
-        {bot.activeCompetitions.map((comp, index) => (
+        {bot?.activeCompetitions?.map((comp, index) => (
           <div key={index} className="flex items-center space-x-2">
             <input
               type="checkbox"

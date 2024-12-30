@@ -5,10 +5,17 @@ from graphene_django.filter import DjangoFilterConnectionField
 
 from aiarena.core import models
 from aiarena.core.services import Ladders
+from aiarena.core.models import website_user
+
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
 class UserType(DjangoObjectTypeWithUID):
+    active_bots_limit = graphene.Int()
+    request_matches_limit = graphene.Int()
+    request_matches_count_left = graphene.Int()
+    own_bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
+
     class Meta:
         model = models.User
         fields = [
@@ -20,6 +27,22 @@ class UserType(DjangoObjectTypeWithUID):
         ]
         filter_fields = []
 
+    @staticmethod
+    def resolve_active_bots_limit(root: models.User, info, **args):
+        return models.User.get_active_bots_limit(root)
+
+    @staticmethod
+    def resolve_request_matches_limit(root: models.User, info, **args):
+        return root.requested_matches_limit
+
+    @staticmethod
+    def resolve_request_matches_count_left(root: models.User, info, **args):
+        return root.match_request_count_left
+
+    @staticmethod
+    def resolve_own_bots(root: models.User, info, **args):
+        return root.bots.all()
+
 
 class BotFilterSet(FilterSet):
     order_by = OrderingFilter(
@@ -27,14 +50,16 @@ class BotFilterSet(FilterSet):
             "bot_zip_updated",
         ]
     )
+    user_id = graphene.ID()
 
     class Meta:
         model = models.Bot
-        fields = ["name", "order_by"]
+        fields = ["name", "user_id", "order_by"]
 
 
 class BotType(DjangoObjectTypeWithUID):
     url = graphene.String()
+    competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
 
     class Meta:
         model = models.Bot
@@ -56,6 +81,10 @@ class BotType(DjangoObjectTypeWithUID):
     def resolve_url(root: models.Bot, info, **args):
         return root.get_absolute_url
 
+    @staticmethod
+    def resolve_competition_participations(root: models.Bot, info, **args):
+        return root.competition_participations.all()
+
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()
@@ -63,33 +92,71 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.CompetitionParticipation
         fields = [
+            "competition",
+            "match_count",
+            "win_perc",
+            "win_count",
+            "loss_perc",
+            "loss_count",
+            "crash_perc",
+            "crash_count",
+            "highest_elo",
             "elo",
             "division_num",
             "bot",
         ]
+        filter_fields = []
 
     @staticmethod
     def resolve_trend(root: models.CompetitionParticipation, info, **args):
         return root.trend
 
 
+class CompetitionRoundsType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.Round
+        fields = [
+            "number",
+            "started",
+            "finished",
+            "complete",
+        ]
+
+
+class CompetitionMapsType(DjangoObjectTypeWithUID):
+    download_link = graphene.String()
+
+    class Meta:
+        model = models.Map
+        fields = [
+            "name",
+            "file",
+        ]
+
+    # *Required* FILE PATH FOR MAP DOWNLOAD FEATURE
+    # @staticmethod
+    # def resolve_download_link(root: models.Map, info, **args):
+    #     return models.map.obtain_s3_filehash_or_default(root.file)
+    #
+
+
 class CompetitionType(DjangoObjectTypeWithUID):
     url = graphene.String()
     participants = DjangoConnectionField("aiarena.graphql.CompetitionParticipationType")
+    rounds = DjangoConnectionField("aiarena.graphql.CompetitionRoundsType")
+    maps = DjangoConnectionField("aiarena.graphql.CompetitionMapsType")
 
     class Meta:
         model = models.Competition
         fields = [
-            "id",
             "name",
             "type",
-            "game_mode",
             "date_created",
             "date_opened",
             "date_closed",
             "status",
         ]
-        filter_fields = ["status", "id"]
+        filter_fields = ["status"]
         connection_class = CountingConnection
 
     @staticmethod
@@ -115,6 +182,7 @@ class NewsType(DjangoObjectTypeWithUID):
 
 
 class Query(graphene.ObjectType):
+    node = graphene.relay.Node.Field()
     viewer = graphene.Field("aiarena.graphql.UserType")
     competitions = DjangoFilterConnectionField("aiarena.graphql.CompetitionType")
     bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
