@@ -3,6 +3,7 @@ import CompetitionCard from "@/_components/_display/CompetitionCard";
 import ClosedCompetitionList from "@/_components/_display/CompetitionList";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
+// import { useCompetition } from "@/_components/_hooks/useCompetition";
 import { useCompetitions } from "@/_components/_hooks/useCompetitions";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { useEffect, useState } from "react";

@@ -1,17 +1,27 @@
 import { useState } from "react";
+import internal from "stream";
 // import MainButton from "../_props/MainButton"; // If you have a custom button component
 // If not, just use a <button> with Tailwind classes.
 
-export default function RequestMatchesSection() {
+
+
+
+interface RequestMatchesSectionProps {
+  requestMatchesCountLeft?: number;
+  requestMatchesLimit?: number;
+}
+
+
+export default function RequestMatchesSection({requestMatchesCountLeft, requestMatchesLimit} : RequestMatchesSectionProps) {
   // Example state - replace with real data fetching logic
-  const [matchRequestLimit, setMatchRequestLimit] = useState(10);
-  const [requestsUsed, setRequestsUsed] = useState(3);
+  const [matchRequestLimit, setMatchRequestLimit] = useState(requestMatchesLimit || 0);
+  const [requestsRemaining, setRequestsUsed] = useState(requestMatchesCountLeft || 0);
   const [inProgressMatches, setInProgressMatches] = useState([
     { id: 1, opponent: "BotA", status: "Match scheduled for tomorrow" },
     { id: 2, opponent: "BotB", status: "Processing..." },
   ]);
 
-  const requestsLeft = matchRequestLimit - requestsUsed;
+  const requestsUsed = matchRequestLimit - requestsRemaining;
 
   const handleRequestNewMatch = () => {
     // Implement logic to request a new match via API
@@ -27,8 +37,8 @@ export default function RequestMatchesSection() {
       <div className="bg-gray-700 p-4 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
         <div className="text-sm text-gray-300">
         <p className="text-left">
-            <span className="font-bold">Limit:</span>{" "}
-            <span className="text-customGreen">{requestsLeft}/{matchRequestLimit}</span>
+            <span className="font-bold">Requests used:</span>{" "}
+            <span className="text-customGreen">{requestsUsed}/{matchRequestLimit}</span>
            
           </p>
           <p className="text-left text-customGreen cursor-pointer">Increase Limit</p>

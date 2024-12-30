@@ -10,6 +10,9 @@ export interface User {
   email: string;
   patreonLevel?: string;
   dateJoined?: string;
+  activeBotsLimit?: number,
+  requestMatchesLimit?: number,
+  requestMatchesCountLeft?: number,
 }
 
 // Define a context type

@@ -20,6 +20,9 @@ export const useUser = (): User | null => {
           email
           patreonLevel
           dateJoined
+          activeBotsLimit
+          requestMatchesLimit
+          requestMatchesCountLeft
         }
       }
     `,
@@ -36,8 +39,12 @@ export const useUser = (): User | null => {
       email: data.viewer.email,
       patreonLevel: data.viewer.patreonLevel ?? undefined,
       dateJoined: data.viewer.dateJoined ?? undefined,
+      activeBotsLimit: data.viewer.activeBotsLimit ?? undefined,
+      requestMatchesLimit: data.viewer.requestMatchesLimit ?? undefined,
+      requestMatchesCountLeft: data.viewer.requestMatchesCountLeft ?? undefined,
     };
   }, [data]);
 
   return user;
 };
+
