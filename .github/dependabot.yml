@@ -7,7 +7,7 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
 
-  # Frontend dependencies (security updates grouped)
+  # Frontend dependencies (security update grouped)
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
