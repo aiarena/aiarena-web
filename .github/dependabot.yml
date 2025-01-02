@@ -13,10 +13,12 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    security-updates:
+      enabled: true
     groups:
       security-updates:
         patterns:
-          - "*security*"
+          - "*" 
 
   # Frontend dependencies (security updates grouped)
   # - package-ecosystem: npm
