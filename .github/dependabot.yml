@@ -13,11 +13,14 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
-    applies-to: security-updates
-    groups:
-      security-updates:
-        patterns:
-          - "*" 
+    allow:
+      - dependency-type: "direct"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+    security-updates-only: true
 
   # Frontend dependencies (security updates grouped)
   # - package-ecosystem: npm
