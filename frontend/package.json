@@ -18,7 +18,7 @@
     "axios": "^1.7.9",
     "cookies": "^0.9.1",
     "eslint": "8.44.0",
-    "eslint-config-next": "13.4.8",
+    "eslint-config-next": "13.4.19",
     "http-proxy": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
     "next": "14.2.5",
