@@ -74,7 +74,7 @@ const patreonIcons: Record<string, string> = {
 };
 
 export default function Page({ params }: CompetitionPageProps) {
-  // const [competition, setCompetition] = useState<Competition | null>(null);
+  // const [competition, setCompetition] = useState<Competition | null>(null)
   const competition = useCompetition(params.id); // Fetch competitions from the hook
   console.log(competition);
   console.log(params);
