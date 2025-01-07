@@ -14,9 +14,9 @@
     "@types/node": "20.3.3",
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
-    "autoprefixer": "10.4.14",
-    "axios": "^1.5.1",
-    "cookies": "^0.8.0",
+    "autoprefixer": "10.4.20",
+    "axios": "^1.7.9",
+    "cookies": "^0.9.1",
     "eslint": "8.44.0",
     "eslint-config-next": "13.4.8",
     "http-proxy": "^1.18.1",
@@ -28,17 +28,17 @@
     "react-relay": "^17.0.0",
     "relay-runtime": "^17.0.0",
     "swr": "^2.2.0",
-    "tailwindcss": "3.3.2",
-    "typescript": "5.1.6"
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.2"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.3",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/react": "18.3.1",
     "@types/react-relay": "^16.0.6",
     "@types/relay-runtime": "^17.0.4",
     "babel-plugin-relay": "^17.0.0",
     "encoding": "^0.1.13",
-    "graphql": "^16.9.0",
+    "graphql": "^16.10.0",
     "relay-compiler": "^17.0.0"
   },
   "relay": {

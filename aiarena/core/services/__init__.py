@@ -7,3 +7,4 @@ from .ladders import Ladders
 from .maps import Maps
 from .match_requests import MatchRequests
 from .matches import Matches
+from .supporter_benefits import SupporterBenefits

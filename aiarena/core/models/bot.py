@@ -270,7 +270,7 @@ class Bot(models.Model, LockableModelMixin):
         - This user is a trusted arenaclient
         """
         return (
-            self.user == user
+            self.user.id == user.id
             or self.bot_zip_publicly_downloadable
             or user.is_staff
             or (user.is_arenaclient and user.arenaclient.trusted)
@@ -285,7 +285,7 @@ class Bot(models.Model, LockableModelMixin):
         - This user is a trusted arenaclient
         """
         return (
-            self.user == user
+            self.user.id == user.id
             or self.bot_data_publicly_downloadable
             or user.is_staff
             or (user.is_arenaclient and user.arenaclient.trusted)

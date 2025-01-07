@@ -19,6 +19,7 @@ from rest_framework.reverse import reverse
 from rest_framework.viewsets import ViewSet
 
 from aiarena.api import serializers as api_serializers
+from aiarena.api.serializers import RequestMatchSerializer
 from aiarena.api.view_filters import BotFilter, MatchFilter, MatchParticipationFilter, ResultFilter
 from aiarena.core.models import (
     Bot,
@@ -41,6 +42,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.permissions import IsServiceOrAdminUser
+from aiarena.core.services import MatchRequests, SupporterBenefits
 from aiarena.patreon.models import PatreonUnlinkedDiscordUID
 
 
@@ -524,22 +526,36 @@ class BotViewSet(viewsets.mixins.UpdateModelMixin, viewsets.ReadOnlyModelViewSet
 
     @action(detail=True, methods=["GET"], name="Download a bot's zip file", url_path="zip")
     def download_zip(self, request, *args, **kwargs):
-        bot = Bot.objects.get(id=kwargs["pk"])
-        if bot.can_download_bot_zip(request.user):
-            response = HttpResponse(FileWrapper(bot.bot_zip), content_type="application/zip")
-            response["Content-Disposition"] = f'inline; filename="{bot.name}.zip"'
-            return response
-        else:
+        """
+        Download a bot's zip file.
+        TODO: this is a defunct feature. Downloads should be via AWS S3. Ideally this should be cleaned up.
+        """
+        try:
+            bot = Bot.objects.get(id=kwargs["pk"])
+            if bot.can_download_bot_zip(request.user):
+                response = HttpResponse(FileWrapper(bot.bot_zip), content_type="application/zip")
+                response["Content-Disposition"] = f'inline; filename="{bot.name}.zip"'
+                return response
+            else:
+                raise Http404()
+        except Bot.DoesNotExist:
             raise Http404()
 
     @action(detail=True, methods=["GET"], name="Download a bot's data file", url_path="data")
     def download_data(self, request, *args, **kwargs):
-        bot = Bot.objects.get(id=kwargs["pk"])
-        if bot.can_download_bot_data(request.user):
-            response = HttpResponse(FileWrapper(bot.bot_data), content_type="application/zip")
-            response["Content-Disposition"] = f'inline; filename="{bot.name}_data.zip"'
-            return response
-        else:
+        """
+        Download a bot's data file.
+        TODO: this is a defunct feature. Downloads should be via AWS S3. Ideally this should be cleaned up.
+        """
+        try:
+            bot = Bot.objects.get(id=kwargs["pk"])
+            if bot.can_download_bot_data(request.user):
+                response = HttpResponse(FileWrapper(bot.bot_data), content_type="application/zip")
+                response["Content-Disposition"] = f'inline; filename="{bot.name}_data.zip"'
+                return response
+            else:
+                raise Http404()
+        except Bot.DoesNotExist:
             raise Http404()
 
 
@@ -1037,6 +1053,60 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = user_include_fields
     search_fields = user_include_fields
     ordering_fields = user_include_fields
+
+
+# !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS
+
+
+class MatchRequestsViewSet(viewsets.ViewSet):
+    """
+    Match request view
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(
+        method="post",
+        request_body=RequestMatchSerializer,
+        responses={
+            201: openapi.Response(
+                "Match requested successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "message": openapi.Schema(type=openapi.TYPE_STRING),
+                        "match_id": openapi.Schema(type=openapi.TYPE_INTEGER),
+                    },
+                ),
+            ),
+            400: "Bad Request",
+        },
+    )
+    @action(detail=False, methods=["post"])
+    def request_single(self, request):
+        """
+        Request a match between two bots.
+        """
+
+        allowed, reject_message = SupporterBenefits.can_request_match_via_api(request.user)
+        if not allowed:
+            return Response({"message": reject_message}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = RequestMatchSerializer(data=request.data)
+        if serializer.is_valid():
+            bot1 = serializer.validated_data["bot1"]
+            bot2 = serializer.validated_data["bot2"]
+            map_instance = serializer.validated_data.get("map")
+
+            try:
+                match = MatchRequests.request_match(request.user, bot1, bot2, map_instance)
+                return Response(
+                    {"message": "Match requested successfully", "match_id": match.id}, status=status.HTTP_201_CREATED
+                )
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # !ATTENTION! IF YOU CHANGE THE API ANNOUNCE IT TO USERS

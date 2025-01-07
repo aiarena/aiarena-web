@@ -1,9 +1,13 @@
+from django.utils import timezone
+
 from constance import config
 
-from aiarena.core.models import Map
-from aiarena.core.services import Maps
-from aiarena.core.services.exceptions import MatchRequestException
-from aiarena.core.services.internal.matches import create
+from aiarena.core.models import Map, Match, Result
+
+from ..exceptions import MatchRequestException
+from ..maps import Maps
+from ..supporter_benefits import SupporterBenefits
+from .matches import create
 
 
 def _get_map(map_selection_type, map_pool, chosen_map):
@@ -13,6 +17,22 @@ def _get_map(map_selection_type, map_pool, chosen_map):
         return chosen_map
 
 
+def get_user_match_request_count_left(user):
+    return (
+        SupporterBenefits.get_requested_matches_limit(user)
+        - Match.objects.only("id")
+        .filter(requested_by=user, created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD)
+        .count()
+        + Result.objects.only("id")
+        .filter(
+            submitted_by=user,
+            type="MatchCancelled",
+            created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD,
+        )
+        .count()
+    )
+
+
 def handle_request_matches(
     requested_by_user, bot1, opponent, match_count, matchup_race, matchup_type, map_selection_type, map_pool, chosen_map
 ):
@@ -20,7 +40,7 @@ def handle_request_matches(
         raise MatchRequestException("Sorry. Requested matches are currently disabled.")
     if bot1 == opponent:
         raise MatchRequestException("Sorry - you cannot request matches between the same bot.")
-    if requested_by_user.match_request_count_left < match_count:
+    if get_user_match_request_count_left(requested_by_user) < match_count:
         raise MatchRequestException("That number of matches exceeds your match request limit.")
 
     match_list = []

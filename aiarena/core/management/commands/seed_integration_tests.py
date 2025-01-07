@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
         create_arena_clients_with_matching_tokens(self.stdout, client, num_acs, devadmin)
 
-        game = client.create_game("StarCraft II")
+        game = client.create_game("StarCraft II", ".SC2Map")
         gamemode = client.create_gamemode("Melee", game.id)
 
         competition = create_open_competition_with_map(

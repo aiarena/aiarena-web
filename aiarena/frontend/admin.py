@@ -336,7 +336,7 @@ class CompetitionParticipationAdmin(admin.ModelAdmin):
 
 @admin.register(Game)
 class GameAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", "map_file_extension")
     search_fields = ("name",)
 
 

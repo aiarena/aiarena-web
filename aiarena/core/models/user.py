@@ -11,9 +11,6 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from constance import config
-
-from aiarena import settings
 from aiarena.core.models.mixins import LockableModelMixin
 
 
@@ -64,61 +61,6 @@ class User(AbstractUser, LockableModelMixin):
         limit = 20
         return mark_safe(
             f'<a href="{self.get_absolute_url}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>'
-        )
-
-    BOTS_LIMIT_MAP = {
-        "none": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
-        "bronze": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_BRONZE_TIER,
-        "silver": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_SILVER_TIER,
-        "gold": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_GOLD_TIER,
-        "platinum": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_PLATINUM_TIER,
-        "diamond": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DIAMOND_TIER,
-    }
-
-    def get_active_bots_limit(self):
-        limit = self.BOTS_LIMIT_MAP[self.patreon_level]
-        if limit is None:
-            return None  # no limit
-        else:
-            return limit + self.extra_active_competition_participations
-
-    def get_active_competition_participations_limit_display(self):
-        limit = self.BOTS_LIMIT_MAP[self.patreon_level]
-        if limit is None:
-            return "unlimited"  # no limit
-        else:
-            return limit + self.extra_active_competition_participations
-
-    REQUESTED_MATCHES_LIMIT_MAP = {
-        "none": settings.MATCH_REQUEST_LIMIT_FREE_TIER,
-        "bronze": settings.MATCH_REQUEST_LIMIT_BRONZE_TIER,
-        "silver": settings.MATCH_REQUEST_LIMIT_SILVER_TIER,
-        "gold": settings.MATCH_REQUEST_LIMIT_GOLD_TIER,
-        "platinum": settings.MATCH_REQUEST_LIMIT_PLATINUM_TIER,
-        "diamond": settings.MATCH_REQUEST_LIMIT_DIAMOND_TIER,
-    }
-
-    @property
-    def requested_matches_limit(self):
-        return self.REQUESTED_MATCHES_LIMIT_MAP[self.patreon_level] + self.extra_periodic_match_requests
-
-    @property
-    def match_request_count_left(self):
-        from .match import Match
-        from .result import Result
-
-        return (
-            self.requested_matches_limit
-            - Match.objects.only("id")
-            .filter(requested_by=self, created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD)
-            .count()
-            + Result.objects.only("id")
-            .filter(
-                submitted_by=self,
-                type="MatchCancelled",
-                created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD,
-            )
-            .count()
         )
 
     @property
