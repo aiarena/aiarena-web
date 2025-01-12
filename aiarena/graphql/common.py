@@ -9,6 +9,7 @@ from graphene.types.mutation import MutationOptions
 from graphene_django import DjangoObjectType
 from graphene_django.forms.mutation import _set_errors_flag_to_context
 from graphene_django.types import ErrorType
+
 from graphql import GraphQLError
 
 from aiarena.core.utils import camel_case

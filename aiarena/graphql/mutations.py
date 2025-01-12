@@ -14,11 +14,6 @@ class UpdateBotInput(CleanedInputType):
     bot_zip_publicly_downloadable = graphene.Boolean()
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
-    
-
-
-    
-
 
 class UpdateBot(CleanedInputMutation):
     bot = graphene.Field(BotType)
