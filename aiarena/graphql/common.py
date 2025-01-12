@@ -9,7 +9,6 @@ from graphene.types.mutation import MutationOptions
 from graphene_django import DjangoObjectType
 from graphene_django.forms.mutation import _set_errors_flag_to_context
 from graphene_django.types import ErrorType
-
 from graphql import GraphQLError
 
 from aiarena.core.utils import camel_case
@@ -232,4 +231,3 @@ class CleanedInputType(InputObjectType):
 def raise_if_annonymous_user(info):
     if not info.context.user.is_authenticated:
         raise GraphQLError("You are not signed in")
-        

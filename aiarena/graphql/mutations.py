@@ -15,6 +15,7 @@ class UpdateBotInput(CleanedInputType):
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
 
+
 class UpdateBot(CleanedInputMutation):
     bot = graphene.Field(BotType)
 
@@ -22,13 +23,13 @@ class UpdateBot(CleanedInputMutation):
         input_class = UpdateBotInput
 
     @classmethod
-    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateBotInput): 
+    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateBotInput):
         raise_if_annonymous_user(info=info)
 
         bot = graphene.Node.get_node_from_global_id(info=info, global_id=input_object.id, only_type=BotType)
         if bot.user.id != info.context.user.id:
             raise GraphQLError("This is not your bot")
-        
+
         for attr, value in input_object.items():
             if attr == "id":
                 continue
