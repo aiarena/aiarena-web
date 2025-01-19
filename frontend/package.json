@@ -17,6 +17,7 @@
     "autoprefixer": "10.4.20",
     "axios": "^1.7.9",
     "cookies": "^0.9.1",
+    "delayed-stream": "^1.0.0",
     "eslint": "8.44.0",
     "eslint-config-next": "13.4.8",
     "http-proxy": "^1.18.1",

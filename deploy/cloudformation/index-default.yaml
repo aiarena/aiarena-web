@@ -949,7 +949,7 @@ Parameters:
     Type: String
     MinLength: 1
     MaxLength: 100
-    Default: arn:aws:acm:eu-central-1:315513665747:certificate/74441d53-854a-4b33-9bfc-7e3686956006
+    Default: arn:aws:acm:eu-central-1:315513665747:certificate/045d1c95-dc43-4eac-8ed4-0d3ef6807d22
 
 Mappings:
 

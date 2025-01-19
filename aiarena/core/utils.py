@@ -140,3 +140,27 @@ def camel_case(snake_str):
         in_camel.append(components[0] + "".join(x.title() for x in components[1:]))
 
     return ".".join(in_camel)
+
+
+def dict_camel_case(d: dict):
+    return {camel_case(k): v for k, v in d.items()}
+
+
+def dict_get(d: dict, path: str | list, default=None):
+    """
+    >>> dict_get({}, '')
+    >>> dict_get('lol', 'lol', 42)
+    42
+    >>> dict_get({'gav': {'nor': 'lol'}}, 'gav.nor')
+    'lol'
+    >>> dict_get({'gav': {'nor': None}}, 'gav.nor')
+    >>> dict_get({'gav': {'nor': 'lol'}}, 'gav.nor.lol')
+    """
+    if isinstance(path, str):
+        path = path.split(".")
+    current = d
+    for key in path:
+        if not isinstance(current, dict) or key not in current:
+            return default
+        current = current[key]
+    return current
