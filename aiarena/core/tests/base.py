@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.test import Client
 from django.urls import reverse
 
+import graphene
 from pytest_django.live_server_helper import LiveServer
 
 from aiarena.core.models import WebsiteUser
@@ -160,3 +161,7 @@ class GraphQLTest:
         if not connection:
             return []
         return [edge["node"] for edge in connection["edges"]]
+
+    @staticmethod
+    def to_global_id(type_, id_: str):
+        return graphene.Node.to_global_id(type_, id_)
