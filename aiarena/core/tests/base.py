@@ -2,7 +2,6 @@ import json
 from http import HTTPStatus
 from urllib.parse import urlparse, urlunparse
 
-from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.test import Client
@@ -80,9 +79,7 @@ class GraphQLTest:
         """
         Create django HTTP client.
         """
-        server_name = urlparse(settings.ROOT_URL).netloc
-
-        client = Client(SERVER_NAME=server_name)
+        client = Client()
         if login_user:
             client.force_login(login_user)
 
