@@ -1,82 +1,82 @@
-from aiarena.core.models import Bot, WebsiteUser
-from aiarena.core.models.bot_race import BotRace
+from aiarena.core.tests.base import GraphQLTest
+from aiarena.graphql import BotType
 
 
-"""
-Example test cases for mutations.
-Please update as needed.
-"""
-
-
-def test_update_bot_success():
+class TestUpdateBot(GraphQLTest):
+    mutation = """
+        mutation($input: UpdateBotInput!) {
+            updateBot(input: $input) {
+                bot {
+                    id
+                }
+            }
+        }
     """
-    Test updating a bot with all fields set to True.
-    """
-    # Create required objects
-    user = WebsiteUser.objects.create_user(username="test_user", password="test123")
-    BotRace.create_all_races()
-    bot = Bot.objects.create(
-        user=user,
-        name="My Bot",
-        bot_zip_publicly_downloadable=False,  # Should change False -> True in this test
-        bot_data_enabled=False,  # Should change False -> True in this test
-        bot_data_publicly_downloadable=False,  # Should change False -> True in this test
-        plays_race=BotRace.terran(),
-    )
 
-    # TODO: Prepare and submit mutation under user's credentials
+    def test_update_bot_success(self, user, bot):
+        """
+        Test updating a bot with all fields set to True.
+        """
 
-    # TODO: assert no errors occurred
+        # We expect the bot fixture to be created with those values
+        assert bot.user == user
+        assert bot.bot_zip_publicly_downloadable is False
+        assert bot.bot_data_enabled is False
+        assert bot.bot_data_publicly_downloadable is False
 
-    # Verify bot was updated correctly
-    bot.refresh_from_db()
-    assert bot.bot_zip_publicly_downloadable is True
-    assert bot.bot_data_enabled is True
-    assert bot.bot_data_publicly_downloadable is True
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            input={
+                "id": self.to_global_id(BotType, bot.id),
+                "botZipPubliclyDownloadable": True,
+                "botDataEnabled": True,
+                "botDataPubliclyDownloadable": True,
+            },
+        )
 
+        # Verify bot was updated correctly
+        bot.refresh_from_db()
+        assert bot.bot_zip_publicly_downloadable is True
+        assert bot.bot_data_enabled is True
+        assert bot.bot_data_publicly_downloadable is True
 
-def test_update_bot_unauthorized():
-    """
-    Test updating a bot that does not belong to the user.
-    """
-    # Create required objects
-    owner = WebsiteUser.objects.create_user(username="owner", password="test123")
-    other_user = WebsiteUser.objects.create_user(username="other", password="test123")
-    BotRace.create_all_races()
-    bot = Bot.objects.create(
-        user=owner,
-        name="My Bot",
-        bot_zip_publicly_downloadable=False,  # Should NOT change False -> True in this test
-        plays_race=BotRace.terran(),
-    )
+    def test_update_bot_unauthorized(self, user, other_user, bot):
+        """
+        Test updating a bot that does not belong to the user.
+        """
+        # We expect the bot fixture to be created with those values
+        assert bot.user == user
+        assert bot.bot_zip_publicly_downloadable is False
 
-    # TODO: Prepare and submit mutation under other_user's credentials with bot.bot_zip_publicly_downloadable == True
+        response = self.mutate(
+            login_user=other_user,
+            input={
+                "id": self.to_global_id(BotType, bot.id),
+                "botZipPubliclyDownloadable": True,
+            },
+        )
+        self.assert_graphql_error_like(response, "This is not your bot")
 
-    # todo: Assert error was returned - "This is not your bot"
+        # Verify bot was not updated
+        bot.refresh_from_db()
+        assert bot.bot_zip_publicly_downloadable is False
 
-    # Optionally, verify bot was not updated
-    bot.refresh_from_db()
-    assert bot.bot_zip_publicly_downloadable is False
+    def test_update_bot_unauthenticated(self, bot):
+        """
+        Test updating a bot without being authenticated.
+        """
+        # We expect the bot fixture to be created with those values
+        assert bot.bot_zip_publicly_downloadable is False
 
+        response = self.mutate(
+            input={
+                "id": self.to_global_id(BotType, bot.id),
+                "botZipPubliclyDownloadable": True,
+            },
+        )
+        self.assert_graphql_error_like(response, "You are not signed in")
 
-def test_update_bot_unauthenticated():
-    """
-    Test updating a bot without being authenticated.
-    """
-    # Create test user and bot
-    user = WebsiteUser.objects.create_user(username="test_user", password="test123")
-    BotRace.create_all_races()
-    bot = Bot.objects.create(
-        user=user,
-        name="My Bot",
-        bot_zip_publicly_downloadable=False,  # Should NOT change False -> True in this test
-        plays_race=BotRace.terran(),
-    )
-
-    # TODO: Prepare and submit unauthenticated mutation with bot.bot_zip_publicly_downloadable == True
-
-    # todo: Assert error was returned - "You are not signed in"
-
-    # Optionally, verify bot was not updated
-    bot.refresh_from_db()
-    assert bot.bot_zip_publicly_downloadable is False
+        # Optionally, verify bot was not updated
+        bot.refresh_from_db()
+        assert bot.bot_zip_publicly_downloadable is False
