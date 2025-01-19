@@ -1,10 +1,12 @@
 from aiarena.core.models import Bot, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
 
+
 """
 Example test cases for mutations.
 Please update as needed.
 """
+
 
 def test_update_bot_success():
     """
@@ -17,21 +19,20 @@ def test_update_bot_success():
         user=user,
         name="My Bot",
         bot_zip_publicly_downloadable=False,  # Should change False -> True in this test
-        bot_data_enabled=False,               # Should change False -> True in this test
-        bot_data_publicly_downloadable=False, # Should change False -> True in this test
-        plays_race=BotRace.terran()
+        bot_data_enabled=False,  # Should change False -> True in this test
+        bot_data_publicly_downloadable=False,  # Should change False -> True in this test
+        plays_race=BotRace.terran(),
     )
-    
+
     # TODO: Prepare and submit mutation under user's credentials
-    
+
     # TODO: assert no errors occurred
-    
+
     # Verify bot was updated correctly
     bot.refresh_from_db()
-    assert bot.bot_zip_publicly_downloadable == True
-    assert bot.bot_data_enabled == True
-    assert bot.bot_data_publicly_downloadable == True
-
+    assert bot.bot_zip_publicly_downloadable is True
+    assert bot.bot_data_enabled is True
+    assert bot.bot_data_publicly_downloadable is True
 
 
 def test_update_bot_unauthorized():
@@ -45,17 +46,18 @@ def test_update_bot_unauthorized():
     bot = Bot.objects.create(
         user=owner,
         name="My Bot",
-        bot_zip_publicly_downloadable=False, # Should NOT change False -> True in this test
-        plays_race=BotRace.terran()
+        bot_zip_publicly_downloadable=False,  # Should NOT change False -> True in this test
+        plays_race=BotRace.terran(),
     )
-    
+
     # TODO: Prepare and submit mutation under other_user's credentials with bot.bot_zip_publicly_downloadable == True
-    
+
     # todo: Assert error was returned - "This is not your bot"
-    
+
     # Optionally, verify bot was not updated
     bot.refresh_from_db()
-    assert bot.bot_zip_publicly_downloadable == False
+    assert bot.bot_zip_publicly_downloadable is False
+
 
 def test_update_bot_unauthenticated():
     """
@@ -67,14 +69,14 @@ def test_update_bot_unauthenticated():
     bot = Bot.objects.create(
         user=user,
         name="My Bot",
-        bot_zip_publicly_downloadable=False, # Should NOT change False -> True in this test
-        plays_race=BotRace.terran()
+        bot_zip_publicly_downloadable=False,  # Should NOT change False -> True in this test
+        plays_race=BotRace.terran(),
     )
-    
+
     # TODO: Prepare and submit unauthenticated mutation with bot.bot_zip_publicly_downloadable == True
 
     # todo: Assert error was returned - "You are not signed in"
-    
+
     # Optionally, verify bot was not updated
     bot.refresh_from_db()
-    assert bot.bot_zip_publicly_downloadable == False
+    assert bot.bot_zip_publicly_downloadable is False
