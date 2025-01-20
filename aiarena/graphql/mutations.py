@@ -15,6 +15,9 @@ class UpdateBotInput(CleanedInputType):
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
 
+    class Meta:
+        required_fields = ["id"]
+
 
 class UpdateBot(CleanedInputMutation):
     bot = graphene.Field(BotType)

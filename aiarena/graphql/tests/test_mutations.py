@@ -3,11 +3,16 @@ from aiarena.graphql import BotType
 
 
 class TestUpdateBot(GraphQLTest):
+    mutation_name = "updateBot"
     mutation = """
         mutation($input: UpdateBotInput!) {
             updateBot(input: $input) {
                 bot {
                     id
+                }
+                errors {
+                    field
+                    messages
                 }
             }
         }
@@ -27,11 +32,13 @@ class TestUpdateBot(GraphQLTest):
         self.mutate(
             login_user=user,
             expected_status=200,
-            input={
-                "id": self.to_global_id(BotType, bot.id),
-                "botZipPubliclyDownloadable": True,
-                "botDataEnabled": True,
-                "botDataPubliclyDownloadable": True,
+            variables={
+                "input": {
+                    "id": self.to_global_id(BotType, bot.id),
+                    "botZipPubliclyDownloadable": True,
+                    "botDataEnabled": True,
+                    "botDataPubliclyDownloadable": True,
+                }
             },
         )
 
@@ -49,14 +56,16 @@ class TestUpdateBot(GraphQLTest):
         assert bot.user == user
         assert bot.bot_zip_publicly_downloadable is False
 
-        response = self.mutate(
+        self.mutate(
             login_user=other_user,
-            input={
-                "id": self.to_global_id(BotType, bot.id),
-                "botZipPubliclyDownloadable": True,
+            variables={
+                "input": {
+                    "id": self.to_global_id(BotType, bot.id),
+                    "botZipPubliclyDownloadable": True,
+                }
             },
+            expected_errors=["This is not your bot"],
         )
-        self.assert_graphql_error_like(response, "This is not your bot")
 
         # Verify bot was not updated
         bot.refresh_from_db()
@@ -69,13 +78,33 @@ class TestUpdateBot(GraphQLTest):
         # We expect the bot fixture to be created with those values
         assert bot.bot_zip_publicly_downloadable is False
 
-        response = self.mutate(
-            input={
-                "id": self.to_global_id(BotType, bot.id),
-                "botZipPubliclyDownloadable": True,
+        self.mutate(
+            variables={
+                "input": {
+                    "id": self.to_global_id(BotType, bot.id),
+                    "botZipPubliclyDownloadable": True,
+                }
             },
+            expected_errors=["You are not signed in"],
         )
-        self.assert_graphql_error_like(response, "You are not signed in")
+
+        # Optionally, verify bot was not updated
+        bot.refresh_from_db()
+        assert bot.bot_zip_publicly_downloadable is False
+
+    def test_required_field_not_specified(self, user, bot):
+        """
+        Test updating a bot without being authenticated.
+        """
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "botZipPubliclyDownloadable": True,
+                }
+            },
+            expected_validation_errors={"id": ["Required field"]},
+        )
 
         # Optionally, verify bot was not updated
         bot.refresh_from_db()
