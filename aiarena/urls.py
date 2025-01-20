@@ -63,7 +63,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("accounts/", include("django.contrib.auth.urls")),
     path("", core_views.Index.as_view(), name="home"),
     path("api/", include("aiarena.api.urls")),
-    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    path("graphql/", csrf_exempt(GraphQLView.as_view(graphiql=True)), name="graphql"),
     path("results/", core_views.RecentResults.as_view(), name="results"),
     path("arenaclients/", core_views.ArenaClients.as_view(), name="arenaclients"),
     path("arenaclients/<int:pk>/", core_views.ArenaClientView.as_view(), name="arenaclient"),
