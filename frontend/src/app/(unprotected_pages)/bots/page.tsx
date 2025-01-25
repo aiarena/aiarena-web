@@ -4,7 +4,7 @@ import CompetitionCard from "@/_components/_display/CompetitionCard";
 import ClosedCompetitionList from "@/_components/_display/CompetitionList";
 
 import FilterableList from "@/_components/_display/FilterableList";
-import WrappedTitle from "@/_components/_display/WrappedTitle";
+import TitleWrapper from "@/_components/_display/TitleWrapper";
 import mockBots from "@/_data/mockBots.json";
 import { formatDate } from "@/_lib/dateUtils";
 import Link from "next/link";

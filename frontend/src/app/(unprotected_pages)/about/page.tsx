@@ -1,6 +1,6 @@
 "use client";
 
-import WrappedTitle from "@/_components/_display/WrappedTitle";
+import TitleWrapper from "@/_components/_display/TitleWrapper";
 import Accordion from "@/_components/_examples/Accordion";
 import Button from "@/_components/_props/Button";
 import MainButton from "@/_components/_props/MainButton";

@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function WrappedTitle({ title }: { title: string }) {
+export default function TitleWrapper({ title }: { title: string }) {
   return (
     <>
       <div className="flex items-center mb-4 justify-center relative">

@@ -7,6 +7,8 @@
     "devdebug": "next dev",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest",
+    "test:e2e": "playwright test",
     "relay": "relay-compiler --watch",
     "build": "relay-compiler && next build"
   },
@@ -33,6 +35,10 @@
     "typescript": "5.7.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/jsdom": "^21.1.7",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/react": "18.3.1",
     "@types/react-relay": "^16.0.6",
@@ -40,7 +46,10 @@
     "babel-plugin-relay": "^17.0.0",
     "encoding": "^0.1.13",
     "graphql": "^16.10.0",
-    "relay-compiler": "^17.0.0"
+    "playwright": "^1.49.1",
+    "relay-compiler": "^17.0.0",
+    "relay-test-utils": "^18.2.0",
+    "vitest": "^3.0.4"
   },
   "relay": {
     "src": "./src",

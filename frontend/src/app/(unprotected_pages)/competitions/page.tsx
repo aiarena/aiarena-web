@@ -2,7 +2,7 @@
 import CompetitionCard from "@/_components/_display/CompetitionCard";
 import ClosedCompetitionList from "@/_components/_display/CompetitionList";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
-import WrappedTitle from "@/_components/_display/WrappedTitle";
+import TitleWrapper from "@/_components/_display/TitleWrapper";
 // import { useCompetition } from "@/_components/_hooks/useCompetition";
 import { useCompetitions } from "@/_components/_hooks/useCompetitions";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
@@ -103,7 +103,7 @@ export default function Page() {
 
       {/* Active Competitions */}
       <section className="mb-16">
-        <WrappedTitle title="Open Competitions" />
+        <TitleWrapper title="Open Competitions" />
         <div className="space-y-8 mt-8">
           {activeCompetitions.length > 0 ? (
             activeCompetitions.map((comp, index) => (
@@ -117,7 +117,7 @@ export default function Page() {
 
       {/* Closed Competitions */}
       <section>
-        <WrappedTitle title="Closed Competitions" />
+        <TitleWrapper title="Closed Competitions" />
         {closedCompetitions.length > 0 ? (
           <ClosedCompetitionList competitions={closedCompetitions} />
         ) : (

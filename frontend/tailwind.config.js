@@ -1,23 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 
-// customGreenDarken2: 'rgba(84, 110, 255, 1)',  
-
-
 const CustomHighlightVar = 'rgba(154, 255, 70, 1)';
 const CustomPrimaryVar = 'rgba(134, 194, 50, 1)';
-// const CustomPrimaryVar = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(
-//     Math.random() * 256
-//   )}, ${Math.floor(Math.random() * 256)}, 1)`;
-
 
 const CustomBackgroundColorVar = 'rgba(134, 194, 50, 1)';
 
-
-// customBackgroundColor1: 'rgba(45,50,59,1)',
-// customBackgroundColor1D1: 'rgba(40,45,55,1)',
-
-
-// 17 24 39
 
 module.exports = {
   darkMode: 'class',

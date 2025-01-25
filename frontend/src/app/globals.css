@@ -407,23 +407,3 @@ nav .block {
   );
   clip-path: polygon(0% 100%, 100% 0%, 100% 100%, 0% 100%);
 }
-
-/* path in string seems to cause error with tailwind. */
-/* 
-.dividing-line10 {
-  position: relative;
-  width: 100%;
-  height: 120px;
-  background: linear-gradient(
-    120deg,
-    rgba(134, 194, 50, 1) 50%,
-    transparent 50%
-  );
-  clip-path: path(
-    "
-     C 15 100, 35 20, 50 80 
-     C 65 140, 85 60, 100 120 
-     L 100 100 
-     L 0 100 Z"
-  );
-} */

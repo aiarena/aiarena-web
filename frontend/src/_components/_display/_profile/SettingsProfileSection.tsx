@@ -48,7 +48,8 @@ export default function SettingsProfileSection({
       {/* Profile Overview */}
       <div className="bg-gray-700 p-4 rounded-md space-y-2">
         <h3 className="text-base font-semibold text-customGreen">Profile</h3>
-        <div className="flex items-center space-x-3">
+        <div className="flex space-x-3 space-y-2 justify-between flex-wrap">
+          <div className="flex">
           <div className="relative w-12 h-12 flex-shrink-0">
             <Image
               src={`${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`}
@@ -57,27 +58,18 @@ export default function SettingsProfileSection({
               className="object-cover"
             />
             <>
-              {user.patreonLevel && user.patreonLevel == "Bronze" ? (
+              {user.patreonLevel && user.patreonLevel != "Bronze" ? (
                 <div className="absolute inset-0 border-2 border-customGreen"></div>
               ) : null}
             </>
           </div>
-          <div className="leading-tight">
+          <div className="leading-tight p-2">
             <p className="text-white font-bold">{user.username}</p>
-            {user.patreonLevel && user.patreonLevel != "NONE" ? (
+            {user.patreonLevel && user.patreonLevel == "NONE" ? (
               <p className="text-customGreen text-xs">Supporter</p>
             ) : null}
           </div>
-        </div>
-      </div>
-
-      {/* Connected Accounts */}
-      <div className="bg-gray-700 p-4 rounded-md space-y-2">
-        <h3 className="text-base font-semibold text-customGreen">
-          Connected Accounts
-        </h3>
-        <div className="flex flex-wrap gap-4">
-          {/* Discord */}
+          </div>
           <div className="flex items-center space-x-2">
             <svg
               className="w-4 h-4 text-indigo-400"

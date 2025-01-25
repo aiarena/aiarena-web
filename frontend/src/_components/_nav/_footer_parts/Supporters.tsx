@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Supporters } from "@/_data/footerLinks";
-import WrappedTitle from "@/_components/_display/WrappedTitle";
+import TitleWrapper from "@/_components/_display/TitleWrapper";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { getFeatureFlags } from "@/_data/featureFlags";
 
@@ -18,7 +18,7 @@ const SupportersComponent: React.FC<SupportersComponentProps> = ({
 
   return (
     <div className="mb-16 px-8 text-center flex-1 mx-auto">
-     <WrappedTitle title="Funded by You"/>
+     <TitleWrapper title="Funded by You"/>
 
      {supporters? 
      <>

@@ -171,12 +171,7 @@ const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
   return (
     <div className="bg-customBackgroundColor1 p-4 border border-gray-700">
       <div className="flex justify-between ">
-        {/* <button
-          onClick={() => console.log("Click!")}
-          className="mb-4 bg-customGreen text-white p-2 rounded hover:bg-customGreenDarken1 w-[4em]"
-        >
-          Show Filters
-        </button> */}
+ 
         <div className="flex gap-2 pb-2 mt-auto flex-wrap">
           {activeBotsLimit ? (
             <span className="flex word-wrap">
@@ -184,7 +179,7 @@ const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
             </span>
           ) : null}
         </div>
-        {/* <h2 className="text-2xl font-bold text-customGreen mb-4">Your Bots</h2> */}
+      
         <div className="pb-4">
           <div className="hidden md:block">
             <MainButton

@@ -24,10 +24,6 @@ export const useBots = (name = '', last = 5) => {
     `,
     { name }
   );
-//   return nodes(data.bots);
-// };
-
-
 
 const botNodes = getNodes(data.bots)
 

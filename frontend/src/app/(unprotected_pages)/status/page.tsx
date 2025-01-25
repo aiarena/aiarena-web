@@ -1,7 +1,7 @@
 "use client";
 import EthernetStatusDots from "@/_components/_display/EthernetStatusEffect";
 import { ImageOverlayWrapper } from "@/_components/_display/ImageOverlayWrapper";
-import WrappedTitle from "@/_components/_display/WrappedTitle";
+import TitleWrapper from "@/_components/_display/TitleWrapper";
 import Image from "next/image";
 import React from "react";
 import mockUptimeData from "@/_data/mockUptime.json";
@@ -30,7 +30,7 @@ const ActivityFeed = () => {
 
   return (
     <div className="bg-customBackgroundColor1 p-4 rounded-md shadow shadow-black ">
-      <WrappedTitle title="Activity Feed" />
+      <TitleWrapper title="Activity Feed" />
       <ul className="space-y-2">
         {activities.map((activity, index) => (
           <li key={index} className="text-gray-300">
@@ -54,7 +54,7 @@ const UptimeGraph = ({
 }) => {
   return (
     <div className="shadow shadow-black bg-customBackgroundColor1 p-4 rounded-md">
-      <WrappedTitle title={title} />
+      <TitleWrapper title={title} />
       <div className="h-40 bg-customBackgroundColor1D1  flex items-end justify-between text-gray-300 mb-2 p-2">
         {data.map((entry, index) => (
           <div
@@ -75,7 +75,7 @@ const UptimeGraph = ({
 const Stats = () => {
   return (
     <div className="bg-customBackgroundColor1 p-4 rounded-md shadow shadow-black ">
-      <WrappedTitle title="Stats" />
+      <TitleWrapper title="Stats" />
       <ul className="space-y-2 text-gray-300">
         <li>
           Date:{" "}
@@ -108,7 +108,7 @@ const Stats = () => {
 const Thanks = () => {
   return (
     <div className="bg-customBackgroundColor1 mt-8 mb-8 p-4 rounded-md shadow shadow-black ">
-      <WrappedTitle title="Thank you" />
+      <TitleWrapper title="Thank you" />
       Thank you Spacemen for supporting AI arena!
       <p>Heart icon</p>
     </div>

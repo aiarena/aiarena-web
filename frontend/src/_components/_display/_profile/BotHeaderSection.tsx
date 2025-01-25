@@ -9,7 +9,7 @@ import { ProfileBotProps } from "@/_components/_display/ProfileBot";
 export default function BotHeaderSection({ bot }: ProfileBotProps) {
   const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
-
+  
   return (
     <div className="p-4 border-b border-gray-600 bg-gray-900 rounded-t-lg">
       {/* Grid Layout: Mobile: 1 col, Desktop: 3 cols */}
@@ -27,8 +27,10 @@ export default function BotHeaderSection({ bot }: ProfileBotProps) {
               <Image
                 src={`${getPublicPrefix()}/icons/trophy.svg`}
                 alt="Trophy Icon"
+               
                 width={20}
                 height={20}
+
               />
               <span className="ml-1 text-lg font-bold text-gray-300">
                 {bot?.trophies?.length || 0}
@@ -39,15 +41,17 @@ export default function BotHeaderSection({ bot }: ProfileBotProps) {
           {/* Settings Button */}
 
           <div
-            className="cursor-pointer hover:bg-slate-700 py-1 px-2 ml-2 flex justify-center rounded-md border-slate-700 border"
+            className="cursor-pointer hover:bg-slate-700 py-1 px-2 ml-2 flex justify-center rounded-md border-slate-700 border items-center"
             onClick={() => setSettingsModalOpen(true)}
           >
             <Image
               alt="Open Settings"
               src={`${getPublicPrefix()}/icons/cogwheel.svg`}
-              width={20}
-              height={20}
+                
+                width={20}
+                height={20}
               className="invert"
+              style={{ width: 20, height: 20 }}
             />
           </div>
         </div>
