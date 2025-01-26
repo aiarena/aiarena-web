@@ -221,7 +221,7 @@ jobs:
           npm run relay &
           
       - name: List Root Directory
-        working-directory: frontend/src/_components_hooks
+        working-directory: frontend/src/_components/_hooks
         run: ls -la
         
       - name: Run Frontend Unit and E2E Tests
