@@ -206,7 +206,7 @@ jobs:
 
       - name: Start Django Backend
         run: |
-          python manage.py runserver
+          python manage.py runserver &
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
