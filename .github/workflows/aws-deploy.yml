@@ -220,7 +220,7 @@ jobs:
         run: |
           npm run relay &
           
-      - name: Debug: List Root Directory
+      - name: List Root Directory
         working-directory: frontend/src/_components_hooks
         run: ls -la
         
