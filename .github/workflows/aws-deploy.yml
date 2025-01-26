@@ -200,10 +200,6 @@ jobs:
         run: |
           PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
 
-      - name:  List Frontend Directory
-        working-directory: frontend
-        run: ls -la
-
       - name: Generate GraphQL schema
         run: |
           python manage.py graphql_schema
@@ -215,14 +211,15 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name:  List Frontend Directory
-        working-directory: frontend
-        run: ls -la
-
       - name: Install Frontend Dependencies
         working-directory: frontend
         run: npm ci
 
+      - name: Start Relay Process
+        working-directory: frontend
+        run: |
+          npm run relay &
+          
       - name: Run Frontend Unit and E2E Tests
         working-directory: frontend
         if:  ${{ !inputs.skip_tests }}
