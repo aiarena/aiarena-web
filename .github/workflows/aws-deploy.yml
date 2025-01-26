@@ -205,6 +205,11 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+        working-directory: frontend
+        
+      - name: Debug: List Frontend Directory
+        working-directory: frontend
+        run: ls -la
 
       - name: Install Frontend Dependencies
         working-directory: frontend
