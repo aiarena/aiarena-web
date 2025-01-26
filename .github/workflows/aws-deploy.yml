@@ -220,6 +220,10 @@ jobs:
         run: |
           npm run relay &
           
+      - name: Debug: List Root Directory
+        working-directory: frontend/src/_components_hooks
+        run: ls -la
+        
       - name: Run Frontend Unit and E2E Tests
         working-directory: frontend
         if:  ${{ !inputs.skip_tests }}
