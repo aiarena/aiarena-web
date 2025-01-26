@@ -200,12 +200,16 @@ jobs:
         run: |
           PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
 
+      - name:  List Frontend Directory
+        working-directory: frontend
+        run: ls -la
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-          
+
       - name:  List Frontend Directory
         working-directory: frontend
         run: ls -la
