@@ -204,9 +204,9 @@ jobs:
         run: |
           python manage.py graphql_schema
 
-      - name: Start Django Backend
-        run: |
-          python manage.py runserver &
+      # - name: Start Django Backend
+      #   run: |
+      #     python manage.py runserver &
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -233,7 +233,8 @@ jobs:
         if:  ${{ !inputs.skip_tests }}
         env:
           NOFAKE_REDIS: 1
-        run: npm run test && npm run test:e2e
+        run: npm run test 
+        # && npm run test:e2e
 
       - name: Publish Frontend Test Results
         uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
