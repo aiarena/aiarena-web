@@ -218,7 +218,7 @@ jobs:
       - name: Start Relay Process
         working-directory: frontend
         run: |
-          npm run relay &
+          npx relay-compiler
           
       - name: List Root Directory
         working-directory: frontend/src/_components/_hooks
