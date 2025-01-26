@@ -159,99 +159,94 @@ jobs:
           path: test-results
           retention-days: 30
 
-  # tests-frontend:
-  #   runs-on: ubuntu-latest
-  #   env:
-  #     DJANGO_ALLOW_ASYNC_UNSAFE: true
-  #   services:
-  #     postgres:
-  #       image: postgres:15.5
-  #       env:
-  #         POSTGRES_PASSWORD: aiarena
-  #         POSTGRES_USER: aiarena
-  #         POSTGRES_DATABASE: test_aiarena
-  #         POSTGRES_ROOT_PASSWORD: aiarena
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
-  #       ports:
-  #         - 5432:5432
-  #   steps:
-  #     - name: Checkout repository and submodules
-  #       uses: actions/checkout@v4
-  #     - uses: shogo82148/actions-setup-redis@v1
-  #       with:
-  #         redis-version: '6.x'
-  #     - run: redis-cli ping
+  tests-frontend:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_ALLOW_ASYNC_UNSAFE: true
+    services:
+      postgres:
+        image: postgres:15.5
+        env:
+          POSTGRES_PASSWORD: aiarena
+          POSTGRES_USER: aiarena
+          POSTGRES_DATABASE: test_aiarena
+          POSTGRES_ROOT_PASSWORD: aiarena
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-redis@v1
+        with:
+          redis-version: '6.x'
+      - run: redis-cli ping
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.12"
-  #         cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
 
-  #     - name: Install Backend Dependencies
-  #       run: pip install -r requirements.DEVELOPMENT.txt
-  #     - name: Grant aiarena user full access
-  #       env:
-  #         PORT: ${{ job.services.postgres.ports[5432] }}
-  #       run: |
-  #         PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
+      - name: Install Backend Dependencies
+        run: pip install -r requirements.DEVELOPMENT.txt
+      - name: Grant aiarena user full access
+        env:
+          PORT: ${{ job.services.postgres.ports[5432] }}
+        run: |
+          PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
 
-  #     - name: Generate GraphQL schema
-  #       run: |
-  #         python manage.py graphql_schema
+      - name: Generate GraphQL schema
+        run: |
+          python manage.py graphql_schema
 
-  #     # - name: Start Django Backend
-  #     #   run: |
-  #     #     python manage.py runserver &
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: '18'
-  #         cache: 'npm'
-  #         cache-dependency-path: frontend/package-lock.json
+      - name: Install Frontend Dependencies
+        working-directory: frontend
+        run: npm ci
 
-  #     - name: Install Frontend Dependencies
-  #       working-directory: frontend
-  #       run: npm ci
-
-  #     - name: Start Relay Process
-  #       working-directory: frontend
-  #       run: |
-  #         npx relay-compiler
+      - name: Start Relay Process
+        working-directory: frontend
+        run: |
+          npx relay-compiler
           
-  #     - name: List Root Directory
-  #       working-directory: frontend/src/_components/_hooks
-  #       run: ls -la
+      - name: List Root Directory
+        working-directory: frontend/src/_components/_hooks
+        run: ls -la
         
-  #     - name: Run Frontend Unit and E2E Tests
-  #       working-directory: frontend
-  #       if:  ${{ !inputs.skip_tests }}
-  #       env:
-  #         NOFAKE_REDIS: 1
-  #       run: npm run test 
-  #       # && npm run test:e2e
+      - name: Run Frontend Unit and E2E Tests
+        working-directory: frontend
+        if:  ${{ !inputs.skip_tests }}
+        env:
+          NOFAKE_REDIS: 1
+        run: npm run test 
 
-  #     - name: Publish Frontend Test Results
-  #       uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
-  #       if: always()
-  #       with:
-  #         check_name: "Frontend Test Report"
-  #         fail_on: "nothing"
-  #         files: |
-  #           frontend/test-results/**/*.xml
+      - name: Publish Frontend Test Results
+        uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
+        if: always()
+        with:
+          check_name: "Frontend Test Report"
+          fail_on: "nothing"
+          files: |
+            frontend/test-results/**/*.xml
 
-  #     - name: Upload Failure Artifacts
-  #       uses: actions/upload-artifact@v4
-  #       if: failure()
-  #       with:
-  #         name: frontend-test-failures
-  #         path: frontend/test-results
-  #         retention-days: 30
+      - name: Upload Failure Artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: frontend-test-failures
+          path: frontend/test-results
+          retention-days: 30
 
   prepare-images:
     if: github.event_name != 'pull_request'
