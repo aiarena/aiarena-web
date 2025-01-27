@@ -38,6 +38,61 @@ jobs:
       - name: Run linters
         uses: pre-commit/action@v3.0.0
 
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_ALLOW_ASYNC_UNSAFE: true
+    services:
+      postgres:
+        # Docker Hub image
+        image: postgres:15.5
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: aiarena
+          POSTGRES_USER: aiarena
+          POSTGRES_DATABASE: test_aiarena
+          POSTGRES_ROOT_PASSWORD: aiarena
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+    steps:
+      - name: Checkout repository and submodules
+        uses: actions/checkout@v4
+      - uses: shogo82148/actions-setup-redis@v1
+        with:
+          redis-version: '6.x'
+      - run: redis-cli ping
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+      - name: Install Dependencies
+        run: pip install -r requirements.DEVELOPMENT.txt
+      - name: Grant aiarena user full access
+        env:
+          PORT: ${{ job.services.postgres.ports[5432] }}
+        run: |
+          PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
+      - name: Run Tests
+        if:  ${{ !inputs.skip_tests }}
+        env:
+          NOFAKE_REDIS: 1
+        run: pytest -m 'not playwright' -n auto --junit-xml test-results/pytest-regular.xml
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
+        if: always()
+        with:
+          check_name: "Test Report"
+          fail_on: "nothing"
+          files: |
+            test-results/pytest-regular.xml
 
   tests-playwright:
     runs-on: ubuntu-latest
@@ -144,7 +199,7 @@ jobs:
     if: github.event_name != 'pull_request'
     name: Deploy to ECS
     runs-on: ubuntu-latest
-    needs: [ linters,  tests-playwright, prepare-images ]
+    needs: [ linters, tests, tests-playwright, prepare-images ]
     steps:
       - uses: actions/checkout@v4
 
