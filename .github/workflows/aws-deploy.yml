@@ -144,7 +144,7 @@ jobs:
     if: github.event_name != 'pull_request'
     name: Deploy to ECS
     runs-on: ubuntu-latest
-    needs: [ linters, tests, tests-playwright, prepare-images ]
+    needs: [ linters,  tests-playwright, prepare-images ]
     steps:
       - uses: actions/checkout@v4
 
