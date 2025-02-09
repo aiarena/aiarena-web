@@ -101,6 +101,11 @@ class User(AbstractUser, LockableModelMixin):
         except WebsiteUser.DoesNotExist:
             return False
 
+    def permission(self, instance):
+        from .. import permissions
+
+        return permissions.check.user(user=self, instance=instance)
+
 
 # Don't allow non WebsiteUsers to login to the website.
 @receiver(pre_save, sender=User)

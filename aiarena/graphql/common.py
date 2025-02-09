@@ -11,6 +11,7 @@ from graphene_django.forms.mutation import _set_errors_flag_to_context
 from graphene_django.types import ErrorType
 from graphql import GraphQLError
 
+from aiarena.core import permissions
 from aiarena.core.utils import camel_case
 
 
@@ -228,6 +229,13 @@ class CleanedInputType(InputObjectType):
         super().__init_subclass_with_meta__(_meta=_meta, **options)
 
 
-def raise_if_annonymous_user(info):
-    if not info.context.user.is_authenticated:
-        raise GraphQLError("You are not signed in")
+def raise_for_access(info, instance, scopes=None):
+    if scopes is None:
+        scopes = [permissions.SCOPE_WRITE]
+
+    user = info.context.user
+    checker = permissions.check.user(user=user, instance=instance)
+
+    for scope in scopes:
+        if not checker.can(scope):
+            raise GraphQLError(f'{user} cannot perform "{scope}" on "{instance}"')

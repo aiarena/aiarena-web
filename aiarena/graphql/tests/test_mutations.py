@@ -64,7 +64,7 @@ class TestUpdateBot(GraphQLTest):
                     "botZipPubliclyDownloadable": True,
                 }
             },
-            expected_errors_like=["This is not your bot"],
+            expected_errors_like=['bobby cannot perform "write" on "My Bot"'],
         )
 
         # Verify bot was not updated
@@ -85,7 +85,7 @@ class TestUpdateBot(GraphQLTest):
                     "botZipPubliclyDownloadable": True,
                 }
             },
-            expected_errors_like=["You are not signed in"],
+            expected_errors_like=['AnonymousUser cannot perform "write" on "My Bot"'],
         )
 
         # Verify bot was not updated

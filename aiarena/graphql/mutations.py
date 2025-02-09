@@ -2,9 +2,8 @@ from django.contrib.auth import authenticate, login, logout
 
 import graphene
 from graphene_django.types import ErrorType
-from graphql import GraphQLError
 
-from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_if_annonymous_user
+from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
 from aiarena.graphql.types import BotType
 
 
@@ -26,11 +25,8 @@ class UpdateBot(CleanedInputMutation):
 
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateBotInput):
-        raise_if_annonymous_user(info=info)
-
         bot = graphene.Node.get_node_from_global_id(info=info, global_id=input_object.id, only_type=BotType)
-        if bot.user.id != info.context.user.id:
-            raise GraphQLError("This is not your bot")
+        raise_for_access(info, bot)
 
         for attr, value in input_object.items():
             if attr == "id":
