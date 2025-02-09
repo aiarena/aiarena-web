@@ -2,16 +2,16 @@ import json
 from http import HTTPStatus
 from urllib.parse import urlparse, urlunparse
 
-from django.conf import settings
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.test import Client
 from django.urls import reverse
 
+import graphene
 from pytest_django.live_server_helper import LiveServer
 
 from aiarena.core.models import WebsiteUser
-from aiarena.core.utils import dict_camel_case, dict_get
+from aiarena.core.utils import dict_get
 
 
 class BrowserHelper:
@@ -34,43 +34,75 @@ class GraphQLTest:
 
     # GraphQL mutation query used by `mutate` method.
     mutation = None
+    # The mutation's name so that we can get the content from the JSON response
+    mutation_name = None
     # stored django test client for the last performed query, makes it possible
     # to check request/response attributes (like auth session)
     last_query_client = None
 
     def mutate(
         self,
-        expected_status: int = 200,
+        variables: dict = None,
+        expected_status: int = HTTPStatus.OK.value,
         mutation: str | None = None,
         login_user: WebsiteUser | None = None,
+        expected_validation_errors=None,
         **kwargs,
     ) -> dict | None:
         """
         Perform GraphQL mutation.
         """
-        kwargs = dict_camel_case(kwargs)
-        return self.query(
+        expected_validation_errors = expected_validation_errors or {}
+        response_data = self.query(
             query=(mutation or self.mutation),
             expected_status=expected_status,
             login_user=login_user,
-            variables=kwargs,
+            variables=variables,
+            **kwargs,
         )
+
+        if response_data:
+            mutation_data = response_data[self.mutation_name] or {}
+        else:
+            mutation_data = {}
+        actual_errors = {error["field"]: error["messages"] for error in mutation_data.get("errors", [])}
+        assert (
+            actual_errors == expected_validation_errors
+        ), f"Unexpected validation errors: {actual_errors}, expected {expected_validation_errors}"
+
+        return response_data
 
     def query(
         self,
         query: str,
         expected_status: int = HTTPStatus.OK.value,
+        expected_errors_like: list = None,
         variables: dict | None = None,
         login_user: WebsiteUser | None = None,
     ) -> dict | None:
         """Perform GraphQL query."""
+        expected_errors_like = expected_errors_like or []
+
         self.last_query_client = self.client(login_user)
+
         response = self.do_post(self.last_query_client, query, variables)
+
         assert response.status_code == expected_status, (
             f"Unexpected response status code: {response.status_code}\n" f"Response content: {response.content}"
         )
+
+        content = json.loads(response.content)
+        error_messages = [error["message"] for error in content.get("errors", [])]
+
+        for message in expected_errors_like:
+            for error in error_messages:
+                if message in error:
+                    break
+            else:
+                raise ValueError(f"Unexpected errors: {error_messages}\nResponse content: {content}")
+
         if response.status_code == HTTPStatus.OK.value:
-            return json.loads(response.content)
+            return json.loads(response.content)["data"]
 
     @classmethod
     def client(
@@ -80,53 +112,11 @@ class GraphQLTest:
         """
         Create django HTTP client.
         """
-        server_name = urlparse(settings.ROOT_URL).netloc
-
-        client = Client(SERVER_NAME=server_name)
+        client = Client()
         if login_user:
             client.force_login(login_user)
 
         return client
-
-    @classmethod
-    def assert_graphql_error(cls, response: dict, message: str):
-        """
-        Check GQL response contains given error message.
-        """
-        assert "errors" in response
-        messages = {error["message"] for error in response["errors"]}
-        if message not in messages:
-            msg = f'Expected to find "{message}" error, but found: {messages}'
-            raise AssertionError(msg)
-
-    @classmethod
-    def assert_graphql_error_like(cls, response: dict, substring: str):
-        """
-        Check GQL response contains given error message.
-        """
-        assert "errors" in response
-        messages = {error["message"] for error in response["errors"]}
-        for message in messages:
-            if substring in message:
-                return
-        msg = '"{}" wasn\'t found in error messages:\n{}'.format(
-            substring,
-            "\n".join(f" - {m}" for m in messages),
-        )
-        raise AssertionError(msg)
-
-    @classmethod
-    def assert_no_graphql_errors(cls, response: dict):
-        """
-        Check GQL response does not contain any errors.
-        """
-        err = {error["message"] for error in response.get("errors", [])}
-        msg = f"Expected no errors, but got: {err}"
-        assert not err, msg
-
-    @classmethod
-    def assert_access_denied(cls, response: dict):
-        cls.assert_graphql_error(response, "Access denied.")
 
     @classmethod
     def do_post(
@@ -163,3 +153,7 @@ class GraphQLTest:
         if not connection:
             return []
         return [edge["node"] for edge in connection["edges"]]
+
+    @staticmethod
+    def to_global_id(type_, id_: str):
+        return graphene.Node.to_global_id(type_, id_)

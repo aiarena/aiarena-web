@@ -2,8 +2,43 @@ from django.contrib.auth import authenticate, login, logout
 
 import graphene
 from graphene_django.types import ErrorType
+from graphql import GraphQLError
 
-from aiarena.graphql.common import CleanedInputMutation, CleanedInputType
+from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_if_annonymous_user
+from aiarena.graphql.types import BotType
+
+
+class UpdateBotInput(CleanedInputType):
+    id = graphene.ID()
+    bot_zip_publicly_downloadable = graphene.Boolean()
+    bot_data_enabled = graphene.Boolean()
+    bot_data_publicly_downloadable = graphene.Boolean()
+
+    class Meta:
+        required_fields = ["id"]
+
+
+class UpdateBot(CleanedInputMutation):
+    bot = graphene.Field(BotType)
+
+    class Meta:
+        input_class = UpdateBotInput
+
+    @classmethod
+    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateBotInput):
+        raise_if_annonymous_user(info=info)
+
+        bot = graphene.Node.get_node_from_global_id(info=info, global_id=input_object.id, only_type=BotType)
+        if bot.user.id != info.context.user.id:
+            raise GraphQLError("This is not your bot")
+
+        for attr, value in input_object.items():
+            if attr == "id":
+                continue
+            setattr(bot, attr, value)
+        bot.save()
+
+        return cls(errors=[], bot=bot)
 
 
 class PasswordSignInInput(CleanedInputType):
@@ -53,5 +88,6 @@ class SignOut(graphene.Mutation):
 
 
 class Mutation(graphene.ObjectType):
+    update_bot = UpdateBot.Field()
     password_sign_in = PasswordSignIn.Field()
     sign_out = SignOut.Field()
