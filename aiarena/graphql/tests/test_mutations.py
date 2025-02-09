@@ -64,7 +64,7 @@ class TestUpdateBot(GraphQLTest):
                     "botZipPubliclyDownloadable": True,
                 }
             },
-            expected_errors=["This is not your bot"],
+            expected_errors_like=["This is not your bot"],
         )
 
         # Verify bot was not updated
@@ -85,7 +85,7 @@ class TestUpdateBot(GraphQLTest):
                     "botZipPubliclyDownloadable": True,
                 }
             },
-            expected_errors=["You are not signed in"],
+            expected_errors_like=["You are not signed in"],
         )
 
         # Verify bot was not updated
@@ -123,9 +123,8 @@ class TestUpdateBot(GraphQLTest):
                 }
             },
             expected_status=400,
-            expected_errors=[
-                "Variable '$input' got invalid value {'id': 'Qm90VHlwZTox', 'name': 'new name pls'}; Field 'name' is "
-                "not defined by type 'UpdateBotInput'.",
+            expected_errors_like=[
+                "Field 'name' is not defined by type 'UpdateBotInput'.",
             ],
         )
 

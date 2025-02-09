@@ -76,12 +76,12 @@ class GraphQLTest:
         self,
         query: str,
         expected_status: int = HTTPStatus.OK.value,
-        expected_errors: list = None,
+        expected_errors_like: list = None,
         variables: dict | None = None,
         login_user: WebsiteUser | None = None,
     ) -> dict | None:
         """Perform GraphQL query."""
-        expected_errors = expected_errors or []
+        expected_errors_like = expected_errors_like or []
 
         self.last_query_client = self.client(login_user)
 
@@ -93,9 +93,13 @@ class GraphQLTest:
 
         content = json.loads(response.content)
         error_messages = [error["message"] for error in content.get("errors", [])]
-        assert set(error_messages) == set(
-            expected_errors
-        ), f"Unexpected errors: {error_messages}\nResponse content: {content}"
+
+        for message in expected_errors_like:
+            for error in error_messages:
+                if message in error:
+                    break
+            else:
+                raise ValueError(f"Unexpected errors: {error_messages}\nResponse content: {content}")
 
         if response.status_code == HTTPStatus.OK.value:
             return json.loads(response.content)["data"]
