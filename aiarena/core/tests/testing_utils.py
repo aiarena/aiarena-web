@@ -40,8 +40,7 @@ class TestAssetPaths:
 # the admin interface
 
 
-def create_game_races():
-    BotRace.create_all_races()
+def get_game_races():
     terran = BotRace.objects.get(label="T")
     zerg = BotRace.objects.get(label="Z")
     protoss = BotRace.objects.get(label="P")

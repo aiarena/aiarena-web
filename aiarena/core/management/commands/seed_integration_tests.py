@@ -9,8 +9,8 @@ from aiarena.core.tests.testing_utils import (
     TestingClient,
     create_arena_clients_with_matching_tokens,
     create_bot_for_competition,
-    create_game_races,
     create_open_competition_with_map,
+    get_game_races,
 )
 
 
@@ -74,7 +74,7 @@ class Command(BaseCommand):
             indepth_bot_statistics_enabled=True,
         )
 
-        protoss, terran, zerg = create_game_races()
+        protoss, terran, zerg = get_game_races()
 
         num_bots_to_create = num_acs * 2  # 2 bots per arena client
         self.create_bots_for_competition(competition, devadmin, terran, num_bots_to_create)

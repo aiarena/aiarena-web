@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
 from aiarena.core.models import Bot, CompetitionParticipation, Map, MapPool, News, WebsiteUser
-from aiarena.core.tests.testing_utils import TestingClient, create_arena_clients_with_matching_tokens, create_game_races
+from aiarena.core.tests.testing_utils import TestingClient, create_arena_clients_with_matching_tokens, get_game_races
 from aiarena.core.tests.tests import TestAssetPaths
 
 
@@ -101,7 +101,7 @@ class Command(BaseCommand):
         game = client.create_game("StarCraft II", ".SC2Map")
         gamemode = client.create_gamemode("Melee", game.id)
 
-        protoss, terran, zerg = create_game_races()
+        protoss, terran, zerg = get_game_races()
 
         competition1, competition2, competition3 = self.create_open_competitions(client, gamemode, terran)
         self.create_competition_maps(competition1, competition2, competition3, gamemode)
