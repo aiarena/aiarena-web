@@ -62,6 +62,7 @@ class BaseTestMixin(TestCase):
     def _create_game_mode_and_open_competition(self, trusted=True):
         game = self.test_client.create_game("StarCraft II", ".SC2Map")
         gamde_mode = self.test_client.create_gamemode("Melee", game.id)
+        BotRace.create_all_races()
         competition = self.test_client.create_competition(
             "Competition 1", "L", gamde_mode.id, require_trusted_infrastructure=trusted
         )

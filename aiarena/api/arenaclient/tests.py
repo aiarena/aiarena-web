@@ -161,6 +161,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         self.test_client.login(self.staffUser1)
         game = self.test_client.create_game("StarCraft II", ".SC2Map")
         game_mode = self.test_client.create_gamemode("Melee", game.id)
+        BotRace.create_all_races()
         Map.objects.create(name="testmap", game_mode=game_mode)
 
         bot1 = self._create_bot(self.regularUser1, "testbot1", BotRace.terran())

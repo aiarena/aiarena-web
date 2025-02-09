@@ -17,6 +17,7 @@ class LadderMatchStarterTests(TestCase):
         # todo: this should be in a fixture or factory
         game = Game.objects.create(name="testgame")
         game_mode = GameMode.objects.create(name="testgamemode", game=game)
+        BotRace.create_all_races()
         bot_race = BotRace.objects.first()
         competition = Competition.objects.create(name="testcompetition", type="L", game_mode=game_mode)
         competition.playable_races.add(bot_race)
