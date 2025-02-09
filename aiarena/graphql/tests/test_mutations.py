@@ -94,7 +94,7 @@ class TestUpdateBot(GraphQLTest):
 
     def test_required_field_not_specified(self, user, bot):
         """
-        Test updating a bot without being authenticated.
+        Test omitting a required field when updating the bot.
         """
         self.mutate(
             login_user=user,
