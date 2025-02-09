@@ -5,7 +5,7 @@ from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.base import BrowserHelper
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def all_bot_races(db):
     BotRace.create_all_races()
 
@@ -44,7 +44,7 @@ def other_user(db):
 
 
 @pytest.fixture
-def bot(db, user):
+def bot(db, user, all_bot_races):
     return Bot.objects.create(
         user=user,
         name="My Bot",
