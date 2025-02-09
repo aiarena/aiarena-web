@@ -88,7 +88,7 @@ class TestUpdateBot(GraphQLTest):
             expected_errors=["You are not signed in"],
         )
 
-        # Optionally, verify bot was not updated
+        # Verify bot was not updated
         bot.refresh_from_db()
         assert bot.bot_zip_publicly_downloadable is False
 
@@ -106,6 +106,29 @@ class TestUpdateBot(GraphQLTest):
             expected_validation_errors={"id": ["Required field"]},
         )
 
-        # Optionally, verify bot was not updated
+        # Verify bot was not updated
         bot.refresh_from_db()
         assert bot.bot_zip_publicly_downloadable is False
+
+    def test_cannot_specify_attributes_not_in_input(self, user, bot):
+        """
+        Test that adding an extra field to the input results in an error.
+        """
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "id": self.to_global_id(BotType, bot.id),
+                    "name": "new name pls",
+                }
+            },
+            expected_status=400,
+            expected_errors=[
+                "Variable '$input' got invalid value {'id': 'Qm90VHlwZTox', 'name': 'new name pls'}; Field 'name' is "
+                "not defined by type 'UpdateBotInput'.",
+            ],
+        )
+
+        # Verify bot was not updated
+        bot.refresh_from_db()
+        assert bot.bot_zip_publicly_downloadable != "new name pls"

@@ -61,7 +61,10 @@ class GraphQLTest:
             **kwargs,
         )
 
-        mutation_data = response_data[self.mutation_name] or {}
+        if response_data:
+            mutation_data = response_data[self.mutation_name] or {}
+        else:
+            mutation_data = {}
         actual_errors = {error["field"]: error["messages"] for error in mutation_data.get("errors", [])}
         assert (
             actual_errors == expected_validation_errors
