@@ -9,7 +9,6 @@ from aiarena.graphql.types import BotType
 
 
 class UpdateBotInput(CleanedInputType):
-    name = graphene.String()
     id = graphene.ID()
     bot_zip_publicly_downloadable = graphene.Boolean()
     bot_data_enabled = graphene.Boolean()
