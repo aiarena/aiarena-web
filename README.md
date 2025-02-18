@@ -5,7 +5,7 @@ A website for running the aiarena.net infrastructure.
 
 [Dev Install instructions](./doc/INSTALL.md)
 
-[Frontend] (./frontend/README.md)
+[Frontend](./frontend/README.md)
 
 [Working with infrastructure](./deploy/README.md)
 
