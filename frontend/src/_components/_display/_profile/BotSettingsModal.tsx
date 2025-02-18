@@ -11,9 +11,16 @@ interface TrophiesModalProps {
 
 export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalProps) {
   const [biography, setBiography] = useState(bot.biography || "");
+  const [botZip] = useState(bot.botZip || "")
   // const [botZipUpdated, setBotZipUpdated] = useState(bot.botZipUpdated || false);
   const [botDataPubliclyDownloadable, setBotDataPubliclyDownloadable] = useState(bot.botDataPubliclyDownloadable || false);
   const [botDataEnabled, setBotDataEnabled] = useState(bot.botDataEnabled || false);
+
+  const handleDownload = (url: string) => {
+    const mirrorUrl = "https://aiarena.net/"
+    console.log("Downloading," + mirrorUrl + url)
+    window.location.href = mirrorUrl + url
+  }
 
   const handleSaveBiography = () => {
     console.log("Biography saved:", biography);
@@ -40,7 +47,7 @@ export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalPro
         <h3 className="text-lg font-bold text-gray-200">Bot Settings</h3>
         <button
           className="bg-customGreen text-white py-2 px-4 rounded w-full"
-          onClick={() => console.log("Download Bot Zip")}
+          onClick={() => handleDownload(botZip)}
         >
           Download Bot Zip
         </button>

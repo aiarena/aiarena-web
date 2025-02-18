@@ -5,27 +5,35 @@ A website for running the aiarena.net infrastructure.
 
 [Dev Install instructions](./doc/INSTALL.md)
 
+[Frontend] (./frontend/README.md)
+
 [Working with infrastructure](./deploy/README.md)
 
 ## Module structure:
-### aiarena/core
+### /aiarena/core
 Core project functionality
 
-### aiarena/api
+### /aiarena/api
 Web API endpoints and functionality.  
 This root api folder contains views for public use.
 
-#### aiarena/api/arenaclient
+#### /aiarena/api/arenaclient
 API endpoints specifically for use by the arenaclients to obtain new matches and report results.
 
-#### aiarena/api/stream
+#### /aiarena/api/stream
 API endpoints specifically for use by the livestream player to obtain a curated list of match replays to feature.
 
-### aiarena/frontend
+### /aiarena/frontend
 Django template website frontend
 
-### aiarena/patreon
+### /aiarena/graphql
+GraphQL API currently used by the Next.JS frontend
+
+### /aiarena/patreon
 A module for linking website users to their patreon counterparts.
+
+### /frontend
+Next.JS / Tailwind frontend using GraphQL
 
 ## License
 

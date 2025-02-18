@@ -59,11 +59,7 @@ export default function BotHeaderSection({ bot }: ProfileBotProps) {
             <p className="text-sm text-gray-400">
               <span className="font-bold">Game:</span> Starcraft II
             </p>
-            {bot.race && (
-              <p className="text-sm text-gray-400">
-                <span className="font-bold">Race:</span> {bot.race}
-              </p>
-            )}
+         
               {bot.type && (
               <p className="text-sm text-gray-400">
                 <span className="font-bold">Type:</span> {bot.type}

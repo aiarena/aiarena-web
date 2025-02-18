@@ -14,9 +14,13 @@ export const useUserBots = (userId: string | null) => {
               name
               created
               type
-              botZipUpdated
+              url
+              botData
               botDataEnabled
               botDataPubliclyDownloadable
+              botZip
+              botZipPubliclyDownloadable
+              botZipUpdated
             }
           }
         }
@@ -36,12 +40,15 @@ export const useUserBots = (userId: string | null) => {
   const botNodes = getNodes(data.bots);
   return botNodes.map((node) => ({
     id: node.id,
-    created: String(node.created), // Ensure string
     name: node.name || "", // Fallback for title
+    created: String(node.created), // Ensure string
     type: node.type || "", // Fallback for type
-    botZipUpdated: node.botZipUpdated || undefined,
+    url: node.url || "",
+    botData: node.botData || "",
     botDataEnabled: node.botDataEnabled || false,
     botDataPubliclyDownloadable: node.botDataPubliclyDownloadable || false,
-    
+    botZip: node.botZip || "", 
+    botZipPubliclyDownloadable: node. botZipPubliclyDownloadable || false,
+    botZipUpdated: node.botZipUpdated || undefined,    
   }));
 };
