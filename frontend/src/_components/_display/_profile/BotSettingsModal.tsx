@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Modal from "../Modal";
 
 import { Bot } from "@/_components/_display/ProfileBotOverviewList";
+import { useUpdateUserBot } from "@/_components/_hooks/useUpdateUserBot";
 
 interface TrophiesModalProps {
   bot: Bot;
@@ -10,11 +11,9 @@ interface TrophiesModalProps {
 }
 
 export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalProps) {
+  const { updateBot, botInFlightField } = useUpdateUserBot();
   const [biography, setBiography] = useState(bot.biography || "");
   const [botZip] = useState(bot.botZip || "")
-  // const [botZipUpdated, setBotZipUpdated] = useState(bot.botZipUpdated || false);
-  const [botDataPubliclyDownloadable, setBotDataPubliclyDownloadable] = useState(bot.botDataPubliclyDownloadable || false);
-  const [botDataEnabled, setBotDataEnabled] = useState(bot.botDataEnabled || false);
 
   const handleDownload = (url: string) => {
     const mirrorUrl = "https://aiarena.net/"
@@ -57,20 +56,13 @@ export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalPro
         >
           Upload Bot Zip
         </button>
-        {/* <div className="flex items-center mt-2">
-          <input
-            type="checkbox"
-            checked={botZipUpdated}
-            onChange={() => setBotZipUpdated(!botZipUpdated)}
-            className="mr-2"
-          />
-          <label className="text-gray-300">Mark Bot Zip Publicly Downloadable</label>
-        </div> */}
+      
         <div className="flex items-center mt-2">
           <input
             type="checkbox"
-            checked={botDataPubliclyDownloadable}
-            onChange={() => setBotDataPubliclyDownloadable(!botDataPubliclyDownloadable)}
+            checked={bot.botDataPubliclyDownloadable }
+            onChange={() => updateBot(bot.id, { botDataPubliclyDownloadable: !bot.botDataPubliclyDownloadable })}
+            disabled={botInFlightField === "botDataPubliclyDownloadable"}
             className="mr-2"
           />
           <label className="text-gray-300">Mark Bot Data Publicly Downloadable</label>
@@ -78,8 +70,9 @@ export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalPro
         <div className="flex items-center mt-2">
           <input
             type="checkbox"
-            checked={botDataEnabled}
-            onChange={() => setBotDataEnabled(!botDataEnabled)}
+            checked={bot.botDataEnabled}
+            onChange={() => updateBot(bot.id, { botDataEnabled: !bot.botDataEnabled})}
+            disabled={botInFlightField === "botDataEnabled"}
             className="mr-2"
           />
           <label className="text-gray-300">Enable Bot Data</label>
