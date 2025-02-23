@@ -9,7 +9,7 @@ django-avatar==8.0.0
 django-bootstrap-form==3.4
 django-constance[redis]==3.1.0
 django-debug-toolbar==3.2.2
-django-dirtyfields==1.9.3
+django-dirtyfields==1.9.6
 django-discord-bind @ git+https://github.com/aiarena/django-discord-bind.git@6c987450c2573ae73537d4ea89ec76679c0418f2
 django-extensions==3.2.3
 django-filter==22.1
