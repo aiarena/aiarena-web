@@ -1,7 +1,7 @@
 -r requirements.LOCAL.txt
 -r requirements.txt
 Werkzeug==3.0.6
-black==23.7.0
+black==25.1.0
 coverage==7.4.0
 django-constance[database]==3.1.0
 django-fakeredis==0.1.2
