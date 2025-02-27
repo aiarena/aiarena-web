@@ -28,11 +28,10 @@ export default function SettingsModal({
 
   const handleSaveBiography = () => {
     console.log("Biography saved:", biography);
-    // Simulate API save call here
     updateBot(bot.id, {
       wikiArticleContent: biography,
     })
-    setHasUnsavedChanges(false); // Reset unsaved changes tracking
+    setHasUnsavedChanges(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
