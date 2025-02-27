@@ -3,6 +3,9 @@ from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
+from wiki.models import Article 
+from wiki.models import ArticleRevision
+
 from aiarena.core import models
 from aiarena.core.services import Ladders
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
@@ -54,10 +57,10 @@ class BotFilterSet(FilterSet):
         model = models.Bot
         fields = ["name", "user_id", "order_by"]
 
-
 class BotType(DjangoObjectTypeWithUID):
     url = graphene.String()
     competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
+    wiki_article = graphene.Field("aiarena.graphql.ArticleType")
 
     class Meta:
         model = models.Bot
@@ -73,7 +76,6 @@ class BotType(DjangoObjectTypeWithUID):
             "bot_data_publicly_downloadable",
             "plays_race",
             "type",
-            "wiki_article",
         ]
         filterset_class = BotFilterSet
         connection_class = CountingConnection
@@ -85,6 +87,39 @@ class BotType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_competition_participations(root: models.Bot, info, **args):
         return root.competition_participations.all()
+    
+    @staticmethod
+    def resolve_wiki_article(root: models.Bot, info, **args):
+        return root.wiki_article
+    
+
+class ArticleType(DjangoObjectTypeWithUID):
+    current_revision = graphene.Field("aiarena.graphql.ArticleRevisionType")
+
+    class Meta:
+        model = Article
+        fields = [
+            "current_revision",
+            "created",
+            "modified",
+            "owner",
+        ]
+        filter_fields = []    
+    
+    @staticmethod
+    def resolve_current_revision(root: Article, info, **args):
+        return root.current_revision
+    
+class ArticleRevisionType(DjangoObjectTypeWithUID): 
+    class Meta: 
+        model = ArticleRevision
+        fields = [
+            "article",
+            "content",
+            "title",
+        ]
+        filter_fields = []
+
 
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):

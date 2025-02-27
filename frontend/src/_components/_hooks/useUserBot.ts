@@ -21,6 +21,11 @@ export const useUserBots = (userId: string | null) => {
               botZip
               botZipPubliclyDownloadable
               botZipUpdated
+              wikiArticle {
+                currentRevision {
+                  content
+                }
+              }
             }
           }
         }
@@ -32,7 +37,7 @@ export const useUserBots = (userId: string | null) => {
 
   // Handle cases where no userId is passed
   if (!userId) {
-    console.log("NO USER ID IN REACT HOOK. (useUserBot.ts) - it's okay.")
+    console.log("No userId.")
     return [];
   }
 
@@ -44,6 +49,7 @@ export const useUserBots = (userId: string | null) => {
     created: String(node.created), // Ensure string
     type: node.type || "", // Fallback for type
     url: node.url || "",
+    wikiArticle: node?.wikiArticle?.currentRevision?.content || "",
     botData: node.botData || "",
     botDataEnabled: node.botDataEnabled || false,
     botDataPubliclyDownloadable: node.botDataPubliclyDownloadable || false,
