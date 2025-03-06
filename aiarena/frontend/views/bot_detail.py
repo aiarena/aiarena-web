@@ -1,5 +1,6 @@
 from django import forms
 from django.db.models import F, Prefetch, Q
+from django.shortcuts import redirect
 from django.utils.safestring import mark_safe
 from django.views.generic import DetailView
 
@@ -208,6 +209,15 @@ class RelativeResultFilter(filters.FilterSet):
 class BotDetail(DetailView):
     model = Bot
     template_name = "bot.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        # This aims to prevent crawlers from overloading our database -
+        # they're scanning high page numbers with weird sorts
+        # while pretending to be actual users (UserAgent looks like a browser)
+        page_number = int(self.request.GET.get("page", "1"))
+        if page_number > 1 and not request.user.is_authenticated:
+            return redirect("login")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
