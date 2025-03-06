@@ -54,8 +54,8 @@ def track_harakiri_request(get_response):
         if settings.SENTRY_DSN and settings.SEND_CRASH_REPORTS:
             environ["SENTRY_DSN"] = settings.SENTRY_DSN
 
-        if settings.SERVER_NAME:
-            environ["TRACK_SERVER_NAME"] = settings.SERVER_NAME
+        if server_name := getattr(settings, "SERVER_NAME", None):
+            environ["TRACK_SERVER_NAME"] = server_name
         elif hasattr(socket, "gethostname"):  # emulate sentry client behavior
             environ["TRACK_SERVER_NAME"] = socket.gethostname()
 
