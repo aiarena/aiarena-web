@@ -51,7 +51,7 @@ def track_harakiri_request(get_response):
         if (user := getattr(request, "user", None)) and user.is_authenticated:
             user_id = str(user.id)
 
-        if settings.SENTRY_DSN and settings.SEND_CRASH_REPORTS:
+        if settings.SENTRY_DSN:
             environ["SENTRY_DSN"] = settings.SENTRY_DSN
 
         if server_name := getattr(settings, "SERVER_NAME", None):
