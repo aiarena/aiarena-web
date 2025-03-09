@@ -5,4 +5,4 @@ boto3==1.33.6  # https://github.com/boto/boto3/blob/develop/CHANGELOG.rst
 click==8.1.3  # https://click.palletsprojects.com/en/8.1.x/changes/
 jinja2==3.1.2  # https://github.com/pallets/jinja/blob/master/CHANGES.rst
 questionary==2.0.1
-sarge==0.1.7  # https://sarge.readthedocs.io/en/latest/overview.html#change-log
+sarge==0.1.7.post1  # https://sarge.readthedocs.io/en/latest/overview.html#change-log
