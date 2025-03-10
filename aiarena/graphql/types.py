@@ -60,7 +60,7 @@ class BotFilterSet(FilterSet):
 class BotType(DjangoObjectTypeWithUID):
     url = graphene.String()
     competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
-    wiki_article = graphene.Field("aiarena.graphql.ArticleType")
+    wiki_article = graphene.String()
 
     class Meta:
         model = models.Bot
@@ -90,37 +90,8 @@ class BotType(DjangoObjectTypeWithUID):
     
     @staticmethod
     def resolve_wiki_article(root: models.Bot, info, **args):
-        return root.wiki_article
+        return root.get_wiki_article().current_revision.content
     
-
-class ArticleType(DjangoObjectTypeWithUID):
-    current_revision = graphene.Field("aiarena.graphql.ArticleRevisionType")
-
-    class Meta:
-        model = Article
-        fields = [
-            "current_revision",
-            "created",
-            "modified",
-            "owner",
-        ]
-        filter_fields = []    
-    
-    @staticmethod
-    def resolve_current_revision(root: Article, info, **args):
-        return root.current_revision
-    
-class ArticleRevisionType(DjangoObjectTypeWithUID): 
-    class Meta: 
-        model = ArticleRevision
-        fields = [
-            "article",
-            "content",
-            "title",
-        ]
-        filter_fields = []
-
-
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()

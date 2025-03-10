@@ -21,11 +21,7 @@ export const useUserBots = (userId: string | null) => {
               botZip
               botZipPubliclyDownloadable
               botZipUpdated
-              wikiArticle {
-                currentRevision {
-                  content
-                }
-              }
+              wikiArticle 
             }
           }
         }
@@ -49,7 +45,7 @@ export const useUserBots = (userId: string | null) => {
     created: String(node.created), // Ensure string
     type: node.type || "", // Fallback for type
     url: node.url || "",
-    wikiArticle: node?.wikiArticle?.currentRevision?.content || "",
+    wikiArticle: node?.wikiArticle || "",
     botData: node.botData || "",
     botDataEnabled: node.botDataEnabled || false,
     botDataPubliclyDownloadable: node.botDataPubliclyDownloadable || false,

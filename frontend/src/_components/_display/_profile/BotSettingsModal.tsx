@@ -29,7 +29,7 @@ export default function SettingsModal({
   const handleSaveBiography = () => {
     console.log("Biography saved:", biography);
     updateBot(bot.id, {
-      wikiArticleContent: biography,
+      wikiArticle: biography,
     })
     setHasUnsavedChanges(false);
   };
