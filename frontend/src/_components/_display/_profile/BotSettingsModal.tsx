@@ -10,20 +10,33 @@ interface TrophiesModalProps {
   onClose: () => void;
 }
 
-export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalProps) {
+export default function SettingsModal({
+  bot,
+  isOpen,
+  onClose,
+}: TrophiesModalProps) {
   const { updateBot, botInFlightField } = useUpdateUserBot();
-  const [biography, setBiography] = useState(bot.biography || "");
-  const [botZip] = useState(bot.botZip || "")
+  const [botZip] = useState(bot.botZip || "");
+  const [biography, setBiography] = useState(bot.wikiArticle);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const handleDownload = (url: string) => {
-    const mirrorUrl = "https://aiarena.net/"
-    console.log("Downloading," + mirrorUrl + url)
-    window.location.href = mirrorUrl + url
-  }
+    const mirrorUrl = "https://aiarena.net/";
+    console.log("Downloading: " + mirrorUrl + url);
+    window.location.href = mirrorUrl + url;
+  };
 
   const handleSaveBiography = () => {
     console.log("Biography saved:", biography);
-    // Add logic to save the biography
+    updateBot(bot.id, {
+      wikiArticle: biography,
+    })
+    setHasUnsavedChanges(false);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setBiography(e.target.value);
+    setHasUnsavedChanges(e.target.value !== bot.wikiArticle);
   };
 
   return isOpen ? (
@@ -34,8 +47,11 @@ export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalPro
           className="w-full bg-gray-700 text-white p-2 rounded"
           rows={4}
           value={biography}
-          onChange={(e) => setBiography(e.target.value)}
+          onChange={handleChange}
         />
+        {hasUnsavedChanges && (
+          <p className="text-sm text-yellow-400">Unsaved changes</p>
+        )}
         <button
           onClick={handleSaveBiography}
           className="w-full bg-customGreen text-white py-2 rounded"
@@ -56,22 +72,30 @@ export default function SettingsModal({ bot, isOpen, onClose }: TrophiesModalPro
         >
           Upload Bot Zip
         </button>
-      
+
         <div className="flex items-center mt-2">
           <input
             type="checkbox"
-            checked={bot.botDataPubliclyDownloadable }
-            onChange={() => updateBot(bot.id, { botDataPubliclyDownloadable: !bot.botDataPubliclyDownloadable })}
+            checked={bot.botDataPubliclyDownloadable}
+            onChange={() =>
+              updateBot(bot.id, {
+                botDataPubliclyDownloadable: !bot.botDataPubliclyDownloadable,
+              })
+            }
             disabled={botInFlightField === "botDataPubliclyDownloadable"}
             className="mr-2"
           />
-          <label className="text-gray-300">Mark Bot Data Publicly Downloadable</label>
+          <label className="text-gray-300">
+            Mark Bot Data Publicly Downloadable
+          </label>
         </div>
         <div className="flex items-center mt-2">
           <input
             type="checkbox"
             checked={bot.botDataEnabled}
-            onChange={() => updateBot(bot.id, { botDataEnabled: !bot.botDataEnabled})}
+            onChange={() =>
+              updateBot(bot.id, { botDataEnabled: !bot.botDataEnabled })
+            }
             disabled={botInFlightField === "botDataEnabled"}
             className="mr-2"
           />

@@ -35,7 +35,7 @@ export interface Bot {
 
   botZipUpdated?: string;
 
-  biography?: string;
+  wikiArticle?: string;
   trophies?: Trophy[];
   activeCompetitions?: ActiveCompetition[];
 }

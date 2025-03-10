@@ -28,6 +28,7 @@ class TestUpdateBot(GraphQLTest):
         assert bot.bot_zip_publicly_downloadable is False
         assert bot.bot_data_enabled is False
         assert bot.bot_data_publicly_downloadable is False
+        assert bot.get_wiki_article().current_revision.content == ""
 
         self.mutate(
             login_user=user,
@@ -38,6 +39,7 @@ class TestUpdateBot(GraphQLTest):
                     "botZipPubliclyDownloadable": True,
                     "botDataEnabled": True,
                     "botDataPubliclyDownloadable": True,
+                    "wikiArticle": "#1Some Content"
                 }
             },
         )
@@ -47,6 +49,7 @@ class TestUpdateBot(GraphQLTest):
         assert bot.bot_zip_publicly_downloadable is True
         assert bot.bot_data_enabled is True
         assert bot.bot_data_publicly_downloadable is True
+        assert bot.get_wiki_article().current_revision.content == "#1Some Content"
 
     def test_update_bot_unauthorized(self, user, other_user, bot):
         """
@@ -55,13 +58,15 @@ class TestUpdateBot(GraphQLTest):
         # We expect the bot fixture to be created with those values
         assert bot.user == user
         assert bot.bot_zip_publicly_downloadable is False
-
+        assert bot.get_wiki_article().current_revision.content == ""
+    
         self.mutate(
             login_user=other_user,
             variables={
                 "input": {
                     "id": self.to_global_id(BotType, bot.id),
                     "botZipPubliclyDownloadable": True,
+                    "wikiArticle": "Some Content"
                 }
             },
             expected_errors_like=['bobby cannot perform "write" on "My Bot"'],
@@ -70,6 +75,7 @@ class TestUpdateBot(GraphQLTest):
         # Verify bot was not updated
         bot.refresh_from_db()
         assert bot.bot_zip_publicly_downloadable is False
+        assert bot.get_wiki_article().current_revision.content == ""
 
     def test_update_bot_unauthenticated(self, bot):
         """
@@ -77,12 +83,14 @@ class TestUpdateBot(GraphQLTest):
         """
         # We expect the bot fixture to be created with those values
         assert bot.bot_zip_publicly_downloadable is False
+        assert bot.get_wiki_article().current_revision.content == ""
 
         self.mutate(
             variables={
                 "input": {
                     "id": self.to_global_id(BotType, bot.id),
                     "botZipPubliclyDownloadable": True,
+                    "wikiArticle": "Some Content"
                 }
             },
             expected_errors_like=['AnonymousUser cannot perform "write" on "My Bot"'],
@@ -91,6 +99,7 @@ class TestUpdateBot(GraphQLTest):
         # Verify bot was not updated
         bot.refresh_from_db()
         assert bot.bot_zip_publicly_downloadable is False
+        assert bot.get_wiki_article().current_revision.content == ""
 
     def test_required_field_not_specified(self, user, bot):
         """
@@ -101,6 +110,7 @@ class TestUpdateBot(GraphQLTest):
             variables={
                 "input": {
                     "botZipPubliclyDownloadable": True,
+                    "wikiArticle": "Some Content"
                 }
             },
             expected_validation_errors={"id": ["Required field"]},
@@ -109,6 +119,7 @@ class TestUpdateBot(GraphQLTest):
         # Verify bot was not updated
         bot.refresh_from_db()
         assert bot.bot_zip_publicly_downloadable is False
+        assert bot.get_wiki_article().current_revision.content == ""
 
     def test_cannot_specify_attributes_not_in_input(self, user, bot):
         """
