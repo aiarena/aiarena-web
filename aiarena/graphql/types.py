@@ -58,6 +58,7 @@ class BotFilterSet(FilterSet):
 class BotType(DjangoObjectTypeWithUID):
     url = graphene.String()
     competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
+    wiki_article = graphene.String()
 
     class Meta:
         model = models.Bot
@@ -73,7 +74,6 @@ class BotType(DjangoObjectTypeWithUID):
             "bot_data_publicly_downloadable",
             "plays_race",
             "type",
-            "wiki_article",
         ]
         filterset_class = BotFilterSet
         connection_class = CountingConnection
@@ -85,6 +85,10 @@ class BotType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_competition_participations(root: models.Bot, info, **args):
         return root.competition_participations.all()
+
+    @staticmethod
+    def resolve_wiki_article(root: models.Bot, info, **args):
+        return root.get_wiki_article().current_revision.content
 
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):

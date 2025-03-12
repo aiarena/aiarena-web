@@ -4,6 +4,8 @@ import { graphql, useMutation } from 'react-relay';
 import { useUpdateUserBotMutation } from './__generated__/useUpdateUserBotMutation.graphql';
 import { useState } from 'react';
 
+
+
 const mutation = graphql`
   mutation useUpdateUserBotMutation($input: UpdateBotInput!) {
     updateBot(input: $input) {
@@ -12,6 +14,7 @@ const mutation = graphql`
         botDataEnabled
         botDataPubliclyDownloadable
         botZipPubliclyDownloadable
+        wikiArticle
       }
     }
   }
@@ -25,6 +28,7 @@ export const useUpdateUserBot = () => {
     botDataEnabled: boolean;
     botDataPubliclyDownloadable: boolean;
     botZipPubliclyDownloadable: boolean;
+    wikiArticle: string;
   }>) => {
     return new Promise((resolve, reject) => {
       const fieldBeingUpdated = Object.keys(updatedFields)[0]; // Track only the first field
