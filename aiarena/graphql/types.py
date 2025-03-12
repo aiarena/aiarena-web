@@ -54,6 +54,7 @@ class BotFilterSet(FilterSet):
         model = models.Bot
         fields = ["name", "user_id", "order_by"]
 
+
 class BotType(DjangoObjectTypeWithUID):
     url = graphene.String()
     competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
@@ -84,11 +85,11 @@ class BotType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_competition_participations(root: models.Bot, info, **args):
         return root.competition_participations.all()
-    
+
     @staticmethod
     def resolve_wiki_article(root: models.Bot, info, **args):
         return root.get_wiki_article().current_revision.content
-    
+
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()

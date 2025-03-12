@@ -39,7 +39,7 @@ class TestUpdateBot(GraphQLTest):
                     "botZipPubliclyDownloadable": True,
                     "botDataEnabled": True,
                     "botDataPubliclyDownloadable": True,
-                    "wikiArticle": "#1Some Content"
+                    "wikiArticle": "#1Some Content",
                 }
             },
         )
@@ -59,14 +59,14 @@ class TestUpdateBot(GraphQLTest):
         assert bot.user == user
         assert bot.bot_zip_publicly_downloadable is False
         assert bot.get_wiki_article().current_revision.content == ""
-    
+
         self.mutate(
             login_user=other_user,
             variables={
                 "input": {
                     "id": self.to_global_id(BotType, bot.id),
                     "botZipPubliclyDownloadable": True,
-                    "wikiArticle": "Some Content"
+                    "wikiArticle": "Some Content",
                 }
             },
             expected_errors_like=['bobby cannot perform "write" on "My Bot"'],
@@ -90,7 +90,7 @@ class TestUpdateBot(GraphQLTest):
                 "input": {
                     "id": self.to_global_id(BotType, bot.id),
                     "botZipPubliclyDownloadable": True,
-                    "wikiArticle": "Some Content"
+                    "wikiArticle": "Some Content",
                 }
             },
             expected_errors_like=['AnonymousUser cannot perform "write" on "My Bot"'],
@@ -107,12 +107,7 @@ class TestUpdateBot(GraphQLTest):
         """
         self.mutate(
             login_user=user,
-            variables={
-                "input": {
-                    "botZipPubliclyDownloadable": True,
-                    "wikiArticle": "Some Content"
-                }
-            },
+            variables={"input": {"botZipPubliclyDownloadable": True, "wikiArticle": "Some Content"}},
             expected_validation_errors={"id": ["Required field"]},
         )
 

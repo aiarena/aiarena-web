@@ -14,9 +14,10 @@ class UpdateBotInput(CleanedInputType):
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
     wiki_article = graphene.String()
-    
+
     class Meta:
         required_fields = ["id"]
+
 
 class UpdateBot(CleanedInputMutation):
     bot = graphene.Field(BotType)
@@ -30,10 +31,10 @@ class UpdateBot(CleanedInputMutation):
         raise_for_access(info, bot)
 
         for attr, value in input_object.items():
-            if attr in ["id", "wiki_article"]: 
+            if attr in ["id", "wiki_article"]:
                 continue
             setattr(bot, attr, value)
-            
+
         if input_object.wiki_article:
             Bot.update_bot_wiki_article(bot, input_object.wiki_article, info.context)
 
