@@ -4,7 +4,6 @@ import graphene
 from graphene_django.types import ErrorType
 
 from aiarena.core.models.bot import Bot
-
 from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
 from aiarena.graphql.types import BotType
 

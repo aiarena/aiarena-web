@@ -3,9 +3,6 @@ from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 
-from wiki.models import Article 
-from wiki.models import ArticleRevision
-
 from aiarena.core import models
 from aiarena.core.services import Ladders
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
