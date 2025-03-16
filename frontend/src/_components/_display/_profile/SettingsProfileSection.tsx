@@ -6,7 +6,7 @@ import { User, Viewer } from "@/_components/_hooks/useViewer";
 
 
 interface SettingsProfileSection {
-    viewer?: Viewer
+    viewer: Viewer
 }
 
 export default function SettingsProfileSection({

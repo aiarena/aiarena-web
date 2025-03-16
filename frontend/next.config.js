@@ -32,7 +32,19 @@ const nextConfig = {
   images: {
     loader: 'default',
     path: isDev ? '/_next/image' : 'https://aiarena.net/new-frontend/_next/image',
-    domains: isDev ? ["localhost", "localhost:8000"] : ["aiarena.net"],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8000',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'aiarena.net',
+        pathname: '/**',
+      },
+    ],
   },
   typescript: {
     ignoreBuildErrors: true,

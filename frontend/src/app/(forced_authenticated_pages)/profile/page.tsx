@@ -20,7 +20,7 @@ export default function Page() {
 
   const [activeTab, setActiveTab] = useState("Bots");
   const userBots = useUserBots(viewer?.user?.id  || null);
-  if (viewer?.user === null ) {
+  if (viewer === null ) {
     // console.log("Compared")
     // router.push("/");
     redirect('/');    // return null;
@@ -49,15 +49,15 @@ export default function Page() {
           <div className="mt-8">
             {activeTab === "Bots" && (
               <div id="bot-overview">
-                  <ProfileBotOverviewList bots={userBots} activeBotsLimit = {viewer?.user.activeBotsLimit} />
+                  <ProfileBotOverviewList bots={userBots} activeBotsLimit = {viewer?.activeBotsLimit} />
               </div>
             )}
 
             {activeTab === "Requested Matches" && (
               <div id="matches">
                   <RequestMatchesSection
-                  requestMatchesCountLeft={viewer?.user?.requestMatchesCountLeft}
-                  requestMatchesLimit={viewer?.user?.requestMatchesLimit}
+                  requestMatchesCountLeft={viewer?.requestMatchesCountLeft}
+                  requestMatchesLimit={viewer?.requestMatchesLimit}
                 />
               </div>
             )}

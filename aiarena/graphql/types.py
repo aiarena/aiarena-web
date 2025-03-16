@@ -9,11 +9,14 @@ from aiarena.core import models
 from aiarena.core.services import Ladders
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
+from aiarena.core.services import SupporterBenefits
+from aiarena.core.services.internal import match_requests
 
 class UserType(DjangoObjectTypeWithUID):
-    active_bots_limit = graphene.Int()
-    request_matches_limit = graphene.Int()
-    request_matches_count_left = graphene.Int()
+
+    # This is the public user type.
+    # put data everyone should be able view here.
+
     own_bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
     avatar_url = graphene.String()
 
@@ -22,23 +25,10 @@ class UserType(DjangoObjectTypeWithUID):
         fields = [
             "id",
             "username",
-            "email",
             "patreon_level",
             "date_joined",
         ]
         filter_fields = []
-
-    @staticmethod
-    def resolve_active_bots_limit(root: models.User, info, **args):
-        return models.User.get_active_bots_limit(root)
-
-    @staticmethod
-    def resolve_request_matches_limit(root: models.User, info, **args):
-        return root.requested_matches_limit
-
-    @staticmethod
-    def resolve_request_matches_count_left(root: models.User, info, **args):
-        return root.match_request_count_left
 
     @staticmethod
     def resolve_own_bots(root: models.User, info, **args):
@@ -201,8 +191,16 @@ class NewsType(DjangoObjectTypeWithUID):
 
 
 class ViewerType(graphene.ObjectType):
+
+    # This is the private viewer user type.
+    # Put data only the logged in user should be able view here.
+    
     user = graphene.Field("aiarena.graphql.UserType")
     api_token = graphene.String()
+    email = graphene.String()
+    active_bots_limit = graphene.Int()
+    request_matches_limit = graphene.Int()
+    request_matches_count_left = graphene.Int()
 
     @staticmethod
     def resolve_user(root: models.User, info, **args):
@@ -211,6 +209,22 @@ class ViewerType(graphene.ObjectType):
     @staticmethod
     def resolve_api_token(root: models.User, info):
         return Token.objects.get(user=info.context.user)
+    
+    @staticmethod
+    def resolve_email(root: models.User, info):
+        return root.email
+    
+    @staticmethod
+    def resolve_active_bots_limit(root: models.User, info, **args):
+        return SupporterBenefits.get_active_bots_limit(root)
+   
+    @staticmethod
+    def resolve_request_matches_limit(root: models.User, info, **args):
+        return SupporterBenefits.get_requested_matches_limit(root)
+
+    @staticmethod
+    def resolve_request_matches_count_left(root: models.User, info, **args):
+        return match_requests.get_user_match_request_count_left(root)
 
 
 class Query(graphene.ObjectType):

@@ -5,20 +5,20 @@ import { fetchViewerQuery } from './__generated__/fetchViewerQuery.graphql';
 import { Viewer } from '@/_components/_hooks/useViewer';
 
 // Fetch the current user's data
-export const fetchViewer = async ()  => {
+export const fetchViewer = async () => {
   const query = graphql`
     query fetchViewerQuery {
       viewer {
       apiToken
-      user{  
-      id
-        username
         email
-        patreonLevel
-        dateJoined
         activeBotsLimit
           requestMatchesLimit
           requestMatchesCountLeft
+      user{  
+      id
+        username
+        patreonLevel
+        dateJoined
           avatarUrl
       }
         }

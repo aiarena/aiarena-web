@@ -6,12 +6,10 @@ import { useMemo } from 'react';
 export interface User {
   id: string;
   username: string;
-  email: string;
+
   patreonLevel?: string;
   dateJoined?: string;
-  activeBotsLimit?: number;
-  requestMatchesLimit?: number;
-  requestMatchesCountLeft?: number;
+
   avatarUrl?: string;
 }
 
@@ -19,6 +17,10 @@ export interface User {
 export interface Viewer {
   user: User;
   apiToken: string;
+  email?: string;
+  activeBotsLimit?: number;
+  requestMatchesLimit?: number;
+  requestMatchesCountLeft?: number;
 }
 
 
@@ -31,15 +33,15 @@ export const useViewer = (): Viewer | null => {
         user {
         id
           username
-          email
           patreonLevel
           dateJoined
-          activeBotsLimit
-          requestMatchesLimit
-          requestMatchesCountLeft
           avatarUrl
         }
           apiToken
+          email
+          activeBotsLimit
+          requestMatchesLimit
+          requestMatchesCountLeft
         }
       }
     `,
