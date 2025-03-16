@@ -1,19 +1,19 @@
 import { useState } from "react";
 import Image from "next/image";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { User } from "@/_components/_hooks/useUser";
+import { User, Viewer } from "@/_components/_hooks/useViewer";
+
+
 
 interface SettingsProfileSection {
-  user: User;
+    viewer?: Viewer
 }
 
 export default function SettingsProfileSection({
-  user,
+  viewer,
 }: SettingsProfileSection) {
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
-  const [apiToken, setApiToken] = useState(
-    "sk_test_********************************"
-  );
+
   const [discordLinked, setDiscordLinked] = useState(false);
   const [patreonLinked, setPatreonLinked] = useState(false);
 
@@ -27,7 +27,7 @@ export default function SettingsProfileSection({
   const handleUnlinkPatreon = () => setPatreonLinked(false);
 
   const handleCopyToken = () => {
-    navigator.clipboard.writeText(apiToken);
+    navigator.clipboard.writeText(viewer.apiToken ?? "");
     alert("API token copied!");
   };
 
@@ -51,20 +51,24 @@ export default function SettingsProfileSection({
         <div className="flex items-center space-x-3">
           <div className="relative w-12 h-12 flex-shrink-0">
             <Image
-              src={`${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`}
+              src={
+                viewer.user.avatarUrl
+                  ? viewer.user.avatarUrl
+                  : `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`
+              }
               alt="User avatar"
               fill
               className="object-cover"
             />
             <>
-              {user.patreonLevel && user.patreonLevel == "Bronze" ? (
+              {viewer.user.patreonLevel && viewer.user.patreonLevel == "Bronze" ? (
                 <div className="absolute inset-0 border-2 border-customGreen"></div>
               ) : null}
             </>
           </div>
           <div className="leading-tight">
-            <p className="text-white font-bold">{user.username}</p>
-            {user.patreonLevel && user.patreonLevel != "NONE" ? (
+            <p className="text-white font-bold">{viewer.user.username}</p>
+            {viewer.user.patreonLevel && viewer.user.patreonLevel != "NONE" ? (
               <p className="text-customGreen text-xs">Supporter</p>
             ) : null}
           </div>
@@ -136,9 +140,9 @@ export default function SettingsProfileSection({
       {/* API Token */}
       <div className="bg-gray-700 p-4 rounded-md space-y-2">
         <h3 className="text-base font-semibold text-customGreen">API Token</h3>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs max-w-full truncate">
-            {apiTokenVisible ? apiToken : "•••••••••••••••••••••••"}
+        <div className="flex flex-wrap items-start gap-2 w-full">
+        <span className="text-left bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs w-full break-words">
+            {apiTokenVisible ? viewer.apiToken : "•••••••••••••••••••••••••••••••••"}
           </span>
           <button
             onClick={() => setApiTokenVisible(!apiTokenVisible)}
@@ -146,6 +150,7 @@ export default function SettingsProfileSection({
           >
             {apiTokenVisible ? "Hide" : "Show"}
           </button>
+
           <button
             onClick={handleCopyToken}
             className="text-white bg-gray-600 px-2 py-0.5 rounded hover:bg-gray-500"

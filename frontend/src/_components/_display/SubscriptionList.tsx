@@ -27,7 +27,7 @@ const SubscriptionComparisonTable = () => {
     },
     {
       tier: "Bronze",
-      price: "$60 /month",
+      price: "$5 /month",
       matchRequests: "80",
       participants: "3",
       star: "Bronze Star",
@@ -35,7 +35,7 @@ const SubscriptionComparisonTable = () => {
     },
     {
       tier: "Silver",
-      price: "$115 /month",
+      price: "$10 /month",
       matchRequests: "200",
       participants: "8",
       star: "Silver Star",
@@ -43,7 +43,7 @@ const SubscriptionComparisonTable = () => {
     },
     {
       tier: "Gold",
-      price: "$285 /month",
+      price: "$25 /month",
       matchRequests: "600",
       participants: "16",
       star: "Golden Star",
@@ -51,7 +51,7 @@ const SubscriptionComparisonTable = () => {
     },
     {
       tier: "Platinum",
-      price: "$565 /month (plus VAT)",
+      price: "$50 /month (plus VAT)",
       matchRequests: "2000",
       participants: "32",
       star: "Platinum Star",
@@ -59,7 +59,7 @@ const SubscriptionComparisonTable = () => {
     },
     {
       tier: "Diamond",
-      price: "$1 125 /month (plus VAT)",
+      price: "$100 /month (plus VAT)",
       matchRequests: "8000",
       participants: "Unlimited",
       star: "Diamond",

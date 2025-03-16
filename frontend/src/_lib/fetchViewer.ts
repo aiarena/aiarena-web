@@ -1,25 +1,34 @@
 import { graphql } from 'react-relay';
 import { fetchQuery } from 'relay-runtime';
 import environment from '@/_lib/RelayEnvironment'; // Relay environment setup
+import { fetchViewerQuery } from './__generated__/fetchViewerQuery.graphql';
+import { Viewer } from '@/_components/_hooks/useViewer';
 
 // Fetch the current user's data
-export const fetchUser = async () => {
+export const fetchViewer = async ()  => {
   const query = graphql`
-    query fetchUserQuery {
+    query fetchViewerQuery {
       viewer {
-        id
+      apiToken
+      user{  
+      id
         username
         email
         patreonLevel
         dateJoined
+        activeBotsLimit
+          requestMatchesLimit
+          requestMatchesCountLeft
+          avatarUrl
       }
+        }
     }
   `;
 
   try {
-    const data = await fetchQuery(environment, query, {}).toPromise(); // Ensure the network request resolves
+    const data = await fetchQuery<fetchViewerQuery>(environment, query, {}).toPromise(); // Ensure the network request resolves
     if (data && data.viewer) {
-      return data.viewer; // Return the fetched user data
+      return data.viewer as Viewer; // Return the fetched user data
     } else {
       console.warn('No viewer data available');
       return null;

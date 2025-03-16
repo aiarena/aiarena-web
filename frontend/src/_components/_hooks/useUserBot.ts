@@ -21,7 +21,7 @@ export const useUserBots = (userId: string | null) => {
               botZip
               botZipPubliclyDownloadable
               botZipUpdated
-              wikiArticle 
+              wikiArticle
             }
           }
         }
@@ -32,7 +32,7 @@ export const useUserBots = (userId: string | null) => {
   );
 
   // Handle cases where no userId is passed
-  if (!userId) {
+  if (!userId ) {
     console.log("No userId.")
     return [];
   }
@@ -49,8 +49,8 @@ export const useUserBots = (userId: string | null) => {
     botData: node.botData || "",
     botDataEnabled: node.botDataEnabled || false,
     botDataPubliclyDownloadable: node.botDataPubliclyDownloadable || false,
-    botZip: node.botZip || "", 
-    botZipPubliclyDownloadable: node. botZipPubliclyDownloadable || false,
-    botZipUpdated: node.botZipUpdated || undefined,    
+    botZip: node.botZip || "",
+    botZipPubliclyDownloadable: node.botZipPubliclyDownloadable || false,
+    botZipUpdated: node.botZipUpdated || undefined,
   }));
 };

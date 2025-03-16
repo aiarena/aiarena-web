@@ -1,5 +1,5 @@
 "use client";
-import { useUserContext } from "@/_components/providers/UserProvider";
+import { useViewerContext } from "@/_components/providers/ViewerProvider";
 import { useSignOut } from "@/_components/_hooks/useSignOut";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,23 +9,25 @@ import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import SettingsProfileSection from "@/_components/_display/_profile/SettingsProfileSection";
 import RequestMatchesSection from "@/_components/_display/_profile/RequestMatchSection";
 import { useUserBots } from "@/_components/_hooks/useUserBot";
+import { useViewer } from "@/_components/_hooks/useViewer";
+import { redirect } from 'next/navigation';
+
 
 export default function Page() {
   const [signOut] = useSignOut();
   const router = useRouter();
-  const { user, setUser, fetching } = useUserContext();
+  const viewer  = useViewer();
+
   const [activeTab, setActiveTab] = useState("Bots");
-
-  const userBots = useUserBots(user?.id || null);
-  console.log("userbots,", userBots)
-
-  if (user === null && fetching === false) {
-    router.push("/");
-    return null;
+  const userBots = useUserBots(viewer?.user?.id  || null);
+  if (viewer?.user === null ) {
+    // console.log("Compared")
+    // router.push("/");
+    redirect('/');    // return null;
   }
-  if (user === null) {
-    return;
-  }
+  
+
+
 
   return (
     <>
@@ -47,23 +49,25 @@ export default function Page() {
           <div className="mt-8">
             {activeTab === "Bots" && (
               <div id="bot-overview">
-                  <ProfileBotOverviewList bots={userBots} activeBotsLimit = {user.activeBotsLimit} />
+                  <ProfileBotOverviewList bots={userBots} activeBotsLimit = {viewer?.user.activeBotsLimit} />
               </div>
             )}
 
             {activeTab === "Requested Matches" && (
               <div id="matches">
                   <RequestMatchesSection
-                  requestMatchesCountLeft={user?.requestMatchesCountLeft}
-                  requestMatchesLimit={user?.requestMatchesLimit}
+                  requestMatchesCountLeft={viewer?.user?.requestMatchesCountLeft}
+                  requestMatchesLimit={viewer?.user?.requestMatchesLimit}
                 />
               </div>
             )}
 
-            {activeTab === "Settings" && (
+            {viewer && activeTab === "Settings" && (
               <div id="settigns">
-                <SettingsProfileSection user={user} />
-              </div>
+              
+                <SettingsProfileSection viewer={viewer || null} />
+            
+                </div>
             )}
           </div>
         </div>

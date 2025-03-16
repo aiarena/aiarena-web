@@ -2,10 +2,11 @@
 import {useState, useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {useSignIn} from "@/_components/_hooks/useSignIn";
-import {useUser} from "@/_components/_hooks/useUser";
+import {useViewer} from "@/_components/_hooks/useViewer";
 import {useSignOut} from "@/_components/_hooks/useSignOut";
-import {useUserContext} from "@/_components/providers/UserProvider";
-import {fetchUser} from "@/_lib/fetchUser";
+import {useViewerContext} from "@/_components/providers/ViewerProvider";
+import {fetchViewer as fetchViewer} from "@/_lib/fetchViewer";
+import { redirect } from 'next/navigation';
 
 export default function Page() {
     const [username, setUsername] = useState('');
@@ -13,12 +14,12 @@ export default function Page() {
     const [email, setEmail] = useState('');
     const [showRegister, setShowRegister] = useState(false);
     const [showForgotUsername, setShowForgotUsername] = useState(false);
-
+    const {viewer, setViewer, fetching } = useViewerContext();
     const router = useRouter(); // Next.js router for redirection
     const [signIn, isSigningIn, signInError] = useSignIn();
     const [signedIn, setSignedIn] = useState(false); // New state to trigger user refetch
 
-    const {setUser} = useUserContext();
+    // const {setUser} = useUserContext();
 
     const handleLogin = () => {
         signIn(username, password, () => {
@@ -33,10 +34,11 @@ export default function Page() {
       // Declare an async function inside the useEffect
       const fetchAndSetUser = async () => {
         try {
-          const user = await fetchUser(); // Await the user data
-            console.log("user",user)
-          setUser(user); // Update the global user context with the fetched user data
+          const viewer = await fetchViewer(); // Await the user data
+            console.log("user",viewer)
+          setViewer(viewer) ; // Update the global user context with the fetched user data
           router.push('/profile'); // Redirect to profile page
+        // redirect
         } catch (error) {
           console.error('Failed to fetch user:', error);
         }
@@ -44,8 +46,14 @@ export default function Page() {
 
       fetchAndSetUser(); // Call the async function
     }
-  }, [signedIn, setUser, router]); // Refetch user after successful login
-
+  }, [signedIn, setViewer, router]); // Refetch user after successful login
+    
+    if (viewer !== null && fetching === false) {    
+        router.push("/profile");
+        return null;
+      }
+      
+      
     return (
         <div className="flex flex-col min-h-screen font-sans text-white">
 

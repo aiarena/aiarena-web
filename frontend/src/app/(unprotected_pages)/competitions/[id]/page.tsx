@@ -11,6 +11,7 @@ import VideoPlayer from "@/_components/_display/VideoPlayer";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import { useCompetition } from "@/_components/_hooks/useCompetition";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import Link from "next/link";
 
 // Types
 interface Participant {
@@ -55,8 +56,6 @@ interface CompetitionsData {
   [key: string]: Competition;
 }
 
-const mockCompetitions: CompetitionsData = competitionsData;
-
 interface CompetitionPageProps {
   params: {
     id: string;
@@ -74,19 +73,10 @@ const patreonIcons: Record<string, string> = {
 };
 
 export default function Page({ params }: CompetitionPageProps) {
-  // const [competition, setCompetition] = useState<Competition | null>(null)
-  const competition = useCompetition(params.id); // Fetch competitions from the hook
-  console.log(competition);
-  console.log(params);
-  const router = useRouter();
-  const { id } = { id: "1" };
+ 
+  const competition = useCompetition(params.id);
 
   const featureFlags = getFeatureFlags();
-
-  // useEffect(() => {
-  //   const competitionData = mockCompetitions[1];
-  //   setCompetition(competitionData);
-  // }, []);
 
   if (!competition) {
     // This block is removed to let errors propagate
@@ -136,14 +126,18 @@ export default function Page({ params }: CompetitionPageProps) {
                     return (
                       <tr
                         key={participant.id}
-                        className="border-t border-gray-600 hover:bg-gray-700 transition cursor-pointer"
+                        className="border-t border-gray-600 hover:bg-gray-700 transition"
                       >
                         <td className="px-4 py-2 truncate">{idx + 1}</td>
-                        <td className="px-4 py-2 font-semibold text-customGreen hover:text-white transition truncate">
+                        <td className="px-4 py-2 font-semibold  transition truncate">
+                          <Link href={`${getPublicPrefix()}/bots/${participant.bot?.id}`} className=" cursor-pointer text-customGreen hover:text-white">
                           {participant.bot?.name || "Unknown"}
+                          </Link>
                         </td>
-                        <td className="px-4 py-2 font-semibold transition truncate">
+                        <td className="px-4 py-2 font-semibold  transition truncate">
+                        <Link href={`${getPublicPrefix()}/authors/${participant.bot?.user?.id}`} className=" cursor-pointer text-customGreen hover:text-white">
                           {participant.bot?.user?.username || "Unknown"}
+                          </Link>
                         </td>
                         <td className="px-4 py-2 truncate">
                           {participant.bot?.type || "N/A"}
