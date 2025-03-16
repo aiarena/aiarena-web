@@ -1,9 +1,8 @@
 import graphene
+from avatar.models import Avatar
 from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
-
-from avatar.models import Avatar
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
@@ -55,6 +54,7 @@ class UserType(DjangoObjectTypeWithUID):
             # We can also return "avatar_url" if we want a relative url
             # return  avatar_url
         return None  # Return None if no avatar exists. However, we probably want to return the default avatar.
+
 
 class BotFilterSet(FilterSet):
     order_by = OrderingFilter(
@@ -199,6 +199,7 @@ class NewsType(DjangoObjectTypeWithUID):
         filter_fields = []
         connection_class = CountingConnection
 
+
 class ViewerType(graphene.ObjectType):
     user = graphene.Field("aiarena.graphql.UserType")
     api_token = graphene.String()
@@ -206,11 +207,11 @@ class ViewerType(graphene.ObjectType):
     @staticmethod
     def resolve_user(root: models.User, info, **args):
         return root
-   
+
     @staticmethod
     def resolve_api_token(root: models.User, info):
         return Token.objects.get(user=info.context.user)
- 
+
 
 class Query(graphene.ObjectType):
     node = graphene.relay.Node.Field()
