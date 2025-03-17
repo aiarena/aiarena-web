@@ -1,48 +1,53 @@
-"use client";
+import { Suspense } from 'react';
 import ArticleWrapper from "@/_components/_display/ArticleWrapper";
-import { useBot } from "@/_components/_hooks/useBot";
-import { useBots } from "@/_components/_hooks/useBots";
+import { formatDateISO } from "@/_lib/dateUtils";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { getSiteUrl } from "@/_lib/getSiteUrl";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import React, { useEffect } from "react";
+import { getBotBasic } from '@/_components/_hooks/useExperimentalBotSSR';
+import BotParticipations from './BotParticipations';
+
 
 interface BotPageProps {
-    params: {
-      id: string;
-    };
-  }
-  
+  params: {
+    id: string;
+  };
+}
 
-export default function Page({ params }:BotPageProps) {
-
-  const bot = useBot(decodeURIComponent(params.id)); 
+// This is a Server Component
+export default async function Page({ params }: BotPageProps) {
+  const botId = decodeURIComponent(params.id);
   
-  console.log(bot);
-  console.log(params);
-    
-  if(!bot) {
-    return notFound()
+  // Fetch basic bot data on the server
+  const bot = await getBotBasic(botId);
+  
+  if (!bot) {
+    return <div>Bot not found</div>;
   }
-  
-  return <>
-  <ArticleWrapper className="bg-customBackgroundColor2 text-white">
-    <section>
+
+  return (
+    <ArticleWrapper className="bg-customBackgroundColor2 text-white">
+      <section>
+        {/* Server-rendered basic bot information */}
         <h1>{bot.name}</h1>
+        <p>Created: {formatDateISO(bot.created)}</p>
+        <p>Last updated: {formatDateISO(bot.botZipUpdated)}</p>
+        <p>Type: {bot.type}</p>
         <p>
-            Created: {bot.created},
-      
+          Author:{" "}
+          <Link
+            href={`${getPublicPrefix()}/authors/${bot.user.id}`}
+            className="text-customGreen cursor-pointer"
+          >
+            {bot.user.username}
+          </Link>
         </p>
-
-<p>
-        Type: {bot.type},
-        </p>
-        <p>
-        Author: <Link href={`${getPublicPrefix()}/authors/${bot.user.id}` } className="text-customGreen cursor-pointer">{bot.user.username}</Link>
-        </p>
-    </section>
-
-  </ArticleWrapper>
-  </>
+        <p>Wiki Article: {bot.wikiArticle}</p>
+        
+        {/* Client-side rendered participations with Suspense boundary */}
+        <Suspense fallback={<div>Loading match and competition data...</div>}>
+          <BotParticipations botId={botId} />
+        </Suspense>
+      </section>
+    </ArticleWrapper>
+  );
 }

@@ -60,6 +60,7 @@ class BotType(DjangoObjectTypeWithUID):
     url = graphene.String()
     competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
     wiki_article = graphene.String()
+    match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
 
     class Meta:
         model = models.Bot
@@ -85,12 +86,15 @@ class BotType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_competition_participations(root: models.Bot, info, **args):
-        return root.competition_participations.all()
+        return root.competition_participations.order_by('-competition__date_created')
 
     @staticmethod
     def resolve_wiki_article(root: models.Bot, info, **args):
         return root.get_wiki_article().current_revision.content
 
+    @staticmethod
+    def resolve_match_participations(root: models.Bot, info, **args):
+        return root.matchparticipation_set.order_by('-match__started')
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()
@@ -197,6 +201,7 @@ class ViewerType(graphene.ObjectType):
     active_bots_limit = graphene.Int()
     request_matches_limit = graphene.Int()
     request_matches_count_left = graphene.Int()
+    requested_matches = DjangoConnectionField("aiarena.graphql.MatchType")
 
     @staticmethod
     def resolve_user(root: models.User, info, **args):
@@ -222,6 +227,80 @@ class ViewerType(graphene.ObjectType):
     def resolve_request_matches_count_left(root: models.User, info, **args):
         return MatchRequests.get_user_match_request_count_left(root)
 
+    @staticmethod
+    def resolve_requested_matches(root: models.User, info, **args):
+        return root.requested_matches.order_by('-first_started')
+
+class MatchParticipationType(DjangoObjectTypeWithUID):
+    
+    class Meta:
+        model = models.MatchParticipation
+        fields = [
+            "elo_change",
+            "avg_step_time",
+            "result",
+            "bot",
+            "match"
+        ]
+        filter_fields = []
+        connection_class = CountingConnection
+
+  
+
+class MatchType(DjangoObjectTypeWithUID):
+    participant1 = graphene.Field("aiarena.graphql.BotType")
+    participant2 = graphene.Field("aiarena.graphql.BotType")
+    status = graphene.String()
+    result = graphene.Field("aiarena.graphql.ResultType")
+
+    class Meta:
+        model = models.Match
+        fields = [
+            "result",
+            "map",
+            "created",
+            "started",
+            "first_started",
+            "requested_by",
+        ]
+        filter_fields = []
+        connection_class = CountingConnection
+
+
+    @staticmethod
+    def resolve_participant1(root: models.Match, info, **args):
+        return root.participant1.bot
+
+    @staticmethod
+    def resolve_participant2(root: models.Match, info, **args):
+        return root.participant2.bot
+   
+    @staticmethod
+    def resolve_status(root: models.Match, info, **args):
+        return root.status
+    
+   
+    @staticmethod
+    def resolve_result(root: models.Match, info, **args):
+        return root.result
+
+
+
+class ResultType(DjangoObjectTypeWithUID):
+
+    class Meta:
+        model = models.Result
+        fields = [
+            "winner",
+            "type",
+            "created",
+            "replay_file",
+            "game_steps",
+            "submitted_by",
+        ]
+        filter_fields = []
+        connection_class = CountingConnection
+
 
 class Query(graphene.ObjectType):
     node = graphene.relay.Node.Field()
@@ -230,6 +309,7 @@ class Query(graphene.ObjectType):
     bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
     news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
+
 
     @staticmethod
     def resolve_viewer(root, info, **args):
@@ -252,3 +332,4 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_users(root, info, **args):
         return models.User.objects.all()
+
