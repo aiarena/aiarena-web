@@ -9,7 +9,7 @@ import AuthNavBar from "./_nav_parts/AuthNavbar";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { usePathname } from "next/navigation";
 import { getFeatureFlags } from "@/_data/featureFlags";
-import { useUserContext } from "../providers/UserProvider";
+import { useViewerContext } from "../providers/ViewerProvider";
 
 const navLinks = [
   {
@@ -77,7 +77,7 @@ const navbarTitle = {
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
   const router = usePathname();
-  const { user } = useUserContext();
+  const { viewer } = useViewerContext();
 
   const handleMenu = () => {
     if (navbar === true) {
@@ -169,8 +169,8 @@ function Navbar() {
                   .filter((link) => {
                     // Filter logic: featureFlag is not explicitly false and user visibility is respected
                     if (link.featureFlag === false) return false;
-                    if (user && link.showLoggedIn) return true;
-                    if (!user && link.showLoggedOut) return true;
+                    if (viewer && link.showLoggedIn) return true;
+                    if (!viewer && link.showLoggedOut) return true;
                     return false;
                   })
                   .map((link, index) => (
@@ -204,8 +204,8 @@ function Navbar() {
                 .filter((link) => {
                   // Filter logic: featureFlag is not explicitly false and user visibility is respected
                   if (link.featureFlag === false) return false;
-                  if (user && link.showLoggedIn) return true;
-                  if (!user && link.showLoggedOut) return true;
+                  if (viewer && link.showLoggedIn) return true;
+                  if (!viewer && link.showLoggedOut) return true;
                   return false;
                 })
                 .map((link, index) => (

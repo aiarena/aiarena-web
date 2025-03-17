@@ -1,45 +1,46 @@
 import graphene
+from avatar.models import Avatar
 from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
+from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
-from aiarena.core.services import Ladders
+from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
 class UserType(DjangoObjectTypeWithUID):
-    active_bots_limit = graphene.Int()
-    request_matches_limit = graphene.Int()
-    request_matches_count_left = graphene.Int()
+    # This is the public user type.
+    # put data everyone should be able view here.
+
     own_bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
+    avatar_url = graphene.String()
 
     class Meta:
         model = models.User
         fields = [
             "id",
             "username",
-            "email",
             "patreon_level",
             "date_joined",
         ]
         filter_fields = []
 
     @staticmethod
-    def resolve_active_bots_limit(root: models.User, info, **args):
-        return models.User.get_active_bots_limit(root)
-
-    @staticmethod
-    def resolve_request_matches_limit(root: models.User, info, **args):
-        return root.requested_matches_limit
-
-    @staticmethod
-    def resolve_request_matches_count_left(root: models.User, info, **args):
-        return root.match_request_count_left
-
-    @staticmethod
     def resolve_own_bots(root: models.User, info, **args):
         return root.bots.all()
+
+    @staticmethod
+    def resolve_avatar_url(root: models.User, info):
+        avatar_instance = Avatar.objects.filter(user=root).order_by("-primary", "-date_uploaded").first()
+
+        if avatar_instance:
+            avatar_url = avatar_instance.get_absolute_url()
+            return info.context.build_absolute_uri(avatar_url)
+            # We can also return "avatar_url" if we want a relative url
+            # return  avatar_url
+        return None  # Return None if no avatar exists. However, we probably want to return the default avatar.
 
 
 class BotFilterSet(FilterSet):
@@ -186,12 +187,49 @@ class NewsType(DjangoObjectTypeWithUID):
         connection_class = CountingConnection
 
 
+class ViewerType(graphene.ObjectType):
+    # This is the private viewer user type.
+    # Put data only the logged in user should be able view here.
+
+    user = graphene.Field("aiarena.graphql.UserType")
+    api_token = graphene.String()
+    email = graphene.String()
+    active_bots_limit = graphene.Int()
+    request_matches_limit = graphene.Int()
+    request_matches_count_left = graphene.Int()
+
+    @staticmethod
+    def resolve_user(root: models.User, info, **args):
+        return root
+
+    @staticmethod
+    def resolve_api_token(root: models.User, info):
+        return Token.objects.get(user=info.context.user)
+
+    @staticmethod
+    def resolve_email(root: models.User, info):
+        return root.email
+
+    @staticmethod
+    def resolve_active_bots_limit(root: models.User, info, **args):
+        return SupporterBenefits.get_active_bots_limit(root)
+
+    @staticmethod
+    def resolve_request_matches_limit(root: models.User, info, **args):
+        return SupporterBenefits.get_requested_matches_limit(root)
+
+    @staticmethod
+    def resolve_request_matches_count_left(root: models.User, info, **args):
+        return MatchRequests.get_user_match_request_count_left(root)
+
+
 class Query(graphene.ObjectType):
     node = graphene.relay.Node.Field()
-    viewer = graphene.Field("aiarena.graphql.UserType")
+    viewer = graphene.Field("aiarena.graphql.ViewerType")
     competitions = DjangoFilterConnectionField("aiarena.graphql.CompetitionType")
     bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
     news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
+    users = DjangoFilterConnectionField("aiarena.graphql.UserType")
 
     @staticmethod
     def resolve_viewer(root, info, **args):
@@ -210,3 +248,7 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_news(root, info, **args):
         return models.News.objects.all().order_by("-created")
+
+    @staticmethod
+    def resolve_users(root, info, **args):
+        return models.User.objects.all()

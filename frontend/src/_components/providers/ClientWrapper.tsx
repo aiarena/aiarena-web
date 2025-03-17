@@ -3,7 +3,7 @@
 import { RelayEnvironmentProvider } from "react-relay";
 import RelayEnvironment from "@/_lib/RelayEnvironment";
 import { LoginProvider } from "@/_components/providers/LoginProvider";
-import { UserProvider } from "@/_components/providers/UserProvider";
+import { ViewerProvider } from "@/_components/providers/ViewerProvider";
 import ErrorBoundary from "./ErrorBoundary";
 
 export default function ClientWrapper({
@@ -16,7 +16,7 @@ export default function ClientWrapper({
       <ErrorBoundary>
         <RelayEnvironmentProvider environment={RelayEnvironment}>
           <LoginProvider>
-            <UserProvider>{children}</UserProvider>
+            <ViewerProvider>{children}</ViewerProvider>
           </LoginProvider>
         </RelayEnvironmentProvider>
       </ErrorBoundary>

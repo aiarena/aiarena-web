@@ -19,7 +19,6 @@ export const useCompetition = (competitionId: string) => {
                     name
                     type
                     user {
-                      email
                       id
                       patreonLevel
                       username
@@ -93,7 +92,6 @@ export const useCompetition = (competitionId: string) => {
               user: participant.bot.user
                 ? {
                     id: participant.bot.user.id,
-                    email: participant.bot.user.email || '',
                     patreonLevel: participant.bot.user.patreonLevel || 'NONE',
                     username: participant.bot.user.username || '',
                   }

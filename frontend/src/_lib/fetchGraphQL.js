@@ -41,14 +41,13 @@ export default async function fetchGraphQL(text, variables, uploadables) {
       variables,
     });
     headers["Content-Type"] = "application/json";
+
   }
 
   let apiUrl;
   if (typeof window === "undefined") {
     const cookieStore = require('next/headers').cookies();
-    console.log(cookieStore.getAll());
-    console.log(cookieStore.get("csrftoken"));
-    console.log(cookieStore.get("sessionid"));
+    headers["Cookie"] = `csrftoken=${cookieStore.get("csrftoken").value}; sessionid=${cookieStore.get("sessionid").value}`
     apiUrl = `${process.env.API_URL}/graphql/`;
   } else {
     apiUrl = '/graphql/';
