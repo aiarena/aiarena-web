@@ -1,21 +1,31 @@
-import { useState } from "react";
+import { ViewerRequestedMatch } from "@/_components/_hooks/useViewerRequestedMatches";
+import { useEffect, useState } from "react";
 import internal from "stream";
+import FilterableList from "../FilterableList";
+import Link from "next/link";
+import { formatDate, formatDateISO } from "@/_lib/dateUtils";
+import { isTemplateSpan } from "typescript";
 // import MainButton from "../_props/MainButton"; // If you have a custom button component
 // If not, just use a <button> with Tailwind classes.
-
-
-
 
 interface RequestMatchesSectionProps {
   requestMatchesCountLeft?: number;
   requestMatchesLimit?: number;
+  requestedMatches?: ViewerRequestedMatch[];
 }
 
-
-export default function RequestMatchesSection({requestMatchesCountLeft, requestMatchesLimit} : RequestMatchesSectionProps) {
+export default function RequestMatchesSection({
+  requestMatchesCountLeft,
+  requestMatchesLimit,
+  requestedMatches,
+}: RequestMatchesSectionProps) {
   // Example state - replace with real data fetching logic
-  const [matchRequestLimit, setMatchRequestLimit] = useState(requestMatchesLimit || 0);
-  const [requestsRemaining, setRequestsUsed] = useState(requestMatchesCountLeft || 0);
+  const [matchRequestLimit, setMatchRequestLimit] = useState(
+    requestMatchesLimit || 0
+  );
+  const [requestsRemaining, setRequestsUsed] = useState(
+    requestMatchesCountLeft || 0
+  );
   const [inProgressMatches, setInProgressMatches] = useState([
     { id: 1, opponent: "BotA", status: "Match scheduled for tomorrow" },
     { id: 2, opponent: "BotB", status: "Processing..." },
@@ -29,19 +39,21 @@ export default function RequestMatchesSection({requestMatchesCountLeft, requestM
     alert("Requesting a new match (placeholder)!");
   };
 
+
   return (
     <div id="matches" className="space-y-4">
-   
-
       {/* Display request limit and requests left */}
       <div className="bg-gray-700 p-4 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
         <div className="text-sm text-gray-300">
-        <p className="text-left">
+          <p className="text-left">
             <span className="font-bold">Requests used:</span>{" "}
-            <span className="text-customGreen">{requestsUsed}/{matchRequestLimit}</span>
-           
+            <span className="text-customGreen">
+              {requestsUsed}/{matchRequestLimit}
+            </span>
           </p>
-          <p className="text-left text-customGreen cursor-pointer">Increase Limit</p>
+          <p className="text-left text-customGreen cursor-pointer">
+            Increase Limit
+          </p>
           {/* <p>
             <span className="font-bold">Match Request Limit:</span>{" "}
             <span className="text-customGreen">{matchRequestLimit}</span>
@@ -62,9 +74,73 @@ export default function RequestMatchesSection({requestMatchesCountLeft, requestM
           </button>
         </div>
       </div>
+      <FilterableList
+        data={requestedMatches || []}
+        fields={[
+          "id",
+          "firstStarted",
+          "participant1",
+          "participant2",
+          "result",
+        ]} // Pass nested field as string
+        defaultFieldSort={1}
+        defaultSortOrder="desc"
+        fieldLabels={{
+          id: "Match ID",
+          firstStarted: "Started",
+          participant1: "Player 1",
+          participant2: "Player 2",
+          result: "Result",
+        }}
+        fieldClasses={
+          {
+            // "user.username": "hidden md:block",
+            // type: "hidden sm:block",
+          }
+        }
+        filters={[
+          {
+            type: "search",
+            label: "Search",
+            field: "all",
+            placeholder: "Search all fields...",
+          },
+          {
+            type: "dropdown",
+            label: "Type",
+            field: "type",
+            placeholder: "Select type",
+          },
+        ]}
+        renderRow={(item, index) => (
+          <div className="block p-4 hover:bg-gray-800 rounded transition flex justify-between items-center shadow-md border border-gray-700">
+            <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
+              <span className="text-left font-semibold text-gray-200 truncate">
+                {item.id}
+              </span>
+              <span className="text-left text-gray-200  truncate">
+                {formatDateISO(item.firstStarted)}
+              </span>
+              <Link href={`/bots/${item.participant1?.id}`}>
+                <span className="bg-blue hidden sm:block text-left text-customGreen truncate ">
+                  {item.participant1?.name || ""}
+                </span>
+              </Link>
+              <Link href={`/bots/${item.participant2?.id}`}>
+                <span className="bg-blue hidden sm:block text-left text-customGreen truncate ">
+                  {item.participant2?.name || ""}
+                </span>
+              </Link>
 
+              <span className="hidden md:block text-left text-gray-200  truncate">
+                {item.result?.type}
+              </span>
+            </div>
+          </div>
+        )}
+      />
       {/* In-Progress Matches */}
-      <div className="bg-gray-700 p-4 rounded-md space-y-3">
+      {/* <div className="bg-gray-700 p-4 rounded-md space-y-3">
         <h3 className="text-lg font-semibold text-customGreen">In-Progress Requests</h3>
         {inProgressMatches.length > 0 ? (
           <ul className="space-y-2">
@@ -83,7 +159,7 @@ export default function RequestMatchesSection({requestMatchesCountLeft, requestM
         ) : (
           <p className="text-gray-400 text-sm">No in-progress match requests.</p>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

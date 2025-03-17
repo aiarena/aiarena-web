@@ -11,19 +11,19 @@ import RequestMatchesSection from "@/_components/_display/_profile/RequestMatchS
 import { useUserBots } from "@/_components/_hooks/useUserBot";
 import { useViewer } from "@/_components/_hooks/useViewer";
 import { redirect } from 'next/navigation';
+import { useViewerRequestedMatches } from "@/_components/_hooks/useViewerRequestedMatches";
 
 
 export default function Page() {
   const [signOut] = useSignOut();
   const router = useRouter();
   const viewer  = useViewer();
+  const requestedMatches = useViewerRequestedMatches();
 
   const [activeTab, setActiveTab] = useState("Bots");
   const userBots = useUserBots(viewer?.user?.id  || null);
   if (viewer === null ) {
-    // console.log("Compared")
-    // router.push("/");
-    redirect('/');    // return null;
+    redirect('/');   
   }
   
 
@@ -58,6 +58,7 @@ export default function Page() {
                   <RequestMatchesSection
                   requestMatchesCountLeft={viewer?.requestMatchesCountLeft}
                   requestMatchesLimit={viewer?.requestMatchesLimit}
+                  requestedMatches = {requestedMatches}
                 />
               </div>
             )}

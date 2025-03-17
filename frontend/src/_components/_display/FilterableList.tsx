@@ -26,6 +26,8 @@ interface FilterableListProps<T> {
     filters: Filter[];
     renderRow: (item: T, index: number) => React.ReactNode;
     resultsPerPage?: number;
+    defaultFieldSort?: number;
+    defaultSortOrder?: "asc" | "desc"
     fieldLabels?: { [key: string]: string };  // Also change fieldLabels to accept any string
     fieldClasses?: { [key: string]: string };
   }
@@ -36,11 +38,13 @@ export default function FilterableList<T>({
   filters,
   renderRow,
   resultsPerPage: initialResultsPerPage = 10,
+  defaultFieldSort = 0,
+  defaultSortOrder = "asc",
   fieldLabels = {}, // Default to an empty object if no fieldLabels are provided
   fieldClasses = {},
 }: FilterableListProps<T>) {
-    const [sortField, setSortField] = useState<string>(fields[0]);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+    const [sortField, setSortField] = useState<string>(fields[defaultFieldSort]);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultSortOrder);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterStates, setFilterStates] = useState<{ [key: string]: string }>(
     {}
