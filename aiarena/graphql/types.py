@@ -86,7 +86,7 @@ class BotType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_competition_participations(root: models.Bot, info, **args):
-        return root.competition_participations.order_by('-competition__date_created')
+        return root.competition_participations.order_by("-competition__date_created")
 
     @staticmethod
     def resolve_wiki_article(root: models.Bot, info, **args):
@@ -94,7 +94,8 @@ class BotType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_match_participations(root: models.Bot, info, **args):
-        return root.matchparticipation_set.order_by('-match__started')
+        return root.matchparticipation_set.order_by("-match__started")
+
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()
@@ -229,23 +230,16 @@ class ViewerType(graphene.ObjectType):
 
     @staticmethod
     def resolve_requested_matches(root: models.User, info, **args):
-        return root.requested_matches.order_by('-first_started')
+        return root.requested_matches.order_by("-first_started")
+
 
 class MatchParticipationType(DjangoObjectTypeWithUID):
-    
     class Meta:
         model = models.MatchParticipation
-        fields = [
-            "elo_change",
-            "avg_step_time",
-            "result",
-            "bot",
-            "match"
-        ]
+        fields = ["elo_change", "avg_step_time", "result", "bot", "match"]
         filter_fields = []
         connection_class = CountingConnection
 
-  
 
 class MatchType(DjangoObjectTypeWithUID):
     participant1 = graphene.Field("aiarena.graphql.BotType")
@@ -266,7 +260,6 @@ class MatchType(DjangoObjectTypeWithUID):
         filter_fields = []
         connection_class = CountingConnection
 
-
     @staticmethod
     def resolve_participant1(root: models.Match, info, **args):
         return root.participant1.bot
@@ -274,20 +267,17 @@ class MatchType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_participant2(root: models.Match, info, **args):
         return root.participant2.bot
-   
+
     @staticmethod
     def resolve_status(root: models.Match, info, **args):
         return root.status
-    
-   
+
     @staticmethod
     def resolve_result(root: models.Match, info, **args):
         return root.result
 
 
-
 class ResultType(DjangoObjectTypeWithUID):
-
     class Meta:
         model = models.Result
         fields = [
@@ -310,7 +300,6 @@ class Query(graphene.ObjectType):
     news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
 
-
     @staticmethod
     def resolve_viewer(root, info, **args):
         if info.context.user.is_authenticated:
@@ -332,4 +321,3 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_users(root, info, **args):
         return models.User.objects.all()
-
