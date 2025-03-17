@@ -10,7 +10,7 @@ from aiarena.core.services import Ladders
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 from aiarena.core.services import SupporterBenefits
-from aiarena.core.services.internal import match_requests
+from aiarena.core.services import MatchRequests
 
 class UserType(DjangoObjectTypeWithUID):
 
@@ -194,7 +194,7 @@ class ViewerType(graphene.ObjectType):
 
     # This is the private viewer user type.
     # Put data only the logged in user should be able view here.
-    
+
     user = graphene.Field("aiarena.graphql.UserType")
     api_token = graphene.String()
     email = graphene.String()
@@ -224,7 +224,7 @@ class ViewerType(graphene.ObjectType):
 
     @staticmethod
     def resolve_request_matches_count_left(root: models.User, info, **args):
-        return match_requests.get_user_match_request_count_left(root)
+        return MatchRequests.get_user_match_request_count_left(root)
 
 
 class Query(graphene.ObjectType):
