@@ -6,14 +6,11 @@ from graphene_django.filter import DjangoFilterConnectionField
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
-from aiarena.core.services import Ladders
+from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
-from aiarena.core.services import SupporterBenefits
-from aiarena.core.services import MatchRequests
 
 class UserType(DjangoObjectTypeWithUID):
-
     # This is the public user type.
     # put data everyone should be able view here.
 
@@ -191,7 +188,6 @@ class NewsType(DjangoObjectTypeWithUID):
 
 
 class ViewerType(graphene.ObjectType):
-
     # This is the private viewer user type.
     # Put data only the logged in user should be able view here.
 
@@ -209,15 +205,15 @@ class ViewerType(graphene.ObjectType):
     @staticmethod
     def resolve_api_token(root: models.User, info):
         return Token.objects.get(user=info.context.user)
-    
+
     @staticmethod
     def resolve_email(root: models.User, info):
         return root.email
-    
+
     @staticmethod
     def resolve_active_bots_limit(root: models.User, info, **args):
         return SupporterBenefits.get_active_bots_limit(root)
-   
+
     @staticmethod
     def resolve_request_matches_limit(root: models.User, info, **args):
         return SupporterBenefits.get_requested_matches_limit(root)
