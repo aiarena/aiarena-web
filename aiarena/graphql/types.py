@@ -100,6 +100,7 @@ class BotType(DjangoObjectTypeWithUID):
     def resolve_plays_race(root: models.Bot, info, **args):
         return root.plays_race
 
+
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()
 
