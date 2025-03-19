@@ -35,7 +35,7 @@ export const useBotParticipations = (botId: string): BotParticipationsData | nul
                 }
               }
             }
-            matchParticipations {
+            matchParticipations(orderBy: "-match__started") {
               edges {
                 node {
                   avgStepTime

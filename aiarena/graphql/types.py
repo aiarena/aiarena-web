@@ -94,7 +94,7 @@ class BotType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_match_participations(root: models.Bot, info, **args):
-        return root.matchparticipation_set.order_by("-match__started")
+        return root.matchparticipation_set.all()
 
     @staticmethod
     def resolve_plays_race(root: models.Bot, info, **args):
@@ -237,11 +237,19 @@ class ViewerType(graphene.ObjectType):
         return root.requested_matches.order_by("-first_started")
 
 
+class MatchParticipationFilterSet(FilterSet):
+    order_by = OrderingFilter(fields=["match__started", "result"])
+
+    class Meta:
+        model = models.MatchParticipation
+        fields = ["order_by"]
+
+
 class MatchParticipationType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.MatchParticipation
         fields = ["elo_change", "avg_step_time", "result", "bot", "match"]
-        filter_fields = []
+        filterset_class = MatchParticipationFilterSet
         connection_class = CountingConnection
 
 
