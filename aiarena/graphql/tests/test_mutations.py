@@ -1,5 +1,128 @@
 from aiarena.core.tests.base import GraphQLTest
-from aiarena.graphql import BotType
+from aiarena.graphql import BotType, CompetitionType
+from aiarena.core.models import CompetitionParticipation
+
+class TestToggleCompetitionParticipation(GraphQLTest):
+    mutation_name = "toggleCompetitionParticipation"
+    mutation = """
+        mutation ($input: ToggleCompetitionParticipationInput!) {
+            toggleCompetitionParticipation(input: $input) {
+                errors {
+                    messages
+                    field
+                }
+            }
+        }
+    """
+
+    def test_happy_path(self, bot, competition):
+        
+        """
+        Test creating a competition participation.
+        """
+        # Make sure there are no existing competition participations
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
+        
+        # Create a competition participation
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                }
+            },
+        )
+
+        # Verify competition participation was created correctly
+        competition_participation = CompetitionParticipation.objects.get(bot=bot, competition=competition)
+        assert competition_participation.active
+        assert competition_participation.division_num == CompetitionParticipation.DEFAULT_DIVISION
+
+        competition_participation.division_num = 1
+        competition_participation.save()
+                
+        # Toggle leave the competition i.e. set active to false, and make sure division is reset to 0
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                }
+            },
+        )
+
+        competition_participation.refresh_from_db()
+        assert not competition_participation.active 
+        assert competition_participation.division_num == CompetitionParticipation.DEFAULT_DIVISION
+    
+        # Toggle reactivate the competition i.e. set active to true
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                }
+            },
+        )
+
+        competition_participation.refresh_from_db()
+        assert competition_participation.active    
+       
+
+    def test_required_field_not_specified(self, competition, bot):
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
+        
+        # Create a competition participation
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {             
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                }
+            },
+            expected_validation_errors={"bot": ["Required field"]},
+        )
+     
+    def test_invalid_id(self, competition, bot):
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
+        
+        # Create a competition participation
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {             
+                    "bot": "Abracadabra",
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                }
+            },
+            expected_validation_errors={"bot": ['Unable to parse global ID "Abracadabra". Make sure it is a base64 encoded string in the format: "TypeName:id". Exception message: Invalid Global ID']},
+        )        
+
+    def test_update_competition_participation_unauthorized(self, competition, bot, other_user):
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
+        
+        # Create a competition participation with other_user.
+        self.mutate(
+            login_user=other_user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                }
+            },
+            expected_errors_like=['bobby cannot perform "write" on "My Bot"']
+        )
+        # Verify the competition participation was not created.
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
 
 
 class TestUpdateBot(GraphQLTest):

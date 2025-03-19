@@ -1,6 +1,6 @@
 import pytest
 
-from aiarena.core.models import Bot, WebsiteUser
+from aiarena.core.models import Bot, WebsiteUser, Competition, Game, GameMode
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.base import BrowserHelper
 
@@ -52,4 +52,25 @@ def bot(db, user, all_bot_races):
         bot_data_enabled=False,
         bot_data_publicly_downloadable=False,
         plays_race=BotRace.terran(),
+    )
+
+@pytest.fixture
+def game(db):
+    return Game.objects.create(
+        name="Starcraft 2",
+    )
+
+@pytest.fixture
+def game_mode(db, game):
+    return GameMode.objects.create(
+        name = "melee",
+        game = game,
+    )
+
+
+@pytest.fixture
+def competition(db, game_mode):
+    return Competition.objects.create(
+        name= "AI Arena SC2 Grand Prix",
+        game_mode=game_mode,
     )
