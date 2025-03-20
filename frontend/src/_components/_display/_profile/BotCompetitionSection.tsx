@@ -50,7 +50,7 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
             {/* Left Column: Competition Name & Stats */}
             <div className="space-y-2">
               <div className="flex items-center space-x-2 border-b border-gray-600 pb-2">
-                <div className="animate-spin ">
+                <div>
                   <div className="circular-gradient-shadow"></div>
                 </div>
                 <p className="ml-16 text-sm font-semibold text-customGreen">
