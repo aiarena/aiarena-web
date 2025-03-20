@@ -5,15 +5,22 @@ import MainButton from "../_props/MainButton";
 import ProfileBot from "./ProfileBot";
 import UploadBotModal from "./_profile/UploadBotModal";
 
-interface ActiveCompetition {
-  name: string;
-  currentELO: number;
-  highestELO: number;
-  matches: number;
-  winRate: string;
-  lossRate: string;
-  crashes: string;
-  rank: string;
+
+interface CompetitionParticipation {
+  active:boolean;
+  id: string;
+  competition: {
+    name: string;
+    status: string;
+  };
+  elo: number;
+  divisionNum: number;
+  crashPerc: number;
+  crashCount: number;
+  trend: number;
+  matchCount: number;
+  winPerc: number;
+  lossPerc: number;
 }
 
 interface Trophy {
@@ -25,21 +32,18 @@ export interface Bot {
   id: string;
   name: string;
   created?: string;
-  type? : string;
-  url? : string;
+  type?: string;
+  url?: string;
   botData?: string;
   botDataEnabled?: boolean;
   botDataPubliclyDownloadable?: boolean;
   botZip?: string;
   botZipPubliclyDownloadable?: boolean;
-
   botZipUpdated?: string;
-
   wikiArticle?: string;
   trophies?: Trophy[];
-  activeCompetitions?: ActiveCompetition[];
+  competitionParticipations?: CompetitionParticipation[];
 }
-
 interface ProfileBotOverviewListProps {
   bots: Bot[];
   activeBotsLimit?: number;

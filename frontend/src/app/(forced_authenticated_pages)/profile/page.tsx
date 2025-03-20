@@ -22,6 +22,7 @@ export default function Page() {
 
   const [activeTab, setActiveTab] = useState("Bots");
   const userBots = useUserBots(viewer?.user?.id  || null);
+  
   if (viewer === null ) {
     redirect('/');   
   }

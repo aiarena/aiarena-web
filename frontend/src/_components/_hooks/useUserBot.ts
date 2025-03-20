@@ -22,6 +22,26 @@ export const useUserBots = (userId: string | null) => {
               botZipPubliclyDownloadable
               botZipUpdated
               wikiArticle
+              competitionParticipations {
+                edges {
+                  node {
+                    active
+                    id
+                    competition {
+                      name
+                      status
+                    }
+                    elo
+                    divisionNum
+                    crashPerc
+                    crashCount
+                    trend
+                    matchCount
+                    winPerc
+                    lossPerc
+                  }
+                }
+              }
             }
           }
         }
@@ -32,7 +52,7 @@ export const useUserBots = (userId: string | null) => {
   );
 
   // Handle cases where no userId is passed
-  if (!userId ) {
+  if (!userId) {
     console.log("No userId.")
     return [];
   }
@@ -52,5 +72,21 @@ export const useUserBots = (userId: string | null) => {
     botZip: node.botZip || "",
     botZipPubliclyDownloadable: node.botZipPubliclyDownloadable || false,
     botZipUpdated: node.botZipUpdated || undefined,
+    competitionParticipations: getNodes(node.competitionParticipations).map((participation) => ({
+      active: participation.active || false,
+      id: participation.id,
+      competition: {
+        name: participation.competition?.name || "",
+        status: participation.competition?.status || "",
+      },
+      elo: participation.elo || 0,
+      divisionNum: participation.divisionNum || 0,
+      crashPerc: participation.crashPerc || 0,
+      crashCount: participation.crashCount || 0,
+      trend: participation.trend || 0,
+      matchCount: participation.matchCount || 0,
+      winPerc: participation.winPerc || 0,
+      lossPerc: participation.lossPerc || 0,
+    })),
   }));
 };

@@ -31,7 +31,7 @@ export const useViewer = (): Viewer | null => {
       query useViewerQuery {            
         viewer {
         user {
-        id
+          id
           username
           patreonLevel
           dateJoined

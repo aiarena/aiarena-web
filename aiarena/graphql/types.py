@@ -119,12 +119,16 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             "elo",
             "division_num",
             "bot",
+            "active",
         ]
         filter_fields = []
 
     @staticmethod
     def resolve_trend(root: models.CompetitionParticipation, info, **args):
-        return root.trend
+        trend_data = models.CompetitionParticipation.objects.filter(id=root.id).calculate_trend(root.competition)
+        if trend_data:
+            return trend_data[0].trend
+        return 0
 
 
 class CompetitionRoundsType(DjangoObjectTypeWithUID):

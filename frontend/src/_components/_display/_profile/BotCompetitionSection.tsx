@@ -10,7 +10,10 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
     useState(false);
 
-    const hasCompetitions = (bot.activeCompetitions || []).length > 0;
+  const activateCompetitions = (bot.competitionParticipations || []).filter(
+    (e) => e.active == true
+  );
+  const hasCompetitions = activateCompetitions.length > 0;
 
   return (
     <div className="p-2">
@@ -22,10 +25,8 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
       >
         {hasCompetitions ? (
           <h4 className="text-left pt-2 text-sm font-semibold text-gray-300">
-            {`${bot?.activeCompetitions?.length}`} Active{" "}
-            {bot?.activeCompetitions?.length === 1
-              ? "Competition"
-              : "Competitions"}
+            {`${activateCompetitions.length}`} Active{" "}
+            {activateCompetitions.length === 1 ? "Competition" : "Competitions"}
           </h4>
         ) : (
           <p className="ml-2 text-left pt-2 text-sm font-semibold text-gray-400">
@@ -41,10 +42,10 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
 
       {/* List Active Competitions */}
       <div className="space-y-4">
-        {bot?.activeCompetitions?.map((comp, index) => (
+        {activateCompetitions.map((comp, index) => (
           <div
             key={index}
-            className="cursor-pointer border border-gray-600 rounded-lg bg-gray-700 hover:bg-gray-600 hover:border-gray-500 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="cursor-pointer border border-gray-600 rounded-lg bg-gray-700 hover:bg-gray-700 hover:border-gray-500 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {/* Left Column: Competition Name & Stats */}
             <div className="space-y-2">
@@ -53,22 +54,28 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                   <div className="circular-gradient-shadow"></div>
                 </div>
                 <p className="ml-16 text-sm font-semibold text-customGreen">
-                  {comp.name}
+                  {comp.competition.name}
                 </p>
-              </div>
-              <div className="text-sm text-left flex flex-wrap">
-                <span className="font-bold text-gray-300 mr-4 block">
-                  Current ELO:{" "}
-                  <span className="font-normal">{comp.currentELO}</span>
+              </div>  
+              <div className="text-sm text-left flex flex-wrap ">
+                <span className="font-bold text-gray-300 mr-4 block ">
+                  Division:{" "}
+                  <span className="font-normal">{comp.divisionNum}</span>
                 </span>
                 <span className="font-bold text-gray-300 mr-4 block">
-                  Highest ELO:{" "}
-                  <span className="font-normal text-customGreen">
-                    {comp.highestELO}
+                  Current ELO: <span className="font-normal">{comp.elo}</span>
+                </span>
+                <span className="font-bold text-gray-300 mr-4 block">
+                  Trend:{" "}
+                  <span
+                    className={`font-normal ${
+                      comp.trend > 0 ? "text-customGreen" : ""
+                    }${comp.trend == 0 ? "text-gray-300" : ""}${
+                      comp.trend < 0 ? "text-red-500 " : ""
+                    }`}
+                  >
+                    {comp.trend}
                   </span>
-                </span>
-                <span className="font-bold text-gray-300 block">
-                  Rank: <span className="font-normal">4/21</span>
                 </span>
               </div>
             </div>
@@ -97,8 +104,12 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                     d="M10 8l6 4-6 4V8z"
                   />
                 </svg>
-                <span className="font-bold">Matches:</span>
-                <span>{comp.matches}</span>
+                <span className="font-bold ">Matches:</span>
+                <span className="">{comp.matchCount}</span>
+                <span className="pl-4 font-bold">Crashes:</span>
+                <span className="text-red-500 font-medium">
+                  {comp.crashCount}
+                </span>
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
                 <svg
@@ -117,11 +128,11 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                 </svg>
                 <span className="font-bold">Win/Loss:</span>
                 <span className="text-customGreen font-medium">
-                  {comp.winRate}
+                  {comp.winPerc.toFixed(1)}%
                 </span>
                 <span>/</span>
                 <span className="text-red-500 font-medium">
-                  {comp.lossRate}
+                  {comp.lossPerc.toFixed(1)}%
                 </span>
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
@@ -140,10 +151,14 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                   />
                 </svg>
                 <span className="font-bold">Crashes:</span>
-                <span className="text-red-500 font-medium">{comp.crashes}</span>
+                <span className="text-red-500 font-medium">
+                  {" "}
+                  {comp.crashPerc.toFixed(2)}%
+                </span>
               </div>
               <div></div>
             </div>
+            
           </div>
         ))}
       </div>
