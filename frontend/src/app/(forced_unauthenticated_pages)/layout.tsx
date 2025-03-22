@@ -1,9 +1,8 @@
 // import NextAuthSessionProvider from "./../components/providers/NextAuthSessionProvider";
 // import Navbar from "@/components/_nav/Navbar";
-"use client"
+"use client";
 import Footer from "@/_components/_nav/Footer";
 import Navbar from "@/_components/_nav/Navbar";
-
 
 // export const metadata = {
 //   title: "SST - Next.js Starter",
@@ -15,7 +14,9 @@ function Layout({ children }: { children: React.ReactNode }) {
     <>
       <div
         className="flex flex-col min-h-screen bg-background-texture"
-        style={{ backgroundImage: `url('${process.env.PUBLIC_PREFIX}/backgrounds/background.gif')` }}
+        style={{
+          backgroundImage: `url('${process.env.PUBLIC_PREFIX}/backgrounds/background.gif')`,
+        }}
       >
         <Navbar />
 
@@ -26,6 +27,5 @@ function Layout({ children }: { children: React.ReactNode }) {
     </>
   );
 }
-
 
 export default Layout;

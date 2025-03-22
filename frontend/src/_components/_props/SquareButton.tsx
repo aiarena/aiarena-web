@@ -8,10 +8,14 @@ interface SquareButtonProps {
   onClick?: MouseEventHandler<HTMLButtonElement>;
 }
 
-export default function SquareButton({ href, text, className, onClick }: SquareButtonProps) {
+export default function SquareButton({
+  href,
+  text,
+  className,
+  onClick,
+}: SquareButtonProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-
 
   const handleRedirect = async (path: string) => {
     setIsLoading(true);

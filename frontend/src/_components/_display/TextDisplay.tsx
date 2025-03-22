@@ -1,13 +1,12 @@
-import React from 'react';
-import { useSecureFetchText } from '@/_components/_hooks/useSecureFetchText';
+import React from "react";
+import { useSecureFetchText } from "@/_components/_hooks/useSecureFetchText";
 
 interface TextDisplayProps {
-    path: string;
-  }
+  path: string;
+}
 
-  const TextDisplay: React.FC<TextDisplayProps> = ({ path }) => {
-    
-    const { data, isLoading, error } = useSecureFetchText(path);
+const TextDisplay: React.FC<TextDisplayProps> = ({ path }) => {
+  const { data, isLoading, error } = useSecureFetchText(path);
 
   if (isLoading) {
     return <div>Loading...</div>;

@@ -1,5 +1,4 @@
 "use client";
-import { useViewerContext } from "@/_components/providers/ViewerProvider";
 import { useSignOut } from "@/_components/_hooks/useSignOut";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -18,12 +17,10 @@ import { pageProfileDashboardQuery } from "./__generated__/pageProfileDashboardQ
 import { getNodes } from "@/_lib/relayHelpers";
 
 export default function Page() {
-
   const data = useLazyLoadQuery<pageProfileDashboardQuery>(
     graphql`
       query pageProfileDashboardQuery {
         viewer {
-          
           user {
             id
             username
@@ -39,11 +36,10 @@ export default function Page() {
           ...ProfileBotOverviewList_viewer
           ...RequestMatchSection_viewer
           ...SettingsProfileSection_viewer
-
         }
       }
     `,
-    {}
+    {},
   );
 
   const [activeTab, setActiveTab] = useState("Bots");

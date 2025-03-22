@@ -1,6 +1,6 @@
-import { useLazyLoadQuery, graphql } from 'react-relay';
-import {getNodes} from "@/_lib/relayHelpers";
-import {useNewsQuery} from "./__generated__/useNewsQuery.graphql.js"
+import { useLazyLoadQuery, graphql } from "react-relay";
+import { getNodes } from "@/_lib/relayHelpers";
+import { useNewsQuery } from "./__generated__/useNewsQuery.graphql.js";
 
 export const useNews = () => {
   const data = useLazyLoadQuery<useNewsQuery>(
@@ -21,7 +21,7 @@ export const useNews = () => {
     `,
     {},
   );
-  
+
   // Extract and process nodes
   const newsNodes = getNodes(data.news);
 

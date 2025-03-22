@@ -12,7 +12,7 @@ interface ServicesComponentProps {
 const ServicesComponent: React.FC<ServicesComponentProps> = ({ services }) => {
   return (
     <div className="mb-16 px-8 text-center flex-1 w-full">
-      <WrappedTitle title="Our Services"/>
+      <WrappedTitle title="Our Services" />
       <ul className="space-y-2">
         <p>Im not really sure what to put here...</p>
         <p> Maybe list games?</p>

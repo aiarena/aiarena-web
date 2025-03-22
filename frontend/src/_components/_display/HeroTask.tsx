@@ -5,7 +5,6 @@ import { ImageOverlayWrapper } from "./ImageOverlayWrapper";
 import { StringMappingType } from "typescript";
 
 interface HeroTaskProps {
-
   backgroundImage: string;
   title: string;
   description: string;
@@ -15,7 +14,6 @@ interface HeroTaskProps {
 }
 
 const HeroTask: React.FC<HeroTaskProps> = ({
-
   backgroundImage,
   title,
   description,

@@ -135,21 +135,29 @@ const SubscriptionComparisonTable = () => {
             )}
             <div className="space-y-2">
               <p>
-                <span className="font-semibold">{attributeLabels.price}:</span> {plan.price}
+                <span className="font-semibold">{attributeLabels.price}:</span>{" "}
+                {plan.price}
               </p>
               <p>
-                <span className="font-semibold">{attributeLabels.matchRequests}:</span>{" "}
+                <span className="font-semibold">
+                  {attributeLabels.matchRequests}:
+                </span>{" "}
                 {plan.matchRequests}
               </p>
               <p>
-                <span className="font-semibold">{attributeLabels.participants}:</span>{" "}
+                <span className="font-semibold">
+                  {attributeLabels.participants}:
+                </span>{" "}
                 {plan.participants}
               </p>
               <p>
-                <span className="font-semibold">{attributeLabels.star}:</span> {plan.star}
+                <span className="font-semibold">{attributeLabels.star}:</span>{" "}
+                {plan.star}
               </p>
               <p>
-                <span className="font-semibold">{attributeLabels.discordRole}:</span>{" "}
+                <span className="font-semibold">
+                  {attributeLabels.discordRole}:
+                </span>{" "}
                 {plan.discordRole}
               </p>
             </div>

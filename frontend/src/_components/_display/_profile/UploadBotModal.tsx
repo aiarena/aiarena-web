@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Modal from "../Modal";
 
-
 interface UploadBotModal {
   isOpen: boolean;
   onClose: () => void;

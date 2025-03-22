@@ -23,7 +23,7 @@ const Observer: React.FC<ObserverProps> = ({
           setIsVisible(true);
         }
       },
-      { threshold }
+      { threshold },
     );
 
     if (ref.current) {

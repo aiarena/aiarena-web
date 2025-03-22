@@ -7,7 +7,7 @@ import React from "react";
 import mockUptimeData from "@/_data/mockUptime.json";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import { notFound } from "next/navigation"; // Import the notFound function
-import { getFeatureFlags }from "@/_data/featureFlags"
+import { getFeatureFlags } from "@/_data/featureFlags";
 
 const ActivityFeed = () => {
   const activities = [
@@ -116,14 +116,13 @@ const Thanks = () => {
 };
 
 const HomePage = () => {
-  const  statusPage = getFeatureFlags().statusPage 
-  const  serverStatus = getFeatureFlags().statusServerStatus
-  const  supporters = getFeatureFlags().supporters
-
+  const statusPage = getFeatureFlags().statusPage;
+  const serverStatus = getFeatureFlags().statusServerStatus;
+  const supporters = getFeatureFlags().supporters;
 
   if (!statusPage) {
-    notFound()
-    return null
+    notFound();
+    return null;
   }
 
   const uptimeData = mockUptimeData;
@@ -136,25 +135,20 @@ const HomePage = () => {
           </div>
           <div>
             <Stats />
-            {supporters?
-            <Thanks /> : null}
-
+            {supporters ? <Thanks /> : null}
           </div>
         </div>
-        {
-
-          serverStatus ? 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {uptimeData.map((server) => (
-            <UptimeGraph
-              key={server.serverName}
-              title={server.serverName}
-              data={server.data}
-            />
-          ))}
-        </div>
-        : null
-        }
+        {serverStatus ? (
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {uptimeData.map((server) => (
+              <UptimeGraph
+                key={server.serverName}
+                title={server.serverName}
+                data={server.data}
+              />
+            ))}
+          </div>
+        ) : null}
       </div>
       <PreFooterSpacer />
     </>

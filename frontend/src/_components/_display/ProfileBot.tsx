@@ -3,14 +3,17 @@ import BotHeaderSection from "./_profile/BotHeaderSection";
 import BotCompetitionsSection from "./_profile/BotCompetitionSection";
 // import { Bot } from "./ProfileBotOverviewList";
 import { graphql, useFragment } from "react-relay";
-import { ProfileBot_bot$data, ProfileBot_bot$key } from "./__generated__/ProfileBot_bot.graphql";
+import {
+  ProfileBot_bot$data,
+  ProfileBot_bot$key,
+} from "./__generated__/ProfileBot_bot.graphql";
 
 export interface ProfileBotProps {
   bot: ProfileBot_bot$key;
 }
 
 export default function ProfileBot(props: ProfileBotProps) {
-  const bot  = useFragment(
+  const bot = useFragment(
     graphql`
       fragment ProfileBot_bot on BotType {
         id
@@ -19,7 +22,7 @@ export default function ProfileBot(props: ProfileBotProps) {
         ...BotCompetitionSection_bot
       }
     `,
-    props.bot
+    props.bot,
   );
   return (
     <div className="rounded-lg bg-gray-800 text-white shadow-md shadow-black">

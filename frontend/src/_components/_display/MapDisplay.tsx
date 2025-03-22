@@ -26,17 +26,15 @@ export default function MapDisplay({ mapName, imageUrl }: MapDisplayProps) {
     <div className="relative w-full h-[80px]">
       {/* Parent container with fixed height */}
       <div className="relative w-full h-full">
-       
-          <Image
-            src={currentImage}
-            alt={mapName}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-contain rounded-lg"
-            onLoad={handleImageLoad} // Use onLoad instead of onLoadingComplete
-            onError={handleImageError} // Handle image load errors
-          />
-     
+        <Image
+          src={currentImage}
+          alt={mapName}
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-contain rounded-lg"
+          onLoad={handleImageLoad} // Use onLoad instead of onLoadingComplete
+          onError={handleImageError} // Handle image load errors
+        />
       </div>
       <div className="relative inset-0 flex items-center justify-center">
         {/* Gradient Overlay */}

@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === "development";
 
 const nextConfig = {
-  assetPrefix: isDev ? undefined : 'https://aiarena.net/new-frontend/',
+  assetPrefix: isDev ? undefined : "https://aiarena.net/new-frontend/",
 
   async rewrites() {
     // In development, we launch the Django app on localhost:8000, and the Next.js app on localhost:3000, which
@@ -12,8 +12,8 @@ const nextConfig = {
     if (isDev) {
       return [
         {
-          source: '/graphql',
-          destination: 'http://localhost:8000/graphql/',
+          source: "/graphql",
+          destination: "http://localhost:8000/graphql/",
         },
       ];
     }
@@ -24,25 +24,27 @@ const nextConfig = {
   },
 
   env: {
-    API_URL: isDev ? 'http://localhost:8000' : 'https://aiarena.net',
-    PUBLIC_PREFIX: isDev ? '.' : '/new-frontend',
+    API_URL: isDev ? "http://localhost:8000" : "https://aiarena.net",
+    PUBLIC_PREFIX: isDev ? "." : "/new-frontend",
   },
   trailingSlash: true,
-  output: 'standalone',
+  output: "standalone",
   images: {
-    loader: 'default',
-    path: isDev ? '/_next/image' : 'https://aiarena.net/new-frontend/_next/image',
+    loader: "default",
+    path: isDev
+      ? "/_next/image"
+      : "https://aiarena.net/new-frontend/_next/image",
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
-        pathname: '/**',
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'aiarena.net',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "aiarena.net",
+        pathname: "/**",
       },
     ],
   },
@@ -52,11 +54,11 @@ const nextConfig = {
 
   compiler: {
     relay: {
-      src: './',
-      language: 'typescript',
-      schema: './schema.graphql',
-    }
-  }
+      src: "./",
+      language: "typescript",
+      schema: "./schema.graphql",
+    },
+  },
 };
 
 module.exports = nextConfig;

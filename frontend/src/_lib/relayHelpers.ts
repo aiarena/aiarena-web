@@ -1,7 +1,9 @@
 // utils/relayHelpers.ts
-export function nodes<T>(connection: { edges?: Array<{ node: T }> } | null | undefined): T[] {
+export function nodes<T>(
+  connection: { edges?: Array<{ node: T }> } | null | undefined,
+): T[] {
   const edges = connection?.edges || [];
-  return edges.map(edge => edge.node);
+  return edges.map((edge) => edge.node);
 }
 
 // export const nodes = <T extends { node?: any }>(
@@ -14,13 +16,19 @@ export function nodes<T>(connection: { edges?: Array<{ node: T }> } | null | und
 //   );
 // };
 
-
 export function getNodes<T>(
-  connection: {
-    readonly edges?: ReadonlyArray<{
-      readonly node: T | null | undefined;
-    } | null | undefined>;
-  } | null | undefined
+  connection:
+    | {
+        readonly edges?: ReadonlyArray<
+          | {
+              readonly node: T | null | undefined;
+            }
+          | null
+          | undefined
+        >;
+      }
+    | null
+    | undefined,
 ): T[] {
   return (
     connection?.edges
@@ -28,5 +36,3 @@ export function getNodes<T>(
       .filter((node): node is T => node !== null && node !== undefined) || [] // Remove null/undefined nodes
   );
 }
-
-

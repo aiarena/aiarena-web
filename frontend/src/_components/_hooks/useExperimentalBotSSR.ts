@@ -1,5 +1,5 @@
 "use server";
-import { cookies } from 'next/headers';
+import { cookies } from "next/headers";
 
 export interface BotSSRData {
   id: string;
@@ -19,12 +19,12 @@ export async function getBotBasic(botId: string): Promise<BotSSRData | null> {
   try {
     const csrftoken = cookies().get("csrftoken")?.value;
     const sessionid = cookies().get("sessionid")?.value;
-    
+
     const response = await fetch(`${process.env.API_URL}/graphql/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Cookie": `csrftoken=${csrftoken}; sessionid=${sessionid}`
+        Cookie: `csrftoken=${csrftoken}; sessionid=${sessionid}`,
       },
       body: JSON.stringify({
         query: `
@@ -47,17 +47,20 @@ export async function getBotBasic(botId: string): Promise<BotSSRData | null> {
         `,
         variables: { id: botId },
       }),
-      cache: 'no-store' // Disable caching to ensure fresh data
+      cache: "no-store", // Disable caching to ensure fresh data
     });
-    
+
     const result = await response.json();
     const bot = result.data?.node;
-    
-    if (!bot || !('id' in bot)) {
-      console.error("Failed to fetch bot data or invalid data structure:", result);
+
+    if (!bot || !("id" in bot)) {
+      console.error(
+        "Failed to fetch bot data or invalid data structure:",
+        result,
+      );
       return null;
     }
-    
+
     return {
       id: bot.id ?? "",
       name: bot.name || "",
@@ -68,7 +71,7 @@ export async function getBotBasic(botId: string): Promise<BotSSRData | null> {
       user: {
         id: bot.user?.id || "",
         username: bot.user?.username || "",
-      }
+      },
     };
   } catch (error) {
     console.error("Error fetching bot basic info:", error);

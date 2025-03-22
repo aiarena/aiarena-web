@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 // I want types for this
-export default function useBackendErrors(mutationName : any) {
+export default function useBackendErrors(mutationName: any) {
   const [backendErrors, setBackendErrors] = React.useState({});
 
-  const handleMutationCompleted = (data : any, errors : any) => {
+  const handleMutationCompleted = (data: any, errors: any) => {
     if (errors?.length || data[mutationName]?.errors?.length) {
       setBackendErrors({
         formErrors: data[mutationName]?.errors,
@@ -15,20 +15,20 @@ export default function useBackendErrors(mutationName : any) {
     if (!(mutationName in data)) {
       // eslint-disable-next-line no-console
       console.error(
-        `Didn't find ${mutationName} in response, is the name correct?`
+        `Didn't find ${mutationName} in response, is the name correct?`,
       );
       setBackendErrors({ failError: true });
       return false;
     } else if (!("errors" in (data[mutationName] || {}))) {
       // eslint-disable-next-line no-console
       console.warn(
-        `Didn't find error keys in response.${mutationName}, please include them for correct error handling.`
+        `Didn't find error keys in response.${mutationName}, please include them for correct error handling.`,
       );
     }
 
     return true;
   };
-  const handleMutationError = (error : any) => {
+  const handleMutationError = (error: any) => {
     // eslint-disable-next-line no-console
     console.error(error);
     setBackendErrors({ failError: true });

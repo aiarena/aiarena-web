@@ -13,7 +13,9 @@ const Footer: React.FC = () => {
     <footer className="border-white border-1  text-white">
       <SectionDivider />
       <div className="pt-12 container mx-auto px-4 flex flex-col md:flex-row md:flex-wrap justify-between items-start">
-        {services ? <ServicesComponent services={footerLinks.services} /> : null}
+        {services ? (
+          <ServicesComponent services={footerLinks.services} />
+        ) : null}
         <SupportersComponent supporterData={footerLinks.topSupporters} />
 
         <SocialComponent links={footerLinks.socialLinks} />

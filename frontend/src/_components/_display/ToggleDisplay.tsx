@@ -5,7 +5,10 @@ interface ToggleDisplayProps {
   rounds: JSX.Element;
 }
 
-export default function ToggleDisplay({ rankings, rounds }: ToggleDisplayProps) {
+export default function ToggleDisplay({
+  rankings,
+  rounds,
+}: ToggleDisplayProps) {
   const [activeTab, setActiveTab] = useState<"rankings" | "rounds">("rankings");
 
   return (

@@ -5,10 +5,10 @@ interface BackendErrorsProps {
   formErrors: {
     messages: string[];
     field: string;
-  }[],
+  }[];
   graphqlErrors: {
     message: string;
-  }[],
+  }[];
   failError: string | null;
 }
 
@@ -37,7 +37,7 @@ export default function BackendErrors({
     return null;
   }
 
-  const message = finalMessages.join(', ');
+  const message = finalMessages.join(", ");
 
   return <Alert message={message} />;
 }

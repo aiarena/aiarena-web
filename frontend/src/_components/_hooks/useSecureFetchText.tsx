@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { secure_request_get } from '@/_lib/secureFetchTools';
-import handleError from '@/_lib/handleError';
+import { useState, useEffect } from "react";
+import { secure_request_get } from "@/_lib/secureFetchTools";
+import handleError from "@/_lib/handleError";
 
 interface FetchResult {
   data: string | null;
@@ -18,12 +18,12 @@ export function useSecureFetchText(path: string): FetchResult {
       .then((response) => {
         if (!response) {
           handleError(response);
-          throw new Error('Fetch error');
+          throw new Error("Fetch error");
         }
         return response.data;
       })
       .then((data) => {
-        setData(data); 
+        setData(data);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -33,4 +33,4 @@ export function useSecureFetchText(path: string): FetchResult {
   }, [path]);
 
   return { data, isLoading, error };
-};
+}

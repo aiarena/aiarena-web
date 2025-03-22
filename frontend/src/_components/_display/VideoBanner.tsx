@@ -76,7 +76,6 @@
 
 // export default VideoBanner;
 
-
 import React, { useEffect, useRef } from "react";
 
 const VideoBanner = ({
@@ -97,9 +96,7 @@ const VideoBanner = ({
   }, []);
 
   return (
-    <div
-      className="relative w-full min-h-[90vh] bg-oldBg0 flex items-center justify-center"
-    >
+    <div className="relative w-full min-h-[90vh] bg-oldBg0 flex items-center justify-center">
       {/* Video background */}
       <video
         ref={videoRef}

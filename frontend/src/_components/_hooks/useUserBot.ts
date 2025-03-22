@@ -1,6 +1,6 @@
-import { useLazyLoadQuery, graphql } from 'react-relay';
+import { useLazyLoadQuery, graphql } from "react-relay";
 import { getNodes } from "@/_lib/relayHelpers";
-import { useUserBotsQuery } from './__generated__/useUserBotsQuery.graphql';
+import { useUserBotsQuery } from "./__generated__/useUserBotsQuery.graphql";
 
 export const useUserBots = (userId: string) => {
   // Always call the query hook, but provide a fallback userId if it's null
@@ -10,7 +10,7 @@ export const useUserBots = (userId: string) => {
         bots(userId: $userId) {
           edges {
             node {
-            ...ProfileBot_bot
+              ...ProfileBot_bot
             }
           }
         }
@@ -18,7 +18,7 @@ export const useUserBots = (userId: string) => {
     `,
 
     { userId: userId },
-     // Provide a default placeholder
+    // Provide a default placeholder
   );
 
   // Handle cases where no userId is passed
@@ -28,5 +28,5 @@ export const useUserBots = (userId: string) => {
 
   // Extract nodes and transform them into the required shape
   const botNodes = getNodes(data.bots);
-  return botNodes
+  return botNodes;
 };

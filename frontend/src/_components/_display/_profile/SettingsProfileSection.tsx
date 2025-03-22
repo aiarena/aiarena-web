@@ -1,31 +1,29 @@
 import { useState } from "react";
 import Image from "next/image";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { User, Viewer} from "@/_components/_hooks/useViewer";
+import { User, Viewer } from "@/_components/_hooks/useViewer";
 import { graphql, useFragment } from "react-relay";
 import { SettingsProfileSection_viewer$key } from "./__generated__/SettingsProfileSection_viewer.graphql";
 
-
 interface SettingsProfileSectionProps {
-   viewer: SettingsProfileSection_viewer$key
+  viewer: SettingsProfileSection_viewer$key;
 }
 
 export default function SettingsProfileSection(
-  props
-: SettingsProfileSectionProps ) {
-
+  props: SettingsProfileSectionProps,
+) {
   const viewer = useFragment(
-      graphql`
-        fragment SettingsProfileSection_viewer on ViewerType {
-          apiToken
-          user{
-            username
-            avatarUrl
-          }
+    graphql`
+      fragment SettingsProfileSection_viewer on ViewerType {
+        apiToken
+        user {
+          username
+          avatarUrl
         }
-      `,
-      props.viewer
-    );
+      }
+    `,
+    props.viewer,
+  );
 
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
 
@@ -65,9 +63,11 @@ export default function SettingsProfileSection(
         <h3 className="text-base font-semibold text-customGreen">Profile</h3>
         <div className="flex items-center space-x-3">
           <div className="relative w-12 h-12 flex-shrink-0">
-            
             <Image
-              src={viewer?.user?.avatarUrl || `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`}
+              src={
+                viewer?.user?.avatarUrl ||
+                `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`
+              }
               alt="User avatar"
               fill
               className="object-cover"
@@ -153,8 +153,10 @@ export default function SettingsProfileSection(
       <div className="bg-gray-700 p-4 rounded-md space-y-2">
         <h3 className="text-base font-semibold text-customGreen">API Token</h3>
         <div className="flex flex-wrap items-start gap-2 w-full">
-        <span className="text-left bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs w-full break-words">
-            {apiTokenVisible ? viewer.apiToken : "•••••••••••••••••••••••••••••••••"}
+          <span className="text-left bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs w-full break-words">
+            {apiTokenVisible
+              ? viewer.apiToken
+              : "•••••••••••••••••••••••••••••••••"}
           </span>
           <button
             onClick={() => setApiTokenVisible(!apiTokenVisible)}

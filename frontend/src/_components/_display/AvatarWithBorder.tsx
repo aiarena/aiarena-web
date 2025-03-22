@@ -2,7 +2,13 @@ import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Image from "next/image";
 import React, { useState } from "react";
 
-export type Border = "NONE" | "BRONZE" | "SILVER" | "GOLD" | "PLATINUM" | "DIAMOND";
+export type Border =
+  | "NONE"
+  | "BRONZE"
+  | "SILVER"
+  | "GOLD"
+  | "PLATINUM"
+  | "DIAMOND";
 
 export interface AvatarWithBorderProps {
   avatarSrc?: string;
@@ -11,11 +17,12 @@ export interface AvatarWithBorderProps {
 
 export default function AvatarWithBorder({
   avatarSrc,
-  border="NONE",
+  border = "NONE",
 }: AvatarWithBorderProps) {
-
   const isValidBorder = (border: string): border is Border =>
-    ["NONE", "BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"].includes(border);
+    ["NONE", "BRONZE", "SILVER", "GOLD", "PLATINUM", "DIAMOND"].includes(
+      border,
+    );
 
   const formatBorder = (border: string): string => {
     const lowerCased = border.toLowerCase();
@@ -39,7 +46,7 @@ export default function AvatarWithBorder({
         />
       </div>
 
-      { border && isValidBorder(border) && border != "NONE" ? (
+      {border && isValidBorder(border) && border != "NONE" ? (
         <Image
           src={`${getPublicPrefix()}/frames/${border.toLocaleLowerCase()}.png`}
           alt={`${formatBorder(border)} frame`}

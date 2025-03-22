@@ -10,7 +10,8 @@ interface DiscordInviteCardProps {
   memberCount: number;
   onlineCount: number;
   serverImageUrl?: string;
-}const DiscordInviteCard: React.FC<DiscordInviteCardProps> = ({
+}
+const DiscordInviteCard: React.FC<DiscordInviteCardProps> = ({
   serverName,
   inviteUrl,
   description,
@@ -21,8 +22,10 @@ interface DiscordInviteCardProps {
   const discordData = getFeatureFlags().heroDiscordUsersInfo;
 
   return (
-    <div className="shadow-customDiscord bg-customBackgroundColor1 text-white p-6 rounded-lg max-w-[40em] mx-auto  lg:flex lg:justify-center lg:items-center lg:p-10  border border-indigo-500
-">
+    <div
+      className="shadow-customDiscord bg-customBackgroundColor1 text-white p-6 rounded-lg max-w-[40em] mx-auto  lg:flex lg:justify-center lg:items-center lg:p-10  border border-indigo-500
+"
+    >
       <div className="flex flex-col md:flex-row items-center gap-8 lg:justify-center">
         {/* Server Image */}
         {serverImageUrl && (
@@ -34,28 +37,29 @@ interface DiscordInviteCardProps {
               alt={`${serverName} Server`}
               className="rounded-full w-auto h-auto"
             />
-           
           </div>
         )}
-        
+
         {/* Card Content */}
         <div className="flex-grow text-center lg:text-center">
-          <h2 className="text-3xl font-bold mb-4 text-customGreen font-gugi">{serverName}</h2>
-          <p className="text-gray-400 mb-6 text-sm lg:text-xl lg:mb-8">{description}</p>
-          {discordData ? 
-          <div className="flex justify-center gap-6 mb-6">
-           
-            <div className="text-green-400">
-              <strong>{onlineCount}</strong> Online
+          <h2 className="text-3xl font-bold mb-4 text-customGreen font-gugi">
+            {serverName}
+          </h2>
+          <p className="text-gray-400 mb-6 text-sm lg:text-xl lg:mb-8">
+            {description}
+          </p>
+          {discordData ? (
+            <div className="flex justify-center gap-6 mb-6">
+              <div className="text-green-400">
+                <strong>{onlineCount}</strong> Online
+              </div>
+              <div className="text-gray-300">
+                <strong>{memberCount}</strong> Members
+              </div>
             </div>
-            <div className="text-gray-300">
-              <strong>{memberCount}</strong> Members
-            </div>
-        
-          </div>
-     : null }  
-     <MainButton text=" Join Server" href="inviteUrl"/>
-       
+          ) : null}
+          <MainButton text=" Join Server" href="inviteUrl" />
+
           {/* <a
             href={inviteUrl}
             target="_blank"
@@ -73,8 +77,8 @@ interface DiscordInviteCardProps {
 
 export default DiscordInviteCard;
 
-
-  {/* <h2 className="text-2xl font-bold mb-2">{serverName}</h2>
+{
+  /* <h2 className="text-2xl font-bold mb-2">{serverName}</h2>
           <p className="text-gray-400 mb-4">{description}</p>
 
           <div className="flex gap-4 mb-6">
@@ -84,12 +88,15 @@ export default DiscordInviteCard;
             <div className="text-gray-300">
               <strong>{memberCount}</strong> Members
             </div>
-          </div> */}
+          </div> */
+}
 
-            {/* Invite Button */}
+{
+  /* Invite Button */
+}
 
-
-             {/*              
+{
+  /*              
         {serverImageUrl && (
           <Image
             width={80}
@@ -99,4 +106,5 @@ export default DiscordInviteCard;
             className="w-full md:w-1/4 rounded-lg mb-4 md:mb-0 md:mr-6"
           />
         )}
-     */}
+     */
+}

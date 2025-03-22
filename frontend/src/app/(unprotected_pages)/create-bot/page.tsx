@@ -138,11 +138,11 @@ const Page = () => {
   const [preferredLanguage, setPreferredLanguage] = useState<Language>("");
   const [frameworkType, setFrameworkType] = useState<FrameworkType>(""); // Beginner or Ladder
   const [selectedFramework, setSelectedFramework] = useState<Framework | null>(
-    null
+    null,
   );
   const [specificFramework, setSpecificFramework] = useState<string>(""); // Track specific framework selection
   const [questionResponses, setQuestionResponses] = useState<QuestionResponses>(
-    {}
+    {},
   ); // Track responses for questionnaire steps
 
   const handleLanguageSelection = (lang: Language) => {
@@ -166,7 +166,7 @@ const Page = () => {
   // Function to filter frameworks based on type (Easiest or Highest Ranked)
   const filterFrameworks = (
     frameworks: Framework[],
-    type: FrameworkType
+    type: FrameworkType,
   ): Framework | null => {
     if (type === "Beginner") {
       return frameworks.sort((a, b) => a.easeOfUse - b.easeOfUse)[0]; // Easiest for Beginners
@@ -201,7 +201,7 @@ const Page = () => {
   // Handle questionnaire response
   const handleQuestionResponse = (
     stepIndex: number,
-    selectedOption: string
+    selectedOption: string,
   ) => {
     setQuestionResponses((prevResponses) => ({
       ...prevResponses,
@@ -226,7 +226,7 @@ const Page = () => {
         </code>
       ) : (
         <span key={index}>{part}</span>
-      )
+      ),
     );
   };
 

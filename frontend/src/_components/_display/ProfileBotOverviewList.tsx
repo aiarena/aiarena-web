@@ -9,32 +9,31 @@ import { useViewerQuery$variables } from "../_hooks/__generated__/useViewerQuery
 import { ProfileBotOverviewList_viewer$key } from "./__generated__/ProfileBotOverviewList_viewer.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 
-
 interface ProfileBotOverviewListProps {
- viewer: ProfileBotOverviewList_viewer$key
+  viewer: ProfileBotOverviewList_viewer$key;
 }
 
-export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (props) => {
-    const viewer  = useFragment(
-      graphql`
-        fragment ProfileBotOverviewList_viewer on ViewerType {
-          activeBotsLimit
-          user {
-            ownBots {
-              edges {
-                node {
-                  id
-                  ...ProfileBot_bot
-                }
+export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
+  props,
+) => {
+  const viewer = useFragment(
+    graphql`
+      fragment ProfileBotOverviewList_viewer on ViewerType {
+        activeBotsLimit
+        user {
+          ownBots {
+            edges {
+              node {
+                id
+                ...ProfileBot_bot
               }
             }
           }
         }
-      `,
-      props.viewer
-    );
-  
-
+      }
+    `,
+    props.viewer,
+  );
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
 
@@ -63,9 +62,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (pr
       </div>
 
       <ul className="space-y-12">
-        
-        {
-        getNodes(viewer.user?.ownBots).map((bot) => (
+        {getNodes(viewer.user?.ownBots).map((bot) => (
           <li key={bot.id}>
             <ProfileBot bot={bot} />
           </li>

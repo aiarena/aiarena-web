@@ -1,7 +1,6 @@
-import { useLazyLoadQuery, graphql } from 'react-relay';
-import { useViewerQuery } from './__generated__/useViewerQuery.graphql';
-import { useMemo } from 'react';
-
+import { useLazyLoadQuery, graphql } from "react-relay";
+import { useViewerQuery } from "./__generated__/useViewerQuery.graphql";
+import { useMemo } from "react";
 
 export interface User {
   id: string;
@@ -13,7 +12,6 @@ export interface User {
   avatarUrl?: string;
 }
 
-
 export interface Viewer {
   user: User;
   apiToken: string;
@@ -23,20 +21,18 @@ export interface Viewer {
   requestMatchesCountLeft?: number;
 }
 
-
 export const useViewer = (): Viewer | null => {
-
   const data = useLazyLoadQuery<useViewerQuery>(
     graphql`
-      query useViewerQuery {            
+      query useViewerQuery {
         viewer {
-        user {
-          id
-          username
-          patreonLevel
-          dateJoined
-          avatarUrl
-        }
+          user {
+            id
+            username
+            patreonLevel
+            dateJoined
+            avatarUrl
+          }
           apiToken
           email
           activeBotsLimit
@@ -45,7 +41,7 @@ export const useViewer = (): Viewer | null => {
         }
       }
     `,
-    {}
+    {},
   );
   // console.log("Console.log DATA: ", data)
   // Always call `useMemo` and safely handle null or undefined data
@@ -69,4 +65,3 @@ export const useViewer = (): Viewer | null => {
 
   return data.viewer as Viewer;
 };
-

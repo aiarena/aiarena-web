@@ -23,18 +23,16 @@
 //   return nodes(data.competitions);
 // };
 
-
-import { useLazyLoadQuery, graphql } from 'react-relay';
+import { useLazyLoadQuery, graphql } from "react-relay";
 import { nodes } from "@/_lib/relayHelpers";
-import {getNodes} from "@/_lib/relayHelpers";
-import { useCompetitionsQuery } from './__generated__/useCompetitionsQuery.graphql';
-
+import { getNodes } from "@/_lib/relayHelpers";
+import { useCompetitionsQuery } from "./__generated__/useCompetitionsQuery.graphql";
 
 export const useCompetitions = () => {
   const data = useLazyLoadQuery<useCompetitionsQuery>(
     graphql`
       query useCompetitionsQuery {
-        competitions(last:20) {
+        competitions(last: 20) {
           edges {
             node {
               id
@@ -47,13 +45,13 @@ export const useCompetitions = () => {
         }
       }
     `,
-    {}
+    {},
   );
-  
-  const competitionNodes = getNodes(data.competitions)
 
-   // Transform into a sanitized shape
-   return competitionNodes.map((node) => ({
+  const competitionNodes = getNodes(data.competitions);
+
+  // Transform into a sanitized shape
+  return competitionNodes.map((node) => ({
     id: node.id,
     dateCreated: String(node.dateCreated), // Ensure string
     name: node.name || "", // Fallback for title

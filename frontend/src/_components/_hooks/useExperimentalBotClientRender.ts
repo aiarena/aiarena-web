@@ -1,7 +1,7 @@
 "use client";
 
-import { useLazyLoadQuery, graphql } from 'react-relay';
-import { useExperimentalBotClientRenderQuery } from './__generated__/useExperimentalBotClientRenderQuery.graphql';
+import { useLazyLoadQuery, graphql } from "react-relay";
+import { useExperimentalBotClientRenderQuery } from "./__generated__/useExperimentalBotClientRenderQuery.graphql";
 
 export interface BotParticipationsData {
   matchParticipations: {
@@ -17,7 +17,9 @@ export interface BotParticipationsData {
   }[];
 }
 
-export const useBotParticipations = (botId: string): BotParticipationsData | null => {
+export const useBotParticipations = (
+  botId: string,
+): BotParticipationsData | null => {
   const data = useLazyLoadQuery<useExperimentalBotClientRenderQuery>(
     graphql`
       query useExperimentalBotClientRenderQuery($id: ID!) {
@@ -53,14 +55,14 @@ export const useBotParticipations = (botId: string): BotParticipationsData | nul
         }
       }
     `,
-    { id: botId }
+    { id: botId },
   );
-  
+
   const bot = data.node;
   if (!bot) {
     return null;
   }
-  
+
   return {
     matchParticipations:
       bot.matchParticipations?.edges?.map((edge) => ({
@@ -74,7 +76,7 @@ export const useBotParticipations = (botId: string): BotParticipationsData | nul
         },
       })) || [],
     competitionParticipations:
-      bot.competitionParticipations?.edges?.map(edge => ({
+      bot.competitionParticipations?.edges?.map((edge) => ({
         competition: {
           status: edge?.node?.competition?.status || "",
           name: edge?.node?.competition?.name || "",

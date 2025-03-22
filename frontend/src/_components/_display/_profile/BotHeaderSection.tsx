@@ -23,7 +23,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
         ...BotSettingsModal_bot
       }
     `,
-    props.bot
+    props.bot,
   );
 
   const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);

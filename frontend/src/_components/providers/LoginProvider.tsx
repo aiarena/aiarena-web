@@ -1,5 +1,5 @@
-"use client"
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+"use client";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface LoginContextProps {
   isLoggedIn: boolean;
@@ -12,7 +12,7 @@ const LoginContext = createContext<LoginContextProps | undefined>(undefined);
 export const useLogin = () => {
   const context = useContext(LoginContext);
   if (!context) {
-    throw new Error('useLogin must be used within a LoginProvider');
+    throw new Error("useLogin must be used within a LoginProvider");
   }
   return context;
 };

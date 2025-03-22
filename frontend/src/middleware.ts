@@ -1,4 +1,3 @@
-
 // export { default } from "next-auth/middleware";
 
 //default uses the _http-secure-cookie to check if a user is logged in.
@@ -14,7 +13,6 @@ export async function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-
 // import { withAuth } from "next-auth/middleware"
 // import { NextResponse } from "next/server";
 // import type { NextRequest } from "next/server";
@@ -23,8 +21,6 @@ export async function middleware(req: NextRequest) {
 
 // const forced_authenticated_pages = ["/note", "/profile", "/settings", "/login"];
 // const forced_unauthenticated_pages = ["/123", "/profile", "auth/signin"];
-
-
 
 // split the route using /, then check for *
 
@@ -37,14 +33,12 @@ export async function middleware(req: NextRequest) {
 //     secret: process.env.NEXTAUTH_SECRET,
 //   });
 
-
 //   if(!token) {
 //     console.log("no token")
 //   }
 //   if (token) {
 //     console.log("a token")
 //   }
-
 
 //if authenticated and on a forced authenticated page
 // if (cookie && forced_authenticated_pages.includes(path)) {
@@ -93,50 +87,6 @@ export async function middleware(req: NextRequest) {
 //     error: '/auth/error',
 //   }
 // })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // // import { withAuth } from "next-auth/middleware"
 // import { NextResponse } from "next/server";

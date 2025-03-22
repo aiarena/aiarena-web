@@ -73,7 +73,6 @@ const patreonIcons: Record<string, string> = {
 };
 
 export default function Page({ params }: CompetitionPageProps) {
- 
   const competition = useCompetition(params.id);
 
   const featureFlags = getFeatureFlags();
@@ -95,7 +94,7 @@ export default function Page({ params }: CompetitionPageProps) {
             acc[division].push(participant);
             return acc;
           },
-          {} as Record<number, typeof competition.participants>
+          {} as Record<number, typeof competition.participants>,
         );
 
         // Render each division
@@ -130,13 +129,19 @@ export default function Page({ params }: CompetitionPageProps) {
                       >
                         <td className="px-4 py-2 truncate">{idx + 1}</td>
                         <td className="px-4 py-2 font-semibold  transition truncate">
-                          <Link href={`${getPublicPrefix()}/bots/${participant.bot?.id}`} className=" cursor-pointer text-customGreen hover:text-white">
-                          {participant.bot?.name || "Unknown"}
+                          <Link
+                            href={`${getPublicPrefix()}/bots/${participant.bot?.id}`}
+                            className=" cursor-pointer text-customGreen hover:text-white"
+                          >
+                            {participant.bot?.name || "Unknown"}
                           </Link>
                         </td>
                         <td className="px-4 py-2 font-semibold  transition truncate">
-                        <Link href={`${getPublicPrefix()}/authors/${participant.bot?.user?.id}`} className=" cursor-pointer text-customGreen hover:text-white">
-                          {participant.bot?.user?.username || "Unknown"}
+                          <Link
+                            href={`${getPublicPrefix()}/authors/${participant.bot?.user?.id}`}
+                            className=" cursor-pointer text-customGreen hover:text-white"
+                          >
+                            {participant.bot?.user?.username || "Unknown"}
                           </Link>
                         </td>
                         <td className="px-4 py-2 truncate">
@@ -269,7 +274,6 @@ export default function Page({ params }: CompetitionPageProps) {
                     <MapDisplay
                       mapName={map.name}
                       imageUrl={`/${map.file}.webp`} // Assuming images are named based on file paths
-                      
                     />
                   </div>
                 ))}

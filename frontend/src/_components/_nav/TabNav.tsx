@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface Tab {
   name: string;
@@ -11,7 +11,11 @@ interface TabNavigationProps {
   setActiveTab: (tabName: string) => void;
 }
 
-const TabNavigation: React.FC<TabNavigationProps> = ({ tabs, activeTab, setActiveTab }) => {
+const TabNavigation: React.FC<TabNavigationProps> = ({
+  tabs,
+  activeTab,
+  setActiveTab,
+}) => {
   return (
     <div className="border-b border-slate-500">
       <div className="flex flex-wrap justify-center md:justify-start space-x-4 md:space-x-6">
@@ -25,8 +29,8 @@ const TabNavigation: React.FC<TabNavigationProps> = ({ tabs, activeTab, setActiv
             }}
             className={`px-3 py-2 text-sm md:text-base font-semibold ${
               activeTab === tab.name
-                ? 'text-customGreen border-b-2 border-customGreen'
-                : 'text-gray-200 hover:text-white'
+                ? "text-customGreen border-b-2 border-customGreen"
+                : "text-gray-200 hover:text-white"
             }`}
           >
             {tab.name}

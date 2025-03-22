@@ -10,10 +10,12 @@ import { graphql, useFragment } from "react-relay";
 import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
 
 interface BotCompetitionSectionProps {
-  bot: BotCompetitionSection_bot$key
+  bot: BotCompetitionSection_bot$key;
 }
 
-export default function BotCompetitionsSection(props: BotCompetitionSectionProps) {
+export default function BotCompetitionsSection(
+  props: BotCompetitionSectionProps,
+) {
   const bot = useFragment(
     graphql`
       fragment BotCompetitionSection_bot on BotType {
@@ -43,7 +45,7 @@ export default function BotCompetitionsSection(props: BotCompetitionSectionProps
         ...JoinCompetitionModal_bot
       }
     `,
-    props.bot
+    props.bot,
   );
   const comp_data = getNodes(bot.competitionParticipations);
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =

@@ -8,8 +8,7 @@ interface Filter {
   placeholder: string;
 }
 
-
-// WARNING! This is the old interface that enforces the fields, but requires 
+// WARNING! This is the old interface that enforces the fields, but requires
 // all data to be flat. Nested fields does not work with this one, but its prefered
 // interface FilterableListProps<T> {
 //   data: (T | null | undefined)[];
@@ -21,16 +20,16 @@ interface Filter {
 // }
 
 interface FilterableListProps<T> {
-    data: (T | null | undefined)[];
-    fields: string[];  // Allow string to support nested fields
-    filters: Filter[];
-    renderRow: (item: T, index: number) => React.ReactNode;
-    resultsPerPage?: number;
-    defaultFieldSort?: number;
-    defaultSortOrder?: "asc" | "desc"
-    fieldLabels?: { [key: string]: string };  // Also change fieldLabels to accept any string
-    fieldClasses?: { [key: string]: string };
-  }
+  data: (T | null | undefined)[];
+  fields: string[]; // Allow string to support nested fields
+  filters: Filter[];
+  renderRow: (item: T, index: number) => React.ReactNode;
+  resultsPerPage?: number;
+  defaultFieldSort?: number;
+  defaultSortOrder?: "asc" | "desc";
+  fieldLabels?: { [key: string]: string }; // Also change fieldLabels to accept any string
+  fieldClasses?: { [key: string]: string };
+}
 
 export default function FilterableList<T>({
   data,
@@ -43,29 +42,27 @@ export default function FilterableList<T>({
   fieldLabels = {}, // Default to an empty object if no fieldLabels are provided
   fieldClasses = {},
 }: FilterableListProps<T>) {
-    const [sortField, setSortField] = useState<string>(fields[defaultFieldSort]);
+  const [sortField, setSortField] = useState<string>(fields[defaultFieldSort]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultSortOrder);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterStates, setFilterStates] = useState<{ [key: string]: string }>(
-    {}
+    {},
   );
   const [resultsPerPage, setResultsPerPage] = useState<number>(
-    initialResultsPerPage
+    initialResultsPerPage,
   );
   const [showFilterMenu, setShowFilterMenu] = useState<boolean>(false);
   // Sorting logic
 
-//   OLD TYPES
-//   const handleSort = (field: keyof T) => {
-//     if (field === sortField) {
-//       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-//     } else {
-//       setSortField(field);
-//       setSortOrder("asc");
-//     }
-//   };
-
-
+  //   OLD TYPES
+  //   const handleSort = (field: keyof T) => {
+  //     if (field === sortField) {
+  //       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  //     } else {
+  //       setSortField(field);
+  //       setSortOrder("asc");
+  //     }
+  //   };
 
   // Utility to determine visibility class based on responsive config
   // const getResponsiveClass = (className: string): string => {
@@ -97,12 +94,6 @@ export default function FilterableList<T>({
     setCurrentPage(1); // Reset to page 1 on filter change
   };
 
-
-
-
-
-  
-
   // Reset pagination to page 1 whenever search or filters change
   //   useEffect(() => {
   //     setCurrentPage(1);
@@ -133,46 +124,46 @@ export default function FilterableList<T>({
   //     });
   //   });
 
+  //   FOR OLD TYPES
+  //   const filteredData = data.filter((item) => {
+  //     // Skip if the item is null or undefined
+  //     if (!item) return false;
 
+  //     return filters.every((filter) => {
+  //       const filterValue = filterStates[filter.field] || "";
 
-//   FOR OLD TYPES
-//   const filteredData = data.filter((item) => {
-//     // Skip if the item is null or undefined
-//     if (!item) return false;
+  //       if (filter.type === "search") {
+  //         if (filterValue.trim() === "") return true;
 
-//     return filters.every((filter) => {
-//       const filterValue = filterStates[filter.field] || "";
-
-//       if (filter.type === "search") {
-//         if (filterValue.trim() === "") return true;
-
-//         const searchRegex = new RegExp(filterValue, "i");
-//         // Ensure we're safely accessing fields, or return false if undefined
-//         return fields.some(
-//           (field) => item[field] && searchRegex.test(String(item[field]))
-//         );
-//       } else if (filter.type === "dropdown") {
-//         return filterValue
-//           ? String(item[filter.field as keyof T] || "").toLowerCase() ===
-//               filterValue.toLowerCase()
-//           : true;
-//       }
-//       return true;
-//     });
-//   });
-const filteredData = data.filter((item) => {
+  //         const searchRegex = new RegExp(filterValue, "i");
+  //         // Ensure we're safely accessing fields, or return false if undefined
+  //         return fields.some(
+  //           (field) => item[field] && searchRegex.test(String(item[field]))
+  //         );
+  //       } else if (filter.type === "dropdown") {
+  //         return filterValue
+  //           ? String(item[filter.field as keyof T] || "").toLowerCase() ===
+  //               filterValue.toLowerCase()
+  //           : true;
+  //       }
+  //       return true;
+  //     });
+  //   });
+  const filteredData = data.filter((item) => {
     if (!item) return false;
-  
+
     return filters.every((filter) => {
       const filterValue = filterStates[filter.field] || "";
-  
+
       if (filter.type === "search") {
         if (filterValue.trim() === "") return true;
-  
+
         const searchRegex = new RegExp(filterValue, "i");
         // Use getNestedValue to safely access nested fields
         return fields.some(
-          (field) => getNestedValue(item, field) && searchRegex.test(String(getNestedValue(item, field)))
+          (field) =>
+            getNestedValue(item, field) &&
+            searchRegex.test(String(getNestedValue(item, field))),
         );
       } else if (filter.type === "dropdown") {
         return filterValue
@@ -183,11 +174,12 @@ const filteredData = data.filter((item) => {
       return true;
     });
   });
-  
 
   // Utility function to access nested fields
   function getNestedValue<T>(obj: T, path: string): any {
-    return path.split('.').reduce((acc: any, key: string) => acc && acc[key], obj);
+    return path
+      .split(".")
+      .reduce((acc: any, key: string) => acc && acc[key], obj);
   }
   const sortedData = [...filteredData].sort((a, b) => {
     // Check if either 'a' or 'b' is null or undefined
@@ -196,10 +188,10 @@ const filteredData = data.filter((item) => {
 
     // Safely access the sortField values using the getNestedValue function
     const valueA = String(
-      getNestedValue(a, String(sortField)) || ""
+      getNestedValue(a, String(sortField)) || "",
     ).toLowerCase();
     const valueB = String(
-      getNestedValue(b, String(sortField)) || ""
+      getNestedValue(b, String(sortField)) || "",
     ).toLowerCase();
 
     // Compare the string values based on sortOrder
@@ -214,7 +206,7 @@ const filteredData = data.filter((item) => {
   const pageSize = resultsPerPage;
   const paginatedData = sortedData.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    currentPage * pageSize,
   );
   const totalPages = Math.ceil(filteredData.length / pageSize);
 
@@ -242,7 +234,7 @@ const filteredData = data.filter((item) => {
             }`}
           >
             {page}
-          </button>
+          </button>,
         );
       }
     } else {
@@ -259,7 +251,7 @@ const filteredData = data.filter((item) => {
             }`}
           >
             1
-          </button>
+          </button>,
         );
       }
 
@@ -268,7 +260,7 @@ const filteredData = data.filter((item) => {
         paginationButtons.push(
           <span key="start-ellipsis" className="px-4 py-1 text-white">
             ...
-          </span>
+          </span>,
         );
       }
 
@@ -304,7 +296,7 @@ const filteredData = data.filter((item) => {
             }`}
           >
             {page}
-          </button>
+          </button>,
         );
       });
 
@@ -313,7 +305,7 @@ const filteredData = data.filter((item) => {
         paginationButtons.push(
           <span key="end-ellipsis" className="px-4 py-1 text-white">
             ...
-          </span>
+          </span>,
         );
       }
 
@@ -330,7 +322,7 @@ const filteredData = data.filter((item) => {
             }`}
           >
             {totalPages}
-          </button>
+          </button>,
         );
       }
 
@@ -343,7 +335,7 @@ const filteredData = data.filter((item) => {
           0,
           <span key="extra-ellipsis" className="px-4 py-1 text-white">
             ...
-          </span>
+          </span>,
         );
       }
     }
@@ -359,7 +351,7 @@ const filteredData = data.filter((item) => {
   };
 
   const handleChangeResultsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const value = Number(event.target.value);
     if (!isNaN(value) && value >= 1) {
@@ -367,7 +359,7 @@ const filteredData = data.filter((item) => {
     }
   };
 
-  const getClassName = (field: string) => fieldClasses[field] || ""; 
+  const getClassName = (field: string) => fieldClasses[field] || "";
 
   return (
     <div className="flex flex-col p-4 bg-customBackgroundColor1">
@@ -419,10 +411,10 @@ const filteredData = data.filter((item) => {
                 new Set(
                   data
                     .map(
-                      (item) => item && String(item[filter.field as keyof T])
+                      (item) => item && String(item[filter.field as keyof T]),
                     ) // Safely handle nulls
-                    .filter((value) => value) // Exclude null or empty values from dropdown
-                )
+                    .filter((value) => value), // Exclude null or empty values from dropdown
+                ),
               );
 
               return (
@@ -454,12 +446,14 @@ const filteredData = data.filter((item) => {
       )}
 
       {/* Sorting Header Fields */}
-      <div    className={`grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))] text-white mb-4 font-bold`}>
+      <div
+        className={`grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))] text-white mb-4 font-bold`}
+      >
         {fields.map((field, index) => (
           <button
             key={index}
             className={`text-left font-bold text-lg text-customGreen hover:text-gray-400 ${getClassName(
-              field
+              field,
             )}`}
             onClick={() => handleSort(field)}
           >
@@ -481,19 +475,22 @@ const filteredData = data.filter((item) => {
             //   {renderRow(item, index)}
             // </li>
             item ? (
-              <li key={index} className="mb-2 h-14 shadow shadow-black bg-customBackgroundColor3D1">
+              <li
+                key={index}
+                className="mb-2 h-14 shadow shadow-black bg-customBackgroundColor3D1"
+              >
                 {renderRow(item, index)}
               </li>
             ) : (
               <li key={index} className="mb-2 h-14">
                 Invalid Data
               </li> // Handle nulls or invalid data
-            )
+            ),
           )}
           {Array.from({ length: pageSize - paginatedData.length }).map(
             (_, index) => (
               <li key={`empty-${index}`} className="mb-2 h-14"></li>
-            )
+            ),
           )}
         </ul>
       </div>

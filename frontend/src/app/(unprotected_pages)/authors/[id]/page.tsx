@@ -29,7 +29,10 @@ export default function Page({ params }: AuthorPageProps) {
           <p>Joined: {author?.dateJoined}</p>
           <p>ImgSRC : {author?.avatarUrl}</p>
 
-      <AvatarWithBorder avatarSrc={author.avatarUrl} border={author.patreonLevel}/>
+          <AvatarWithBorder
+            avatarSrc={author.avatarUrl}
+            border={author.patreonLevel}
+          />
 
           {author?.ownBots && author.ownBots.length > 0 ? (
             <ul>

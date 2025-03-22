@@ -13,8 +13,17 @@ interface Notification {
 const NotificationSystem: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = (message: string, type: NotificationType, timeout = 5000) => {
-    const newNotification: Notification = { id: "uuidv4()", message, type, timeout };
+  const addNotification = (
+    message: string,
+    type: NotificationType,
+    timeout = 5000,
+  ) => {
+    const newNotification: Notification = {
+      id: "uuidv4()",
+      message,
+      type,
+      timeout,
+    };
     setNotifications((prev) => [...prev, newNotification]);
 
     setTimeout(() => {
@@ -45,7 +54,7 @@ const NotificationSystem: React.FC = () => {
         <div
           key={notif.id}
           className={`p-4 rounded-md shadow-lg transition transform hover:scale-105 ${getTypeStyles(
-            notif.type
+            notif.type,
           )}`}
         >
           <p>{notif.message}</p>

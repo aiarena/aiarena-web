@@ -1,7 +1,5 @@
-import React from 'react'
+import React from "react";
 
 export default function PreFooterSpacer() {
-  return (
-   <div className='py-10'></div>
-  )
+  return <div className="py-10"></div>;
 }

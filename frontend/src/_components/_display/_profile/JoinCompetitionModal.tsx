@@ -8,7 +8,6 @@ import { getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
 import { JoinCompetitionModal_bot$key } from "./__generated__/JoinCompetitionModal_bot.graphql";
 
-
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
   isOpen: boolean;
@@ -40,7 +39,7 @@ export default function JoinCompetitionModal({
         }
       }
     `,
-    props.bot
+    props.bot,
   );
 
   const [confirmLeave, setConfirmLeave] = useState<string[]>([]);
@@ -57,7 +56,7 @@ export default function JoinCompetitionModal({
       botCompetitionParticipations?.some(
         (participation) =>
           competitionId === participation.competition.id &&
-          participation.active === true
+          participation.active === true,
       ) || false
     );
   };

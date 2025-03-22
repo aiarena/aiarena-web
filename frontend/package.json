@@ -40,6 +40,7 @@
     "babel-plugin-relay": "^17.0.0",
     "encoding": "^0.1.13",
     "graphql": "^16.10.0",
+    "prettier": "^3.5.3",
     "relay-compiler": "^17.0.0"
   },
   "relay": {

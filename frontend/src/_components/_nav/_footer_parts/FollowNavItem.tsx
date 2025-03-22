@@ -12,7 +12,11 @@ const FollowComponent: React.FC<FollowComponentProps> = ({ icons }) => {
       <h4 className="text-lg font-semibold mb-2">Follow Us</h4>
       <div className="flex space-x-4">
         {icons.map((icon, index) => (
-          <Link href={icon.href} key={index} className="hover:text-gray-400 cursor-pointer">
+          <Link
+            href={icon.href}
+            key={index}
+            className="hover:text-gray-400 cursor-pointer"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -20,7 +24,12 @@ const FollowComponent: React.FC<FollowComponentProps> = ({ icons }) => {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon.icon} />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={icon.icon}
+              />
             </svg>
           </Link>
         ))}

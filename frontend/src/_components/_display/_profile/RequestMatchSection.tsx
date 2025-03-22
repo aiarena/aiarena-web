@@ -14,7 +14,6 @@ import { useViewerRequestedMatchesQuery$variables } from "@/_components/_hooks/_
 import { RequestMatchSection_viewer$key } from "./__generated__/RequestMatchSection_viewer.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 
-
 interface RequestMatchesSectionProps {
   viewer: RequestMatchSection_viewer$key;
 }
@@ -60,7 +59,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         }
       }
     `,
-    props.viewer
+    props.viewer,
   );
 
   // Example state - replace with real data fetching logic

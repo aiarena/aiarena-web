@@ -1,17 +1,18 @@
-import { getPublicPrefix } from '@/_lib/getPublicPrefix';
-import React, { FC, ReactNode } from 'react';
-
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import React, { FC, ReactNode } from "react";
 
 interface BackgroundTextureProps {
   children?: ReactNode;
   className?: string;
 }
 
-const BackgroundTexture: FC<BackgroundTextureProps> = ({ children, className = '' }) => {
-
+const BackgroundTexture: FC<BackgroundTextureProps> = ({
+  children,
+  className = "",
+}) => {
   const style: React.CSSProperties = {
     backgroundImage: `url('${getPublicPrefix()}/backgrounds/background.gif')`,
-    backgroundRepeat: 'repeat',
+    backgroundRepeat: "repeat",
   };
 
   return (

@@ -14,7 +14,7 @@
     --foreground-rgb: 25, 25, 25;
     /* Brown/Gray gradient for dark mode */
     --background-start-rgb: 15, 15, 15; /* Dim Gray */
-    --background-end-rgb: 47, 47, 47;      /* Darker Gray */
+    --background-end-rgb: 47, 47, 47; /* Darker Gray */
   }
 }
 @layer base {
@@ -43,7 +43,6 @@
   }
 }
 
-
 body {
   color: rgb(var(--foreground-rgb)); /* Apply the white text color */
   background: linear-gradient(
@@ -53,8 +52,6 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
-
-
 
 .video-overlay {
   position: absolute;
@@ -98,33 +95,12 @@ nav .block {
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* Fancy Effects  */
-
-
-
 
 .animate-gradientShift {
   background-size: 200% 100%;
   animation: gradientShift 5s cubic-bezier(0.66, 0, 0.34, 1) infinite;
 }
-
-
-
-
-
 
 .circular-gradient-shadow {
   width: 16px;
@@ -132,13 +108,15 @@ nav .block {
   position: relative;
   margin: 5px auto;
   border-radius: 100%;
-  background:rgb(134, 254, 50);
+  background: rgb(134, 254, 50);
   box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
-  animation: rotate-gradient 4s linear infinite, pulse 2s ease-in-out infinite;
+  animation:
+    rotate-gradient 4s linear infinite,
+    pulse 2s ease-in-out infinite;
 }
 
 .circular-gradient-shadow::before {
-  content: '';
+  content: "";
   position: absolute;
   top: -3px;
   left: -3px;
@@ -146,7 +124,9 @@ nav .block {
   bottom: -3px;
   border-radius: 100%;
   box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
-  animation: rotate-shadow 4s linear infinite reverse, pulse-shadow 4s ease-in-out infinite;
+  animation:
+    rotate-shadow 4s linear infinite reverse,
+    pulse-shadow 4s ease-in-out infinite;
 }
 
 @keyframes rotate-gradient {
@@ -168,7 +148,8 @@ nav .block {
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
   }
@@ -179,7 +160,8 @@ nav .block {
 }
 
 @keyframes pulse-shadow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
   }
   50% {
@@ -187,40 +169,37 @@ nav .block {
   }
 }
 
-
-
-
-
 @keyframes sine-wave {
   0% {
-    border-color: rgba(134, 194, 50, 1); 
+    border-color: rgba(134, 194, 50, 1);
   }
   25% {
-    border-color: rgba(154, 210, 70, 1); 
+    border-color: rgba(154, 210, 70, 1);
   }
   50% {
-    border-color: rgba(174, 230, 90, 1); 
+    border-color: rgba(174, 230, 90, 1);
   }
   75% {
-    border-color: rgba(154, 210, 70, 1); 
+    border-color: rgba(154, 210, 70, 1);
   }
   100% {
-    border-color: rgba(134, 194, 50, 1); 
+    border-color: rgba(134, 194, 50, 1);
   }
 }
 
 @keyframes sine-wave-text {
-  0%, 100% {
-    color: rgba(134, 194, 50, 1); 
+  0%,
+  100% {
+    color: rgba(134, 194, 50, 1);
   }
   25% {
-    color: rgba(154, 210, 70, 1); 
+    color: rgba(154, 210, 70, 1);
   }
   50% {
     color: rgba(174, 230, 90, 1);
   }
   75% {
-    color: rgba(154, 210, 70, 1); 
+    color: rgba(154, 210, 70, 1);
   }
 }
 
@@ -232,18 +211,17 @@ nav .block {
   animation: sine-wave-text 5s ease-in-out infinite;
 }
 
-
-
-
 .dividing-line {
   position: relative;
   width: 100%;
   height: 10px;
-  background: linear-gradient(25deg, 
-    transparent 48%, 
-    rgba(134, 194, 50, 1) 48%, 
-    rgba(134, 194, 50, 1) 52%, 
-    transparent 52%);
+  background: linear-gradient(
+    25deg,
+    transparent 48%,
+    rgba(134, 194, 50, 1) 48%,
+    rgba(134, 194, 50, 1) 52%,
+    transparent 52%
+  );
 }
 
 .dividing-line::before {
@@ -267,11 +245,13 @@ nav .block {
   position: relative;
   width: 100%;
   height: 10px;
-  background: linear-gradient(25deg, 
-    transparent 48%, 
-    rgba(134, 194, 50, 1) 48%, 
-    rgba(134, 194, 50, 1) 52%, 
-    transparent 52%);
+  background: linear-gradient(
+    25deg,
+    transparent 48%,
+    rgba(134, 194, 50, 1) 48%,
+    rgba(134, 194, 50, 1) 52%,
+    transparent 52%
+  );
 }
 
 .dividing-line1::before {
@@ -295,11 +275,13 @@ nav .block {
   position: relative;
   width: 100%;
   height: 10px;
-  background: linear-gradient(45deg, 
-    transparent 40%, 
-    rgba(134, 194, 50, 1) 40%, 
-    rgba(134, 194, 50, 1) 60%, 
-    transparent 60%);
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(134, 194, 50, 1) 40%,
+    rgba(134, 194, 50, 1) 60%,
+    transparent 60%
+  );
 }
 
 .dividing-line2::before {
@@ -329,7 +311,6 @@ nav .block {
   );
   clip-path: polygon(0% 0%, 100% 100%, 100% 100%, 0% 100%);
 }
-
 
 .dividing-line4 {
   position: relative;
@@ -368,7 +349,6 @@ nav .block {
   clip-path: polygon(0% 0%, 50% 100%, 100% 0%, 100% 100%, 0% 100%);
 }
 
-
 .dividing-line7 {
   position: relative;
   width: 100%;
@@ -392,8 +372,6 @@ nav .block {
   );
   clip-path: polygon(0% 0%, 50% 80%, 100% 0%, 100% 100%, 0% 100%);
 }
-
-
 
 .dividing-line9 {
   position: relative;

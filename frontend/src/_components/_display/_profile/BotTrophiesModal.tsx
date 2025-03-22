@@ -13,7 +13,11 @@ interface TrophiesModalProps {
   onClose: () => void;
 }
 
-export default function TrophiesModal({ bot, isOpen, onClose }: TrophiesModalProps) {
+export default function TrophiesModal({
+  bot,
+  isOpen,
+  onClose,
+}: TrophiesModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -34,7 +38,9 @@ export default function TrophiesModal({ bot, isOpen, onClose }: TrophiesModalPro
                     style={{ objectFit: "contain" }}
                   />
                 </div>
-                <p className="text-xs text-gray-300 text-center">{trophy.title}</p>
+                <p className="text-xs text-gray-300 text-center">
+                  {trophy.title}
+                </p>
               </div>
             ))}
           </div>

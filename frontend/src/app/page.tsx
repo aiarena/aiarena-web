@@ -64,77 +64,72 @@ export default function Page() {
 
   return (
     <>
+      <div className="flex flex-col min-h-screen font-sans bg-background-texture">
+        <Navbar />
 
-    <div className="flex flex-col min-h-screen font-sans bg-background-texture">
-      <Navbar />
-  
-      <main className="flex-grow bg-darken text-white">
-        
-        <VideoBanner source={`${getPublicPrefix()}/videos/ai-banner.mp4`}>
-        
-          <div className="text-6xl font-bold font-gugi text-customGreen">
-            <Image
-              className="m-auto pb-6 invert h-40 w-40 "
-              src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
-              alt="AI-arena-logo"
-              width={10}
-              height={10}
-            />
-            <h1 className="font-bold font-gugi text-customGreen text-6xl pt-8">
-              AI Arena
-            </h1>
-            
-          </div>
-          <h2 className="text-2xl mb-12">Welcome to the AI Arena!</h2>
-          {heroTasks ? (
-            <div className="mb-32 mt-36">
-              <InitiationHeroTasks tasks={tasks} />
+        <main className="flex-grow bg-darken text-white">
+          <VideoBanner source={`${getPublicPrefix()}/videos/ai-banner.mp4`}>
+            <div className="text-6xl font-bold font-gugi text-customGreen">
+              <Image
+                className="m-auto pb-6 invert h-40 w-40 "
+                src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
+                alt="AI-arena-logo"
+                width={10}
+                height={10}
+              />
+              <h1 className="font-bold font-gugi text-customGreen text-6xl pt-8">
+                AI Arena
+              </h1>
             </div>
-          ) : (
-            <MainButton href={`${getPublicPrefix()}/login/`} text="Login" />
-          )}
-        
-        </VideoBanner>
-        <div className="lg:space-x-4 lg:space-y-0">
-          <div className="rounded-lg rounded-lg">
-            <ImageOverlayWrapper
-              //   imageUrl={`${process.env.PUBLIC_PREFIX}/social_icons/discord-icon.svg`}
-              imageUrl={`/generated_assets/dall_e_bg_2.webp`}
-              alt="Discord background"
-              sectionDivider={true}
-              sectionDividerDarken={5}
-              blurAmount="blur-md"
-              opacityAmount="opacity-70"
-            >
-              <div className="">
-                <div className="min-h-[30em] relative z-10 flex items-center justify-center  ">
-                  <DiscordInviteCard
-                    serverName="AI Arena"
-                    inviteUrl="https://discord.gg/your-invite-code"
-                    description="Join the AI Arena discord community"
-                    memberCount={2500}
-                    onlineCount={450}
-                    serverImageUrl={`${getPublicPrefix()}/social_icons/discord-icon.svg`}
-                  />
-                </div>
+            <h2 className="text-2xl mb-12">Welcome to the AI Arena!</h2>
+            {heroTasks ? (
+              <div className="mb-32 mt-36">
+                <InitiationHeroTasks tasks={tasks} />
               </div>
-            </ImageOverlayWrapper>
+            ) : (
+              <MainButton href={`${getPublicPrefix()}/login/`} text="Login" />
+            )}
+          </VideoBanner>
+          <div className="lg:space-x-4 lg:space-y-0">
+            <div className="rounded-lg rounded-lg">
+              <ImageOverlayWrapper
+                //   imageUrl={`${process.env.PUBLIC_PREFIX}/social_icons/discord-icon.svg`}
+                imageUrl={`/generated_assets/dall_e_bg_2.webp`}
+                alt="Discord background"
+                sectionDivider={true}
+                sectionDividerDarken={5}
+                blurAmount="blur-md"
+                opacityAmount="opacity-70"
+              >
+                <div className="">
+                  <div className="min-h-[30em] relative z-10 flex items-center justify-center  ">
+                    <DiscordInviteCard
+                      serverName="AI Arena"
+                      inviteUrl="https://discord.gg/your-invite-code"
+                      description="Join the AI Arena discord community"
+                      memberCount={2500}
+                      onlineCount={450}
+                      serverImageUrl={`${getPublicPrefix()}/social_icons/discord-icon.svg`}
+                    />
+                  </div>
+                </div>
+              </ImageOverlayWrapper>
+            </div>
           </div>
-        </div>
 
-        <ImageOverlayWrapper
-          imageUrl={`/demo_assets/demo-news.webp`}
-          alt="Space Background"
-          sectionDivider={true}
-          sectionDividerDarken={5}
-          blurAmount="blur-sm"
-          opacityAmount="opacity-80"
-        >
-          <LatestNews newsData={newsData} />
-        </ImageOverlayWrapper>
-      </main>
-      <Footer />
-    </div>
+          <ImageOverlayWrapper
+            imageUrl={`/demo_assets/demo-news.webp`}
+            alt="Space Background"
+            sectionDivider={true}
+            sectionDividerDarken={5}
+            blurAmount="blur-sm"
+            opacityAmount="opacity-80"
+          >
+            <LatestNews newsData={newsData} />
+          </ImageOverlayWrapper>
+        </main>
+        <Footer />
+      </div>
     </>
   );
 }

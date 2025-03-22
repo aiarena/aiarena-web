@@ -10,7 +10,6 @@ interface NavItemProps {
 }
 
 function NavItem({ href, children, onClick, className }: NavItemProps) {
-
   return (
     <div className="text-l p-2  text-center">
       <Link

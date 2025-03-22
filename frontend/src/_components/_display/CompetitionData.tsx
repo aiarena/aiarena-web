@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 const CompetitionData: React.FC = () => {
   const [data, setData] = useState<any>(null);
@@ -53,10 +53,10 @@ const CompetitionData: React.FC = () => {
           }
         `;
 
-        const response = await fetch('/api/proxy', {
-          method: 'POST',
+        const response = await fetch("/api/proxy", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({ query }),
         });
@@ -68,7 +68,7 @@ const CompetitionData: React.FC = () => {
         const result = await response.json();
         setData(result);
       } catch (error: any) {
-        setError(error.message || 'An error occurred while fetching data');
+        setError(error.message || "An error occurred while fetching data");
       }
     }
 
@@ -83,11 +83,7 @@ const CompetitionData: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  return (
-    <div>
-      {/* Render your data here */}
-    </div>
-  );
+  return <div>{/* Render your data here */}</div>;
 };
 
 export default CompetitionData;

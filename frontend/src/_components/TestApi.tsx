@@ -55,7 +55,6 @@
 //       });
 //     }
 
-
 //     fetchApi();
 //     // if (session?.status === "authenticated") {
 //     //   fetchApiAuth();

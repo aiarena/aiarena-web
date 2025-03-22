@@ -11,10 +11,10 @@ interface BotParticipationsProps {
 export default function BotParticipations({ botId }: BotParticipationsProps) {
   // State to track if component is mounted (client-side)
   const [isMounted, setIsMounted] = useState(false);
-  
+
   // Always call the hook to follow React rules
   const participations = useBotParticipations(botId);
-  
+
   // Set mounted state on client
   useEffect(() => {
     setIsMounted(true);
@@ -36,13 +36,15 @@ export default function BotParticipations({ botId }: BotParticipationsProps) {
         <p>No competition participations found</p>
       ) : (
         <ul>
-          {participations.competitionParticipations.map((participation, index) => (
-            <li key={index}>
-              Competition: {participation.competition.name}, Status:{" "}
-              {participation.competition.status}, Division:{" "}
-              {participation.divisionNum}, Elo: {participation.elo}
-            </li>
-          ))}
+          {participations.competitionParticipations.map(
+            (participation, index) => (
+              <li key={index}>
+                Competition: {participation.competition.name}, Status:{" "}
+                {participation.competition.status}, Division:{" "}
+                {participation.divisionNum}, Elo: {participation.elo}
+              </li>
+            ),
+          )}
         </ul>
       )}
 
@@ -53,10 +55,10 @@ export default function BotParticipations({ botId }: BotParticipationsProps) {
         <ul>
           {participations.matchParticipations.map((matchPart) => (
             <li key={matchPart.match.id}>
-              Date: {formatDateISO(matchPart.match.started)}{" "}
-              Match: {matchPart.match.id}, Status: {matchPart.match.status},{" "}
-              Result: {matchPart.result}, ELO Change: {matchPart.eloChange}, Avg
-              Step Time: {matchPart.avgStepTime}
+              Date: {formatDateISO(matchPart.match.started)} Match:{" "}
+              {matchPart.match.id}, Status: {matchPart.match.status}, Result:{" "}
+              {matchPart.result}, ELO Change: {matchPart.eloChange}, Avg Step
+              Time: {matchPart.avgStepTime}
             </li>
           ))}
         </ul>

@@ -124,7 +124,9 @@ const LatestNews: React.FC<LatestNewsProps> = ({ newsData }) => {
             key={index}
             onClick={() => handleDotClick(index)}
             className={` w-6 h-3 rounded-full mx-1 transition duration-300 ${
-              currentIndex === index ? "bg-customGreen shadow shadow-black" : "bg-gray-400"
+              currentIndex === index
+                ? "bg-customGreen shadow shadow-black"
+                : "bg-gray-400"
             }`}
           ></button>
         ))}
