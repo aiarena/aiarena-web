@@ -1,44 +1,83 @@
-import { ViewerRequestedMatch } from "@/_components/_hooks/useViewerRequestedMatches";
+import {
+  useViewerRequestedMatches,
+  ViewerRequestedMatch,
+} from "@/_components/_hooks/useViewerRequestedMatches";
 import { useEffect, useState } from "react";
 import internal from "stream";
 import FilterableList from "../FilterableList";
 import Link from "next/link";
 import { formatDate, formatDateISO } from "@/_lib/dateUtils";
 import { isTemplateSpan } from "typescript";
-// import MainButton from "../_props/MainButton"; // If you have a custom button component
-// If not, just use a <button> with Tailwind classes.
+import { graphql, useFragment } from "react-relay";
+import { ProfileBotOverviewList_viewer$key } from "../__generated__/ProfileBotOverviewList_viewer.graphql";
+import { useViewerRequestedMatchesQuery$variables } from "@/_components/_hooks/__generated__/useViewerRequestedMatchesQuery.graphql";
+import { RequestMatchSection_viewer$key } from "./__generated__/RequestMatchSection_viewer.graphql";
+import { getNodes } from "@/_lib/relayHelpers";
+
 
 interface RequestMatchesSectionProps {
-  requestMatchesCountLeft?: number;
-  requestMatchesLimit?: number;
-  requestedMatches?: ViewerRequestedMatch[];
+  viewer: RequestMatchSection_viewer$key;
 }
 
-export default function RequestMatchesSection({
-  requestMatchesCountLeft,
-  requestMatchesLimit,
-  requestedMatches,
-}: RequestMatchesSectionProps) {
+export default function RequestMatchSection(props: RequestMatchesSectionProps) {
+  const viewer = useFragment(
+    graphql`
+      fragment RequestMatchSection_viewer on ViewerType {
+        requestMatchesLimit
+        requestMatchesCountLeft
+        requestedMatches {
+          edges {
+            node {
+              id
+              firstStarted
+              participant1 {
+                id
+                name
+              }
+              participant2 {
+                id
+                name
+              }
+              result {
+                type
+                winner {
+                  name
+                }
+              }
+            }
+          }
+          totalCount
+        }
+        user {
+          ownBots {
+            edges {
+              node {
+                id
+                ...ProfileBot_bot
+              }
+            }
+          }
+        }
+      }
+    `,
+    props.viewer
+  );
+
   // Example state - replace with real data fetching logic
-  const [matchRequestLimit, setMatchRequestLimit] = useState(
-    requestMatchesLimit || 0
-  );
-  const [requestsRemaining, setRequestsUsed] = useState(
-    requestMatchesCountLeft || 0
-  );
   const [inProgressMatches, setInProgressMatches] = useState([
     { id: 1, opponent: "BotA", status: "Match scheduled for tomorrow" },
     { id: 2, opponent: "BotB", status: "Processing..." },
   ]);
 
-  const requestsUsed = matchRequestLimit - requestsRemaining;
+  const requestsUsed = viewer.requestedMatches?.totalCount;
+
+  // const requestedMatches = useViewerRequestedMatches();
 
   const handleRequestNewMatch = () => {
     // Implement logic to request a new match via API
     // For example, you might open a modal or directly call an API endpoint.
     alert("Requesting a new match (placeholder)!");
   };
-
 
   return (
     <div id="matches" className="space-y-4">
@@ -48,7 +87,7 @@ export default function RequestMatchesSection({
           <p className="text-left">
             <span className="font-bold">Requests used:</span>{" "}
             <span className="text-customGreen">
-              {requestsUsed}/{matchRequestLimit}
+              {requestsUsed}/{viewer.requestMatchesLimit}
             </span>
           </p>
           <p className="text-left text-customGreen cursor-pointer">
@@ -75,7 +114,7 @@ export default function RequestMatchesSection({
         </div>
       </div>
       <FilterableList
-        data={requestedMatches || []}
+        data={getNodes(viewer.requestedMatches)}
         fields={[
           "id",
           "firstStarted",

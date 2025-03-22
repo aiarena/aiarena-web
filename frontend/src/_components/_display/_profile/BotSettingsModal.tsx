@@ -1,23 +1,47 @@
 import React, { useState } from "react";
 import Modal from "../Modal";
 
-import { Bot } from "@/_components/_display/ProfileBotOverviewList";
 import { useUpdateUserBot } from "@/_components/_hooks/useUpdateUserBot";
+import { graphql, useFragment } from "react-relay";
+import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.graphql";
+import {
+  useUpdateUserBotMutation,
+  useUpdateUserBotMutation$data,
+  useUpdateUserBotMutation$variables,
+} from "@/_components/_hooks/__generated__/useUpdateUserBotMutation.graphql";
 
-interface TrophiesModalProps {
-  bot: Bot;
+interface BotSettingsModalProps {
+  bot: BotSettingsModal_bot$key;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function SettingsModal({
-  bot,
+export default function BotSettingsModal({
   isOpen,
   onClose,
-}: TrophiesModalProps) {
+  ...props
+}: BotSettingsModalProps) {
+  const bot = useFragment(
+    graphql`
+      fragment BotSettingsModal_bot on BotType {
+        id
+        name
+        url
+        botData
+        botDataEnabled
+        botDataPubliclyDownloadable
+        botZip
+        botZipPubliclyDownloadable
+        botZipUpdated
+        wikiArticle
+      }
+    `,
+    props.bot
+  );
+
   const { updateBot, botInFlightField } = useUpdateUserBot();
-  const [botZip] = useState(bot.botZip || "");
-  const [biography, setBiography] = useState(bot.wikiArticle);
+  const botZip = bot.botZip;
+  const [biography, setBiography] = useState(bot.wikiArticle || "");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const handleDownload = (url: string) => {
@@ -28,9 +52,10 @@ export default function SettingsModal({
 
   const handleSaveBiography = () => {
     console.log("Biography saved:", biography);
+
     updateBot(bot.id, {
       wikiArticle: biography,
-    })
+    });
     setHasUnsavedChanges(false);
   };
 

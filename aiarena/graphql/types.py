@@ -208,8 +208,8 @@ class ViewerType(graphene.ObjectType):
     api_token = graphene.String()
     email = graphene.String()
     active_bots_limit = graphene.Int()
-    request_matches_limit = graphene.Int()
-    request_matches_count_left = graphene.Int()
+    request_matches_limit = graphene.Int(required=True)
+    request_matches_count_left = graphene.Int(required=True)
     requested_matches = DjangoConnectionField("aiarena.graphql.MatchType")
 
     @staticmethod
@@ -234,7 +234,7 @@ class ViewerType(graphene.ObjectType):
 
     @staticmethod
     def resolve_request_matches_count_left(root: models.User, info, **args):
-        return MatchRequests.get_user_match_request_count_left(root)
+        return MatchRequests.get_user_match_request_count_left(root) 
 
     @staticmethod
     def resolve_requested_matches(root: models.User, info, **args):

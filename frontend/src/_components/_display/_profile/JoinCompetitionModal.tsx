@@ -1,29 +1,46 @@
 import React, { useState } from "react";
 import Modal from "../Modal";
-import { Bot } from "../ProfileBotOverviewList";
+
 import { useCompetitions } from "@/_components/_hooks/useCompetitions";
 import { PassThrough } from "stream";
 import { useToggleCompetitionParticipation } from "@/_components/_hooks/useToggleCompetitionParticipation";
-// import Modal from "../Modal";
+import { getNodes } from "@/_lib/relayHelpers";
+import { graphql, useFragment } from "react-relay";
+import { JoinCompetitionModal_bot$key } from "./__generated__/JoinCompetitionModal_bot.graphql";
 
-// interface Competition {
-//   name: string;
-// }
 
 interface JoinCompetitionModalProps {
-  bot: Bot;
+  bot: JoinCompetitionModal_bot$key;
   isOpen: boolean;
   onClose: () => void;
-  // competitions: Competition[]
 }
 
 export default function JoinCompetitionModal({
-  bot,
   isOpen,
   onClose,
+  ...props
 }: JoinCompetitionModalProps) {
-  const [selectedCompetitions, setSelectedCompetitions] = useState<string[]>(
-    []
+  const bot = useFragment(
+    graphql`
+      fragment JoinCompetitionModal_bot on BotType {
+        id
+        name
+        competitionParticipations {
+          edges {
+            node {
+              active
+              id
+              competition {
+                id
+                name
+                status
+              }
+            }
+          }
+        }
+      }
+    `,
+    props.bot
   );
 
   const [confirmLeave, setConfirmLeave] = useState<string[]>([]);
@@ -31,7 +48,7 @@ export default function JoinCompetitionModal({
 
   const openCompetitions = competitions.filter((comp) => comp.status == "OPEN");
 
-  const botCompetitionParticipations = bot.competitionParticipations;
+  const botCompetitionParticipations = getNodes(bot.competitionParticipations);
   const [toggleCompetitionParticipation, isInFlight, error] =
     useToggleCompetitionParticipation();
 
@@ -56,14 +73,13 @@ export default function JoinCompetitionModal({
 
   const handlePromptConfirmLeave = (compId: string) => {
     setConfirmLeave((prev) => [...prev, compId]);
-    console.log(confirmLeave)
+    console.log(confirmLeave);
   };
 
   const handlePromptCancelLeave = (compId: string) => {
     setConfirmLeave((prev) => [...prev].filter((e) => e != compId));
-    console.log(confirmLeave)
+    console.log(confirmLeave);
   };
-
 
   return isOpen ? (
     <Modal onClose={onClose} title={`${bot.name} - Edit competitions`}>
@@ -90,19 +106,28 @@ export default function JoinCompetitionModal({
               {hasActiveCompetitionParticipation(comp.id) ? (
                 <>
                   {confirmLeave.some((item) => item == comp.id) ? (
-                   <div>
-                      <button onClick={() => toggleCompetition(comp.id)} className="bg-red-700 p-2 border  border-gray-600">Leave</button>
-                      <button onClick={() => handlePromptCancelLeave(comp.id)} className="p-2 border  border-gray-600" >Cancel</button>
-                   </div>
+                    <div>
+                      <button
+                        onClick={() => toggleCompetition(comp.id)}
+                        className="bg-red-700 p-2 border  border-gray-600"
+                      >
+                        Leave
+                      </button>
+                      <button
+                        onClick={() => handlePromptCancelLeave(comp.id)}
+                        className="p-2 border  border-gray-600"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   ) : (
                     <button
-                    onClick={() => handlePromptConfirmLeave(comp.id)}
-                    className="bg-red-700 p-2"
-                  >
-                    Leave
-                  </button>
+                      onClick={() => handlePromptConfirmLeave(comp.id)}
+                      className="bg-red-700 p-2"
+                    >
+                      Leave
+                    </button>
                   )}
-            
                 </>
               ) : (
                 <button

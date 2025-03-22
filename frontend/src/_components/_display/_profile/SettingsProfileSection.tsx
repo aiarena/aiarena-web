@@ -2,15 +2,31 @@ import { useState } from "react";
 import Image from "next/image";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { User, Viewer} from "@/_components/_hooks/useViewer";
+import { graphql, useFragment } from "react-relay";
+import { SettingsProfileSection_viewer$key } from "./__generated__/SettingsProfileSection_viewer.graphql";
 
 
-interface SettingsProfileSection {
-    viewer: Viewer
+interface SettingsProfileSectionProps {
+   viewer: SettingsProfileSection_viewer$key
 }
 
-export default function SettingsProfileSection({
-  viewer,
-}: SettingsProfileSection) {
+export default function SettingsProfileSection(
+  props
+: SettingsProfileSectionProps ) {
+
+  const viewer = useFragment(
+      graphql`
+        fragment SettingsProfileSection_viewer on ViewerType {
+          apiToken
+          user{
+            username
+            avatarUrl
+          }
+        }
+      `,
+      props.viewer
+    );
+
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
 
   const [discordLinked, setDiscordLinked] = useState(false);

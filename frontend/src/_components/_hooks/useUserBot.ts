@@ -10,46 +10,15 @@ export const useUserBots = (userId: string) => {
         bots(userId: $userId) {
           edges {
             node {
-              id    
-              name
-              created
-              type
-              url
-              botData
-              botDataEnabled
-              botDataPubliclyDownloadable
-              botZip
-              botZipPubliclyDownloadable
-              botZipUpdated
-              wikiArticle
-              competitionParticipations {
-                edges {
-                  node {
-                    active
-                    id
-                    competition {
-                      id
-                      name
-                      status
-                    }
-                    elo
-                    divisionNum
-                    crashPerc
-                    crashCount
-                    trend
-                    matchCount
-                    winPerc
-                    lossPerc
-                  }
-                }
-              }
+            ...ProfileBot_bot
             }
           }
         }
       }
     `,
 
-    { userId: userId } // Provide a default placeholder
+    { userId: userId },
+     // Provide a default placeholder
   );
 
   // Handle cases where no userId is passed
@@ -60,35 +29,5 @@ export const useUserBots = (userId: string) => {
 
   // Extract nodes and transform them into the required shape
   const botNodes = getNodes(data.bots);
-  return botNodes.map((node) => ({
-    id: node.id,
-    name: node.name || "", // Fallback for title
-    created: String(node.created), // Ensure string
-    type: node.type || "", // Fallback for type
-    url: node.url || "",
-    wikiArticle: node?.wikiArticle || "",
-    botData: node.botData || "",
-    botDataEnabled: node.botDataEnabled || false,
-    botDataPubliclyDownloadable: node.botDataPubliclyDownloadable || false,
-    botZip: node.botZip || "",
-    botZipPubliclyDownloadable: node.botZipPubliclyDownloadable || false,
-    botZipUpdated: node.botZipUpdated || undefined,
-    competitionParticipations: getNodes(node.competitionParticipations).map((participation) => ({
-      active: participation.active || false,
-      id: participation.id,
-      competition: {
-        id: participation.competition?.id || "",
-        name: participation.competition?.name || "",
-        status: participation.competition?.status || "",
-      },
-      elo: participation.elo || 0,
-      divisionNum: participation.divisionNum || 0,
-      crashPerc: participation.crashPerc || 0,
-      crashCount: participation.crashCount || 0,
-      trend: participation.trend || 0,
-      matchCount: participation.matchCount || 0,
-      winPerc: participation.winPerc || 0,
-      lossPerc: participation.lossPerc || 0,
-    })),
-  }));
+  return botNodes
 };
