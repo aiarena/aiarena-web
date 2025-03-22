@@ -23,7 +23,6 @@ export const useUserBots = (userId: string) => {
 
   // Handle cases where no userId is passed
   if (!userId) {
-    console.log("No userId.")
     return [];
   }
 

@@ -42,7 +42,6 @@ export const useUpdateUserBot = () => {
         },
         onCompleted: (data) => {
           setBotInFlightField(null);
-          console.log("Mutation completed:", data);
           resolve(data);
         },
         onError: (err) => {

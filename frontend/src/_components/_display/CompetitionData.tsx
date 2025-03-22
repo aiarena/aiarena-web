@@ -53,8 +53,6 @@ const CompetitionData: React.FC = () => {
           }
         `;
 
-        console.log('Sending POST request with query:', query);  // Log the query being sent
-
         const response = await fetch('/api/proxy', {
           method: 'POST',
           headers: {
@@ -63,17 +61,13 @@ const CompetitionData: React.FC = () => {
           body: JSON.stringify({ query }),
         });
 
-        console.log('Received response:', response);  // Log the response object
-
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }
 
         const result = await response.json();
-        console.log('Received data:', result);  // Log the received data
         setData(result);
       } catch (error: any) {
-        console.error('Fetch error:', error.message);  // Log any errors
         setError(error.message || 'An error occurred while fetching data');
       }
     }

@@ -119,7 +119,5 @@ export const useCompetition = (competitionId: string) => {
       })) || [], // Default to an empty array if undefined
   };
 
-  console.log('Sanitized Competition Data:', sanitizedCompetition);
-
   return sanitizedCompetition;
 };

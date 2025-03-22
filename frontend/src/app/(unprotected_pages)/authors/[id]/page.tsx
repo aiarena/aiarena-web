@@ -20,7 +20,6 @@ export default function Page({ params }: AuthorPageProps) {
   if (author === null) {
     notFound();
   }
-  console.log(author)
   return (
     <>
       <ArticleWrapper className="bg-customBackgroundColor2 text-white">

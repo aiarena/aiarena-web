@@ -46,13 +46,10 @@ export default function BotSettingsModal({
 
   const handleDownload = (url: string) => {
     const mirrorUrl = "https://aiarena.net/";
-    console.log("Downloading: " + mirrorUrl + url);
     window.location.href = mirrorUrl + url;
   };
 
   const handleSaveBiography = () => {
-    console.log("Biography saved:", biography);
-
     updateBot(bot.id, {
       wikiArticle: biography,
     });

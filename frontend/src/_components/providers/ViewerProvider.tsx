@@ -32,7 +32,6 @@ export const ViewerProvider = ({ children }: { children: ReactNode }) => {
     
     } 
     setFetching(false);
-    console.log(fetchedViewer)
   }, [fetchedViewer]);
 
   return (

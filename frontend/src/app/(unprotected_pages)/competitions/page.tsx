@@ -78,8 +78,6 @@ import { useEffect, useState } from "react";
 export default function Page() {
   const compData = useCompetitions(); // Fetch competitions from the hook
 
-  console.log(compData)
-
   // Filter active and closed competitions directly
   const validCompetitions = (compData || []).filter((comp) => comp !== null && comp !== undefined);
   const activeCompetitions = validCompetitions.filter((comp) => comp.status === "OPEN");

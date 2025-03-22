@@ -45,10 +45,6 @@ export default function BotCompetitionsSection(props: BotCompetitionSectionProps
     `,
     props.bot
   );
-  console.log(
-    "Hydration error debug: ",
-    getNodes(bot.competitionParticipations)
-  );
   const comp_data = getNodes(bot.competitionParticipations);
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
     useState(false);

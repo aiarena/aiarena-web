@@ -26,7 +26,6 @@
   }
 
   export const useBot = (botId: string): Bot | null => {
-    console.log("Attempting to get bot with:", botId);
 
     const data = useLazyLoadQuery<useBotQuery>(
       graphql`

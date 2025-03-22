@@ -90,7 +90,6 @@ function Navbar() {
   };
 
   const handleWindowResize = () => {
-    console.log("resized screen");
     if (window.innerWidth >= 760) {
       // Only close the navbar on larger screens
       setNavbar(false);

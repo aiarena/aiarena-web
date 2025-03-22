@@ -26,7 +26,6 @@ export default function SmallCompetitionList({ competitions }: SmallCompetitionL
   const [selectedCompetition, setSelectedCompetition] = useState<string | null>(null);
   const router = useRouter();
   useEffect(() => {
-    console.log(competitions)
     if (competitions.length > 0) {
       setSelectedCompetition(competitions[0].node.name);
     }

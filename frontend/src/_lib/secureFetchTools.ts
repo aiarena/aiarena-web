@@ -20,7 +20,6 @@ interface GetResponse {
         })
         .then((response) => {
           if (response.status === 200) {
-            console.log("get returned response", response)
             return {data: response.data.response, status: response.status};
           } else {
             handleError({ message: response.statusText });
@@ -63,7 +62,6 @@ export async function secure_request_post({
       })
       .then((response) => {
         if (response.status === 200) {
-          console.log("post returned response", response)
           return {data: response.data.response, status: response.status};
         } else {
           handleError({ message: response.statusText });

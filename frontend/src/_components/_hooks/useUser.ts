@@ -5,7 +5,6 @@ import { getDataIDsFromFragment } from 'relay-runtime';
 import { useUserQuery } from './__generated__/useUserQuery.graphql';
 
 export const useUser = (userId: string) => {
-  console.log("attempting to get user with,", userId)
   const data = useLazyLoadQuery<useUserQuery>(
     graphql`
       query useUserQuery($id: ID!) {

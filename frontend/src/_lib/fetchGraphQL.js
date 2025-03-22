@@ -53,8 +53,6 @@ export default async function fetchGraphQL(text, variables, uploadables) {
     apiUrl = '/graphql/';
   }
 
-  console.log(`Making a GraphQL request to ${apiUrl}`);
-
   const response = await fetch(apiUrl, {
     method: "POST",
     headers: headers,

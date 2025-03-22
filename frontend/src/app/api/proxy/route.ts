@@ -2,16 +2,12 @@ import axios from 'axios';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
-  console.log('Received POST request:', req.url);  // Log request URL
-
   try {
     const graphqlUrl = 'https://aiarena.net/graphql/';
 
     const { query } = await req.json();
-    console.log('Received query:', query);  // Log the query
 
     if (!query) {
-      console.log('No query provided');
       return NextResponse.json({ error: 'Query parameter is required' }, { status: 400 });
     }
 
@@ -29,7 +25,6 @@ export async function POST(req: NextRequest) {
       { headers }
     );
 
-    console.log('GraphQL response:', response.data);  // Log the response data
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: any) {
     console.error('Proxy error:', error.message);

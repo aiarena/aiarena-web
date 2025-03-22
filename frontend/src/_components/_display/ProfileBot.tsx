@@ -21,9 +21,6 @@ export default function ProfileBot(props: ProfileBotProps) {
     `,
     props.bot
   );
-
-  console.log("Bot response data: ", bot);
-
   return (
     <div className="rounded-lg bg-gray-800 text-white shadow-md shadow-black">
       {/* Header Section */}

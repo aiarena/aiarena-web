@@ -24,7 +24,6 @@ export const getPresignedUrl = async () => {
     const response = await secure_request_get({
       path: `presigned`,
     });
-    console.log("response", response)
     if (response.status !== 200) {
       throw new Error("Failed to get pre-signed URL");
     }

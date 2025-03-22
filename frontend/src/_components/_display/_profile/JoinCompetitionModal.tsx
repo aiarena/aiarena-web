@@ -62,23 +62,18 @@ export default function JoinCompetitionModal({
     );
   };
 
-  console.log(openCompetitions);
-
   const toggleCompetition = (compId: string) => {
     toggleCompetitionParticipation(bot.id, compId, (response) => {
       // Handle the response here
-      console.log("response", response);
     });
   };
 
   const handlePromptConfirmLeave = (compId: string) => {
     setConfirmLeave((prev) => [...prev, compId]);
-    console.log(confirmLeave);
   };
 
   const handlePromptCancelLeave = (compId: string) => {
     setConfirmLeave((prev) => [...prev].filter((e) => e != compId));
-    console.log(confirmLeave);
   };
 
   return isOpen ? (
