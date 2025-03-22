@@ -46,26 +46,26 @@ export async function middleware(req: NextRequest) {
 //   }
 
 
-    //if authenticated and on a forced authenticated page
-  // if (cookie && forced_authenticated_pages.includes(path)) {
-  //   return NextResponse.redirect("http://localhost:3000/auth/signin");
-  //   // return NextResponse.next();
-  // }
-    //if NOT authenticated and on a forced UN_authenticated page
-  // if (!cookie && forced_unauthenticated_pages.includes(path)) {
-  //   return NextResponse.next();
-  // }
+//if authenticated and on a forced authenticated page
+// if (cookie && forced_authenticated_pages.includes(path)) {
+//   return NextResponse.redirect("http://localhost:3000/auth/signin");
+//   // return NextResponse.next();
+// }
+//if NOT authenticated and on a forced UN_authenticated page
+// if (!cookie && forced_unauthenticated_pages.includes(path)) {
+//   return NextResponse.next();
+// }
 
-  // if (!token && forced_authenticated_pages.includes(path)) {
-  //   return NextResponse.redirect("http://localhost:3000/auth/signin");
-  // }
+// if (!token && forced_authenticated_pages.includes(path)) {
+//   return NextResponse.redirect("http://localhost:3000/auth/signin");
+// }
 
-  // // Unauthenticated user trying to access pages meant for authenticated users
-  // if (cookie && forced_unauthenticated_pages.includes(path)) {
-  //   // if (!session && forced_authenticated_pages.includes(path)) {
-  //   return NextResponse.redirect("http://localhost:3000/dashboard");
-  // }
-  // Default to allowing access
+// // Unauthenticated user trying to access pages meant for authenticated users
+// if (cookie && forced_unauthenticated_pages.includes(path)) {
+//   // if (!session && forced_authenticated_pages.includes(path)) {
+//   return NextResponse.redirect("http://localhost:3000/dashboard");
+// }
+// Default to allowing access
 //   return NextResponse.next();
 // }
 

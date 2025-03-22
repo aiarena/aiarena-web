@@ -90,7 +90,7 @@ class GraphQLTest:
         assert response.status_code == expected_status, (
             f"Unexpected response status code: {response.status_code}\n" f"Response content: {response.content}"
         )
-        
+
         content = json.loads(response.content)
         error_messages = [error["message"] for error in content.get("errors", [])]
         found = []
@@ -102,8 +102,8 @@ class GraphQLTest:
                     break
             else:
                 raise ValueError(f"Unexpected errors: {error_messages}\nResponse content: {content}")
-        unexpected = set(error_messages)-set(found)
-        assert not unexpected, (f"Unexpected errors: {unexpected}")
+        unexpected = set(error_messages) - set(found)
+        assert not unexpected, f"Unexpected errors: {unexpected}"
 
         if response.status_code == HTTPStatus.OK.value:
             return json.loads(response.content)["data"]

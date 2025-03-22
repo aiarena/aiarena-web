@@ -11,49 +11,54 @@ from aiarena.core.models.bot import Bot
 from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
 from aiarena.graphql.types import BotType, CompetitionParticipationType, CompetitionType
 
+
 class ToggleCompetitionParticipationInput(CleanedInputType):
-    bot : Bot = graphene.ID()
-    competition : Competition = graphene.ID()
+    bot: Bot = graphene.ID()
+    competition: Competition = graphene.ID()
 
     class Meta:
         required_fields = ["bot", "competition"]
-    
+
     @staticmethod
     def clean_bot(bot, info):
         try:
             return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
         except Exception as e:
             raise ValidationError(e)
-        
-    
+
     @staticmethod
     def clean_competition(competition, info):
         try:
-            competition : Competition = graphene.Node.get_node_from_global_id(info=info, global_id=competition, only_type=CompetitionType)
+            competition: Competition = graphene.Node.get_node_from_global_id(
+                info=info, global_id=competition, only_type=CompetitionType
+            )
         except Exception as e:
             raise ValidationError(e)
-        
+
         if competition.status in ["closing", "closed"]:
             raise ValidationError("This competition is closed.")
         return competition
-    
+
+
 class ToggleCompetitionParticipation(CleanedInputMutation):
     competition_participation = graphene.Field(CompetitionParticipationType)
 
-    class Meta: 
+    class Meta:
         input_class = ToggleCompetitionParticipationInput
 
     @classmethod
-    def perform_mutate(cls, info:graphene.ResolveInfo, input_object: ToggleCompetitionParticipationInput):
-  
+    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: ToggleCompetitionParticipationInput):
+
         raise_for_access(info, input_object.bot)
-        try: 
-            competition_participation : CompetitionParticipation = input_object.competition.participations.get(bot = input_object.bot)        
+        try:
+            competition_participation: CompetitionParticipation = input_object.competition.participations.get(
+                bot=input_object.bot
+            )
 
         except CompetitionParticipation.DoesNotExist:
             competition_participation = None
 
-        if competition_participation is None: 
+        if competition_participation is None:
             competition_participation = input_object.competition.participations.create(bot=input_object.bot)
 
         elif competition_participation.active:
@@ -66,7 +71,6 @@ class ToggleCompetitionParticipation(CleanedInputMutation):
             competition_participation.save()
 
         return cls(errors=[], competition_participation=competition_participation)
-
 
 
 class UpdateBotInput(CleanedInputType):

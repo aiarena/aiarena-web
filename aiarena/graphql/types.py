@@ -234,7 +234,7 @@ class ViewerType(graphene.ObjectType):
 
     @staticmethod
     def resolve_request_matches_count_left(root: models.User, info, **args):
-        return MatchRequests.get_user_match_request_count_left(root) 
+        return MatchRequests.get_user_match_request_count_left(root)
 
     @staticmethod
     def resolve_requested_matches(root: models.User, info, **args):

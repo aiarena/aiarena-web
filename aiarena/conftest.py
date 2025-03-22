@@ -54,23 +54,25 @@ def bot(db, user, all_bot_races):
         plays_race=BotRace.terran(),
     )
 
+
 @pytest.fixture
 def game(db):
     return Game.objects.create(
         name="Starcraft 2",
     )
 
+
 @pytest.fixture
 def game_mode(db, game):
     return GameMode.objects.create(
-        name = "melee",
-        game = game,
+        name="melee",
+        game=game,
     )
 
 
 @pytest.fixture
 def competition(db, game_mode):
     return Competition.objects.create(
-        name= "AI Arena SC2 Grand Prix",
+        name="AI Arena SC2 Grand Prix",
         game_mode=game_mode,
     )
