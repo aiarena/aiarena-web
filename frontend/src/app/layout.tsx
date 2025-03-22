@@ -118,7 +118,9 @@ export default function ServerLayout({
         className={`${quicksand.variable} ${gugi.variable} font-sans text-center`}
       >
         <BackgroundTexture>
-          <ClientWrapper>{children}</ClientWrapper>
+          <ClientWrapper>
+            {children}
+            </ClientWrapper>
         </BackgroundTexture>
       </body>
     </html>

@@ -119,12 +119,16 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             "elo",
             "division_num",
             "bot",
+            "active",
         ]
         filter_fields = []
 
     @staticmethod
     def resolve_trend(root: models.CompetitionParticipation, info, **args):
-        return root.trend
+        trend_data = models.CompetitionParticipation.objects.filter(id=root.id).calculate_trend(root.competition)
+        if trend_data:
+            return trend_data[0].trend
+        return 0
 
 
 class CompetitionRoundsType(DjangoObjectTypeWithUID):
@@ -204,8 +208,8 @@ class ViewerType(graphene.ObjectType):
     api_token = graphene.String()
     email = graphene.String()
     active_bots_limit = graphene.Int()
-    request_matches_limit = graphene.Int()
-    request_matches_count_left = graphene.Int()
+    request_matches_limit = graphene.Int(required=True)
+    request_matches_count_left = graphene.Int(required=True)
     requested_matches = DjangoConnectionField("aiarena.graphql.MatchType")
 
     @staticmethod

@@ -2,11 +2,30 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import TrophiesModal from "@/_components/_display/_profile/BotTrophiesModal";
-import SettingsModal from "@/_components/_display/_profile/BotSettingsModal";
+import BotSettingsModal from "@/_components/_display/_profile/BotSettingsModal";
 import { formatDate } from "@/_lib/dateUtils";
-import { ProfileBotProps } from "@/_components/_display/ProfileBot";
+import { graphql, useFragment } from "react-relay";
+import { BotHeaderSection_bot$key } from "./__generated__/BotHeaderSection_bot.graphql";
 
-export default function BotHeaderSection({ bot }: ProfileBotProps) {
+export interface BotHeaderSectionProps {
+  bot: BotHeaderSection_bot$key;
+}
+
+export default function BotHeaderSection(props: BotHeaderSectionProps) {
+  const bot = useFragment(
+    graphql`
+      fragment BotHeaderSection_bot on BotType {
+        id
+        name
+        created
+        type
+        botZipUpdated
+        ...BotSettingsModal_bot
+      }
+    `,
+    props.bot
+  );
+
   const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
 
@@ -31,7 +50,7 @@ export default function BotHeaderSection({ bot }: ProfileBotProps) {
                 height={20}
               />
               <span className="ml-1 text-lg font-bold text-gray-300">
-                {bot?.trophies?.length || 0}
+                {/* {bot?.trophies?.length || 0} */}0
               </span>
             </div>
           </div>
@@ -59,8 +78,8 @@ export default function BotHeaderSection({ bot }: ProfileBotProps) {
             <p className="text-sm text-gray-400">
               <span className="font-bold">Game:</span> Starcraft II
             </p>
-         
-              {bot.type && (
+
+            {bot.type && (
               <p className="text-sm text-gray-400">
                 <span className="font-bold">Type:</span> {bot.type}
               </p>
@@ -83,15 +102,15 @@ export default function BotHeaderSection({ bot }: ProfileBotProps) {
       </div>
 
       {/* Modals */}
-      {isTrophiesModalOpen && (
+      {/* {isTrophiesModalOpen && (
         <TrophiesModal
           bot={bot}
           isOpen={isTrophiesModalOpen}
           onClose={() => setTrophiesModalOpen(false)}
         />
-      )}
+      )} */}
       {isSettingsModalOpen && (
-        <SettingsModal
+        <BotSettingsModal
           bot={bot}
           isOpen={isSettingsModalOpen}
           onClose={() => setSettingsModalOpen(false)}

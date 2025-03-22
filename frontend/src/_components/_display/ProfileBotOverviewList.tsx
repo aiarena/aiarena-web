@@ -4,60 +4,47 @@ import React, { useState } from "react";
 import MainButton from "../_props/MainButton";
 import ProfileBot from "./ProfileBot";
 import UploadBotModal from "./_profile/UploadBotModal";
+import { graphql, useFragment } from "react-relay";
+import { useViewerQuery$variables } from "../_hooks/__generated__/useViewerQuery.graphql";
+import { ProfileBotOverviewList_viewer$key } from "./__generated__/ProfileBotOverviewList_viewer.graphql";
+import { getNodes } from "@/_lib/relayHelpers";
 
-interface ActiveCompetition {
-  name: string;
-  currentELO: number;
-  highestELO: number;
-  matches: number;
-  winRate: string;
-  lossRate: string;
-  crashes: string;
-  rank: string;
-}
-
-interface Trophy {
-  title: string;
-  image: string;
-}
-
-export interface Bot {
-  id: string;
-  name: string;
-  created?: string;
-  type? : string;
-  url? : string;
-  botData?: string;
-  botDataEnabled?: boolean;
-  botDataPubliclyDownloadable?: boolean;
-  botZip?: string;
-  botZipPubliclyDownloadable?: boolean;
-
-  botZipUpdated?: string;
-
-  wikiArticle?: string;
-  trophies?: Trophy[];
-  activeCompetitions?: ActiveCompetition[];
-}
 
 interface ProfileBotOverviewListProps {
-  bots: Bot[];
-  activeBotsLimit?: number;
+ viewer: ProfileBotOverviewList_viewer$key
 }
 
-const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
-  bots,
-  activeBotsLimit,
-}) => {
+export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (props) => {
+    const viewer  = useFragment(
+      graphql`
+        fragment ProfileBotOverviewList_viewer on ViewerType {
+          activeBotsLimit
+          user {
+            ownBots {
+              edges {
+                node {
+                  id
+                  ...ProfileBot_bot
+                }
+              }
+            }
+          }
+        }
+      `,
+      props.viewer
+    );
+  
+
+
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
 
   return (
     <div className="bg-customBackgroundColor1 p-4 border border-gray-700">
       <div className="flex justify-between ">
         <div className="flex gap-2 pb-2 mt-auto flex-wrap">
-          {activeBotsLimit ? (
+          {viewer.activeBotsLimit ? (
             <span className="flex word-wrap">
-              You may have {activeBotsLimit} active competition participations.
+              X / {viewer.activeBotsLimit} active competition participations.
             </span>
           ) : null}
         </div>
@@ -76,8 +63,10 @@ const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
       </div>
 
       <ul className="space-y-12">
-        {bots.map((bot, id) => (
-          <li key={id}>
+        
+        {
+        getNodes(viewer.user?.ownBots).map((bot) => (
+          <li key={bot.id}>
             <ProfileBot bot={bot} />
           </li>
         ))}
@@ -89,5 +78,3 @@ const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
     </div>
   );
 };
-
-export default ProfileBotOverviewList;

@@ -1,17 +1,32 @@
 import { useState } from "react";
 import Image from "next/image";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { User, Viewer } from "@/_components/_hooks/useViewer";
+import { User, Viewer} from "@/_components/_hooks/useViewer";
+import { graphql, useFragment } from "react-relay";
+import { SettingsProfileSection_viewer$key } from "./__generated__/SettingsProfileSection_viewer.graphql";
 
 
-
-interface SettingsProfileSection {
-    viewer: Viewer
+interface SettingsProfileSectionProps {
+   viewer: SettingsProfileSection_viewer$key
 }
 
-export default function SettingsProfileSection({
-  viewer,
-}: SettingsProfileSection) {
+export default function SettingsProfileSection(
+  props
+: SettingsProfileSectionProps ) {
+
+  const viewer = useFragment(
+      graphql`
+        fragment SettingsProfileSection_viewer on ViewerType {
+          apiToken
+          user{
+            username
+            avatarUrl
+          }
+        }
+      `,
+      props.viewer
+    );
+
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
 
   const [discordLinked, setDiscordLinked] = useState(false);
@@ -50,27 +65,24 @@ export default function SettingsProfileSection({
         <h3 className="text-base font-semibold text-customGreen">Profile</h3>
         <div className="flex items-center space-x-3">
           <div className="relative w-12 h-12 flex-shrink-0">
+            
             <Image
-              src={
-                viewer.user.avatarUrl
-                  ? viewer.user.avatarUrl
-                  : `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`
-              }
+              src={viewer?.user?.avatarUrl || `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`}
               alt="User avatar"
               fill
               className="object-cover"
             />
             <>
-              {viewer.user.patreonLevel && viewer.user.patreonLevel == "Bronze" ? (
+              {/* {viewer.user.patreonLevel && viewer.user.patreonLevel == "Bronze" ? (
                 <div className="absolute inset-0 border-2 border-customGreen"></div>
-              ) : null}
+              ) : null} */}
             </>
           </div>
           <div className="leading-tight">
-            <p className="text-white font-bold">{viewer.user.username}</p>
-            {viewer.user.patreonLevel && viewer.user.patreonLevel != "NONE" ? (
+            <p className="text-white font-bold">{viewer?.user?.username}</p>
+            {/* {viewer.user.patreonLevel && viewer.user.patreonLevel != "NONE" ? (
               <p className="text-customGreen text-xs">Supporter</p>
-            ) : null}
+            ) : null} */}
           </div>
         </div>
       </div>

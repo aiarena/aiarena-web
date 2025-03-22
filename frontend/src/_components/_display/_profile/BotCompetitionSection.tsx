@@ -5,27 +5,69 @@ import SquareButton from "@/_components/_props/SquareButton";
 import JoinCompetitionModal from "./JoinCompetitionModal";
 
 import { ProfileBotProps } from "@/_components/_display/ProfileBot";
+import { getNodes } from "@/_lib/relayHelpers";
+import { graphql, useFragment } from "react-relay";
+import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
 
-export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
+interface BotCompetitionSectionProps {
+  bot: BotCompetitionSection_bot$key
+}
+
+export default function BotCompetitionsSection(props: BotCompetitionSectionProps) {
+  const bot = useFragment(
+    graphql`
+      fragment BotCompetitionSection_bot on BotType {
+        id
+        name
+        competitionParticipations {
+          edges {
+            node {
+              active
+              id
+              competition {
+                id
+                name
+                status
+              }
+              elo
+              divisionNum
+              crashPerc
+              crashCount
+              trend
+              matchCount
+              winPerc
+              lossPerc
+            }
+          }
+        }
+        ...JoinCompetitionModal_bot
+      }
+    `,
+    props.bot
+  );
+  console.log(
+    "Hydration error debug: ",
+    getNodes(bot.competitionParticipations)
+  );
+  const comp_data = getNodes(bot.competitionParticipations);
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
     useState(false);
 
-    const hasCompetitions = (bot.activeCompetitions || []).length > 0;
+  const activeCompetitions = (comp_data ?? []).filter((e) => e.active);
+  const hasCompetitions = activeCompetitions.length > 0;
 
   return (
     <div className="p-2">
       {/* Competitions Header */}
       <div
         className={`${
-          hasCompetitions ? " mb-2 border-b border-gray-600 pb-2 " : null
+          hasCompetitions ? " mb-2 border-b border-gray-600 pb-2 " : ""
         } flex justify-between flex-wrap w-full gap-4`}
       >
         {hasCompetitions ? (
           <h4 className="text-left pt-2 text-sm font-semibold text-gray-300">
-            {`${bot?.activeCompetitions?.length}`} Active{" "}
-            {bot?.activeCompetitions?.length === 1
-              ? "Competition"
-              : "Competitions"}
+            {`${activeCompetitions.length}`} Active{" "}
+            {activeCompetitions.length === 1 ? "Competition" : "Competitions"}
           </h4>
         ) : (
           <p className="ml-2 text-left pt-2 text-sm font-semibold text-gray-400">
@@ -41,34 +83,43 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
 
       {/* List Active Competitions */}
       <div className="space-y-4">
-        {bot?.activeCompetitions?.map((comp, index) => (
+        {activeCompetitions.map((participation, index) => (
           <div
-            key={index}
-            className="cursor-pointer border border-gray-600 rounded-lg bg-gray-700 hover:bg-gray-600 hover:border-gray-500 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
+            key={participation.id}
+            className="cursor-pointer border border-gray-600 rounded-lg bg-gray-700 hover:bg-gray-700 hover:border-gray-500 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {/* Left Column: Competition Name & Stats */}
             <div className="space-y-2">
               <div className="flex items-center space-x-2 border-b border-gray-600 pb-2">
-                <div className="animate-spin ">
+                <div>
                   <div className="circular-gradient-shadow"></div>
                 </div>
                 <p className="ml-16 text-sm font-semibold text-customGreen">
-                  {comp.name}
+                  {participation.competition.name}
                 </p>
               </div>
-              <div className="text-sm text-left flex flex-wrap">
-                <span className="font-bold text-gray-300 mr-4 block">
-                  Current ELO:{" "}
-                  <span className="font-normal">{comp.currentELO}</span>
-                </span>
-                <span className="font-bold text-gray-300 mr-4 block">
-                  Highest ELO:{" "}
-                  <span className="font-normal text-customGreen">
-                    {comp.highestELO}
+              <div className="text-sm text-left flex flex-wrap ">
+                <span className="font-bold text-gray-300 mr-4 block ">
+                  Division:{" "}
+                  <span className="font-normal">
+                    {participation.divisionNum}
                   </span>
                 </span>
-                <span className="font-bold text-gray-300 block">
-                  Rank: <span className="font-normal">4/21</span>
+                <span className="font-bold text-gray-300 mr-4 block">
+                  Current ELO:{" "}
+                  <span className="font-normal">{participation.elo}</span>
+                </span>
+                <span className="font-bold text-gray-300 mr-4 block">
+                  Trend:{" "}
+                  <span
+                    className={`font-normal ${
+                      (participation.trend ?? 0) > 0 ? "text-customGreen" : ""
+                    }${
+                      (participation.trend ?? 0) === 0 ? "text-gray-300" : ""
+                    }${(participation.trend ?? 0) < 0 ? "text-red-500" : ""}`}
+                  >
+                    {participation.trend ?? 0}
+                  </span>
                 </span>
               </div>
             </div>
@@ -97,8 +148,12 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                     d="M10 8l6 4-6 4V8z"
                   />
                 </svg>
-                <span className="font-bold">Matches:</span>
-                <span>{comp.matches}</span>
+                <span className="font-bold ">Matches:</span>
+                <span className="">{participation.matchCount}</span>
+                <span className="pl-4 font-bold">Crashes:</span>
+                <span className="text-red-500 font-medium">
+                  {participation.crashCount}
+                </span>
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
                 <svg
@@ -117,11 +172,11 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                 </svg>
                 <span className="font-bold">Win/Loss:</span>
                 <span className="text-customGreen font-medium">
-                  {comp.winRate}
+                  {(participation.winPerc ?? 0).toFixed(1)}%
                 </span>
                 <span>/</span>
                 <span className="text-red-500 font-medium">
-                  {comp.lossRate}
+                  {(participation.lossPerc ?? 0).toFixed(1)}%
                 </span>
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
@@ -140,7 +195,10 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                   />
                 </svg>
                 <span className="font-bold">Crashes:</span>
-                <span className="text-red-500 font-medium">{comp.crashes}</span>
+                <span className="text-red-500 font-medium">
+                  {" "}
+                  {(participation.crashPerc ?? 0).toFixed(1)}%
+                </span>
               </div>
               <div></div>
             </div>
@@ -152,7 +210,6 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
 
       {isJoinCompetitionModalOpen && (
         <JoinCompetitionModal
-          competitions={[]}
           isOpen={isJoinCompetitionModalOpen}
           bot={bot}
           onClose={() => setJoinCompetitionModalOpen(false)}

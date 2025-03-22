@@ -127,13 +127,12 @@ nav .block {
 
 
 .circular-gradient-shadow {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   position: relative;
   margin: 5px auto;
   border-radius: 100%;
   background:rgb(134, 254, 50);
-  /* background: linear-gradient(180deg, rgba(134, 254, 50, 1), rgba(134, 254, 50, 1)); */
   box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);
   animation: rotate-gradient 4s linear infinite, pulse 2s ease-in-out infinite;
 }
