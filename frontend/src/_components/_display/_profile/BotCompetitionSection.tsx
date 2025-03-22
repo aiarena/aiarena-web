@@ -10,23 +10,23 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
     useState(false);
 
-  const activateCompetitions = (bot.competitionParticipations || []).filter(
-    (e) => e.active == true
+  const activeCompetitions = (bot?.competitionParticipations ?? []).filter(
+    (e) => e.active
   );
-  const hasCompetitions = activateCompetitions.length > 0;
+  const hasCompetitions = activeCompetitions.length > 0;
 
   return (
     <div className="p-2">
       {/* Competitions Header */}
       <div
         className={`${
-          hasCompetitions ? " mb-2 border-b border-gray-600 pb-2 " : null
+          hasCompetitions ? " mb-2 border-b border-gray-600 pb-2 " : ""
         } flex justify-between flex-wrap w-full gap-4`}
       >
         {hasCompetitions ? (
           <h4 className="text-left pt-2 text-sm font-semibold text-gray-300">
-            {`${activateCompetitions.length}`} Active{" "}
-            {activateCompetitions.length === 1 ? "Competition" : "Competitions"}
+            {`${activeCompetitions.length}`} Active{" "}
+            {activeCompetitions.length === 1 ? "Competition" : "Competitions"}
           </h4>
         ) : (
           <p className="ml-2 text-left pt-2 text-sm font-semibold text-gray-400">
@@ -42,7 +42,7 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
 
       {/* List Active Competitions */}
       <div className="space-y-4">
-        {activateCompetitions.map((comp, index) => (
+        {activeCompetitions.map((comp, index) => (
           <div
             key={index}
             className="cursor-pointer border border-gray-600 rounded-lg bg-gray-700 hover:bg-gray-700 hover:border-gray-500 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -56,7 +56,7 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                 <p className="ml-16 text-sm font-semibold text-customGreen">
                   {comp.competition.name}
                 </p>
-              </div>  
+              </div>
               <div className="text-sm text-left flex flex-wrap ">
                 <span className="font-bold text-gray-300 mr-4 block ">
                   Division:{" "}
@@ -69,12 +69,12 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                   Trend:{" "}
                   <span
                     className={`font-normal ${
-                      comp.trend > 0 ? "text-customGreen" : ""
-                    }${comp.trend == 0 ? "text-gray-300" : ""}${
-                      comp.trend < 0 ? "text-red-500 " : ""
+                      (comp.trend ?? 0) > 0 ? "text-customGreen" : ""
+                    }${(comp.trend ?? 0) === 0 ? "text-gray-300" : ""}${
+                      (comp.trend ?? 0) < 0 ? "text-red-500" : ""
                     }`}
                   >
-                    {comp.trend}
+                    {comp.trend ?? 0}
                   </span>
                 </span>
               </div>
@@ -128,11 +128,11 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                 </svg>
                 <span className="font-bold">Win/Loss:</span>
                 <span className="text-customGreen font-medium">
-                  {comp.winPerc.toFixed(1)}%
+                  {(comp.winPerc ?? 0).toFixed(1)}%
                 </span>
                 <span>/</span>
                 <span className="text-red-500 font-medium">
-                  {comp.lossPerc.toFixed(1)}%
+                  {(comp.lossPerc ?? 0).toFixed(1)}%
                 </span>
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
@@ -153,12 +153,11 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
                 <span className="font-bold">Crashes:</span>
                 <span className="text-red-500 font-medium">
                   {" "}
-                  {comp.crashPerc.toFixed(2)}%
+                  {(comp.crashPerc ?? 0).toFixed(1)}%
                 </span>
               </div>
               <div></div>
             </div>
-            
           </div>
         ))}
       </div>
@@ -167,7 +166,6 @@ export default function BotCompetitionsSection({ bot }: ProfileBotProps) {
 
       {isJoinCompetitionModalOpen && (
         <JoinCompetitionModal
-          competitions={[]}
           isOpen={isJoinCompetitionModalOpen}
           bot={bot}
           onClose={() => setJoinCompetitionModalOpen(false)}

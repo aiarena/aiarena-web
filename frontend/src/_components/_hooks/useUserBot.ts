@@ -2,7 +2,7 @@ import { useLazyLoadQuery, graphql } from 'react-relay';
 import { getNodes } from "@/_lib/relayHelpers";
 import { useUserBotsQuery } from './__generated__/useUserBotsQuery.graphql';
 
-export const useUserBots = (userId: string | null) => {
+export const useUserBots = (userId: string) => {
   // Always call the query hook, but provide a fallback userId if it's null
   const data = useLazyLoadQuery<useUserBotsQuery>(
     graphql`
@@ -28,6 +28,7 @@ export const useUserBots = (userId: string | null) => {
                     active
                     id
                     competition {
+                      id
                       name
                       status
                     }
@@ -48,7 +49,7 @@ export const useUserBots = (userId: string | null) => {
       }
     `,
 
-    { userId: userId || "default" } // Provide a default placeholder
+    { userId: userId } // Provide a default placeholder
   );
 
   // Handle cases where no userId is passed
@@ -76,6 +77,7 @@ export const useUserBots = (userId: string | null) => {
       active: participation.active || false,
       id: participation.id,
       competition: {
+        id: participation.competition?.id || "",
         name: participation.competition?.name || "",
         status: participation.competition?.status || "",
       },

@@ -10,6 +10,7 @@ interface CompetitionParticipation {
   active:boolean;
   id: string;
   competition: {
+    id: string;
     name: string;
     status: string;
   };
@@ -49,7 +50,7 @@ interface ProfileBotOverviewListProps {
   activeBotsLimit?: number;
 }
 
-const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
+export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
   bots,
   activeBotsLimit,
 }) => {
@@ -61,7 +62,7 @@ const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
         <div className="flex gap-2 pb-2 mt-auto flex-wrap">
           {activeBotsLimit ? (
             <span className="flex word-wrap">
-              You may have {activeBotsLimit} active competition participations.
+              X / {activeBotsLimit} active competition participations.
             </span>
           ) : null}
         </div>
@@ -93,5 +94,3 @@ const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = ({
     </div>
   );
 };
-
-export default ProfileBotOverviewList;

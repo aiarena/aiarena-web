@@ -4,7 +4,7 @@ import { useSignOut } from "@/_components/_hooks/useSignOut";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import TabNavigation from "@/_components/_nav/TabNav";
-import ProfileBotOverviewList from "@/_components/_display/ProfileBotOverviewList";
+// import  from "@/_components/_display/ProfileBotOverviewList";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import SettingsProfileSection from "@/_components/_display/_profile/SettingsProfileSection";
 import RequestMatchesSection from "@/_components/_display/_profile/RequestMatchSection";
@@ -12,6 +12,7 @@ import { useUserBots } from "@/_components/_hooks/useUserBot";
 import { useViewer } from "@/_components/_hooks/useViewer";
 import { redirect } from 'next/navigation';
 import { useViewerRequestedMatches } from "@/_components/_hooks/useViewerRequestedMatches";
+import { ProfileBotOverviewList } from "@/_components/_display/ProfileBotOverviewList";
 
 
 export default function Page() {
@@ -21,12 +22,13 @@ export default function Page() {
   const requestedMatches = useViewerRequestedMatches();
 
   const [activeTab, setActiveTab] = useState("Bots");
-  const userBots = useUserBots(viewer?.user?.id  || null);
-  
   if (viewer === null ) {
     redirect('/');   
   }
   
+  const userBots = useUserBots(viewer?.user?.id);
+  
+
 
 
 
