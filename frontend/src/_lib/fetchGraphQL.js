@@ -14,7 +14,7 @@ export default async function fetchGraphQL(text, variables, uploadables) {
       JSON.stringify({
         query: text,
         variables,
-      })
+      }),
     );
     const map = {};
     Object.keys(uploadables).forEach((key) => {
@@ -41,16 +41,21 @@ export default async function fetchGraphQL(text, variables, uploadables) {
       variables,
     });
     headers["Content-Type"] = "application/json";
-
   }
 
   let apiUrl;
   if (typeof window === "undefined") {
-    const cookieStore = require('next/headers').cookies();
-    headers["Cookie"] = `csrftoken=${cookieStore.get("csrftoken").value}; sessionid=${cookieStore.get("sessionid").value}`
+    const cookieStore = await require("next/headers").cookies();
+    const cookiesToPass = ["csrftoken", "sessionid"];
+    headers["Cookie"] = cookiesToPass
+      .filter((cookieName) => cookieStore.has(cookieName))
+      .map(
+        (cookieName) => `${cookieName}=${cookieStore.get(cookieName).value};`,
+      )
+      .join(" ");
     apiUrl = `${process.env.API_URL}/graphql/`;
   } else {
-    apiUrl = '/graphql/';
+    apiUrl = "/graphql/";
   }
 
   const response = await fetch(apiUrl, {
