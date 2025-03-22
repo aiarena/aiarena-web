@@ -34,15 +34,11 @@ export default function Page() {
       const fetchAndSetUser = async () => {
         try {
           const viewer = await fetchViewer(); // Await the user data
-          console.log("user", viewer);
-
           setViewer(viewer); // Update the global user context with the fetched user data
           router.push("/profile"); // Redirect to profile page
 
           // redirect
-        } catch (error) {
-          console.error("Failed to fetch user:", error);
-        }
+        } catch (error) {}
       };
 
       fetchAndSetUser(); // Call the async function
