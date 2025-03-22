@@ -1,6 +1,6 @@
 import pytest
 
-from aiarena.core.models import Bot, WebsiteUser, Competition, Game, GameMode
+from aiarena.core.models import Bot, Competition, Game, GameMode, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.base import BrowserHelper
 

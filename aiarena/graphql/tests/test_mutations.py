@@ -1,6 +1,6 @@
+from aiarena.core.models import CompetitionParticipation
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.graphql import BotType, CompetitionType
-from aiarena.core.models import CompetitionParticipation
 
 
 class TestToggleCompetitionParticipation(GraphQLTest):

@@ -1,13 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
-
 from django.core.exceptions import ValidationError
 
 import graphene
 from graphene_django.types import ErrorType
 
-from aiarena.core.models.competition_participation import CompetitionParticipation
-from aiarena.core.models.competition import Competition
 from aiarena.core.models.bot import Bot
+from aiarena.core.models.competition import Competition
+from aiarena.core.models.competition_participation import CompetitionParticipation
 from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
 from aiarena.graphql.types import BotType, CompetitionParticipationType, CompetitionType
 
