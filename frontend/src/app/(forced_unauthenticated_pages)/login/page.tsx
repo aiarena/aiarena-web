@@ -2,11 +2,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSignIn } from "@/_components/_hooks/useSignIn";
-import { useViewer } from "@/_components/_hooks/useViewer";
-import { useSignOut } from "@/_components/_hooks/useSignOut";
 import { useViewerContext } from "@/_components/providers/ViewerProvider";
 import { fetchViewer as fetchViewer } from "@/_lib/fetchViewer";
-import { redirect } from "next/navigation";
 
 export default function Page() {
   const [username, setUsername] = useState("");
@@ -38,7 +35,9 @@ export default function Page() {
           router.push("/profile"); // Redirect to profile page
 
           // redirect
-        } catch (error) {}
+        } catch {
+          /* todo: handle error */
+        }
       };
 
       fetchAndSetUser(); // Call the async function

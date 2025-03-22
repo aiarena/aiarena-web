@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import NavItem from "./_nav_parts/NavItem";
-import MobileNavitem from "./_nav_parts/MobileNavItem";
 import MobileNavItem from "./_nav_parts/MobileNavItem";
 import AuthNavBar from "./_nav_parts/AuthNavbar";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";

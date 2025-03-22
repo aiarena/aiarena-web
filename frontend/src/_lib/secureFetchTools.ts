@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import handleError from "./handleError";
 import { getSiteUrl } from "./getSiteUrl";
 
@@ -45,7 +45,6 @@ interface PostResponse {
 export async function secure_request_post({
   path,
   data,
-  additionalHeaders = {},
 }: PostOptions): Promise<PostResponse> {
   const url = getSiteUrl();
 

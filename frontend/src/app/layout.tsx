@@ -61,13 +61,10 @@
 // export default RootLayout;
 
 import "./globals.css";
-import { Inter } from "next/font/google";
 import { quicksand, gugi } from "@/_styles/fonts"; // Adjust the path as necessary
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import ClientWrapper from "@/_components/providers/ClientWrapper";
 import BackgroundTexture from "@/_components/_display/BackgroundTexture";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "AI Arena",

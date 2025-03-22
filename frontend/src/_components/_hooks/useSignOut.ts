@@ -30,7 +30,7 @@ export const useSignOut = (): [() => void, boolean, string | null] => {
           setError(null); // Clear error on success
         }
       },
-      onError: (err) => {
+      onError: () => {
         setError("Something went wrong during sign out. Please try again.");
       },
     });

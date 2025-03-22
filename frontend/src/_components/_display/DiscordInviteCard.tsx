@@ -13,6 +13,7 @@ interface DiscordInviteCardProps {
 }
 const DiscordInviteCard: React.FC<DiscordInviteCardProps> = ({
   serverName,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   inviteUrl,
   description,
   memberCount,
@@ -65,7 +66,7 @@ const DiscordInviteCard: React.FC<DiscordInviteCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             className="py-3 px-10 w-full md:w-auto inline-block lg:py-4 lg:px-12  hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold rounded-full shadow-lg transition duration-300 ease-in-out transform shadow shadow-black"
-          
+
           >
             Join Server
           </a> */}

@@ -45,6 +45,7 @@ export default async function fetchGraphQL(text, variables, uploadables) {
 
   let apiUrl;
   if (typeof window === "undefined") {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const cookieStore = await require("next/headers").cookies();
     const cookiesToPass = ["csrftoken", "sessionid"];
     headers["Cookie"] = cookiesToPass

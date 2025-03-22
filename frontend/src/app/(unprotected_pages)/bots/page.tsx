@@ -1,11 +1,5 @@
 "use client";
-
-import CompetitionCard from "@/_components/_display/CompetitionCard";
-import ClosedCompetitionList from "@/_components/_display/CompetitionList";
-
 import FilterableList from "@/_components/_display/FilterableList";
-import WrappedTitle from "@/_components/_display/WrappedTitle";
-import mockBots from "@/_data/mockBots.json";
 import { formatDate } from "@/_lib/dateUtils";
 import Link from "next/link";
 import { getFeatureFlags } from "@/_data/featureFlags";
@@ -49,7 +43,7 @@ export default function Page() {
             placeholder: "Select type",
           },
         ]}
-        renderRow={(item, index) => (
+        renderRow={(item) => (
           <div className="block p-4 hover:bg-gray-800 rounded transition flex justify-between items-center shadow-md border border-gray-700">
             <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
               <Link

@@ -4,11 +4,6 @@ import Modal from "../Modal";
 import { useUpdateUserBot } from "@/_components/_hooks/useUpdateUserBot";
 import { graphql, useFragment } from "react-relay";
 import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.graphql";
-import {
-  useUpdateUserBotMutation,
-  useUpdateUserBotMutation$data,
-  useUpdateUserBotMutation$variables,
-} from "@/_components/_hooks/__generated__/useUpdateUserBotMutation.graphql";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;

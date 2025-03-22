@@ -1,60 +1,13 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import Image from "next/image";
-import competitionsData from "@/_data/mockCompetiton.json";
 import CompetitionHeader from "@/_components/_display/CompetitionHeader";
 import ToggleDisplay from "@/_components/_display/ToggleDisplay";
 import MapDisplay from "@/_components/_display/MapDisplay";
-import VideoComponent from "@/_components/_display/VideoBanner";
 import VideoPlayer from "@/_components/_display/VideoPlayer";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import { useCompetition } from "@/_components/_hooks/useCompetition";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Link from "next/link";
-
-// Types
-interface Participant {
-  rank: number;
-  name: string;
-  race: string;
-  author: string;
-  type: string;
-  winRate: string;
-  elo: number;
-  trend: string;
-}
-
-interface Round {
-  roundNumber: number;
-  startedAt: string;
-  finishedAt: string | null;
-}
-
-interface Competition {
-  name: string;
-  created: string;
-  opened: string;
-  status: string;
-  progress: number;
-  topPlayers: string[];
-  participants: number;
-  totalGames: number;
-  imageUrl: string;
-  maps: string[];
-  rankings: {
-    division1: Participant[];
-    division2: Participant[];
-    division3: Participant[];
-    division4: Participant[];
-    // Add more divisions if needed
-  };
-  rounds: Round[];
-}
-
-interface CompetitionsData {
-  [key: string]: Competition;
-}
 
 interface CompetitionPageProps {
   params: {
@@ -269,7 +222,7 @@ export default function Page({ params }: CompetitionPageProps) {
                 Maps
               </h3>
               <div className="flex flex-wrap justify-center gap-4">
-                {competition.maps.map((map, index) => (
+                {competition.maps.map((map) => (
                   <div key={map.id} className="flex-none w-28 h-28">
                     <MapDisplay
                       mapName={map.name}

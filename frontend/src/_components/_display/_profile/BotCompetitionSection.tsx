@@ -1,10 +1,8 @@
 import React, { useState } from "react";
-import MainButton from "@/_components/_props/MainButton";
 import SquareButton from "@/_components/_props/SquareButton";
 
 import JoinCompetitionModal from "./JoinCompetitionModal";
 
-import { ProfileBotProps } from "@/_components/_display/ProfileBot";
 import { getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
 import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
@@ -81,7 +79,7 @@ export default function BotCompetitionsSection(
 
       {/* List Active Competitions */}
       <div className="space-y-4">
-        {activeCompetitions.map((participation, index) => (
+        {activeCompetitions.map((participation) => (
           <div
             key={participation.id}
             className="cursor-pointer border border-gray-600 rounded-lg bg-gray-700 hover:bg-gray-700 hover:border-gray-500 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"

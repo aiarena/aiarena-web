@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { User, Viewer } from "@/_components/_hooks/useViewer";
 import { graphql, useFragment } from "react-relay";
 import { SettingsProfileSection_viewer$key } from "./__generated__/SettingsProfileSection_viewer.graphql";
 

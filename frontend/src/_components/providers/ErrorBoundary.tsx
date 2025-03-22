@@ -1,7 +1,6 @@
 "use client";
 
 import React, { Component, ReactNode } from "react";
-import Navbar from "../_nav/Navbar";
 
 type ErrorBoundaryProps = {
   children: ReactNode;

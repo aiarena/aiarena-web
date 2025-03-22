@@ -1,7 +1,5 @@
 import React from "react";
-import FooterNavItem from "./FooterNavItem";
 import { FooterLink } from "@/_data/footerLinks";
-import Link from "next/link";
 
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 
@@ -9,7 +7,7 @@ interface ServicesComponentProps {
   services: FooterLink[];
 }
 
-const ServicesComponent: React.FC<ServicesComponentProps> = ({ services }) => {
+const ServicesComponent: React.FC<ServicesComponentProps> = () => {
   return (
     <div className="mb-16 px-8 text-center flex-1 w-full">
       <WrappedTitle title="Our Services" />

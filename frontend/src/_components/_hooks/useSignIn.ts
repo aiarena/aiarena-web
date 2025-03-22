@@ -42,7 +42,7 @@ export const useSignIn = (): [SignInFunction, boolean, string | null] => {
         }
       },
 
-      onError: (err) => {
+      onError: () => {
         setError("Something went wrong. Please try again."); // Handle unexpected errors
       },
     });

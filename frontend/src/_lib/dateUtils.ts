@@ -2,7 +2,7 @@
 export const formatDate = (dateString: string, locale = "en-GB") => {
   try {
     return new Date(dateString).toLocaleDateString(locale) || "";
-  } catch (error) {
+  } catch {
     return "";
   }
 };
@@ -12,7 +12,7 @@ export const formatDateISO = (dateString: string): string => {
   try {
     const date = new Date(dateString);
     return date.toISOString().replace("T", " ").slice(0, 19) || ""; // YYYY-MM-DD HH:mm:ss
-  } catch (error) {
+  } catch {
     return "";
   }
 };

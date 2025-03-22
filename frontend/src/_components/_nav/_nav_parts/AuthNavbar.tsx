@@ -1,10 +1,8 @@
 "use client";
 
 export const dynamic = "force-dynamic";
-import { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { useLogin } from "@/_components/providers/LoginProvider";
 import { useSignOut } from "@/_components/_hooks/useSignOut";
 import { useViewerContext } from "@/_components/providers/ViewerProvider";
 import { useRouter } from "next/navigation";
@@ -12,7 +10,7 @@ import { useRouter } from "next/navigation";
 export default function AuthNavBar() {
   const router = useRouter(); // Next.js router for navigation
   const { viewer, setViewer, fetching } = useViewerContext();
-  const [signOut, isSigningOut] = useSignOut();
+  const [signOut] = useSignOut();
 
   const handleSignOut = () => {
     signOut(); // Trigger the sign out mutation

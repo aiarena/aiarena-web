@@ -16,7 +16,6 @@ export default function BackendErrors({
   formErrors = [],
   graphqlErrors = [],
   failError = null,
-  ...props
 }: BackendErrorsProps) {
   const formMessages =
     formErrors?.map((error) => {

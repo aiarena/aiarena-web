@@ -1,11 +1,8 @@
-import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import Image from "next/image";
 import React, { useState } from "react";
 import MainButton from "../_props/MainButton";
 import ProfileBot from "./ProfileBot";
 import UploadBotModal from "./_profile/UploadBotModal";
 import { graphql, useFragment } from "react-relay";
-import { useViewerQuery$variables } from "../_hooks/__generated__/useViewerQuery.graphql";
 import { ProfileBotOverviewList_viewer$key } from "./__generated__/ProfileBotOverviewList_viewer.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 

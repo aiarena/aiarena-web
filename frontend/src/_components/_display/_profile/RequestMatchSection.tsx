@@ -1,16 +1,7 @@
-import {
-  useViewerRequestedMatches,
-  ViewerRequestedMatch,
-} from "@/_components/_hooks/useViewerRequestedMatches";
-import { useEffect, useState } from "react";
-import internal from "stream";
 import FilterableList from "../FilterableList";
 import Link from "next/link";
-import { formatDate, formatDateISO } from "@/_lib/dateUtils";
-import { isTemplateSpan } from "typescript";
+import { formatDateISO } from "@/_lib/dateUtils";
 import { graphql, useFragment } from "react-relay";
-import { ProfileBotOverviewList_viewer$key } from "../__generated__/ProfileBotOverviewList_viewer.graphql";
-import { useViewerRequestedMatchesQuery$variables } from "@/_components/_hooks/__generated__/useViewerRequestedMatchesQuery.graphql";
 import { RequestMatchSection_viewer$key } from "./__generated__/RequestMatchSection_viewer.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 
@@ -61,12 +52,6 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
     `,
     props.viewer,
   );
-
-  // Example state - replace with real data fetching logic
-  const [inProgressMatches, setInProgressMatches] = useState([
-    { id: 1, opponent: "BotA", status: "Match scheduled for tomorrow" },
-    { id: 2, opponent: "BotB", status: "Processing..." },
-  ]);
 
   const requestsUsed = viewer.requestedMatches?.totalCount;
 
@@ -150,7 +135,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
             placeholder: "Select type",
           },
         ]}
-        renderRow={(item, index) => (
+        renderRow={(item) => (
           <div className="block p-4 hover:bg-gray-800 rounded transition flex justify-between items-center shadow-md border border-gray-700">
             <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
               <span className="text-left font-semibold text-gray-200 truncate">

@@ -2,16 +2,13 @@
 import CompetitionData from "@/_components/_display/CompetitionData";
 import Accordion from "@/_components/_examples/Accordion";
 import Card from "@/_components/_examples/Card";
-import HoverCard from "@/_components/_examples/Card";
 import FeatureCard from "@/_components/_examples/FeatureCard";
 import GradientButton from "@/_components/_examples/GradientButton";
-import NotificationBanner from "@/_components/_examples/NotificationBanner";
 import PricingCard from "@/_components/_examples/PricingCard";
 import ProfileCard from "@/_components/_examples/ProfileCard";
 import ProgressBar from "@/_components/_examples/ProgressBar";
 import StatCard from "@/_components/_examples/StatCard";
 import StatsOverview from "@/_components/_examples/StatsOverview";
-import TestimonialsCarousel from "@/_components/_examples/TestimonalsCarousel";
 import TitleBanner from "@/_components/_examples/TitleBanner";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";

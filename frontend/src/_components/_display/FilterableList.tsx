@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { flattenDiagnosticMessageText } from "typescript";
 
 interface Filter {
   type: "search" | "dropdown";

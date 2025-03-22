@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import TrophiesModal from "@/_components/_display/_profile/BotTrophiesModal";
+// import TrophiesModal from "@/_components/_display/_profile/BotTrophiesModal";
 import BotSettingsModal from "@/_components/_display/_profile/BotSettingsModal";
 import { formatDate } from "@/_lib/dateUtils";
 import { graphql, useFragment } from "react-relay";
@@ -26,7 +26,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
     props.bot,
   );
 
-  const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
+  // const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
 
   return (
@@ -38,21 +38,21 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
             {/* Bot Name */}
             <h3 className="font-bold text-lg text-customGreen">{bot.name}</h3>
 
-            {/* Trophy Icon and Count */}
-            <div
-              className="flex items-center cursor-pointer hover:bg-slate-700 rounded p-1 ml-2"
-              onClick={() => setTrophiesModalOpen(true)}
-            >
-              <Image
-                src={`${getPublicPrefix()}/icons/trophy.svg`}
-                alt="Trophy Icon"
-                width={20}
-                height={20}
-              />
-              <span className="ml-1 text-lg font-bold text-gray-300">
-                {/* {bot?.trophies?.length || 0} */}0
-              </span>
-            </div>
+            {/*/!* Trophy Icon and Count *!/*/}
+            {/*<div*/}
+            {/*  className="flex items-center cursor-pointer hover:bg-slate-700 rounded p-1 ml-2"*/}
+            {/*  onClick={() => setTrophiesModalOpen(true)}*/}
+            {/*>*/}
+            {/*  <Image*/}
+            {/*    src={`${getPublicPrefix()}/icons/trophy.svg`}*/}
+            {/*    alt="Trophy Icon"*/}
+            {/*    width={20}*/}
+            {/*    height={20}*/}
+            {/*  />*/}
+            {/*  <span className="ml-1 text-lg font-bold text-gray-300">*/}
+            {/*     {bot?.trophies?.length || 0} */}
+            {/*  </span>*/}
+            {/*</div>*/}
           </div>
 
           {/* Settings Button */}

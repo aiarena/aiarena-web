@@ -1,20 +1,13 @@
 "use client";
-import { useSignOut } from "@/_components/_hooks/useSignOut";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import TabNavigation from "@/_components/_nav/TabNav";
-// import  from "@/_components/_display/ProfileBotOverviewList";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import SettingsProfileSection from "@/_components/_display/_profile/SettingsProfileSection";
 import RequestMatchSection from "@/_components/_display/_profile/RequestMatchSection";
-import { useUserBots } from "@/_components/_hooks/useUserBot";
-import { useViewer } from "@/_components/_hooks/useViewer";
 import { redirect } from "next/navigation";
-import { useViewerRequestedMatches } from "@/_components/_hooks/useViewerRequestedMatches";
 import { ProfileBotOverviewList } from "@/_components/_display/ProfileBotOverviewList";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { pageProfileDashboardQuery } from "./__generated__/pageProfileDashboardQuery.graphql";
-import { getNodes } from "@/_lib/relayHelpers";
 
 export default function Page() {
   const data = useLazyLoadQuery<pageProfileDashboardQuery>(

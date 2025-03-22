@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
 import FilterableList from "./FilterableList";
 import { formatDate } from "@/_lib/dateUtils";
@@ -41,7 +40,7 @@ export default function ClosedCompetitionList({
           },
         ]}
         resultsPerPage={5}
-        renderRow={(item, index) => (
+        renderRow={(item) => (
           <Link
             href={`/competition/${item.id}`}
             className="block p-4 hover:bg-gray-800 rounded transition flex justify-between items-center shadow-md border border-gray-700"

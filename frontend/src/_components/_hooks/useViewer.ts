@@ -1,14 +1,11 @@
 import { useLazyLoadQuery, graphql } from "react-relay";
 import { useViewerQuery } from "./__generated__/useViewerQuery.graphql";
-import { useMemo } from "react";
 
 export interface User {
   id: string;
   username: string;
-
   patreonLevel?: string;
   dateJoined?: string;
-
   avatarUrl?: string;
 }
 

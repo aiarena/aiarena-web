@@ -3,10 +3,7 @@ import CompetitionCard from "@/_components/_display/CompetitionCard";
 import ClosedCompetitionList from "@/_components/_display/CompetitionList";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
-// import { useCompetition } from "@/_components/_hooks/useCompetition";
 import { useCompetitions } from "@/_components/_hooks/useCompetitions";
-import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { useEffect, useState } from "react";
 
 // const mockData = {
 //   activeCompetitions: [
@@ -111,9 +108,9 @@ export default function Page() {
           <WrappedTitle title="Open Competitions" />
           <div className="space-y-8 mt-8">
             {activeCompetitions.length > 0 ? (
-              activeCompetitions.map((comp, index) => (
+              activeCompetitions.map((comp) => (
                 <CompetitionCard
-                  key={index}
+                  key={comp.id}
                   competition={comp}
                   imageUrl={getBackgroundImage(comp.name)}
                 />

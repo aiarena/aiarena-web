@@ -1,8 +1,6 @@
 import Image from "next/image";
 import React from "react";
 import MainButton from "../_props/MainButton";
-import { ImageOverlayWrapper } from "./ImageOverlayWrapper";
-import { StringMappingType } from "typescript";
 
 interface HeroTaskProps {
   backgroundImage: string;

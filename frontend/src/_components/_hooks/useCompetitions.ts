@@ -24,7 +24,6 @@
 // };
 
 import { useLazyLoadQuery, graphql } from "react-relay";
-import { nodes } from "@/_lib/relayHelpers";
 import { getNodes } from "@/_lib/relayHelpers";
 import { useCompetitionsQuery } from "./__generated__/useCompetitionsQuery.graphql";
 

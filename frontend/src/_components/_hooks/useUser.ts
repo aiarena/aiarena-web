@@ -1,7 +1,4 @@
-import { useLazyLoadQuery, graphql } from "react-relay";
-import { getNodes, nodes } from "@/_lib/relayHelpers";
-
-import { getDataIDsFromFragment } from "relay-runtime";
+import { graphql, useLazyLoadQuery } from "react-relay";
 import { useUserQuery } from "./__generated__/useUserQuery.graphql";
 
 export const useUser = (userId: string) => {
@@ -39,21 +36,19 @@ export const useUser = (userId: string) => {
     return null;
   }
 
-  const sanitizedBot = {
+  // Transform into a sanitized shape
+  return {
     id: user.id,
     dateJoined: String(user.dateJoined), // Ensure string
     username: user.username || "", // Fallback for title
     patreonLevel: user.patreonLevel || "", // Fallback for text
     avatarUrl: user.avatarUrl || "",
     ownBots:
-      data.node.ownBots?.edges?.map((edge) => ({
+      data.node?.ownBots?.edges?.map((edge) => ({
         name: edge?.node?.name || "",
         type: edge?.node?.type || "",
         id: edge?.node?.id || "",
         playsRace: edge?.node?.playsRace || "",
       })) || [],
   };
-
-  // Transform into a sanitized shape
-  return sanitizedBot;
 };

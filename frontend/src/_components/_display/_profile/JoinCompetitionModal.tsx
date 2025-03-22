@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Modal from "../Modal";
 
 import { useCompetitions } from "@/_components/_hooks/useCompetitions";
-import { PassThrough } from "stream";
 import { useToggleCompetitionParticipation } from "@/_components/_hooks/useToggleCompetitionParticipation";
 import { getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
@@ -48,8 +47,7 @@ export default function JoinCompetitionModal({
   const openCompetitions = competitions.filter((comp) => comp.status == "OPEN");
 
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
-  const [toggleCompetitionParticipation, isInFlight, error] =
-    useToggleCompetitionParticipation();
+  const [toggleCompetitionParticipation] = useToggleCompetitionParticipation();
 
   const hasActiveCompetitionParticipation = (competitionId: string) => {
     return (
@@ -62,7 +60,7 @@ export default function JoinCompetitionModal({
   };
 
   const toggleCompetition = (compId: string) => {
-    toggleCompetitionParticipation(bot.id, compId, (response) => {
+    toggleCompetitionParticipation(bot.id, compId, () => {
       // Handle the response here
     });
   };
@@ -80,7 +78,7 @@ export default function JoinCompetitionModal({
       <div className="space-y-4">
         {openCompetitions &&
           openCompetitions.length > 0 &&
-          openCompetitions.map((comp, index) => (
+          openCompetitions.map((comp) => (
             <div
               className="flex items-center space-x-2 border border-gray-600 rounded-md p-2 justify-between"
               key={comp.id}

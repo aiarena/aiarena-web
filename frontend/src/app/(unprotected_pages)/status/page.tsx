@@ -1,8 +1,6 @@
 "use client";
 import EthernetStatusDots from "@/_components/_display/EthernetStatusEffect";
-import { ImageOverlayWrapper } from "@/_components/_display/ImageOverlayWrapper";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
-import Image from "next/image";
 import React from "react";
 import mockUptimeData from "@/_data/mockUptime.json";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";

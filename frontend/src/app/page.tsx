@@ -2,19 +2,9 @@
 import Navbar from "@/_components/_nav/Navbar";
 import VideoBanner from "@/_components/_display/VideoBanner";
 import Footer from "@/_components/_nav/Footer";
-import NewsBox from "@/_components/_display/NewsBox";
-import PlayerRankingList from "@/_components/_display/PlayerRankingList";
-import TopContributorsList from "@/_components/_display/TopContributorList";
-import TitleBanner from "@/_components/_examples/TitleBanner";
-import React, { useEffect, useState } from "react";
-import SmallCompetitionList from "@/_components/_display/SmallCompetitionList";
-import { ApiResponse, Competition, News } from "@/types";
-import { useLazyLoadQuery } from "react-relay";
-import { graphql } from "relay-runtime";
+import React from "react";
 
 import { useNews } from "@/_components/_hooks/useNews";
-import { useCompetitions } from "@/_components/_hooks/useCompetitions";
-import { useBots } from "@/_components/_hooks/useBots";
 import LatestNews from "@/_components/_display/LatestNews";
 import Image from "next/image";
 import InitiationHeroTasks from "@/_components/_display/InitiationHeroTasks";
@@ -55,9 +45,6 @@ const tasks = [
 ];
 
 export default function Page() {
-  const [competitions, setCompetitions] = useState<Competition[]>([]);
-  const [news, setNews] = useState<News[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const heroTasks = getFeatureFlags().heroTasks;
 
   const newsData = useNews();

@@ -2,11 +2,9 @@
 import ArticleWrapper from "@/_components/_display/ArticleWrapper";
 import AvatarWithBorder from "@/_components/_display/AvatarWithBorder";
 import { useUser } from "@/_components/_hooks/useUser";
-import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
-import React, { useEffect } from "react";
+import React from "react";
 
 interface AuthorPageProps {
   params: {

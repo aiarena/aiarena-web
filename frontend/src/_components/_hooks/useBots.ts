@@ -1,8 +1,8 @@
 import { useLazyLoadQuery, graphql } from "react-relay";
-import { getNodes, nodes } from "@/_lib/relayHelpers";
+import { getNodes } from "@/_lib/relayHelpers";
 import { useBotsQuery } from "./__generated__/useBotsQuery.graphql";
 
-export const useBots = (name = "", last = 5) => {
+export const useBots = (name = "") => {
   const data = useLazyLoadQuery<useBotsQuery>(
     graphql`
       query useBotsQuery($name: String, $first: Int) {

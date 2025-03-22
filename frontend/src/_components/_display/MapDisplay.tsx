@@ -8,10 +8,8 @@ interface MapDisplayProps {
 
 export default function MapDisplay({ mapName, imageUrl }: MapDisplayProps) {
   const [currentImage, setCurrentImage] = useState(imageUrl);
-  const [imageError, setImageError] = useState(false); // Track image load errors
 
   const handleImageError = () => {
-    setImageError(true);
     setCurrentImage("/maps/map_fallback.webp"); // Path to your fallback image
   };
 
