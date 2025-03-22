@@ -47,7 +47,6 @@ class ToggleCompetitionParticipation(CleanedInputMutation):
 
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: ToggleCompetitionParticipationInput):
-
         raise_for_access(info, input_object.bot)
         try:
             competition_participation: CompetitionParticipation = input_object.competition.participations.get(
