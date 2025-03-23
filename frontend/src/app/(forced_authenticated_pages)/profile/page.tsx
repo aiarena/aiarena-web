@@ -14,18 +14,6 @@ export default function Page() {
     graphql`
       query pageProfileDashboardQuery {
         viewer {
-          user {
-            id
-            username
-            patreonLevel
-            dateJoined
-            avatarUrl
-          }
-          apiToken
-          email
-          activeBotsLimit
-          requestMatchesLimit
-          requestMatchesCountLeft
           ...ProfileBotOverviewList_viewer
           ...RequestMatchSection_viewer
           ...SettingsProfileSection_viewer
