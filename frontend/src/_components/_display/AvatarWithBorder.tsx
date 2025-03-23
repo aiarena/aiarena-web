@@ -24,11 +24,6 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
 
   const defaultAvatar = `/user/default.jpg`;
 
-  const [imgSrc, setImgSrc] = useState(user?.avatarUrl || defaultAvatar);
-  const handleImageError = () => {
-    setImgSrc(defaultAvatar);
-  };
-
   const formatBorder = (border: string): string => {
     const lowerCased = border.toLowerCase();
     return lowerCased.charAt(0).toUpperCase() + lowerCased.slice(1);
@@ -64,17 +59,16 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
       <div
         className={`mr-[${avatarSize.marginRight}px] mt-[${avatarSize.marginTop}px] w-[${avatarSize.avatar}px] h-[${avatarSize.avatar}px] bg-white overflow-hidden `}
       >
-        <Image
-          src={imgSrc}
+        <img
+          src={user?.avatarUrl || `${getPublicPrefix()}/${defaultAvatar}`}
           alt="User avatar"
           width={avatarSize.avatar}
           height={avatarSize.avatar}
-          onError={handleImageError}
         />
       </div>
 
       {user.patreonLevel && user.patreonLevel != "NONE" ? (
-        <Image
+        <img
           src={`/frames/${user.patreonLevel.toLocaleLowerCase()}.png`}
           alt={`${formatBorder(user.patreonLevel)} frame`}
           width={avatarSize.border}
