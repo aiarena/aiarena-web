@@ -6,19 +6,46 @@ import { getFeatureFlags } from "@/_data/featureFlags";
 import { notFound } from "next/navigation";
 import { useBots } from "@/_components/_hooks/useBots";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { pageBotsQuery } from "./__generated__/pageBotsQuery.graphql";
+import { getNodes } from "@/_lib/relayHelpers";
 
 export default function Page() {
   const botsPage = getFeatureFlags().botsPage;
-  const bots = useBots();
+
+  const data = useLazyLoadQuery<pageBotsQuery>(
+    graphql`
+      query pageBotsQuery {
+        bots {
+          edges {
+            node {
+              id
+              name
+              created
+              type
+              user {
+                id
+                username
+              }
+            }
+          }
+        }
+      }
+    `,
+    {}
+  );
 
   if (!botsPage) {
+    notFound();
+  }
+  if (!data.bots) {
     notFound();
   }
 
   return (
     <>
       <FilterableList
-        data={bots}
+        data={getNodes(data.bots)}
         fields={["name", "created", "type", "user.username"]} // Pass nested field as string
         fieldLabels={{
           name: "Bot Name",
