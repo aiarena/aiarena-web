@@ -75,7 +75,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
 
       {user.patreonLevel && user.patreonLevel != "NONE" ? (
         <Image
-          src={`${getPublicPrefix()}/frames/${user.patreonLevel.toLocaleLowerCase()}.png`}
+          src={`/frames/${user.patreonLevel.toLocaleLowerCase()}.png`}
           alt={`${formatBorder(user.patreonLevel)} frame`}
           width={avatarSize.border}
           height={avatarSize.border}
