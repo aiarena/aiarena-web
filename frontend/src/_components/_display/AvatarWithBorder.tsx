@@ -22,11 +22,11 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
     props.user
   );
 
-  const [imgSrc, setImgSrc] = useState(
-    user.avatarUrl || `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`
-  );
+  const defaultAvatar = `${getPublicPrefix()}/public/user/default.jpg`;
+
+  const [imgSrc, setImgSrc] = useState(user.avatarUrl || defaultAvatar);
   const handleImageError = () => {
-    setImgSrc(`${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`);
+    setImgSrc(defaultAvatar);
   };
 
   const formatBorder = (border: string): string => {
@@ -56,7 +56,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
   };
 
   const avatarSize = getAvatarSize(props.size);
-
+  console.log(user.avatarUrl);
   return (
     <div
       className={`p-3 relative w-[${avatarSize.border}px] h-[${avatarSize.border}px] flex items-center justify-center`}
