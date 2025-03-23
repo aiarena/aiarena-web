@@ -456,8 +456,6 @@ class ResultAdmin(admin.ModelAdmin):
         "game_steps",
         "submitted_by",
         "arenaclient_log",
-        "interest_rating",
-        "date_interest_rating_calculated",
         "replay_file_has_been_cleaned",
     )
     list_filter = (
@@ -465,7 +463,6 @@ class ResultAdmin(admin.ModelAdmin):
         "winner",
         "created",
         "submitted_by",
-        "date_interest_rating_calculated",
         "replay_file_has_been_cleaned",
     )
     list_select_related = ["match", "winner", "submitted_by"]

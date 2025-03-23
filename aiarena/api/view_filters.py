@@ -69,7 +69,7 @@ class ResultFilter(filters.FilterSet):
 
     class Meta:
         model = Result
-        fields = ["id", "type", "created", "game_steps", "interest_rating", "date_interest_rating_calculated"]
+        fields = ["id", "type", "created", "game_steps"]
 
 
 class MatchFilter(filters.FilterSet):
