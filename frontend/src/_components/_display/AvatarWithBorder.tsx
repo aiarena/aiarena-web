@@ -22,9 +22,9 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
     props.user
   );
 
-  const defaultAvatar = `${getPublicPrefix()}/public/user/default.jpg`;
+  const defaultAvatar = `${getPublicPrefix()}/user/default.jpg`;
 
-  const [imgSrc, setImgSrc] = useState(user.avatarUrl || defaultAvatar);
+  const [imgSrc, setImgSrc] = useState(defaultAvatar);
   const handleImageError = () => {
     setImgSrc(defaultAvatar);
   };
