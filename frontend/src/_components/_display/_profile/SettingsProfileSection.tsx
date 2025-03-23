@@ -1,15 +1,14 @@
 import { useState } from "react";
-import Image from "next/image";
-import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { graphql, useFragment } from "react-relay";
 import { SettingsProfileSection_viewer$key } from "./__generated__/SettingsProfileSection_viewer.graphql";
+import AvatarWithBorder from "../AvatarWithBorder";
 
 interface SettingsProfileSectionProps {
   viewer: SettingsProfileSection_viewer$key;
 }
 
 export default function SettingsProfileSection(
-  props: SettingsProfileSectionProps,
+  props: SettingsProfileSectionProps
 ) {
   const viewer = useFragment(
     graphql`
@@ -17,11 +16,12 @@ export default function SettingsProfileSection(
         apiToken
         user {
           username
-          avatarUrl
+          patreonLevel
+          ...AvatarWithBorder_user
         }
       }
     `,
-    props.viewer,
+    props.viewer
   );
 
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
@@ -61,27 +61,17 @@ export default function SettingsProfileSection(
       <div className="bg-gray-700 p-4 rounded-md space-y-2">
         <h3 className="text-base font-semibold text-customGreen">Profile</h3>
         <div className="flex items-center space-x-3">
-          <div className="relative w-12 h-12 flex-shrink-0">
-            <Image
-              src={
-                viewer?.user?.avatarUrl ||
-                `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`
-              }
-              alt="User avatar"
-              fill
-              className="object-cover"
-            />
-            <>
-              {/* {viewer.user.patreonLevel && viewer.user.patreonLevel == "Bronze" ? (
-                <div className="absolute inset-0 border-2 border-customGreen"></div>
-              ) : null} */}
-            </>
+          <div className="relative ">
+            {viewer?.user ? (
+              <AvatarWithBorder user={viewer.user} size="sm" />
+            ) : null}
           </div>
           <div className="leading-tight">
             <p className="text-white font-bold">{viewer?.user?.username}</p>
-            {/* {viewer.user.patreonLevel && viewer.user.patreonLevel != "NONE" ? (
+            {viewer?.user?.patreonLevel &&
+            viewer.user.patreonLevel != "NONE" ? (
               <p className="text-customGreen text-xs">Supporter</p>
-            ) : null} */}
+            ) : null}
           </div>
         </div>
       </div>
