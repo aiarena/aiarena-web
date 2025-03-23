@@ -24,7 +24,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
 
   const defaultAvatar = `${getPublicPrefix()}/user/default.jpg`;
 
-  const [imgSrc, setImgSrc] = useState(defaultAvatar);
+  const [imgSrc, setImgSrc] = useState(user?.avatarUrl || defaultAvatar);
   const handleImageError = () => {
     setImgSrc(defaultAvatar);
   };
@@ -56,7 +56,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
   };
 
   const avatarSize = getAvatarSize(props.size);
-  console.log(user.avatarUrl);
+
   return (
     <div
       className={`p-3 relative w-[${avatarSize.border}px] h-[${avatarSize.border}px] flex items-center justify-center`}
