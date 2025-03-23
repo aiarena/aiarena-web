@@ -3,7 +3,6 @@ from wsgiref.util import FileWrapper
 
 from constance import config
 from django.core.cache import cache
-from django.db import transaction
 from django.http import HttpResponse
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -131,8 +130,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 f"bot2_tags: {serializer.validated_data.get('bot2_tags')} "
             )
 
-        with transaction.atomic():
-            result = handle_result_submission(match_id, serializer.validated_data)
+        result = handle_result_submission(match_id, serializer.validated_data)
 
         headers = self.get_success_headers(serializer.data)
         return Response({"result_id": result.id}, status=status.HTTP_201_CREATED, headers=headers)
