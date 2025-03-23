@@ -1,6 +1,6 @@
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import { AvatarWithBorder_user$key } from "./__generated__/AvatarWithBorder_user.graphql";
 
@@ -21,6 +21,13 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
     `,
     props.user
   );
+
+  const [imgSrc, setImgSrc] = useState(
+    user.avatarUrl || `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`
+  );
+  const handleImageError = () => {
+    setImgSrc(`${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`);
+  };
 
   const formatBorder = (border: string): string => {
     const lowerCased = border.toLowerCase();
@@ -58,15 +65,11 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
         className={`mr-[${avatarSize.marginRight}px] mt-[${avatarSize.marginTop}px] w-[${avatarSize.avatar}px] h-[${avatarSize.avatar}px] bg-white overflow-hidden `}
       >
         <Image
-          src={
-            user.avatarUrl
-              ? "http://localhost:8000/media/avatars/2023/resized/80/80/unnamed.png"
-              : `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`
-          }
+          src={imgSrc}
           alt="User avatar"
           width={avatarSize.avatar}
           height={avatarSize.avatar}
-          className=""
+          onError={handleImageError}
         />
       </div>
 

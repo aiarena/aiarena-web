@@ -208,7 +208,7 @@ export default function Page({ params }: CompetitionPageProps) {
                   <div key={map.id} className="flex-none w-28 h-28">
                     <MapDisplay
                       mapName={map.name}
-                      imageUrl={`/${map.file}.webp`}
+                      imageUrl={`${getPublicPrefix()}/${map.file}.webp`}
                     />
                   </div>
                 ))}
