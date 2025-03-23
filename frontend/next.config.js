@@ -46,6 +46,11 @@ const nextConfig = {
         hostname: "aiarena.net",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "aiarena-mediaproductionbucket-rrwubgechzmq.s3.amazonaws.com",
+        pathname: "/**",
+      },
     ],
   },
   typescript: {
