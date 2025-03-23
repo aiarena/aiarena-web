@@ -25,8 +25,68 @@ const patreonIcons: Record<string, string> = {
   DIAMOND: "diamond.png",
 };
 
-export default function Page({ params }: CompetitionPageProps) {
-  const competition = useCompetition(params.id);
+export default function Page(props: CompetitionPageProps) {
+  // we want to add map support and fix downloads before adding this
+
+  // const competition = useLazyLoadQuery<pageCompetitionQuery>(
+  //   graphql`
+  //     query pageCompetitionQuery($id: ID!) {
+  //       node(id: $id) {
+  //         ... on CompetitionType {
+  //           id
+  //           participants {
+  //             edges {
+  //               node {
+  //                 id
+  //                 elo
+  //                 bot {
+  //                   id
+  //                   name
+  //                   type
+  //                   user {
+  //                     id
+  //                     patreonLevel
+  //                     username
+  //                   }
+  //                 }
+  //                 trend
+  //                 divisionNum
+  //               }
+  //             }
+  //           }
+  //           rounds {
+  //             edges {
+  //               node {
+  //                 id
+  //                 finished
+  //                 started
+  //                 number
+  //                 complete
+  //               }
+  //             }
+  //           }
+  //           maps {
+  //             edges {
+  //               node {
+  //                 id
+  //                 name
+  //                 file
+  //               }
+  //             }
+  //           }
+  //           dateClosed
+  //           dateCreated
+  //           dateOpened
+  //           name
+  //           status
+  //         }
+  //       }
+  //     }
+  //   `,
+  //   { id: decodeURIComponent(props.params.id) }
+  // );
+
+  const competition = useCompetition(props.params.id);
 
   const featureFlags = getFeatureFlags();
 

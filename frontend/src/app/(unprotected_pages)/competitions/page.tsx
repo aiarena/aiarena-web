@@ -4,12 +4,36 @@ import ClosedCompetitionList from "@/_components/_display/CompetitionList";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import { useCompetitions } from "@/_components/_hooks/useCompetitions";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { pageCompetitionsQuery } from "./__generated__/pageCompetitionsQuery.graphql";
+import { getNodes } from "@/_lib/relayHelpers";
 
 export default function Page() {
-  const compData = useCompetitions(); // Fetch competitions from the hook
+  // const compData = useCompetitions(); // Fetch competitions from the hook
+
+  const data = useLazyLoadQuery<pageCompetitionsQuery>(
+    graphql`
+      query pageCompetitionsQuery {
+        competitions {
+          edges {
+            node {
+              id
+              name
+              type
+              dateCreated
+              status
+            }
+          }
+        }
+      }
+    `,
+    {}
+  );
+
+  const competitions = getNodes(data.competitions);
 
   // Filter active and closed competitions directly
-  const validCompetitions = (compData || []).filter(
+  const validCompetitions = competitions.filter(
     (comp) => comp !== null && comp !== undefined
   );
   const activeCompetitions = validCompetitions.filter(

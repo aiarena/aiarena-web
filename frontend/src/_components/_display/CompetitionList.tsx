@@ -2,14 +2,17 @@
 import Link from "next/link";
 import FilterableList from "./FilterableList";
 import { formatDate } from "@/_lib/dateUtils";
+import { CoreCompetitionStatusChoices } from "../_hooks/__generated__/useCompetitionQuery.graphql";
+import { CoreCompetitionTypeChoices } from "../_hooks/__generated__/useCompetitionsQuery.graphql";
 
 // Props inferred from Relay data
 interface ClosedCompetitionListProps {
   competitions: {
-    id: string;
-    name: string;
-    dateCreated: string;
-    status: string;
+    readonly dateCreated: any;
+    readonly id: string;
+    readonly name: string;
+    readonly status: CoreCompetitionStatusChoices | null | undefined;
+    readonly type: CoreCompetitionTypeChoices;
   }[];
 }
 
@@ -26,6 +29,8 @@ export default function ClosedCompetitionList({
           dateCreated: "Date Created",
           status: "Status",
         }}
+        defaultSortOrder={"desc"}
+        defaultFieldSort={1}
         fieldClasses={{
           // "name": "Competition Name",
           dateCreated: "hidden sm:block",
