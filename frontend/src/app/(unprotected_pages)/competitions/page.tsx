@@ -5,84 +5,18 @@ import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import { useCompetitions } from "@/_components/_hooks/useCompetitions";
 
-// const mockData = {
-//   activeCompetitions: [
-//     {
-//       name: "Sc2 AI Arena 2024 Season 2",
-//       created: "11. June 2024 - 06:47:31",
-//       opened: "11. June 2024 - 20:52:33",
-//       status: "Open",
-//       progress: 75, // example progress value
-//       topPlayers: ["Player1", "Player2", "Player3"],
-//       participants: 150,
-//       totalGames: 1200,
-//       imageUrl: `/competitions/sc2_1.webp`, // Placeholder image URL
-//     },
-//     {
-//       name: "Sc2 AI Arena Micro Ladder",
-//       created: "09. Aug. 2023 - 08:41:29",
-//       opened: "15. Aug. 2023 - 15:47:20",
-//       status: "Open",
-//       progress: 50, // example progress value
-//       topPlayers: ["PlayerA", "PlayerB", "PlayerC"],
-//       participants: 100,
-//       totalGames: 900,
-//       imageUrl: `/competitions/sc2.webp`, // Placeholder image URL
-//     },
-//   ],
-//   closedCompetitions: [
-//     {
-//       name: "Sc2 AI Arena 2024 Pre-Season 2",
-//       created: "16. March 2024 - 13:20:26",
-//       opened: "17. March 2024 - 01:11:31",
-//       closed: "11. June 2024 - 07:23:50",
-//     },
-//     {
-//       name: "Sc2 AI Arena 2024 Season 1",
-//       created: "15. Feb. 2024 - 21:39:09",
-//       opened: "16. Feb. 2024 - 09:54:04",
-//       closed: "12. March 2024 - 13:37:03",
-//     },
-//     {
-//       name: "Sc2 AI Arena 2024 Pre-Season 2",
-//       created: "16. March 2024 - 13:20:26",
-//       opened: "17. March 2024 - 01:11:31",
-//       closed: "11. June 2024 - 07:23:50",
-//     },
-//     {
-//       name: "Sc2 AI Arena 2024 Season 1",
-//       created: "15. Feb. 2024 - 21:39:09",
-//       opened: "16. Feb. 2024 - 09:54:04",
-//       closed: "12. March 2024 - 13:37:03",
-//     },
-//     {
-//       name: "Sc2 AI Arena 2024 Pre-Season 2",
-//       created: "16. March 2024 - 13:20:26",
-//       opened: "17. March 2024 - 01:11:31",
-//       closed: "11. June 2024 - 07:23:50",
-//     },
-//     {
-//       name: "Sc2 AI Arena 2024 Season 1",
-//       created: "15. Feb. 2024 - 21:39:09",
-//       opened: "16. Feb. 2024 - 09:54:04",
-//       closed: "12. March 2024 - 13:37:03",
-//     },
-//     // Add more closed competitions here...
-//   ],
-// };
-
 export default function Page() {
   const compData = useCompetitions(); // Fetch competitions from the hook
 
   // Filter active and closed competitions directly
   const validCompetitions = (compData || []).filter(
-    (comp) => comp !== null && comp !== undefined,
+    (comp) => comp !== null && comp !== undefined
   );
   const activeCompetitions = validCompetitions.filter(
-    (comp) => comp.status === "OPEN",
+    (comp) => comp.status === "OPEN"
   );
   const closedCompetitions = validCompetitions.filter(
-    (comp) => comp.status === "CLOSED",
+    (comp) => comp.status === "CLOSED"
   );
 
   // Function to determine the background image

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import { notFound } from "next/navigation";
 import { useBots } from "@/_components/_hooks/useBots";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 export default function Page() {
   const botsPage = getFeatureFlags().botsPage;
@@ -47,7 +48,7 @@ export default function Page() {
           <div className="block p-4 hover:bg-gray-800 rounded transition flex justify-between items-center shadow-md border border-gray-700">
             <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
               <Link
-                href={`/bots/${item.id}`}
+                href={`${getPublicPrefix()}/bots/${item.id}`}
                 className="text-left font-semibold text-customGreen  truncate"
               >
                 {item.name}
@@ -58,7 +59,7 @@ export default function Page() {
               <span className="hidden md:block text-left text-gray-200  truncate">
                 {item.type}
               </span>
-              <Link href={`/authors/${item.user.id}`}>
+              <Link href={`${getPublicPrefix()}/authors/${item.user.id}`}>
                 <span className="bg-blue hidden sm:block text-left text-customGreen truncate ">
                   {item.user.username}
                 </span>

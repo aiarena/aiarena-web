@@ -8,6 +8,7 @@ import { getFeatureFlags } from "@/_data/featureFlags";
 import { useCompetition } from "@/_components/_hooks/useCompetition";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 interface CompetitionPageProps {
   params: {
@@ -22,7 +23,6 @@ const patreonIcons: Record<string, string> = {
   GOLD: "gold.png",
   PLATINUM: "platinum.png",
   DIAMOND: "diamond.png",
-  // Add other levels as needed
 };
 
 export default function Page({ params }: CompetitionPageProps) {
@@ -31,8 +31,7 @@ export default function Page({ params }: CompetitionPageProps) {
   const featureFlags = getFeatureFlags();
 
   if (!competition) {
-    // This block is removed to let errors propagate
-    throw new Error("Competition data is missing.");
+    notFound();
   }
   const renderRankings = (
     <div>
@@ -47,7 +46,7 @@ export default function Page({ params }: CompetitionPageProps) {
             acc[division].push(participant);
             return acc;
           },
-          {} as Record<number, typeof competition.participants>,
+          {} as Record<number, typeof competition.participants>
         );
 
         // Render each division
@@ -198,23 +197,6 @@ export default function Page({ params }: CompetitionPageProps) {
               official maps and standard melee rules. It rigorously tests
               strategy, micro, resource management, and decision-making.
             </p>
-            {/* {featureFlags.competitionMaps ? (
-              <div className="pt-4">
-                <h3 className="text-2xl font-semibold text-customGreen my-4">
-                  Maps
-                </h3>
-                <div className="flex flex-wrap justify-center gap-4">
-                  {competition.maps.map((mapName, index) => (
-                    <div key={index} className="flex-none w-28 h-28">
-                      <MapDisplay
-                        mapName={mapName}
-                        imageUrl={`/maps/oceanborn.jpg`} // Static image for demonstration
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null} */}
           </div>
           {featureFlags.competitionMaps && !featureFlags.competitionVideo ? (
             <div className="border-gray-700 border-2 bg-customBackgroundColor1  rounded-lg shadow-md lg:col-span-2">
@@ -226,7 +208,7 @@ export default function Page({ params }: CompetitionPageProps) {
                   <div key={map.id} className="flex-none w-28 h-28">
                     <MapDisplay
                       mapName={map.name}
-                      imageUrl={`/${map.file}.webp`} // Assuming images are named based on file paths
+                      imageUrl={`${getPublicPrefix()}/${map.file}.webp`}
                     />
                   </div>
                 ))}

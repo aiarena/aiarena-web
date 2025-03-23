@@ -11,7 +11,7 @@ interface ProfileBotOverviewListProps {
 }
 
 export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
-  props,
+  props
 ) => {
   const viewer = useFragment(
     graphql`
@@ -22,6 +22,13 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
             edges {
               node {
                 id
+                competitionParticipations {
+                  edges {
+                    node {
+                      active
+                    }
+                  }
+                }
                 ...ProfileBot_bot
               }
             }
@@ -29,10 +36,21 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
         }
       }
     `,
-    props.viewer,
+    props.viewer
   );
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
+
+  const activeBotParticipation = getNodes(viewer.user?.ownBots).reduce(
+    (total, item) => {
+      const activeCount =
+        getNodes(item.competitionParticipations).filter(
+          (participation) => participation.active
+        ).length || 0;
+      return total + activeCount;
+    },
+    0
+  );
 
   return (
     <div className="bg-customBackgroundColor1 p-4 border border-gray-700">
@@ -40,7 +58,8 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
         <div className="flex gap-2 pb-2 mt-auto flex-wrap">
           {viewer.activeBotsLimit ? (
             <span className="flex word-wrap">
-              X / {viewer.activeBotsLimit} active competition participations.
+              {activeBotParticipation} / {viewer.activeBotsLimit} active
+              competition participations.
             </span>
           ) : null}
         </div>

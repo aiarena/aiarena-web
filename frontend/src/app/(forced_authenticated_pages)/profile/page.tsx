@@ -32,7 +32,7 @@ export default function Page() {
         }
       }
     `,
-    {},
+    {}
   );
 
   const [activeTab, setActiveTab] = useState("Bots");
@@ -40,17 +40,14 @@ export default function Page() {
     redirect("/");
   }
 
-  // const userBots = useUserBots(data?.user.id);
-
   return (
     <>
-      <div className="min-h-screen flex justify-center">
+      <div className="min-h-screen flex justify-center text-gray-300">
         <div className="mx-auto py-8 px-4 max-w-7xl bg-gray-800 w-full">
           {/* Navigation Tabs */}
           <TabNavigation
             tabs={[
               { name: "Bots", href: "#bot-overview" },
-              // { name: "Achievements", href: "#achievements" },
               { name: "Requested Matches", href: "#matches" },
               { name: "Settings", href: "#settings" },
             ]}
