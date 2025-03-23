@@ -5,6 +5,7 @@ import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Link from "next/link";
 import { getBotBasic } from "@/_components/_hooks/useExperimentalBotSSR";
 import BotParticipations from "./BotParticipations";
+import { notFound } from "next/navigation";
 
 interface BotPageProps {
   params: {
@@ -20,7 +21,7 @@ export default async function Page({ params }: BotPageProps) {
   const bot = await getBotBasic(botId);
 
   if (!bot) {
-    return <div>Bot not found</div>;
+    notFound();
   }
 
   return (

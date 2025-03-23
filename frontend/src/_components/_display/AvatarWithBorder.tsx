@@ -22,11 +22,11 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
     props.user
   );
 
-  const [imgSrc, setImgSrc] = useState(
-    user.avatarUrl || `${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`
-  );
+  const defaultAvatar = `${getPublicPrefix()}/user/default.jpg`;
+
+  const [imgSrc, setImgSrc] = useState(user?.avatarUrl || defaultAvatar);
   const handleImageError = () => {
-    setImgSrc(`${getPublicPrefix()}/assets_logo/img/default_avatar.jpg`);
+    setImgSrc(defaultAvatar);
   };
 
   const formatBorder = (border: string): string => {

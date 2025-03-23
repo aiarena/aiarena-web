@@ -21,7 +21,6 @@ export default function Page(props: AuthorPageProps) {
       query pageAuthorQuery($id: ID!) {
         node(id: $id) {
           ... on UserType {
-            ...AvatarWithBorder_user
             username
             patreonLevel
             dateJoined
@@ -36,11 +35,12 @@ export default function Page(props: AuthorPageProps) {
               }
               totalCount
             }
+            ...AvatarWithBorder_user
           }
         }
       }
     `,
-    { id: props.params.id }
+    { id: decodeURIComponent(props.params.id) }
   );
 
   if (!user.node) {
