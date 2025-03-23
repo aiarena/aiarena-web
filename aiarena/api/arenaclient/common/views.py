@@ -1,9 +1,10 @@
 import logging
 from wsgiref.util import FileWrapper
 
-from constance import config
 from django.core.cache import cache
 from django.http import HttpResponse
+
+from constance import config
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -14,6 +15,7 @@ from aiarena.core.models import (
     MatchParticipation,
 )
 from aiarena.core.permissions import IsArenaClient, IsArenaClientOrAdminUser
+
 from .ac_coordinator import ACCoordinator
 from .exceptions import LadderDisabled, NoGameForClient
 from .result_submission_handler import handle_result_submission
@@ -22,6 +24,7 @@ from .serializers import (
     SetArenaClientStatusSerializer,
     SubmitResultCombinedSerializer,
 )
+
 
 logger = logging.getLogger(__name__)
 

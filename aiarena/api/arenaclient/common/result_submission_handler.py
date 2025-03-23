@@ -1,26 +1,29 @@
 import logging
 
-from constance import config
 from django.conf import settings
 from django.db import transaction
-from django.db.models import F
-from django.db.models import Prefetch, Sum
+from django.db.models import F, Prefetch, Sum
+
+from constance import config
 from rest_framework.exceptions import APIException
 
 from aiarena.core.models import (
+    BotCrashLimitAlert,
     CompetitionParticipation,
     Match,
     MatchParticipation,
     MatchTag,
-    Tag, BotCrashLimitAlert,
+    Tag,
 )
-from aiarena.core.services import BotStatistics, Bots
+from aiarena.core.services import Bots, BotStatistics
 from aiarena.core.utils import parse_tags
+
 from .serializers import (
     SubmitResultBotSerializer,
     SubmitResultParticipationSerializer,
     SubmitResultResultSerializer,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -71,14 +74,12 @@ def handle_result_submission(match_id, result_data):
         # validate bots
         if not p1_instance.bot.is_in_match(match_id):
             logger.warning(
-                f"A result was submitted for match {match_id}, "
-                f"which Bot {p1_instance.bot.name} isn't currently in!"
+                f"A result was submitted for match {match_id}, " f"which Bot {p1_instance.bot.name} isn't currently in!"
             )
             raise APIException(f"Unable to log result: Bot {p1_instance.bot.name} is not currently in this match!")
         if not p2_instance.bot.is_in_match(match_id):
             logger.warning(
-                f"A result was submitted for match {match_id}, "
-                f"which Bot {p2_instance.bot.name} isn't currently in!"
+                f"A result was submitted for match {match_id}, " f"which Bot {p2_instance.bot.name} isn't currently in!"
             )
             raise APIException(f"Unable to log result: Bot {p2_instance.bot.name} is not currently in this match!")
         bot1 = None
@@ -129,9 +130,7 @@ def handle_result_submission(match_id, result_data):
                     tag_obj = Tag.objects.get_or_create(name=tag)
                     total_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1_user)[0])
                 # remove tags for this match that belong to this user and were not sent in the form
-                match.tags.remove(
-                    *match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in total_match_tags])
-                )
+                match.tags.remove(*match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in total_match_tags]))
                 # add everything, this shouldn't cause duplicates
                 match.tags.add(*total_match_tags)
         else:
@@ -141,9 +140,7 @@ def handle_result_submission(match_id, result_data):
                     tag_obj = Tag.objects.get_or_create(name=tag)
                     p1_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1_user)[0])
                 # remove tags for this match that belong to this user and were not sent in the form
-                match.tags.remove(
-                    *match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in p1_match_tags])
-                )
+                match.tags.remove(*match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in p1_match_tags]))
                 # add everything, this shouldn't cause duplicates
                 match.tags.add(*p1_match_tags)
 
@@ -153,9 +150,7 @@ def handle_result_submission(match_id, result_data):
                     tag_obj = Tag.objects.get_or_create(name=tag)
                     p2_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot2_user)[0])
                 # remove tags for this match that belong to this user and were not sent in the form
-                match.tags.remove(
-                    *match.tags.filter(user=bot2_user).exclude(id__in=[mt.id for mt in p2_match_tags])
-                )
+                match.tags.remove(*match.tags.filter(user=bot2_user).exclude(id__in=[mt.id for mt in p2_match_tags]))
                 # add everything, this shouldn't cause duplicates
                 match.tags.add(*p2_match_tags)
         match.result = result
@@ -199,8 +194,8 @@ def handle_result_submission(match_id, result_data):
                 # test here to check ELO total and ensure no corruption
                 match_competition = result.match.round.competition
                 expected_elo_sum = (
-                        settings.ELO_START_VALUE
-                        * CompetitionParticipation.objects.filter(competition=match_competition).count()
+                    settings.ELO_START_VALUE
+                    * CompetitionParticipation.objects.filter(competition=match_competition).count()
                 )
                 actual_elo_sum = CompetitionParticipation.objects.filter(competition=match_competition).aggregate(
                     Sum("elo")
