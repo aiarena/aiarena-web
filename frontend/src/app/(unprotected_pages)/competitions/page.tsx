@@ -3,7 +3,6 @@ import CompetitionCard from "@/_components/_display/CompetitionCard";
 import ClosedCompetitionList from "@/_components/_display/CompetitionList";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
-import { useCompetitions } from "@/_components/_hooks/useCompetitions";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { pageCompetitionsQuery } from "./__generated__/pageCompetitionsQuery.graphql";
 import { getNodes } from "@/_lib/relayHelpers";

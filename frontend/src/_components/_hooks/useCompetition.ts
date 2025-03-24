@@ -45,7 +45,7 @@ export const useCompetition = (competitionId: string) => {
                 node {
                   id
                   name
-                  file
+                  downloadLink
                 }
               }
             }
@@ -90,17 +90,17 @@ export const useCompetition = (competitionId: string) => {
           divisionNum: participant.divisionNum,
           bot: participant.bot
             ? {
-                id: participant.bot.id,
-                name: participant.bot.name || "",
-                type: participant.bot.type || "",
-                user: participant.bot.user
-                  ? {
-                      id: participant.bot.user.id,
-                      patreonLevel: participant.bot.user.patreonLevel || "NONE",
-                      username: participant.bot.user.username || "",
-                    }
-                  : null,
-              }
+              id: participant.bot.id,
+              name: participant.bot.name || "",
+              type: participant.bot.type || "",
+              user: participant.bot.user
+                ? {
+                  id: participant.bot.user.id,
+                  patreonLevel: participant.bot.user.patreonLevel || "NONE",
+                  username: participant.bot.user.username || "",
+                }
+                : null,
+            }
             : null,
         })) || [], // Default to an empty array if undefined
     rounds:
@@ -121,7 +121,7 @@ export const useCompetition = (competitionId: string) => {
         .map((map) => ({
           id: map.id,
           name: map.name || "",
-          file: map.file || "",
+          downloadLink: map.downloadLink || "",
         })) || [], // Default to an empty array if undefined
   };
 
