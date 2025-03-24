@@ -33,14 +33,14 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
       sm: {
         avatar: 77,
         border: 85,
-        marginRight: 3,
-        marginTop: 1,
+        moveBorderRight: 3,
+        moveBorderUp: 1,
       },
       lg: {
         avatar: 150,
         border: 170,
-        marginRight: 4,
-        marginTop: 2,
+        moveBorderRight: 4,
+        moveBorderUp: 2,
       },
     };
 
@@ -75,7 +75,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
           height={avatarSize.border}
           className={`absolute w-[${avatarSize.border}px] h-[${avatarSize.border}px] object-contain pointer-events-none`}
           style={{
-            transform: `translate(${avatarSize.marginRight}px, -${avatarSize.marginTop}px)`,
+            transform: `translate(${avatarSize.moveBorderRight}px, -${avatarSize.moveBorderUp}px)`,
           }}
         />
       ) : null}
