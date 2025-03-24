@@ -31,7 +31,7 @@ export default function BotSettingsModal({
         wikiArticle
       }
     `,
-    props.bot,
+    props.bot
   );
 
   const { updateBot, botInFlightField } = useUpdateUserBot();

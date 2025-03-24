@@ -1,6 +1,5 @@
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import Image from "next/image";
-import React, { useState } from "react";
+import React from "react";
 import { graphql, useFragment } from "react-relay";
 import { AvatarWithBorder_user$key } from "./__generated__/AvatarWithBorder_user.graphql";
 

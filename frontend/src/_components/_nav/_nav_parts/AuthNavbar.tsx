@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useSignOut } from "@/_components/_hooks/useSignOut";
 import { useViewerContext } from "@/_components/providers/ViewerProvider";
 import { useRouter } from "next/navigation";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 export default function AuthNavBar() {
   const router = useRouter(); // Next.js router for navigation
@@ -37,13 +38,13 @@ export default function AuthNavBar() {
         </button>
       ) : (
         <div className="mt-1">
-          <Link href="/register">
+          <Link href={`${getPublicPrefix()}/register`}>
             <span className="bg-customGreen m-2 rounded py-1 px-2 whitespace-nowrap">
               Sign Up
             </span>
           </Link>
 
-          <Link href="/login">
+          <Link href={`${getPublicPrefix()}/login`}>
             <span className="bg-customGreen m-2 rounded py-1 px-2 whitespace-nowrap">
               Login
             </span>
