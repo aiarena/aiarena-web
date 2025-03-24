@@ -18,7 +18,7 @@ export default function ProfileBot(props: ProfileBotProps) {
         ...BotCompetitionSection_bot
       }
     `,
-    props.bot,
+    props.bot
   );
   return (
     <div className="rounded-lg bg-gray-800 text-white shadow-md shadow-black">

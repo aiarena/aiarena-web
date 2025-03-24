@@ -50,7 +50,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         }
       }
     `,
-    props.viewer,
+    props.viewer
   );
 
   const requestsUsed = viewer.requestedMatches?.totalCount;

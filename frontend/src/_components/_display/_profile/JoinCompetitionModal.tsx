@@ -38,7 +38,7 @@ export default function JoinCompetitionModal({
         }
       }
     `,
-    props.bot,
+    props.bot
   );
 
   const [confirmLeave, setConfirmLeave] = useState<string[]>([]);
@@ -54,7 +54,7 @@ export default function JoinCompetitionModal({
       botCompetitionParticipations?.some(
         (participation) =>
           competitionId === participation.competition.id &&
-          participation.active === true,
+          participation.active === true
       ) || false
     );
   };

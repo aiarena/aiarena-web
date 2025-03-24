@@ -12,7 +12,7 @@ interface BotCompetitionSectionProps {
 }
 
 export default function BotCompetitionsSection(
-  props: BotCompetitionSectionProps,
+  props: BotCompetitionSectionProps
 ) {
   const bot = useFragment(
     graphql`
@@ -43,7 +43,7 @@ export default function BotCompetitionsSection(
         ...JoinCompetitionModal_bot
       }
     `,
-    props.bot,
+    props.bot
   );
   const comp_data = getNodes(bot.competitionParticipations);
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
