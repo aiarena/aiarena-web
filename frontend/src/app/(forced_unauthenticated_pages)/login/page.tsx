@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSignIn } from "@/_components/_hooks/useSignIn";
 import { useViewerContext } from "@/_components/providers/ViewerProvider";
 import { fetchViewer as fetchViewer } from "@/_lib/fetchViewer";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 export default function Page() {
   const [username, setUsername] = useState("");
@@ -32,7 +33,7 @@ export default function Page() {
         try {
           const viewer = await fetchViewer(); // Await the user data
           setViewer(viewer); // Update the global user context with the fetched user data
-          router.push("/profile"); // Redirect to profile page
+          router.push(`${getPublicPrefix()}/profile`); // Redirect to profile page
 
           // redirect
         } catch {
@@ -46,7 +47,7 @@ export default function Page() {
 
   useEffect(() => {
     if (viewer !== null && !fetching) {
-      router.push("/profile");
+      router.push(`${getPublicPrefix()}/profile`);
     }
   }, [viewer, fetching, router]); // Dependencies ensure this runs after state updates
 

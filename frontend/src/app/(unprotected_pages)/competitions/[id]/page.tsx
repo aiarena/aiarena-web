@@ -265,10 +265,11 @@ export default function Page(props: CompetitionPageProps) {
               </h3>
               <div className="flex flex-wrap justify-center gap-4">
                 {competition.maps.map((map) => (
-                  <div key={map.id} className="flex-none w-28 h-28">
+                  <div key={map.id} className="flex-none w-28 h-32">
                     <MapDisplay
                       mapName={map.name}
-                      imageUrl={`${getPublicPrefix()}/${map.file}.webp`}
+                      imageUrl={`/maps/${map.name}.webp`}
+                      downloadLink={map.downloadLink}
                     />
                   </div>
                 ))}

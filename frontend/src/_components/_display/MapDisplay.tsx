@@ -4,9 +4,14 @@ import { useState } from "react";
 interface MapDisplayProps {
   mapName: string;
   imageUrl: string;
+  downloadLink: string;
 }
 
-export default function MapDisplay({ mapName, imageUrl }: MapDisplayProps) {
+export default function MapDisplay({
+  mapName,
+  imageUrl,
+  downloadLink,
+}: MapDisplayProps) {
   const [currentImage, setCurrentImage] = useState(imageUrl);
 
   const handleImageError = () => {
@@ -35,10 +40,29 @@ export default function MapDisplay({ mapName, imageUrl }: MapDisplayProps) {
         />
       </div>
       <div className="relative inset-0 flex items-center justify-center">
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-transparent"></div>
-        {/* Centered Text */}
-        <p className="relative text-white text-sm font-bold z-10">{mapName}</p>
+        <div>
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-transparent"></div>
+          {/* Centered Text */}
+          <p className="relative text-white text-sm font-bold z-10">
+            {mapName}
+          </p>
+        </div>
+      </div>
+      <div>
+        <a
+          href={downloadLink}
+          id="downloadLink"
+          download
+          className="inline-block"
+        >
+          <img
+            src="/icons/download.svg"
+            className="invert"
+            width={20}
+            height={20}
+          ></img>
+        </a>
       </div>
     </div>
   );

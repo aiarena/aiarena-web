@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { ProfileBotOverviewList } from "@/_components/_display/ProfileBotOverviewList";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { pageProfileDashboardQuery } from "./__generated__/pageProfileDashboardQuery.graphql";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 export default function Page() {
   const data = useLazyLoadQuery<pageProfileDashboardQuery>(
@@ -25,7 +26,7 @@ export default function Page() {
 
   const [activeTab, setActiveTab] = useState("Bots");
   if (!data.viewer) {
-    redirect("/");
+    redirect(`${getPublicPrefix()}/`);
   }
 
   return (

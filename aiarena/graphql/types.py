@@ -149,14 +149,11 @@ class CompetitionMapsType(DjangoObjectTypeWithUID):
         model = models.Map
         fields = [
             "name",
-            "file",
         ]
 
-    # *Required* FILE PATH FOR MAP DOWNLOAD FEATURE
-    # @staticmethod
-    # def resolve_download_link(root: models.Map, info, **args):
-    #     return models.map.obtain_s3_filehash_or_default(root.file)
-    #
+    @staticmethod
+    def resolve_download_link(root: models.Map, info, **args):
+        return info.context.build_absolute_uri(root.file.url)
 
 
 class CompetitionType(DjangoObjectTypeWithUID):

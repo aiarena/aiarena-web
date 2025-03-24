@@ -31,16 +31,16 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
   const getAvatarSize = (size: AvatarWithBorderSizes = "sm") => {
     const sizes = {
       sm: {
-        avatar: 75,
+        avatar: 77,
         border: 85,
-        marginRight: 5,
-        marginTop: 3,
+        marginRight: 3,
+        marginTop: 1,
       },
       lg: {
         avatar: 150,
         border: 170,
-        marginRight: 10,
-        marginTop: 4,
+        marginRight: 4,
+        marginTop: 2,
       },
     };
 
@@ -56,13 +56,14 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
       className={`p-3 relative w-[${avatarSize.border}px] h-[${avatarSize.border}px] flex items-center justify-center`}
     >
       <div
-        className={`mr-[${avatarSize.marginRight}px] mt-[${avatarSize.marginTop}px] w-[${avatarSize.avatar}px] h-[${avatarSize.avatar}px] bg-white overflow-hidden `}
+        className={`w-[${avatarSize.avatar}px] h-[${avatarSize.avatar}px] bg-white overflow-hidden `}
       >
         <img
           src={user?.avatarUrl || `${getPublicPrefix()}/${defaultAvatar}`}
           alt="User avatar"
           width={avatarSize.avatar}
           height={avatarSize.avatar}
+          className={`pr-[2px]`}
         />
       </div>
 
@@ -73,6 +74,9 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
           width={avatarSize.border}
           height={avatarSize.border}
           className={`absolute w-[${avatarSize.border}px] h-[${avatarSize.border}px] object-contain pointer-events-none`}
+          style={{
+            transform: `translate(${avatarSize.marginRight}px, -${avatarSize.marginTop}px)`,
+          }}
         />
       ) : null}
     </div>
