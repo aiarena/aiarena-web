@@ -1,6 +1,260 @@
-from aiarena.core.models import CompetitionParticipation
+from aiarena.core.models import CompetitionParticipation, Match
 from aiarena.core.tests.base import GraphQLTest
-from aiarena.graphql import BotType, CompetitionType
+from aiarena.graphql import BotType, CompetitionType, MapPoolType, MapType
+
+
+class TestRequestMatch(GraphQLTest):
+    mutation_name = "requestMatch"
+    mutation = """
+        mutation ($input: RequestMatchInput!) {
+            requestMatch(input: $input) {
+                errors {
+                    messages
+                    field
+                }
+            }
+        }
+    """
+
+    def test_specific_matchup_specific_map_success(self, user, bot, other_bot, map):
+        """
+        Test creating a match request with a specific opponent, and a specific map.
+        """
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "specific_map",
+                    "chosenMap": self.to_global_id(MapType, map.id),
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                }
+            },
+        )
+        match = Match.objects.get(requested_by=user)
+        assert match.status == "Queued"
+        assert match.participant1.id == bot.id
+        assert match.participant2.id == other_bot.id
+
+    def test_specific_matchup_map_pool_success(self, user, bot, other_bot, map_pool):
+        """
+        Test creating a match request with a specific opponent, and a map pool.
+        """
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+        )
+        match = Match.objects.get(requested_by=user)
+        assert match.status == "Queued"
+        assert match.participant1.id == bot.id
+        assert match.participant2.id == other_bot.id
+
+    def test_not_logged_in(self, user, bot, other_bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_errors_like=["You need to be logged in in to perform this action."],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_invalid_opponent(self, user, bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 1,
+                    "opponent": 999,
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_errors_like=['Error processing opponent: Unable to parse global ID "999".'],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_no_opponent(self, user, bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 1,
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_errors_like=["Error requesting match: Opponent is required for a specific matchup."],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_invalid_bot1(self, user, bot, other_bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": 999,
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_errors_like=['Error processing bot1: Unable to parse global ID "999".'],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_no_bot1(self, user, bot, other_bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_validation_errors={"bot1": ["Required field"]},
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_invalid_map_selection_type(self, user, bot, other_bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "dodecahedron",
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_errors_like=["'mapSelectionType' must be set to 'specific_map' or 'map_pool'."],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_no_map_selection_type(self, user, bot, other_bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_errors_like=["'mapSelectionType' must be set to 'specific_map' or 'map_pool'."],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_high_match_count(self, user, bot, other_bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 500,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_errors_like=["Error requesting match: That number of matches exceeds your match request limit."],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_no_match_count(self, user, bot, other_bot, map_pool):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "map_pool",
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": self.to_global_id(MapPoolType, map_pool.id),
+                }
+            },
+            expected_validation_errors={"matchCount": ["Required field"]},
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_invalid_map_pool(self, user, bot, other_bot):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "mapPool": 999,
+                }
+            },
+            expected_errors_like=['Error processing mapPool: Unable to parse global ID "999".'],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
+
+    def test_no_map_pool(self, user, bot, other_bot):
+        assert not Match.objects.filter(requested_by=user).exists()
+
+        self.mutate(
+            login_user=user,
+            variables={
+                "input": {
+                    "bot1": self.to_global_id(BotType, bot.id),
+                    "mapSelectionType": "map_pool",
+                    "matchCount": 1,
+                    "opponent": self.to_global_id(BotType, other_bot.id),
+                }
+            },
+            expected_errors_like=["Either 'mapPool' or 'chosenMap' must be provided."],
+        )
+        assert not Match.objects.filter(requested_by=user).exists()
 
 
 class TestToggleCompetitionParticipation(GraphQLTest):

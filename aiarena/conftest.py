@@ -1,6 +1,6 @@
 import pytest
 
-from aiarena.core.models import Bot, Competition, Game, GameMode, WebsiteUser
+from aiarena.core.models import Bot, Competition, CompetitionParticipation, Game, GameMode, Map, MapPool, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.base import BrowserHelper
 
@@ -56,6 +56,18 @@ def bot(db, user, all_bot_races):
 
 
 @pytest.fixture
+def other_bot(db, other_user):
+    return Bot.objects.create(
+        user=other_user,
+        name="Not My Bot",
+        bot_zip_publicly_downloadable=False,
+        bot_data_enabled=False,
+        bot_data_publicly_downloadable=False,
+        plays_race=BotRace.zerg(),
+    )
+
+
+@pytest.fixture
 def game(db):
     return Game.objects.create(
         name="Starcraft 2",
@@ -76,3 +88,35 @@ def competition(db, game_mode):
         name="AI Arena SC2 Grand Prix",
         game_mode=game_mode,
     )
+
+
+@pytest.fixture
+def competition_participation_user(db, competition, bot):
+    return CompetitionParticipation.objects.create(
+        competition=competition,
+        bot=bot,
+    )
+
+
+@pytest.fixture
+def competition_participation_other_user(db, competition, other_bot):
+    return CompetitionParticipation.objects.create(
+        competition=competition,
+        bot=other_bot,
+    )
+
+
+@pytest.fixture
+def map(db, game_mode):
+    return Map.objects.create(
+        name="AiArenaArena513LE",
+        file="/maps/AiArenaArena513LE.map",
+        game_mode=game_mode,
+    )
+
+
+@pytest.fixture
+def map_pool(db, map):
+    map_pool = MapPool.objects.create(name="The Finest SC2 Maps")
+    map_pool.maps.add(map)
+    return map_pool

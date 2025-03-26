@@ -131,7 +131,7 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
         return 0
 
 
-class CompetitionRoundsType(DjangoObjectTypeWithUID):
+class RoundsType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.Round
         fields = [
@@ -142,14 +142,13 @@ class CompetitionRoundsType(DjangoObjectTypeWithUID):
         ]
 
 
-class CompetitionMapsType(DjangoObjectTypeWithUID):
+class MapType(DjangoObjectTypeWithUID):
     download_link = graphene.String()
 
     class Meta:
         model = models.Map
-        fields = [
-            "name",
-        ]
+        fields = ["name", "game_mode", "enabled"]
+        filter_fields = []
 
     @staticmethod
     def resolve_download_link(root: models.Map, info, **args):
@@ -159,8 +158,8 @@ class CompetitionMapsType(DjangoObjectTypeWithUID):
 class CompetitionType(DjangoObjectTypeWithUID):
     url = graphene.String()
     participants = DjangoConnectionField("aiarena.graphql.CompetitionParticipationType")
-    rounds = DjangoConnectionField("aiarena.graphql.CompetitionRoundsType")
-    maps = DjangoConnectionField("aiarena.graphql.CompetitionMapsType")
+    rounds = DjangoConnectionField("aiarena.graphql.RoundsType")
+    maps = DjangoConnectionField("aiarena.graphql.MapType")
 
     class Meta:
         model = models.Competition
@@ -254,6 +253,22 @@ class MatchParticipationType(DjangoObjectTypeWithUID):
         connection_class = CountingConnection
 
 
+class MapPoolFilterSet(FilterSet):
+    order_by = OrderingFilter(fields=["enabled"])
+
+    class Meta:
+        model = models.MapPool
+        fields = ["name", "order_by"]
+
+
+class MapPoolType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.MapPool
+        fields = ["name", "maps", "enabled"]
+        filterset_class = MapPoolFilterSet
+        connection_class = CountingConnection
+
+
 class MatchType(DjangoObjectTypeWithUID):
     participant1 = graphene.Field("aiarena.graphql.BotType")
     participant2 = graphene.Field("aiarena.graphql.BotType")
@@ -312,6 +327,8 @@ class Query(graphene.ObjectType):
     bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
     news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
+    maps = DjangoFilterConnectionField("aiarena.graphql.MapType")
+    map_pools = DjangoFilterConnectionField("aiarena.graphql.MapPoolType")
 
     @staticmethod
     def resolve_viewer(root, info, **args):
@@ -334,3 +351,11 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_users(root, info, **args):
         return models.User.objects.all()
+
+    @staticmethod
+    def resolve_maps(root, info, **args):
+        return models.Map.objects.all()
+
+    @staticmethod
+    def resolve_map_pools(root, info, **args):
+        return models.MapPool.objects.all()
