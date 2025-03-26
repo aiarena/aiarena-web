@@ -22,9 +22,16 @@ from aiarena.graphql.types import (
 )
 
 
+# if we have a method of displaying a meaningful errormessage if incorrect enum is supplied, this would be better
+# class MapSelectionTypeEnum(graphene.Enum):
+#     specific_map = "specific_map"
+#     map_pool = "map_pool"
+
+
 class RequestMatchInput(CleanedInputType):
     bot1: Bot = graphene.ID()
     match_count = graphene.Int()
+    # map_selection_type = MapSelectionTypeEnum()
     map_selection_type = graphene.String()
     opponent: Bot = graphene.ID(default=None)
     map_pool: MapPool = graphene.ID(default=None)
@@ -80,7 +87,7 @@ class RequestMatchInput(CleanedInputType):
 
 
 class RequestMatch(CleanedInputMutation):
-    match = graphene.Field(MatchType)
+    match = graphene.List(MatchType)
 
     class Meta:
         input_class = RequestMatchInput
@@ -91,7 +98,7 @@ class RequestMatch(CleanedInputMutation):
             raise GraphQLError("You need to be logged in in to perform this action.")
 
         try:
-            match = handle_request_matches(
+            matches = handle_request_matches(
                 requested_by_user=info.context.user,
                 bot1=input_object.bot1,
                 opponent=input_object.opponent,
@@ -103,7 +110,8 @@ class RequestMatch(CleanedInputMutation):
                 chosen_map=input_object.chosen_map,
             )
 
-            return cls(errors=[], match=match)
+            return cls(errors=[], match=matches)
+
         except Exception as e:
             raise GraphQLError(f"Error requesting match: {str(e)}")
 
