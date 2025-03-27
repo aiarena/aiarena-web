@@ -1,11 +1,11 @@
 import { useLazyLoadQuery, graphql } from "react-relay";
-import { useCompetitionQuery } from "./__generated__/useCompetitionQuery.graphql";
+import { useCompetitionDataQuery } from "./__generated__/useCompetitionDataQuery.graphql";
 
-export const useCompetition = (competitionId: string) => {
+export const useCompetitionData = (competitionId: string) => {
   // Execute the query to fetch competition data
-  const data = useLazyLoadQuery<useCompetitionQuery>(
+  const data = useLazyLoadQuery<useCompetitionDataQuery>(
     graphql`
-      query useCompetitionQuery($id: ID!) {
+      query useCompetitionDataQuery($id: ID!) {
         node(id: $id) {
           ... on CompetitionType {
             id
@@ -40,20 +40,6 @@ export const useCompetition = (competitionId: string) => {
                 }
               }
             }
-            maps {
-              edges {
-                node {
-                  id
-                  name
-                  downloadLink
-                }
-              }
-            }
-            dateClosed
-            dateCreated
-            dateOpened
-            name
-            status
           }
         }
       }
@@ -71,11 +57,6 @@ export const useCompetition = (competitionId: string) => {
   // Sanitize and transform the competition data
   const sanitizedCompetition = {
     id: competition.id,
-    name: competition.name || "",
-    status: competition.status || "",
-    dateCreated: competition.dateCreated || "",
-    dateOpened: competition.dateOpened || "",
-    dateClosed: competition.dateClosed || "",
     participants:
       competition.participants?.edges
         ?.map((edge) => edge?.node)
@@ -113,15 +94,6 @@ export const useCompetition = (competitionId: string) => {
           started: round.started || "",
           number: round.number || 0,
           complete: round.complete || false,
-        })) || [], // Default to an empty array if undefined
-    maps:
-      competition.maps?.edges
-        ?.map((edge) => edge?.node)
-        .filter((map): map is NonNullable<typeof map> => !!map)
-        .map((map) => ({
-          id: map.id,
-          name: map.name || "",
-          downloadLink: map.downloadLink || "",
         })) || [], // Default to an empty array if undefined
   };
 

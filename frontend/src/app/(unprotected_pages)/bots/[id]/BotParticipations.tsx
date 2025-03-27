@@ -1,5 +1,6 @@
 "use client";
 
+import LoadingDots from "@/_components/_display/LoadingDots";
 import { useBotParticipations } from "@/_components/_hooks/useExperimentalBotClientRender";
 import { formatDateISO } from "@/_lib/dateUtils";
 import { useEffect, useState } from "react";
@@ -22,7 +23,12 @@ export default function BotParticipations({ botId }: BotParticipationsProps) {
 
   // Only render the actual content on the client-side
   if (!isMounted) {
-    return <div>Loading participation data...</div>;
+    return (
+      <div className="pt-12 pb-24 items-center">
+        <p>Loading rounds and competition rankings...</p>
+        <LoadingDots className={"pt-2"} />
+      </div>
+    );
   }
 
   if (!participations) {
@@ -43,7 +49,7 @@ export default function BotParticipations({ botId }: BotParticipationsProps) {
                 {participation.competition.status}, Division:{" "}
                 {participation.divisionNum}, Elo: {participation.elo}
               </li>
-            ),
+            )
           )}
         </ul>
       )}
