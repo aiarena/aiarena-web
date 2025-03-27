@@ -1,4 +1,4 @@
-from aiarena.core.models import CompetitionParticipation, Match
+from aiarena.core.models import CompetitionParticipation, Match, MatchParticipation
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.graphql import BotType, CompetitionType, MapPoolType, MapType
 
@@ -35,10 +35,18 @@ class TestRequestMatch(GraphQLTest):
                 }
             },
         )
+
         match = Match.objects.get(requested_by=user)
         assert match.status == "Queued"
-        assert match.participant1.id == bot.id
-        assert match.participant2.id == other_bot.id
+        assert match.map
+
+        match_participation_bot_1 = MatchParticipation.objects.get(bot=bot)
+        match_participation_bot_2 = MatchParticipation.objects.get(bot=other_bot)
+
+        assert match_participation_bot_1.bot == bot
+        assert match_participation_bot_2.bot == other_bot
+        assert match_participation_bot_1.match == match
+        assert match_participation_bot_2.match == match
 
     def test_specific_matchup_map_pool_success(self, user, bot, other_bot, map_pool):
         """
@@ -61,8 +69,14 @@ class TestRequestMatch(GraphQLTest):
         )
         match = Match.objects.get(requested_by=user)
         assert match.status == "Queued"
-        assert match.participant1.id == bot.id
-        assert match.participant2.id == other_bot.id
+        assert match.map
+
+        match_participation_bot_1 = MatchParticipation.objects.get(bot=bot)
+        match_participation_bot_2 = MatchParticipation.objects.get(bot=other_bot)
+        assert match_participation_bot_1.bot == bot
+        assert match_participation_bot_2.bot == other_bot
+        assert match_participation_bot_1.match == match
+        assert match_participation_bot_2.match == match
 
     def test_not_logged_in(self, user, bot, other_bot, map_pool):
         assert not Match.objects.filter(requested_by=user).exists()
