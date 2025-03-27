@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Component, ReactNode } from "react";
+import MainButton from "../_props/MainButton";
 
 type ErrorBoundaryProps = {
   children: ReactNode;
@@ -27,22 +28,38 @@ export default class ErrorBoundary extends Component<
     console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
-  handleRetry = () => {
-    window.location.reload();
-  };
-
   render() {
     if (this.state.hasError) {
       return (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white p-3 rounded-lg shadow-md">
-          <p>Something went wrong. Please refresh the page or try again.</p>
-          <button
-            onClick={this.handleRetry}
-            className="mt-2 bg-white text-red-500 px-3 py-1 rounded-lg"
-          >
-            Retry
-          </button>
-        </div>
+        <>
+          <div className=" h-[100vh] w-[100vw] text-white flex justify-center items-center filter:darken bg-darken">
+            <div>
+              <div className="pb-8">
+                <h2 className="pb-8">Something went wrong.</h2>
+
+                <MainButton
+                  onClick={() => {
+                    window.location.href = "/";
+                  }}
+                  text="Home"
+                />
+              </div>
+              <div>
+                <h4 className="pb-4"> Or use the old frontend</h4>
+
+                <MainButton
+                  onClick={() => {
+                    window.location.href = "/old-frontend/";
+                  }}
+                  text="Old Frontend"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="fixed left-4 sm:left-auto bottom-4 right-4 bg-red-500 text-white p-3 rounded-lg shadow-md">
+            <p>Something went wrong.</p>
+          </div>
+        </>
       );
     }
 

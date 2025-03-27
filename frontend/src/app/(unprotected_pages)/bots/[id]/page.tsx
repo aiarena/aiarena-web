@@ -4,11 +4,11 @@ import ArticleWrapper from "@/_components/_display/ArticleWrapper";
 import { formatDateISO } from "@/_lib/dateUtils";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Link from "next/link";
-import { getBotBasic } from "@/_components/_hooks/useExperimentalBotSSR";
 import BotParticipations from "./BotParticipations";
 import { notFound } from "next/navigation";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { pageBotQuery } from "./__generated__/pageBotQuery.graphql";
+import LoadingDots from "@/_components/_display/LoadingDots";
 
 interface BotPageProps {
   params: {
@@ -63,7 +63,14 @@ export default function Page(props: BotPageProps) {
         <p>Wiki Article: {bot.node.wikiArticle}</p>
 
         {/* Client-side rendered participations with Suspense boundary */}
-        <Suspense fallback={<div>Loading match and competition data...</div>}>
+        <Suspense
+          fallback={
+            <div className="pt-12 pb-24 items-center">
+              <p>Loading rounds and competition rankings...</p>
+              <LoadingDots className={"pt-2"} />
+            </div>
+          }
+        >
           {bot.node.id && <BotParticipations botId={bot.node.id} />}
         </Suspense>
       </section>

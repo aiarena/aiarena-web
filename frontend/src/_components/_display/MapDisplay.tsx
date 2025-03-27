@@ -1,10 +1,11 @@
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import Image from "next/image";
 import { useState } from "react";
 
 interface MapDisplayProps {
   mapName: string;
   imageUrl: string;
-  downloadLink: string;
+  downloadLink: string | null | undefined;
 }
 
 export default function MapDisplay({
@@ -50,19 +51,21 @@ export default function MapDisplay({
         </div>
       </div>
       <div>
-        <a
-          href={downloadLink}
-          id="downloadLink"
-          download
-          className="inline-block"
-        >
-          <img
-            src="/icons/download.svg"
-            className="invert"
-            width={20}
-            height={20}
-          ></img>
-        </a>
+        {downloadLink ? (
+          <a
+            href={downloadLink}
+            id="downloadLink"
+            download
+            className="inline-block"
+          >
+            <img
+              src={`${getPublicPrefix()}/icons/download.svg`}
+              className="invert"
+              width={20}
+              height={20}
+            ></img>
+          </a>
+        ) : null}
       </div>
     </div>
   );
