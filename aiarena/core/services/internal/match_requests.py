@@ -48,19 +48,11 @@ def handle_request_matches(
     if matchup_type == "random_ladder_bot":
         bot1 = bot1
 
-        # required for initial django frontend
-        if matchup_race == "P":
-            matchup_race = BotRace.protoss()
-        if matchup_race == "Z":
-            matchup_race = BotRace.zerg()
-        if matchup_race == "T":
-            matchup_race = BotRace.terran()
-
         for _ in range(0, match_count):
             opponent = (
                 bot1.get_random_active_excluding_self()
                 if matchup_race == "any"
-                else bot1.get_active_excluding_self().filter(plays_race=matchup_race).order_by("?").first()
+                else bot1.get_active_excluding_self().filter(plays_race__label=matchup_race).order_by("?").first()
             )
 
             if opponent is None:
