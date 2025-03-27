@@ -3,7 +3,6 @@ from django.utils import timezone
 from constance import config
 
 from aiarena.core.models import Map, Match, Result
-from aiarena.core.models.bot_race import BotRace
 
 from ..exceptions import MatchRequestException
 from ..maps import Maps
