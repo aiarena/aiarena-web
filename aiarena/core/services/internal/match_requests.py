@@ -4,9 +4,9 @@ from constance import config
 
 from aiarena.core.models import Map, Match, Result
 
-from ..exceptions import MatchRequestException
-from ..maps import Maps
+from ...exceptions import MatchRequestException
 from ..supporter_benefits import SupporterBenefits
+from .maps import Maps
 from .matches import create
 
 
