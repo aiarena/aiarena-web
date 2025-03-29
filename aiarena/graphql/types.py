@@ -1,3 +1,8 @@
+from datetime import timedelta
+
+from django.conf import settings
+from django.utils import timezone
+
 import graphene
 from avatar.models import Avatar
 from django_filters import FilterSet, OrderingFilter
@@ -6,6 +11,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
+from aiarena.core.models import Result, User
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
