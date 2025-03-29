@@ -41,12 +41,18 @@ const UptimeGraph = ({
   );
 };
 
-const Thanks = ({ name }: { name: string }) => {
+const Thanks = ({ user }: { user: { username: string; id: string } }) => {
   return (
     <div className="bg-customBackgroundColor1 mt-8 mb-8 p-4 rounded-md shadow shadow-black ">
       <WrappedTitle title="Thank you" />
-      Thank you {name} for supporting AI arena!
-      <p>Heart icon</p>
+      Thank you{" "}
+      <Link
+        href={`${getPublicPrefix()}/authors/${user.id}`}
+        className="text-customGreen"
+      >
+        {user.username}
+      </Link>{" "}
+      for supporting AI arena!
     </div>
   );
 };
@@ -85,6 +91,7 @@ export default function Page() {
           matchCount1h
           matchCount24h
           randomSupporter {
+            id
             username
           }
           buildNumber
@@ -244,8 +251,10 @@ export default function Page() {
                   </li>
                 </ul>
               </div>
-              {supporters && data.stats?.randomSupporter?.username ? (
-                <Thanks name={data.stats?.randomSupporter?.username} />
+              {supporters &&
+              data.stats?.randomSupporter?.username &&
+              data.stats?.randomSupporter?.id ? (
+                <Thanks user={data.stats?.randomSupporter} />
               ) : null}
             </div>
           </div>
