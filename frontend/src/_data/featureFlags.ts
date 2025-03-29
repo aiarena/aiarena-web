@@ -31,7 +31,7 @@ export function getFeatureFlags(): FeatureFlags {
     botsPage: true,
     competitionMaps: true,
     competitionVideo: false,
-    supporters: false,
+    supporters: true,
     examples: false,
   };
 
