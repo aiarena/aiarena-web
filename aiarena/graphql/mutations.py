@@ -3,12 +3,117 @@ from django.core.exceptions import ValidationError
 
 import graphene
 from graphene_django.types import ErrorType
+from graphql import GraphQLError
 
 from aiarena.core.models.bot import Bot
 from aiarena.core.models.competition import Competition
 from aiarena.core.models.competition_participation import CompetitionParticipation
+from aiarena.core.models.map import Map
+from aiarena.core.models.map_pool import MapPool
+from aiarena.core.services.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
-from aiarena.graphql.types import BotType, CompetitionParticipationType, CompetitionType
+from aiarena.graphql.types import (
+    BotType,
+    CompetitionParticipationType,
+    CompetitionType,
+    MapPoolType,
+    MapType,
+    MatchType,
+)
+
+
+# if we have a method of displaying a meaningful errormessage if incorrect enum is supplied, this would be better
+# class MapSelectionTypeEnum(graphene.Enum):
+#     specific_map = "specific_map"
+#     map_pool = "map_pool"
+
+
+class RequestMatchInput(CleanedInputType):
+    bot1: Bot = graphene.ID()
+    match_count = graphene.Int()
+    # map_selection_type = MapSelectionTypeEnum()
+    map_selection_type = graphene.String()
+    opponent: Bot = graphene.ID(default=None)
+    map_pool: MapPool = graphene.ID(default=None)
+    chosen_map: Map = graphene.ID(default=None)
+
+    class Meta:
+        required_fields = [
+            "bot1",
+            "match_count",
+            "map_selection_type",
+        ]
+
+    def clean(self, info):
+        if not self.map_pool and not self.chosen_map:
+            raise GraphQLError("Either 'mapPool' or 'chosenMap' must be provided.")
+
+        if self.map_selection_type != "specific_map" and self.map_selection_type != "map_pool":
+            raise GraphQLError("'mapSelectionType' must be set to 'specific_map' or 'map_pool'.")
+
+        if self.map_selection_type == "specific_map" and not self.chosen_map:
+            raise GraphQLError("If 'mapSelectionType' is set to 'specific_map', a 'chosenMap' must be provided.")
+
+        if self.map_selection_type == "map_pool" and not self.map_pool:
+            raise GraphQLError("If 'mapSelectionType' is set to 'map_pool', a 'mapPool' must be provided.")
+
+    @staticmethod
+    def clean_bot1(bot, info):
+        try:
+            return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
+        except Exception as e:
+            raise GraphQLError(f"Error processing bot1: {str(e)}")
+
+    @staticmethod
+    def clean_opponent(bot, info):
+        try:
+            return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
+        except Exception as e:
+            raise GraphQLError(f"Error processing opponent: {str(e)}")
+
+    @staticmethod
+    def clean_map_pool(map_pool, info):
+        try:
+            return graphene.Node.get_node_from_global_id(info=info, global_id=map_pool, only_type=MapPoolType)
+        except Exception as e:
+            raise GraphQLError(f"Error processing mapPool: {str(e)}")
+
+    @staticmethod
+    def clean_chosen_map(map, info):
+        try:
+            return graphene.Node.get_node_from_global_id(info=info, global_id=map, only_type=MapType)
+        except Exception as e:
+            raise GraphQLError(f"Error processing chosenMap: {str(e)}")
+
+
+class RequestMatch(CleanedInputMutation):
+    match = graphene.List(MatchType)
+
+    class Meta:
+        input_class = RequestMatchInput
+
+    @classmethod
+    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: RequestMatchInput):
+        if not info.context.user.is_authenticated:
+            raise GraphQLError("You need to be logged in in to perform this action.")
+
+        try:
+            matches = handle_request_matches(
+                requested_by_user=info.context.user,
+                bot1=input_object.bot1,
+                opponent=input_object.opponent,
+                match_count=input_object.match_count,
+                matchup_race=None,
+                matchup_type="specific_matchup",
+                map_selection_type=input_object.map_selection_type,
+                map_pool=input_object.map_pool,
+                chosen_map=input_object.chosen_map,
+            )
+
+            return cls(errors=[], match=matches)
+
+        except Exception as e:
+            raise GraphQLError(f"Error requesting match: {str(e)}")
 
 
 class ToggleCompetitionParticipationInput(CleanedInputType):
@@ -153,6 +258,7 @@ class SignOut(graphene.Mutation):
 
 
 class Mutation(graphene.ObjectType):
+    request_match = RequestMatch.Field()
     update_bot = UpdateBot.Field()
     toggle_competition_participation = ToggleCompetitionParticipation.Field()
     password_sign_in = PasswordSignIn.Field()

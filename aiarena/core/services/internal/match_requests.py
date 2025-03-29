@@ -46,11 +46,12 @@ def handle_request_matches(
     match_list = []
     if matchup_type == "random_ladder_bot":
         bot1 = bot1
+
         for _ in range(0, match_count):
             opponent = (
                 bot1.get_random_active_excluding_self()
                 if matchup_race == "any"
-                else bot1.get_active_excluding_self.filter(plays_race=matchup_race)
+                else bot1.get_active_excluding_self().filter(plays_race__label=matchup_race).order_by("?").first()
             )
 
             if opponent is None:
@@ -66,6 +67,9 @@ def handle_request_matches(
                 )
             )
     else:  # specific_matchup
+        if opponent is None:
+            raise MatchRequestException("Opponent is required for a specific matchup.")
+
         for _ in range(0, match_count):
             match_list.append(
                 handle_request_match(
