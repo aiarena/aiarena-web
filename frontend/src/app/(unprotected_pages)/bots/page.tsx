@@ -4,7 +4,6 @@ import { formatDate } from "@/_lib/dateUtils";
 import Link from "next/link";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import { notFound } from "next/navigation";
-import { useBots } from "@/_components/_hooks/useBots";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { pageBotsQuery } from "./__generated__/pageBotsQuery.graphql";

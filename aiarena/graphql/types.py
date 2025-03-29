@@ -305,6 +305,39 @@ class ResultType(DjangoObjectTypeWithUID):
         connection_class = CountingConnection
 
 
+class StatsType(graphene.ObjectType):
+    match_count_1h = graphene.Int()
+    match_count_24h = graphene.Int()
+    arenaclients = graphene.Int()
+    random_supporter = graphene.Field("aiarena.graphql.UserType")
+    build_number = graphene.String()
+    date_time = graphene.DateTime()
+
+    @staticmethod
+    def resolve_match_count_1h(root, info, **args):
+        return Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=1)).count()
+
+    @staticmethod
+    def resolve_match_count_24h(root, info, **args):
+        return Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=24)).count()
+
+    @staticmethod
+    def resolve_arenaclients(root, info, **args):
+        return User.objects.only("id").filter(type="ARENA_CLIENT", is_active=True).count()
+
+    @staticmethod
+    def resolve_random_supporter(root, info, **args):
+        return User.random_supporter()
+
+    @staticmethod
+    def resolve_build_number(root, info, **args):
+        return settings.BUILD_NUMBER
+
+    @staticmethod
+    def resolve_date_time(root, info, **args):
+        return timezone.now()
+
+
 class Query(graphene.ObjectType):
     node = graphene.relay.Node.Field()
     viewer = graphene.Field("aiarena.graphql.ViewerType")

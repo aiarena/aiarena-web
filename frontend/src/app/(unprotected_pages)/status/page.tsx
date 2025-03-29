@@ -1,47 +1,17 @@
 "use client";
 import EthernetStatusDots from "@/_components/_display/EthernetStatusEffect";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
-import React from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import mockUptimeData from "@/_data/mockUptime.json";
 import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
-import { notFound } from "next/navigation"; // Import the notFound function
+import { notFound } from "next/navigation";
 import { getFeatureFlags } from "@/_data/featureFlags";
-
-const ActivityFeed = () => {
-  const activities = [
-    { time: "1h ago", event: "Bot Arty was updated." },
-    { time: "4h ago", event: "Bot BenBotBC was updated." },
-    { time: "7h ago", event: "Bot TerrAIn-Python was updated." },
-    { time: "7h ago", event: "Bot DominionDog was updated." },
-    { time: "9h ago", event: "Bot Roro was updated." },
-    { time: "9h ago", event: "Bot Zozo was updated." },
-    { time: "9h ago", event: "Bot Dodo was updated." },
-    { time: "15h ago", event: "Bot Clicadinha was updated." },
-    { time: "1d ago", event: "Bot DemonZ was updated." },
-    { time: "1d, 6h ago", event: "Bot PerilousProtossBot was updated." },
-    { time: "1d, 6h ago", event: "Bot Akamight was updated." },
-    { time: "1d, 19h ago", event: "Bot Eris was updated." },
-    { time: "2d, 17h ago", event: "Bot ThomTest was updated." },
-    { time: "2d, 19h ago", event: "Bot nida was updated." },
-    { time: "3d ago", event: "Bot SharkbotTest was updated." },
-  ];
-
-  return (
-    <div className="bg-customBackgroundColor1 p-4 rounded-md shadow shadow-black ">
-      <WrappedTitle title="Activity Feed" />
-      <ul className="space-y-2">
-        {activities.map((activity, index) => (
-          <li key={index} className="text-gray-300">
-            <span className="font-semibold text-customGreen">
-              {activity.time}
-            </span>{" "}
-            – {activity.event}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { pageStatusQuery } from "./__generated__/pageStatusQuery.graphql";
+import { getNodes } from "@/_lib/relayHelpers";
+import Link from "next/link";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import LoadingDots from "@/_components/_display/LoadingDots";
 
 const UptimeGraph = ({
   title,
@@ -70,50 +40,60 @@ const UptimeGraph = ({
     </div>
   );
 };
-const Stats = () => {
-  return (
-    <div className="bg-customBackgroundColor1 p-4 rounded-md shadow shadow-black ">
-      <WrappedTitle title="Stats" />
-      <ul className="space-y-2 text-gray-300">
-        <li>
-          Date:{" "}
-          <span className="font-semibold text-customGreen">17. Oct. 2024</span>
-        </li>
-        <li>
-          Time:{" "}
-          <span className="font-semibold text-customGreen">05:00:59 UTC</span>
-        </li>
-        <li>
-          Matches (1h):{" "}
-          <span className="font-semibold text-customGreen">105</span>
-        </li>
-        <li>
-          Matches (24h):{" "}
-          <span className="font-semibold text-customGreen">2560</span>
-        </li>
-        <li>
-          Arena Clients:{" "}
-          <span className="font-semibold text-customGreen">22</span>
-        </li>
-        <li>
-          Build: <span className="font-semibold text-customGreen">494</span>
-        </li>
-      </ul>
-    </div>
-  );
-};
 
-const Thanks = () => {
+const Thanks = ({ name }: { name: string }) => {
   return (
     <div className="bg-customBackgroundColor1 mt-8 mb-8 p-4 rounded-md shadow shadow-black ">
       <WrappedTitle title="Thank you" />
-      Thank you Spacemen for supporting AI arena!
+      Thank you {name} for supporting AI arena!
       <p>Heart icon</p>
     </div>
   );
 };
 
-const HomePage = () => {
+const loadingFallback = () => {
+  return (
+    <div className="pt-12 pb-24 items-center">
+      <p>Loading activity feed...</p>
+      <LoadingDots className={"pt-2"} />
+    </div>
+  );
+};
+
+export default function Page() {
+  const [isMounted, setIsMounted] = useState(false);
+  const data = useLazyLoadQuery<pageStatusQuery>(
+    graphql`
+      query pageStatusQuery {
+        bots(orderBy: "-bot_zip_updated", first: 10) {
+          edges {
+            node {
+              id
+              name
+              created
+              botZipUpdated
+              user {
+                id
+                username
+              }
+            }
+          }
+        }
+        stats {
+          dateTime
+          arenaclients
+          matchCount1h
+          matchCount24h
+          randomSupporter {
+            username
+          }
+          buildNumber
+        }
+      }
+    `,
+    {}
+  );
+
   const statusPage = getFeatureFlags().statusPage;
   const serverStatus = getFeatureFlags().statusServerStatus;
   const supporters = getFeatureFlags().supporters;
@@ -123,34 +103,166 @@ const HomePage = () => {
     return null;
   }
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return loadingFallback();
+  }
+  const current_date = new Date(data.stats?.dateTime);
+
+  const formattedDate = current_date.toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const formattedTime = current_date.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  function createDateString(ms: number) {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    if (hours == 1) {
+      return `${hours} hour ago.`;
+    }
+    if (hours > 0) {
+      return `${hours} hours ago.`;
+    }
+    const minutes = Math.floor(ms / (1000 * 60));
+    if (minutes == 1) {
+      return `${minutes} minute ago.`;
+    }
+    if (minutes > 0) {
+      return `${minutes} minutes ago.`;
+    }
+    const seconds = Math.floor(ms / (1000 * 60 * 60));
+    if (seconds == 1) {
+      return `${seconds} seconds ago.`;
+    }
+    if (seconds > 0) {
+      return `${seconds} seconds ago.`;
+    }
+  }
+
+  const parsedData = getNodes(data.bots).map((item) => {
+    const zip_updated_at = new Date(item.botZipUpdated);
+
+    const item_age = Math.abs(
+      zip_updated_at.getTime() - current_date.getTime()
+    );
+    return {
+      bot: {
+        name: item.name,
+        id: item.id,
+      },
+      user: item.user,
+      age: createDateString(item_age),
+    };
+  });
+
   const uptimeData = mockUptimeData;
   return (
     <>
       <div className=" min-h-screen max-w-7xl m-auto pt-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="col-span-1 md:col-span-2">
-            <ActivityFeed />
+        <Suspense fallback={loadingFallback()}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="col-span-1 md:col-span-2">
+              {/* <ActivityFeed activities={parsedData} /> */}
+              <div className="bg-customBackgroundColor1 p-4 rounded-md shadow shadow-black ">
+                <WrappedTitle title="Activity Feed" />
+                <ul className="space-y-2">
+                  {parsedData.map((activity, index) => (
+                    <li
+                      key={index}
+                      className="text-gray-300 block border-t border-1 border-slate-500"
+                    >
+                      <div>
+                        <p className="pt-2 text-left">
+                          Bot{" "}
+                          <Link
+                            className="font-semibold text-customGreen"
+                            href={`${getPublicPrefix()}/bots/${activity.bot.id}`}
+                          >
+                            {activity.bot.name}
+                          </Link>{" "}
+                          was updated.
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-left text-slate-500">
+                          {activity.age}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div>
+              <div className="bg-customBackgroundColor1 p-4 rounded-md shadow shadow-black ">
+                <WrappedTitle title="Stats" />
+                <ul className="space-y-2 text-gray-300">
+                  <li>
+                    Date:{" "}
+                    <span className="font-semibold text-customGreen">
+                      {formattedDate}
+                    </span>
+                  </li>
+                  <li>
+                    Time:{" "}
+                    <span className="font-semibold text-customGreen">
+                      {formattedTime}
+                    </span>
+                  </li>
+                  <li>
+                    Matches (1h):{" "}
+                    <span className="font-semibold text-customGreen">
+                      {data.stats?.matchCount1h}
+                    </span>
+                  </li>
+                  <li>
+                    Matches (24h):{" "}
+                    <span className="font-semibold text-customGreen">
+                      {data.stats?.matchCount24h}
+                    </span>
+                  </li>
+                  <li>
+                    Arena Clients:{" "}
+                    <span className="font-semibold text-customGreen">
+                      {data.stats?.arenaclients}
+                    </span>
+                  </li>
+                  <li>
+                    Build:{" "}
+                    <span className="font-semibold text-customGreen">
+                      {data.stats?.buildNumber}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              {supporters && data.stats?.randomSupporter?.username ? (
+                <Thanks name={data.stats?.randomSupporter?.username} />
+              ) : null}
+            </div>
           </div>
-          <div>
-            <Stats />
-            {supporters ? <Thanks /> : null}
-          </div>
-        </div>
-        {serverStatus ? (
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {uptimeData.map((server) => (
-              <UptimeGraph
-                key={server.serverName}
-                title={server.serverName}
-                data={server.data}
-              />
-            ))}
-          </div>
-        ) : null}
+          {serverStatus ? (
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {uptimeData.map((server) => (
+                <UptimeGraph
+                  key={server.serverName}
+                  title={server.serverName}
+                  data={server.data}
+                />
+              ))}
+            </div>
+          ) : null}
+        </Suspense>
       </div>
       <PreFooterSpacer />
     </>
   );
-};
-
-export default HomePage;
+}
