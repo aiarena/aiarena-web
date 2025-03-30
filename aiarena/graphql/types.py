@@ -368,6 +368,7 @@ class Query(graphene.ObjectType):
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
     maps = DjangoFilterConnectionField("aiarena.graphql.MapType")
     map_pools = DjangoFilterConnectionField("aiarena.graphql.MapPoolType")
+    stats = graphene.Field(StatsType)
 
     @staticmethod
     def resolve_viewer(root, info, **args):
@@ -398,3 +399,7 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_map_pools(root, info, **args):
         return models.MapPool.objects.all()
+
+    @staticmethod
+    def resolve_stats(root, info, **args):
+        return StatsType()
