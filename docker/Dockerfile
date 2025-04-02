@@ -18,6 +18,9 @@ RUN apt update && apt install -y postgresql-client-15
 ADD ./requirements.txt /srv/requirements.txt
 RUN pip install -r /srv/requirements.txt
 
+# Sentry CLI
+RUN curl -sL https://sentry.io/get-cli/ | bash
+
 COPY . /app
 WORKDIR /app
 
