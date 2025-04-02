@@ -9,8 +9,9 @@ from django.views.generic import FormView
 from constance import config
 from django_select2.forms import Select2Widget
 
+from aiarena.core.exceptions import MatchRequestException
 from aiarena.core.models import Bot, Map, MapPool
-from aiarena.core.services import MatchRequestException, MatchRequests, SupporterBenefits
+from aiarena.core.services import MatchRequests, SupporterBenefits
 
 
 class BotWidget(Select2Widget):
