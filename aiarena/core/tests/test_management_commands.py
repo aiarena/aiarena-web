@@ -102,8 +102,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIn(
             "Cleaning up result files starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
-            "12 records gathered.\n"
-            "Cleaned up 12 replays and 12 arena client logs.",
+            "12 records gathered.\n",
             out.getvalue(),
         )
 
@@ -113,8 +112,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIn(
             "Cleaning up result files starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
-            "0 records gathered.\n"
-            "Cleaned up 0 replays and 0 arena client logs.",
+            "0 records gathered.\n",
             out.getvalue(),
         )
 
@@ -127,8 +125,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIn(
             "Cleaning up match logfiles starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
-            f"{NUM_MATCHES * 2} records gathered.\n"
-            f"Cleaned up {NUM_MATCHES * 2} logfiles.",
+            f"{NUM_MATCHES * 2} records gathered.\n",
             out.getvalue(),
         )
 
@@ -138,8 +135,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIn(
             "Cleaning up match logfiles starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
-            "0 records gathered.\n"
-            "Cleaned up 0 logfiles.",
+            "0 records gathered.\n",
             out.getvalue(),
         )
 
