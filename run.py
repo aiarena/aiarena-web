@@ -289,18 +289,14 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
 @click.option("--container-name")
 def production_attach_to_task(task_id, container_name):
     clusters = aws.all_clusters()
-    cluster_id = questionary.select("First, choose an ECS cluster", clusters).unsafe_ask()
-
-    services = aws.cluster_services(cluster_id)
-    service_id = questionary.select("Then, pick the service", services).unsafe_ask()
-
-    tasks = aws.service_tasks(cluster_id, service_id)
-    if task_id and task_id not in tasks:
-        raise ValueError(f"Task with --task-id={task_id} does not exist")
+    cluster_id = questionary.select("Choose an ECS cluster", clusters).unsafe_ask()
 
     if task_id:
-        task = tasks[task_id]
+        task = aws.describe_tasks(cluster_id, [task_id])[task_id]
     else:
+        services = aws.cluster_services(cluster_id)
+        service_id = questionary.select("Pick the service", services).unsafe_ask()
+        tasks = aws.service_tasks(cluster_id, service_id)
         task = questionary.select(
             "Select the task ID",
             [
