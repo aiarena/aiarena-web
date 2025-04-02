@@ -323,8 +323,6 @@ result_include_fields = (
     "game_steps",
     "submitted_by",
     "arenaclient_log",
-    "interest_rating",
-    "date_interest_rating_calculated",
     "replay_file_has_been_cleaned",
     "arenaclient_log_has_been_cleaned",
 )
@@ -336,8 +334,6 @@ result_search_fields = (
     "created",
     "game_steps",
     "submitted_by",
-    "interest_rating",
-    "date_interest_rating_calculated",
     "replay_file_has_been_cleaned",
     "arenaclient_log_has_been_cleaned",
 )
