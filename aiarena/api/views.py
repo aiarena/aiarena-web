@@ -129,14 +129,14 @@ bot_include_fields = (
 )
 bot_search_fields = (
     "id",
-    "user",
+    "user__username",
     "name",
     "created",
     "bot_zip_updated",
     "bot_zip_publicly_downloadable",
     "bot_data_enabled",
     "bot_data_publicly_downloadable",
-    "plays_race",
+    "plays_race__label",
     "type",
     "game_display_id",
 )
