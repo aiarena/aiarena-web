@@ -8,14 +8,15 @@ let relayEnvironment;
 
 // Define a function that fetches the results of an operation (query/mutation/etc)
 // and returns its results as a Promise
-function fetchQuery(operation, variables, cacheConfig, uploadables) {
+function fetchQuery(operation, variables) {
+  // operation, variables, cacheConfig, uploadables can be used in function, removed to silence errors
   let apiUrl;
   if (typeof window === "undefined") {
   apiUrl = `${process.env.API_URL}/graphql/`;
 } else {
   apiUrl = "/graphql/";
 }
-
+  
   return fetch(apiUrl, {
     method: "POST",
     headers: {
