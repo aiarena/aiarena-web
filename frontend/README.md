@@ -43,3 +43,19 @@ If you get a watchman error when running npm run relay:
   Or
 - Remove --watch from the "npm run relay" command:
   "relay": "relay-compiler --watch",
+
+
+
+
+
+
+
+
+
+
+
+
+
+TODO:
+TESTS:
+Write test to ensure relay enviornment is stateless on the server and statefull on the client.

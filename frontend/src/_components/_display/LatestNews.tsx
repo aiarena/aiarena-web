@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import NewsBox from "./NewsBox"; // Import your NewsBox component
 
@@ -5,9 +6,9 @@ interface LatestNewsProps {
   newsData: {
     id: string;
     created: string;
-    title: string;
+    title: string | null | undefined;
     text: string;
-    ytLink?: string;
+    ytLink: string | null | undefined;
   }[];
 }
 

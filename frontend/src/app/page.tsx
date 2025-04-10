@@ -1,10 +1,7 @@
-"use client";
 import Navbar from "@/_components/_nav/Navbar";
 import VideoBanner from "@/_components/_display/VideoBanner";
 import Footer from "@/_components/_nav/Footer";
 import React from "react";
-
-import { useNews } from "@/_components/_hooks/useNews";
 import LatestNews from "@/_components/_display/LatestNews";
 import Image from "next/image";
 import InitiationHeroTasks from "@/_components/_display/InitiationHeroTasks";
@@ -13,6 +10,10 @@ import DiscordInviteCard from "@/_components/_display/DiscordInviteCard";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import MainButton from "@/_components/_props/MainButton";
+import { fetchQuery, graphql } from "relay-runtime";
+import { initEnvironment } from "@/_lib/relay/RelayEnvironment";
+import { pageNewsQuery } from "./__generated__/pageNewsQuery.graphql";
+import { getNodes } from "@/_lib/relayHelpers";
 
 const tasks = [
   {
@@ -44,10 +45,43 @@ const tasks = [
   },
 ];
 
-export default function Page() {
+const NewsQuery = graphql`
+  query pageNewsQuery {
+    news(last: 5) {
+      edges {
+        node {
+          id
+          title
+          text
+          created
+          ytLink
+        }
+      }
+    }
+  }
+`;
+
+// This is a working server side fetch implementation, note async await in page and fetchNewsData function
+
+async function fetchNewsData() {
+  const environment = initEnvironment();
+  try {
+    const newsData = await fetchQuery<pageNewsQuery>(
+      environment,
+      NewsQuery,
+      {}
+    ).toPromise();
+
+    return newsData;
+  } catch (error) {
+    console.error("Error fetching news data:", error);
+  }
+}
+
+export default async function Page() {
   const heroTasks = getFeatureFlags().heroTasks;
 
-  const newsData = useNews();
+  const newsData = await fetchNewsData();
 
   return (
     <>
@@ -80,7 +114,6 @@ export default function Page() {
           <div className="lg:space-x-4 lg:space-y-0">
             <div className="rounded-lg rounded-lg">
               <ImageOverlayWrapper
-                //   imageUrl={`${process.env.PUBLIC_PREFIX}/social_icons/discord-icon.svg`}
                 imageUrl={`/generated_assets/dall_e_bg_2.webp`}
                 alt="Discord background"
                 sectionDivider={true}
@@ -103,17 +136,18 @@ export default function Page() {
               </ImageOverlayWrapper>
             </div>
           </div>
-
-          <ImageOverlayWrapper
-            imageUrl={`/demo_assets/demo-news.webp`}
-            alt="Space Background"
-            sectionDivider={true}
-            sectionDividerDarken={5}
-            blurAmount="blur-sm"
-            opacityAmount="opacity-80"
-          >
-            <LatestNews newsData={newsData} />
-          </ImageOverlayWrapper>
+          {newsData ? (
+            <ImageOverlayWrapper
+              imageUrl={`/demo_assets/demo-news.webp`}
+              alt="Space Background"
+              sectionDivider={true}
+              sectionDividerDarken={5}
+              blurAmount="blur-sm"
+              opacityAmount="opacity-80"
+            >
+              <LatestNews newsData={getNodes(newsData.news)} />
+            </ImageOverlayWrapper>
+          ) : null}
         </main>
         <Footer />
       </div>
