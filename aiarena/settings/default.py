@@ -586,3 +586,8 @@ MATCH_REQUEST_LIMIT_PLATINUM_TIER = 2000
 MATCH_REQUEST_LIMIT_DIAMOND_TIER = 8000
 
 SENTRY_DSN = None
+
+SILENCED_SYSTEM_CHECKS = [
+    # The staticfiles dir only exists when building the production docker image
+    "staticfiles.W004",
+]
