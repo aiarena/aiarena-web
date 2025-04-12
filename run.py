@@ -396,6 +396,12 @@ def _confirm_restore(filename):
 @click.option("--quiet", "quiet", flag_value="quiet", default=None)
 @timing
 def restore_backup(filename, s3, quiet):
+    """
+    For this command to work, you need to have Postgres running,
+    and the credentials specified in the DATABASES setting must
+    be correct for a user with admin privileges (i.e. create/drop DBs).
+    """
+
     if s3:
         bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
         backups = aws.cli(
