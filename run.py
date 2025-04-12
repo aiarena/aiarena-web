@@ -452,7 +452,7 @@ def restore_backup(filename, s3, quiet):
     DB_PASSWORD = "aiarena"
 
     echo("Dropping and re-creating the DB...")
-    run(f"dropdb -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
+    run(f"dropdb --if-exists -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
     run(f"createdb -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
 
     echo("Restoring DB backup...")
