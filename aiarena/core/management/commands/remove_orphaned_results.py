@@ -13,13 +13,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
 
-        # Get results where no associated match exists
         orphaned_results = Result.objects.filter(~Q(match__isnull=False))
 
-        for result in orphaned_results:
-            self.stdout.write(f"Orphaned result: {result}")
-            if not dry_run:
-                result.delete()
-                self.stdout.write(f"Deleted orphaned result: {result}")
-            else:
-                self.stdout.write(f"Would delete orphaned result: {result}")
+        self.stdout.write(f"Found {orphaned_results.count()} orphaned results.")
+        if dry_run:
+            self.stdout.write("Dry run: No results will be deleted.")
+        else:
+            orphaned_results.delete()
+            self.stdout.write(f"Deleted {orphaned_results.count()} orphaned results.")
