@@ -1,0 +1,24 @@
+{# Sentry #}
+{% if settings.SENTRY_DSN %}
+  <script>
+    (function() {
+      {% if user.is_anonymous %}
+      var user = {
+        id: null,
+        username: '- Anonymous -'
+      };
+      {% else %}
+      var user = {
+        id: {{ user.id }},
+        username: '{{ user.full_name }}'
+      };
+      {% endif %}
+
+      window.SentryConfig = {
+        dsn: '{{ settings.SENTRY_DSN }}',
+        release: '{{ settings.BUILD_NUMBER }}',
+        user: user,
+      };
+    })();
+  </script>
+{% endif %}
