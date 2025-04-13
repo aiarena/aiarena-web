@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Frontend" type="js.build_tools.npm">
-    <package-json value="$PROJECT_DIR$/frontend/package.json" />
+    <package-json value="$PROJECT_DIR$/aiarena/frontend-spa/package.json" />
     <command value="run" />
     <scripts>
-      <script value="devdebug" />
+      <script value="dev" />
     </scripts>
     <node-interpreter value="project" />
     <envs />

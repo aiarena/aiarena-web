@@ -1,9 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Relay" type="js.build_tools.npm">
-    <package-json value="$PROJECT_DIR$/aiarena/frontend-spa/package.json" />
+  <configuration default="false" name="Next Frontend" type="js.build_tools.npm">
+    <package-json value="$PROJECT_DIR$/frontend/package.json" />
     <command value="run" />
     <scripts>
-      <script value="start_relay" />
+      <script value="devdebug" />
     </scripts>
     <node-interpreter value="project" />
     <envs />
