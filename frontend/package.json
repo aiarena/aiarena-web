@@ -49,7 +49,7 @@
   },
   "relay": {
     "src": "./src",
-    "schema": "../schema.graphql",
+    "schema": "./schema.graphql",
     "language": "typescript"
   }
 }
