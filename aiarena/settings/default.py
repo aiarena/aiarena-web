@@ -393,7 +393,7 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "static"
 
 # Django + Vite settings
-FRONTEND_ASSETS_PATH = BASE_DIR / "spa-frontend/static/dist"
+FRONTEND_ASSETS_PATH = APP_DIR / "frontend-spa/static/dist"
 DJANGO_VITE = {
     "default": {
         "manifest_path": FRONTEND_ASSETS_PATH / ".vite/manifest.json",
