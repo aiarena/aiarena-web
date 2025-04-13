@@ -104,6 +104,11 @@ def build_graphql_schema(env: dict | None = None, img="dev"):
     )
 
 
+def build_frontend():
+    echo("Build frontend")
+    run("npm install && npm run relay && npm run build")
+
+
 def deploy_environment():
     try:
         REDIS_CACHE_DB = int(os.environ.get("BUILD_NUMBER", "")) % 5 + 5
@@ -146,6 +151,7 @@ def prepare_images():
     docker.build_image("env", arch=docker.ARCH_AMD64)
     docker.build_image("dev", arch=docker.ARCH_AMD64)
     build_graphql_schema(environment, img="dev")
+    build_frontend()
 
     frontend_tag = f"frontend-{build_number}-{docker.ARCH_AMD64}"
     docker.build_image(
