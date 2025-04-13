@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.middleware.csrf import get_token
 from django.shortcuts import render
@@ -20,7 +22,7 @@ def frontend(request, *args, extra_settings: dict | None = None, **kwargs):
         request,
         "frontend/frontend.html",
         {
-            "frontend_settings": frontend_settings,
+            "frontend_settings": json.dumps(frontend_settings),
             "user": request.user,
         },
     )

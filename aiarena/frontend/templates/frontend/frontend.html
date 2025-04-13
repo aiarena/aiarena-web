@@ -15,7 +15,7 @@
     <!-- JS app root container -->
   </div>
   <script>
-    window.Settings = {{ frontend_settings|escapejs }};
+    window.Settings = JSON.parse('{{ frontend_settings|escapejs }}');
     window.BUILD_NUMBER = '{{ settings.BUILD_NUMBER }}';
     
     if (window.global === undefined) {
