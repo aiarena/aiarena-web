@@ -18,13 +18,13 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     manifest: true,
+    sourcemap: true,
     emptyOutDir: true,
     outDir: path.resolve(__dirname, './static/dist'),
     rollupOptions: {
       input: ['./src/main.tsx'],
       cache: false,
       output: {
-        sourcemap: true,
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
             return 'vendor';
