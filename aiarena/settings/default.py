@@ -31,7 +31,7 @@ def str_to_bool(s):
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = Path(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+BASE_DIR = Path(__file__).parent.parent.parent
 APP_DIR = BASE_DIR / "aiarena"
 GRAPPELLI_ADMIN_TITLE = "AiArena Admin"
 GRAPPELLI_SWITCH_USER_ORIGINAL = True
