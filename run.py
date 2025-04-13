@@ -229,7 +229,7 @@ def monitor_ecs():
     aws.monitor_ecs_cluster(
         stack_name=PROJECT_NAME,
         services=SERVICES,
-        limit_minutes=7,
+        limit_minutes=10,
     )
 
 
