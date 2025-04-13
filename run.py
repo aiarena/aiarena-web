@@ -106,7 +106,10 @@ def build_graphql_schema(env: dict | None = None, img="dev"):
 
 def build_frontend():
     echo("Build frontend")
-    run("npm install && npm run relay && npm run build")
+    run(
+        "npm install && npm run relay && npm run build",
+        cwd="aiarena/frontend-spa",
+    )
 
 
 def deploy_environment():
