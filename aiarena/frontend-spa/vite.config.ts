@@ -5,7 +5,7 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? 'https://static.aiarena.net/' : '/static/',
+  base: mode === 'production' ? 'https://aiarena.net/static/' : '/static/',
   plugins: [
     react(),
     relay,
