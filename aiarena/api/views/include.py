@@ -1,0 +1,261 @@
+bot_include_fields = (
+    "id",
+    "user",
+    "name",
+    "created",
+    "bot_zip",
+    "bot_zip_updated",
+    "bot_zip_md5hash",
+    "bot_zip_publicly_downloadable",
+    "bot_data_enabled",
+    "bot_data",
+    "bot_data_md5hash",
+    "bot_data_publicly_downloadable",
+    "plays_race",
+    "type",
+    "game_display_id",
+)
+bot_search_fields = (
+    "id",
+    "user__username",
+    "name",
+    "created",
+    "bot_zip_updated",
+    "bot_zip_publicly_downloadable",
+    "bot_data_enabled",
+    "bot_data_publicly_downloadable",
+    "plays_race__label",
+    "type",
+    "game_display_id",
+)
+bot_race_include_fields = "id", "label"
+competition_include_fields = (
+    "id",
+    "name",
+    "type",
+    "game_mode",
+    "date_created",
+    "date_opened",
+    "date_closed",
+    "status",
+    "max_active_rounds",
+    "interest",
+    "target_n_divisions",
+    "n_divisions",
+    "target_division_size",
+    "rounds_per_cycle",
+    "rounds_this_cycle",
+    "n_placements",
+)
+competition_bot_matchup_stats_include_fields = (
+    "bot",
+    "opponent",
+    "match_count",
+    "win_count",
+    "win_perc",
+    "loss_count",
+    "loss_perc",
+    "tie_count",
+    "tie_perc",
+    "crash_count",
+    "crash_perc",
+    "updated",
+)
+competition_bot_map_stats_include_fields = (
+    "bot",
+    "map",
+    "match_count",
+    "win_count",
+    "win_perc",
+    "loss_count",
+    "loss_perc",
+    "tie_count",
+    "tie_perc",
+    "crash_count",
+    "crash_perc",
+    "updated",
+)
+competition_participation_include_fields = (
+    "id",
+    "competition",
+    "bot",
+    "elo",
+    "match_count",
+    "win_perc",
+    "win_count",
+    "loss_perc",
+    "loss_count",
+    "tie_perc",
+    "tie_count",
+    "crash_perc",
+    "crash_count",
+    "elo_graph",
+    "winrate_vs_duration_graph",
+    "highest_elo",
+    "slug",
+    "active",
+    "division_num",
+    "in_placements",
+)
+competition_participation_filter_fields = (
+    "id",
+    "competition",
+    "bot",
+    "elo",
+    "match_count",
+    "win_perc",
+    "win_count",
+    "loss_perc",
+    "loss_count",
+    "tie_perc",
+    "tie_count",
+    "crash_perc",
+    "crash_count",
+    "highest_elo",
+    "slug",
+    "active",
+    "division_num",
+    "in_placements",
+)
+discord_user_include_fields = (
+    "user",
+    "uid",
+)
+game_include_fields = (
+    "id",
+    "name",
+)
+game_mode_include_fields = (
+    "id",
+    "name",
+    "game",
+)
+map_include_fields = (
+    "id",
+    "name",
+    "file",
+    "game_mode",
+    "competitions",
+    "enabled",
+)
+map_filter_fields = (
+    "id",
+    "name",
+    "game_mode",
+    "competitions",
+    "enabled",
+)
+map_pool_include_fields = (
+    "id",
+    "name",
+    "maps",
+    "enabled",
+)
+match_include_fields = (
+    "id",
+    "map",
+    "created",
+    "started",
+    "assigned_to",
+    "round",
+    "requested_by",
+    "require_trusted_arenaclient",
+)
+matchparticipation_include_fields = (
+    "id",
+    "match",
+    "participant_number",
+    "bot",
+    "starting_elo",
+    "resultant_elo",
+    "elo_change",
+    "match_log",
+    "avg_step_time",
+    "result",
+    "result_cause",
+    "use_bot_data",
+    "update_bot_data",
+    "match_log_has_been_cleaned",
+)
+matchparticipation_filter_fields = (
+    "id",
+    "match",
+    "participant_number",
+    "bot",
+    "starting_elo",
+    "resultant_elo",
+    "elo_change",
+    "avg_step_time",
+    "result",
+    "result_cause",
+    "use_bot_data",
+    "update_bot_data",
+    "match_log_has_been_cleaned",
+)
+matchtag_include_fields = "user", "tag_name"
+news_include_fields = (
+    "id",
+    "created",
+    "title",
+    "text",
+    "yt_link",
+)
+patreon_unlinked_uid_include_fields = ("discord_uid",)
+result_include_fields = (
+    "id",
+    "match",
+    "winner",
+    "type",
+    "created",
+    "replay_file",
+    "game_steps",
+    "submitted_by",
+    "arenaclient_log",
+    "replay_file_has_been_cleaned",
+    "arenaclient_log_has_been_cleaned",
+)
+result_search_fields = (
+    "id",
+    "match",
+    "winner",
+    "type",
+    "created",
+    "game_steps",
+    "submitted_by",
+    "replay_file_has_been_cleaned",
+    "arenaclient_log_has_been_cleaned",
+)
+round_include_fields = (
+    "id",
+    "number",
+    "competition",
+    "started",
+    "finished",
+    "complete",
+)
+trophy_include_fields = (
+    "id",
+    "icon",
+    "bot",
+    "name",
+)
+trophy_icon_include_fields = (
+    "id",
+    "name",
+    "image",
+)
+trophy_icon_filter_fields = (
+    "id",
+    "name",
+)
+user_include_fields = (
+    "id",
+    "username",
+    "first_name",
+    "last_name",
+    "is_staff",
+    "is_active",
+    "date_joined",
+    "patreon_level",
+    "type",
+)
