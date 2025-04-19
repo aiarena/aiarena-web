@@ -1,5 +1,3 @@
-import mimetypes
-
 from .default import *  # noqa: F403
 
 
