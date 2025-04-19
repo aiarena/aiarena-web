@@ -23,3 +23,8 @@ elif ENVIRONMENT_TYPE == ENVIRONMENT_TYPES.DEVELOPMENT:
         from .dev import *  # noqa: F403, F405
 else:
     raise Exception(f"Unrecognized DJANGO_ENVIRONMENT set: {ENVIRONMENT_TYPE}")
+
+if DJDT:  # noqa: F405
+    INSTALLED_APPS.append("debug_toolbar")  # noqa: F405
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")  # noqa: F405
+    mimetypes.add_type("application/javascript", ".js", True)  # Needed for debug-toolbar to work
