@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.db.models import Prefetch
+from django.utils.timezone import now
 from django.views.generic import DetailView
 
 from aiarena.core.models import Bot, MatchParticipation, Result, User
@@ -21,6 +24,7 @@ class AuthorDetail(DetailView):
         )
         results_queryset = (
             Result.objects.filter(match__matchparticipation__bot__in=context["bot_list"])
+            .filter(created__gt=now() - timedelta(days=30))
             .only("type", "match__requested_by__username", "created", "game_steps", "replay_file", "winner__name")
             .select_related("match__requested_by", "winner")
             .order_by("-created")
