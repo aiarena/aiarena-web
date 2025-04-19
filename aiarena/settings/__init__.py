@@ -1,3 +1,4 @@
+import mimetypes
 import os
 from enum import Enum
 
