@@ -1,4 +1,6 @@
 import logging
+from dataclasses import dataclass
+from typing import Any
 
 from django.conf import settings
 from django.db import transaction
@@ -72,67 +74,87 @@ def handle_result_submission(match_id, result_data):
         )
         participant2.is_valid(raise_exception=True)
 
-        return submit_result(
-            match,
-            p1_instance,
-            p2_instance,
-            participant1,
-            participant2,
-            result,
+        dto = ResultSubmission(
+            match=match,
+            p1_instance=p1_instance,
+            p2_instance=p2_instance,
+            participant1=participant1,
+            participant2=participant2,
+            result=result,
             bot1_data=result_data.get("bot1_data"),
             bot2_data=result_data.get("bot2_data"),
             bot1_tags=result_data.get("bot1_tags"),
             bot2_tags=result_data.get("bot2_tags"),
         )
 
+        return submit_result(dto)
 
-def submit_result(
-    match,
-    p1_instance,
-    p2_instance,
-    participant1,
-    participant2,
-    result,
-    bot1_data,
-    bot2_data,
-    bot1_tags,
-    bot2_tags,
-):
+
+@dataclass
+class ResultSubmission:
+    """
+    Data Transfer Object for result submission.
+    """
+
+    match: Match
+    p1_instance: MatchParticipation
+    p2_instance: MatchParticipation
+    participant1: SubmitResultParticipationSerializer
+    participant2: SubmitResultParticipationSerializer
+    result: SubmitResultResultSerializer
+    bot1_data: Any | None
+    bot2_data: Any | None
+    bot1_tags: list | None
+    bot2_tags: list | None
+
+
+def submit_result(result_submission: ResultSubmission):
+    """
+    Processes the result of a match.
+    """
     # validate bots
-    if not p1_instance.bot.is_in_match(match.id):
+    if not result_submission.p1_instance.bot.is_in_match(result_submission.match.id):
         logger.warning(
-            f"A result was submitted for match {match.id}, " f"which Bot {p1_instance.bot.name} isn't currently in!"
+            f"A result was submitted for match {result_submission.match.id}, "
+            f"which Bot {result_submission.p1_instance.bot.name} isn't currently in!"
         )
-        raise APIException(f"Unable to log result: Bot {p1_instance.bot.name} is not currently in this match!")
-    if not p2_instance.bot.is_in_match(match.id):
+        raise APIException(
+            f"Unable to log result: Bot {result_submission.p1_instance.bot.name} is not currently in this match!"
+        )
+    if not result_submission.p2_instance.bot.is_in_match(result_submission.match.id):
         logger.warning(
-            f"A result was submitted for match {match.id}, " f"which Bot {p2_instance.bot.name} isn't currently in!"
+            f"A result was submitted for match {result_submission.match.id}, "
+            f"which Bot {result_submission.p2_instance.bot.name} isn't currently in!"
         )
-        raise APIException(f"Unable to log result: Bot {p2_instance.bot.name} is not currently in this match!")
+        raise APIException(
+            f"Unable to log result: Bot {result_submission.p2_instance.bot.name} is not currently in this match!"
+        )
     bot1 = None
     bot2 = None
-    match_is_requested = match.is_requested
+    match_is_requested = result_submission.match.is_requested
     # should we update the bot data?
-    if p1_instance.use_bot_data and p1_instance.update_bot_data and not match_is_requested:
-        # if we set the bot data key to anything, it will overwrite the existing bot data
-        # so only include bot1_data if it isn't none
-        # Also don't update bot data if it's a requested match.
-        if bot1_data is not None and not match_is_requested:
-            bot1_dict = {"bot_data": bot1_data}
-            bot1 = SubmitResultBotSerializer(instance=p1_instance.bot, data=bot1_dict, partial=True)
+    if (
+        result_submission.p1_instance.use_bot_data
+        and result_submission.p1_instance.update_bot_data
+        and not match_is_requested
+    ):
+        if result_submission.bot1_data is not None and not match_is_requested:
+            bot1_dict = {"bot_data": result_submission.bot1_data}
+            bot1 = SubmitResultBotSerializer(instance=result_submission.p1_instance.bot, data=bot1_dict, partial=True)
             bot1.is_valid(raise_exception=True)
-    if p2_instance.use_bot_data and p2_instance.update_bot_data and not match_is_requested:
-        # if we set the bot data key to anything, it will overwrite the existing bot data
-        # so only include bot2_data if it isn't none
-        # Also don't update bot data if it's a requested match.
-        if bot2_data is not None and not match_is_requested:
-            bot2_dict = {"bot_data": bot2_data}
-            bot2 = SubmitResultBotSerializer(instance=p2_instance.bot, data=bot2_dict, partial=True)
+    if (
+        result_submission.p2_instance.use_bot_data
+        and result_submission.p2_instance.update_bot_data
+        and not match_is_requested
+    ):
+        if result_submission.bot2_data is not None and not match_is_requested:
+            bot2_dict = {"bot_data": result_submission.bot2_data}
+            bot2 = SubmitResultBotSerializer(instance=result_submission.p2_instance.bot, data=bot2_dict, partial=True)
             bot2.is_valid(raise_exception=True)
     # save models
-    result = result.save()
-    participant1 = participant1.save()
-    participant2 = participant2.save()
+    result = result_submission.result.save()
+    participant1 = result_submission.participant1.save()
+    participant2 = result_submission.participant2.save()
     # save these after the others so if there's a validation error,
     # then the bot data files don't need reverting to match their hashes.
     # This could probably be done more fool-proof by actually rolling back the files on a transaction fail.
@@ -143,8 +165,8 @@ def submit_result(
     # Save Tags
     bot1_user = participant1.bot.user
     bot2_user = participant2.bot.user
-    parsed_bot1_tags = parse_tags(bot1_tags)
-    parsed_bot2_tags = parse_tags(bot2_tags)
+    parsed_bot1_tags = parse_tags(result_submission.bot1_tags)
+    parsed_bot2_tags = parse_tags(result_submission.bot2_tags)
     # Union tags if both bots belong to the same user
     if bot1_user == bot2_user:
         total_tags = list(
@@ -157,9 +179,11 @@ def submit_result(
                 tag_obj = Tag.objects.get_or_create(name=tag)
                 total_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1_user)[0])
             # remove tags for this match that belong to this user and were not sent in the form
-            match.tags.remove(*match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in total_match_tags]))
+            result_submission.match.tags.remove(
+                *result_submission.match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in total_match_tags])
+            )
             # add everything, this shouldn't cause duplicates
-            match.tags.add(*total_match_tags)
+            result_submission.match.tags.add(*total_match_tags)
     else:
         if parsed_bot1_tags:
             p1_match_tags = []
@@ -167,9 +191,11 @@ def submit_result(
                 tag_obj = Tag.objects.get_or_create(name=tag)
                 p1_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1_user)[0])
             # remove tags for this match that belong to this user and were not sent in the form
-            match.tags.remove(*match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in p1_match_tags]))
+            result_submission.match.tags.remove(
+                *result_submission.match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in p1_match_tags])
+            )
             # add everything, this shouldn't cause duplicates
-            match.tags.add(*p1_match_tags)
+            result_submission.match.tags.add(*p1_match_tags)
 
         if parsed_bot2_tags:
             p2_match_tags = []
@@ -177,11 +203,13 @@ def submit_result(
                 tag_obj = Tag.objects.get_or_create(name=tag)
                 p2_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot2_user)[0])
             # remove tags for this match that belong to this user and were not sent in the form
-            match.tags.remove(*match.tags.filter(user=bot2_user).exclude(id__in=[mt.id for mt in p2_match_tags]))
+            result_submission.match.tags.remove(
+                *result_submission.match.tags.filter(user=bot2_user).exclude(id__in=[mt.id for mt in p2_match_tags])
+            )
             # add everything, this shouldn't cause duplicates
-            match.tags.add(*p2_match_tags)
-    match.result = result
-    match.save()
+            result_submission.match.tags.add(*p2_match_tags)
+    result_submission.match.result = result
+    result_submission.match.save()
     # Only do these actions if the match is part of a round
     if result.match.round is not None:
         result.match.round.update_if_completed()
