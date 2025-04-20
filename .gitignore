@@ -28,7 +28,7 @@ test-results/
 testtest11.py
 
 schema.graphql
-frontend/**/__generated__
+**/__generated__
 frontend/.next
 frontend/staticfiles
 frontend/node_modules
