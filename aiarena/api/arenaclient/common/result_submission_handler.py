@@ -74,7 +74,6 @@ def handle_result_submission(match_id, result_data):
 
         return submit_result(
             match,
-            match_id,
             p1_instance,
             p2_instance,
             participant1,
@@ -89,7 +88,6 @@ def handle_result_submission(match_id, result_data):
 
 def submit_result(
     match,
-    match_id,
     p1_instance,
     p2_instance,
     participant1,
@@ -101,14 +99,14 @@ def submit_result(
     bot2_tags,
 ):
     # validate bots
-    if not p1_instance.bot.is_in_match(match_id):
+    if not p1_instance.bot.is_in_match(match.id):
         logger.warning(
-            f"A result was submitted for match {match_id}, " f"which Bot {p1_instance.bot.name} isn't currently in!"
+            f"A result was submitted for match {match.id}, " f"which Bot {p1_instance.bot.name} isn't currently in!"
         )
         raise APIException(f"Unable to log result: Bot {p1_instance.bot.name} is not currently in this match!")
-    if not p2_instance.bot.is_in_match(match_id):
+    if not p2_instance.bot.is_in_match(match.id):
         logger.warning(
-            f"A result was submitted for match {match_id}, " f"which Bot {p2_instance.bot.name} isn't currently in!"
+            f"A result was submitted for match {match.id}, " f"which Bot {p2_instance.bot.name} isn't currently in!"
         )
         raise APIException(f"Unable to log result: Bot {p2_instance.bot.name} is not currently in this match!")
     bot1 = None
