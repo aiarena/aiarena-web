@@ -22,13 +22,17 @@
     "react-relay": "^18.2.0",
     "relay-compiler": "^18.2.0",
     "relay-runtime": "^18.2.0",
+    "tailwindcss": "^3.4.17",
     "vite-plugin-relay": "^2.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "@tailwindcss/vite": "^4.1.4",
     "@types/node": "^22.14.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "@types/react-relay": "^18.2.0",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",
