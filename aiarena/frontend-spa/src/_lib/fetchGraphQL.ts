@@ -1,6 +1,11 @@
-export default async function fetchGraphQL(text, variables, uploadables) {
+import {
+  Variables, UploadableMap,
+} from "relay-runtime";
+
+
+export default async function fetchGraphQL(text: string | null, variables: Variables, uploadables: UploadableMap | null | undefined) {
   let body;
-  const headers = {};
+  const headers: { [key: string]: string } = {};
   if (uploadables && Object.keys(uploadables).length !== 0) {
     // https://github.com/jaydenseric/graphql-multipart-request-spec
 
@@ -16,7 +21,7 @@ export default async function fetchGraphQL(text, variables, uploadables) {
         variables,
       }),
     );
-    const map = {};
+    const map: { [key: string]: string[] } = {};
     Object.keys(uploadables).forEach((key) => {
       if (Object.prototype.hasOwnProperty.call(uploadables, key)) {
         const forUpload = uploadables[key];
