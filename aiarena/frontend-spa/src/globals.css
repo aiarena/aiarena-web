@@ -2,21 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 225, 225, 225;
-  /* Brown/Gray gradient for light mode */
-  --background-start-rgb: 69, 70, 69; /* Brown */
-  --background-end-rgb: 25, 30, 25; /* Gray */
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 25, 25, 25;
-    /* Brown/Gray gradient for dark mode */
-    --background-start-rgb: 15, 15, 15; /* Dim Gray */
-    --background-end-rgb: 47, 47, 47; /* Darker Gray */
-  }
-}
 /*@layer base {*/
 /*  h1 {*/
 /*    @apply text-5xl font-bold;*/
@@ -44,38 +29,43 @@
 /*}*/
 
 body {
-  color: rgb(var(--foreground-rgb)); /* Apply the white text color */
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: rgb(225, 225, 225); /* Apply the white text color */
+  background: linear-gradient(rgb(12, 12, 12), rgb(20, 20, 20));
+  margin: 0;
 }
 
-.video-overlay {
+a {
+  color: rgba(134, 194, 50, 1);
+  /* color: theme(colors.cusotm green) */
+  text-decoration: none;
+}
+
+a:hover {
+  color: white;
+}
+
+/* a:hover .video-overlay {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
   color: white;
-  z-index: 1; /* Ensure this is above the video */
-  pointer-events: none; /* Prevent interaction with the video, but not its children */
+  z-index: 1; 
+  pointer-events: none; 
 }
 
 .video-overlay * {
-  pointer-events: auto; /* Allow interaction with child elements */
-}
-
+  pointer-events: auto;
+} */
+/* 
 nav {
   position: relative;
-  z-index: 10; /* Ensure the navbar is always above the video and overlay */
-}
-
+  z-index: 10; } */
+/* 
 nav .block {
-  z-index: 20; /* For the mobile menu, ensure it is above the overlay text */
-}
+  z-index: 20; 
+} */
 
 /* Hide video overlay when mobile navbar is active */
 @media (max-width: 768px) {
@@ -384,4 +374,3 @@ nav .block {
   );
   clip-path: polygon(0% 100%, 100% 0%, 100% 100%, 0% 100%);
 }
-

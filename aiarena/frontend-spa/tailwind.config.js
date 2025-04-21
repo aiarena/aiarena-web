@@ -1,5 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-
 // customGreenDarken2: 'rgba(84, 110, 255, 1)',
 
 const CustomHighlightVar = "rgba(154, 255, 70, 1)";
@@ -14,8 +13,8 @@ const CustomBackgroundColorVar = "rgba(134, 194, 50, 1)";
 // customBackgroundColor1D1: 'rgba(40,45,55,1)',
 
 // 17 24 39
-
-module.exports = {
+console.log("Hi there")
+export default {
   darkMode: "class",
 
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -116,7 +115,8 @@ module.exports = {
         ".bg-fancy-texture": {
           "background-size": "50px 50px",
           "background-repeat": "repeat",
-        },
+        }
+        // ,
         // '.bg-background-texture': {
         //   'background-image': `url('${getPublicPrefix()}/backgrounds/background.gif')`,
         //   'background-repeat': 'repeat',
