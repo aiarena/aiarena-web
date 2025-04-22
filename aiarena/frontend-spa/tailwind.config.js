@@ -20,10 +20,7 @@ export default {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ["var(--font-quicksand)", "sans-serif"],
-        gugi: ["var(--font-gugi)", "sans-serif"],
-      },
+  
       colors: {
         customGreen: CustomPrimaryVar,
 
@@ -116,11 +113,6 @@ export default {
           "background-size": "50px 50px",
           "background-repeat": "repeat",
         }
-        // ,
-        // '.bg-background-texture': {
-        //   'background-image': `url('${getPublicPrefix()}/backgrounds/background.gif')`,
-        //   'background-repeat': 'repeat',
-        // },
       };
       addUtilities(newUtilities, ["responsive", "hover"]);
     },
