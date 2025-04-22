@@ -1,49 +1,10 @@
 import { useState, useEffect } from "react";
-// import NavItem from "./_nav_parts/NavItem";
-// import MobileNavItem from "./_nav_parts/MobileNavItem";
-// import AuthNavBar from "./_nav_parts/AuthNavbar";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { Link, NavLink } from "react-router";
-
-const navLinks = [
-  {
-    title: "Home",
-    path: `${getPublicPrefix()}/`,
-    showLoggedIn: true,
-    showLoggedOut: true,
-    featureFlag: null,
-  },
-  {
-    title: "Wiki",
-    path: "https://aiarena.net/wiki/",
-    showLoggedIn: true,
-    showLoggedOut: true,
-    featureFlag: null,
-  },
-  {
-    title: "About us",
-    path: `${getPublicPrefix()}/about/`,
-    showLoggedIn: true,
-    showLoggedOut: true,
-    featureFlag: null,
-  },
-  {
-    title: "Profile",
-    path: `${getPublicPrefix()}/profile/`,
-    showLoggedIn: true,
-    showLoggedOut: false,
-    featureFlag: null,
-  },
-];
-
-const navbarTitle = {
-  title: "AI Arena",
-};
+import { navbarTitle, navLinks } from "@/_data/navbarLinks";
 
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
-  // const router = usePathname();
-  // const { viewer } = useViewerContext();
 
   const handleMenu = () => {
     if (navbar === true) {
@@ -63,10 +24,10 @@ function Navbar() {
     }
   };
 
-  // const handleMobileNavItemClick = () => {
-  //   setNavbar(false);
-  //   document.body.style.overflow = "unset";
-  // };
+  const handleMobileNavItemClick = () => {
+    setNavbar(false);
+    document.body.style.overflow = "unset";
+  };
 
   useEffect(() => {
     // Add event listener when the component mounts
@@ -80,7 +41,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className="w-full bg-neutral-900 px-2 text-white dark:bg-gray-900 font-sans sticky top-0 z-50">
+      <nav className="w-full bg-neutral-900 px-2 text-white sticky top-0 z-50">
         <div className="flex justify-between md:p-3 md:flex ">
           <Link
             to={navLinks[0].path}
@@ -101,13 +62,12 @@ function Navbar() {
           {/* Phone */}
           <div className="md:hidden py-4">
             <button
-              className="py-3 rounded-md pr-4"
+              className="py-3 rounded-md px-3 cursor-pointer"
               onClick={() => handleMenu()}
             >
-              <p>IMG</p>
-              {/* {navbar ? (
+              {navbar ? (
                 <div>
-                  <Image
+                  <img
                     src={`${getPublicPrefix()}/icons/cross.svg`}
                     width={24}
                     height={24}
@@ -116,14 +76,14 @@ function Navbar() {
                   />
                 </div>
               ) : (
-                <Image
+                <img
                   src={`${getPublicPrefix()}/icons/menu.svg`}
                   width={24}
                   height={24}
                   alt="menu"
                   className="invert w-6 h-6"
                 />
-              )} */}
+              )}
             </button>
           </div>
           {/* pc nav */}
@@ -132,18 +92,16 @@ function Navbar() {
             <div className="flex flex-col">
               <ul className="flex flex-wrap">
                 {navLinks.map((link, index) => (
-                  <li key={index} className={`pb-2`}>
+                  <li key={index} className={`pb-2 text-l p-2  text-center`}>
                     <NavLink
                       to={link.path}
-                      // onClick={handleWindowResize}
+                      onClick={handleWindowResize}
                       className={({ isActive }) =>
-                        isActive ? "border-b-2 border-customGreen" : ""
+                        `py-2 hover:text-slate-300 text-white ${isActive ? "border-b-2 border-customGreen" : "border-b-2 border-transparent"}`
                       }
                     >
                       {link.title}
                     </NavLink>
-
-                    {/* We used to use NavItem for this item */}
                   </li>
                 ))}
               </ul>
@@ -155,39 +113,34 @@ function Navbar() {
             </div> */}
           </div>
         </div>
-        {/* {navbar === true ? (
+        {navbar === true ? (
           <div className={`md:block ${navbar ? "block" : "hidden"}`}>
             <ul className="md:h-auto md:flex mt-8 h-screen max-h-[calc(100vh-7rem)] overflow-y-auto">
               {navLinks.map((link, index) => (
-                <li
-                  key={index}
-                  className={`${
-                    router === `${link.path}`
-                      ? "border-b-2 border-t-2 border-customGreen"
-                      : ""
-                  }`}
-                >
-                  <MobileNavItem
+                <li key={index} className="text-l p-2 text-center w-full">
+                  <NavLink
                     key={index}
-                    href={link.path}
+                    to={link.path}
                     onClick={handleMobileNavItemClick}
-                    className={
-                      router === `${link.path}`
-                        ? "border-b-2 border-t-2 border-customGreen"
-                        : ""
+                    className={({ isActive }) =>
+                      `block w-full bg-slate-800 hover:bg-slate-700 py-2 text-white hover:text-slate-300 ${
+                        isActive
+                          ? "border-b-2 border-customGreen"
+                          : "border-b-2 border-transparent"
+                      }`
                     }
                   >
                     {link.title}
-                  </MobileNavItem>
+                  </NavLink>
                 </li>
               ))}
 
               <li className="flex justify-center pb-10">
-                <AuthNavBar />
+                {/* <AuthNavBar /> */}
               </li>
             </ul>
           </div>
-        ) : null} */}
+        ) : null}
       </nav>
     </>
   );

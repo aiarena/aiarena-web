@@ -9,24 +9,24 @@ interface FooterNavItemProps {
 }
 
 const FooterNavItem: React.FC<FooterNavItemProps> = ({
-  // icon,
+  icon,
   href,
   name,
-  // invertIcon,
+  invertIcon,
 }) => {
   return (
     <li>
       <div className="flex ">
         <Link to={href} className="hover:underline">
           <div className="flex ">
-            {/* <Image
+            <img
               src={icon}
               alt={name + "-Icon"}
               width={24}
               height={24}
               className={`mr-2 w-6 h-6 ${invertIcon ? "invert" : ""}`}
-            /> */}
-            <p>An imgs</p>
+            />
+
             {name}
           </div>
         </Link>
