@@ -13,7 +13,7 @@ const CustomBackgroundColorVar = "rgba(134, 194, 50, 1)";
 // customBackgroundColor1D1: 'rgba(40,45,55,1)',
 
 // 17 24 39
-console.log("Hi there")
+
 export default {
   darkMode: "class",
 

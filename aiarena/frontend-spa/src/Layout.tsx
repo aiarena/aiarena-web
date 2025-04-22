@@ -6,7 +6,6 @@ export default function Layout() {
   return (
     <div className="flex flex-col min-h-screen font-sans text-custom-green ">
       <Navbar />
-      <div className="text-black"> asd</div>
       <main className="flex-grow bg-warmGray">
         <Outlet />
       </main>
