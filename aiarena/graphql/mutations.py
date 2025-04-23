@@ -11,6 +11,7 @@ from aiarena.core.models.competition_participation import CompetitionParticipati
 from aiarena.core.models.map import Map
 from aiarena.core.models.map_pool import MapPool
 from aiarena.core.services.internal.match_requests import handle_request_matches
+from aiarena.core.services.users import Users
 from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
 from aiarena.graphql.types import (
     BotType,
@@ -162,6 +163,9 @@ class ToggleCompetitionParticipation(CleanedInputMutation):
             competition_participation = None
 
         if competition_participation is None:
+            if not Users.get_remaining_competition_participations(input_object.bot.user) > 0:
+                raise GraphQLError("You're out of active competition participations.")
+
             competition_participation = input_object.competition.participations.create(bot=input_object.bot)
 
         elif competition_participation.active:
@@ -170,6 +174,9 @@ class ToggleCompetitionParticipation(CleanedInputMutation):
             competition_participation.save()
 
         else:
+            if not Users.get_remaining_competition_participations(input_object.bot.user) > 0:
+                raise GraphQLError("You're out of active competition participations.")
+
             competition_participation.active = True
             competition_participation.save()
 
