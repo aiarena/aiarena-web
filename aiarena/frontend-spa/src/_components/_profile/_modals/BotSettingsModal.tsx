@@ -2,8 +2,8 @@ import React, { useState } from "react";
 
 import { graphql, useFragment } from "react-relay";
 import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.graphql";
-import Modal from "../_props/Modal";
-import { useUpdateUserBot } from "../_hooks/useUpdateUserBot";
+import { useUpdateUserBot } from "@/_components/_hooks/useUpdateUserBot";
+import Modal from "@/_components/_props/Modal";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;

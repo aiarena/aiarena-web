@@ -4,7 +4,7 @@ import { getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
 import SquareButton from "../_props/SquareButton";
 import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
-import JoinCompetitionModal from "./JoinCompetitionModal";
+import JoinCompetitionModal from "./_modals/JoinCompetitionModal";
 
 interface BotCompetitionSectionProps {
   bot: BotCompetitionSection_bot$key;

@@ -4,7 +4,7 @@ import { graphql, useFragment } from "react-relay";
 import { ProfileBotOverviewList_viewer$key } from "./__generated__/ProfileBotOverviewList_viewer.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 import MainButton from "../_props/MainButton";
-import UploadBotModal from "./UploadBotModal";
+import UploadBotModal from "./_modals/UploadBotModal";
 import ProfileBot from "./ProfileBot";
 
 interface ProfileBotOverviewListProps {

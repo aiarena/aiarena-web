@@ -3,8 +3,8 @@ import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
 import { JoinCompetitionModal_bot$key } from "./__generated__/JoinCompetitionModal_bot.graphql";
 import { startTransition, useState } from "react";
 import { JoinCompetitionModalCompetitionsQuery } from "./__generated__/JoinCompetitionModalCompetitionsQuery.graphql";
-import Modal from "../_props/Modal";
-import { useToggleCompetitionParticipation } from "../_hooks/useToggleCompetitionParticipation";
+import { useToggleCompetitionParticipation } from "@/_components/_hooks/useToggleCompetitionParticipation";
+import Modal from "@/_components/_props/Modal";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;

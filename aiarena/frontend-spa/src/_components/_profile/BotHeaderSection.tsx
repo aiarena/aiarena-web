@@ -5,7 +5,7 @@ import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 import { graphql, useFragment } from "react-relay";
 import { formatDate } from "@/_lib/dateUtils";
-import BotSettingsModal from "./BotSettingsModal";
+import BotSettingsModal from "./_modals/BotSettingsModal";
 import { BotHeaderSection_bot$key } from "./__generated__/BotHeaderSection_bot.graphql";
 
 export interface BotHeaderSectionProps {
@@ -34,7 +34,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
     <div className="p-4 border-b border-gray-600 bg-gray-900 rounded-t-lg">
       {/* Grid Layout: Mobile: 1 col, Desktop: 3 cols */}
       <div className="text-left space-y-2">
-        <div className="flex justify-between flex-wrap">
+        <div className="flex justify-between flsex-wrap">
           <div className="flex items-center flex-wrap">
             {/* Bot Name */}
             <h3 className="font-bold text-lg text-customGreen">{bot.name}</h3>

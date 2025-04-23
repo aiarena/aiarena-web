@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Modal from "../_props/Modal";
+import Modal from "@/_components/_props/Modal";
+import { useState } from "react";
 
 interface UploadBotModal {
   isOpen: boolean;
