@@ -1,9 +1,10 @@
 // "use client";
 import TabNavigation from "@/_components/_nav/TabNav";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
 import { ProfileBotOverviewList } from "@/_components/_profile/ProfileBotOverviewList";
+import RequestMatchSection from "@/_components/_profile/RequestMatchSection";
 // import TabNavigation from "@/_components/_nav/TabNav";
 // import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
 // import SettingsProfileSection from "@/_components/_display/_profile/SettingsProfileSection";
@@ -20,7 +21,7 @@ export default function Profile() {
       query ProfileQuery {
         viewer {
           ...ProfileBotOverviewList_viewer
-          # ...RequestMatchSection_viewer
+          ...RequestMatchSection_viewer
           # ...SettingsProfileSection_viewer
         }
       }
@@ -56,15 +57,19 @@ export default function Profile() {
           <div className="mt-8">
             {activeTab === "Bots" && (
               <div id="bot-overview">
-                <ProfileBotOverviewList viewer={data.viewer} />
+                <Suspense fallback={"_"}>
+                  <ProfileBotOverviewList viewer={data.viewer} />
+                </Suspense>
               </div>
             )}
 
-            {/* {activeTab === "Requested Matches" && (
+            {activeTab === "Requested Matches" && (
               <div id="matches">
-                <RequestMatchSection viewer={data.viewer} />
+                <Suspense fallback={"_"}>
+                  <RequestMatchSection viewer={data.viewer} />
+                </Suspense>
               </div>
-            )} */}
+            )}
 
             {/* {data && activeTab === "Settings" && (
               <div id="settigns">
@@ -74,7 +79,6 @@ export default function Profile() {
           </div>
         </div>
       </div>
-      {/* <PreFooterSpacer /> */}
     </>
   );
 }
