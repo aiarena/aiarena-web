@@ -37,7 +37,9 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
         <div className="flex justify-between flsex-wrap">
           <div className="flex items-center flex-wrap">
             {/* Bot Name */}
-            <h3 className="font-bold text-lg text-customGreen">{bot.name}</h3>
+            <h3 className="font-bold text-lg text-customGreen font-gugi font-light">
+              {bot.name}
+            </h3>
 
             {/*/!* Trophy Icon and Count *!/*/}
             {/*<div*/}
