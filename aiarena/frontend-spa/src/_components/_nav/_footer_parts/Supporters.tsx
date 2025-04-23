@@ -1,26 +1,32 @@
 import React from "react";
-// import Link from "next/link";
-// import Image from "next/image";
-import { Supporters } from "@/_data/footerLinks";
-// import WrappedTitle from "@/_components/_display/WrappedTitle";
-// import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
-// import { getFeatureFlags } from "@/_data/featureFlags";
 import { Link } from "react-router";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
+import { graphql, useFragment } from "react-relay";
+import { SupportersComponent_stats$key } from "./__generated__/SupportersComponent_stats.graphql";
 
 interface SupportersComponentProps {
-  supporterData: Supporters[];
+  stats: SupportersComponent_stats$key | undefined | null;
 }
 
-const SupportersComponent: React.FC<SupportersComponentProps> = ({
-  supporterData,
-}) => {
+const SupportersComponent: React.FC<SupportersComponentProps> = (props) => {
+  const stats = useFragment(
+    graphql`
+      fragment SupportersComponent_stats on StatsType {
+        randomSupporter {
+          username
+          id
+        }
+      }
+    `,
+    props.stats
+  );
+
   return (
     <div className="mb-16 px-8 text-center flex-1 mx-auto">
       <WrappedTitle title="Funded by You" />
-      <p className="text-lg mb-6">{supporterData[0].name}</p>
+      <p className="text-lg mb-6">{stats?.randomSupporter?.username}</p>
       <p className="text-lg mb-6">
         Thank you for your support! <br /> Your contributions help us keep
         going.

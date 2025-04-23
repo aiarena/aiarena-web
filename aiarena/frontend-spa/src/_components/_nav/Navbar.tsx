@@ -54,7 +54,7 @@ function Navbar() {
               width={48}
               height={48}
             />
-            <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0 pb-5 font-gugi">
+            <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0 pb-5 font-gugi font-light">
               {navbarTitle.title}
             </h2>
           </Link>
