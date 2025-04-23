@@ -18,6 +18,7 @@
 
   --color-customGreen: rgba(134, 194, 50, 1);
   --color-darken: rgba(0, 0, 0, 0.3);
+  --color-darken-2: rgba(0, 0, 0, 0.8);
   --color-transparent: rgba(0, 0, 0, 0);
 }
 
@@ -73,6 +74,10 @@ a {
 
 a:hover {
   color: white;
+}
+
+button:hover {
+  cursor: pointer;
 }
 
 /* a:hover .video-overlay {
