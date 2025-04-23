@@ -1,5 +1,5 @@
 import React, { MouseEventHandler, useState } from "react";
-import { Navigate, Router, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 interface MainButtonProps {
   href?: string;
