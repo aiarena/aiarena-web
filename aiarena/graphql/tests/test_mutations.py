@@ -395,6 +395,42 @@ class TestToggleCompetitionParticipation(GraphQLTest):
         # Verify the competition participation was not created.
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
 
+    def test_update_competition_participation_insufficient_free_competitions(self, competition, bot, user, bot_factory):
+        assert CompetitionParticipation.objects.filter(bot__user=user).count() == 0
+
+        # Creating 4 bots
+        bot_names = {0: "Zergelito", 1: "Probelito", 2: "Marinolito", 3: "Dronelito"}
+        for i in range(4):
+            bot_name = bot_names[i]
+            extra_bot = bot_factory(user=user, name=bot_name)
+            assert not CompetitionParticipation.objects.filter(bot=extra_bot, competition=competition).exists()
+            self.mutate(
+                login_user=user,
+                expected_status=200,
+                variables={
+                    "input": {
+                        "bot": self.to_global_id(BotType, extra_bot.id),
+                        "competition": self.to_global_id(CompetitionType, competition.id),
+                    }
+                },
+            )
+            assert CompetitionParticipation.objects.filter(bot=extra_bot, competition=competition).exists()
+
+        # Test that the 5th bot isn't created
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                }
+            },
+            expected_errors_like=["You are out of active competition participations."],
+        )
+        # Verify the competition participation was not created.
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
+
 
 class TestUpdateBot(GraphQLTest):
     mutation_name = "updateBot"

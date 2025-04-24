@@ -164,7 +164,7 @@ class ToggleCompetitionParticipation(CleanedInputMutation):
 
         if competition_participation is None:
             if not Users.get_remaining_competition_participations(input_object.bot.user) > 0:
-                raise GraphQLError("You're out of active competition participations.")
+                raise GraphQLError("You are out of active competition participations.")
 
             competition_participation = input_object.competition.participations.create(bot=input_object.bot)
 
@@ -175,7 +175,7 @@ class ToggleCompetitionParticipation(CleanedInputMutation):
 
         else:
             if not Users.get_remaining_competition_participations(input_object.bot.user) > 0:
-                raise GraphQLError("You're out of active competition participations.")
+                raise GraphQLError("You are out of active competition participations.")
 
             competition_participation.active = True
             competition_participation.save()
