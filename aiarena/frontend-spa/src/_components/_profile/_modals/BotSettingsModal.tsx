@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment, useMutation } from "react-relay";
 import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.graphql";
-import { useUpdateUserBot } from "@/_components/_hooks/useUpdateUserBot";
 import Modal from "@/_components/_props/Modal";
+import { BotSettingsModalMutation } from "./__generated__/BotSettingsModalMutation.graphql";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -34,26 +34,26 @@ export default function BotSettingsModal({
     props.bot
   );
 
-  const { updateBot, botInFlightField } = useUpdateUserBot();
-  const botZip = bot.botZip;
+  const [updateBot, updating] = useMutation<BotSettingsModalMutation>(graphql`
+    mutation BotSettingsModalMutation($input: UpdateBotInput!) {
+      updateBot(input: $input) {
+        bot {
+          id
+          botDataEnabled
+          botDataPubliclyDownloadable
+          botZipPubliclyDownloadable
+          wikiArticle
+        }
+      }
+    }
+  `);
+
+  // const { updateBot, botInFlightField } = useUpdateUserBot();
   const [biography, setBiography] = useState(bot.wikiArticle || "");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const handleDownload = (url: string) => {
-    const mirrorUrl = "https://aiarena.net/";
-    window.location.href = mirrorUrl + url;
-  };
-
-  const handleSaveBiography = () => {
-    updateBot(bot.id, {
-      wikiArticle: biography,
-    });
-    setHasUnsavedChanges(false);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setBiography(e.target.value);
-    setHasUnsavedChanges(e.target.value !== bot.wikiArticle);
+    window.location.href = `/${url}`;
   };
 
   return isOpen ? (
@@ -64,13 +64,27 @@ export default function BotSettingsModal({
           className="w-full bg-gray-700 text-white p-2 rounded"
           rows={4}
           value={biography}
-          onChange={handleChange}
+          onChange={(e) => {
+            setBiography(e.target.value);
+            setHasUnsavedChanges(e.target.value !== bot.wikiArticle);
+          }}
         />
         {hasUnsavedChanges && (
           <p className="text-sm text-yellow-400">Unsaved changes</p>
         )}
+
         <button
-          onClick={handleSaveBiography}
+          onClick={() => {
+            updateBot({
+              variables: {
+                input: {
+                  id: bot.id,
+                  wikiArticle: biography,
+                },
+              },
+            });
+            setHasUnsavedChanges(false);
+          }}
           className="w-full bg-customGreen text-white py-2 rounded"
         >
           Save Biography
@@ -79,7 +93,7 @@ export default function BotSettingsModal({
         <h3 className="text-lg font-bold text-gray-200">Bot Settings</h3>
         <button
           className="bg-customGreen text-white py-2 px-4 rounded w-full"
-          onClick={() => handleDownload(botZip)}
+          onClick={() => handleDownload(bot.botZip)}
         >
           Download Bot Zip
         </button>
@@ -95,11 +109,17 @@ export default function BotSettingsModal({
             type="checkbox"
             checked={bot.botDataPubliclyDownloadable}
             onChange={() =>
-              updateBot(bot.id, {
-                botDataPubliclyDownloadable: !bot.botDataPubliclyDownloadable,
+              updateBot({
+                variables: {
+                  input: {
+                    id: bot.id,
+                    botDataPubliclyDownloadable:
+                      !bot.botDataPubliclyDownloadable,
+                  },
+                },
               })
             }
-            disabled={botInFlightField === "botDataPubliclyDownloadable"}
+            disabled={updating}
             className="mr-2"
           />
           <label className="text-gray-300">
@@ -111,9 +131,16 @@ export default function BotSettingsModal({
             type="checkbox"
             checked={bot.botDataEnabled}
             onChange={() =>
-              updateBot(bot.id, { botDataEnabled: !bot.botDataEnabled })
+              updateBot({
+                variables: {
+                  input: {
+                    id: bot.id,
+                    botDataEnabled: !bot.botDataEnabled,
+                  },
+                },
+              })
             }
-            disabled={botInFlightField === "botDataEnabled"}
+            disabled={updating}
             className="mr-2"
           />
           <label className="text-gray-300">Enable Bot Data</label>
