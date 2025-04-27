@@ -1,6 +1,5 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { viteCommonjs } from "@originjs/vite-plugin-commonjs";
 import relay from "vite-plugin-relay";
 import path from "path";
 import tailwindcss from "@tailwindcss/vite";
@@ -8,7 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   base: mode === "production" ? "https://aiarena.net/static/" : "/static/",
-  plugins: [react(), relay, viteCommonjs(), tailwindcss()],
+  plugins: [react(), tailwindcss(), relay],
   server: {
     host: "localhost",
     origin: "http://localhost:4000",
