@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { graphql, useFragment, useMutation } from "react-relay";
 import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.graphql";
