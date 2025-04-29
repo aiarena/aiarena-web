@@ -2,7 +2,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ValidationError
 
 import graphene
+from constance import config
 from graphene_django.types import ErrorType
+from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from aiarena.core.models.bot import Bot
@@ -182,6 +184,7 @@ class UpdateBotInput(CleanedInputType):
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
     wiki_article = graphene.String()
+    bot_zip = Upload()
 
     class Meta:
         required_fields = ["id"]
@@ -197,6 +200,9 @@ class UpdateBot(CleanedInputMutation):
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateBotInput):
         bot = graphene.Node.get_node_from_global_id(info=info, global_id=input_object.id, only_type=BotType)
         raise_for_access(info, bot)
+
+        if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):
+            raise Exception("Bot uploads are currently disabled.")
 
         for attr, value in input_object.items():
             if attr in ["id", "wiki_article"]:

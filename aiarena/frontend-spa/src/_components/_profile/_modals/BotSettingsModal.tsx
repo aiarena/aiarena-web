@@ -43,6 +43,7 @@ export default function BotSettingsModal({
           botDataPubliclyDownloadable
           botZipPubliclyDownloadable
           wikiArticle
+          botZip
         }
       }
     }
@@ -51,6 +52,7 @@ export default function BotSettingsModal({
   // const { updateBot, botInFlightField } = useUpdateUserBot();
   const [biography, setBiography] = useState(bot.wikiArticle || "");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [botZipFile, setBotZipFile] = useState<File | null>(null);
 
   const handleDownload = (url: string) => {
     window.location.href = `/${url}`;
@@ -94,12 +96,41 @@ export default function BotSettingsModal({
         <button
           className="bg-customGreen text-white py-2 px-4 rounded w-full"
           onClick={() => handleDownload(bot.botZip)}
+          disabled={bot.botZip == "{}" ? true : false}
         >
           Download Bot Zip
         </button>
+        <label className="block">
+          <span className="text-gray-300">Bot ZIP:</span>
+          <input
+            type="file"
+            className="w-full bg-gray-700 text-white p-2 rounded"
+            onChange={(e) => {
+              if (e.target.files != null) {
+                setBotZipFile(e.target.files[0]);
+              } else {
+                setBotZipFile(null);
+              }
+            }}
+          />
+        </label>
         <button
           className="bg-gray-700 text-white py-2 px-4 rounded w-full mt-2"
-          onClick={() => console.log("Upload Bot Zip")}
+          onClick={() => {
+            if (!botZipFile) return;
+            updateBot({
+              variables: {
+                input: {
+                  id: bot.id,
+                  botZip: null,
+                },
+              },
+              uploadables: {
+                "input.botZip": botZipFile,
+              },
+            });
+            setHasUnsavedChanges(false);
+          }}
         >
           Upload Bot Zip
         </button>
