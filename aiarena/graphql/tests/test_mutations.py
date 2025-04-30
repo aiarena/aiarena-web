@@ -271,11 +271,11 @@ class TestRequestMatch(GraphQLTest):
         assert not Match.objects.filter(requested_by=user).exists()
 
 
-class TestToggleCompetitionParticipation(GraphQLTest):
-    mutation_name = "toggleCompetitionParticipation"
+class TestUpdateCompetitionParticipation(GraphQLTest):
+    mutation_name = "updateCompetitionParticipation"
     mutation = """
-        mutation ($input: ToggleCompetitionParticipationInput!) {
-            toggleCompetitionParticipation(input: $input) {
+        mutation ($input: UpdateCompetitionParticipationInput!) {
+            updateCompetitionParticipation(input: $input) {
                 errors {
                     messages
                     field
@@ -299,6 +299,7 @@ class TestToggleCompetitionParticipation(GraphQLTest):
                 "input": {
                     "bot": self.to_global_id(BotType, bot.id),
                     "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": True,
                 }
             },
         )
@@ -308,10 +309,7 @@ class TestToggleCompetitionParticipation(GraphQLTest):
         assert competition_participation.active
         assert competition_participation.division_num == CompetitionParticipation.DEFAULT_DIVISION
 
-        competition_participation.division_num = 1
-        competition_participation.save()
-
-        # Toggle leave the competition i.e. set active to false, and make sure division is reset to 0
+        # Verify that setting an active participation to active doesn't change active status
         self.mutate(
             login_user=bot.user,
             expected_status=200,
@@ -319,6 +317,27 @@ class TestToggleCompetitionParticipation(GraphQLTest):
                 "input": {
                     "bot": self.to_global_id(BotType, bot.id),
                     "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": True,
+                }
+            },
+        )
+
+        competition_participation = CompetitionParticipation.objects.get(bot=bot, competition=competition)
+        assert competition_participation.active
+        assert competition_participation.division_num == CompetitionParticipation.DEFAULT_DIVISION
+
+        competition_participation.division_num = 1
+        competition_participation.save()
+
+        # Leave the competition i.e. set active to false, and make sure division is reset to 0
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": False,
                 }
             },
         )
@@ -326,8 +345,8 @@ class TestToggleCompetitionParticipation(GraphQLTest):
         competition_participation.refresh_from_db()
         assert not competition_participation.active
         assert competition_participation.division_num == CompetitionParticipation.DEFAULT_DIVISION
+        # Verify that setting an inactive participation to inactive doesn't change active status
 
-        # Toggle reactivate the competition i.e. set active to true
         self.mutate(
             login_user=bot.user,
             expected_status=200,
@@ -335,12 +354,42 @@ class TestToggleCompetitionParticipation(GraphQLTest):
                 "input": {
                     "bot": self.to_global_id(BotType, bot.id),
                     "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": False,
+                }
+            },
+        )
+        assert not competition_participation.active
+        assert competition_participation.division_num == CompetitionParticipation.DEFAULT_DIVISION
+
+        # Reactivate the competition i.e. set active to true
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": True,
                 }
             },
         )
 
         competition_participation.refresh_from_db()
         assert competition_participation.active
+
+    def test_join_closed_competiton(self, competition_factory, game_mode, bot):
+        closed_competition = competition_factory(name="A closed Competition", status="closed", game_mode=game_mode)
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=closed_competition).exists()
+        # Create a competition participation
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {"competition": self.to_global_id(CompetitionType, closed_competition.id), "active": True}
+            },
+            expected_errors_like={"This competition is closed."},
+        )
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=closed_competition).exists()
 
     def test_required_field_not_specified(self, competition, bot):
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
@@ -349,15 +398,28 @@ class TestToggleCompetitionParticipation(GraphQLTest):
         self.mutate(
             login_user=bot.user,
             expected_status=200,
-            variables={
-                "input": {
-                    "competition": self.to_global_id(CompetitionType, competition.id),
-                }
-            },
+            variables={"input": {"competition": self.to_global_id(CompetitionType, competition.id), "active": True}},
             expected_validation_errors={"bot": ["Required field"]},
         )
 
-    def test_invalid_id(self, competition, bot):
+    def test_active_field_not_boolean(self, competition, bot):
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
+
+        # Create a competition participation
+        self.mutate(
+            login_user=bot.user,
+            expected_status=400,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": "Innocent robot'); DROP TABLE ROBOTS; --",
+                }
+            },
+            expected_errors_like={"Boolean cannot represent a non boolean value"},
+        )
+
+    def test_invalid_bot_id(self, competition, bot):
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
 
         # Create a competition participation
@@ -368,10 +430,32 @@ class TestToggleCompetitionParticipation(GraphQLTest):
                 "input": {
                     "bot": "Abracadabra",
                     "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": True,
                 }
             },
             expected_validation_errors={
                 "bot": [
+                    'Unable to parse global ID "Abracadabra". Make sure it is a base64 encoded string in the format: "TypeName:id". Exception message: Invalid Global ID'
+                ]
+            },
+        )
+
+    def test_invalid_competition_id(self, competition, bot):
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
+
+        # Create a competition participation
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": "Abracadabra",
+                    "active": True,
+                }
+            },
+            expected_validation_errors={
+                "competition": [
                     'Unable to parse global ID "Abracadabra". Make sure it is a base64 encoded string in the format: "TypeName:id". Exception message: Invalid Global ID'
                 ]
             },
@@ -388,6 +472,7 @@ class TestToggleCompetitionParticipation(GraphQLTest):
                 "input": {
                     "bot": self.to_global_id(BotType, bot.id),
                     "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": True,
                 }
             },
             expected_errors_like=['bobby cannot perform "write" on "My Bot"'],
@@ -411,6 +496,7 @@ class TestToggleCompetitionParticipation(GraphQLTest):
                     "input": {
                         "bot": self.to_global_id(BotType, extra_bot.id),
                         "competition": self.to_global_id(CompetitionType, competition.id),
+                        "active": True,
                     }
                 },
             )
@@ -424,12 +510,14 @@ class TestToggleCompetitionParticipation(GraphQLTest):
                 "input": {
                     "bot": self.to_global_id(BotType, bot.id),
                     "competition": self.to_global_id(CompetitionType, competition.id),
+                    "active": True,
                 }
             },
-            expected_errors_like=["You are out of active competition participations."],
+            expected_errors_like=["Too many active participations already exist for this user."],
         )
         # Verify the competition participation was not created.
-        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
+        assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition, active=True).exists()
+        # assert CompetitionParticipation.objects.filter(bot__user=user).count() == 5
 
 
 class TestUpdateBot(GraphQLTest):

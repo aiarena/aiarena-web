@@ -11,8 +11,12 @@ from aiarena.core.models.competition_participation import CompetitionParticipati
 from aiarena.core.models.map import Map
 from aiarena.core.models.map_pool import MapPool
 from aiarena.core.services.internal.match_requests import handle_request_matches
-from aiarena.core.services.users import Users
-from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
+from aiarena.graphql.common import (
+    CleanedInputMutation,
+    CleanedInputType,
+    raise_for_access,
+    raise_graphql_error_from_exception,
+)
 from aiarena.graphql.types import (
     BotType,
     CompetitionParticipationType,
@@ -117,9 +121,10 @@ class RequestMatch(CleanedInputMutation):
             raise GraphQLError(f"Error requesting match: {str(e)}")
 
 
-class ToggleCompetitionParticipationInput(CleanedInputType):
+class UpdateCompetitionParticipationInput(CleanedInputType):
     bot: Bot = graphene.ID()
     competition: Competition = graphene.ID()
+    active = graphene.Boolean(default=True)
 
     class Meta:
         required_fields = ["bot", "competition"]
@@ -141,44 +146,62 @@ class ToggleCompetitionParticipationInput(CleanedInputType):
             raise ValidationError(e)
 
         if competition.status in ["closing", "closed"]:
-            raise ValidationError("This competition is closed.")
+            raise GraphQLError("This competition is closed.")
         return competition
 
 
-class ToggleCompetitionParticipation(CleanedInputMutation):
+class UpdateCompetitionParticipation(CleanedInputMutation):
     competition_participation = graphene.Field(CompetitionParticipationType)
 
     class Meta:
-        input_class = ToggleCompetitionParticipationInput
+        input_class = UpdateCompetitionParticipationInput
 
     @classmethod
-    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: ToggleCompetitionParticipationInput):
-        raise_for_access(info, input_object.bot)
+    def get_competition_participation_if_exists(cls, input_object):
         try:
-            competition_participation: CompetitionParticipation = input_object.competition.participations.get(
-                bot=input_object.bot
-            )
-
+            return input_object.competition.participations.get(bot=input_object.bot)
         except CompetitionParticipation.DoesNotExist:
-            competition_participation = None
+            return None
 
-        if competition_participation is None:
-            if not Users.get_remaining_competition_participations(input_object.bot.user) > 0:
-                raise GraphQLError("You are out of active competition participations.")
+    @classmethod
+    def create_new_competition_participation(cls, input_object):
+        competition_participation = CompetitionParticipation(
+            competition=input_object.competition,
+            bot=input_object.bot,
+            active=input_object.active,
+        )
+        return competition_participation
 
-            competition_participation = input_object.competition.participations.create(bot=input_object.bot)
+    @classmethod
+    def update_competition_participation(cls, input_object, competition_participation):
+        try:
+            competition_participation.active = input_object.active
+            competition_participation.full_clean()
+            competition_participation.save()
+            return competition_participation
 
-        elif competition_participation.active:
+        except ValidationError as e:
+            raise_graphql_error_from_exception(e)
+
+    @classmethod
+    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateCompetitionParticipationInput):
+        raise_for_access(info, input_object.bot)
+
+        competition_participation = cls.get_competition_participation_if_exists(input_object)
+
+        # Return the object if not change to active.
+        if competition_participation and competition_participation.active == input_object.active:
+            return cls(errors=[], competition_participation=competition_participation)
+
+        # Reset division for existing participant when setting false,
+        # or raise error for attempting to set a new competition_participation to false.
+        if competition_participation and input_object.active is False:
             competition_participation.division_num = CompetitionParticipation.DEFAULT_DIVISION
-            competition_participation.active = False
-            competition_participation.save()
 
-        else:
-            if not Users.get_remaining_competition_participations(input_object.bot.user) > 0:
-                raise GraphQLError("You are out of active competition participations.")
+        if not competition_participation:
+            competition_participation = cls.create_new_competition_participation(input_object)
 
-            competition_participation.active = True
-            competition_participation.save()
+        competition_participation = cls.update_competition_participation(input_object, competition_participation)
 
         return cls(errors=[], competition_participation=competition_participation)
 
@@ -267,6 +290,6 @@ class SignOut(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     request_match = RequestMatch.Field()
     update_bot = UpdateBot.Field()
-    toggle_competition_participation = ToggleCompetitionParticipation.Field()
+    update_competition_participation = UpdateCompetitionParticipation.Field()
     password_sign_in = PasswordSignIn.Field()
     sign_out = SignOut.Field()

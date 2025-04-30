@@ -10,6 +10,7 @@ class Users:
             active_count += bot.competition_participations.filter(active=True).count()
         return active_count
 
+    @staticmethod
     def get_remaining_competition_participations(user: User):
         available_count = SupporterBenefits.get_active_bots_limit(
             user

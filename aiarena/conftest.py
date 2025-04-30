@@ -113,6 +113,14 @@ def competition(db, game_mode):
 
 
 @pytest.fixture
+def competition_factory(game_mode):
+    def create_competition(name, game_mode, status):
+        return Competition.objects.create(name=name, game_mode=game_mode, status=status)
+
+    return create_competition
+
+
+@pytest.fixture
 def competition_participation_user(db, competition, bot):
     return CompetitionParticipation.objects.create(
         competition=competition,
