@@ -7,7 +7,7 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />} path="spa-frontend">
-        <Route index element={<NotImplemented />} />
+        <Route index element={<Profile />} />
         <Route path="competitions" element={<NotImplemented />} />
         <Route path="about" element={<NotImplemented />} />
         <Route path="status" element={<NotImplemented />} />

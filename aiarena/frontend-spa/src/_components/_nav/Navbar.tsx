@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { Link, NavLink } from "react-router";
+import { Link } from "react-router";
 import { navbarTitle, navLinks } from "@/_data/navbarLinks";
 
 function Navbar() {
@@ -54,7 +54,7 @@ function Navbar() {
               width={48}
               height={48}
             />
-            <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0 pb-5 font-gugi font-light">
+            <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0 pb-5 font-gugi font-light text-customGreen hover:text-white">
               {navbarTitle.title}
             </h2>
           </Link>
@@ -93,7 +93,7 @@ function Navbar() {
               <ul className="flex flex-wrap">
                 {navLinks.map((link, index) => (
                   <li key={index} className={`pb-2 text-l p-2  text-center`}>
-                    <NavLink
+                    {/* <NavLink
                       to={link.path}
                       onClick={handleWindowResize}
                       className={({ isActive }) =>
@@ -101,7 +101,18 @@ function Navbar() {
                       }
                     >
                       {link.title}
-                    </NavLink>
+                    </NavLink> */}
+                    <a
+                      key={index}
+                      href={link.path}
+                      className={`py-2 text-white  ${
+                        window.location.pathname === link.path
+                          ? "border-b-2 border-customGreen"
+                          : "border-b-2 border-transparent hover:border-customGreen"
+                      }`}
+                    >
+                      {link.title}
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -118,7 +129,19 @@ function Navbar() {
             <ul className="md:h-auto md:flex mt-8 h-screen max-h-[calc(100vh-7rem)] overflow-y-auto">
               {navLinks.map((link, index) => (
                 <li key={index} className="text-l p-2 text-center w-full">
-                  <NavLink
+                  <a
+                    key={index}
+                    href={link.path}
+                    onClick={handleMobileNavItemClick}
+                    className={`block w-full bg-slate-800 hover:bg-slate-700 py-2 text-white hover:text-slate-300 ${
+                      window.location.pathname === link.path
+                        ? "border-b-2 border-customGreen"
+                        : "border-b-2 border-transparent"
+                    }`}
+                  >
+                    {link.title}
+                  </a>
+                  {/* <NavLink
                     key={index}
                     to={link.path}
                     onClick={handleMobileNavItemClick}
@@ -131,7 +154,7 @@ function Navbar() {
                     }
                   >
                     {link.title}
-                  </NavLink>
+                  </NavLink> */}
                 </li>
               ))}
 
