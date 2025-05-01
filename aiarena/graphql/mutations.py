@@ -13,7 +13,12 @@ from aiarena.core.models.competition_participation import CompetitionParticipati
 from aiarena.core.models.map import Map
 from aiarena.core.models.map_pool import MapPool
 from aiarena.core.services.internal.match_requests import handle_request_matches
-from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
+from aiarena.graphql.common import (
+    CleanedInputMutation,
+    CleanedInputType,
+    raise_for_access,
+    raise_graphql_error_from_exception,
+)
 from aiarena.graphql.types import (
     BotType,
     CompetitionParticipationType,
@@ -179,7 +184,7 @@ class ToggleCompetitionParticipation(CleanedInputMutation):
 
 
 class UpdateBotInput(CleanedInputType):
-    id = graphene.ID()
+    id = graphene.ID(required=True)
     bot_zip_publicly_downloadable = graphene.Boolean()
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
@@ -211,9 +216,12 @@ class UpdateBot(CleanedInputMutation):
 
         if input_object.wiki_article:
             Bot.update_bot_wiki_article(bot, input_object.wiki_article, info.context)
+        try:
+            bot.full_clean()
+            bot.save()
 
-        bot.full_clean()
-        bot.save()
+        except ValidationError as e:
+            raise_graphql_error_from_exception(e)
 
         return cls(errors=[], bot=bot)
 

@@ -239,3 +239,18 @@ def raise_for_access(info, instance, scopes=None):
     for scope in scopes:
         if not checker.can(scope):
             raise GraphQLError(f'{user} cannot perform "{scope}" on "{instance}"')
+
+
+def parse_deep_errors(e):
+    if hasattr(e, "message_dict"):
+        messages = []
+        for field, field_messages in e.message_dict.items():
+            messages.extend(field_messages)
+        return messages
+    elif hasattr(e, "messages"):
+        return e.messages
+    return [str(e)]
+
+
+def raise_graphql_error_from_exception(e):
+    raise GraphQLError("; ".join(parse_deep_errors(e)))

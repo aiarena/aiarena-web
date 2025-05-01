@@ -5,11 +5,20 @@ import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.g
 import Modal from "@/_components/_props/Modal";
 import { BotSettingsModalMutation } from "./__generated__/BotSettingsModalMutation.graphql";
 
+import MutationFeedbackMessage from "@/_components/_display/MutationFeedbackMessage";
+
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
   isOpen: boolean;
   onClose: () => void;
 }
+
+type StatusField = "botZipUpload" | "wikiArticle";
+interface RequestStatusMessage {
+  successMessage?: string | null;
+  errorMessage?: string | null;
+}
+type RequestStatusMessages = Partial<Record<StatusField, RequestStatusMessage>>;
 
 export default function BotSettingsModal({
   isOpen,
@@ -49,9 +58,11 @@ export default function BotSettingsModal({
     }
   `);
 
-  // const { updateBot, botInFlightField } = useUpdateUserBot();
   const [biography, setBiography] = useState(bot.wikiArticle || "");
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasUnsavedWikiChanges, setHasUnsavedChanges] = useState(false);
+  const [requestStatusMessages, setRequestStatusMessages] =
+    useState<RequestStatusMessages>({});
+
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
 
   const handleDownload = (url: string) => {
@@ -71,10 +82,6 @@ export default function BotSettingsModal({
             setHasUnsavedChanges(e.target.value !== bot.wikiArticle);
           }}
         />
-        {hasUnsavedChanges && (
-          <p className="text-sm text-yellow-400">Unsaved changes</p>
-        )}
-
         <button
           onClick={() => {
             updateBot({
@@ -84,14 +91,30 @@ export default function BotSettingsModal({
                   wikiArticle: biography,
                 },
               },
+              onCompleted: (response, error) => {
+                {
+                  setRequestStatusMessages((prev) => ({
+                    ...prev,
+                    wikiArticle: {
+                      successMessage: response.updateBot?.bot
+                        ? "Bot Wiki Updated!"
+                        : null,
+                      errorMessage: error ? error[0].message : null,
+                    },
+                  }));
+                }
+              },
             });
             setHasUnsavedChanges(false);
           }}
-          className="w-full bg-customGreen text-white py-2 rounded"
+          className={`w-full text-white py-2 rounded ${hasUnsavedWikiChanges ? "bg-customGreen" : "bg-slate-500"}`}
         >
           Save Biography
         </button>
-
+        <MutationFeedbackMessage
+          onSuccess={requestStatusMessages?.wikiArticle?.successMessage}
+          onError={requestStatusMessages?.wikiArticle?.errorMessage}
+        />
         <h3 className="text-lg font-bold text-gray-200">Bot Settings</h3>
         <button
           className="bg-customGreen text-white py-2 px-4 rounded w-full"
@@ -115,7 +138,7 @@ export default function BotSettingsModal({
           />
         </label>
         <button
-          className="bg-gray-700 text-white py-2 px-4 rounded w-full mt-2"
+          className={`w-full text-white py-2 rounded ${botZipFile ? "bg-customGreen" : "bg-slate-500"}`}
           onClick={() => {
             if (!botZipFile) return;
             updateBot({
@@ -128,13 +151,29 @@ export default function BotSettingsModal({
               uploadables: {
                 "input.botZip": botZipFile,
               },
+              onCompleted: (response, error) => {
+                {
+                  setRequestStatusMessages((prev) => ({
+                    ...prev,
+                    botZipUpload: {
+                      successMessage: response.updateBot?.bot
+                        ? "Bot Zip Updated!"
+                        : null,
+                      errorMessage: error ? error[0].message : null,
+                    },
+                  }));
+                }
+              },
             });
             setHasUnsavedChanges(false);
           }}
         >
           Upload Bot Zip
         </button>
-
+        <MutationFeedbackMessage
+          onSuccess={requestStatusMessages?.botZipUpload?.successMessage}
+          onError={requestStatusMessages?.botZipUpload?.errorMessage}
+        />
         <div className="flex items-center mt-2">
           <input
             type="checkbox"
