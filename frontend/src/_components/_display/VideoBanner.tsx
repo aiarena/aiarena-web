@@ -75,7 +75,7 @@
 // };
 
 // export default VideoBanner;
-
+"use client";
 import React, { useEffect, useRef } from "react";
 
 const VideoBanner = ({

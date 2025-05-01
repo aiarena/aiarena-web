@@ -5,41 +5,67 @@ import Link from "next/link";
 import { getFeatureFlags } from "@/_data/featureFlags";
 import { notFound } from "next/navigation";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { graphql, useLazyLoadQuery } from "react-relay";
-import { pageBotsQuery } from "./__generated__/pageBotsQuery.graphql";
+import {
+  graphql,
+  PreloadedQuery,
+  usePreloadedQuery,
+  useQueryLoader,
+} from "react-relay";
 import { getNodes } from "@/_lib/relayHelpers";
 
-export default function Page() {
-  const botsPage = getFeatureFlags().botsPage;
+import { useEffect } from "react";
+import { PlaceholderLoadingFallback } from "@/_components/_display/PlaceholderLoadingFallback";
+import { pageBotsQuery } from "./__generated__/pageBotsQuery.graphql";
 
-  const data = useLazyLoadQuery<pageBotsQuery>(
-    graphql`
-      query pageBotsQuery {
-        bots {
-          edges {
-            node {
-              id
-              name
-              created
-              type
-              user {
-                id
-                username
-              }
-            }
+// This is a working example of a client render page
+
+const BotsQuery = graphql`
+  query pageBotsQuery {
+    bots {
+      edges {
+        node {
+          id
+          name
+          created
+          type
+          user {
+            id
+            username
           }
         }
       }
-    `,
-    {}
-  );
+    }
+  }
+`;
 
+export default function Page() {
+  const botsPage = getFeatureFlags().botsPage;
+  const [queryRef, loadQuery] = useQueryLoader<pageBotsQuery>(BotsQuery);
   if (!botsPage) {
     notFound();
   }
-  if (!data.bots) {
-    notFound();
-  }
+  useEffect(() => {
+    loadQuery({});
+  }, [loadQuery]);
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Bots</h1>
+      {!queryRef ? (
+        <PlaceholderLoadingFallback />
+      ) : (
+        <BotContentRender queryRef={queryRef} />
+      )}
+    </div>
+  );
+}
+
+type BotContentRenderProps = {
+  queryRef: PreloadedQuery<pageBotsQuery>;
+};
+
+function BotContentRender({ queryRef }: BotContentRenderProps) {
+  const data = usePreloadedQuery<pageBotsQuery>(BotsQuery, queryRef);
 
   return (
     <>
