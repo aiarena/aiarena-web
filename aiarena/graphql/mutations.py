@@ -212,6 +212,7 @@ class UpdateBot(CleanedInputMutation):
         if input_object.wiki_article:
             Bot.update_bot_wiki_article(bot, input_object.wiki_article, info.context)
 
+        bot.full_clean()
         bot.save()
 
         return cls(errors=[], bot=bot)
