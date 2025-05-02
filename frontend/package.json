@@ -49,7 +49,7 @@
   },
   "relay": {
     "src": "./src",
-    "schema": "../aiarena/schema.graphql",
+    "schema": "./schema.graphql",
     "language": "typescript"
   }
 }
