@@ -1,10 +1,16 @@
 import { getNodes } from "@/_lib/relayHelpers";
-import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  useLazyLoadQuery,
+  useMutation,
+} from "react-relay";
 import { JoinCompetitionModal_bot$key } from "./__generated__/JoinCompetitionModal_bot.graphql";
-import { startTransition, useState } from "react";
+import { useState } from "react";
 import { JoinCompetitionModalCompetitionsQuery } from "./__generated__/JoinCompetitionModalCompetitionsQuery.graphql";
-import { useToggleCompetitionParticipation } from "@/_components/_hooks/useToggleCompetitionParticipation";
+// import { useUpdateCompetitionParticipation } from "@/_components/_hooks/useUpdateCompetitionParticipation";
 import Modal from "@/_components/_props/Modal";
+import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
@@ -62,13 +68,30 @@ export default function JoinCompetitionModal({
       {}
     );
 
+  const [updateCompetitionparticipation] =
+    useMutation<JoinCompetitionModalMutation>(graphql`
+      mutation JoinCompetitionModalMutation(
+        $input: UpdateCompetitionParticipationInput!
+      ) {
+        updateCompetitionParticipation(input: $input) {
+          competitionParticipation {
+            active
+            id
+            bot {
+              id
+            }
+          }
+        }
+      }
+    `);
+
   const [confirmLeave, setConfirmLeave] = useState<string[]>([]);
   const openCompetitions = getNodes(competition_data.competitions).filter(
     (comp) => comp.status == "OPEN"
   );
 
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
-  const [toggleCompetitionParticipation] = useToggleCompetitionParticipation();
+  // const [updateCompetitionParticipation] = useUpdateCompetitionParticipation();
 
   const hasActiveCompetitionParticipation = (competitionId: string) => {
     return (
@@ -80,13 +103,13 @@ export default function JoinCompetitionModal({
     );
   };
 
-  const toggleCompetition = (compId: string) => {
-    startTransition(() => {
-      toggleCompetitionParticipation(bot.id, compId, () => {
-        // Handle the response here
-      });
-    });
-  };
+  // const updateCompetition = (compId: string, active: boolean) => {
+  //   startTransition(() => {
+  //     // updateCompetitionParticipation(bot.id, compId, active, () => {
+  //     //   // Handle the response here
+  //     // });
+  //   });
+  // };
 
   const handlePromptConfirmLeave = (compId: string) => {
     setConfirmLeave((prev) => [...prev, compId]);
@@ -123,7 +146,17 @@ export default function JoinCompetitionModal({
                   {confirmLeave.some((item) => item == comp.id) ? (
                     <div>
                       <button
-                        onClick={() => toggleCompetition(comp.id)}
+                        onClick={() => {
+                          updateCompetitionparticipation({
+                            variables: {
+                              input: {
+                                competition: comp.id,
+                                bot: bot.id,
+                                active: false,
+                              },
+                            },
+                          });
+                        }}
                         className="bg-red-700 p-2 border  border-gray-600"
                       >
                         Leave
@@ -146,7 +179,17 @@ export default function JoinCompetitionModal({
                 </>
               ) : (
                 <button
-                  onClick={() => toggleCompetition(comp.id)}
+                  onClick={() => {
+                    updateCompetitionparticipation({
+                      variables: {
+                        input: {
+                          competition: comp.id,
+                          bot: bot.id,
+                          active: true,
+                        },
+                      },
+                    });
+                  }}
                   className="bg-customGreen p-2"
                 >
                   Join

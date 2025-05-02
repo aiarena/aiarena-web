@@ -86,6 +86,28 @@ def other_bot(db, other_user, zip_file):
 
 
 @pytest.fixture
+def bot_factory():
+    def create_bot(
+        user,
+        name,
+        bot_zip_publicly_downloadable=False,
+        bot_data_enabled=False,
+        bot_data_publicly_downloadable=False,
+        plays_race=BotRace.random(),
+    ):
+        return Bot.objects.create(
+            user=user,
+            name=name,
+            bot_zip_publicly_downloadable=bot_zip_publicly_downloadable,
+            bot_data_enabled=bot_data_enabled,
+            bot_data_publicly_downloadable=bot_data_publicly_downloadable,
+            plays_race=plays_race,
+        )
+
+    return create_bot
+
+
+@pytest.fixture
 def game(db):
     return Game.objects.create(
         name="Starcraft 2",
@@ -106,6 +128,14 @@ def competition(db, game_mode):
         name="AI Arena SC2 Grand Prix",
         game_mode=game_mode,
     )
+
+
+@pytest.fixture
+def competition_factory(game_mode):
+    def create_competition(name, game_mode, status):
+        return Competition.objects.create(name=name, game_mode=game_mode, status=status)
+
+    return create_competition
 
 
 @pytest.fixture
