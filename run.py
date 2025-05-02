@@ -104,6 +104,14 @@ def build_graphql_schema(env: dict | None = None, img="dev"):
     )
 
 
+def build_frontend():
+    echo("Build frontend")
+    run(
+        "npm install && npm run relay && npm run build",
+        cwd="aiarena/frontend-spa",
+    )
+
+
 def deploy_environment():
     try:
         REDIS_CACHE_DB = int(os.environ.get("BUILD_NUMBER", "")) % 5 + 5
@@ -146,6 +154,7 @@ def prepare_images():
     docker.build_image("env", arch=docker.ARCH_AMD64)
     docker.build_image("dev", arch=docker.ARCH_AMD64)
     build_graphql_schema(environment, img="dev")
+    build_frontend()
 
     frontend_tag = f"frontend-{build_number}-{docker.ARCH_AMD64}"
     docker.build_image(
@@ -220,7 +229,7 @@ def monitor_ecs():
     aws.monitor_ecs_cluster(
         stack_name=PROJECT_NAME,
         services=SERVICES,
-        limit_minutes=7,
+        limit_minutes=10,
     )
 
 
@@ -289,18 +298,14 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
 @click.option("--container-name")
 def production_attach_to_task(task_id, container_name):
     clusters = aws.all_clusters()
-    cluster_id = questionary.select("First, choose an ECS cluster", clusters).unsafe_ask()
-
-    services = aws.cluster_services(cluster_id)
-    service_id = questionary.select("Then, pick the service", services).unsafe_ask()
-
-    tasks = aws.service_tasks(cluster_id, service_id)
-    if task_id and task_id not in tasks:
-        raise ValueError(f"Task with --task-id={task_id} does not exist")
+    cluster_id = questionary.select("Choose an ECS cluster", clusters).unsafe_ask()
 
     if task_id:
-        task = tasks[task_id]
+        task = aws.describe_tasks(cluster_id, [task_id])[task_id]
     else:
+        services = aws.cluster_services(cluster_id)
+        service_id = questionary.select("Pick the service", services).unsafe_ask()
+        tasks = aws.service_tasks(cluster_id, service_id)
         task = questionary.select(
             "Select the task ID",
             [
@@ -400,6 +405,12 @@ def _confirm_restore(filename):
 @click.option("--quiet", "quiet", flag_value="quiet", default=None)
 @timing
 def restore_backup(filename, s3, quiet):
+    """
+    For this command to work, you need to have Postgres running,
+    and the credentials specified in the DATABASES setting must
+    be correct for a user with admin privileges (i.e. create/drop DBs).
+    """
+
     if s3:
         bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
         backups = aws.cli(
@@ -456,7 +467,7 @@ def restore_backup(filename, s3, quiet):
     DB_PASSWORD = "aiarena"
 
     echo("Dropping and re-creating the DB...")
-    run(f"dropdb -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
+    run(f"dropdb --if-exists -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
     run(f"createdb -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
 
     echo("Restoring DB backup...")

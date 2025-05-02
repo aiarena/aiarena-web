@@ -38,8 +38,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0" 
             integrity="sha512-R/QOHLpV1Ggq22vfDAWYOaMd5RopHrJNMxi8/lJu8Oihwi4Ho4BRFeiMiCefn9rasajKjnx9/fTQ/xkWnkDACg==" 
             crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@%5E2" 
-            integrity="sha512-9XUPaxPgKYUymYfFkLG3sWAry0PbqgRAYiRPU7Ymj4TSUjjCzOhMFZAKJGh4FRg0VFNNTOLP6e3Fr66jgkFyyw==" 
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1"
+            integrity="sha512-9XUPaxPgKYUymYfFkLG3sWAry0PbqgRAYiRPU7Ymj4TSUjjCzOhMFZAKJGh4FRg0VFNNTOLP6e3Fr66jgkFyyw=="
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@%5E1"
             integrity="sha512-hVy4KxCKgnXi2ok7rlnlPma4JHXI1VPQeempoaclV1GwRHrDeaiuS1pI6DVldaj5oh6Opy2XJ2CTljQLPkaMrQ=="
@@ -62,24 +62,6 @@
 
         gtag('config', 'UA-153791853-1');
     </script>
-
-    <!-- Matomo -->
-    {% if not debug %}
-    <script>
-      var _paq = window._paq = window._paq || [];
-      /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
-      _paq.push(['trackPageView']);
-      _paq.push(['enableLinkTracking']);
-      (function() {
-        var u="https://aiarena.matomo.cloud/";
-        _paq.push(['setTrackerUrl', u+'matomo.php']);
-        _paq.push(['setSiteId', '1']);
-        var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-        g.async=true; g.src='https://cdn.matomo.cloud/aiarena.matomo.cloud/matomo.js'; s.parentNode.insertBefore(g,s);
-      })();
-    </script>
-    {% endif %}
-    <!-- End Matomo Code -->
 
 </head>
 

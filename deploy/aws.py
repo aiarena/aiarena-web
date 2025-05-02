@@ -202,18 +202,22 @@ def cluster_services(cluster):
     return [service_arn.split("/")[-1] for service_arn in arn_list]
 
 
-def service_tasks(cluster, service):
-    arn_list = cli("ecs list-tasks", {"cluster": cluster, "service-name": service})["taskArns"]
+def describe_tasks(cluster, task_list):
     tasks = cli(
         "ecs describe-tasks",
         {
             "cluster": cluster,
-            "tasks": arn_list,
+            "tasks": task_list,
         },
     )["tasks"]
     for task in tasks:
         task["id"] = task["taskArn"].split("/")[-1]
     return {task["id"]: task for task in tasks}
+
+
+def service_tasks(cluster, service):
+    arn_list = cli("ecs list-tasks", {"cluster": cluster, "service-name": service})["taskArns"]
+    return describe_tasks(cluster, arn_list)
 
 
 def execute_command(cluster_id, task_id, command: str, container_name=None, interactive=True):

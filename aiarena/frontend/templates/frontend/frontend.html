@@ -1,0 +1,29 @@
+{% load static %}
+{% load django_vite %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% include 'frontend/frontend_extra.html' %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="robots" content="noindex">
+  <title>AI Arena</title>
+  <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+</head>
+<body>
+  <div id="root">
+    <!-- JS app root container -->
+  </div>
+  <script>
+    window.Settings = JSON.parse('{{ frontend_settings|escapejs }}');
+    window.BUILD_NUMBER = '{{ settings.BUILD_NUMBER }}';
+    
+    if (window.global === undefined) {
+      window.global = window;
+    }
+  </script>
+  {% vite_hmr_client %}
+  {% vite_react_refresh %}
+  {% vite_asset 'src/main.tsx' %}
+</body>
+</html>

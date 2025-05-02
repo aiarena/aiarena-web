@@ -29,3 +29,8 @@ class NotEnoughAvailableBots(Exception):
 class MaxActiveRounds(Exception):
     def __init__(self):
         super().__init__("This competition has reached it's maximum active rounds.")
+
+
+class MatchRequestException(Exception):
+    def __init__(self, message):
+        super().__init__(message)

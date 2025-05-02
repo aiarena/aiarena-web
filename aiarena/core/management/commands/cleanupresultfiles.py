@@ -21,6 +21,7 @@ class Command(BaseFileCleanupCommand):
         )
         self.stdout.write(f"{results.count()} records gathered.")
         replays_cleaned_count = ac_logs_cleaned_count = 0
+        processed_count = 0
         for result in results:
             with transaction.atomic():
                 result.lock_me()
@@ -41,4 +42,10 @@ class Command(BaseFileCleanupCommand):
                     self.stdout.write(
                         f"WARNING: Match {result.match.id} had no files to clean up even though it should have."
                     )
+            processed_count += 1
+            self.stdout.write(
+                f"\rProgress: {processed_count}/{results.count()}",
+                ending="",
+            )
+        self.stdout.write("\n")
         self.stdout.write(f"Cleaned up {replays_cleaned_count} replays and {ac_logs_cleaned_count} arena client logs.")

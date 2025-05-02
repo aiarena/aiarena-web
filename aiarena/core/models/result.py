@@ -69,8 +69,6 @@ class Result(models.Model, LockableModelMixin):
         User, on_delete=models.PROTECT, blank=True, null=True, related_name="submitted_results"
     )
     arenaclient_log = models.FileField(upload_to=arenaclient_log_upload_to, blank=True, null=True)
-    interest_rating = models.FloatField(blank=True, null=True, db_index=True)
-    date_interest_rating_calculated = models.DateTimeField(blank=True, null=True)
     replay_file_has_been_cleaned = models.BooleanField(default=False)
     """This is set to true when the replay file is deleted by the cleanup job."""
     arenaclient_log_has_been_cleaned = models.BooleanField(default=False)

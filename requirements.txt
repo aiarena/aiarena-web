@@ -24,6 +24,7 @@ django-robots==6.1
 django-select2==8.1.2
 django-storages==1.13.2
 django-tables2==2.7.0
+django-vite==3.1.0
 djangorestframework==3.15.2
 docutils<0.17
 drf-yasg @ git+https://github.com/max-muoto/drf-yasg.git@68cc6fa76848d1d0194d847569009eb603e516b2

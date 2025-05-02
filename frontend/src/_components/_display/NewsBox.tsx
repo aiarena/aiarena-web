@@ -1,7 +1,7 @@
 import React from "react";
 
 interface NewsBoxProps {
-  videoUrl?: string;
+  videoUrl: string | null | undefined;
 }
 
 const NewsBox: React.FC<NewsBoxProps> = ({ videoUrl }) => {

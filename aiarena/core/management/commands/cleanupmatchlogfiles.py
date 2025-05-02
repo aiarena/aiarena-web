@@ -28,4 +28,9 @@ class Command(BaseFileCleanupCommand):
                     cleanup_count += 1
                     if verbose:
                         self.stdout.write(f"Participant {participant.id} match log deleted.")
+            self.stdout.write(
+                f"\rProgress: {cleanup_count}/{participants.count()}",
+                ending="",
+            )
+        self.stdout.write("\n")
         self.stdout.write(f"Cleaned up {cleanup_count} logfiles.")

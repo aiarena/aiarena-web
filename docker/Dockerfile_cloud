@@ -3,6 +3,8 @@ FROM aiarena/env
 ENV DJANGO_ENVIRONMENT=PRODUCTION
 ARG SECRET_KEY
 
+COPY . /app/
+
 RUN python /app/manage.py collectstatic --noinput --clear
 
 VOLUME /app

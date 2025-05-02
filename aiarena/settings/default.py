@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 import sys
 from datetime import timedelta
+from pathlib import Path
 
 
 # celery isn't available if we're currently installing dependencies
@@ -30,8 +31,8 @@ def str_to_bool(s):
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).parent.parent.parent
+APP_DIR = BASE_DIR / "aiarena"
 GRAPPELLI_ADMIN_TITLE = "AiArena Admin"
 GRAPPELLI_SWITCH_USER_ORIGINAL = True
 GRAPPELLI_INDEX_DASHBOARD = "aiarena.frontend.dashboard.CustomIndexDashboard"
@@ -71,6 +72,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sitemaps",
+    "django_vite",
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
@@ -157,7 +159,7 @@ REST_FRAMEWORK = {
 
 GRAPHENE = {
     "SCHEMA": "aiarena.schema.schema",
-    "SCHEMA_OUTPUT": "frontend/schema.graphql",
+    "SCHEMA_OUTPUT": APP_DIR / "schema.graphql",
 }
 
 CACHES = {
@@ -384,12 +386,24 @@ USE_L10N = True
 
 USE_TZ = True
 
+DEBUG = False
+DJDT = False
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = BASE_DIR / "static"
+
+# Django + Vite settings
+FRONTEND_ASSETS_PATH = APP_DIR / "frontend-spa/static/dist"
+DJANGO_VITE = {
+    "default": {
+        "manifest_path": FRONTEND_ASSETS_PATH / ".vite/manifest.json",
+    },
+}
 STATICFILES_DIRS = [
+    FRONTEND_ASSETS_PATH,
     "frontend/staticfiles",
 ]
 
@@ -397,7 +411,7 @@ STATICFILES_DIRS = [
 MEDIA_URL = "/media/"
 
 # Random scripts such as SQL
-SCRIPTS_ROOT = os.path.join(BASE_DIR, "scripts")
+SCRIPTS_ROOT = BASE_DIR / "scripts"
 
 
 def is_running_tests():
@@ -586,3 +600,8 @@ MATCH_REQUEST_LIMIT_PLATINUM_TIER = 2000
 MATCH_REQUEST_LIMIT_DIAMOND_TIER = 8000
 
 SENTRY_DSN = None
+
+SILENCED_SYSTEM_CHECKS = [
+    # The staticfiles dir only exists when building the production docker image
+    "staticfiles.W004",
+]

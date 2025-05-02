@@ -133,7 +133,7 @@ if SENTRY_DSN:
         "release": BUILD_NUMBER,  # noqa: F405
         "send_default_pii": True,
         # https://docs.sentry.io/performance/distributed-tracing/#python
-        "traces_sample_rate": 0.0025,  # 0.25%
+        "traces_sample_rate": 1,  # 100%
         "profiles_sample_rate": 0.1,  # 10% of transactions
         "attach_stacktrace": True,
     }
