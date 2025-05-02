@@ -390,7 +390,7 @@ class TestToggleCompetitionParticipation(GraphQLTest):
                     "competition": self.to_global_id(CompetitionType, competition.id),
                 }
             },
-            expected_errors_like=['bobby cannot perform "write" on "My Bot"'],
+            expected_errors_like=['bobby cannot perform "write" on "My_Bot"'],
         )
         # Verify the competition participation was not created.
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
@@ -463,7 +463,7 @@ class TestUpdateBot(GraphQLTest):
                     "wikiArticle": "Some Content",
                 }
             },
-            expected_errors_like=['bobby cannot perform "write" on "My Bot"'],
+            expected_errors_like=['bobby cannot perform "write" on "My_Bot"'],
         )
 
         # Verify bot was not updated
@@ -487,7 +487,7 @@ class TestUpdateBot(GraphQLTest):
                     "wikiArticle": "Some Content",
                 }
             },
-            expected_errors_like=['AnonymousUser cannot perform "write" on "My Bot"'],
+            expected_errors_like=['AnonymousUser cannot perform "write" on "My_Bot"'],
         )
 
         # Verify bot was not updated

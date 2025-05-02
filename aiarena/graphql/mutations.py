@@ -2,7 +2,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ValidationError
 
 import graphene
+from constance import config
 from graphene_django.types import ErrorType
+from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from aiarena.core.models.bot import Bot
@@ -11,7 +13,12 @@ from aiarena.core.models.competition_participation import CompetitionParticipati
 from aiarena.core.models.map import Map
 from aiarena.core.models.map_pool import MapPool
 from aiarena.core.services.internal.match_requests import handle_request_matches
-from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
+from aiarena.graphql.common import (
+    CleanedInputMutation,
+    CleanedInputType,
+    raise_for_access,
+    raise_graphql_error_from_exception,
+)
 from aiarena.graphql.types import (
     BotType,
     CompetitionParticipationType,
@@ -182,6 +189,7 @@ class UpdateBotInput(CleanedInputType):
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
     wiki_article = graphene.String()
+    bot_zip = Upload()
 
     class Meta:
         required_fields = ["id"]
@@ -198,6 +206,9 @@ class UpdateBot(CleanedInputMutation):
         bot = graphene.Node.get_node_from_global_id(info=info, global_id=input_object.id, only_type=BotType)
         raise_for_access(info, bot)
 
+        if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):
+            raise Exception("Bot uploads are currently disabled.")
+
         for attr, value in input_object.items():
             if attr in ["id", "wiki_article"]:
                 continue
@@ -205,8 +216,12 @@ class UpdateBot(CleanedInputMutation):
 
         if input_object.wiki_article:
             Bot.update_bot_wiki_article(bot, input_object.wiki_article, info.context)
+        try:
+            bot.full_clean()
+            bot.save()
 
-        bot.save()
+        except ValidationError as e:
+            raise_graphql_error_from_exception(e)
 
         return cls(errors=[], bot=bot)
 
