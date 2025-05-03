@@ -2,7 +2,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ValidationError
 
 import graphene
+from constance import config
 from graphene_django.types import ErrorType
+from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from aiarena.core.models.bot import Bot
@@ -11,7 +13,12 @@ from aiarena.core.models.competition_participation import CompetitionParticipati
 from aiarena.core.models.map import Map
 from aiarena.core.models.map_pool import MapPool
 from aiarena.core.services.internal.match_requests import handle_request_matches
-from aiarena.graphql.common import CleanedInputMutation, CleanedInputType, raise_for_access
+from aiarena.graphql.common import (
+    CleanedInputMutation,
+    CleanedInputType,
+    raise_for_access,
+    raise_graphql_error_from_exception,
+)
 from aiarena.graphql.types import (
     BotType,
     CompetitionParticipationType,
@@ -116,9 +123,10 @@ class RequestMatch(CleanedInputMutation):
             raise GraphQLError(f"Error requesting match: {str(e)}")
 
 
-class ToggleCompetitionParticipationInput(CleanedInputType):
+class UpdateCompetitionParticipationInput(CleanedInputType):
     bot: Bot = graphene.ID()
     competition: Competition = graphene.ID()
+    active = graphene.Boolean(default=True)
 
     class Meta:
         required_fields = ["bot", "competition"]
@@ -140,38 +148,62 @@ class ToggleCompetitionParticipationInput(CleanedInputType):
             raise ValidationError(e)
 
         if competition.status in ["closing", "closed"]:
-            raise ValidationError("This competition is closed.")
+            raise GraphQLError("This competition is closed.")
         return competition
 
 
-class ToggleCompetitionParticipation(CleanedInputMutation):
+class UpdateCompetitionParticipation(CleanedInputMutation):
     competition_participation = graphene.Field(CompetitionParticipationType)
 
     class Meta:
-        input_class = ToggleCompetitionParticipationInput
+        input_class = UpdateCompetitionParticipationInput
 
     @classmethod
-    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: ToggleCompetitionParticipationInput):
-        raise_for_access(info, input_object.bot)
+    def get_competition_participation_if_exists(cls, input_object):
         try:
-            competition_participation: CompetitionParticipation = input_object.competition.participations.get(
-                bot=input_object.bot
-            )
-
+            return input_object.competition.participations.get(bot=input_object.bot)
         except CompetitionParticipation.DoesNotExist:
-            competition_participation = None
+            return None
 
-        if competition_participation is None:
-            competition_participation = input_object.competition.participations.create(bot=input_object.bot)
+    @classmethod
+    def create_new_competition_participation(cls, input_object):
+        competition_participation = CompetitionParticipation(
+            competition=input_object.competition,
+            bot=input_object.bot,
+            active=input_object.active,
+        )
+        return competition_participation
 
-        elif competition_participation.active:
+    @classmethod
+    def update_competition_participation(cls, input_object, competition_participation):
+        try:
+            competition_participation.active = input_object.active
+            competition_participation.full_clean()
+            competition_participation.save()
+            return competition_participation
+
+        except ValidationError as e:
+            raise_graphql_error_from_exception(e)
+
+    @classmethod
+    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateCompetitionParticipationInput):
+        raise_for_access(info, input_object.bot)
+
+        competition_participation = cls.get_competition_participation_if_exists(input_object)
+
+        # Return the object if not change to active.
+        if competition_participation and competition_participation.active == input_object.active:
+            return cls(errors=[], competition_participation=competition_participation)
+
+        # Reset division for existing participant when setting false,
+        # or raise error for attempting to set a new competition_participation to false.
+        if competition_participation and input_object.active is False:
             competition_participation.division_num = CompetitionParticipation.DEFAULT_DIVISION
-            competition_participation.active = False
-            competition_participation.save()
 
-        else:
-            competition_participation.active = True
-            competition_participation.save()
+        if not competition_participation:
+            competition_participation = cls.create_new_competition_participation(input_object)
+
+        competition_participation = cls.update_competition_participation(input_object, competition_participation)
 
         return cls(errors=[], competition_participation=competition_participation)
 
@@ -182,6 +214,7 @@ class UpdateBotInput(CleanedInputType):
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
     wiki_article = graphene.String()
+    bot_zip = Upload()
 
     class Meta:
         required_fields = ["id"]
@@ -198,6 +231,9 @@ class UpdateBot(CleanedInputMutation):
         bot = graphene.Node.get_node_from_global_id(info=info, global_id=input_object.id, only_type=BotType)
         raise_for_access(info, bot)
 
+        if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):
+            raise Exception("Bot uploads are currently disabled.")
+
         for attr, value in input_object.items():
             if attr in ["id", "wiki_article"]:
                 continue
@@ -205,8 +241,12 @@ class UpdateBot(CleanedInputMutation):
 
         if input_object.wiki_article:
             Bot.update_bot_wiki_article(bot, input_object.wiki_article, info.context)
+        try:
+            bot.full_clean()
+            bot.save()
 
-        bot.save()
+        except ValidationError as e:
+            raise_graphql_error_from_exception(e)
 
         return cls(errors=[], bot=bot)
 
@@ -260,6 +300,6 @@ class SignOut(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     request_match = RequestMatch.Field()
     update_bot = UpdateBot.Field()
-    toggle_competition_participation = ToggleCompetitionParticipation.Field()
+    update_competition_participation = UpdateCompetitionParticipation.Field()
     password_sign_in = PasswordSignIn.Field()
     sign_out = SignOut.Field()

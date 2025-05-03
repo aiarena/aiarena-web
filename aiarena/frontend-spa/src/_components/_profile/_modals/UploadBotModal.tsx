@@ -38,7 +38,6 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             type="file"
             className="w-full bg-gray-700 text-white p-2 rounded"
           />
-          <p className="text-sm text-gray-500">Ingen fil har valts</p>
         </label>
 
         <label className="block">

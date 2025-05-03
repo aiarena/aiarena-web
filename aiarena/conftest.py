@@ -1,8 +1,22 @@
+import io
+import zipfile
+
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 import pytest
 
 from aiarena.core.models import Bot, Competition, CompetitionParticipation, Game, GameMode, Map, MapPool, WebsiteUser
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.base import BrowserHelper
+
+
+@pytest.fixture
+def zip_file():
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("run.py", b'print("12 Pool")')
+    buffer.seek(0)
+    return SimpleUploadedFile("bot.zip", buffer.read(), content_type="application/zip")
 
 
 @pytest.fixture
@@ -44,27 +58,53 @@ def other_user(db):
 
 
 @pytest.fixture
-def bot(db, user, all_bot_races):
+def bot(db, user, all_bot_races, zip_file):
     return Bot.objects.create(
         user=user,
-        name="My Bot",
+        name="My_Bot",
         bot_zip_publicly_downloadable=False,
         bot_data_enabled=False,
         bot_data_publicly_downloadable=False,
+        bot_zip=zip_file,
+        type="python",
         plays_race=BotRace.terran(),
     )
 
 
 @pytest.fixture
-def other_bot(db, other_user):
+def other_bot(db, other_user, zip_file):
     return Bot.objects.create(
         user=other_user,
-        name="Not My Bot",
+        name="Not_My_Bot",
         bot_zip_publicly_downloadable=False,
         bot_data_enabled=False,
         bot_data_publicly_downloadable=False,
+        bot_zip=zip_file,
+        type="python",
         plays_race=BotRace.zerg(),
     )
+
+
+@pytest.fixture
+def bot_factory():
+    def create_bot(
+        user,
+        name,
+        bot_zip_publicly_downloadable=False,
+        bot_data_enabled=False,
+        bot_data_publicly_downloadable=False,
+        plays_race=BotRace.random(),
+    ):
+        return Bot.objects.create(
+            user=user,
+            name=name,
+            bot_zip_publicly_downloadable=bot_zip_publicly_downloadable,
+            bot_data_enabled=bot_data_enabled,
+            bot_data_publicly_downloadable=bot_data_publicly_downloadable,
+            plays_race=plays_race,
+        )
+
+    return create_bot
 
 
 @pytest.fixture
@@ -88,6 +128,14 @@ def competition(db, game_mode):
         name="AI Arena SC2 Grand Prix",
         game_mode=game_mode,
     )
+
+
+@pytest.fixture
+def competition_factory(game_mode):
+    def create_competition(name, game_mode, status):
+        return Competition.objects.create(name=name, game_mode=game_mode, status=status)
+
+    return create_competition
 
 
 @pytest.fixture

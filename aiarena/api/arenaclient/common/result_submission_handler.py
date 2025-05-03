@@ -74,7 +74,7 @@ def handle_result_submission(match_id, result_data):
         )
         participant2.is_valid(raise_exception=True)
 
-        dto = ResultSubmission(
+        result_submission = ResultSubmission(
             match=match,
             p1_instance=p1_instance,
             p2_instance=p2_instance,
@@ -87,7 +87,7 @@ def handle_result_submission(match_id, result_data):
             bot2_tags=result_data.get("bot2_tags"),
         )
 
-        return submit_result(dto)
+        return submit_result(result_submission)
 
 
 @dataclass

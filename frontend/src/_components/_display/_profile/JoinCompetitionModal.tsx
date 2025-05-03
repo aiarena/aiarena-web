@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import Modal from "../Modal";
 
-import { useCompetitions } from "@/_components/_hooks/useCompetitions";
-import { useToggleCompetitionParticipation } from "@/_components/_hooks/useToggleCompetitionParticipation";
+// import { useCompetitions } from "@/_components/_hooks/useCompetitions";
+// import { useToggleCompetitionParticipation } from "@/_components/_hooks/useToggleCompetitionParticipation";
 import { getNodes } from "@/_lib/relayHelpers";
-import { graphql, useFragment } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  useLazyLoadQuery,
+  useMutation,
+} from "react-relay";
 import { JoinCompetitionModal_bot$key } from "./__generated__/JoinCompetitionModal_bot.graphql";
+import { JoinCompetitionModalCompetitionsQuery } from "./__generated__/JoinCompetitionModalCompetitionsQuery.graphql";
+import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
@@ -40,14 +47,53 @@ export default function JoinCompetitionModal({
     `,
     props.bot
   );
+  // TODO
+  // maybe theres a better way to fetch this
+  const competition_data =
+    useLazyLoadQuery<JoinCompetitionModalCompetitionsQuery>(
+      graphql`
+        query JoinCompetitionModalCompetitionsQuery {
+          competitions(last: 20) {
+            edges {
+              node {
+                id
+                name
+                type
+                dateCreated
+                status
+              }
+            }
+          }
+        }
+      `,
+      {}
+    );
+
+  const [updateCompetitionparticipation] =
+    useMutation<JoinCompetitionModalMutation>(graphql`
+      mutation JoinCompetitionModalMutation(
+        $input: UpdateCompetitionParticipationInput!
+      ) {
+        updateCompetitionParticipation(input: $input) {
+          competitionParticipation {
+            active
+            id
+            bot {
+              id
+            }
+          }
+        }
+      }
+    `);
 
   const [confirmLeave, setConfirmLeave] = useState<string[]>([]);
-  const competitions = useCompetitions();
 
-  const openCompetitions = competitions.filter((comp) => comp.status == "OPEN");
+  const openCompetitions = getNodes(competition_data.competitions).filter(
+    (comp) => comp.status == "OPEN"
+  );
 
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
-  const [toggleCompetitionParticipation] = useToggleCompetitionParticipation();
+  // const [toggleCompetitionParticipation] = useToggleCompetitionParticipation();
 
   const hasActiveCompetitionParticipation = (competitionId: string) => {
     return (
@@ -59,11 +105,11 @@ export default function JoinCompetitionModal({
     );
   };
 
-  const toggleCompetition = (compId: string) => {
-    toggleCompetitionParticipation(bot.id, compId, () => {
-      // Handle the response here
-    });
-  };
+  // const toggleCompetition = (compId: string) => {
+  //   toggleCompetitionParticipation(bot.id, compId, () => {
+  //     // Handle the response here
+  //   });
+  // };
 
   const handlePromptConfirmLeave = (compId: string) => {
     setConfirmLeave((prev) => [...prev, compId]);
@@ -100,7 +146,17 @@ export default function JoinCompetitionModal({
                   {confirmLeave.some((item) => item == comp.id) ? (
                     <div>
                       <button
-                        onClick={() => toggleCompetition(comp.id)}
+                        onClick={() => {
+                          updateCompetitionparticipation({
+                            variables: {
+                              input: {
+                                competition: comp.id,
+                                bot: bot.id,
+                                active: false,
+                              },
+                            },
+                          });
+                        }}
                         className="bg-red-700 p-2 border  border-gray-600"
                       >
                         Leave
@@ -123,7 +179,17 @@ export default function JoinCompetitionModal({
                 </>
               ) : (
                 <button
-                  onClick={() => toggleCompetition(comp.id)}
+                  onClick={() => {
+                    updateCompetitionparticipation({
+                      variables: {
+                        input: {
+                          competition: comp.id,
+                          bot: bot.id,
+                          active: true,
+                        },
+                      },
+                    });
+                  }}
                   className="bg-customGreen p-2"
                 >
                   Join
