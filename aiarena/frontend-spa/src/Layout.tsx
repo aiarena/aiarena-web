@@ -7,7 +7,7 @@ import WithSideNav from "./_components/_nav/WithSideNav";
 export default function Layout() {
   return (
     <BackgroundTexture>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen font-quicksand ">
         <Navbar />
         <WithSideNav>
           <Outlet />
