@@ -53,7 +53,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
   );
 
   return (
-    <div className="bg-customBackgroundColor1 p-4 border border-gray-700">
+    <div className="bg-customBackgroundColor1">
       <div className="flex justify-between ">
         <div className="flex gap-2 pb-2 mt-auto flex-wrap">
           {viewer.activeBotsLimit ? (

@@ -124,7 +124,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           },
         ]}
         renderRow={(item) => (
-          <div className="block p-4 hover:bg-gray-800 rounded transition flex justify-between items-center shadow-md border border-gray-700">
+          <div className="block p-4 hover:bg-gray-800 bg-gray-900 rounded transition flex justify-between items-center shadow-md border border-gray-700">
             <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
               <span className=" hidden md:block text-left font-semibold text-gray-200 truncate">
                 {item.id}

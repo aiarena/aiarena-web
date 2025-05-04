@@ -6,6 +6,7 @@ import SquareButton from "../_props/SquareButton";
 import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
 import JoinCompetitionModal from "./_modals/JoinCompetitionModal";
 import ActiveDot from "../_display/ActiveDot";
+import LoadingSpinnerGray from "../_display/LoadingSpinnerGray";
 
 interface BotCompetitionSectionProps {
   bot: BotCompetitionSection_bot$key;
@@ -206,7 +207,7 @@ export default function BotCompetitionsSection(
       {/* Join Competition Modal */}
 
       {isJoinCompetitionModalOpen && (
-        <Suspense fallback="2">
+        <Suspense fallback={<LoadingSpinnerGray />}>
           <JoinCompetitionModal
             isOpen={isJoinCompetitionModalOpen}
             bot={bot}

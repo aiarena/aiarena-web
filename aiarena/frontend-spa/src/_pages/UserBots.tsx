@@ -1,0 +1,36 @@
+import { Suspense } from "react";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
+import { ProfileBotOverviewList } from "@/_components/_profile/ProfileBotOverviewList";
+
+import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
+
+export default function UserBots() {
+  const data = useLazyLoadQuery<ProfileQuery>(
+    graphql`
+      query ProfileQuery {
+        viewer {
+          ...ProfileBotOverviewList_viewer
+        }
+      }
+    `,
+    {}
+  );
+
+  // const [activeTab, setActiveTab] = useState("Bots");
+  if (!data.viewer) {
+    return (
+      <>
+        <p>No viewer</p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Suspense fallback={<LoadingSpinnerGray />}>
+        <ProfileBotOverviewList viewer={data.viewer} />
+      </Suspense>
+    </>
+  );
+}

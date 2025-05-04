@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import { navbarTitle, navLinks } from "@/_data/navbarLinks";
 
 function Navbar() {
@@ -93,26 +93,30 @@ function Navbar() {
               <ul className="flex flex-wrap">
                 {navLinks.map((link, index) => (
                   <li key={index} className={`pb-2 text-l p-2  text-center`}>
-                    {/* <NavLink
-                      to={link.path}
-                      onClick={handleWindowResize}
-                      className={({ isActive }) =>
-                        `py-2 hover:text-slate-300 text-white ${isActive ? "border-b-2 border-customGreen" : "border-b-2 border-transparent"}`
-                      }
-                    >
-                      {link.title}
-                    </NavLink> */}
-                    <a
-                      key={index}
-                      href={link.path}
-                      className={`py-2 text-white  ${
-                        window.location.pathname === link.path
-                          ? "border-b-2 border-customGreen"
-                          : "border-b-2 border-transparent hover:border-customGreen"
-                      }`}
-                    >
-                      {link.title}
-                    </a>
+                    {link.path === "/dashboard/" ? (
+                      <NavLink
+                        key={index}
+                        to={link.path}
+                        className={({ isActive }) =>
+                          isActive
+                            ? "py-2 text-white border-b-2 border-customGreen"
+                            : "py-2 text-white border-b-2 border-transparent hover:border-customGreen"
+                        }
+                      >
+                        {link.title}
+                      </NavLink>
+                    ) : (
+                      <a
+                        key={index}
+                        href={link.path}
+                        className={`
+                      py-2 text-white border-b-2
+                        ${window.location.pathname == link.path ? " border-customGreen" : "border-transparent hover:border-customGreen"}
+                      `}
+                      >
+                        {link.title}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
