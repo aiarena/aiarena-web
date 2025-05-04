@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from constance import config
 
-from aiarena.core.management.commands import cleanupresultfiles
+from aiarena.core.management.commands import doglobalfilecleanup
 from aiarena.core.models import (
     Bot,
     Competition,
@@ -86,42 +86,17 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         self.assertIsNotNone(round.finished)
 
     def test_doglobalfilecleanup(self):
-        """
-        Test that the command runs without error
-        """
-        NUM_MATCHES = 12
-        self._generate_files_to_cleanup(NUM_MATCHES)
-        call_command("doglobalfilecleanup")
-
-    def test_cleanup_replays_and_logs(self):
         NUM_MATCHES = 12
         participants, results = self._generate_files_to_cleanup(NUM_MATCHES)
 
         out = StringIO()
-        call_command("cleanupresultfiles", stdout=out)
+        call_command("doglobalfilecleanup", stdout=out)
         self.assertIn(
             "Cleaning up result files starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
             "12 records gathered.\n",
             out.getvalue(),
         )
-
-        # ensure the job doesn't re-clean the same records when run again
-        out = StringIO()
-        call_command("cleanupresultfiles", stdout=out)
-        self.assertIn(
-            "Cleaning up result files starting from 30 days into the past...\n"
-            "Gathering records to clean...\n"
-            "0 records gathered.\n",
-            out.getvalue(),
-        )
-
-        self.assertEqual(results.count(), NUM_MATCHES)
-        for result in results:
-            self.assertFalse(result.replay_file)
-
-        out = StringIO()
-        call_command("cleanupmatchlogfiles", stdout=out)
         self.assertIn(
             "Cleaning up match logfiles starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
@@ -131,13 +106,23 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
         # ensure the job doesn't re-clean the same records when run again
         out = StringIO()
-        call_command("cleanupmatchlogfiles", stdout=out)
+        call_command("doglobalfilecleanup", stdout=out)
+        self.assertIn(
+            "Cleaning up result files starting from 30 days into the past...\n"
+            "Gathering records to clean...\n"
+            "0 records gathered.\n",
+            out.getvalue(),
+        )
         self.assertIn(
             "Cleaning up match logfiles starting from 30 days into the past...\n"
             "Gathering records to clean...\n"
             "0 records gathered.\n",
             out.getvalue(),
         )
+
+        self.assertEqual(results.count(), NUM_MATCHES)
+        for result in results:
+            self.assertFalse(result.replay_file)
 
         self.assertEqual(participants.count(), NUM_MATCHES * 2)
         for participant in participants:
@@ -163,7 +148,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         participants = MatchParticipation.objects.filter(match_log__isnull=False)
         self.assertEqual(participants.count(), num_matches * 2)
         # set the created time so they'll be purged
-        results.update(created=timezone.now() - timedelta(days=cleanupresultfiles.Command._DEFAULT_DAYS_LOOKBACK + 1))
+        results.update(created=timezone.now() - timedelta(days=doglobalfilecleanup.Command._DEFAULT_DAYS_LOOKBACK + 1))
         return participants, results
 
     def test_generatestats(self):
