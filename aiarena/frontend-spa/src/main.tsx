@@ -16,5 +16,5 @@ createRoot(document.getElementById("root")!).render(
         </SnackbarProvider>
       </BrowserRouter>
     </RelayEnvironmentProvider>
-  </StrictMode>,
+  </StrictMode>
 );
