@@ -16,7 +16,7 @@ export default function UpdateBiographyInput(props: UpdateBiographyInputProps) {
         wikiArticle
       }
     `,
-    props.bot,
+    props.bot
   );
 
   const [updateBot, updating] = useMutation<UpdateBiographyInputMutation>(
@@ -32,7 +32,7 @@ export default function UpdateBiographyInput(props: UpdateBiographyInputProps) {
           }
         }
       }
-    `,
+    `
   );
 
   const [biography, setBiography] = useState(bot.wikiArticle || "");

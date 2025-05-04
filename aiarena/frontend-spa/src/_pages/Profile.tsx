@@ -3,9 +3,9 @@ import TabNavigation from "@/_components/_nav/TabNav";
 import { Suspense, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
-import { ProfileBotOverviewList } from "@/_components/_profile/ProfileBotOverviewList";
-import RequestMatchSection from "@/_components/_profile/RequestMatchSection";
-import SettingsProfileSection from "@/_components/_profile/SettingsProfileSection";
+import { ProfileBotOverviewList } from "@/_components/_sections/ProfileBotOverviewList";
+import RequestMatchSection from "@/_components/_sections/RequestMatchSection";
+import SettingsProfileSection from "@/_components/_sections/SettingsProfileSection";
 import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
 
 export default function Profile() {

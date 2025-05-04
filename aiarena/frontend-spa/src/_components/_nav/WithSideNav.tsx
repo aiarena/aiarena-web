@@ -31,7 +31,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
               key={tab.name}
               to={tab.path}
               className={({ isActive }) =>
-                `m-2 pl-2 py-2 text-white border-1 font-gugi shadow shadow-black shadow-sm hover:shadow-md hover:shadow-black sduration-300 ease-in-out transform   ${
+                `m-2 pl-2 py-2 text-white border-1 font-gugi shadow shadow-black shadow-sm hover:shadow-md hover:shadow-black duration-300 ease-in-out transform   ${
                   isActive
                     ? "bg-gray-800 text-large border-gray-700 border-b-customGreen border-b-2"
                     : "border-gray-700 hover:border-b-customGreen border-b-2"
@@ -50,7 +50,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
                 key={tab.name}
                 to={tab.path}
                 className={({ isActive }) =>
-                  `py-2 text-white  ${
+                  `py-2 text-white font-gugi    ${
                     isActive
                       ? "border-b-2 border-customGreen"
                       : "border-b-2 border-transparent hover:border-customGreen"

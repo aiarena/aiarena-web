@@ -6,7 +6,7 @@ import Modal from "@/_components/_props/Modal";
 import { BotSettingsModalMutation } from "./__generated__/BotSettingsModalMutation.graphql";
 
 import MutationFeedbackMessage from "@/_components/_display/MutationFeedbackMessage";
-import UpdateBiographyInput from "@/_components/_profile/_modals/bot_settings_modal/UpdateBiographyInput.tsx";
+import UpdateBiographyInput from "@/_components/_sections/_modals/bot_settings_modal/UpdateBiographyInput";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -42,7 +42,7 @@ export default function BotSettingsModal({
         ...UpdateBiographyInput_bot
       }
     `,
-    props.bot,
+    props.bot
   );
 
   const [updateBot, updating] = useMutation<BotSettingsModalMutation>(graphql`

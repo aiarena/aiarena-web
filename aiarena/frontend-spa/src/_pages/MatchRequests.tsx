@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
-import RequestMatchSection from "@/_components/_profile/RequestMatchSection";
+import RequestMatchSection from "@/_components/_sections/RequestMatchSection";
 
 import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
 
