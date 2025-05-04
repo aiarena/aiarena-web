@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
 
+import django_filters
 import graphene
 from avatar.models import Avatar
 from django_filters import FilterSet, OrderingFilter
@@ -56,6 +57,7 @@ class BotFilterSet(FilterSet):
         ]
     )
     user_id = graphene.ID()
+    name = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = models.Bot
@@ -154,7 +156,7 @@ class MapType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.Map
         fields = ["name", "game_mode", "enabled"]
-        filter_fields = []
+        filter_fields = ["name"]
 
     @staticmethod
     def resolve_download_link(root: models.Map, info, **args):

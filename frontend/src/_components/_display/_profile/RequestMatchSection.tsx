@@ -4,6 +4,10 @@ import { formatDateISO } from "@/_lib/dateUtils";
 import { graphql, useFragment } from "react-relay";
 import { RequestMatchSection_viewer$key } from "./__generated__/RequestMatchSection_viewer.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
+import { footerLinks } from "@/_data/footerLinks";
+import RequestMatchModal from "./RequestMatchModal";
+import { useState } from "react";
+import MainButton from "@/_components/_props/MainButton";
 
 interface RequestMatchesSectionProps {
   viewer: RequestMatchSection_viewer$key;
@@ -53,15 +57,17 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
     props.viewer
   );
 
-  const requestsUsed = viewer.requestedMatches?.totalCount;
+  const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
+
+  // const requestsUsed = viewer.requestedMatches?.totalCount;
 
   // const requestedMatches = useViewerRequestedMatches();
 
-  const handleRequestNewMatch = () => {
-    // Implement logic to request a new match via API
-    // For example, you might open a modal or directly call an API endpoint.
-    alert("Requesting a new match (placeholder)!");
-  };
+  // const handleRequestNewMatch = () => {
+  //   // Implement logic to request a new match via API
+  //   // For example, you might open a modal or directly call an API endpoint.
+  //   alert("Requesting a new match (placeholder)!");
+  // };
 
   return (
     <div id="matches" className="space-y-4">
@@ -71,12 +77,17 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           <p className="text-left">
             <span className="font-bold">Requests used:</span>{" "}
             <span className="text-customGreen">
-              {requestsUsed}/{viewer.requestMatchesLimit}
+              {viewer.requestMatchesLimit - viewer.requestMatchesCountLeft}/
+              {viewer.requestMatchesLimit}
             </span>
           </p>
-          <p className="text-left text-customGreen cursor-pointer">
+          <Link
+            href={footerLinks.socialLinks[1].href}
+            className="float-left text-left text-customGreen cursor-pointer"
+            target="_blank"
+          >
             Increase Limit
-          </p>
+          </Link>
           {/* <p>
             <span className="font-bold">Match Request Limit:</span>{" "}
             <span className="text-customGreen">{matchRequestLimit}</span>
@@ -89,12 +100,10 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         <div>
           {/* Request new match button */}
           {/* If you have a custom button component `MainButton`, use that. Otherwise, use a standard button: */}
-          <button
-            onClick={handleRequestNewMatch}
-            className="text-sm text-white bg-indigo-500 px-3 py-1 rounded-md hover:bg-indigo-400 transition"
-          >
-            Request New Match
-          </button>
+          <MainButton
+            onClick={() => setIsRequestMatchModalOpen(true)}
+            text="Request New Match"
+          />
         </div>
       </div>
       <FilterableList
@@ -164,7 +173,9 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
       />
       {/* In-Progress Matches */}
       {/* <div className="bg-gray-700 p-4 rounded-md space-y-3">
-        <h3 className="text-lg font-semibold text-customGreen">In-Progress Requests</h3>
+        <h3 className="text-lg font-semibold text-customGreen">
+          In-Progress Requests
+        </h3>
         {inProgressMatches.length > 0 ? (
           <ul className="space-y-2">
             {inProgressMatches.map((match) => (
@@ -175,14 +186,28 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
                 <span>
                   <span className="font-bold">Opponent:</span> {match.opponent}
                 </span>
-                <span className="text-xs text-gray-400 mt-1 sm:mt-0 sm:ml-2">{match.status}</span>
+                <span className="text-xs text-gray-400 mt-1 sm:mt-0 sm:ml-2">
+                  {match.status}
+                </span>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-gray-400 text-sm">No in-progress match requests.</p>
+          <p className="text-gray-400 text-sm">
+            No in-progress match requests.
+          </p>
         )}
       </div> */}
+
+      {/* <RequestMatchModalV2
+        isOpen={isRequestMatchModalOpen}
+        onClose={() => setIsRequestMatchModalOpen(false)}
+      /> */}
+
+      <RequestMatchModal
+        isOpen={isRequestMatchModalOpen}
+        onClose={() => setIsRequestMatchModalOpen(false)}
+      />
     </div>
   );
 }

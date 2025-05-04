@@ -1,12 +1,15 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { createPortal } from "react-dom";
 
-const Modal = ({ children, onClose, title }) => {
+interface ModalProps {
+  children: ReactNode;
+  onClose: () => void;
+  title: string;
+}
+
+const Modal = ({ children, onClose, title }: ModalProps) => {
   return createPortal(
-    <div
-      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div
         className="bg-gray-800 text-white rounded-lg shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl"
         onClick={(e) => e.stopPropagation()}
@@ -39,7 +42,7 @@ const Modal = ({ children, onClose, title }) => {
         </div>
       </div>
     </div>,
-    document.body,
+    document.body
   );
 };
 

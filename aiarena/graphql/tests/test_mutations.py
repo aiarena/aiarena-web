@@ -31,7 +31,7 @@ class TestRequestMatch(GraphQLTest):
                     "mapSelectionType": "specific_map",
                     "chosenMap": self.to_global_id(MapType, map.id),
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                 }
             },
         )
@@ -62,7 +62,7 @@ class TestRequestMatch(GraphQLTest):
                     "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -87,7 +87,7 @@ class TestRequestMatch(GraphQLTest):
                     "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -95,7 +95,7 @@ class TestRequestMatch(GraphQLTest):
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
-    def test_invalid_opponent(self, user, bot, map_pool):
+    def test_invalid_bot2(self, user, bot, map_pool):
         assert not Match.objects.filter(requested_by=user).exists()
 
         self.mutate(
@@ -105,15 +105,15 @@ class TestRequestMatch(GraphQLTest):
                     "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "opponent": 999,
+                    "bot2": 999,
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=['Error processing opponent: Unable to parse global ID "999".'],
+            expected_errors_like=['Error processing bot2: Unable to parse global ID "999".'],
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
-    def test_no_opponent(self, user, bot, map_pool):
+    def test_no_bot2(self, user, bot, map_pool):
         assert not Match.objects.filter(requested_by=user).exists()
 
         self.mutate(
@@ -126,7 +126,7 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=["Error requesting match: Opponent is required for a specific matchup."],
+            expected_validation_errors={"bot2": ["Required field"]},
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -140,7 +140,7 @@ class TestRequestMatch(GraphQLTest):
                     "bot1": 999,
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -157,7 +157,7 @@ class TestRequestMatch(GraphQLTest):
                 "input": {
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -175,7 +175,7 @@ class TestRequestMatch(GraphQLTest):
                     "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "dodecahedron",
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -192,7 +192,7 @@ class TestRequestMatch(GraphQLTest):
                 "input": {
                     "bot1": self.to_global_id(BotType, bot.id),
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -210,7 +210,7 @@ class TestRequestMatch(GraphQLTest):
                     "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 500,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -227,7 +227,7 @@ class TestRequestMatch(GraphQLTest):
                 "input": {
                     "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -245,7 +245,7 @@ class TestRequestMatch(GraphQLTest):
                     "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": 999,
                 }
             },
@@ -263,7 +263,7 @@ class TestRequestMatch(GraphQLTest):
                     "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "opponent": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                 }
             },
             expected_errors_like=["Either 'mapPool' or 'chosenMap' must be provided."],

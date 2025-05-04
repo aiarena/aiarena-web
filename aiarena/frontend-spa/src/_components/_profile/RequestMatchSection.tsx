@@ -4,6 +4,9 @@ import { RequestMatchSection_viewer$key } from "./__generated__/RequestMatchSect
 import { getNodes } from "@/_lib/relayHelpers";
 import FilterableList from "../_props/FilterableList";
 import { Link } from "react-router";
+import RequestMatchModal from "./_modals/RequestMatchModal";
+import { useState } from "react";
+import MainButton from "../_props/MainButton";
 
 interface RequestMatchesSectionProps {
   viewer: RequestMatchSection_viewer$key;
@@ -56,12 +59,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
   const requestsUsed = viewer.requestedMatches?.totalCount;
 
   // const requestedMatches = useViewerRequestedMatches();
-
-  const handleRequestNewMatch = () => {
-    // Implement logic to request a new match via API
-    // For example, you might open a modal or directly call an API endpoint.
-    alert("Requesting a new match (placeholder)!");
-  };
+  const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
 
   return (
     <div id="matches" className="space-y-4">
@@ -89,12 +87,10 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         <div>
           {/* Request new match button */}
           {/* If you have a custom button component `MainButton`, use that. Otherwise, use a standard button: */}
-          <button
-            onClick={handleRequestNewMatch}
-            className="text-sm text-white bg-indigo-500 px-3 py-1 rounded-md hover:bg-indigo-400 transition"
-          >
-            Request New Match
-          </button>
+          <MainButton
+            onClick={() => setIsRequestMatchModalOpen(true)}
+            text="Request New Match"
+          />
         </div>
       </div>
       <FilterableList
@@ -102,18 +98,18 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         fields={[
           "id",
           "firstStarted",
-          "participant1",
-          "participant2",
-          "result",
+          "participant1.name",
+          "participant2.name",
+          "result.type",
         ]} // Pass nested field as string
         defaultFieldSort={1}
         defaultSortOrder="desc"
         fieldLabels={{
           id: "Match ID",
           firstStarted: "Started",
-          participant1: "Player 1",
-          participant2: "Player 2",
-          result: "Result",
+          "participant1.name": "Player 1",
+          "participant2.name": "Player 2",
+          "result.type": "Result",
         }}
         fieldClasses={{
           id: "hidden md:block",
@@ -126,12 +122,6 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
             field: "all",
             placeholder: "Search all fields...",
           },
-          {
-            type: "dropdown",
-            label: "Type",
-            field: "type",
-            placeholder: "Select type",
-          },
         ]}
         renderRow={(item) => (
           <div className="block p-4 hover:bg-gray-800 rounded transition flex justify-between items-center shadow-md border border-gray-700">
@@ -140,7 +130,9 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
                 {item.id}
               </span>
               <span className="hidden sm:block text-left text-gray-200  truncate">
-                {formatDateISO(item.firstStarted)}
+                {item.firstStarted != undefined
+                  ? formatDateISO(item.firstStarted)
+                  : "In Queue"}
               </span>
               <Link to={`/bots/${item.participant1?.id}`}>
                 <span className="bg-blue  text-left text-customGreen truncate ">
@@ -181,6 +173,10 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           <p className="text-gray-400 text-sm">No in-progress match requests.</p>
         )}
       </div> */}
+      <RequestMatchModal
+        isOpen={isRequestMatchModalOpen}
+        onClose={() => setIsRequestMatchModalOpen(false)}
+      />
     </div>
   );
 }
