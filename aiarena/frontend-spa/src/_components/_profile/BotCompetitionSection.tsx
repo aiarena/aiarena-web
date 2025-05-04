@@ -5,6 +5,7 @@ import { graphql, useFragment } from "react-relay";
 import SquareButton from "../_props/SquareButton";
 import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
 import JoinCompetitionModal from "./_modals/JoinCompetitionModal";
+import ActiveDot from "../_display/ActiveDot";
 
 interface BotCompetitionSectionProps {
   bot: BotCompetitionSection_bot$key;
@@ -88,7 +89,7 @@ export default function BotCompetitionsSection(
             <div className="space-y-2">
               <div className="flex items-center space-x-2 border-b border-gray-600 pb-2">
                 <div>
-                  <div className="circular-gradient-shadow"></div>
+                  <ActiveDot />
                 </div>
                 <p className="ml-16 text-sm font-semibold text-customGreen">
                   {participation.competition.name}
