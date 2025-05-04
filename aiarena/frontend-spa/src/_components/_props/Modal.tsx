@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 interface ModalProps {
@@ -8,18 +8,29 @@ interface ModalProps {
 }
 
 const Modal = ({ children, onClose, title }: ModalProps) => {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+  }, []);
+
+  function handleClose() {
+    document.body.style.overflow = "unset";
+  }
+
   return createPortal(
     <div className="fixed inset-0 bg-darken-2 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div
-        className="bg-gray-800 text-white rounded-lg shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl"
+        className="overflow-y-auto  bg-gray-800 rounded-lg shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[90vh] "
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="pb-6 px-2 pt-2 overflow-y-auto max-h-screen">
+        <div className="pb-6 px-2 pt-2 max-h-screen">
           <div className="flex items-center justify-between mb-4">
             <p className="text-customGreen text-lg font-bold ml-2">{title}</p>
             <button
               className="text-gray-400 hover:text-gray-200"
-              onClick={onClose}
+              onClick={() => {
+                handleClose();
+                onClose();
+              }}
               aria-label="Close modal"
             >
               <svg
