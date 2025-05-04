@@ -8,7 +8,7 @@ import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
 export default function UserBots() {
   const data = useLazyLoadQuery<ProfileQuery>(
     graphql`
-      query ProfileQuery {
+      query UserBotsQuery {
         viewer {
           ...ProfileBotOverviewList_viewer
         }

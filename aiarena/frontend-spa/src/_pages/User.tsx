@@ -8,7 +8,7 @@ import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
 export default function User() {
   const data = useLazyLoadQuery<ProfileQuery>(
     graphql`
-      query ProfileQuery {
+      query UserQuery {
         viewer {
           ...SettingsProfileSection_viewer
         }

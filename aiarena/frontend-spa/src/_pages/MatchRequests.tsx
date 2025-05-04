@@ -8,7 +8,7 @@ import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
 export default function MatchRequests() {
   const data = useLazyLoadQuery<ProfileQuery>(
     graphql`
-      query ProfileQuery {
+      query MatchRequestsQuery {
         viewer {
           ...RequestMatchSection_viewer
         }
