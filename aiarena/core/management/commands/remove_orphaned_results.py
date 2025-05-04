@@ -15,9 +15,10 @@ class Command(BaseCommand):
 
         orphaned_results = Result.objects.filter(~Q(match__isnull=False))
 
-        self.stdout.write(f"Found {orphaned_results.count()} orphaned results.")
+        count = orphaned_results.count()
+        self.stdout.write(f"Found {count} orphaned results.")
         if dry_run:
             self.stdout.write("Dry run: No results will be deleted.")
         else:
             orphaned_results.delete()
-            self.stdout.write(f"Deleted {orphaned_results.count()} orphaned results.")
+            self.stdout.write(f"Deleted {count} orphaned results.")
