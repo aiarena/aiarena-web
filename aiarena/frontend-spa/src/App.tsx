@@ -6,7 +6,7 @@ import Profile from "./_pages/Profile";
 export default function App() {
   return (
     <Routes>
-      <Route element={<Layout />} path="spa-frontend">
+      <Route element={<Layout />} path="dashboard">
         <Route index element={<Profile />} />
         <Route path="competitions" element={<NotImplemented />} />
         <Route path="about" element={<NotImplemented />} />
