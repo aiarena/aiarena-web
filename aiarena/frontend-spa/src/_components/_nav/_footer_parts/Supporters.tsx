@@ -26,7 +26,9 @@ const SupportersComponent: React.FC<SupportersComponentProps> = (props) => {
   return (
     <div className="mb-16 px-8 text-center flex-1 mx-auto">
       <WrappedTitle title="Funded by You" />
-      <p className="text-lg mb-6">{stats?.randomSupporter?.username}</p>
+      <p className="text-lg mb-6 text-xl font-gugi font-light">
+        {stats?.randomSupporter?.username}
+      </p>
       <p className="text-lg mb-6">
         Thank you for your support! <br /> Your contributions help us keep
         going.

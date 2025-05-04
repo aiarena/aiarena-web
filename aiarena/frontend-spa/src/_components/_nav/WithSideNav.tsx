@@ -25,20 +25,20 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
   return (
     <div className={`${sideNavbar ? "flex" : ""}`}>
       {sideNavbar ? (
-        <aside className="w-1/8 min-w-[200px] bg-gray-900 text-gray-100 flex flex-col border-r border-gray-700">
+        <aside className="w-1/12 min-w-[12em] bg-gray-900 flex flex-col border-r border-gray-700">
           {sideNavbarLinks.map((tab) => (
             <NavLink
               key={tab.name}
               to={tab.path}
               className={({ isActive }) =>
-                `m-2 pl-2 py-2 text-white border-b-2  ${
+                `m-2 pl-2 py-2 text-white border-1 font-gugi shadow shadow-black shadow-sm hover:shadow-md hover:shadow-black sduration-300 ease-in-out transform   ${
                   isActive
-                    ? "bg-gray-800 text-large border-customGreen"
-                    : "border-gray-800 border-b-transparent hover:border-customGreen"
+                    ? "bg-gray-800 text-large border-gray-700 border-b-customGreen border-b-2"
+                    : "border-gray-700 hover:border-b-customGreen border-b-2"
                 }`
               }
             >
-              {tab.name}
+              <p className="text-gray-100 font-thin text-l"> {tab.name}</p>
             </NavLink>
           ))}
         </aside>
