@@ -37,16 +37,17 @@ from aiarena.graphql.types import (
 
 class RequestMatchInput(CleanedInputType):
     bot1: Bot = graphene.ID()
+    bot2: Bot = graphene.ID()
     match_count = graphene.Int()
     # map_selection_type = MapSelectionTypeEnum()
     map_selection_type = graphene.String()
-    opponent: Bot = graphene.ID(default=None)
     map_pool: MapPool = graphene.ID(default=None)
     chosen_map: Map = graphene.ID(default=None)
 
     class Meta:
         required_fields = [
             "bot1",
+            "bot2",
             "match_count",
             "map_selection_type",
         ]
@@ -72,11 +73,11 @@ class RequestMatchInput(CleanedInputType):
             raise GraphQLError(f"Error processing bot1: {str(e)}")
 
     @staticmethod
-    def clean_opponent(bot, info):
+    def clean_bot2(bot, info):
         try:
             return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
         except Exception as e:
-            raise GraphQLError(f"Error processing opponent: {str(e)}")
+            raise GraphQLError(f"Error processing bot2: {str(e)}")
 
     @staticmethod
     def clean_map_pool(map_pool, info):
@@ -108,7 +109,7 @@ class RequestMatch(CleanedInputMutation):
             matches = handle_request_matches(
                 requested_by_user=info.context.user,
                 bot1=input_object.bot1,
-                opponent=input_object.opponent,
+                opponent=input_object.bot2,
                 match_count=input_object.match_count,
                 matchup_race=None,
                 matchup_type="specific_matchup",

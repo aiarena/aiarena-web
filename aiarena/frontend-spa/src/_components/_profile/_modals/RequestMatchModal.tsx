@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import Modal from "../Modal";
-import { graphql, useLazyLoadQuery } from "react-relay";
-import SelectSearch from "@/_components/_props/SearchSelectList";
+import Modal from "@/_components/_props/Modal";
+import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import SelectSearchList from "@/_components/_props/SelectSearchList";
 import { RequestMatchModalBot1Query } from "./__generated__/RequestMatchModalBot1Query.graphql";
 import { RequestMatchModalBot2Query } from "./__generated__/RequestMatchModalBot2Query.graphql";
 import { RequestMatchModalSpecificMapQuery } from "./__generated__/RequestMatchModalSpecificMapQuery.graphql";
 import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModalMapPoolQuery.graphql";
+import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
+import MutationFeedbackMessage from "@/_components/_display/MutationFeedbackMessage";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -27,7 +29,17 @@ interface UploadBotModal {
   onClose: () => void;
 }
 
+type StatusField = "requestMatch";
+interface RequestStatusMessage {
+  successMessage?: string | null;
+  errorMessage?: string | null;
+}
+type RequestStatusMessages = Partial<Record<StatusField, RequestStatusMessage>>;
+
 export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
+  const [requestStatusMessages, setRequestStatusMessages] =
+    useState<RequestStatusMessages>({});
+
   const [bot1IsSearching, setBot1IsSearching] = useState(false);
   const [bot1SearchTerm, setBot1SearchTerm] = useState("");
 
@@ -88,13 +100,13 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   };
 
   const handleSpecificMapSearch = (term: string) => {
-    setBot2IsSearching(true);
-    setBot2SearchTerm(term);
+    setSpecificMapIsSearching(true);
+    setSpecificMapSearchTerm(term);
   };
 
   const handleMapPoolSearch = (term: string) => {
-    setBot2IsSearching(true);
-    setBot2SearchTerm(term);
+    setMapPoolIsSearching(true);
+    setMapPoolSearchTerm(term);
   };
 
   React.useEffect(() => {
@@ -148,8 +160,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         }
       }
     `,
-    queryVariablesBot1,
-    { fetchPolicy: "network-only" }
+    queryVariablesBot1
   );
 
   const bot2Data = useLazyLoadQuery<RequestMatchModalBot2Query>(
@@ -171,8 +182,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         }
       }
     `,
-    queryVariablesBot2,
-    { fetchPolicy: "network-only" }
+    queryVariablesBot2
   );
 
   const specificMapData = useLazyLoadQuery<RequestMatchModalSpecificMapQuery>(
@@ -188,8 +198,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         }
       }
     `,
-    queryVariablesSpecificMap,
-    { fetchPolicy: "network-only" }
+    queryVariablesSpecificMap
   );
 
   const mapPoolData = useLazyLoadQuery<RequestMatchModalMapPoolQuery>(
@@ -205,8 +214,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         }
       }
     `,
-    queryVariablesMapPool,
-    { fetchPolicy: "network-only" }
+    queryVariablesMapPool
   );
 
   React.useEffect(() => {
@@ -289,7 +297,15 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       .filter(Boolean) as Option[];
   }, [mapPoolData]);
 
-  const handleRequestMatch = () => {};
+  const [requestMatch] = useMutation<RequestMatchModalMutation>(graphql`
+    mutation RequestMatchModalMutation($input: RequestMatchInput!) {
+      requestMatch(input: $input) {
+        match {
+          id
+        }
+      }
+    }
+  `);
 
   if (!isOpen) return null;
 
@@ -298,7 +314,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       <div className="space-y-4">
         <div className="mb-4">
           <label className="block text-left font-medium mb-1">Bot 1</label>
-          <SelectSearch
+          <SelectSearchList
             options={bot1Options}
             searchOrSelect={bot1SearchOrSelect}
             onChange={(value) => {
@@ -307,15 +323,14 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               if (value.select) {
                 setBot1SearchTerm(value.searchAndDisplay);
               }
+              console.log(value.select);
             }}
             onSearch={handleBot1Search}
             isLoading={bot1IsSearching}
             placeholder="Search for bots..."
           />
-        </div>
-        <div className="mb-4">
           <label className="block text-left font-medium mb-1">Bot 2</label>
-          <SelectSearch
+          <SelectSearchList
             options={bot2Options}
             searchOrSelect={bot2SearchOrSelect}
             onChange={(value) => {
@@ -329,8 +344,18 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             isLoading={bot2IsSearching}
             placeholder="Search for bots..."
           />
-        </div>{" "}
-        <div className="">
+        </div>
+        <div className="mb-4"></div>{" "}
+        <div className="flex">
+          <label className="block text-left font-medium mb-1 pt-2 pr-2">
+            Match Count:
+          </label>
+          <input
+            value={matchCount}
+            type="number"
+            className="text-right w-16 pl-4 mr-2 focus:ring-customGreen focus:outline-none focus:ring-2  rounded-md bg-gray-900 border border-gray-700 gap-3"
+            onChange={(e) => setMatchCount(parseInt(e.target.value))}
+          ></input>
           <div>
             <button
               onClick={() => {
@@ -356,7 +381,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <label className="block text-left font-medium mb-1">
                 Specific Map
               </label>
-              <SelectSearch
+              <SelectSearchList
                 options={specificMapOptions}
                 searchOrSelect={specificMapSearchOrSelect}
                 onChange={(value) => {
@@ -377,7 +402,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <label className="block text-left font-medium mb-1">
                 Map pool
               </label>
-              <SelectSearch
+              <SelectSearchList
                 options={mapPoolOptions}
                 searchOrSelect={mapPoolSearchOrSelect}
                 onChange={(value) => {
@@ -396,19 +421,49 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         </div>
         <br />
         <br />
-        Match Count:{" "}
-        <input
-          value={matchCount}
-          type="number"
-          className="text-black text-right w-10"
-          onChange={(e) => setMatchCount(parseInt(e.target.value))}
-        ></input>
         <button
-          onClick={handleRequestMatch}
-          className="w-full bg-customGreen text-white py-2 rounded"
+          onClick={() => {
+            requestMatch({
+              variables: {
+                input: {
+                  bot1: bot1SearchOrSelect.select,
+                  bot2: bot2SearchOrSelect.select,
+                  matchCount: matchCount,
+                  mapSelectionType: mapSelectionType,
+
+                  chosenMap:
+                    mapSelectionType == "specific_map"
+                      ? specificMapSearchOrSelect.select
+                      : undefined,
+                  mapPool:
+                    mapSelectionType == "map_pool"
+                      ? mapPoolSearchOrSelect.select
+                      : undefined,
+                },
+              },
+              onCompleted: (response, error) => {
+                {
+                  setRequestStatusMessages((prev) => ({
+                    ...prev,
+                    requestMatch: {
+                      successMessage: response.requestMatch?.match
+                        ? "Match Request submitted!"
+                        : null,
+                      errorMessage: error ? error[0].message : null,
+                    },
+                  }));
+                }
+              },
+            });
+          }}
+          className="w-full bg-customGreen text-white py-2 rounded mt-12"
         >
           Request match
         </button>
+        <MutationFeedbackMessage
+          onSuccess={requestStatusMessages?.requestMatch?.successMessage}
+          onError={requestStatusMessages?.requestMatch?.errorMessage}
+        />
       </div>
     </Modal>
   );
