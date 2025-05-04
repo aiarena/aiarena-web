@@ -5,6 +5,8 @@ import User from "./_pages/User";
 import UserBots from "./_pages/UserBots";
 import MatchRequests from "./_pages/MatchRequests";
 import Dashboard from "./_pages/Dashboard";
+import { getFeatureFlags } from "./_data/featureFlags";
+import Examples from "./_pages/Examples";
 
 export default function App() {
   return (
@@ -17,6 +19,9 @@ export default function App() {
         <Route path="userbots" element={<UserBots />} />
         <Route path="matchrequests" element={<MatchRequests />} />
         <Route path="user" element={<User />} />
+        {getFeatureFlags().examples && (
+          <Route path="examples" element={<Examples />} />
+        )}
       </Route>
     </Routes>
   );

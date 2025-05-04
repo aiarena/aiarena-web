@@ -1,12 +1,12 @@
 import React from "react";
 import { footerLinks } from "@/_data/footerLinks";
 import SocialComponent from "./_footer_parts/SocialNavItem";
-// import ServicesComponent from "./_footer_parts/ServicesNavItem";
 import SupportersComponent from "./_footer_parts/Supporters";
 import SectionDivider from "../_display/SectionDivider";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { FooterQuery } from "./__generated__/FooterQuery.graphql";
-// import SectionDivider from "../_display/SectionDivider";
+import SquareButton from "../_props/SquareButton";
+import { getFeatureFlags } from "@/_data/featureFlags";
 
 const Footer: React.FC = () => {
   const data = useLazyLoadQuery<FooterQuery>(
@@ -33,6 +33,9 @@ const Footer: React.FC = () => {
         <SocialComponent links={footerLinks.socialLinks} />
       </div>
 
+      {getFeatureFlags().examples && (
+        <SquareButton href="examples" text="UI Examples" />
+      )}
       <footer className="p-4 bg-[linear-gradient(90deg,rgba(134,194,50,1)_0%,rgba(50,120,30,1)_100%)] text-center">
         © {new Date().getFullYear()} AI Arena. All rights reserved.
       </footer>

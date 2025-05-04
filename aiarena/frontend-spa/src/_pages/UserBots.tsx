@@ -16,8 +16,6 @@ export default function UserBots() {
     `,
     {}
   );
-
-  // const [activeTab, setActiveTab] = useState("Bots");
   if (!data.viewer) {
     return (
       <>
