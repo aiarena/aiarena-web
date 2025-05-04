@@ -6,11 +6,11 @@ import {
   useMutation,
 } from "react-relay";
 import { JoinCompetitionModal_bot$key } from "./__generated__/JoinCompetitionModal_bot.graphql";
-import { useState } from "react";
 import { JoinCompetitionModalCompetitionsQuery } from "./__generated__/JoinCompetitionModalCompetitionsQuery.graphql";
 // import { useUpdateCompetitionParticipation } from "@/_components/_hooks/useUpdateCompetitionParticipation";
 import Modal from "@/_components/_props/Modal";
 import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
+import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
@@ -85,13 +85,11 @@ export default function JoinCompetitionModal({
       }
     `);
 
-  const [confirmLeave, setConfirmLeave] = useState<string[]>([]);
   const openCompetitions = getNodes(competition_data.competitions).filter(
     (comp) => comp.status == "OPEN"
   );
 
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
-  // const [updateCompetitionParticipation] = useUpdateCompetitionParticipation();
 
   const hasActiveCompetitionParticipation = (competitionId: string) => {
     return (
@@ -103,20 +101,16 @@ export default function JoinCompetitionModal({
     );
   };
 
-  // const updateCompetition = (compId: string, active: boolean) => {
-  //   startTransition(() => {
-  //     // updateCompetitionParticipation(bot.id, compId, active, () => {
-  //     //   // Handle the response here
-  //     // });
-  //   });
-  // };
-
-  const handlePromptConfirmLeave = (compId: string) => {
-    setConfirmLeave((prev) => [...prev, compId]);
-  };
-
-  const handlePromptCancelLeave = (compId: string) => {
-    setConfirmLeave((prev) => [...prev].filter((e) => e != compId));
+  const handleToggleCompetitionParticipation = (compID: string) => {
+    updateCompetitionparticipation({
+      variables: {
+        input: {
+          active: !hasActiveCompetitionParticipation(compID) ? true : false,
+          bot: bot.id,
+          competition: compID,
+        },
+      },
+    });
   };
 
   return isOpen ? (
@@ -141,60 +135,10 @@ export default function JoinCompetitionModal({
                   )}
                 </div>
               </div>
-              {hasActiveCompetitionParticipation(comp.id) ? (
-                <>
-                  {confirmLeave.some((item) => item == comp.id) ? (
-                    <div>
-                      <button
-                        onClick={() => {
-                          updateCompetitionparticipation({
-                            variables: {
-                              input: {
-                                competition: comp.id,
-                                bot: bot.id,
-                                active: false,
-                              },
-                            },
-                          });
-                        }}
-                        className="bg-red-700 p-2 border  border-gray-600"
-                      >
-                        Leave
-                      </button>
-                      <button
-                        onClick={() => handlePromptCancelLeave(comp.id)}
-                        className="p-2 border  border-gray-600"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => handlePromptConfirmLeave(comp.id)}
-                      className="bg-red-700 p-2"
-                    >
-                      Leave
-                    </button>
-                  )}
-                </>
-              ) : (
-                <button
-                  onClick={() => {
-                    updateCompetitionparticipation({
-                      variables: {
-                        input: {
-                          competition: comp.id,
-                          bot: bot.id,
-                          active: true,
-                        },
-                      },
-                    });
-                  }}
-                  className="bg-customGreen p-2"
-                >
-                  Join
-                </button>
-              )}
+              <SimpleToggle
+                enabled={hasActiveCompetitionParticipation(comp.id)}
+                setEnabled={() => handleToggleCompetitionParticipation(comp.id)}
+              />
             </div>
           ))}
       </div>
