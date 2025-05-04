@@ -7,6 +7,7 @@ import MatchRequests from "./_pages/MatchRequests";
 import Dashboard from "./_pages/Dashboard";
 import { getFeatureFlags } from "./_data/featureFlags";
 import Examples from "./_pages/Examples";
+import PageNotFound from "./_pages/PageNotFound";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         {getFeatureFlags().examples && (
           <Route path="examples" element={<Examples />} />
         )}
+        <Route path="*" element={<PageNotFound />} />
       </Route>
     </Routes>
   );
