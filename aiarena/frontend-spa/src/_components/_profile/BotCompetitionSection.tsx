@@ -92,7 +92,7 @@ export default function BotCompetitionsSection(
                 <div>
                   <ActiveDot />
                 </div>
-                <p className="ml-16 text-sm font-semibold text-customGreen">
+                <p className="text-sm font-semibold text-customGreen">
                   {participation.competition.name}
                 </p>
               </div>
