@@ -31,9 +31,11 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
               key={tab.name}
               to={tab.path}
               className={({ isActive }) =>
-                isActive
-                  ? "m-2 bg-gray-800 pl-2 py-2 text-white text-large border-b-2 border-customGreen"
-                  : "m-2 border-gray-800 pl-2 py-2 text-white border-b-2 border-b-transparent hover:border-customGreen"
+                `m-2 pl-2 py-2 text-white border-b-2  ${
+                  isActive
+                    ? "bg-gray-800 text-large border-customGreen"
+                    : "border-gray-800 border-b-transparent hover:border-customGreen"
+                }`
               }
             >
               {tab.name}
@@ -44,17 +46,19 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
         <div className="border-b border-customGreen">
           <div className="flex flex-wrap justify-center space-x-4 py-4 bg-gray-900">
             {sideNavbarLinks.map((tab) => (
-              <a
+              <NavLink
                 key={tab.name}
-                href={tab.path}
-                className={`py-2 text-white  ${
-                  window.location.pathname === tab.path
-                    ? "border-b-2 border-customGreen"
-                    : "border-b-2 border-transparent hover:border-customGreen"
-                }`}
+                to={tab.path}
+                className={({ isActive }) =>
+                  `py-2 text-white  ${
+                    isActive
+                      ? "border-b-2 border-customGreen"
+                      : "border-b-2 border-transparent hover:border-customGreen"
+                  }`
+                }
               >
                 {tab.name}
-              </a>
+              </NavLink>
             ))}
           </div>
         </div>
