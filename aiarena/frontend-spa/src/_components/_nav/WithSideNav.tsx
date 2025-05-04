@@ -25,7 +25,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
   return (
     <div className={`${sideNavbar ? "flex" : ""}`}>
       {sideNavbar ? (
-        <aside className="w-1/8 min-w-[200px] bg-gray-900 text-gray-100 flex flex-col">
+        <aside className="w-1/8 min-w-[200px] bg-gray-900 text-gray-100 flex flex-col border-r border-gray-700">
           {sideNavbarLinks.map((tab) => (
             <NavLink
               key={tab.name}

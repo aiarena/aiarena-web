@@ -20,7 +20,7 @@ export default function ProfileBot(props: ProfileBotProps) {
     props.bot
   );
   return (
-    <div className="rounded-lg bg-gray-800 text-white shadow-md shadow-black">
+    <div className="rounded-lg bg-gray-800 text-white shadow-md shadow-black border border-slate-700">
       {/* Header Section */}
       <BotHeaderSection bot={bot} />
 
