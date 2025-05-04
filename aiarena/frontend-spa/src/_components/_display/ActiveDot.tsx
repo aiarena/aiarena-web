@@ -7,7 +7,7 @@ const ActiveDot: React.FC = () => (
         width: 16px;
         height: 16px;
         position: relative;
-        margin: 5px auto;
+        margin: 5px;
         border-radius: 50%;
         background: rgb(134, 254, 50);
         box-shadow: 0 0 1px rgba(134, 254, 50, 0.5);

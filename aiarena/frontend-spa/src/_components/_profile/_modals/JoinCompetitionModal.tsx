@@ -137,7 +137,7 @@ export default function JoinCompetitionModal({
               </div>
               <SimpleToggle
                 enabled={hasActiveCompetitionParticipation(comp.id)}
-                setEnabled={() => handleToggleCompetitionParticipation(comp.id)}
+                onChange={() => handleToggleCompetitionParticipation(comp.id)}
               />
             </div>
           ))}
