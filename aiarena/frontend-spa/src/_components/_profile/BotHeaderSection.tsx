@@ -5,7 +5,7 @@ import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 import { graphql, useFragment } from "react-relay";
 import { formatDate } from "@/_lib/dateUtils";
-import BotSettingsModal from "./_modals/BotSettingsModal";
+import BotSettingsModal from "./_modals/bot_settings_modal/BotSettingsModal";
 import { BotHeaderSection_bot$key } from "./__generated__/BotHeaderSection_bot.graphql";
 
 export interface BotHeaderSectionProps {
@@ -24,7 +24,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
         ...BotSettingsModal_bot
       }
     `,
-    props.bot
+    props.bot,
   );
 
   // const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);

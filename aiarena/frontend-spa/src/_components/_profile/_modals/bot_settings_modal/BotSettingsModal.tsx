@@ -6,6 +6,7 @@ import Modal from "@/_components/_props/Modal";
 import { BotSettingsModalMutation } from "./__generated__/BotSettingsModalMutation.graphql";
 
 import MutationFeedbackMessage from "@/_components/_display/MutationFeedbackMessage";
+import UpdateBiographyInput from "@/_components/_profile/_modals/bot_settings_modal/UpdateBiographyInput.tsx";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -38,9 +39,10 @@ export default function BotSettingsModal({
         botZipPubliclyDownloadable
         botZipUpdated
         wikiArticle
+        ...UpdateBiographyInput_bot
       }
     `,
-    props.bot
+    props.bot,
   );
 
   const [updateBot, updating] = useMutation<BotSettingsModalMutation>(graphql`
@@ -58,8 +60,6 @@ export default function BotSettingsModal({
     }
   `);
 
-  const [biography, setBiography] = useState(bot.wikiArticle || "");
-  const [hasUnsavedWikiChanges, setHasUnsavedChanges] = useState(false);
   const [requestStatusMessages, setRequestStatusMessages] =
     useState<RequestStatusMessages>({});
 
@@ -72,45 +72,7 @@ export default function BotSettingsModal({
   return isOpen ? (
     <Modal onClose={onClose} title={`${bot.name} - Settings`}>
       <div className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-200">Biography</h3>
-        <textarea
-          className="w-full bg-gray-700 text-white p-2 rounded"
-          rows={4}
-          value={biography}
-          onChange={(e) => {
-            setBiography(e.target.value);
-            setHasUnsavedChanges(e.target.value !== bot.wikiArticle);
-          }}
-        />
-        <button
-          onClick={() => {
-            updateBot({
-              variables: {
-                input: {
-                  id: bot.id,
-                  wikiArticle: biography,
-                },
-              },
-              onCompleted: (response, error) => {
-                {
-                  setRequestStatusMessages((prev) => ({
-                    ...prev,
-                    wikiArticle: {
-                      successMessage: response.updateBot?.bot
-                        ? "Bot Wiki Updated!"
-                        : null,
-                      errorMessage: error ? error[0].message : null,
-                    },
-                  }));
-                }
-              },
-            });
-            setHasUnsavedChanges(false);
-          }}
-          className={`w-full text-white py-2 rounded ${hasUnsavedWikiChanges ? "bg-customGreen" : "bg-slate-500"}`}
-        >
-          Save Biography
-        </button>
+        <UpdateBiographyInput bot={bot} />
         <MutationFeedbackMessage
           onSuccess={requestStatusMessages?.wikiArticle?.successMessage}
           onError={requestStatusMessages?.wikiArticle?.errorMessage}
@@ -119,7 +81,7 @@ export default function BotSettingsModal({
         <button
           className="bg-customGreen text-white py-2 px-4 rounded w-full"
           onClick={() => handleDownload(bot.botZip)}
-          disabled={bot.botZip == "{}" ? true : false}
+          disabled={bot.botZip == "{}"}
         >
           Download Bot Zip
         </button>
@@ -165,7 +127,6 @@ export default function BotSettingsModal({
                 }
               },
             });
-            setHasUnsavedChanges(false);
           }}
         >
           Upload Bot Zip
