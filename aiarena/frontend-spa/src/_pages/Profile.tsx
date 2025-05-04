@@ -6,15 +6,7 @@ import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
 import { ProfileBotOverviewList } from "@/_components/_profile/ProfileBotOverviewList";
 import RequestMatchSection from "@/_components/_profile/RequestMatchSection";
 import SettingsProfileSection from "@/_components/_profile/SettingsProfileSection";
-// import TabNavigation from "@/_components/_nav/TabNav";
-// import PreFooterSpacer from "@/_components/_display/PreFooterSpacer";
-// import SettingsProfileSection from "@/_components/_display/_profile/SettingsProfileSection";
-// import RequestMatchSection from "@/_components/_display/_profile/RequestMatchSection";
-// import { redirect } from "next/navigation";
-// import { ProfileBotOverviewList } from "@/_components/_display/ProfileBotOverviewList";
-// import { graphql, useLazyLoadQuery } from "react-relay";
-// import { pageProfileDashboardQuery } from "./__generated__/pageProfileDashboardQuery.graphql";
-// import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
 
 export default function Profile() {
   const data = useLazyLoadQuery<ProfileQuery>(
@@ -58,7 +50,7 @@ export default function Profile() {
           <div className="mt-8">
             {activeTab === "Bots" && (
               <div id="bot-overview">
-                <Suspense fallback={"_"}>
+                <Suspense fallback={<LoadingSpinnerGray />}>
                   <ProfileBotOverviewList viewer={data.viewer} />
                 </Suspense>
               </div>
@@ -66,7 +58,7 @@ export default function Profile() {
 
             {activeTab === "Requested Matches" && (
               <div id="matches">
-                <Suspense fallback={"_"}>
+                <Suspense fallback={<LoadingSpinnerGray />}>
                   <RequestMatchSection viewer={data.viewer} />
                 </Suspense>
               </div>
@@ -74,7 +66,9 @@ export default function Profile() {
 
             {data && activeTab === "Settings" && (
               <div id="settigns">
-                <SettingsProfileSection viewer={data.viewer} />
+                <Suspense fallback={<LoadingSpinnerGray />}>
+                  <SettingsProfileSection viewer={data.viewer} />
+                </Suspense>
               </div>
             )}
           </div>

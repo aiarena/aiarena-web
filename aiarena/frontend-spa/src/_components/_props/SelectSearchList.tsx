@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
+import LoadingSpinnerGray from "../_display/LoadingSpinnerGray";
 
 // Define types for our component
 interface Option {
@@ -117,7 +118,7 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
           onClick={toggleDropdown}
         >
           {isLoading ? (
-            <div className="animate-spin h-5 w-5 border-2 border-gray-600 border-t-transparent rounded-full" />
+            <LoadingSpinnerGray />
           ) : (
             <svg
               xmlns="http://www.w3.org/2000/svg"
