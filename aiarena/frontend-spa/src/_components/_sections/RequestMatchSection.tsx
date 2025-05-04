@@ -62,7 +62,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
 
   return (
-    <div id="matches" className="space-y-4">
+    <div id="matches">
       {/* Display request limit and requests left */}
       <div className="bg-gray-700 p-4 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
         <div className="text-sm text-gray-300">
@@ -94,6 +94,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         </div>
       </div>
       <FilterableList
+        classes="pt-4"
         data={getNodes(viewer.requestedMatches)}
         fields={[
           "id",

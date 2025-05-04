@@ -28,6 +28,7 @@ interface FilterableListProps<T> {
   defaultSortOrder?: "asc" | "desc";
   fieldLabels?: { [key: string]: string }; // Also change fieldLabels to accept any string
   fieldClasses?: { [key: string]: string };
+  classes?: string;
 }
 
 export default function FilterableList<T>({
@@ -40,6 +41,7 @@ export default function FilterableList<T>({
   defaultSortOrder = "asc",
   fieldLabels = {}, // Default to an empty object if no fieldLabels are provided
   fieldClasses = {},
+  classes = "p-4",
 }: FilterableListProps<T>) {
   const [sortField, setSortField] = useState<string>(fields[defaultFieldSort]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultSortOrder);
@@ -364,7 +366,7 @@ export default function FilterableList<T>({
   const getClassName = (field: string) => fieldClasses[field] || "";
 
   return (
-    <div className="flex flex-col p-4 bg-customBackgroundColor1">
+    <div className={`flex flex-col bg-customBackgroundColor1 ${classes}`}>
       {/* Filter button */}
       <button
         onClick={() => setShowFilterMenu(!showFilterMenu)}

@@ -80,7 +80,7 @@ export default function MainButton({
       <div className="relative inline-block">
         <button
           onClick={handleClick}
-          className={`${className} shadow shadow-black shadow-sm hover:shadow-lg hover:shadow-black relative z-10 hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full  transition duration-300 ease-in-out transform`}
+          className={`${className} shadow shadow-black shadow-sm hover:shadow-lg hover:shadow-black relative z-10 hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold py-2 px-6 rounded-full  transition duration-300 ease-in-out transform`}
           //   disabled={isLoading}
         >
           {text}
