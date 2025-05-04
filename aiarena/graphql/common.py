@@ -66,7 +66,7 @@ class CleanedInputMutation(graphene.Mutation):
     class Meta:
         abstract = True
 
-    errors = graphene.List(ErrorType)
+    errors = graphene.List(graphene.NonNull(ErrorType), required=True)
 
     @classmethod
     def __init_subclass_with_meta__(
