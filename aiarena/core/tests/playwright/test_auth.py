@@ -40,4 +40,9 @@ def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admi
     expect(page.locator("#sidebar-items")).to_contain_text("Logged in: billy")
 
     page.goto(f"{bh.live_server.url}/dashboard/userbots")
-    expect(page.get_by_role("button", name="Create! Bot")).to_be_visible(timeout=5_000)
+    expect(page.get_by_role("button", name="Create Bot")).to_be_visible(timeout=5_000)
+
+
+def test_spa_test_working(page: Page, bh: BrowserHelper):
+    page.goto(f"{bh.live_server.url}/dashboard/userbots")
+    expect(page.locator("text=Home")).to_be_visible()

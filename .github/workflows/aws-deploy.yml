@@ -163,6 +163,9 @@ jobs:
         run: npm run build
         working-directory: aiarena/frontend-spa
 
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput
+
       #  Playwright E2E  
       - name: Install Playwright browsers
         run: playwright install --with-deps
