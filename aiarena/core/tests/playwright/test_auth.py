@@ -27,10 +27,8 @@ def test_login_with_wrong_credentials(page: Page, bh: BrowserHelper):
     )
 
 
-def test_spa_userbots_shows_no_viewer(page: Page):
-    url = f"{SPA_ROOT}/dashboard/userbots"
-
-    page.goto(url)
+def test_spa_userbots_shows_no_viewer(page: Page, bh: BrowserHelper):
+    page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.locator("text=no viewer")).to_be_visible()
 
 
@@ -41,7 +39,5 @@ def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admi
     page.get_by_role("button", name="Log in").click()
     expect(page.locator("#sidebar-items")).to_contain_text("Logged in: billy")
 
-    url = f"{SPA_ROOT}/dashboard/userbots"
-
-    page.goto(url)
+    page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.get_by_role("button", name="Create! Bot")).to_be_visible(timeout=5_000)
