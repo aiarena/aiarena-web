@@ -20,5 +20,5 @@ PRIVATE_STORAGE_CLASS = "private_storage.storage.files.PrivateFileSystemStorage"
 PRIVATE_STORAGE_ROOT = os.path.join(BASE_DIR, "private-media")  # noqa: F405
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")  # noqa: F405
 
-DJANGO_VITE["default"]["dev_mode"] = True  # noqa: F405
+DJANGO_VITE["default"]["dev_mode"] = not RUNNING_TESTS  # noqa: F405
 DJANGO_VITE["default"]["dev_server_port"] = 4000  # noqa: F405
