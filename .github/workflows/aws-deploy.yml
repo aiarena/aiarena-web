@@ -126,7 +126,7 @@ jobs:
           redis-version: '6.x'
       - run: redis-cli ping
 
-      #  Python side
+      #  Python Dependencies
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -134,7 +134,38 @@ jobs:
           cache: 'pip'
       - name: Install Dependencies
         run: pip install -r requirements.DEVELOPMENT.txt
-        
+
+      - name: Generate GraphQL Schema
+        run: python manage.py graphql_schema
+      
+      #  Node.JS Dependencies  
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: aiarena/frontend-spa/package-lock.json
+
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: aiarena/frontend-spa
+
+      #  Front‑end QA
+      - name: Lint React code
+        run: npm run lint
+        working-directory: aiarena/frontend-spa
+
+      - name: Generate Relay artifacts                 
+        run: npm run relay
+        working-directory: aiarena/frontend-spa
+
+      - name: Build Vite bundle                     
+        run: npm run build
+        working-directory: aiarena/frontend-spa
+
+      - name: Collect static files
+        run: python manage.py collectstatic --noinput
+
       #  Playwright E2E  
       - name: Install Playwright browsers
         run: playwright install --with-deps
