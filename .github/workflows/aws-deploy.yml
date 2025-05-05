@@ -135,6 +135,9 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements.DEVELOPMENT.txt
 
+      - name: Generate GraphQL Schema
+        run: python manage.py graphql_schema
+      
       #  Node.JS Dependencies  
       - name: Set up Node
         uses: actions/setup-node@v4
