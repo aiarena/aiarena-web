@@ -118,12 +118,15 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
+      #  Repo + Redis
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
       - uses: shogo82148/actions-setup-redis@v1
         with:
           redis-version: '6.x'
       - run: redis-cli ping
+
+      #  Python side
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -131,7 +134,9 @@ jobs:
           cache: 'pip'
       - name: Install Dependencies
         run: pip install -r requirements.DEVELOPMENT.txt
-      - name: Install Playwrighgt browsers
+        
+      #  Playwright E2E  
+      - name: Install Playwright browsers
         run: playwright install --with-deps
       - name: Grant aiarena user full access
         env:
@@ -143,6 +148,9 @@ jobs:
         env:
           NOFAKE_REDIS: 1
         run: pytest -m playwright --tracing retain-on-failure --junit-xml test-results/pytest-playwright.xml
+      
+      
+      #   Reports 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
         if: always()
