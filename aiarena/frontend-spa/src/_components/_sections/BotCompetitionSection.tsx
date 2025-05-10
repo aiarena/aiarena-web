@@ -201,7 +201,11 @@ export default function BotCompetitionsSection(
                   {(participation.crashPerc ?? 0).toFixed(1)}%
                 </span>
               </div>
-              <a href=""> Explore more stats</a>
+              <a
+                href={`/competitions/stats/${extractRelayID(participation.id, "CompetitionParticipationType")}`}
+              >
+                Explore more stats
+              </a>
             </div>
           </div>
         ))}
