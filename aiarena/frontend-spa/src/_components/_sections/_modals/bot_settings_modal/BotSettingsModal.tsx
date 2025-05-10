@@ -32,7 +32,6 @@ export default function BotSettingsModal({
         botZipPubliclyDownloadable
         botZipUpdated
         wikiArticle
-        ...UpdateBiographyInput_bot
         ...BotBiographyModal_bot
       }
     `,
