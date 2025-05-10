@@ -47,7 +47,7 @@ export default function BotAllParticipationsModal({
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
 
   return isOpen ? (
-    <Modal onClose={onClose} title={`${bot.name} - All competitions`}>
+    <Modal onClose={onClose} title={`All Competitions - ${bot.name}`}>
       <div className="space-y-4">
         {botCompetitionParticipations &&
           botCompetitionParticipations.length > 0 &&

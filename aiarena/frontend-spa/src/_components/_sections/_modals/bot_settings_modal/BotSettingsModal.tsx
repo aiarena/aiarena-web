@@ -70,7 +70,7 @@ export default function BotSettingsModal({
   };
 
   return isOpen ? (
-    <Modal onClose={onClose} title={`${bot.name} - Settings`}>
+    <Modal onClose={onClose} title={`Settings - ${bot.name}`}>
       <div className="space-y-4">
         <UpdateBiographyInput bot={bot} />
         <MutationFeedbackMessage

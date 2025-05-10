@@ -114,7 +114,7 @@ export default function JoinCompetitionModal({
   };
 
   return isOpen ? (
-    <Modal onClose={onClose} title={`${bot.name} - Edit competitions`}>
+    <Modal onClose={onClose} title={`Edit Competitions - ${bot.name}`}>
       <div className="space-y-4">
         {openCompetitions &&
           openCompetitions.length > 0 &&
