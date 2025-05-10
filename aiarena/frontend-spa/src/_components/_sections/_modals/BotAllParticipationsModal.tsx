@@ -69,7 +69,7 @@ export default function BotAllParticipationsModal({
                       Opened: {formatDate(participation.competition.dateOpened)}
                     </p>
                     <p>
-                      Closed:
+                      Closed:{" "}
                       {participation.competition.dateClosed != null
                         ? formatDate(participation.competition.dateClosed)
                         : ""}
