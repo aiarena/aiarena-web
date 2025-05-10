@@ -1,6 +1,6 @@
 import { Suspense, useState } from "react";
 
-import { getNodes } from "@/_lib/relayHelpers";
+import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
 import SquareButton from "../_props/SquareButton";
 import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
@@ -84,7 +84,7 @@ export default function BotCompetitionsSection(
         {activeCompetitions.map((participation) => (
           <div
             key={participation.id}
-            className="cursor-pointer border border-gray-600 rounded-lg bg-gray-700 hover:bg-gray-700 hover:border-gray-500 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="border border-gray-600 rounded-lg bg-gray-700 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {/* Left Column: Competition Name & Stats */}
             <div className="space-y-2">
@@ -92,9 +92,12 @@ export default function BotCompetitionsSection(
                 <div>
                   <ActiveDot />
                 </div>
-                <p className="text-sm font-semibold text-customGreen">
+                <a
+                  href={`/competitions/${extractRelayID(participation.competition.id, "CompetitionType")}`}
+                  className="text-sm font-semibold"
+                >
                   {participation.competition.name}
-                </p>
+                </a>
               </div>
               <div className="text-sm text-left flex flex-wrap ">
                 <span className="font-bold text-gray-300 mr-4 block ">
@@ -198,7 +201,7 @@ export default function BotCompetitionsSection(
                   {(participation.crashPerc ?? 0).toFixed(1)}%
                 </span>
               </div>
-              <div></div>
+              <a href=""> Explore more stats</a>
             </div>
           </div>
         ))}

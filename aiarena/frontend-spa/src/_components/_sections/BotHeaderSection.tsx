@@ -7,6 +7,8 @@ import { graphql, useFragment } from "react-relay";
 import { formatDate } from "@/_lib/dateUtils";
 import BotSettingsModal from "./_modals/bot_settings_modal/BotSettingsModal";
 import { BotHeaderSection_bot$key } from "./__generated__/BotHeaderSection_bot.graphql";
+import UnderlineButton from "../_props/UnderlineButton";
+import { extractRelayID } from "@/_lib/relayHelpers";
 
 export interface BotHeaderSectionProps {
   bot: BotHeaderSection_bot$key;
@@ -24,7 +26,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
         ...BotSettingsModal_bot
       }
     `,
-    props.bot,
+    props.bot
   );
 
   // const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
@@ -37,15 +39,18 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
         <div className="flex justify-between flsex-wrap">
           <div className="flex items-center flex-wrap">
             {/* Bot Name */}
-            <h3 className="font-bold text-lg text-customGreen font-gugi font-light">
+            <a
+              href={`/bots/${extractRelayID(bot.id, "BotType")}`}
+              className="font-bold text-lg text-customGreen font-gugi font-light"
+            >
               {bot.name}
-            </h3>
+            </a>
 
             {/*/!* Trophy Icon and Count *!/*/}
             {/*<div*/}
             {/*  className="flex items-center cursor-pointer hover:bg-slate-700 rounded p-1 ml-2"*/}
             {/*  onClick={() => setTrophiesModalOpen(true)}*/}
-            {/*>*/}
+            {/*>
             {/*  <Image*/}
             {/*    src={`${getPublicPrefix()}/icons/trophy.svg`}*/}
             {/*    alt="Trophy Icon"*/}
@@ -96,10 +101,9 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
           </div>
           {/* Right list */}
           <div>
-            {" "}
-            <button className="mt-2 text-customGreen underline">
-              Activity log
-            </button>
+            <UnderlineButton onClick={() => console.log("clicked")}>
+              View all participations
+            </UnderlineButton>
           </div>
         </div>
       </div>
