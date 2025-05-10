@@ -10,6 +10,7 @@ import { JoinCompetitionModalCompetitionsQuery } from "./__generated__/JoinCompe
 import Modal from "@/_components/_props/Modal";
 import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
 import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
+import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
@@ -80,9 +81,17 @@ export default function JoinCompetitionModal({
               id
             }
           }
+          errors {
+            field
+            messages
+          }
         }
       }
     `);
+  const handlers = useSnackbarErrorHandlers(
+    "updateCompetitionParticipation",
+    "Bot Participation Updated!"
+  );
 
   const openCompetitions = getNodes(competition_data.competitions).filter(
     (comp) => comp.status == "OPEN"
@@ -109,6 +118,7 @@ export default function JoinCompetitionModal({
           competition: compID,
         },
       },
+      ...handlers,
     });
   };
 

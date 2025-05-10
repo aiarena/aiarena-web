@@ -7,7 +7,7 @@ import { RequestMatchModalBot2Query } from "./__generated__/RequestMatchModalBot
 import { RequestMatchModalSpecificMapQuery } from "./__generated__/RequestMatchModalSpecificMapQuery.graphql";
 import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModalMapPoolQuery.graphql";
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
-import MutationFeedbackMessage from "@/_components/_display/MutationFeedbackMessage";
+import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -29,17 +29,7 @@ interface UploadBotModal {
   onClose: () => void;
 }
 
-type StatusField = "requestMatch";
-interface RequestStatusMessage {
-  successMessage?: string | null;
-  errorMessage?: string | null;
-}
-type RequestStatusMessages = Partial<Record<StatusField, RequestStatusMessage>>;
-
 export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
-  const [requestStatusMessages, setRequestStatusMessages] =
-    useState<RequestStatusMessages>({});
-
   const [bot1IsSearching, setBot1IsSearching] = useState(false);
   const [bot1SearchTerm, setBot1SearchTerm] = useState("");
 
@@ -303,9 +293,18 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         match {
           id
         }
+        errors {
+          field
+          messages
+        }
       }
     }
   `);
+
+  const handlers = useSnackbarErrorHandlers(
+    "requestMatch",
+    "Match Request Updated!"
+  );
 
   if (!isOpen) return null;
 
@@ -441,29 +440,13 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                       : undefined,
                 },
               },
-              onCompleted: (response, error) => {
-                {
-                  setRequestStatusMessages((prev) => ({
-                    ...prev,
-                    requestMatch: {
-                      successMessage: response.requestMatch?.match
-                        ? "Match Request submitted!"
-                        : null,
-                      errorMessage: error ? error[0].message : null,
-                    },
-                  }));
-                }
-              },
+              ...handlers,
             });
           }}
           className="w-full bg-customGreen text-white py-2 rounded mt-12"
         >
           Request match
         </button>
-        <MutationFeedbackMessage
-          onSuccess={requestStatusMessages?.requestMatch?.successMessage}
-          onError={requestStatusMessages?.requestMatch?.errorMessage}
-        />
       </div>
     </Modal>
   );
