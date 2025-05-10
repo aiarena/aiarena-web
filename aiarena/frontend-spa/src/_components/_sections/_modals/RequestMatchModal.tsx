@@ -393,6 +393,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                 onSearch={handleSpecificMapSearch}
                 isLoading={specificMapIsSearching}
                 placeholder="Search for specific map..."
+                maxHeight="small"
               />
             </div>
           ) : null}
@@ -414,6 +415,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                 onSearch={handleMapPoolSearch}
                 isLoading={mapPoolIsSearching}
                 placeholder="Search for map pool..."
+                maxHeight="small"
               />
             </div>
           ) : null}
