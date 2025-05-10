@@ -75,7 +75,6 @@ export default function BotSettingsModal({
     <>
       <Modal onClose={onClose} title={`${bot.name} - Settings`}>
         <div className="space-y-4">
-          {/* <UpdateBiographyInput bot={bot} /> */}
           <button
             className="bg-customGreen text-white py-2 px-4 rounded w-full"
             onClick={() => setBiographyModalOpen(true)}
