@@ -6,9 +6,15 @@ import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
 import MainButton from "@/_components/_props/MainButton";
 import SquareButton from "@/_components/_props/SquareButton";
 import { useState } from "react";
+import MDEditor from "@uiw/react-md-editor";
+import rehypeSanitize from "rehype-sanitize";
 
 export default function Examples() {
   const [toggle, setToggle] = useState(true);
+  const [markdown, setMarkdown] = useState<string | undefined>(
+    `**Hello world!!!**`
+  );
+
   return (
     <div>
       <h1>Examples</h1>
@@ -42,6 +48,18 @@ export default function Examples() {
       <div className="p-10 space-y-4">
         <h4>Decoration</h4>
         <ActiveDot />
+      </div>
+
+      <div className="p-10 space-y-4">
+        <h4>Markdown</h4>
+        <h3>Editor</h3>
+        <MDEditor
+          value={markdown}
+          onChange={setMarkdown}
+          previewOptions={{
+            rehypePlugins: [[rehypeSanitize]],
+          }}
+        />
       </div>
     </div>
   );
