@@ -67,13 +67,14 @@ body {
 }
 
 a {
-  /* color: rgba(134, 194, 50, 1); */
+  color: rgba(134, 194, 50, 1);
   /* color: theme(colors.cusotm green) */
   text-decoration: none;
 }
 
 a:hover {
   color: white;
+  cursor: pointer;
 }
 
 button:hover {
