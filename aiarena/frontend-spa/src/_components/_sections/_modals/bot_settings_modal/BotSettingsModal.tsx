@@ -5,21 +5,14 @@ import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.g
 import Modal from "@/_components/_props/Modal";
 import { BotSettingsModalMutation } from "./__generated__/BotSettingsModalMutation.graphql";
 
-import MutationFeedbackMessage from "@/_components/_display/MutationFeedbackMessage";
 import UpdateBiographyInput from "@/_components/_sections/_modals/bot_settings_modal/UpdateBiographyInput";
+import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
   isOpen: boolean;
   onClose: () => void;
 }
-
-type StatusField = "botZipUpload" | "wikiArticle";
-interface RequestStatusMessage {
-  successMessage?: string | null;
-  errorMessage?: string | null;
-}
-type RequestStatusMessages = Partial<Record<StatusField, RequestStatusMessage>>;
 
 export default function BotSettingsModal({
   isOpen,
@@ -56,12 +49,13 @@ export default function BotSettingsModal({
           wikiArticle
           botZip
         }
+        errors {
+          field
+          messages
+        }
       }
     }
   `);
-
-  const [requestStatusMessages, setRequestStatusMessages] =
-    useState<RequestStatusMessages>({});
 
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
 
@@ -69,14 +63,16 @@ export default function BotSettingsModal({
     window.location.href = `/${url}`;
   };
 
+  const handlers = useSnackbarErrorHandlers(
+    "updateBot",
+    "Bot Settings Updated!"
+  );
+
   return isOpen ? (
     <Modal onClose={onClose} title={`Settings - ${bot.name}`}>
       <div className="space-y-4">
         <UpdateBiographyInput bot={bot} />
-        <MutationFeedbackMessage
-          onSuccess={requestStatusMessages?.wikiArticle?.successMessage}
-          onError={requestStatusMessages?.wikiArticle?.errorMessage}
-        />
+
         <h3 className="text-lg font-bold text-gray-200">Bot Settings</h3>
         <button
           className="bg-customGreen text-white py-2 px-4 rounded w-full"
@@ -113,28 +109,12 @@ export default function BotSettingsModal({
               uploadables: {
                 "input.botZip": botZipFile,
               },
-              onCompleted: (response, error) => {
-                {
-                  setRequestStatusMessages((prev) => ({
-                    ...prev,
-                    botZipUpload: {
-                      successMessage: response.updateBot?.bot
-                        ? "Bot Zip Updated!"
-                        : null,
-                      errorMessage: error ? error[0].message : null,
-                    },
-                  }));
-                }
-              },
+              ...handlers,
             });
           }}
         >
           Upload Bot Zip
         </button>
-        <MutationFeedbackMessage
-          onSuccess={requestStatusMessages?.botZipUpload?.successMessage}
-          onError={requestStatusMessages?.botZipUpload?.errorMessage}
-        />
         <div className="flex items-center mt-2">
           <input
             type="checkbox"
