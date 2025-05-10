@@ -9,7 +9,7 @@ import useBackendErrors, {
 
 export default function useSnackbarErrorHandlers(
   mutationName: string,
-  successMessage: string,
+  successMessage: string
 ) {
   const { enqueueSnackbar } = useSnackbar();
   const {
@@ -24,12 +24,15 @@ export default function useSnackbarErrorHandlers(
       return;
     }
 
-    enqueueSnackbar(<span>{messages.join("; ")}</span>, { variant: "error" });
+    enqueueSnackbar(
+      <span className="overflow-auto">{messages.join("; ")}</span>,
+      { variant: "error" }
+    );
   }, [enqueueSnackbar, backendErrors]);
 
   const handleMutationCompleted = (
     response: OnCompletedResponse,
-    errors: GraphqlError[] | null,
+    errors: GraphqlError[] | null
   ) => {
     const success = onMutationCompleted(response, errors);
 
