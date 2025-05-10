@@ -9,6 +9,7 @@ import BotSettingsModal from "./_modals/bot_settings_modal/BotSettingsModal";
 import { BotHeaderSection_bot$key } from "./__generated__/BotHeaderSection_bot.graphql";
 import UnderlineButton from "../_props/UnderlineButton";
 import { extractRelayID } from "@/_lib/relayHelpers";
+import BotAllParticipationsModal from "./_modals/BotAllParticipationsModal";
 
 export interface BotHeaderSectionProps {
   bot: BotHeaderSection_bot$key;
@@ -24,6 +25,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
         type
         botZipUpdated
         ...BotSettingsModal_bot
+        ...BotAllParticipationsModal_bot
       }
     `,
     props.bot
@@ -31,7 +33,8 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
 
   // const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
-
+  const [isAllParticipationsModalOpen, setAllParticipationsModalOpen] =
+    useState(false);
   return (
     <div className="p-4 border-b border-gray-600 bg-gray-900 rounded-t-lg">
       {/* Grid Layout: Mobile: 1 col, Desktop: 3 cols */}
@@ -101,7 +104,11 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
           </div>
           {/* Right list */}
           <div>
-            <UnderlineButton onClick={() => console.log("clicked")}>
+            <UnderlineButton
+              onClick={() => {
+                setAllParticipationsModalOpen(true);
+              }}
+            >
               View all participations
             </UnderlineButton>
           </div>
@@ -121,6 +128,14 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
           bot={bot}
           isOpen={isSettingsModalOpen}
           onClose={() => setSettingsModalOpen(false)}
+        />
+      )}
+
+      {isAllParticipationsModalOpen && (
+        <BotAllParticipationsModal
+          bot={bot}
+          isOpen={isAllParticipationsModalOpen}
+          onClose={() => setAllParticipationsModalOpen(false)}
         />
       )}
     </div>

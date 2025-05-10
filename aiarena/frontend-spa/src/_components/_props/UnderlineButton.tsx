@@ -10,7 +10,7 @@ export default function UnderlineButton({
 }: UnderlineButtonProps) {
   return (
     <button
-      onClick={() => onClick}
+      onClick={() => onClick()}
       className="mt-2 text-customGreen underline hover:text-white"
     >
       {children}
