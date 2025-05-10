@@ -61,6 +61,21 @@
 /*  }*/
 /*}*/
 
+@layer base {
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  h2 {
+    font-size: var(--text-2xl);
+  }
+  h3 {
+    font-size: var(--text-xl);
+  }
+  h4 {
+    font-size: var(--text-xl);
+  }
+}
+
 body {
   color: rgb(225, 225, 225); /* Apply the white text color */
   background: linear-gradient(rgb(12, 12, 12), rgb(20, 20, 20));

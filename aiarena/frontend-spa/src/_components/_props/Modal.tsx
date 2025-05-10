@@ -7,23 +7,32 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  keepUnsetOnClose?: boolean;
+  size?: "m" | "l";
 }
 
-const Modal = ({ children, onClose, isOpen, title }: ModalProps) => {
+const Modal = ({
+  children,
+  onClose,
+  isOpen,
+  title,
+  keepUnsetOnClose,
+  size = "m",
+}: ModalProps) => {
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen && !keepUnsetOnClose) {
       document.body.style.overflow = "unset";
     } else {
       document.body.style.overflow = "hidden";
     }
-  }, [isOpen]);
+  }, [isOpen, keepUnsetOnClose]);
 
   if (!isOpen) return null;
 
   return createPortal(
     <div className="fixed inset-0 bg-darken-2 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div
-        className="   bg-gray-800 rounded-lg shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl "
+        className={` bg-gray-800 rounded-lg shadow-md w-full  ${size == "m" ? "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl" : null} ${size == "l" ? "max-w-screen" : null}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="pb-6 px-2 pt-2 max-h-screen">
