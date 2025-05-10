@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { createPortal } from "react-dom";
+import SectionDivider from "../_display/SectionDivider";
 
 interface ModalProps {
   children: ReactNode;
@@ -23,8 +24,9 @@ const Modal = ({ children, onClose, title }: ModalProps) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="pb-6 px-2 pt-2 max-h-screen">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-customGreen text-lg font-bold ml-2">{title}</p>
+          <div className="flex items-center justify-between pb-2">
+            <p className="text-lg font-bold ml-2 truncate">{title}</p>
+
             <button
               className="text-gray-400 hover:text-gray-200"
               onClick={() => {
@@ -49,7 +51,8 @@ const Modal = ({ children, onClose, title }: ModalProps) => {
               </svg>
             </button>
           </div>
-          <div className="p-4">{children}</div>
+          <SectionDivider color="gray" />
+          <div className="pt-8 p-4">{children}</div>
         </div>
       </div>
     </div>,
