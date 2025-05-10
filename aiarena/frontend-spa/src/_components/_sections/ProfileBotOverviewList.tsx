@@ -57,10 +57,22 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
       <div className="flex justify-between ">
         <div className="flex gap-2 pb-2 mt-auto flex-wrap">
           {viewer.activeBotsLimit ? (
-            <span className="flex word-wrap">
-              {activeBotParticipation} / {viewer.activeBotsLimit} active
-              competition participations.
-            </span>
+            <div className="block">
+              <p className="pb-1">
+                {activeBotParticipation} / {viewer.activeBotsLimit} active
+                competition participations.
+              </p>
+              <p>
+                Want more? Consider{" "}
+                <a
+                  className="cursor-pointer"
+                  href={"https://www.patreon.com/aiarena"}
+                >
+                  supporting us
+                </a>
+                .
+              </p>
+            </div>
           ) : null}
         </div>
         {/* <h2 className="text-2xl font-bold text-customGreen mb-4">Your Bots</h2> */}
