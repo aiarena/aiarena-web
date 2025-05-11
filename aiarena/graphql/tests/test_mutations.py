@@ -545,7 +545,7 @@ class TestCreateBot(GraphQLTest):
             variables={
                 "input": {
                     "name": "NotSerral",
-                    "playsRace": BotRace.terran(),
+                    "playsRace": "Qm90UmFjZVR5cGU6Mw==",
                     "botDataEnabled": False,
                     "type": "PYTHON",
                     "botZip": zip_file,
@@ -553,6 +553,10 @@ class TestCreateBot(GraphQLTest):
             },
         )
         assert not Bot.objects.filter(user=user).exists()
+
+
+#  "playsRace": BotRace.terran(),
+# "playsRace": "Qm90UmFjZVR5cGU6Mw==",
 
 
 class TestUpdateBot(GraphQLTest):
