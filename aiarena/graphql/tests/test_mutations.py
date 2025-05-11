@@ -1,4 +1,4 @@
-from aiarena.core.models import CompetitionParticipation, Match, MatchParticipation
+from aiarena.core.models import Bot, BotRace, CompetitionParticipation, Match, MatchParticipation
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.graphql import BotType, CompetitionType, MapPoolType, MapType
 
@@ -518,6 +518,41 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
         # Verify the competition participation was not created.
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition, active=True).exists()
         # assert CompetitionParticipation.objects.filter(bot__user=user).count() == 5
+
+
+class TestCreateBot(GraphQLTest):
+    mutationn_name = "uploadBot"
+    mutation = """
+        mutation($input: CreateBotInput!){
+            createBot(
+                input: $input) {
+                    bot {
+                        id
+                    }
+                    errors {
+                        field
+                        messages
+                    }
+                }
+            }
+    """
+
+    def test_create_bot_success(self, user, zip_file):
+        assert not Bot.objects.filter(user=user).exists()
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "name": "NotSerral",
+                    "playsRace": BotRace.terran(),
+                    "botDataEnabled": False,
+                    "type": "PYTHON",
+                    "botZip": zip_file,
+                }
+            },
+        )
+        assert not Bot.objects.filter(user=user).exists()
 
 
 class TestUpdateBot(GraphQLTest):
