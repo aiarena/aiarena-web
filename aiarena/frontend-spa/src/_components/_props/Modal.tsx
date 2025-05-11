@@ -62,8 +62,8 @@ const Modal = ({
               </svg>
             </button>
           </div>
-          <SectionDivider color="gray" />
-          <div className="pt-8 p-4">{children}</div>
+          <SectionDivider color="gray" className="mb-1" />
+          <div className=" p-4 overflow-y-auto max-h-[90vh]">{children}</div>
         </div>
       </div>
     </div>,
