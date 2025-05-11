@@ -20,6 +20,7 @@ from aiarena.graphql.common import (
     raise_graphql_error_from_exception,
 )
 from aiarena.graphql.types import (
+    BotRaceType,
     BotType,
     CompetitionParticipationType,
     CompetitionType,
@@ -209,6 +210,61 @@ class UpdateCompetitionParticipation(CleanedInputMutation):
         return cls(errors=[], competition_participation=competition_participation)
 
 
+class BotTypesEnum(graphene.Enum):
+    CPPWIN32 = "cppwin32"
+    CPPLINUX = "cpplinux"
+    DOTNETCORE = "dotnetcore"
+    JAVA = "java"
+    NODEJS = "nodejs"
+    PYTHON = "python"
+
+
+class UploadBotInput(CleanedInputType):
+    name = graphene.String()
+    bot_data_enabled = graphene.Boolean(default=True)
+    bot_zip = Upload()
+    plays_race = graphene.ID(required=True)
+    type = BotTypesEnum()
+
+    class Meta:
+        required_fields = ["name", "bot_zip", "plays_race", "type"]
+
+    @staticmethod
+    def clean_plays_race(plays_race, info):
+        try:
+            return graphene.Node.get_node_from_global_id(info=info, global_id=plays_race, only_type=BotRaceType)
+        except Exception as e:
+            raise ValidationError(e)
+
+
+class UploadBot(CleanedInputMutation):
+    bot = graphene.Field(BotType)
+
+    class Meta:
+        input_class = UploadBotInput
+
+    @classmethod
+    def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UploadBotInput):
+        if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):
+            raise Exception("Bot uploads are currently disabled.")
+
+        bot = Bot(
+            user=info.context.user,
+            name=input_object.name,
+            bot_zip=input_object.bot_zip,
+            bot_data_enabled=input_object.bot_data_enabled,
+            plays_race=input_object.plays_race,
+            type=input_object.type.value,
+        )
+        try:
+            bot.full_clean()
+            bot.save()
+        except ValidationError as e:
+            raise_graphql_error_from_exception(e)
+
+        return cls(errors=[], bot=bot)
+
+
 class UpdateBotInput(CleanedInputType):
     id = graphene.ID()
     bot_zip_publicly_downloadable = graphene.Boolean()
@@ -300,6 +356,7 @@ class SignOut(graphene.Mutation):
 
 class Mutation(graphene.ObjectType):
     request_match = RequestMatch.Field()
+    upload_bot = UploadBot.Field()
     update_bot = UpdateBot.Field()
     update_competition_participation = UpdateCompetitionParticipation.Field()
     password_sign_in = PasswordSignIn.Field()
