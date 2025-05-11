@@ -1,15 +1,15 @@
 import { useState } from "react";
 
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-// import TrophiesModal from "@/_components/_display/_profile/BotTrophiesModal";
 
 import { graphql, useFragment } from "react-relay";
 import { formatDate } from "@/_lib/dateUtils";
 import BotSettingsModal from "./_modals/bot_settings_modal/BotSettingsModal";
 import { BotHeaderSection_bot$key } from "./__generated__/BotHeaderSection_bot.graphql";
 import UnderlineButton from "../_props/UnderlineButton";
-import { extractRelayID } from "@/_lib/relayHelpers";
+import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
 import BotAllParticipationsModal from "./_modals/BotAllParticipationsModal";
+import BotTrophiesModal from "./_modals/BotTrophiesModal";
 
 export interface BotHeaderSectionProps {
   bot: BotHeaderSection_bot$key;
@@ -24,14 +24,24 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
         created
         type
         botZipUpdated
+        trophies {
+          edges {
+            node {
+              name
+              trophyIconImage
+              trophyIconName
+            }
+          }
+        }
         ...BotSettingsModal_bot
         ...BotAllParticipationsModal_bot
+        ...BotTrophiesModal_bot
       }
     `,
     props.bot
   );
 
-  // const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
+  const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
   const [isAllParticipationsModalOpen, setAllParticipationsModalOpen] =
     useState(false);
@@ -50,20 +60,21 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
             </a>
 
             {/*/!* Trophy Icon and Count *!/*/}
-            {/*<div*/}
-            {/*  className="flex items-center cursor-pointer hover:bg-slate-700 rounded p-1 ml-2"*/}
-            {/*  onClick={() => setTrophiesModalOpen(true)}*/}
-            {/*>
-            {/*  <Image*/}
-            {/*    src={`${getPublicPrefix()}/icons/trophy.svg`}*/}
-            {/*    alt="Trophy Icon"*/}
-            {/*    width={20}*/}
-            {/*    height={20}*/}
-            {/*  />*/}
-            {/*  <span className="ml-1 text-lg font-bold text-gray-300">*/}
-            {/*     {bot?.trophies?.length || 0} */}
-            {/*  </span>*/}
-            {/*</div>*/}
+
+            <div
+              className="flex items-center cursor-pointer hover:bg-slate-700 rounded p-1 ml-2"
+              onClick={() => setTrophiesModalOpen(true)}
+            >
+              <img
+                src={`${getPublicPrefix()}/icons/trophy.svg`}
+                alt="Trophy Icon"
+                width={20}
+                height={20}
+              />
+              <span className="ml-1 text-lg font-bold text-gray-300">
+                {getNodes(bot?.trophies).length || 0}
+              </span>
+            </div>
           </div>
 
           {/* Settings Button */}
@@ -116,13 +127,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
       </div>
 
       {/* Modals */}
-      {/* {isTrophiesModalOpen && (
-        <TrophiesModal
-          bot={bot}
-          isOpen={isTrophiesModalOpen}
-          onClose={() => setTrophiesModalOpen(false)}
-        />
-      )} */}
+
       {isSettingsModalOpen && (
         <BotSettingsModal
           bot={bot}
@@ -136,6 +141,13 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
           bot={bot}
           isOpen={isAllParticipationsModalOpen}
           onClose={() => setAllParticipationsModalOpen(false)}
+        />
+      )}
+      {isTrophiesModalOpen && (
+        <BotTrophiesModal
+          bot={bot}
+          isOpen={isTrophiesModalOpen}
+          onClose={() => setTrophiesModalOpen(false)}
         />
       )}
     </div>

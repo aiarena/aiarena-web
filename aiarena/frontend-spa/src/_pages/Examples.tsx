@@ -5,10 +5,26 @@ import WrappedTitle from "@/_components/_display/WrappedTitle";
 import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
 import MainButton from "@/_components/_props/MainButton";
 import SquareButton from "@/_components/_props/SquareButton";
+import ProfileBot from "@/_components/_sections/ProfileBot";
 import { useState } from "react";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { ExamplesQuery } from "./__generated__/ExamplesQuery.graphql";
 
 export default function Examples() {
   const [toggle, setToggle] = useState(true);
+  const bot = useLazyLoadQuery<ExamplesQuery>(
+    graphql`
+      query ExamplesQuery($id: ID!) {
+        node(id: $id) {
+          ... on BotType {
+            ...ProfileBot_bot
+          }
+        }
+      }
+    `,
+    { id: decodeURIComponent("Qm90VHlwZToyNDg=") }
+  );
+
   return (
     <div>
       <h1>Examples</h1>
@@ -42,6 +58,11 @@ export default function Examples() {
       <div className="p-10 space-y-4">
         <h4>Decoration</h4>
         <ActiveDot />
+      </div>
+
+      <div>
+        <h4>Eris - as appears on console.</h4>
+        {bot.node && <ProfileBot bot={bot.node} />}
       </div>
     </div>
   );
