@@ -1,7 +1,7 @@
 import logging
 
 from django.db import models
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import m2m_changed, post_delete
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.html import escape
@@ -92,3 +92,10 @@ def delete_orphan_match_tags(sender, **kwargs):
         for mt in MatchTag.objects.filter(pk__in=kwargs["pk_set"]):
             if not mt.match_set.all():
                 mt.delete()
+
+
+@receiver(post_delete, sender=Match)
+def delete_result_on_match_delete(sender, instance, **kwargs):
+    result = instance.result
+    if result:
+        result.delete()
