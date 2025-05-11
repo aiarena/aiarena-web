@@ -20,7 +20,7 @@ const Modal = ({ children, onClose, title }: ModalProps) => {
   return createPortal(
     <div className="fixed inset-0 bg-darken-2 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div
-        className="overflow-y-auto  bg-gray-800 rounded-lg shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl max-h-[90vh] "
+        className="bg-gray-800 rounded-lg shadow-md w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="pb-6 px-2 pt-2 max-h-screen">
@@ -51,8 +51,8 @@ const Modal = ({ children, onClose, title }: ModalProps) => {
               </svg>
             </button>
           </div>
-          <SectionDivider color="gray" />
-          <div className="pt-8 p-4">{children}</div>
+          <SectionDivider color="gray" className="mb-1" />
+          <div className=" p-4 overflow-y-auto max-h-[90vh]">{children}</div>
         </div>
       </div>
     </div>,
