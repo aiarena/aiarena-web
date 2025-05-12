@@ -160,7 +160,6 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             value={type}
             onChange={(e) => {
               setType(e.target.value);
-              console.log(type);
             }}
             className="w-full bg-gray-700 text-white p-2 rounded"
           >
