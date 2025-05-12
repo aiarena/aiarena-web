@@ -8,6 +8,7 @@ from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from aiarena.core.models.bot import Bot
+from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.competition import Competition
 from aiarena.core.models.competition_participation import CompetitionParticipation
 from aiarena.core.models.map import Map
@@ -20,7 +21,6 @@ from aiarena.graphql.common import (
     raise_graphql_error_from_exception,
 )
 from aiarena.graphql.types import (
-    BotRaceType,
     BotType,
     CompetitionParticipationType,
     CompetitionType,
@@ -210,31 +210,30 @@ class UpdateCompetitionParticipation(CleanedInputMutation):
         return cls(errors=[], competition_participation=competition_participation)
 
 
-class BotTypesEnum(graphene.Enum):
-    CPPWIN32 = "cppwin32"
-    CPPLINUX = "cpplinux"
-    DOTNETCORE = "dotnetcore"
-    JAVA = "java"
-    NODEJS = "nodejs"
-    PYTHON = "python"
-
-
 class UploadBotInput(CleanedInputType):
     name = graphene.String()
-    bot_data_enabled = graphene.Boolean(default=True)
+    bot_data_enabled = graphene.Boolean(default=False)
     bot_zip = Upload()
-    plays_race = graphene.ID(required=True)
-    type = BotTypesEnum()
+    plays_race = graphene.String()
+    type = graphene.String()
 
     class Meta:
         required_fields = ["name", "bot_zip", "plays_race", "type"]
 
     @staticmethod
     def clean_plays_race(plays_race, info):
+        input_value = plays_race.strip().upper()
         try:
-            return graphene.Node.get_node_from_global_id(info=info, global_id=plays_race, only_type=BotRaceType)
-        except Exception as e:
-            raise ValidationError(e)
+            return BotRace.objects.get(label=input_value)
+        except Exception:
+            raise ValidationError(f"Invalid bot race: '{plays_race}'")
+
+    @staticmethod
+    def clean_type(type, info):
+        input_value = type.strip().lower()
+        if input_value not in dict(Bot.TYPES):
+            raise ValidationError(f"Invalid bot type: '{type}'")
+        return input_value
 
 
 class UploadBot(CleanedInputMutation):
@@ -254,7 +253,7 @@ class UploadBot(CleanedInputMutation):
             bot_zip=input_object.bot_zip,
             bot_data_enabled=input_object.bot_data_enabled,
             plays_race=input_object.plays_race,
-            type=input_object.type.value,
+            type=input_object.type,
         )
         try:
             bot.full_clean()

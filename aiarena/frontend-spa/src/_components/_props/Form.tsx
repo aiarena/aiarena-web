@@ -18,8 +18,9 @@ export default function Form({
     <form className="space-y-4" onSubmit={handleSubmit}>
       {children}
       <button
+        disabled={loading}
         type="submit"
-        className="w-full bg-customGreen text-white py-2 rounded "
+        className="w-full bg-customGreen text-white flex justify-center py-2 rounded "
       >
         {loading ? <LoadingSpinnerGray /> : submitTitle}
       </button>

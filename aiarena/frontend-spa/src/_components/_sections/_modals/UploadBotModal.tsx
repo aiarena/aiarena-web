@@ -4,10 +4,7 @@ import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { UploadBotModalQuery } from "./__generated__/UploadBotModalQuery.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
-import {
-  BotTypesEnum,
-  UploadBotModalMutation,
-} from "./__generated__/UploadBotModalMutation.graphql";
+import { UploadBotModalMutation } from "./__generated__/UploadBotModalMutation.graphql";
 import Form from "@/_components/_props/Form";
 
 interface UploadBotModal {
@@ -15,14 +12,13 @@ interface UploadBotModal {
   onClose: () => void;
 }
 
-const BOT_TYPES: Record<BotTypesEnum, string> = {
-  CPPWIN32: "cppwin32",
-  CPPLINUX: "cpplinux",
-  DOTNETCORE: "dotnetcore",
-  JAVA: "java",
-  NODEJS: "nodejs",
-  PYTHON: "python",
-  "%future added value": "future",
+const BOT_TYPES: Record<string, string> = {
+  cppwin32: "C++ (Windows)",
+  cpplinux: "C++ (Linux)",
+  dotnetcore: ".NET Core",
+  java: "Java",
+  nodejs: "Node.js",
+  python: "Python",
 };
 
 export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
@@ -46,9 +42,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
 
   const [name, setName] = useState("");
   const [race, setRace] = useState(bot_races[0].id);
-  const [type, setType] = useState<BotTypesEnum>(
-    Object.keys(BOT_TYPES)[0] as BotTypesEnum
-  );
+  const [type, setType] = useState(Object.keys(BOT_TYPES)[0]);
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
 
   const [botDataEnabled, setBotDataEnabled] = useState(false);
@@ -102,7 +96,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
       <Form
         handleSubmit={handleUpload}
         submitTitle="Upload Bot"
-        loading={!updating}
+        loading={updating}
       >
         <label className="block">
           <span className="text-gray-300">Name:</span>
@@ -152,7 +146,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             className="w-full bg-gray-700 text-white p-2 rounded"
           >
             {bot_races.map((bot_race) => (
-              <option key={bot_race.id} value={bot_race.id}>
+              <option key={bot_race.id} value={bot_race.label}>
                 {bot_race.name}
               </option>
             ))}
@@ -165,18 +159,16 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             required={true}
             value={type}
             onChange={(e) => {
-              setType(e.target.value as BotTypesEnum);
+              setType(e.target.value);
               console.log(type);
             }}
             className="w-full bg-gray-700 text-white p-2 rounded"
           >
-            {Object.entries(BOT_TYPES)
-              .filter((item) => item[0] != "%future added value")
-              .map(([label]) => (
-                <option key={label} value={label}>
-                  {label}
-                </option>
-              ))}
+            {Object.entries(BOT_TYPES).map(([label, value]) => (
+              <option key={label} value={label}>
+                {value}
+              </option>
+            ))}
           </select>
         </label>
       </Form>

@@ -523,8 +523,8 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
 class TestCreateBot(GraphQLTest):
     mutationn_name = "uploadBot"
     mutation = """
-        mutation($input: CreateBotInput!){
-            createBot(
+        mutation($input: UploadBotInput!){
+            uploadBot(
                 input: $input) {
                     bot {
                         id
@@ -545,7 +545,7 @@ class TestCreateBot(GraphQLTest):
             variables={
                 "input": {
                     "name": "NotSerral",
-                    "playsRace": "Qm90UmFjZVR5cGU6Mw==",
+                    "playsRace": "Z",
                     "botDataEnabled": False,
                     "type": "PYTHON",
                     "botZip": zip_file,
