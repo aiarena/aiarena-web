@@ -1,9 +1,8 @@
 import { formatDateISO } from "@/_lib/dateUtils";
 import { graphql, useFragment } from "react-relay";
 import { RequestMatchSection_viewer$key } from "./__generated__/RequestMatchSection_viewer.graphql";
-import { getNodes } from "@/_lib/relayHelpers";
+import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
 import FilterableList from "../_props/FilterableList";
-import { Link } from "react-router";
 import RequestMatchModal from "./_modals/RequestMatchModal";
 import { useState } from "react";
 import MainButton from "../_props/MainButton";
@@ -75,18 +74,8 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           <p className="text-left text-customGreen cursor-pointer">
             Increase Limit
           </p>
-          {/* <p>
-            <span className="font-bold">Match Request Limit:</span>{" "}
-            <span className="text-customGreen">{matchRequestLimit}</span>
-          </p>
-          <p>
-            <span className="font-bold">Requests Left:</span>{" "}
-            <span className="text-customGreen">{requestsLeft}</span>
-          </p> */}
         </div>
         <div>
-          {/* Request new match button */}
-          {/* If you have a custom button component `MainButton`, use that. Otherwise, use a standard button: */}
           <MainButton
             onClick={() => setIsRequestMatchModalOpen(true)}
             text="Request New Match"
@@ -127,28 +116,34 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         renderRow={(item) => (
           <div className="block p-4 hover:bg-gray-800 bg-gray-900 rounded transition flex justify-between items-center shadow-md border border-gray-700">
             <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
-              <span className=" hidden md:block text-left font-semibold text-gray-200 truncate">
-                {item.id}
-              </span>
-              <span className="hidden sm:block text-left text-gray-200  truncate">
+              <a
+                className=" hidden md:block text-left font-semibold text-gray-200 truncate"
+                href={`/matches/${extractRelayID(item.id, "MatchType")}`}
+              >
+                {extractRelayID(item.id, "MatchType")}
+              </a>
+
+              <p className="hidden sm:block text-left text-gray-200  truncate">
                 {item.firstStarted != undefined
                   ? formatDateISO(item.firstStarted)
                   : "In Queue"}
-              </span>
-              <Link to={`/bots/${item.participant1?.id}`}>
-                <span className="bg-blue  text-left text-customGreen truncate ">
-                  {item.participant1?.name || ""}
-                </span>
-              </Link>
-              <Link to={`/bots/${item.participant2?.id}`}>
-                <span className="bg-blue  text-left text-customGreen truncate ">
-                  {item.participant2?.name || ""}
-                </span>
-              </Link>
+              </p>
+              <a
+                className=" text-left text-customGreen truncate "
+                href={`/bots/${extractRelayID(item.participant1?.id, "BotType")}`}
+              >
+                {item.participant1?.name || ""}
+              </a>
+              <a
+                className=" text-left text-customGreen truncate "
+                href={`/bots/${extractRelayID(item.participant2?.id, "BotType")}`}
+              >
+                {item.participant2?.name || ""}
+              </a>
 
-              <span className=" text-left text-gray-200  truncate">
+              <p className=" text-left text-gray-200  truncate">
                 {item.result?.type}
-              </span>
+              </p>
             </div>
           </div>
         )}
