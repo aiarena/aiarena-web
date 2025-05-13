@@ -19,15 +19,15 @@ def test_spa_nav_to_django(page: Page, bh: BrowserHelper):
     expect(page.locator("text=Welcome to AI Arena!")).to_be_visible(timeout=7_000)
 
 
-# def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admin_user):
-#     page.goto(bh.reverse("login"))
-#     page.get_by_label("Username:").fill("billy")
-#     page.get_by_label("Password:").fill("guest")
-#     page.get_by_role("button", name="Log in").click()
-#     expect(page.locator("#sidebar-items")).to_contain_text("Logged in: billy")
+def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admin_user):
+    page.goto(bh.reverse("login"))
+    page.get_by_label("Username:").fill("billy")
+    page.get_by_label("Password:").fill("guest")
+    page.get_by_role("button", name="Log in").click()
+    expect(page.locator("#sidebar-items")).to_contain_text("Logged in: billy")
 
-#     page.goto(f"{bh.live_server.url}/dashboard/userbots")
-#     expect(page.get_by_role("button", name="Upload Bot")).to_be_visible(timeout=5_000)
+    page.goto(f"{bh.live_server.url}/dashboard/userbots")
+    expect(page.get_by_role("button", name="Upload Bot")).to_be_visible(timeout=5_000)
 
 
 # def test_spa_userbots_shows_active_competition_participations(page: Page, bh: BrowserHelper, user, admin_user):
