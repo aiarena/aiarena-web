@@ -1,4 +1,4 @@
-from aiarena.core.models import Bot, BotRace, CompetitionParticipation, Match, MatchParticipation
+from aiarena.core.models import CompetitionParticipation, Match, MatchParticipation
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.graphql import BotType, CompetitionType, MapPoolType, MapType
 
