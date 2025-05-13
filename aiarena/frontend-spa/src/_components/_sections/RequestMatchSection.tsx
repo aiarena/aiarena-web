@@ -55,9 +55,6 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
     `,
     props.viewer
   );
-
-  const requestsUsed = viewer.requestedMatches?.totalCount;
-
   // const requestedMatches = useViewerRequestedMatches();
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
 
@@ -69,7 +66,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           <p className="text-left">
             <span className="font-bold">Requests used:</span>{" "}
             <span className="text-customGreen">
-              {requestsUsed}/{viewer.requestMatchesLimit}
+              {viewer.requestMatchesCountLeft}/{viewer.requestMatchesLimit}
             </span>
           </p>
           <p className="text-left text-customGreen cursor-pointer">
