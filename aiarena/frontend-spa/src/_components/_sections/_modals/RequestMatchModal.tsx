@@ -350,7 +350,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           <input
             value={matchCount}
             type="number"
-            className="text-right w-16 pl-4 mr-2 focus:ring-customGreen focus:outline-none focus:ring-2  rounded-md bg-gray-900 border border-gray-700 gap-3"
             onChange={(e) => setMatchCount(parseInt(e.target.value))}
           ></input>
           <div>
