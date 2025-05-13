@@ -221,132 +221,6 @@ export default function FilterableList<T>({
     }
   }, [totalPages, currentPage]);
 
-  const renderPagination = () => {
-    const paginationButtons = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let page = 1; page <= totalPages; page++) {
-        paginationButtons.push(
-          <button
-            key={page}
-            onClick={() => setCurrentPage(page)}
-            className={`px-3 py-1 rounded mx-1 ${
-              currentPage === page
-                ? "shadow shadow-black bg-customGreen text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-white"
-            }`}
-          >
-            {page}
-          </button>
-        );
-      }
-    } else {
-      // Always display the first page
-      if (currentPage > 3) {
-        paginationButtons.push(
-          <button
-            key={1}
-            onClick={() => setCurrentPage(1)}
-            className={`px-3 py-1 rounded mx-1 ${
-              currentPage === 1
-                ? "bg-customGreen text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-white"
-            }`}
-          >
-            1
-          </button>
-        );
-      }
-
-      // Add ellipsis if needed at the start
-      if (currentPage > 4) {
-        paginationButtons.push(
-          <span key="start-ellipsis" className="px-4 py-1 text-white">
-            ...
-          </span>
-        );
-      }
-
-      // Determine visible pages
-      const visiblePages = [];
-      if (currentPage <= 4) {
-        // When currentPage is at the beginning, show pages 1 to 5
-        for (let page = 1; page <= Math.min(5, totalPages); page++) {
-          visiblePages.push(page);
-        }
-      } else if (currentPage >= totalPages - 2) {
-        // When currentPage is near the end, show the last 5 pages
-        for (let page = totalPages - 4; page <= totalPages; page++) {
-          visiblePages.push(page);
-        }
-      } else {
-        // Show 3 pages around the currentPage
-        for (let page = currentPage - 1; page <= currentPage + 1; page++) {
-          visiblePages.push(page);
-        }
-      }
-
-      // Add the visible pages to paginationButtons
-      visiblePages.forEach((page) => {
-        paginationButtons.push(
-          <button
-            key={page}
-            onClick={() => setCurrentPage(page)}
-            className={`px-3 py-1 rounded mx-1 ${
-              currentPage === page
-                ? "bg-customGreen text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-white"
-            }`}
-          >
-            {page}
-          </button>
-        );
-      });
-
-      // Add ellipsis if needed at the end
-      if (currentPage < totalPages - 3) {
-        paginationButtons.push(
-          <span key="end-ellipsis" className="px-4 py-1 text-white">
-            ...
-          </span>
-        );
-      }
-
-      // Always display the last page
-      if (currentPage < totalPages - 2) {
-        paginationButtons.push(
-          <button
-            key={totalPages}
-            onClick={() => setCurrentPage(totalPages)}
-            className={`px-3 py-1 rounded mx-1 ${
-              currentPage === totalPages
-                ? "bg-customGreen text-white"
-                : "bg-gray-700 hover:bg-gray-600 text-white"
-            }`}
-          >
-            {totalPages}
-          </button>
-        );
-      }
-
-      // Ensure the total number of buttons is always 7
-      if (paginationButtons.length > 7) {
-        paginationButtons.splice(1, paginationButtons.length - 7);
-      } else if (paginationButtons.length < 7 && paginationButtons.length > 5) {
-        paginationButtons.splice(
-          5,
-          0,
-          <span key="extra-ellipsis" className="px-4 py-1 text-white">
-            ...
-          </span>
-        );
-      }
-    }
-
-    return paginationButtons;
-  };
-
   const handleChangePage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
     if (!isNaN(value) && value >= 1 && value <= totalPages) {
@@ -502,6 +376,17 @@ export default function FilterableList<T>({
       {/* Pagination Controls */}
       <div className="flex flex-wrap justify-center items-center mt-4 p-4 border-t border-gray-900">
         <button
+          onClick={() => setCurrentPage(() => 1)}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 rounded mx-1 ${
+            currentPage === 1
+              ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+              : "shadow shadow-black bg-customGreen text-white"
+          }`}
+        >
+          {"<<"}
+        </button>
+        <button
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
           className={`px-3 py-1 rounded mx-1 ${
@@ -512,10 +397,10 @@ export default function FilterableList<T>({
         >
           {"<"}
         </button>
-        <div className="hidden md:block ">{renderPagination()}</div>
-        <div className="block md:hidden">
+        {/* <div className="hidden md:block ">{renderPagination()}</div> */}
+        <div className="block">
           <input
-            className="w-12 text-black m-2 text-center"
+            className="w-12 ml-3 text-center"
             type="number"
             min="1"
             value={currentPage}
@@ -534,6 +419,17 @@ export default function FilterableList<T>({
           }`}
         >
           {">"}
+        </button>
+        <button
+          onClick={() => setCurrentPage(() => totalPages)}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 rounded mx-1 ${
+            currentPage === totalPages
+              ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+              : "shadow shadow-black bg-customGreen text-white"
+          }`}
+        >
+          {">>"}
         </button>
       </div>
     </div>
