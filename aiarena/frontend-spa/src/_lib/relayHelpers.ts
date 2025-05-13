@@ -18,3 +18,20 @@ export function getNodes<T>(
             .filter((node): node is T => node !== null && node !== undefined) || [] // Remove null/undefined nodes
     );
 }
+
+
+export function extractRelayID(base64Id: string, expectedType: string) {
+    try {
+        const decoded = atob(base64Id);
+        const [type, id] = decoded.split(":");
+
+        if (type === expectedType) {
+            return id;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Invalid Base64 ID:", error);
+        return null;
+    }
+}

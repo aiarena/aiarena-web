@@ -5,6 +5,7 @@ import WrappedTitle from "@/_components/_display/WrappedTitle";
 import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
 import MainButton from "@/_components/_props/MainButton";
 import SquareButton from "@/_components/_props/SquareButton";
+import ProfileBot from "@/_components/_sections/ProfileBot";
 import { useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import rehypeSanitize from "rehype-sanitize";
@@ -13,6 +14,20 @@ export default function Examples() {
   const [toggle, setToggle] = useState(true);
   const [markdown, setMarkdown] = useState<string | undefined>(
     `**Hello world!!!**`
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { ExamplesQuery } from "./__generated__/ExamplesQuery.graphql";
+
+  const bot = useLazyLoadQuery<ExamplesQuery>(
+    graphql`
+      query ExamplesQuery($id: ID!) {
+        node(id: $id) {
+          ... on BotType {
+            ...ProfileBot_bot
+          }
+        }
+      }
+    `,
+    { id: decodeURIComponent("Qm90VHlwZToyNDg=") }
   );
 
   return (
@@ -60,6 +75,9 @@ export default function Examples() {
             rehypePlugins: [[rehypeSanitize]],
           }}
         />
+      <div>
+        <h4>Eris - as appears on console.</h4>
+        {bot.node && <ProfileBot bot={bot.node} />}
       </div>
     </div>
   );

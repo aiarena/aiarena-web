@@ -7,19 +7,15 @@ import { BotSettingsModalMutation } from "./__generated__/BotSettingsModalMutati
 
 import MutationFeedbackMessage from "@/_components/_display/MutationFeedbackMessage";
 import BiographyModal from "./BotBiographyModal";
+import UpdateBiographyInput from "@/_components/_sections/_modals/bot_settings_modal/UpdateBiographyInput";
+import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
+
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
   isOpen: boolean;
   onClose: () => void;
 }
-
-type StatusField = "botZipUpload" | "wikiArticle";
-interface RequestStatusMessage {
-  successMessage?: string | null;
-  errorMessage?: string | null;
-}
-type RequestStatusMessages = Partial<Record<StatusField, RequestStatusMessage>>;
 
 export default function BotSettingsModal({
   isOpen,
@@ -56,12 +52,13 @@ export default function BotSettingsModal({
           wikiArticle
           botZip
         }
+        errors {
+          field
+          messages
+        }
       }
     }
   `);
-
-  const [requestStatusMessages, setRequestStatusMessages] =
-    useState<RequestStatusMessages>({});
 
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
   const [isBiographyModalOpen, setBiographyModalOpen] = useState(false);
@@ -70,41 +67,83 @@ export default function BotSettingsModal({
     window.location.href = `/${url}`;
   };
 
+  const handlers = useSnackbarErrorHandlers(
+    "updateBot",
+    "Bot Settings Updated!"
+  );
+
   return isOpen ? (
-    <>
-      <Modal onClose={onClose} title={`${bot.name} - Settings`}>
-        <div className="space-y-4">
-          <button
+    <Modal onClose={onClose} title={`Settings - ${bot.name}`}>
+      <div className="space-y-4">
+      <button
             className="bg-customGreen text-white py-2 px-4 rounded w-full"
             onClick={() => setBiographyModalOpen(true)}
           >
             Edit Bot Biography
           </button>
-          <MutationFeedbackMessage
-            onSuccess={requestStatusMessages?.wikiArticle?.successMessage}
-            onError={requestStatusMessages?.wikiArticle?.errorMessage}
+
+        <h3 className="text-lg font-bold text-gray-200">Bot Settings</h3>
+        <button
+          className="bg-customGreen text-white py-2 px-4 rounded w-full"
+          onClick={() => handleDownload(bot.botZip)}
+          disabled={bot.botZip == "{}"}
+        >
+          Download Bot Zip
+        </button>
+        <label className="block">
+          <span className="text-gray-300">Bot ZIP:</span>
+          <input
+            type="file"
+            className="w-full bg-gray-700 text-white p-2 rounded"
+            onChange={(e) => {
+              if (e.target.files != null) {
+                setBotZipFile(e.target.files[0]);
+              } else {
+                setBotZipFile(null);
+              }
+            }}
           />
-          <h3 className="text-lg font-bold text-gray-200">Bot Settings</h3>
-          <button
-            className="bg-customGreen text-white py-2 px-4 rounded w-full"
-            onClick={() => handleDownload(bot.botZip)}
-            disabled={bot.botZip == "{}"}
-          >
-            Download Bot Zip
-          </button>
-          <label className="block">
-            <span className="text-gray-300">Bot ZIP:</span>
-            <input
-              type="file"
-              className="w-full bg-gray-700 text-white p-2 rounded"
-              onChange={(e) => {
-                if (e.target.files != null) {
-                  setBotZipFile(e.target.files[0]);
-                } else {
-                  setBotZipFile(null);
-                }
-              }}
-            />
+        </label>
+        <button
+          className={`w-full text-white py-2 rounded ${botZipFile ? "bg-customGreen" : "bg-slate-500"}`}
+          onClick={() => {
+            if (!botZipFile) return;
+            updateBot({
+              variables: {
+                input: {
+                  id: bot.id,
+                  botZip: null,
+                },
+              },
+              uploadables: {
+                "input.botZip": botZipFile,
+              },
+              ...handlers,
+            });
+          }}
+        >
+          Upload Bot Zip
+        </button>
+        <div className="flex items-center mt-2">
+          <input
+            type="checkbox"
+            checked={bot.botDataPubliclyDownloadable}
+            onChange={() =>
+              updateBot({
+                variables: {
+                  input: {
+                    id: bot.id,
+                    botDataPubliclyDownloadable:
+                      !bot.botDataPubliclyDownloadable,
+                  },
+                },
+              })
+            }
+            disabled={updating}
+            className="mr-2"
+          />
+          <label className="text-gray-300">
+            Mark Bot Data Publicly Downloadable
           </label>
           <button
             className={`w-full text-white py-2 rounded ${botZipFile ? "bg-customGreen" : "bg-slate-500"}`}

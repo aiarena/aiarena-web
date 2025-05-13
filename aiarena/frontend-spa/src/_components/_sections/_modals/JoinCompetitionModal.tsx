@@ -1,4 +1,4 @@
-import { getNodes } from "@/_lib/relayHelpers";
+import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
 import {
   graphql,
   useFragment,
@@ -7,10 +7,10 @@ import {
 } from "react-relay";
 import { JoinCompetitionModal_bot$key } from "./__generated__/JoinCompetitionModal_bot.graphql";
 import { JoinCompetitionModalCompetitionsQuery } from "./__generated__/JoinCompetitionModalCompetitionsQuery.graphql";
-// import { useUpdateCompetitionParticipation } from "@/_components/_hooks/useUpdateCompetitionParticipation";
 import Modal from "@/_components/_props/Modal";
 import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
 import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
+import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
@@ -81,9 +81,17 @@ export default function JoinCompetitionModal({
               id
             }
           }
+          errors {
+            field
+            messages
+          }
         }
       }
     `);
+  const handlers = useSnackbarErrorHandlers(
+    "updateCompetitionParticipation",
+    "Bot Participation Updated!"
+  );
 
   const openCompetitions = getNodes(competition_data.competitions).filter(
     (comp) => comp.status == "OPEN"
@@ -110,11 +118,12 @@ export default function JoinCompetitionModal({
           competition: compID,
         },
       },
+      ...handlers,
     });
   };
 
   return isOpen ? (
-    <Modal onClose={onClose} title={`${bot.name} - Edit competitions`}>
+    <Modal onClose={onClose} title={`Edit Competitions - ${bot.name}`}>
       <div className="space-y-4">
         {openCompetitions &&
           openCompetitions.length > 0 &&
@@ -125,14 +134,12 @@ export default function JoinCompetitionModal({
             >
               <div className="block">
                 <div>
-                  <span className="text-gray-300">{comp.name}</span>
-                </div>
-                <div className="text-left">
-                  {hasActiveCompetitionParticipation(comp.id) ? (
-                    <span className="text-customGreen">Currently Active</span>
-                  ) : (
-                    <span className="text-red-400">Currently Inactive</span>
-                  )}
+                  <a
+                    href={`/competitions/${extractRelayID(comp.id, "CompetitionType")}`}
+                    className="text-sm font-semibold"
+                  >
+                    {comp.name}
+                  </a>
                 </div>
               </div>
               <SimpleToggle

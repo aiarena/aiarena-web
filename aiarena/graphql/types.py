@@ -70,6 +70,7 @@ class BotType(DjangoObjectTypeWithUID):
     wiki_article = graphene.String()
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
     plays_race = graphene.String()
+    trophies = DjangoConnectionField("aiarena.graphql.TrophyType")
 
     class Meta:
         model = models.Bot
@@ -107,6 +108,24 @@ class BotType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_plays_race(root: models.Bot, info, **args):
         return root.plays_race
+
+
+class TrophyType(DjangoObjectTypeWithUID):
+    trophy_icon_name = graphene.String()
+    trophy_icon_image = graphene.String()
+
+    class Meta:
+        model = models.Trophy
+        fields = [
+            "name",
+            "bot",
+        ]
+
+    def resolve_trophy_icon_name(root: models.Trophy, info):
+        return root.icon.name if root.icon else None
+
+    def resolve_trophy_icon_image(root: models.Trophy, info):
+        return root.icon.image.url if root.icon and root.icon.image else None
 
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):

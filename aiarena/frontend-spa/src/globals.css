@@ -89,6 +89,7 @@ a {
 
 a:hover {
   color: white;
+  cursor: pointer;
 }
 
 button:hover {

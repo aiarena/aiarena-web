@@ -138,9 +138,6 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response({"result_id": result.id}, status=status.HTTP_201_CREATED, headers=headers)
 
-    # todo: use a model form
-    # todo: avoid results being logged against matches not owned by the submitter
-
 
 class SetArenaClientStatusViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """

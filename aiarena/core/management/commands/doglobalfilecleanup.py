@@ -30,13 +30,17 @@ class Command(BaseCommand):
         self.stdout.write(f"Cleaning up result files starting from {days} days into the past...")
         self.stdout.write("Gathering records to clean...")
         # exclude results if that have neither a replay file nor an arena client log file
-        results = Result.objects.exclude(replay_file="", arenaclient_log="").filter(
-            created__lt=timezone.now() - timedelta(days=days)
+        results_qs = (
+            Result.objects.exclude(replay_file="", arenaclient_log="")
+            .filter(created__lt=timezone.now() - timedelta(days=days))
+            .only("id", "replay_file", "arenaclient_log", "match", "created")
         )
-        self.stdout.write(f"{results.count()} records gathered.")
+        results_count = results_qs.count()
+        self.stdout.write(f"{results_count} records gathered.")
         replays_cleaned_count = ac_logs_cleaned_count = 0
         processed_count = 0
-        for result in results:
+
+        for result in results_qs.iterator():
             change_made = False
             if result.clean_replay_file():
                 replays_cleaned_count += 1
@@ -55,29 +59,37 @@ class Command(BaseCommand):
                     f"WARNING: Match {result.match.id} had no files to clean up even though it should have."
                 )
             processed_count += 1
-            self.stdout.write(
-                f"\rProgress: {processed_count}/{results.count()}",
-                ending="",
-            )
+
+            if processed_count % 100 == 0 or processed_count == results_count:
+                self.stdout.write(
+                    f"\rProgress: {processed_count}/{results_count}",
+                    ending="",
+                )
         self.stdout.write("\n")
         self.stdout.write(f"Cleaned up {replays_cleaned_count} replays and {ac_logs_cleaned_count} arena client logs.")
 
         self.stdout.write(f"Cleaning up match logfiles starting from {days} days into the past...")
         self.stdout.write("Gathering records to clean...")
-        participants = MatchParticipation.objects.exclude(match_log="").filter(
-            match__result__created__lt=timezone.now() - timedelta(days=days)
+        participants_qs = (
+            MatchParticipation.objects.exclude(match_log="")
+            .filter(match__result__created__lt=timezone.now() - timedelta(days=days))
+            .only("id", "match_log", "match")
         )
-        self.stdout.write(f"{participants.count()} records gathered.")
+        participants_count = participants_qs.count()
+        self.stdout.write(f"{participants_count} records gathered.")
         cleanup_count = 0
-        for participant in participants:
+        processed_participants = 0
+        for participant in participants_qs.iterator():
             if participant.clean_match_log():
                 participant.save()
                 cleanup_count += 1
                 if verbose:
                     self.stdout.write(f"Participant {participant.id} match log deleted.")
-            self.stdout.write(
-                f"\rProgress: {cleanup_count}/{participants.count()}",
-                ending="",
-            )
+            processed_participants += 1
+            if processed_participants % 100 == 0 or processed_participants == participants_count:
+                self.stdout.write(
+                    f"\rProgress: {processed_participants}/{participants_count}",
+                    ending="",
+                )
         self.stdout.write("\n")
         self.stdout.write(f"Cleaned up {cleanup_count} logfiles.")
