@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { Link, NavLink } from "react-router";
+import { NavLink } from "react-router";
 import { navbarTitle, navLinks } from "@/_data/navbarLinks";
 
 function Navbar() {
@@ -43,8 +43,8 @@ function Navbar() {
     <>
       <nav className="w-full bg-neutral-900 px-2 text-white sticky top-0 z-50">
         <div className="flex justify-between md:p-3 md:flex ">
-          <Link
-            to={navLinks[0].path}
+          <a
+            href={navLinks[0].path}
             className="flex justify-between items-center"
           >
             <img
@@ -54,10 +54,10 @@ function Navbar() {
               width={48}
               height={48}
             />
-            <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0 pb-5 font-gugi font-light text-customGreen hover:text-white">
+            <h2 className="text-2xl font-bold md:5pl:5 py-4 md:py-0 pb-5 font-gugi font-light text-customGreen hover:text-white text-center">
               {navbarTitle.title}
             </h2>
-          </Link>
+          </a>
 
           {/* Phone */}
           <div className="md:hidden py-4">
