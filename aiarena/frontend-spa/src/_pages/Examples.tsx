@@ -9,13 +9,14 @@ import ProfileBot from "@/_components/_sections/ProfileBot";
 import { useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import rehypeSanitize from "rehype-sanitize";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { ExamplesQuery } from "./__generated__/ExamplesQuery.graphql";
 
 export default function Examples() {
   const [toggle, setToggle] = useState(true);
   const [markdown, setMarkdown] = useState<string | undefined>(
     `**Hello world!!!**`
-import { graphql, useLazyLoadQuery } from "react-relay";
-import { ExamplesQuery } from "./__generated__/ExamplesQuery.graphql";
+  );
 
   const bot = useLazyLoadQuery<ExamplesQuery>(
     graphql`
@@ -75,6 +76,7 @@ import { ExamplesQuery } from "./__generated__/ExamplesQuery.graphql";
             rehypePlugins: [[rehypeSanitize]],
           }}
         />
+      </div>
       <div>
         <h4>Eris - as appears on console.</h4>
         {bot.node && <ProfileBot bot={bot.node} />}
