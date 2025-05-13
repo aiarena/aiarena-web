@@ -120,7 +120,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
                 className=" hidden md:block text-left font-semibold text-gray-200 truncate"
                 href={`/matches/${extractRelayID(item.id, "MatchType")}`}
               >
-                {extractRelayID(item.id, "MatchType")}
+                {item.id}
               </a>
 
               <p className="hidden sm:block text-left text-gray-200  truncate">
