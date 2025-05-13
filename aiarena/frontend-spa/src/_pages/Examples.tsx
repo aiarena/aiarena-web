@@ -7,11 +7,17 @@ import MainButton from "@/_components/_props/MainButton";
 import SquareButton from "@/_components/_props/SquareButton";
 import ProfileBot from "@/_components/_sections/ProfileBot";
 import { useState } from "react";
+import MDEditor from "@uiw/react-md-editor";
+import rehypeSanitize from "rehype-sanitize";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { ExamplesQuery } from "./__generated__/ExamplesQuery.graphql";
 
 export default function Examples() {
   const [toggle, setToggle] = useState(true);
+  const [markdown, setMarkdown] = useState<string | undefined>(
+    `**Hello world!!!**`
+  );
+
   const bot = useLazyLoadQuery<ExamplesQuery>(
     graphql`
       query ExamplesQuery($id: ID!) {
@@ -60,6 +66,17 @@ export default function Examples() {
         <ActiveDot />
       </div>
 
+      <div className="p-10 space-y-4">
+        <h4>Markdown</h4>
+        <h3>Editor</h3>
+        <MDEditor
+          value={markdown}
+          onChange={setMarkdown}
+          previewOptions={{
+            rehypePlugins: [[rehypeSanitize]],
+          }}
+        />
+      </div>
       <div>
         <h4>Eris - as appears on console.</h4>
         {bot.node && <ProfileBot bot={bot.node} />}
