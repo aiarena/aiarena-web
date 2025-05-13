@@ -55,7 +55,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
     `,
     props.viewer
   );
-  // const requestedMatches = useViewerRequestedMatches();
+
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
 
   return (
@@ -63,12 +63,15 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
       {/* Display request limit and requests left */}
       <div className="bg-gray-700 p-4 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
         <div className="text-sm text-gray-300">
-          <p className="text-left">
-            <span className="font-bold">Requests used:</span>{" "}
-            <span className="text-customGreen">
-              {viewer.requestMatchesCountLeft}/{viewer.requestMatchesLimit}
-            </span>
-          </p>
+          <div className="text-left flex">
+            <p className="font-bold">Requests remaining:</p>
+            <div className="flex">
+              <p className="text-customGreen ml-1">
+                {viewer.requestMatchesCountLeft}
+              </p>
+              <p>/{viewer.requestMatchesLimit}</p>
+            </div>
+          </div>
           <p className="text-left text-customGreen cursor-pointer">
             Increase Limit
           </p>
