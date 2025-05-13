@@ -349,9 +349,6 @@ export default function FilterableList<T>({
       >
         <ul className="text-white">
           {paginatedData.map((item, index) =>
-            // <li key={index} className="mb-2 h-14">
-            //   {renderRow(item, index)}
-            // </li>
             item ? (
               <li
                 key={index}
@@ -375,29 +372,30 @@ export default function FilterableList<T>({
 
       {/* Pagination Controls */}
       <div className="flex flex-wrap justify-center items-center mt-4 p-4 border-t border-gray-900">
-        <button
-          onClick={() => setCurrentPage(() => 1)}
-          disabled={currentPage === 1}
-          className={`px-3 py-1 rounded mx-1 ${
-            currentPage === 1
-              ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-              : "shadow shadow-black bg-customGreen text-white"
-          }`}
-        >
-          {"<<"}
-        </button>
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className={`px-3 py-1 rounded mx-1 ${
-            currentPage === 1
-              ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-              : "shadow shadow-black bg-customGreen text-white"
-          }`}
-        >
-          {"<"}
-        </button>
-        {/* <div className="hidden md:block ">{renderPagination()}</div> */}
+        <div className="flex">
+          <button
+            onClick={() => setCurrentPage(() => 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded mx-1 ${
+              currentPage === 1
+                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                : "shadow shadow-black bg-customGreen text-white"
+            }`}
+          >
+            {"<<"}
+          </button>
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded mx-1 ${
+              currentPage === 1
+                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                : "shadow shadow-black bg-customGreen text-white"
+            }`}
+          >
+            {"<"}
+          </button>
+        </div>
         <div className="block">
           <input
             className="w-12 ml-3 text-center"
@@ -407,30 +405,32 @@ export default function FilterableList<T>({
             onChange={handleChangePage}
           />
         </div>
-        <button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
-          disabled={currentPage === totalPages}
-          className={`px-3 py-1 rounded mx-1 ${
-            currentPage === totalPages
-              ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-              : "shadow shadow-black bg-customGreen text-white"
-          }`}
-        >
-          {">"}
-        </button>
-        <button
-          onClick={() => setCurrentPage(() => totalPages)}
-          disabled={currentPage === totalPages}
-          className={`px-3 py-1 rounded mx-1 ${
-            currentPage === totalPages
-              ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-              : "shadow shadow-black bg-customGreen text-white"
-          }`}
-        >
-          {">>"}
-        </button>
+        <div className="flex">
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded mx-1 ${
+              currentPage === totalPages
+                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                : "shadow shadow-black bg-customGreen text-white"
+            }`}
+          >
+            {">"}
+          </button>
+          <button
+            onClick={() => setCurrentPage(() => totalPages)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded mx-1 ${
+              currentPage === totalPages
+                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                : "shadow shadow-black bg-customGreen text-white"
+            }`}
+          >
+            {">>"}
+          </button>
+        </div>
       </div>
     </div>
   );
