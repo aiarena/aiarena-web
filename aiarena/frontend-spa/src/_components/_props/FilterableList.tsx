@@ -244,7 +244,7 @@ export default function FilterableList<T>({
       {/* Filter button */}
       <button
         onClick={() => setShowFilterMenu(!showFilterMenu)}
-        className="shadow shadow-black mb-4 bg-customGreen text-white p-2 rounded hover:bg-customGreenDarken1 w-[4em]"
+        className="shadow shadow-black mb-4 bg-customGreen text-white p-2 rounded hover:bg-customGreenDarken1 w-[8em]"
       >
         {showFilterMenu ? "Hide Filters" : "Show Filters"}
       </button>
