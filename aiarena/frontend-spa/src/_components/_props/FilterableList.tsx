@@ -208,6 +208,9 @@ export default function FilterableList<T>({
 
   // Pagination logic
   const pageSize = resultsPerPage;
+
+  // we want to cap pageSize
+
   const paginatedData = sortedData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
@@ -233,7 +236,11 @@ export default function FilterableList<T>({
   ) => {
     const value = Number(event.target.value);
     if (!isNaN(value) && value >= 1) {
-      setResultsPerPage(value);
+      if (data.length >= value) {
+        setResultsPerPage(value);
+      } else {
+        setResultsPerPage(data.length);
+      }
     }
   };
 
