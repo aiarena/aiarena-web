@@ -3,7 +3,6 @@ import { graphql, useFragment } from "react-relay";
 import { BotTrophiesModal_bot$key } from "./__generated__/BotTrophiesModal_bot.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 
-// import { ProfileBotProps } from "../ProfileBot";
 interface TrophiesModalProps {
   bot: BotTrophiesModal_bot$key;
   isOpen: boolean;
