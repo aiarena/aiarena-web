@@ -63,7 +63,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
       <div className="bg-gray-700 p-4 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
         <div className="text-sm text-gray-300">
           <div className="text-left flex">
-            <p className="font-bold">Requests remaining:</p>
+            <p className="font-bold">Monthly Requests remaining:</p>
             <div className="flex">
               <p className="text-customGreen ml-1">
                 {viewer.requestMatchesCountLeft}
