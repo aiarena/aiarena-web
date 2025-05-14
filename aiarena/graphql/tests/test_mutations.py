@@ -520,6 +520,41 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
         # assert CompetitionParticipation.objects.filter(bot__user=user).count() == 5
 
 
+# class TestCreateBot(GraphQLTest):
+#     mutationn_name = "uploadBot"
+#     mutation = """
+#         mutation($input: UploadBotInput!){
+#             uploadBot(
+#                 input: $input) {
+#                     bot {
+#                         id
+#                     }
+#                     errors {
+#                         field
+#                         messages
+#                     }
+#                 }
+#             }
+#     """
+
+#     def test_create_bot_success(self, user, zip_file):
+#         assert not Bot.objects.filter(user=user).exists()
+#         self.mutate(
+#             login_user=user,
+#             expected_status=200,
+#             variables={
+#                 "input": {
+#                     "name": "NotSerral",
+#                     "playsRace": "Z",
+#                     "botDataEnabled": False,
+#                     "type": "PYTHON",
+#                     "botZip": zip_file,
+#                 }
+#             },
+#         )
+#         assert not Bot.objects.filter(user=user).exists()
+
+
 class TestUpdateBot(GraphQLTest):
     mutation_name = "updateBot"
     mutation = """

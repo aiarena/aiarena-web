@@ -12,7 +12,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
-from aiarena.core.models import Result, User
+from aiarena.core.models import BotRace, Result, User
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
@@ -108,6 +108,24 @@ class BotType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_plays_race(root: models.Bot, info, **args):
         return root.plays_race
+
+
+class BotRaceType(DjangoObjectTypeWithUID):
+    name = graphene.String()
+
+    class Meta:
+        model = models.BotRace
+        fields = [
+            "id",
+            "label",
+            "name",
+        ]
+        filter_fields = []
+        connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_name(root: BotRace, info, **args):
+        return root.get_label_display()
 
 
 class TrophyType(DjangoObjectTypeWithUID):
@@ -390,6 +408,7 @@ class Query(graphene.ObjectType):
     maps = DjangoFilterConnectionField("aiarena.graphql.MapType")
     map_pools = DjangoFilterConnectionField("aiarena.graphql.MapPoolType")
     stats = graphene.Field(StatsType)
+    bot_race = DjangoFilterConnectionField("aiarena.graphql.BotRaceType")
 
     @staticmethod
     def resolve_viewer(root, info, **args):
@@ -424,3 +443,7 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_stats(root, info, **args):
         return StatsType()
+
+    @staticmethod
+    def resolve_bot_race(root, info, **args):
+        return models.BotRace.objects.all()
