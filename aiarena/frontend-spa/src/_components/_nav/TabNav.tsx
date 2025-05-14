@@ -24,8 +24,8 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
             key={tab.name}
             href={tab.href}
             onClick={(e) => {
-              e.preventDefault(); // Prevent default link behavior
-              setActiveTab(tab.name); // Update the active tab
+              e.preventDefault();
+              setActiveTab(tab.name);
             }}
             className={`px-3 py-2 text-sm md:text-base font-semibold ${
               activeTab === tab.name

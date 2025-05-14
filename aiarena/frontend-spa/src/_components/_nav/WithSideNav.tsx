@@ -5,22 +5,20 @@ import { NavLink } from "react-router";
 export default function WithSideNav({ children }: { children: ReactNode }) {
   const [sideNavbar, setSideNavbar] = useState(false);
 
-  // one stable, memoised function
   const handleWindowResize = useCallback(() => {
     if (window.innerWidth >= 920) {
       setSideNavbar(true); // close on large screens
     } else {
       setSideNavbar(false);
     }
-  }, []); // ︙no deps → same reference for life
+  }, []);
 
   useEffect(() => {
-    // run once so the initial state matches the viewport
     handleWindowResize();
 
     window.addEventListener("resize", handleWindowResize);
     return () => window.removeEventListener("resize", handleWindowResize);
-  }, [handleWindowResize]); // <- handler is now stable, so it’s safe
+  }, [handleWindowResize]);
 
   return (
     <div className={`${sideNavbar ? "flex" : ""}`}>
