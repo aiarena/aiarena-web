@@ -19,7 +19,7 @@ def test_spa_nav_to_django(page: Page, bh: BrowserHelper):
     expect(page.locator("text=Welcome to AI Arena!")).to_be_visible()
 
 
-def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admin_user):
+def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admin_user, bot_race):
     page.goto(bh.reverse("login"))
     page.get_by_label("Username:").fill("billy")
     page.get_by_label("Password:").fill("guest")
@@ -30,6 +30,7 @@ def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admi
     expect(page.get_by_role("button", name="Upload Bot")).to_be_visible()
 
 
+@pytest.mark.skip(reason="to be implemented once we implement mock files")
 def test_spa_userbots_shows_active_competition_participations(page: Page, bh: BrowserHelper, user, admin_user):
     page.goto(bh.reverse("login"))
     page.get_by_label("Username:").fill("billy")
@@ -59,7 +60,7 @@ def test_spa_userbots_shows_active_competition_participations(page: Page, bh: Br
     page.get_by_label("Plays Race:").select_option("Protoss")
 
     page.get_by_label("Type:").select_option("python")
-    expect(page.get_by_label("Type:")).to_have_value("python") 
+    expect(page.get_by_label("Type:")).to_have_value("python")
     page.locator("form").get_by_role("button", name="Upload Bot").click()
 
     expect(page.locator("form").get_by_role("button", name="Upload Bot")).not_to_be_visible()

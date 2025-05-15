@@ -209,6 +209,7 @@ class UpdateCompetitionParticipation(CleanedInputMutation):
 
         return cls(errors=[], competition_participation=competition_participation)
 
+
 class UploadBotInput(CleanedInputType):
     name = graphene.String()
     bot_data_enabled = graphene.Boolean(default=False)
@@ -261,6 +262,7 @@ class UploadBot(CleanedInputMutation):
             raise_graphql_error_from_exception(e)
 
         return cls(errors=[], bot=bot)
+
 
 class UpdateBotInput(CleanedInputType):
     id = graphene.ID()

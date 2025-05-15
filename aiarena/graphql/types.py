@@ -110,6 +110,7 @@ class BotType(DjangoObjectTypeWithUID):
     def resolve_plays_race(root: models.Bot, info, **args):
         return root.plays_race
 
+
 class BotRaceType(DjangoObjectTypeWithUID):
     name = graphene.String()
 
@@ -126,6 +127,7 @@ class BotRaceType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_name(root: BotRace, info, **args):
         return root.get_label_display()
+
 
 class TrophyType(DjangoObjectTypeWithUID):
     trophy_icon_name = graphene.String()
@@ -443,7 +445,7 @@ class Query(graphene.ObjectType):
     def resolve_stats(root, info, **args):
         return StatsType()
 
-# rename bot_races
+    # rename bot_races
     @staticmethod
     def resolve_bot_race(root, info, **args):
         return models.BotRace.objects.all()

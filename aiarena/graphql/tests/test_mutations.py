@@ -519,6 +519,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition, active=True).exists()
         # assert CompetitionParticipation.objects.filter(bot__user=user).count() == 5
 
+
 # class TestCreateBot(GraphQLTest):
 #     mutationn_name = "uploadBot"
 #     mutation = """
