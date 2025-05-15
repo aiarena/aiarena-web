@@ -44,7 +44,10 @@ export default function BotBiographyModal({
 
   const [biography, setBiography] = useState(bot.wikiArticle || "");
 
-  const handlers = useSnackbarErrorHandlers("updateBot", "Bot Wiki Updated!");
+  const { onCompleted, onError } = useSnackbarErrorHandlers(
+    "updateBot",
+    "Bot Wiki Updated!"
+  );
 
   const hasUnsavedWikiChanges =
     normalizeNewlines(biography) !== normalizeNewlines(bot.wikiArticle);
@@ -57,6 +60,7 @@ export default function BotBiographyModal({
     <>
       <Modal
         keepUnsetOnClose={true}
+        isOpen={isOpen}
         onClose={onClose}
         title={`${bot.name} - Biography`}
         size="l"
@@ -75,7 +79,13 @@ export default function BotBiographyModal({
                   wikiArticle: biography,
                 },
               },
-              ...handlers,
+              onCompleted: (...args) => {
+                const success = onCompleted(...args);
+                if (success) {
+                  onClose();
+                }
+              },
+              onError,
             });
           }}
         >
