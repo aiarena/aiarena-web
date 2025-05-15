@@ -19,7 +19,7 @@ def test_spa_nav_to_django(page: Page, bh: BrowserHelper):
     expect(page.locator("text=Welcome to AI Arena!")).to_be_visible()
 
 
-def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admin_user, bot_race):
+def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admin_user, all_bot_races):
     page.goto(bh.reverse("login"))
     page.get_by_label("Username:").fill("billy")
     page.get_by_label("Password:").fill("guest")
