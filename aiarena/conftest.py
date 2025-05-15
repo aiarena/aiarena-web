@@ -19,7 +19,7 @@ def zip_file():
     return SimpleUploadedFile("bot.zip", buffer.read(), content_type="application/zip")
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def all_bot_races(db):
     BotRace.create_all_races()
 

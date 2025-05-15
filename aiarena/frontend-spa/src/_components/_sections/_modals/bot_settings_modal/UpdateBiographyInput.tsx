@@ -38,7 +38,10 @@ export default function UpdateBiographyInput(props: UpdateBiographyInputProps) {
   const [biography, setBiography] = useState(bot.wikiArticle || "");
   const hasUnsavedWikiChanges = biography !== bot.wikiArticle;
 
-  const handlers = useSnackbarErrorHandlers("updateBot", "Bot Wiki Updated!");
+  const { onCompleted, onError } = useSnackbarErrorHandlers(
+    "updateBot",
+    "Bot Wiki Updated!"
+  );
 
   return (
     <>
@@ -61,7 +64,10 @@ export default function UpdateBiographyInput(props: UpdateBiographyInputProps) {
                 wikiArticle: biography,
               },
             },
-            ...handlers,
+            onCompleted: (...args) => {
+              onCompleted(...args);
+            },
+            onError,
           });
         }}
         className={`w-full text-white py-2 rounded ${hasUnsavedWikiChanges ? "bg-customGreen" : "bg-slate-500"}`}

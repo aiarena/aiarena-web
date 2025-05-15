@@ -63,13 +63,13 @@ export default function BotSettingsModal({
     window.location.href = `/${url}`;
   };
 
-  const handlers = useSnackbarErrorHandlers(
+  const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateBot",
     "Bot Settings Updated!"
   );
 
-  return isOpen ? (
-    <Modal onClose={onClose} title={`Settings - ${bot.name}`}>
+  return (
+    <Modal onClose={onClose} isOpen={isOpen} title={`Settings - ${bot.name}`}>
       <div className="space-y-4">
         <UpdateBiographyInput bot={bot} />
 
@@ -109,7 +109,13 @@ export default function BotSettingsModal({
               uploadables: {
                 "input.botZip": botZipFile,
               },
-              ...handlers,
+              onCompleted: (...args) => {
+                const success = onCompleted(...args);
+                if (success) {
+                  onClose();
+                }
+              },
+              onError,
             });
           }}
         >
@@ -158,5 +164,5 @@ export default function BotSettingsModal({
         </div>
       </div>
     </Modal>
-  ) : null;
+  );
 }

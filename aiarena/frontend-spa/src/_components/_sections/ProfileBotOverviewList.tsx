@@ -6,6 +6,7 @@ import { getNodes } from "@/_lib/relayHelpers";
 import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
 import ProfileBot from "./ProfileBot";
+import { ProfileBotOverviewList_user$key } from "./__generated__/ProfileBotOverviewList_user.graphql";
 
 interface ProfileBotOverviewListProps {
   viewer: ProfileBotOverviewList_viewer$key;
@@ -19,29 +20,39 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
       fragment ProfileBotOverviewList_viewer on ViewerType {
         activeBotsLimit
         user {
-          ownBots {
-            edges {
-              node {
-                id
-                competitionParticipations {
-                  edges {
-                    node {
-                      active
-                    }
-                  }
-                }
-                ...ProfileBot_bot
-              }
-            }
-          }
+          ...ProfileBotOverviewList_user
         }
       }
     `,
     props.viewer
   );
+
+  const userData = useFragment(
+    graphql`
+      fragment ProfileBotOverviewList_user on UserType {
+        ownBots {
+          edges {
+            node {
+              id
+              competitionParticipations {
+                edges {
+                  node {
+                    active
+                  }
+                }
+              }
+              ...ProfileBot_bot
+            }
+          }
+        }
+      }
+    `,
+    viewer.user as ProfileBotOverviewList_user$key
+  );
+
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
 
-  const activeBotParticipation = getNodes(viewer.user?.ownBots).reduce(
+  const activeBotParticipation = getNodes(userData?.ownBots).reduce(
     (total, item) => {
       const activeCount =
         getNodes(item.competitionParticipations).filter(
@@ -90,7 +101,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
       </div>
 
       <ul className="space-y-12">
-        {getNodes(viewer.user?.ownBots).map((bot) => (
+        {getNodes(userData?.ownBots).map((bot) => (
           <li key={bot.id}>
             <ProfileBot bot={bot} />
           </li>

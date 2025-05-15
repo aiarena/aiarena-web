@@ -30,11 +30,14 @@ export default function BotTrophiesModal(props: TrophiesModalProps) {
     props.bot
   );
 
-  if (!props.isOpen) return null;
   const trophies = getNodes(bot.trophies);
 
   return (
-    <Modal onClose={props.onClose} title={`${bot.name}'s Trophies`}>
+    <Modal
+      onClose={props.onClose}
+      isOpen={props.isOpen}
+      title={`${bot.name}'s Trophies`}
+    >
       <div className="p-4">
         {bot.trophies && trophies.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

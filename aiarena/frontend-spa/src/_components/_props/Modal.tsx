@@ -4,18 +4,21 @@ import SectionDivider from "../_display/SectionDivider";
 
 interface ModalProps {
   children: ReactNode;
+  isOpen: boolean;
   onClose: () => void;
   title: string;
 }
 
-const Modal = ({ children, onClose, title }: ModalProps) => {
+const Modal = ({ children, onClose, isOpen, title }: ModalProps) => {
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-  }, []);
+    if (!isOpen) {
+      document.body.style.overflow = "unset";
+    } else {
+      document.body.style.overflow = "hidden";
+    }
+  }, [isOpen]);
 
-  function handleClose() {
-    document.body.style.overflow = "unset";
-  }
+  if (!isOpen) return null;
 
   return createPortal(
     <div className="fixed inset-0 bg-darken-2 bg-opacity-70 flex items-center justify-center z-50 p-4">
@@ -30,7 +33,6 @@ const Modal = ({ children, onClose, title }: ModalProps) => {
             <button
               className="text-gray-400 hover:text-gray-200"
               onClick={() => {
-                handleClose();
                 onClose();
               }}
               aria-label="Close modal"

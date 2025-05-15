@@ -22,6 +22,7 @@ class UserType(DjangoObjectTypeWithUID):
     # put data everyone should be able view here.
 
     own_bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
+    # rename this own_bots -> bots
     avatar_url = graphene.String()
 
     class Meta:

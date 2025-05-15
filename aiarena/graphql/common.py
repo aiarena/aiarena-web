@@ -67,7 +67,8 @@ class CleanedInputMutation(graphene.Mutation):
         abstract = True
 
     errors = graphene.List(graphene.NonNull(ErrorType), required=True)
-
+    node = graphene.relay.Node.Field()
+    
     @classmethod
     def __init_subclass_with_meta__(
         cls,

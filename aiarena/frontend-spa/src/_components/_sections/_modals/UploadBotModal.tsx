@@ -12,6 +12,8 @@ interface UploadBotModal {
   onClose: () => void;
 }
 
+type Race = "P" | "R" | "T" | "Z";
+
 const BOT_TYPES: Record<string, string> = {
   cppwin32: "C++ (Windows)",
   cpplinux: "C++ (Linux)",
@@ -22,9 +24,15 @@ const BOT_TYPES: Record<string, string> = {
 };
 
 export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
-  const bot_race_data = useLazyLoadQuery<UploadBotModalQuery>(
+  const data = useLazyLoadQuery<UploadBotModalQuery>(
     graphql`
       query UploadBotModalQuery {
+        viewer {
+          user {
+            id
+          }
+        }
+
         botRace {
           edges {
             node {
@@ -38,23 +46,28 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
     `,
     {}
   );
-  const bot_races = getNodes(bot_race_data.botRace);
+  const bot_races = getNodes(data.botRace);
 
   const [name, setName] = useState("");
-  const [race, setRace] = useState(bot_races[0].id);
+  const [race, setRace] = useState<Race>("P");
   const [type, setType] = useState(Object.keys(BOT_TYPES)[0]);
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
 
   const [botDataEnabled, setBotDataEnabled] = useState(false);
 
-  const handlers = useSnackbarErrorHandlers(
+  const { onCompleted, onError } = useSnackbarErrorHandlers(
     "uploadBot",
     "Bot Uploaded Succesfully!"
   );
 
   const [uploadBot, updating] = useMutation<UploadBotModalMutation>(graphql`
-    mutation UploadBotModalMutation($input: UploadBotInput!) {
+    mutation UploadBotModalMutation($input: UploadBotInput!, $userId: ID!) {
       uploadBot(input: $input) {
+        node(id: $userId) {
+          ... on UserType {
+            ...ProfileBotOverviewList_user
+          }
+        }
         bot {
           id
         }
@@ -66,14 +79,17 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
     }
   `);
 
+  // also sort on userbots
+  // redirect on logged out
+
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Uploading Bot", { name, race, type, botDataEnabled });
-    if (!name || !botZipFile || !race || !type) {
+    if (!name || !botZipFile || !race || !type || !data.viewer?.user?.id) {
       return;
     }
     uploadBot({
       variables: {
+        userId: data.viewer.user.id,
         input: {
           playsRace: race,
           botDataEnabled: botDataEnabled,
@@ -85,14 +101,17 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
       uploadables: {
         "input.botZip": botZipFile,
       },
-      ...handlers,
+      onCompleted: (...args) => {
+        const success = onCompleted(...args);
+        if (success) {
+          onClose();
+        }
+      },
+      onError,
     });
   };
-
-  if (!isOpen) return null;
-
   return (
-    <Modal onClose={onClose} title="Upload Bot">
+    <Modal onClose={onClose} isOpen={isOpen} title="Upload Bot">
       <Form
         handleSubmit={handleUpload}
         submitTitle="Upload Bot"
@@ -141,7 +160,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             value={race}
             required
             onChange={(e) => {
-              setRace(e.target.value);
+              setRace(e.target.value as Race);
             }}
             className="w-full bg-gray-700 text-white p-2 rounded"
           >
