@@ -5,6 +5,7 @@ import SectionDivider from "../_display/SectionDivider";
 interface ModalProps {
   children: ReactNode;
   onClose: () => void;
+  isOpen: boolean;
   title: string;
   keepUnsetOnClose?: boolean;
   size?: "m" | "l";
@@ -12,26 +13,26 @@ interface ModalProps {
 
 const Modal = ({
   children,
+  isOpen,
   onClose,
   title,
   keepUnsetOnClose,
   size = "m",
 }: ModalProps) => {
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-  }, []);
-
-  function handleClose() {
-    if (!keepUnsetOnClose) {
+    if (!isOpen && !keepUnsetOnClose) {
       document.body.style.overflow = "unset";
+    } else {
+      document.body.style.overflow = "hidden";
     }
-  }
+  }, [isOpen, keepUnsetOnClose]);
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div className="fixed inset-0 bg-darken-2 bg-opacity-70 flex items-center justify-center z-50 p-4">
       <div
-
-        className={` bg-gray-800 rounded-lg shadow-md w-full  ${size == "m" ? "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl" : null} ${size == "l" ? "max-w-screen" : null}`}
+        className={` bg-gray-800 rounded-lg shadow-md w-full ${size == "m" ? "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl" : null} ${size == "l" ? "max-w-screen" : null}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="pb-6 px-2 pt-2 max-h-screen">
@@ -41,7 +42,6 @@ const Modal = ({
             <button
               className="text-gray-400 hover:text-gray-200"
               onClick={() => {
-                handleClose();
                 onClose();
               }}
               aria-label="Close modal"

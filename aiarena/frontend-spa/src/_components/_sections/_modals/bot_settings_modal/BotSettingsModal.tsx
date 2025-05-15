@@ -63,14 +63,14 @@ export default function BotSettingsModal({
     window.location.href = `/${url}`;
   };
 
-  const handlers = useSnackbarErrorHandlers(
+  const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateBot",
     "Bot Settings Updated!"
   );
 
-  return isOpen ? (
+  return (
     <>
-      <Modal onClose={onClose} title={`Settings - ${bot.name}`}>
+      <Modal onClose={onClose} isOpen={isOpen} title={`Settings - ${bot.name}`}>
         <div className="space-y-4">
           <button
             className="bg-customGreen text-white py-2 px-4 rounded w-full"
@@ -115,7 +115,10 @@ export default function BotSettingsModal({
                 uploadables: {
                   "input.botZip": botZipFile,
                 },
-                ...handlers,
+                onCompleted: (...args) => {
+                  onCompleted(...args);
+                },
+                onError,
               });
             }}
           >
@@ -156,7 +159,10 @@ export default function BotSettingsModal({
                         botDataEnabled: !bot.botDataEnabled,
                       },
                     },
-                    ...handlers,
+                    onCompleted: (...args) => {
+                      onCompleted(...args);
+                    },
+                    onError,
                   })
                 }
                 disabled={updating}
@@ -176,5 +182,5 @@ export default function BotSettingsModal({
         />
       )}
     </>
-  ) : null;
+  );
 }
