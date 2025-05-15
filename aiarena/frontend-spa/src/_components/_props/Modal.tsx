@@ -20,11 +20,14 @@ const Modal = ({
   size = "m",
 }: ModalProps) => {
   useEffect(() => {
-    if (!isOpen && !keepUnsetOnClose) {
-      document.body.style.overflow = "unset";
-    } else {
+    if (isOpen) {
       document.body.style.overflow = "hidden";
     }
+    return () => {
+      if (!keepUnsetOnClose) {
+        document.body.style.overflow = "unset";
+      }
+    };
   }, [isOpen, keepUnsetOnClose]);
 
   if (!isOpen) return null;
