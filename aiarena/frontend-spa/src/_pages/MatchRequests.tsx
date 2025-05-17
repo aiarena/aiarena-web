@@ -18,11 +18,8 @@ export default function MatchRequests() {
   );
 
   if (!data.viewer) {
-    return (
-      <>
-        <p>No viewer</p>
-      </>
-    );
+    window.location.replace("/accounts/login");
+    return null;
   }
 
   return (

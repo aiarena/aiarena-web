@@ -88,7 +88,7 @@ export default function JoinCompetitionModal({
         }
       }
     `);
-  const handlers = useSnackbarErrorHandlers(
+  const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateCompetitionParticipation",
     "Bot Participation Updated!"
   );
@@ -118,12 +118,19 @@ export default function JoinCompetitionModal({
           competition: compID,
         },
       },
-      ...handlers,
+      onCompleted: (...args) => {
+        onCompleted(...args);
+      },
+      onError,
     });
   };
 
-  return isOpen ? (
-    <Modal onClose={onClose} title={`Edit Competitions - ${bot.name}`}>
+  return (
+    <Modal
+      onClose={onClose}
+      isOpen={isOpen}
+      title={`Edit Competitions - ${bot.name}`}
+    >
       <div className="space-y-4">
         {openCompetitions &&
           openCompetitions.length > 0 &&
@@ -150,5 +157,5 @@ export default function JoinCompetitionModal({
           ))}
       </div>
     </Modal>
-  ) : null;
+  );
 }

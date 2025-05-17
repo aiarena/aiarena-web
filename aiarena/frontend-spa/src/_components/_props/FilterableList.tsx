@@ -209,8 +209,6 @@ export default function FilterableList<T>({
   // Pagination logic
   const pageSize = resultsPerPage;
 
-  // we want to cap pageSize
-
   const paginatedData = sortedData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize

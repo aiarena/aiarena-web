@@ -46,8 +46,12 @@ export default function BotAllParticipationsModal({
 
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
 
-  return isOpen ? (
-    <Modal onClose={onClose} title={`All Competitions - ${bot.name}`}>
+  return (
+    <Modal
+      onClose={onClose}
+      isOpen={isOpen}
+      title={`All Competitions - ${bot.name}`}
+    >
       <div className="space-y-4">
         {botCompetitionParticipations &&
           botCompetitionParticipations.length > 0 &&
@@ -93,5 +97,5 @@ export default function BotAllParticipationsModal({
           ))}
       </div>
     </Modal>
-  ) : null;
+  );
 }
