@@ -36,7 +36,7 @@ export default function BotTrophiesModal(props: TrophiesModalProps) {
     <Modal
       onClose={props.onClose}
       isOpen={props.isOpen}
-      title={`${bot.name}'s Trophies`}
+      title={`Trophies - ${bot.name}`}
     >
       <div className="p-4">
         {bot.trophies && trophies.length > 0 ? (
