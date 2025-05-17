@@ -10,6 +10,8 @@ import { ProfileBotOverviewList_user$key } from "./__generated__/ProfileBotOverv
 import Searchbar from "../_props/Searchbar";
 import Dropdown from "../_props/Dropdown";
 import DropdownButton from "../_props/DropdownButton";
+// import DropdownTW from "../_props/DropdownTW";
+// import DropdownMenuItemTW from "../_props/DropdownMenuItemTW";
 
 interface ProfileBotOverviewListProps {
   viewer: ProfileBotOverviewList_viewer$key;
@@ -82,7 +84,18 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
   }, 0);
 
   const [useSort, setUseSort] = useState("Sort By");
+  // const [displaySort, setDisplaySort] = useState("Sort By");
+
   const [searchBarValue, setSearchBarValue] = useState("");
+
+  // const handleSortChange = (value: string) => {
+  //   setUseSort(value);
+
+  //   // Delay updating visible title to prevent re-render flicker
+  //   setTimeout(() => {
+  //     setDisplaySort(value);
+  //   }, 70); // Adjust as needed
+  // };
 
   return (
     <div className="bg-customBackgroundColor1">
@@ -135,7 +148,33 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
               <></>
             )}
           </Dropdown>
-
+          {/*
+          <DropdownTW title={displaySort}>
+            {activeBotParticipations > 0 ? (
+              <DropdownMenuItemTW
+                onClick={() => handleSortChange("Active Competitions")}
+                title={"Active Competitions"}
+              />
+            ) : (
+              <></>
+            )}
+            <DropdownMenuItemTW
+              onClick={() => handleSortChange("Zip Updated")}
+              title={"Zip Updated"}
+            />
+            <DropdownMenuItemTW
+              onClick={() => handleSortChange("Created")}
+              title={"Created"}
+            />
+            {totalTrophies > 0 ? (
+              <DropdownMenuItemTW
+                onClick={() => handleSortChange("Trophies")}
+                title={"Trophies"}
+              />
+            ) : (
+              <></>
+            )}
+          </DropdownTW> */}
           <Searchbar
             onChange={(e) => {
               setSearchBarValue(e.target.value);
