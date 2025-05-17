@@ -65,7 +65,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
 
-  const activeBotParticipation = getNodes(userData?.ownBots).reduce(
+  const activeBotParticipations = getNodes(userData?.ownBots).reduce(
     (total, item) => {
       const activeCount =
         getNodes(item.competitionParticipations).filter(
@@ -76,17 +76,22 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
     0
   );
 
+  const totalTrophies = getNodes(userData?.ownBots).reduce((total, item) => {
+    const trophyCount = getNodes(item.trophies).length || 0;
+    return total + trophyCount;
+  }, 0);
+
   const [useSort, setUseSort] = useState("Sort By");
   const [searchBarValue, setSearchBarValue] = useState("");
 
   return (
     <div className="bg-customBackgroundColor1">
-      <div className="flex justify-between  flex-wrap-reverse w-full pb-4">
-        <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap-reverse w-fullitems-start">
+        <div className="flex gap-4 flex-wrap pb-4">
           {viewer.activeBotsLimit ? (
             <div className="block">
               <p className="pb-1">
-                {activeBotParticipation} / {viewer.activeBotsLimit} active
+                {activeBotParticipations} / {viewer.activeBotsLimit} active
                 competition participations.
               </p>
               <p>
@@ -103,12 +108,16 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
           ) : null}
         </div>
 
-        <div className="flex gap-4 ">
+        <div className="flex gap-4 ml-auto ">
           <Dropdown title={useSort}>
-            <DropdownButton
-              onClick={() => setUseSort("Active Competitions")}
-              title={"Active Competitions"}
-            />
+            {activeBotParticipations > 0 ? (
+              <DropdownButton
+                onClick={() => setUseSort("Active Competitions")}
+                title={"Active Competitions"}
+              />
+            ) : (
+              <></>
+            )}
             <DropdownButton
               onClick={() => setUseSort("Zip Updated")}
               title={"Zip Updated"}
@@ -117,10 +126,14 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
               onClick={() => setUseSort("Created")}
               title={"Created"}
             />
-            <DropdownButton
-              onClick={() => setUseSort("Trophies")}
-              title={"Trophies"}
-            />
+            {totalTrophies > 0 ? (
+              <DropdownButton
+                onClick={() => setUseSort("Trophies")}
+                title={"Trophies"}
+              />
+            ) : (
+              <></>
+            )}
           </Dropdown>
 
           <Searchbar
@@ -177,7 +190,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
                   const bMatches = regex.test(b.name) ? 0 : -1;
 
                   return bMatches - aMatches;
-                } else if (activeBotParticipation == 0) {
+                } else if (activeBotParticipations == 0) {
                   return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
                 } else {
                   return (a.competitionParticipations?.edges?.length || 0) <=
