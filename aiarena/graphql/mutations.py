@@ -245,7 +245,7 @@ class UploadBot(CleanedInputMutation):
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UploadBotInput):
         if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):
-            raise Exception("Bot uploads are currently disabled.")
+            raise GraphQLError("Bot uploads are currently disabled.")
 
         bot = Bot(
             user=info.context.user,
