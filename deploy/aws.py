@@ -755,6 +755,11 @@ def get_ecs_status(stack_name, services, threads=8):
             if task_def not in task_definitions_info:
                 continue
 
+            # One-off tasks that were started manually, don't have a startedBy value
+            # we don't want to look at those when monitoring a deployment
+            if not task.get("startedBy"):
+                continue
+
             actual_version, service = task_definitions_info[task_def]
             status = task["lastStatus"]
             stopped_reason = task.get("stoppedReason", "")
