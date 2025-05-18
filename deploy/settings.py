@@ -13,7 +13,6 @@ PROJECT_ID = 83
 
 WEB_PORT = PROJECT_ID * 100 + 1
 DJANGO_PORT = PROJECT_ID * 100 + 11
-NEXTJS_PORT = PROJECT_ID * 100 + 12
 
 IMAGES: dict[str, Path] = {
     "env": PROJECT_PATH / "docker/Dockerfile",
@@ -23,7 +22,6 @@ IMAGES: dict[str, Path] = {
 }
 
 UWSGI_CONTAINER_NAME = "aiarena-uwsgi"
-NEXTJS_CONTAINER_NAME = "aiarena-nextjs"
 NGINX_CONTAINER_NAME = "nginx"
 
 DB_NAME = "aiarena"
@@ -136,19 +134,6 @@ class WebTask(BaseTask):
             "command": command.split(" "),
         }
 
-    def nextjs_container(self, env, ports, name):
-        return {
-            "name": name,
-            "environment": [
-                {"name": "HOSTNAME", "value": "localhost"},
-                {"name": "PORT", "value": str(NEXTJS_PORT)},
-            ],
-            "essential": True,
-            "image": image_url.format(image="frontend"),
-            "portMappings": ports,
-            "logConfiguration": get_log_configuration(self.family, "nextjs"),
-        }
-
     def code_container(self, *args, **kwargs):
         container = super().code_container(*args, **kwargs)
         container["logConfiguration"] = get_log_configuration(self.family, "django")
@@ -161,11 +146,6 @@ class WebTask(BaseTask):
                 self.convert_port_to_mapping([[DJANGO_PORT, DJANGO_PORT]]),
                 name=UWSGI_CONTAINER_NAME,
                 command="/app/aiarena/uwsgi.sh",
-            ),
-            self.nextjs_container(
-                env,
-                self.convert_port_to_mapping([[NEXTJS_PORT, NEXTJS_PORT]]),
-                name=NEXTJS_CONTAINER_NAME,
             ),
             self.nginx_container(
                 env,
