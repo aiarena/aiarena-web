@@ -105,7 +105,7 @@ class BaseTask(Task):
 
 class WebTask(BaseTask):
     default_cpu = "256"
-    default_memory = "512"
+    default_memory = "1024"
 
     # noinspection PyUnusedLocal
     def nginx_container(self, env, ports, code_container, name, command=None, hostname=None):
