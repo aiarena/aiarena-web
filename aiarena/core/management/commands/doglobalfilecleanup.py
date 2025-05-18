@@ -80,7 +80,7 @@ class Command(BaseCommand):
         ac_logs_cleaned_count = 0
         processed_count = 0
 
-        batch_size = 100
+        batch_size = 1000
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             for i in range(0, results_count, batch_size):
