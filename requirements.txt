@@ -39,6 +39,6 @@ pytz==2022.7.1
 redis==5.2.1
 sentry-sdk[django]==1.32.0
 six==1.16.0
-uwsgi==2.0.28
+uwsgi==2.0.29
 wheel==0.45.1
 wiki==0.11.1
