@@ -11,7 +11,26 @@ from aiarena.core.tests.base import BrowserHelper
 
 
 @pytest.fixture
-def zip_file():
+def get_fixture(request: pytest.FixtureRequest):
+    """
+    Fixture that can be used to get another fixture by name.
+    Useful if you want to parameterize the test with fixtures, since pytest
+    does not allow this.
+    https://github.com/pytest-dev/pytest/issues/349#issuecomment-471400399
+
+    Example:
+
+        @pytest.mark.parametrize('name', ('fixture_1', 'fixture_2'))
+        def test_integration(get_fixture, name):
+            parametrized_fixture = get_fixture(name)
+            ...
+
+    """
+    return request.getfixturevalue
+
+
+@pytest.fixture
+def python_zip_file():
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("run.py", b'print("12 Pool")')
