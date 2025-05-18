@@ -12,6 +12,7 @@ def test_spa_userbots_shows_no_viewer(page: Page, bh: BrowserHelper):
     expect(page.get_by_label("Username")).to_be_visible()
     expect(page.get_by_label("Password")).to_be_visible()
 
+
 def test_spa_nav_to_django(page: Page, bh: BrowserHelper):
     page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.locator("text=Home")).to_be_visible()
