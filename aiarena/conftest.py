@@ -38,7 +38,16 @@ def python_zip_file():
     return SimpleUploadedFile("bot.zip", buffer.read(), content_type="application/zip")
 
 
-@pytest.fixture()
+@pytest.fixture
+def invalid_python_zip_file():
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("notrun.py", b'print("12 Pool")')
+    buffer.seek(0)
+    return SimpleUploadedFile("bot.zip", buffer.read(), content_type="application/zip")
+
+
+@pytest.fixture
 def all_bot_races(db):
     BotRace.create_all_races()
 

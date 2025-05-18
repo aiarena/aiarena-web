@@ -1,4 +1,6 @@
-from aiarena.core.models import CompetitionParticipation, Match, MatchParticipation
+import pytest
+
+from aiarena.core.models import Bot, CompetitionParticipation, Match, MatchParticipation
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.graphql import BotType, CompetitionType, MapPoolType, MapType
 
@@ -520,39 +522,51 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
         # assert CompetitionParticipation.objects.filter(bot__user=user).count() == 5
 
 
-# class TestCreateBot(GraphQLTest):
-#     mutationn_name = "uploadBot"
-#     mutation = """
-#         mutation($input: UploadBotInput!){
-#             uploadBot(
-#                 input: $input) {
-#                     bot {
-#                         id
-#                     }
-#                     errors {
-#                         field
-#                         messages
-#                     }
-#                 }
-#             }
-#     """
+class TestUploadBot(GraphQLTest):
+    mutation_name = "uploadBot"
+    mutation = """
+    mutation ($input: UploadBotInput!) {
+        uploadBot(input: $input) {
+            bot {
+                id
+            }
+            errors {
+                field
+                messages
+            }
+        }
+    }
+    """
 
-#     def test_create_bot_success(self, user, zip_file):
-#         assert not Bot.objects.filter(user=user).exists()
-#         self.mutate(
-#             login_user=user,
-#             expected_status=200,
-#             variables={
-#                 "input": {
-#                     "name": "NotSerral",
-#                     "playsRace": "Z",
-#                     "botDataEnabled": False,
-#                     "type": "PYTHON",
-#                     "botZip": zip_file,
-#                 }
-#             },
-#         )
-#         assert not Bot.objects.filter(user=user).exists()
+    @pytest.mark.parametrize(
+        "zip_fixture,expected_errors,should_create",
+        [
+            ("python_zip_file", [], True),
+            (
+                "invalid_python_zip_file",
+                ["A bot of type python would need to have a file in the zip file root named run.py"],
+                False,
+            ),
+        ],
+    )
+    def test_create_bot(self, user, get_fixture, all_bot_races, zip_fixture, expected_errors, should_create):
+        assert not Bot.objects.filter(user=user).exists()
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "name": "NotSerral",
+                    "playsRace": "Z",
+                    "botDataEnabled": False,
+                    "type": "PYTHON",
+                    "botZip": None,
+                }
+            },
+            files={"input.botZip": get_fixture(zip_fixture)},
+            expected_errors_like=expected_errors,
+        )
+        assert Bot.objects.filter(user=user).exists() == should_create
 
 
 class TestUpdateBot(GraphQLTest):
