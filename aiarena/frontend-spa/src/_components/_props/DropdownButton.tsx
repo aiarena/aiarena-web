@@ -20,7 +20,6 @@ export default function DropdownButton({
       onClick={handleClick}
     >
       <span>{title}</span>
-      <span>{">"}</span>
     </button>
   );
 }
