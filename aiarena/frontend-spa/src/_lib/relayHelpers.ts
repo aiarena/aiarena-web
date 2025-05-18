@@ -20,7 +20,10 @@ export function getNodes<T>(
 }
 
 
-export function extractRelayID(base64Id: string, expectedType: string) {
+export function extractRelayID(base64Id: string | undefined | null, expectedType: string) {
+    if (base64Id == null || base64Id == undefined) {
+        return null
+    }
     try {
         const decoded = atob(base64Id);
         const [type, id] = decoded.split(":");

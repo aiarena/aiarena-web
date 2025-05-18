@@ -111,7 +111,7 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
         <input
           ref={inputRef}
           type="text"
-          className="w-full px-4 py-2 border border-gray-600  rounded-md focus:outline-none focus:ring-2 focus:ring-customGreen"
+          className="w-full px-4 py-2 text-left"
           placeholder={placeholder}
           value={searchTerm}
           onChange={handleInputChange}

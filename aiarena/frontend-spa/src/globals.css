@@ -61,6 +61,24 @@
 /*  }*/
 /*}*/
 
+@layer base {
+  h1 {
+    font-size: var(--text-4xl);
+  }
+  h2 {
+    font-size: var(--text-2xl);
+  }
+  h3 {
+    font-size: var(--text-xl);
+  }
+  h4 {
+    font-size: var(--text-xl);
+  }
+  input {
+    @apply w-16 pl-4 mr-2 focus:ring-customGreen focus:outline-none focus:ring-2 rounded-md bg-gray-900 border border-gray-700 gap-3;
+  }
+}
+
 body {
   color: rgb(225, 225, 225); /* Apply the white text color */
   background: linear-gradient(rgb(12, 12, 12), rgb(20, 20, 20));

@@ -20,15 +20,10 @@ const Footer: React.FC = () => {
     {}
   );
 
-  // TODO
-  // remove undefined and null checks inside the supporters Component, this should all be handled by relay
-
   return (
     <footer className=" text-white ">
       <SectionDivider />
       <div className="pt-12 container mx-auto px-4 flex flex-col md:flex-row md:flex-wrap justify-between items-start">
-        {/* <ServicesComponent services={footerLinks.services} /> */}
-
         <SupportersComponent stats={data.stats} />
         <SocialComponent links={footerLinks.socialLinks} />
       </div>

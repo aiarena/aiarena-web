@@ -301,15 +301,13 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     }
   `);
 
-  const handlers = useSnackbarErrorHandlers(
+  const { onCompleted, onError } = useSnackbarErrorHandlers(
     "requestMatch",
     "Match Request Updated!"
   );
 
-  if (!isOpen) return null;
-
   return (
-    <Modal onClose={onClose} title="Request Match">
+    <Modal onClose={onClose} isOpen={isOpen} title="Request Match">
       <div className="space-y-4">
         <div className="mb-4">
           <label className="block text-left font-medium mb-1">Bot 1</label>
@@ -352,7 +350,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           <input
             value={matchCount}
             type="number"
-            className="text-right w-16 pl-4 mr-2 focus:ring-customGreen focus:outline-none focus:ring-2  rounded-md bg-gray-900 border border-gray-700 gap-3"
             onChange={(e) => setMatchCount(parseInt(e.target.value))}
           ></input>
           <div>
@@ -442,7 +439,13 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                       : undefined,
                 },
               },
-              ...handlers,
+              onCompleted: (...args) => {
+                const success = onCompleted(...args);
+                if (success) {
+                  onClose();
+                }
+              },
+              onError,
             });
           }}
           className="w-full bg-customGreen text-white py-2 rounded mt-12"
