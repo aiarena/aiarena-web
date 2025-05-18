@@ -44,7 +44,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
         }
       }
     `,
-    {}
+    {},
   );
   const bot_races = getNodes(data.botRace);
 
@@ -57,7 +57,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "uploadBot",
-    "Bot Uploaded Succesfully!"
+    "Bot Uploaded Successfully!",
   );
 
   const [uploadBot, updating] = useMutation<UploadBotModalMutation>(graphql`
