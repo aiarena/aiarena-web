@@ -86,28 +86,28 @@ def other_user(db):
 
 
 @pytest.fixture
-def bot(db, user, all_bot_races, zip_file):
+def bot(db, user, all_bot_races, python_zip_file):
     return Bot.objects.create(
         user=user,
         name="My_Bot",
         bot_zip_publicly_downloadable=False,
         bot_data_enabled=False,
         bot_data_publicly_downloadable=False,
-        bot_zip=zip_file,
+        bot_zip=python_zip_file,
         type="python",
         plays_race=BotRace.terran(),
     )
 
 
 @pytest.fixture
-def other_bot(db, other_user, zip_file):
+def other_bot(db, other_user, python_zip_file):
     return Bot.objects.create(
         user=other_user,
         name="Not_My_Bot",
         bot_zip_publicly_downloadable=False,
         bot_data_enabled=False,
         bot_data_publicly_downloadable=False,
-        bot_zip=zip_file,
+        bot_zip=python_zip_file,
         type="python",
         plays_race=BotRace.zerg(),
     )
