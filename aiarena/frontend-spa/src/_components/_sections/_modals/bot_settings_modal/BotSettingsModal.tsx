@@ -143,35 +143,37 @@ export default function BotSettingsModal({
             Upload Bot Zip
           </button>
 
-          <div className="flex items-center mt-2">
-            <input
-              type="checkbox"
-              checked={bot.botDataPubliclyDownloadable}
-              onChange={() =>
-                toggleSetting(
-                  "botDataPubliclyDownloadable",
-                  !bot.botDataPubliclyDownloadable
-                )
-              }
-              disabled={updating}
-              className="mr-2"
-            />
-            <label className="text-gray-300">
-              Mark Bot Data Publicly Downloadable
-            </label>
-          </div>
+          <div className="items-center mt-2">
+            <div className="flex items-center mt-2">
+              <input
+                type="checkbox"
+                checked={bot.botDataPubliclyDownloadable}
+                onChange={() =>
+                  toggleSetting(
+                    "botDataPubliclyDownloadable",
+                    !bot.botDataPubliclyDownloadable
+                  )
+                }
+                disabled={updating}
+                className="mr-2"
+              />
+              <label className="text-gray-300">
+                Mark Bot Data Publicly Downloadable
+              </label>
+            </div>
 
-          <div className="flex items-center mt-2">
-            <input
-              type="checkbox"
-              checked={bot.botDataEnabled}
-              onChange={() =>
-                toggleSetting("botDataEnabled", !bot.botDataEnabled)
-              }
-              disabled={updating}
-              className="mr-2"
-            />
-            <label className="text-gray-300">Enable Bot Data</label>
+            <div className="flex items-center mt-2">
+              <input
+                type="checkbox"
+                checked={bot.botDataEnabled}
+                onChange={() =>
+                  toggleSetting("botDataEnabled", !bot.botDataEnabled)
+                }
+                disabled={updating}
+                className="mr-2"
+              />
+              <label className="text-gray-300">Enable Bot Data</label>
+            </div>
           </div>
         </div>
       </Modal>
