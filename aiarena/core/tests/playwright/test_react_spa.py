@@ -7,7 +7,7 @@ from ..base import BrowserHelper
 pytestmark = [pytest.mark.playwright]
 
 
-def test_spa_userbots_shows_no_viewer(page: Page, bh: BrowserHelper):
+def test_spa_redirect_to_django_login_if_no_user(page: Page, bh: BrowserHelper):
     page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.get_by_label("Username")).to_be_visible()
     expect(page.get_by_label("Password")).to_be_visible()
@@ -15,7 +15,6 @@ def test_spa_userbots_shows_no_viewer(page: Page, bh: BrowserHelper):
 
 def test_spa_nav_to_django(page: Page, bh: BrowserHelper):
     page.goto(f"{bh.live_server.url}/dashboard/userbots")
-    expect(page.locator("text=Home")).to_be_visible()
     page.get_by_role("link", name="Home").click()
     expect(page.locator("text=Welcome to AI Arena!")).to_be_visible()
 
