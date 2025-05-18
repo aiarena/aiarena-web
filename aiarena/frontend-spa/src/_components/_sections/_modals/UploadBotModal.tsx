@@ -44,7 +44,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
         }
       }
     `,
-    {},
+    {}
   );
   const bot_races = getNodes(data.botRace);
 
@@ -57,7 +57,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "uploadBot",
-    "Bot Uploaded Successfully!",
+    "Bot Uploaded Successfully!"
   );
 
   const [uploadBot, updating] = useMutation<UploadBotModalMutation>(graphql`
@@ -68,9 +68,6 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             ...ProfileBotOverviewList_user
           }
         }
-        bot {
-          id
-        }
         errors {
           field
           messages
@@ -78,9 +75,6 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
       }
     }
   `);
-
-  // also sort on userbots
-  // redirect on logged out
 
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault();
