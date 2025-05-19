@@ -38,6 +38,7 @@ def test_spa_userbots_shows_active_competition_participations(
     python_zip_file,
     all_bot_races,
 ):
+    generated_python_file = python_zip_file()
     page.goto(bh.reverse("login"))
     page.get_by_label("Username:").fill("billy")
     page.get_by_label("Password:").fill("guest")
@@ -54,9 +55,9 @@ def test_spa_userbots_shows_active_competition_participations(
 
     page.get_by_label("Bot ZIP:").set_input_files(
         FilePayload(
-            name=python_zip_file.name,
-            mimeType=python_zip_file.content_type,
-            buffer=python_zip_file.read(),
+            name=generated_python_file.name,
+            mimeType=generated_python_file.content_type,
+            buffer=generated_python_file.read(),
         )
     )
     page.get_by_label("Bot Data Enabled:").check()

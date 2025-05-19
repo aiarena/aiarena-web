@@ -1,3 +1,5 @@
+from django.conf import settings
+
 import pytest
 
 from aiarena.core.models import Bot, CompetitionParticipation, Match, MatchParticipation
@@ -539,20 +541,120 @@ class TestUploadBot(GraphQLTest):
     """
 
     @pytest.mark.parametrize(
-        "zip_fixture,expected_errors,should_create",
+        "bot_name,language,zip_fixture,expected_errors,should_create",
         [
-            ("python_zip_file", [], True),
+            ("a_cpp_win_bot", "CPPWIN32", "cpp_win_zip_file", [], True),
             (
+                "a_cpp_win_bot",
+                "CPpWIN32",
+                "invalid_python_zip_file",
+                ["A bot of type cppwin32 would need to have a file in the zip file root named a_cpp_win_bot.exe"],
+                False,
+            ),
+            ("a_cpp_lin_bot", "CPPLINUX", "cpp_lin_zip_file", [], True),
+            (
+                "a_cpp_lin_bot",
+                "CPPLInUX",
+                "invalid_python_zip_file",
+                ["A bot of type cpplinux would need to have a file in the zip file root named a_cpp_lin_bot"],
+                False,
+            ),
+            ("a_dot_net_bot", "DOTNETCORE", "dotnet_zip_file", [], True),
+            (
+                "a_dot_net_bot",
+                "DOTnetCORE",
+                "invalid_python_zip_file",
+                ["A bot of type dotnetcore would need to have a file in the zip file root named a_dot_net_bot.dll"],
+                False,
+            ),
+            ("a_java_bot", "JAVA", "java_zip_file", [], True),
+            (
+                "a_java_bot",
+                "JaVA",
+                "invalid_python_zip_file",
+                ["A bot of type java would need to have a file in the zip file root named a_java_bot.jar"],
+                False,
+            ),
+            ("a_node_js_bot", "NODEJS", "node_js_zip_file", [], True),
+            (
+                "a_node_js_bot",
+                "NODEjS",
+                "invalid_python_zip_file",
+                ["A bot of type nodejs would need to have a file in the zip file root named a_node_js_bot.js"],
+                False,
+            ),
+            ("a_python_bot", "PythoN", "python_zip_file", [], True),
+            (
+                "a_python_bot",
+                "PythoN",
                 "invalid_python_zip_file",
                 ["A bot of type python would need to have a file in the zip file root named run.py"],
                 False,
             ),
         ],
     )
-    def test_create_bot(self, user, get_fixture, all_bot_races, zip_fixture, expected_errors, should_create):
+    def test_upload_bot(
+        self, user, get_fixture, all_bot_races, bot_name, language, zip_fixture, expected_errors, should_create
+    ):
         assert not Bot.objects.filter(user=user).exists()
         self.mutate(
             login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "name": bot_name,
+                    "playsRace": "Z",
+                    "botDataEnabled": False,
+                    "type": language,
+                    "botZip": None,
+                }
+            },
+            files={"input.botZip": get_fixture(zip_fixture)},
+            expected_errors_like=expected_errors,
+        )
+        assert Bot.objects.filter(user=user).exists() == should_create
+
+        if should_create:
+            bot = Bot.objects.get(user=user, name=bot_name)
+            assert bot.user.id == user.id
+            assert bot.bot_zip_publicly_downloadable is False
+            assert bot.bot_data_enabled is False
+            assert bot.bot_data_publicly_downloadable is False
+            assert bot.get_wiki_article().current_revision.content == ""
+            assert bot.get_bot_zip_limit_in_mb() == settings.CONSTANCE_CONFIG["BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER"][0]
+        else:
+            pass
+
+    def test_upload_bot_bot_data_enabled(self, user, get_fixture, all_bot_races, python_zip_file):
+        assert not Bot.objects.filter(user=user).exists()
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "name": "NotMaru",
+                    "playsRace": "T",
+                    "botDataEnabled": True,
+                    "type": "PYTHON",
+                    "botZip": None,
+                }
+            },
+            files={"input.botZip": python_zip_file()},
+        )
+        assert Bot.objects.filter(user=user).exists()
+
+        bot = Bot.objects.get(user=user, name="NotMaru")
+        assert bot.user.id == user.id
+        assert bot.bot_zip_publicly_downloadable is False
+        assert bot.bot_data_enabled is True
+        assert bot.bot_data_publicly_downloadable is False
+        assert bot.get_wiki_article().current_revision.content == ""
+        assert bot.get_bot_zip_limit_in_mb() == settings.CONSTANCE_CONFIG["BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER"][0]
+
+    def test_upload_bot_not_logged_in(self, all_bot_races, python_zip_file):
+        assert Bot.objects.count() == 0
+        self.mutate(
+            login_user="",
             expected_status=200,
             variables={
                 "input": {
@@ -563,10 +665,68 @@ class TestUploadBot(GraphQLTest):
                     "botZip": None,
                 }
             },
-            files={"input.botZip": get_fixture(zip_fixture)},
-            expected_errors_like=expected_errors,
+            files={"input.botZip": python_zip_file()},
+            expected_errors_like=["You need to be logged in in to perform this action."],
         )
-        assert Bot.objects.filter(user=user).exists() == should_create
+        assert Bot.objects.count() == 0
+
+    def test_upload_bot_max_bots(self, user, all_bot_races, python_zip_file):
+        # makes the max amount of bot count a default user can create
+
+        assert not Bot.objects.filter(user=user).exists()
+
+        max_bot_count = settings.CONSTANCE_CONFIG["MAX_USER_BOT_COUNT"][0]
+
+        def get_bot_name(i):
+            # creates a string like, a, b, c -> aa, ab, ac -> aaa, aab, aac
+            name = ""
+            while True:
+                name = chr(97 + (i % 26)) + name
+                i = i // 26 - 1
+                if i < 0:
+                    break
+            return name
+
+        # creates [max_bot_count]
+
+        for i in range(max_bot_count):
+            bot_name = get_bot_name(i)
+
+            self.mutate(
+                login_user=user,
+                expected_status=200,
+                variables={
+                    "input": {
+                        "name": bot_name,
+                        "playsRace": "P",
+                        "botDataEnabled": False,
+                        "type": "PYTHON",
+                        "botZip": None,
+                    }
+                },
+                files={"input.botZip": python_zip_file()},
+            )
+            assert Bot.objects.filter(name=bot_name).exists()
+        assert Bot.objects.filter(user=user).count() == max_bot_count
+
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "name": "NotHarstem",
+                    "playsRace": "P",
+                    "botDataEnabled": False,
+                    "type": "PYTHON",
+                    "botZip": None,
+                }
+            },
+            files={"input.botZip": python_zip_file()},
+            expected_errors_like=[
+                f"Maximum bot count of {max_bot_count} already reached. No more bots may be added for this user."
+            ],
+        )
+        assert Bot.objects.filter(user=user).count() == max_bot_count
 
 
 class TestUpdateBot(GraphQLTest):
