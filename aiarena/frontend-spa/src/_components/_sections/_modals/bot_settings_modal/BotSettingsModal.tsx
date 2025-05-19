@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { graphql, useFragment, useMutation } from "react-relay";
 import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.graphql";
@@ -58,6 +58,7 @@ export default function BotSettingsModal({
 
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
   const [isBiographyModalOpen, setBiographyModalOpen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleDownload = (url: string) => {
     window.location.href = `/${url}`;
@@ -91,6 +92,7 @@ export default function BotSettingsModal({
             <span className="text-gray-300">Bot ZIP:</span>
             <input
               type="file"
+              ref={fileInputRef}
               className="w-full bg-gray-700 text-white p-2 rounded"
               onChange={(e) => {
                 if (e.target.files != null) {
@@ -116,6 +118,13 @@ export default function BotSettingsModal({
                   "input.botZip": botZipFile,
                 },
                 onCompleted: (...args) => {
+                  const success = onCompleted(...args);
+                  if (success) {
+                    setBotZipFile(null);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = "";
+                    }
+                  }
                   onCompleted(...args);
                 },
                 onError,
