@@ -43,7 +43,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           totalCount
         }
         user {
-          ownBots {
+          bots {
             edges {
               node {
                 id

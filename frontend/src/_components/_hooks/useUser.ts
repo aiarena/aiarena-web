@@ -12,7 +12,7 @@ export const useUser = (userId: string) => {
             patreonLevel
             dateJoined
             avatarUrl
-            ownBots {
+            bots {
               edges {
                 node {
                   id
@@ -43,8 +43,8 @@ export const useUser = (userId: string) => {
     username: user.username || "", // Fallback for title
     patreonLevel: user.patreonLevel || "", // Fallback for text
     avatarUrl: user.avatarUrl || "",
-    ownBots:
-      data.node?.ownBots?.edges?.map((edge) => ({
+    bots:
+      data.node?.bots?.edges?.map((edge) => ({
         name: edge?.node?.name || "",
         type: edge?.node?.type || "",
         id: edge?.node?.id || "",

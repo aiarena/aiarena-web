@@ -24,7 +24,7 @@ export default function Page(props: AuthorPageProps) {
             username
             patreonLevel
             dateJoined
-            ownBots {
+            bots {
               edges {
                 node {
                   id
@@ -56,9 +56,9 @@ export default function Page(props: AuthorPageProps) {
           <p>Joined: {formatDate(user.node?.dateJoined)}</p>
           {user.node ? <AvatarWithBorder user={user.node} size="lg" /> : null}
 
-          {user.node?.ownBots && user.node?.ownBots?.totalCount > 0 ? (
+          {user.node?.bots && user.node?.bots?.totalCount > 0 ? (
             <ul>
-              {getNodes(user.node.ownBots).map((bot) => (
+              {getNodes(user.node.bots).map((bot) => (
                 <li key={bot.id} onClick={() => console.log(bot.id)}>
                   <p>Name: {bot.name}</p>
                   <p>Plays Race: {bot.playsRace}</p>

@@ -33,7 +33,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
   const userData = useFragment(
     graphql`
       fragment ProfileBotOverviewList_user on UserType {
-        ownBots {
+        bots {
           edges {
             node {
               id
@@ -65,7 +65,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
 
-  const activeBotParticipations = getNodes(userData?.ownBots).reduce(
+  const activeBotParticipations = getNodes(userData?.bots).reduce(
     (total, item) => {
       const activeCount =
         getNodes(item.competitionParticipations).filter(
@@ -76,7 +76,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
     0
   );
 
-  const totalTrophies = getNodes(userData?.ownBots).reduce((total, item) => {
+  const totalTrophies = getNodes(userData?.bots).reduce((total, item) => {
     const trophyCount = getNodes(item.trophies).length || 0;
     return total + trophyCount;
   }, 0);
@@ -164,7 +164,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
       </div>
 
       <ul className="space-y-12">
-        {getNodes(userData?.ownBots)
+        {getNodes(userData?.bots)
           .sort((a, b) => {
             switch (useSort) {
               case "Zip Updated":

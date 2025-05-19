@@ -18,7 +18,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
       fragment ProfileBotOverviewList_viewer on ViewerType {
         activeBotsLimit
         user {
-          ownBots {
+          bots {
             edges {
               node {
                 id
@@ -41,7 +41,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
 
-  const activeBotParticipation = getNodes(viewer.user?.ownBots).reduce(
+  const activeBotParticipation = getNodes(viewer.user?.bots).reduce(
     (total, item) => {
       const activeCount =
         getNodes(item.competitionParticipations).filter(
@@ -78,7 +78,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
       </div>
 
       <ul className="space-y-12">
-        {getNodes(viewer.user?.ownBots).map((bot) => (
+        {getNodes(viewer.user?.bots).map((bot) => (
           <li key={bot.id}>
             <ProfileBot bot={bot} />
           </li>

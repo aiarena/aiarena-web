@@ -21,8 +21,7 @@ class UserType(DjangoObjectTypeWithUID):
     # This is the public user type.
     # put data everyone should be able view here.
 
-    own_bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
-    # rename this own_bots -> bots
+    bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
     avatar_url = graphene.String()
 
     class Meta:
@@ -36,7 +35,7 @@ class UserType(DjangoObjectTypeWithUID):
         filter_fields = []
 
     @staticmethod
-    def resolve_own_bots(root: models.User, info, **args):
+    def resolve_bots(root: models.User, info, **args):
         return root.bots.all()
 
     @staticmethod
