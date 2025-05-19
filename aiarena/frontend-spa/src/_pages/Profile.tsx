@@ -23,12 +23,10 @@ export default function Profile() {
   );
 
   const [activeTab, setActiveTab] = useState("Bots");
+
   if (!data.viewer) {
-    return (
-      <>
-        <p>No viewer</p>
-      </>
-    );
+    window.location.replace("/accounts/login");
+    return null;
   }
 
   return (

@@ -2,7 +2,6 @@ import json
 from http import HTTPStatus
 from urllib.parse import urlparse, urlunparse
 
-from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.test import Client
 from django.urls import reverse
@@ -79,13 +78,14 @@ class GraphQLTest:
         expected_errors_like: list = None,
         variables: dict | None = None,
         login_user: WebsiteUser | None = None,
+        **kwargs,
     ) -> dict | None:
         """Perform GraphQL query."""
         expected_errors_like = expected_errors_like or []
 
         self.last_query_client = self.client(login_user)
 
-        response = self.do_post(self.last_query_client, query, variables)
+        response = self.do_post(self.last_query_client, query, variables, **kwargs)
 
         assert response.status_code == expected_status, (
             f"Unexpected response status code: {response.status_code}\n" f"Response content: {response.content}"
@@ -127,22 +127,35 @@ class GraphQLTest:
         cls,
         client: Client,
         query: str,
-        variables: dict | None,
+        variables=None,
+        files=None,
+        headers=None,
     ) -> HttpResponse:
         """
         Perform POST-request to the GraphQL api.
         """
-        return client.post(
-            reverse("graphql"),
-            data=json.dumps(
-                {
-                    "query": query,
-                    "variables": (variables or {}),
-                },
-                cls=DjangoJSONEncoder,
-            ),
-            content_type="application/json",
-        )
+
+        headers = headers or {}
+        files = files or {}
+        variables = variables or {}
+        map_ = {}
+
+        for key in files.keys():
+            map_[key] = [f"variables.{key}"]
+            if key not in variables:
+                variables[key] = None
+
+        body = {"query": query}
+        if variables:
+            body["variables"] = variables
+
+        data = {
+            "operations": json.dumps(body),
+            "map": json.dumps(map_),
+            **files,
+        }
+
+        return client.post(reverse("graphql"), data, **headers)
 
     @staticmethod
     def nodes(response, path):

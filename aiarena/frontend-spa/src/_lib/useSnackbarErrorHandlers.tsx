@@ -37,12 +37,13 @@ export default function useSnackbarErrorHandlers(
     const success = onMutationCompleted(response, errors);
 
     if (!success || !successMessage) {
-      return;
+      return success;
     }
 
     enqueueSnackbar(<span>{successMessage}</span>, {
       variant: "default",
     });
+    return success;
   };
 
   return {

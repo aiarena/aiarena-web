@@ -6,6 +6,10 @@ import { getNodes } from "@/_lib/relayHelpers";
 import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
 import ProfileBot from "./ProfileBot";
+import { ProfileBotOverviewList_user$key } from "./__generated__/ProfileBotOverviewList_user.graphql";
+import Searchbar from "../_props/Searchbar";
+import Dropdown from "../_props/Dropdown";
+import DropdownButton from "../_props/DropdownButton";
 
 interface ProfileBotOverviewListProps {
   viewer: ProfileBotOverviewList_viewer$key;
@@ -19,29 +23,49 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
       fragment ProfileBotOverviewList_viewer on ViewerType {
         activeBotsLimit
         user {
-          ownBots {
-            edges {
-              node {
-                id
-                competitionParticipations {
-                  edges {
-                    node {
-                      active
-                    }
-                  }
-                }
-                ...ProfileBot_bot
-              }
-            }
-          }
+          ...ProfileBotOverviewList_user
         }
       }
     `,
     props.viewer
   );
+
+  const userData = useFragment(
+    graphql`
+      fragment ProfileBotOverviewList_user on UserType {
+        ownBots {
+          edges {
+            node {
+              id
+              botZipUpdated
+              created
+              name
+              trophies {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+              competitionParticipations {
+                edges {
+                  node {
+                    active
+                  }
+                }
+              }
+              ...ProfileBot_bot
+            }
+          }
+        }
+      }
+    `,
+    viewer.user as ProfileBotOverviewList_user$key
+  );
+
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
 
-  const activeBotParticipation = getNodes(viewer.user?.ownBots).reduce(
+  const activeBotParticipations = getNodes(userData?.ownBots).reduce(
     (total, item) => {
       const activeCount =
         getNodes(item.competitionParticipations).filter(
@@ -52,14 +76,23 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
     0
   );
 
+  const totalTrophies = getNodes(userData?.ownBots).reduce((total, item) => {
+    const trophyCount = getNodes(item.trophies).length || 0;
+    return total + trophyCount;
+  }, 0);
+
+  const [useSort, setUseSort] = useState("Sort By");
+
+  const [searchBarValue, setSearchBarValue] = useState("");
+
   return (
     <div className="bg-customBackgroundColor1">
-      <div className="flex justify-between ">
-        <div className="flex gap-2 pb-2 mt-auto flex-wrap">
+      <div className="flex flex-wrap-reverse w-fullitems-start">
+        <div className="flex gap-4 flex-wrap pb-4">
           {viewer.activeBotsLimit ? (
             <div className="block">
               <p className="pb-1">
-                {activeBotParticipation} / {viewer.activeBotsLimit} active
+                {activeBotParticipations} / {viewer.activeBotsLimit} active
                 competition participations.
               </p>
               <p>
@@ -75,26 +108,104 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
             </div>
           ) : null}
         </div>
-        {/* <h2 className="text-2xl font-bold text-customGreen mb-4">Your Bots</h2> */}
-        <div className="pb-4">
-          <div className="hidden md:block">
-            <MainButton
-              onClick={() => setUploadBotModalOpen(true)}
-              text="Upload Bot"
+
+        <div className="flex gap-4 ml-auto ">
+          <Dropdown title={useSort}>
+            {activeBotParticipations > 0 ? (
+              <DropdownButton
+                onClick={() => setUseSort("Active Competitions")}
+                title={"Active Competitions"}
+              />
+            ) : (
+              <></>
+            )}
+            <DropdownButton
+              onClick={() => setUseSort("Zip Updated")}
+              title={"Zip Updated"}
             />
-          </div>
-          <div className="block md:hidden">
-            <MainButton onClick={() => setUploadBotModalOpen(true)} text="+" />
+            <DropdownButton
+              onClick={() => setUseSort("Created")}
+              title={"Created"}
+            />
+            {totalTrophies > 0 ? (
+              <DropdownButton
+                onClick={() => setUseSort("Trophies")}
+                title={"Trophies"}
+              />
+            ) : (
+              <></>
+            )}
+          </Dropdown>
+
+          <Searchbar
+            onChange={(e) => {
+              setSearchBarValue(e.target.value);
+              setUseSort("Sort By");
+            }}
+            value={searchBarValue}
+            placeholder="Search your bots..."
+          />
+
+          <div>
+            <div className="hidden md:block">
+              <MainButton
+                onClick={() => setUploadBotModalOpen(true)}
+                text="Upload Bot"
+              />
+            </div>
+            <div className="block md:hidden">
+              <MainButton
+                onClick={() => setUploadBotModalOpen(true)}
+                text="+"
+              />
+            </div>
           </div>
         </div>
       </div>
 
       <ul className="space-y-12">
-        {getNodes(viewer.user?.ownBots).map((bot) => (
-          <li key={bot.id}>
-            <ProfileBot bot={bot} />
-          </li>
-        ))}
+        {getNodes(userData?.ownBots)
+          .sort((a, b) => {
+            switch (useSort) {
+              case "Zip Updated":
+                return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
+              case "Created":
+                return a.created <= b.created ? 0 : -1;
+              case "Trophies":
+                return (a.trophies?.edges?.length || 0) <=
+                  (b.trophies?.edges?.length || 0)
+                  ? 0
+                  : -1;
+              case "Active Competitions":
+                return (a.competitionParticipations?.edges?.length || 0) <=
+                  (b.competitionParticipations?.edges?.length || 0)
+                  ? 0
+                  : -1;
+
+              default:
+                if (searchBarValue.trim().length > 0) {
+                  const pattern = searchBarValue?.trim();
+
+                  const regex = new RegExp(pattern, "i");
+                  const aMatches = regex.test(a.name) ? 0 : -1;
+                  const bMatches = regex.test(b.name) ? 0 : -1;
+
+                  return bMatches - aMatches;
+                } else if (activeBotParticipations == 0) {
+                  return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
+                } else {
+                  return (a.competitionParticipations?.edges?.length || 0) <=
+                    (b.competitionParticipations?.edges?.length || 0)
+                    ? 0
+                    : -1;
+                }
+            }
+          })
+          .map((bot) => (
+            <li key={bot.id}>
+              <ProfileBot bot={bot} />
+            </li>
+          ))}
       </ul>
       <UploadBotModal
         isOpen={isUploadBotModalOpen}
