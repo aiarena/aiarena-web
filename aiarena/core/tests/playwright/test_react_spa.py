@@ -71,5 +71,5 @@ def test_spa_userbots_shows_active_competition_participations(
     page.locator("form").get_by_role("button", name="Upload Bot").click()
 
     expect(page.locator("form").get_by_role("button", name="Upload Bot")).not_to_be_visible()
-    expect(page.get_by_text("Bot Uploaded Successfully!")).to_be_visible()
+    expect(page.get_by_text("Bot Uploaded Succesfully!")).to_be_visible()
     expect(page.get_by_text("robo-her0")).to_be_visible()
