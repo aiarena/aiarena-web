@@ -161,10 +161,6 @@ function Navbar() {
                   </NavLink> */}
                 </li>
               ))}
-
-              <li className="flex justify-center pb-10">
-                {/* <AuthNavBar /> */}
-              </li>
             </ul>
           </div>
         ) : null}

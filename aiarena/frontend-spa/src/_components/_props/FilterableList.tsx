@@ -7,26 +7,15 @@ interface Filter {
   placeholder: string;
 }
 
-// WARNING! This is the old interface that enforces the fields, but requires
-// all data to be flat. Nested fields does not work with this one, but its prefered
-// interface FilterableListProps<T> {
-//   data: (T | null | undefined)[];
-//   fields: (keyof T)[];
-//   filters: Filter[];
-//   renderRow: (item: T, index: number) => React.ReactNode;
-//   resultsPerPage?: number;
-//   fieldLabels?: { [key in keyof T]?: string }; // Add fieldLabels prop
-// }
-
 interface FilterableListProps<T> {
   data: (T | null | undefined)[];
-  fields: string[]; // Allow string to support nested fields
+  fields: string[];
   filters: Filter[];
   renderRow: (item: T, index: number) => React.ReactNode;
   resultsPerPage?: number;
   defaultFieldSort?: number;
   defaultSortOrder?: "asc" | "desc";
-  fieldLabels?: { [key: string]: string }; // Also change fieldLabels to accept any string
+  fieldLabels?: { [key: string]: string };
   fieldClasses?: { [key: string]: string };
   classes?: string;
 }
@@ -39,7 +28,7 @@ export default function FilterableList<T>({
   resultsPerPage: initialResultsPerPage = 10,
   defaultFieldSort = 0,
   defaultSortOrder = "asc",
-  fieldLabels = {}, // Default to an empty object if no fieldLabels are provided
+  fieldLabels = {},
   fieldClasses = {},
   classes = "p-4",
 }: FilterableListProps<T>) {
@@ -53,28 +42,6 @@ export default function FilterableList<T>({
     initialResultsPerPage
   );
   const [showFilterMenu, setShowFilterMenu] = useState<boolean>(false);
-  // Sorting logic
-
-  //   OLD TYPES
-  //   const handleSort = (field: keyof T) => {
-  //     if (field === sortField) {
-  //       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-  //     } else {
-  //       setSortField(field);
-  //       setSortOrder("asc");
-  //     }
-  //   };
-
-  // Utility to determine visibility class based on responsive config
-  // const getResponsiveClass = (className: string): string => {
-  //   return Object.keys(responsive)
-  //     .map((bp) =>
-  //       responsive[bp].some((field) => `display-${bp}` === className)
-  //         ? `${bp}:block`
-  //         : `${bp}:hidden`
-  //     )
-  //     .join(" ");
-  // };
 
   // Sorting logic
   const handleSort = (field: string) => {
@@ -95,61 +62,6 @@ export default function FilterableList<T>({
     setCurrentPage(1); // Reset to page 1 on filter change
   };
 
-  // Reset pagination to page 1 whenever search or filters change
-  //   useEffect(() => {
-  //     setCurrentPage(1);
-  //   }, [searchTerm, dropdownFilters]);
-
-  // Handle dropdown filter changes
-  //   const handleDropdownChange = (field: string, value: string) => {
-  //     setDropdownFilters((prevFilters) => ({
-  //       ...prevFilters,
-  //       [field]: value,
-  //     }));
-  //   };
-
-  // Apply filtering logic based on all filters
-  //   const filteredData = data.filter((item) => {
-  //     return filters.every((filter) => {
-  //       const filterValue = filterStates[filter.field] || "";
-  //       if (filter.type === "search") {
-  //         if (filterValue.trim() === "") return true;
-  //         const searchRegex = new RegExp(filterValue, "i");
-  //         return fields.some((field) => searchRegex.test(String(item[field])));
-  //       } else if (filter.type === "dropdown") {
-  //         return filterValue
-  //           ? String(item[filter.field as keyof T]) === filterValue
-  //           : true;
-  //       }
-  //       return true;
-  //     });
-  //   });
-
-  //   FOR OLD TYPES
-  //   const filteredData = data.filter((item) => {
-  //     // Skip if the item is null or undefined
-  //     if (!item) return false;
-
-  //     return filters.every((filter) => {
-  //       const filterValue = filterStates[filter.field] || "";
-
-  //       if (filter.type === "search") {
-  //         if (filterValue.trim() === "") return true;
-
-  //         const searchRegex = new RegExp(filterValue, "i");
-  //         // Ensure we're safely accessing fields, or return false if undefined
-  //         return fields.some(
-  //           (field) => item[field] && searchRegex.test(String(item[field]))
-  //         );
-  //       } else if (filter.type === "dropdown") {
-  //         return filterValue
-  //           ? String(item[filter.field as keyof T] || "").toLowerCase() ===
-  //               filterValue.toLowerCase()
-  //           : true;
-  //       }
-  //       return true;
-  //     });
-  //   });
   const filteredData = data.filter((item) => {
     if (!item) return false;
 
@@ -187,8 +99,8 @@ export default function FilterableList<T>({
   }
   const sortedData = [...filteredData].sort((a, b) => {
     // Check if either 'a' or 'b' is null or undefined
-    if (a === null || a === undefined) return 1; // Treat null or undefined as greater (sorted to end)
-    if (b === null || b === undefined) return -1; // Treat null or undefined as greater (sorted to end)
+    if (a === null || a === undefined) return 1;
+    if (b === null || b === undefined) return -1;
 
     // Safely access the sortField values using the getNestedValue function
     const valueA = String(
@@ -285,18 +197,13 @@ export default function FilterableList<T>({
                 </div>
               );
             } else if (filter.type === "dropdown") {
-              //   const uniqueValues = Array.from(
-              //     new Set(
-              //       data.map((item) => String(item[filter.field as keyof T]))
-              //     )
-              //   );
               const uniqueValues = Array.from(
                 new Set(
                   data
                     .map(
                       (item) => item && String(item[filter.field as keyof T])
-                    ) // Safely handle nulls
-                    .filter((value) => value) // Exclude null or empty values from dropdown
+                    )
+                    .filter((value) => value)
                 )
               );
 
@@ -314,9 +221,7 @@ export default function FilterableList<T>({
                     {uniqueValues.map((value, index) => (
                       <option key={index} value={value ?? ""}>
                         {" "}
-                        {/* Ensure no null values */}
                         {value ?? "Unknown"}{" "}
-                        {/* Optionally handle display for null values */}
                       </option>
                     ))}
                   </select>

@@ -1,6 +1,6 @@
 interface SectionDividerProps {
   title?: string;
-  darken?: 1 | 2 | 3 | 9; // Optional prop for darken, with values 1, 2, or 3
+  darken?: 1 | 2 | 3 | 9;
   className?: string;
   color?: "customGreen" | "gray";
 }
