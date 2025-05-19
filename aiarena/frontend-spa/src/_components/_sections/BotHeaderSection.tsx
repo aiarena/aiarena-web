@@ -47,7 +47,6 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
     useState(false);
   return (
     <div className="p-4 border-b border-gray-600 bg-gray-900 rounded-t-lg">
-      {/* Grid Layout: Mobile: 1 col, Desktop: 3 cols */}
       <div className="text-left space-y-2">
         <div className="flex justify-between flsex-wrap">
           <div className="flex items-center flex-wrap">
@@ -58,8 +57,6 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
             >
               {bot.name}
             </a>
-
-            {/*/!* Trophy Icon and Count *!/*/}
 
             <div
               className="flex items-center cursor-pointer hover:bg-slate-700 rounded p-1 ml-2"
