@@ -343,21 +343,24 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           />
         </div>
         <div className="mb-4"></div>{" "}
-        <div className="flex">
-          <label className="block text-left font-medium mb-1 pt-2 pr-2">
-            Match Count:
-          </label>
-          <input
-            value={matchCount}
-            type="number"
-            onChange={(e) => setMatchCount(parseInt(e.target.value))}
-          ></input>
-          <div>
+        <div className=" flex flex-wrap gap-4">
+          <div className="flex">
+            <label className="block text-left font-medium mb-1 pt-2 pr-2">
+              Match Count:
+            </label>
+            <input
+              className="w-16"
+              value={matchCount}
+              type="number"
+              onChange={(e) => setMatchCount(parseInt(e.target.value))}
+            ></input>
+          </div>
+          <div className="block">
             <button
               onClick={() => {
                 setMapSelectionType("specific_map");
               }}
-              className={`${mapSelectionType == "specific_map" ? "bg-customGreen" : null} p-2`}
+              className={`rounded-lg  ${mapSelectionType == "specific_map" ? "bg-customGreen-dark " : null} p-2`}
             >
               Specific Map
             </button>{" "}
@@ -365,7 +368,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               onClick={() => {
                 setMapSelectionType("map_pool");
               }}
-              className={`${mapSelectionType == "map_pool" ? "bg-customGreen" : null} p-2`}
+              className={`rounded-lg ${mapSelectionType == "map_pool" ? "bg-customGreen-dark" : null} p-2`}
             >
               Map Pool
             </button>
@@ -448,7 +451,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               onError,
             });
           }}
-          className="w-full bg-customGreen text-white py-2 rounded mt-12"
+          className="w-full bg-customGreen-dark text-white py-2 rounded mt-12"
         >
           Request match
         </button>
