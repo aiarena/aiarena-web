@@ -72,13 +72,12 @@ export default function JoinCompetitionModal({
     useMutation<JoinCompetitionModalMutation>(graphql`
       mutation JoinCompetitionModalMutation(
         $input: UpdateCompetitionParticipationInput!
+        $botId: ID!
       ) {
         updateCompetitionParticipation(input: $input) {
-          competitionParticipation {
-            active
-            id
-            bot {
-              id
+          node(id: $botId) {
+            ... on BotType {
+              ...ProfileBot_bot
             }
           }
           errors {
@@ -117,6 +116,7 @@ export default function JoinCompetitionModal({
           bot: bot.id,
           competition: compID,
         },
+        botId: bot.id,
       },
       onCompleted: (...args) => {
         onCompleted(...args);
