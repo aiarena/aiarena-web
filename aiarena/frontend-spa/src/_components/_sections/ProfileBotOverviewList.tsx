@@ -91,9 +91,14 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
         <div className="flex gap-4 flex-wrap pb-4">
           {viewer.activeBotsLimit ? (
             <div className="block">
-              <p className="pb-1">
-                {activeBotParticipations} / {viewer.activeBotsLimit} active
-                competition participations.
+              <p className="pb-1 ">
+                <span
+                  className={`pb-1 ${activeBotParticipations == viewer.activeBotsLimit ? "text-red-500" : ""}`}
+                >
+                  {activeBotParticipations}
+                </span>{" "}
+                / {viewer.activeBotsLimit} {""}
+                active competition participations.
               </p>
               <p>
                 Want more? Consider{" "}
