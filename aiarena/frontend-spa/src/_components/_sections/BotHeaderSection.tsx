@@ -1,7 +1,4 @@
 import { useState } from "react";
-
-import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-
 import { graphql, useFragment } from "react-relay";
 import { formatDate } from "@/_lib/dateUtils";
 import BotSettingsModal from "./_modals/bot_settings_modal/BotSettingsModal";
@@ -10,6 +7,7 @@ import UnderlineButton from "../_props/UnderlineButton";
 import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
 import BotAllParticipationsModal from "./_modals/BotAllParticipationsModal";
 import BotTrophiesModal from "./_modals/BotTrophiesModal";
+import { TrophyIcon, CogIcon } from "@heroicons/react/20/solid";
 
 export interface BotHeaderSectionProps {
   bot: BotHeaderSection_bot$key;
@@ -61,13 +59,14 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
             <div
               className="flex items-center cursor-pointer hover:bg-slate-700 rounded p-1 ml-2"
               onClick={() => setTrophiesModalOpen(true)}
+              title="Bot Trophies"
             >
-              <img
-                src={`${getPublicPrefix()}/icons/trophy.svg`}
-                alt="Trophy Icon"
-                width={20}
-                height={20}
+              <TrophyIcon
+                aria-label="Trophy icon"
+                className=" size-5 text-white"
+                role="img"
               />
+
               <span className="ml-1 text-lg font-bold text-gray-300">
                 {getNodes(bot?.trophies).length || 0}
               </span>
@@ -79,13 +78,12 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
           <div
             className="cursor-pointer hover:bg-slate-700 py-1 px-2 ml-2 flex justify-center rounded-md border-slate-700 border"
             onClick={() => setSettingsModalOpen(true)}
+            title="Bot Settings"
           >
-            <img
-              alt="Open Settings"
-              src={`${getPublicPrefix()}/icons/cogwheel.svg`}
-              width={20}
-              height={20}
-              className="invert"
+            <CogIcon
+              aria-label="Settings icon"
+              className="size-6  text-white"
+              role="img"
             />
           </div>
         </div>
