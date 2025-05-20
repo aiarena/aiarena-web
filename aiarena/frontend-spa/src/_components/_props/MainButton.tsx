@@ -42,26 +42,26 @@ export default function MainButton({
           0% {
             border-color: transparent;
             border-bottom-color: var(
-              --customGreenHighlight1
+               --color-customGreen
             ); /* Start from the bottom */
           }
           25% {
             border-left-color: var(
-              --customGreenHighlight1
+               --color-customGreen
             ); /* Move to the left */
           }
           50% {
-            border-top-color: var(--customGreenHighlight1); /* Then the top */
+            border-top-color: var( --color-customGreen); /* Then the top */
           }
           75% {
             border-right-color: var(
-              --customGreenHighlight1
+               --color-customGreen
             ); /* Finish at the right */
           }
           100% {
             border-color: transparent;
             border-bottom-color: var(
-              --customGreenHighlight1
+              --color-customGreen
             ); /* Loop back to the bottom */
           }
         }

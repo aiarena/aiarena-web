@@ -6,6 +6,7 @@ interface SquareButtonProps {
   text: string;
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
+  isLoading?: boolean;
 }
 
 export default function SquareButton({
@@ -13,18 +14,19 @@ export default function SquareButton({
   text,
   className,
   onClick,
+  isLoading,
 }: SquareButtonProps) {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [hrefIsLoading, setHrefIsLoading] = useState(false);
 
   const handleRedirect = async (path: string) => {
-    setIsLoading(true);
+    setHrefIsLoading(true);
     try {
       navigate(path);
     } catch (error) {
       console.error("Failed to navigate:", error);
     } finally {
-      setIsLoading(false);
+      setHrefIsLoading(false);
     }
   };
 
@@ -43,26 +45,26 @@ export default function SquareButton({
           0% {
             border-color: transparent;
             border-bottom-color: var(
-              --customGreenHighlight1
+               --color-customGreen
             ); /* Start from the bottom */
           }
           25% {
             border-left-color: var(
-              --customGreenHighlight1
+              --color-customGreen
             ); /* Move to the left */
           }
           50% {
-            border-top-color: var(--customGreenHighlight1); /* Then the top */
+            border-top-color: var( --color-customGreen); /* Then the top */
           }
           75% {
             border-right-color: var(
-              --customGreenHighlight1
+              --color-customGreen
             ); /* Finish at the right */
           }
           100% {
             border-color: transparent;
             border-bottom-color: var(
-              --customGreenHighlight1
+              --color-customGreen
             ); /* Loop back to the bottom */
           }
         }
@@ -86,7 +88,9 @@ export default function SquareButton({
         >
           {text}
         </button>
-        {isLoading && <div className="animate-highlight"></div>}
+        {(hrefIsLoading || isLoading) && (
+          <div className="animate-highlight"></div>
+        )}
       </div>
     </>
   );

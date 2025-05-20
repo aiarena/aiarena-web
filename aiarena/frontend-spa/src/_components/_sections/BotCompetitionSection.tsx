@@ -6,7 +6,7 @@ import SquareButton from "../_props/SquareButton";
 import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
 import JoinCompetitionModal from "./_modals/JoinCompetitionModal";
 import ActiveDot from "../_display/ActiveDot";
-import LoadingSpinnerGray from "../_display/LoadingSpinnerGray";
+import SuspenseGetLoading from "../_props/SuspenseGetLoading";
 
 interface BotCompetitionSectionProps {
   bot: BotCompetitionSection_bot$key;
@@ -50,6 +50,8 @@ export default function BotCompetitionsSection(
 
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
     useState(false);
+  const [isJoinCompetitionModalLoading, setIsJoinCompetitionModalLoading] =
+    useState(false);
 
   const activeCompetitions = (comp_data ?? []).filter((e) => e.active);
   const hasCompetitions = activeCompetitions.length > 0;
@@ -76,6 +78,7 @@ export default function BotCompetitionsSection(
         <SquareButton
           text="Edit Competitions"
           onClick={() => setJoinCompetitionModalOpen(true)}
+          isLoading={isJoinCompetitionModalLoading}
         />
       </div>
 
@@ -214,7 +217,11 @@ export default function BotCompetitionsSection(
       {/* Join Competition Modal */}
 
       {isJoinCompetitionModalOpen && (
-        <Suspense fallback={<LoadingSpinnerGray />}>
+        <Suspense
+          fallback={
+            <SuspenseGetLoading setLoading={setIsJoinCompetitionModalLoading} />
+          }
+        >
           <JoinCompetitionModal
             isOpen={isJoinCompetitionModalOpen}
             bot={bot}
