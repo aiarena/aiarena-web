@@ -63,13 +63,20 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
       <div className="bg-gray-700 p-4 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
         <div className="text-sm text-gray-300">
           <div className="text-left flex">
-            <p className="font-bold">Monthly Requests remaining:</p>
-            <div className="flex">
-              <p className="text-customGreen ml-1">
+            <p className="font-bold">
+              Monthly Requests remaining:{" "}
+              <span
+                className={`${viewer.requestMatchesCountLeft > 5 ? "text-customGreen" : ""}
+                  
+                  ${viewer.requestMatchesCountLeft <= 5 && viewer.requestMatchesCountLeft != 0 ? "text-yellow-500" : ""}
+                  ${viewer.requestMatchesCountLeft == 0 ? "text-red-500" : ""}
+                  `}
+              >
+                {" "}
                 {viewer.requestMatchesCountLeft}
-              </p>
-              <p>/{viewer.requestMatchesLimit}</p>
-            </div>
+              </span>{" "}
+              / {viewer.requestMatchesLimit}
+            </p>
           </div>
           <p className="text-left text-customGreen cursor-pointer">
             Increase Limit
