@@ -210,7 +210,7 @@ export default function SettingsProfileSection(
           </div>
           <button
             type="submit"
-            className="text-white bg-customGreen px-3 py-1 rounded text-xs hover:bg-green-500"
+            className="text-white bg-customGreen-dark px-3 py-1 rounded text-xs hover:bg-green-500"
           >
             Update
           </button>

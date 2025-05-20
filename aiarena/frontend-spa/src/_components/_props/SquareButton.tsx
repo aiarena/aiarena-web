@@ -81,7 +81,7 @@ export default function SquareButton({
       <div className="relative inline-block">
         <button
           onClick={handleClick}
-          className={`${className} shadow shadow-black shadow-sm hover:shadow-lg hover:shadow-black relative z-10 hover:border-2 border-2 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white py-1 px-2 rounded-md  transition duration-300 ease-in-out transform`}
+          className={`${className} shadow shadow-black shadow-sm hover:shadow-md hover:shadow-black relative z-10 hover:border-2 border-2 border-customGreen-dark bg-customGreen-dark hover:bg-transparent hover:border-customGreen text-white py-1 px-2 rounded-md  transition duration-300 ease-in-out transform`}
           //   disabled={isLoading}
         >
           {text}

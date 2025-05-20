@@ -161,7 +161,7 @@ export default function FilterableList<T>({
       {/* Filter button */}
       <button
         onClick={() => setShowFilterMenu(!showFilterMenu)}
-        className="shadow shadow-black mb-4 bg-customGreen text-white p-2 rounded hover:bg-customGreenDarken1 w-[8em]"
+        className="shadow shadow-black mb-4 bg-customGreen-dark text-white p-2 rounded hover:bg-customGreenDarken1 w-[8em]"
       >
         {showFilterMenu ? "Hide Filters" : "Show Filters"}
       </button>
@@ -289,7 +289,7 @@ export default function FilterableList<T>({
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === 1
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "shadow shadow-black bg-customGreen text-white"
+                : "shadow shadow-black bg-customGreen-dark text-white"
             }`}
           >
             {"<<"}
@@ -300,7 +300,7 @@ export default function FilterableList<T>({
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === 1
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "shadow shadow-black bg-customGreen text-white"
+                : "shadow shadow-black bg-customGreen-dark text-white"
             }`}
           >
             {"<"}
@@ -324,7 +324,7 @@ export default function FilterableList<T>({
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === totalPages
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "shadow shadow-black bg-customGreen text-white"
+                : "shadow shadow-black bg-customGreen-dark text-white"
             }`}
           >
             {">"}
@@ -335,7 +335,7 @@ export default function FilterableList<T>({
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === totalPages
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "shadow shadow-black bg-customGreen text-white"
+                : "shadow shadow-black bg-customGreen-dark text-white"
             }`}
           >
             {">>"}
