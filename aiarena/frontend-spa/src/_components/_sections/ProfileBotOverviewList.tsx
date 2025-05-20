@@ -10,6 +10,7 @@ import { ProfileBotOverviewList_user$key } from "./__generated__/ProfileBotOverv
 import Searchbar from "../_props/Searchbar";
 import Dropdown from "../_props/Dropdown";
 import DropdownButton from "../_props/DropdownButton";
+import WantMore from "../_display/WantMore";
 
 interface ProfileBotOverviewListProps {
   viewer: ProfileBotOverviewList_viewer$key;
@@ -88,32 +89,21 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
   return (
     <div className="bg-customBackgroundColor1">
       <div className="flex flex-wrap-reverse w-fullitems-start">
+        {/* Display active competition limit and current active competitions */}
         <div className="flex gap-4 flex-wrap pb-4">
-          {viewer.activeBotsLimit ? (
-            <div className="block">
-              <p className="pb-1 ">
-                <span
-                  className={`pb-1 ${activeBotParticipations == viewer.activeBotsLimit ? "text-red-400" : ""}`}
-                >
-                  {activeBotParticipations}
-                </span>{" "}
-                / {viewer.activeBotsLimit} {""}
-                active competition participations.
-              </p>
-              <p>
-                Want more? Consider{" "}
-                <a
-                  className="cursor-pointer"
-                  href={"https://www.patreon.com/aiarena"}
-                >
-                  supporting us
-                </a>
-                .
-              </p>
-            </div>
-          ) : null}
+          <div className="block">
+            <p className="pb-1 ">
+              <span
+                className={`pb-1 ${activeBotParticipations == viewer.activeBotsLimit ? "text-red-400" : ""}`}
+              >
+                {activeBotParticipations}
+              </span>{" "}
+              / {viewer.activeBotsLimit} {""}
+              active competition participations.
+            </p>
+            <WantMore />
+          </div>
         </div>
-
         <div className="flex gap-4 ml-auto ">
           <Dropdown title={useSort}>
             {activeBotParticipations > 0 ? (
