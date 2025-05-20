@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useState } from "react";
+import React, { MouseEventHandler } from "react";
 import { useNavigate } from "react-router";
 
 interface SquareButtonProps {
@@ -17,24 +17,12 @@ export default function SquareButton({
   isLoading,
 }: SquareButtonProps) {
   const navigate = useNavigate();
-  const [hrefIsLoading, setHrefIsLoading] = useState(false);
-
-  const handleRedirect = async (path: string) => {
-    setHrefIsLoading(true);
-    try {
-      navigate(path);
-    } catch (error) {
-      console.error("Failed to navigate:", error);
-    } finally {
-      setHrefIsLoading(false);
-    }
-  };
 
   const handleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
     if (onClick) {
       onClick(event);
     } else if (href) {
-      handleRedirect(href);
+      navigate(href);
     }
   };
 
@@ -88,9 +76,7 @@ export default function SquareButton({
         >
           {text}
         </button>
-        {(hrefIsLoading || isLoading) && (
-          <div className="animate-highlight"></div>
-        )}
+        {isLoading && <div className="animate-highlight"></div>}
       </div>
     </>
   );
