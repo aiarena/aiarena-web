@@ -6,6 +6,7 @@ import FilterableList from "../_props/FilterableList";
 import RequestMatchModal from "./_modals/RequestMatchModal";
 import { useState } from "react";
 import MainButton from "../_props/MainButton";
+import WantMore from "../_display/WantMore";
 
 interface RequestMatchesSectionProps {
   viewer: RequestMatchSection_viewer$key;
@@ -56,39 +57,39 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
   );
 
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
+  const matchRequestsUsed =
+    viewer.requestMatchesLimit - viewer.requestMatchesCountLeft;
 
   return (
-    <div id="matches">
-      {/* Display request limit and requests left */}
-      <div className="bg-gray-700 p-4 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
-        <div className="text-sm text-gray-300">
-          <div className="text-left flex">
-            <p className="font-bold">
-              Monthly Requests remaining:{" "}
+    <div>
+      <div className="flex flex-wrap-reverse w-fullitems-start">
+        {/* Display request limit and requests left */}
+        <div className="flex gap-4 flex-wrap pb-4">
+          <div className="block">
+            <p className="pb-1">
               <span
                 className={`${viewer.requestMatchesCountLeft > 5 ? "text-customGreen" : ""}
                   
-                  ${viewer.requestMatchesCountLeft <= 5 && viewer.requestMatchesCountLeft != 0 ? "text-yellow-500" : ""}
-                  ${viewer.requestMatchesCountLeft == 0 ? "text-red-400" : ""}
+                  ${viewer.requestMatchesCountLeft <= 5 && viewer.requestMatchesCountLeft > 0 ? "text-yellow-500" : ""}
+                  ${viewer.requestMatchesCountLeft <= 0 ? "text-red-400" : ""}
                   `}
               >
                 {" "}
-                {viewer.requestMatchesCountLeft}
+                {matchRequestsUsed}
               </span>{" "}
-              / {viewer.requestMatchesLimit}
+              / {viewer.requestMatchesLimit} monthly match requests used.
             </p>
+            <WantMore />
           </div>
-          <p className="text-left text-customGreen cursor-pointer">
-            Increase Limit
-          </p>
         </div>
-        <div>
+        <div className="flex gap-4 ml-auto ">
           <MainButton
             onClick={() => setIsRequestMatchModalOpen(true)}
             text="Request New Match"
           />
         </div>
       </div>
+
       <FilterableList
         classes="pt-4"
         data={getNodes(viewer.requestedMatches)}
