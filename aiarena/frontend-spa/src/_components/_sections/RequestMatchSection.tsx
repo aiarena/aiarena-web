@@ -69,7 +69,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
                 className={`${viewer.requestMatchesCountLeft > 5 ? "text-customGreen" : ""}
                   
                   ${viewer.requestMatchesCountLeft <= 5 && viewer.requestMatchesCountLeft != 0 ? "text-yellow-500" : ""}
-                  ${viewer.requestMatchesCountLeft == 0 ? "text-red-500" : ""}
+                  ${viewer.requestMatchesCountLeft == 0 ? "text-red-400" : ""}
                   `}
               >
                 {" "}
