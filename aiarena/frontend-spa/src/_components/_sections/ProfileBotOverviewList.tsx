@@ -182,8 +182,12 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
                   ? 0
                   : -1;
               case "Active Competitions":
-                return (a.competitionParticipations?.edges?.length || 0) <=
-                  (b.competitionParticipations?.edges?.length || 0)
+                return (a.competitionParticipations?.edges?.filter(
+                  (comp) => comp?.node?.active == true
+                ).length || 0) <=
+                  (b.competitionParticipations?.edges.filter(
+                    (comp) => comp?.node?.active == true
+                  ).length || 0)
                   ? 0
                   : -1;
 
@@ -199,8 +203,12 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
                 } else if (activeBotParticipations == 0) {
                   return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
                 } else {
-                  return (a.competitionParticipations?.edges?.length || 0) <=
-                    (b.competitionParticipations?.edges?.length || 0)
+                  return (a.competitionParticipations?.edges?.filter(
+                    (comp) => comp?.node?.active == true
+                  ).length || 0) <=
+                    (b.competitionParticipations?.edges.filter(
+                      (comp) => comp?.node?.active == true
+                    ).length || 0)
                     ? 0
                     : -1;
                 }
