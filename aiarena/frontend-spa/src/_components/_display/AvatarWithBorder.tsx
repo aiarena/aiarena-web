@@ -2,7 +2,7 @@ import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { graphql, useFragment } from "react-relay";
 import { AvatarWithBorder_user$key } from "./__generated__/AvatarWithBorder_user.graphql";
 
-type AvatarWithBorderSizes = "sm" | "lg";
+type AvatarWithBorderSizes = "sm" | "lg" | "xl";
 
 export interface AvatarWithBorderProps {
   size?: AvatarWithBorderSizes;
@@ -41,6 +41,12 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
         moveBorderRight: 4,
         moveBorderUp: 2,
       },
+      xl: {
+        avatar: 220,
+        border: 260,
+        moveBorderRight: 5,
+        moveBorderUp: 4,
+      },
     };
 
     const returnSize = sizes[size];
@@ -52,10 +58,10 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
 
   return (
     <div
-      className={`p-3 relative w-[${avatarSize.border}px] h-[${avatarSize.border}px] flex items-center justify-center`}
+      className={`p-3 relative w-[${avatarSize.border}px] max-w-[80vw] h-[${avatarSize.border}px] max-h-[80vh] flex items-center justify-center`}
     >
       <div
-        className={`w-[${avatarSize.avatar}px] h-[${avatarSize.avatar}px] bg-white overflow-hidden `}
+        className={`w-[${avatarSize.avatar}px] max-w-[80vw] h-[${avatarSize.avatar}px]  max-h-[80vh]  bg-white overflow-hidden `}
       >
         <img
           src={user?.avatarUrl || `${getPublicPrefix()}/${defaultAvatar}`}
@@ -72,7 +78,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
           alt={`${formatBorder(user.patreonLevel)} frame`}
           width={avatarSize.border}
           height={avatarSize.border}
-          className={`absolute w-[${avatarSize.border}px] h-[${avatarSize.border}px] object-contain pointer-events-none`}
+          className={`absolute w-[${avatarSize.border}px] h-[${avatarSize.border}px]  object-contain pointer-events-none`}
           style={{
             transform: `translate(${avatarSize.moveBorderRight}px, -${avatarSize.moveBorderUp}px)`,
           }}
