@@ -40,13 +40,13 @@ export default function SettingsProfileSection(
   const { enqueueSnackbar } = useSnackbar();
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
 
-  const [discordLinked, setDiscordLinked] = useState(false);
-  const [patreonLinked, setPatreonLinked] = useState(false);
+  // const [discordLinked, setDiscordLinked] = useState(false);
+  // const [patreonLinked, setPatreonLinked] = useState(false);
 
-  const handleLinkDiscord = () => setDiscordLinked(true);
-  const handleUnlinkDiscord = () => setDiscordLinked(false);
-  const handleLinkPatreon = () => setPatreonLinked(true);
-  const handleUnlinkPatreon = () => setPatreonLinked(false);
+  // const handleLinkDiscord = () => setDiscordLinked(true);
+  // const handleUnlinkDiscord = () => setDiscordLinked(false);
+  // const handleLinkPatreon = () => setPatreonLinked(true);
+  // const handleUnlinkPatreon = () => setPatreonLinked(false);
 
   const handleCopyToken = () => {
     navigator.clipboard.writeText(viewer.apiToken ?? "");
@@ -114,7 +114,7 @@ export default function SettingsProfileSection(
           </div>
           <SectionDivider className="pb-4" />
           <div className="gap-4 flex flex-col">
-            <div className="bg-gray-700 p-4 rounded-md ">
+            {/* <div className="bg-gray-700 p-4 rounded-md ">
               <h3 className="text-base font-semibold text-customGreen">
                 Connected Accounts
               </h3>
@@ -171,7 +171,7 @@ export default function SettingsProfileSection(
                   )}
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* API Token */}
             <div className="bg-gray-700 p-4 rounded-md">
