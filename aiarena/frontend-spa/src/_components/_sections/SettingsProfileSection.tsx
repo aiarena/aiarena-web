@@ -73,9 +73,9 @@ export default function SettingsProfileSection(
   };
 
   return (
-    <div className="   w-full justify-center flex">
+    <div className="">
       {/* sidesection */}
-      <div className="md:flex md:flex-row md:gap-4">
+      <div className="lg:flex lg:flex-row lg:gap-4">
         <div className="relative p-2 ">
           <div className="flex justify-center">
             {viewer?.user ? (
@@ -83,20 +83,20 @@ export default function SettingsProfileSection(
             ) : null}
           </div>
           {/* desktop view statusinfo */}
-          <div className="hidden md:block mt-4">
+          <div className="hidden lg:block mt-4">
             <StatusInfo />
           </div>
         </div>
 
         {/* mainsection */}
         <div>
-          <div className="md:block md:text-left flex justify-center">
+          <div className="lg:block lg:text-left flex justify-center">
             <div className="leading-tight py-4">
-              <p className="font-bold text-2xl md:block md:text-left flex justify-center pb-4">
+              <p className="font-bold text-2xl lg:block lg:text-left flex justify-center pb-4">
                 {viewer?.user?.username}
               </p>
               {viewer.firstName || viewer.lastName ? (
-                <p className="  md:block md:text-left flex justify-center">
+                <p className="  lg:block lg:text-left flex justify-center">
                   {viewer.firstName} {viewer.lastName}
                 </p>
               ) : null}
@@ -107,13 +107,12 @@ export default function SettingsProfileSection(
                 </p>
               ) : null}
               {/* mobile view statusinfo */}
-              <div className="block md:hidden ">
+              <div className="block lg:hidden pt-4">
                 <StatusInfo />
               </div>
             </div>
           </div>
           <SectionDivider className="pb-4" />
-
           <div className="gap-4 flex flex-col">
             <div className="bg-gray-700 p-4 rounded-md ">
               <h3 className="text-base font-semibold text-customGreen">
