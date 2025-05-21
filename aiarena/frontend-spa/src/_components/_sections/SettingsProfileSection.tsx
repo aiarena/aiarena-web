@@ -2,6 +2,14 @@ import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import { SettingsProfileSection_viewer$key } from "./__generated__/SettingsProfileSection_viewer.graphql";
 import AvatarWithBorder from "../_display/AvatarWithBorder";
+import SectionDivider from "../_display/SectionDivider";
+import { formatDate } from "@/_lib/dateUtils";
+import {
+  ClipboardDocumentIcon,
+  EyeIcon,
+  EyeSlashIcon,
+} from "@heroicons/react/20/solid";
+import { useSnackbar } from "notistack";
 
 interface SettingsProfileSectionProps {
   viewer: SettingsProfileSection_viewer$key;
@@ -14,24 +22,26 @@ export default function SettingsProfileSection(
     graphql`
       fragment SettingsProfileSection_viewer on ViewerType {
         apiToken
+        receiveEmailComms
+        lastLogin
+        dateJoined
+        firstName
+        lastName
         user {
           username
           patreonLevel
+
           ...AvatarWithBorder_user
         }
       }
     `,
     props.viewer
   );
-
+  const { enqueueSnackbar } = useSnackbar();
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
 
   const [discordLinked, setDiscordLinked] = useState(false);
   const [patreonLinked, setPatreonLinked] = useState(false);
-
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   const handleLinkDiscord = () => setDiscordLinked(true);
   const handleUnlinkDiscord = () => setDiscordLinked(false);
@@ -40,181 +50,179 @@ export default function SettingsProfileSection(
 
   const handleCopyToken = () => {
     navigator.clipboard.writeText(viewer.apiToken ?? "");
-    alert("API token copied!");
+    enqueueSnackbar("API token copied to clipboard!");
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword === confirmNewPassword) {
-      alert("Password changed!");
-      setOldPassword("");
-      setNewPassword("");
-      setConfirmNewPassword("");
-    } else {
-      alert("Passwords do not match!");
-    }
+  const StatusInfo = () => {
+    return (
+      <dl className="ml-4 text-sm text-gray-300 space-y-2">
+        <div className="flex">
+          <dt className="w-40 font-medium text-white">Date Joined:</dt>
+          <dd>{formatDate(viewer.dateJoined)}</dd>
+        </div>
+        <div className="flex">
+          <dt className="w-40 font-medium text-white">Last Login:</dt>
+          <dd>{formatDate(viewer.lastLogin)}</dd>
+        </div>
+        <div className="flex">
+          <dt className="w-40 font-medium text-white">Receive Emails:</dt>
+          <dd>{viewer.receiveEmailComms ? "Yes" : "No"}</dd>
+        </div>
+      </dl>
+    );
   };
 
   return (
-    <div className="space-y-6 text-sm max-w-lg w-full">
-      {/* Profile Overview */}
-      <div className="bg-gray-700 p-4 rounded-md space-y-2">
-        <h3 className="text-base font-semibold text-customGreen">Profile</h3>
-        <div className="flex items-center space-x-3">
-          <div className="relative ">
+    <div className="   w-full justify-center flex">
+      {/* sidesection */}
+      <div className="md:flex md:flex-row md:gap-4">
+        <div className="relative p-2 ">
+          <div className="flex justify-center">
             {viewer?.user ? (
-              <AvatarWithBorder user={viewer.user} size="sm" />
+              <AvatarWithBorder user={viewer.user} size="xl" />
             ) : null}
           </div>
-          <div className="leading-tight">
-            <p className="text-white font-bold">{viewer?.user?.username}</p>
-            {viewer?.user?.patreonLevel &&
-            viewer.user.patreonLevel != "NONE" ? (
-              <p className="text-customGreen text-xs">Supporter</p>
-            ) : null}
+          {/* desktop view statusinfo */}
+          <div className="hidden md:block mt-4">
+            <StatusInfo />
           </div>
         </div>
-      </div>
 
-      {/* Connected Accounts */}
-      <div className="bg-gray-700 p-4 rounded-md space-y-2">
-        <h3 className="text-base font-semibold text-customGreen">
-          Connected Accounts
-        </h3>
-        <div className="flex flex-wrap gap-4">
-          {/* Discord */}
-          <div className="flex items-center space-x-2">
-            <svg
-              className="w-4 h-4 text-indigo-400"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M20.317 4.369A19.791 19.791 0 0016.845 3c-.247.454-.53 1.047-.721 1.514a17.835 17.835 0 00-4.248 0c-.191-.467-.474-1.06-.721-1.514A19.781 19.781 0 003.683 4.37C.976 9.05 0 13.5 0 17.752c0 0 4.144 3.697 8.298 3.697h.878a7.548 7.548 0 007.547-7.547c0-.056 0-.11-.002-.165 1.102-.794 2.03-1.695 2.805-2.7a19.248 19.248 0 001.79-2.6z" />
-            </svg>
-            <span className="text-gray-300">Discord:</span>
-            {discordLinked ? (
-              <button
-                onClick={handleUnlinkDiscord}
-                className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
-              >
-                Unlink
-              </button>
-            ) : (
-              <button
-                onClick={handleLinkDiscord}
-                className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
-              >
-                Link
-              </button>
-            )}
+        {/* mainsection */}
+        <div>
+          <div className="md:block md:text-left flex justify-center">
+            <div className="leading-tight py-4">
+              <p className="font-bold text-2xl md:block md:text-left flex justify-center pb-4">
+                {viewer?.user?.username}
+              </p>
+              {viewer.firstName || viewer.lastName ? (
+                <p className="  md:block md:text-left flex justify-center">
+                  {viewer.firstName} {viewer.lastName}
+                </p>
+              ) : null}
+              {viewer?.user?.patreonLevel &&
+              viewer.user.patreonLevel == "NONE" ? (
+                <p className="font-thin md:block md:text-left flex justify-center pb-4">
+                  <i>Supporter</i>
+                </p>
+              ) : null}
+              {/* mobile view statusinfo */}
+              <div className="block md:hidden ">
+                <StatusInfo />
+              </div>
+            </div>
           </div>
+          <SectionDivider className="pb-4" />
 
-          {/* Patreon */}
-          <div className="flex items-center space-x-2">
-            <svg
-              className="w-4 h-4 text-red-400"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <circle cx="12" cy="12" r="9" />
-            </svg>
-            <span className="text-gray-300">Patreon:</span>
-            {patreonLinked ? (
-              <button
-                onClick={handleUnlinkPatreon}
-                className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
-              >
-                Unlink
-              </button>
-            ) : (
-              <button
-                onClick={handleLinkPatreon}
-                className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
-              >
-                Link
-              </button>
-            )}
+          <div className="gap-4 flex flex-col">
+            <div className="bg-gray-700 p-4 rounded-md ">
+              <h3 className="text-base font-semibold text-customGreen">
+                Connected Accounts
+              </h3>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center space-x-2">
+                  <svg
+                    className="w-4 h-4 text-indigo-400"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M20.317 4.369A19.791 19.791 0 0016.845 3c-.247.454-.53 1.047-.721 1.514a17.835 17.835 0 00-4.248 0c-.191-.467-.474-1.06-.721-1.514A19.781 19.781 0 003.683 4.37C.976 9.05 0 13.5 0 17.752c0 0 4.144 3.697 8.298 3.697h.878a7.548 7.548 0 007.547-7.547c0-.056 0-.11-.002-.165 1.102-.794 2.03-1.695 2.805-2.7a19.248 19.248 0 001.79-2.6z" />
+                  </svg>
+                  <span className="text-gray-300">Discord:</span>
+                  {discordLinked ? (
+                    <button
+                      onClick={handleUnlinkDiscord}
+                      className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
+                    >
+                      Unlink
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleLinkDiscord}
+                      className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
+                    >
+                      Link
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <svg
+                    className="w-4 h-4 text-red-400"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                  <span className="text-gray-300">Patreon:</span>
+                  {patreonLinked ? (
+                    <button
+                      onClick={handleUnlinkPatreon}
+                      className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
+                    >
+                      Unlink
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleLinkPatreon}
+                      className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
+                    >
+                      Link
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* API Token */}
+            <div className="bg-gray-700 p-4 rounded-md">
+              <h3 className="text-base font-semibold text-customGreen">
+                API Token
+              </h3>
+              <div className="w-full">
+                <div className="flex items-center gap-2 bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs break-words w-96 max-w-[70vw]">
+                  <span className="flex-1 truncate">
+                    {apiTokenVisible
+                      ? viewer.apiToken
+                      : "•••••••••••••••••••••••••••••••••••••••"}
+                  </span>
+
+                  <button
+                    onClick={() => setApiTokenVisible(!apiTokenVisible)}
+                    className="text-white  hover:text-gray-400 p-1"
+                    title={apiTokenVisible ? "Hide token" : "Show token"}
+                  >
+                    {apiTokenVisible ? (
+                      <EyeSlashIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </button>
+
+                  <button
+                    onClick={handleCopyToken}
+                    className="text-white hover:text-gray-400 p-1"
+                    title="Copy token"
+                  >
+                    <ClipboardDocumentIcon className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="flex gap-4 mt-2 text-sm">
+                  <a
+                    href="/wiki/data-api/"
+                    className="text-blue-300 hover:underline"
+                  >
+                    Read more
+                  </a>
+                  <a href="/api/" className="text-blue-300 hover:underline">
+                    API Endpoints
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* API Token */}
-      <div className="bg-gray-700 p-4 rounded-md space-y-2">
-        <h3 className="text-base font-semibold text-customGreen">API Token</h3>
-        <div className="flex flex-wrap items-start gap-2 w-full">
-          <span className="text-left bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs w-full break-words">
-            {apiTokenVisible
-              ? viewer.apiToken
-              : "•••••••••••••••••••••••••••••••••"}
-          </span>
-          <button
-            onClick={() => setApiTokenVisible(!apiTokenVisible)}
-            className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
-          >
-            {apiTokenVisible ? "Hide" : "Show"}
-          </button>
-
-          <button
-            onClick={handleCopyToken}
-            className="text-white bg-gray-600 px-2 py-0.5 rounded hover:bg-gray-500"
-          >
-            Copy
-          </button>
-        </div>
-      </div>
-
-      {/* Change Password */}
-      <div className="bg-gray-700 p-4 rounded-md">
-        <h3 className="text-base font-semibold text-customGreen mb-2">
-          Change Password
-        </h3>
-        <form onSubmit={handleChangePassword} className="space-y-3">
-          <div className="flex flex-col max-w-xs w-full">
-            <label className="block text-gray-300 text-xs mb-1">
-              Old Password
-            </label>
-            <input
-              type="password"
-              className="w-full p-1 bg-gray-800 text-white rounded border border-gray-600 text-xs 
-                         focus:outline-none focus:ring-1 focus:ring-customGreen focus:border-customGreen"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex flex-col max-w-xs w-full">
-            <label className="block text-gray-300 text-xs mb-1">
-              New Password
-            </label>
-            <input
-              type="password"
-              className="w-full p-1 bg-gray-800 text-white rounded border border-gray-600 text-xs 
-                         focus:outline-none focus:ring-1 focus:ring-customGreen focus:border-customGreen"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex flex-col max-w-xs w-full">
-            <label className="block text-gray-300 text-xs mb-1">
-              Confirm New Password
-            </label>
-            <input
-              type="password"
-              className="w-full p-1 bg-gray-800 text-white rounded border border-gray-600 text-xs 
-                         focus:outline-none focus:ring-1 focus:ring-customGreen focus:border-customGreen"
-              value={confirmNewPassword}
-              onChange={(e) => setConfirmNewPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="text-white bg-customGreen-dark px-3 py-1 rounded text-xs hover:bg-green-500"
-          >
-            Update
-          </button>
-        </form>
       </div>
     </div>
   );
