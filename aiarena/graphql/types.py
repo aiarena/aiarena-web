@@ -252,6 +252,11 @@ class ViewerType(graphene.ObjectType):
     request_matches_limit = graphene.Int(required=True)
     request_matches_count_left = graphene.Int(required=True)
     requested_matches = DjangoConnectionField("aiarena.graphql.MatchType")
+    receive_email_comms = graphene.Boolean()
+    last_login = graphene.DateTime()
+    date_joined = graphene.DateTime()
+    first_name = graphene.String()
+    last_name = graphene.String()
 
     @staticmethod
     def resolve_user(root: models.User, info, **args):
@@ -280,6 +285,26 @@ class ViewerType(graphene.ObjectType):
     @staticmethod
     def resolve_requested_matches(root: models.User, info, **args):
         return root.requested_matches.order_by("-first_started")
+
+    @staticmethod
+    def resolve_receive_email_comms(root: models.User, info):
+        return root.receive_email_comms
+
+    @staticmethod
+    def resolve_last_login(root: models.User, info):
+        return root.last_login
+
+    @staticmethod
+    def resolve_date_joined(root: models.User, info):
+        return root.date_joined
+
+    @staticmethod
+    def resolve_first_name(root: models.User, info):
+        return root.first_name
+
+    @staticmethod
+    def resolve_last_name(root: models.User, info):
+        return root.last_name
 
 
 class MatchParticipationFilterSet(FilterSet):
