@@ -89,7 +89,7 @@ export default function SettingsProfileSection(
         </div>
 
         {/* mainsection */}
-        <div>
+        <div className="w-full">
           <div className="lg:block lg:text-left flex justify-center">
             <div className="leading-tight py-4">
               <p className="font-bold text-2xl lg:block lg:text-left flex justify-center pb-4">
@@ -113,7 +113,7 @@ export default function SettingsProfileSection(
             </div>
           </div>
           <SectionDivider className="pb-4" />
-          <div className="gap-4 flex flex-col">
+          <div className="gap-4 flex flex-col max-w-[26em]">
             {/* <div className="bg-gray-700 p-4 rounded-md ">
               <h3 className="text-base font-semibold text-customGreen">
                 Connected Accounts
@@ -178,8 +178,8 @@ export default function SettingsProfileSection(
               <h3 className="mt-1 ml-2 text-base font-semibold text-customGreen">
                 API Token
               </h3>
-              <div className="w-full p-4">
-                <div className="flex items-center gap-2 bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs break-words w-96 max-w-[70vw]">
+              <div className=" p-4">
+                <div className="flex items-center gap-2 bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs break-words ">
                   <span className="flex-1 truncate">
                     {apiTokenVisible
                       ? viewer.apiToken
