@@ -101,8 +101,8 @@ export default function SettingsProfileSection(
                 </p>
               ) : null}
               {viewer?.user?.patreonLevel &&
-              viewer.user.patreonLevel == "NONE" ? (
-                <p className="font-thin md:block md:text-left flex justify-center pb-4">
+              viewer.user.patreonLevel != "NONE" ? (
+                <p className="font-thin lg:block lg:text-left flex justify-center pb-4">
                   <i>Supporter</i>
                 </p>
               ) : null}
