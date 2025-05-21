@@ -174,11 +174,11 @@ export default function SettingsProfileSection(
             </div> */}
 
             {/* API Token */}
-            <div className="bg-gray-700 p-4 rounded-md">
-              <h3 className="text-base font-semibold text-customGreen">
+            <div className="bg-gray-700  rounded-md">
+              <h3 className="mt-1 ml-2 text-base font-semibold text-customGreen">
                 API Token
               </h3>
-              <div className="w-full">
+              <div className="w-full p-4">
                 <div className="flex items-center gap-2 bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs break-words w-96 max-w-[70vw]">
                   <span className="flex-1 truncate">
                     {apiTokenVisible
@@ -212,7 +212,7 @@ export default function SettingsProfileSection(
                     href="/wiki/data-api/"
                     className="text-blue-300 hover:underline"
                   >
-                    Read more
+                    Wiki
                   </a>
                   <a href="/api/" className="text-blue-300 hover:underline">
                     API Endpoints
