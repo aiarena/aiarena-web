@@ -398,7 +398,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               onClick={() => {
                 setMapSelectionType("specific_map");
               }}
-              className={` border-2 border-customGreen-dark rounded-lg  ${mapSelectionType == "specific_map" ? "bg-customGreen-dark " : "hover:bg-transparent hover:border-customGreen"} p-2`}
+              className={` border-2 rounded-lg  ${mapSelectionType == "specific_map" ? "border-customGreen-dark bg-customGreen-dark " : "border-gray-700 hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Specific Map
             </button>{" "}
@@ -407,7 +407,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               onClick={() => {
                 setMapSelectionType("map_pool");
               }}
-              className={` border-2 border-customGreen-dark rounded-lg ${mapSelectionType == "map_pool" ? "bg-customGreen-dark" : "hover:bg-transparent hover:border-customGreen"} p-2`}
+              className={` border-2  rounded-lg ${mapSelectionType == "map_pool" ? "border-customGreen-dark bg-customGreen-dark" : "border-gray-700 hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Map Pool
             </button>
