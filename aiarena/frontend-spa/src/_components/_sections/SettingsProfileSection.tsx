@@ -57,15 +57,15 @@ export default function SettingsProfileSection(
     return (
       <dl className="ml-4 text-sm text-gray-300 space-y-2">
         <div className="flex">
-          <dt className="w-40 font-medium text-white">Date Joined:</dt>
+          <dt className="w-36 font-medium text-white">Date Joined:</dt>
           <dd>{formatDate(viewer.dateJoined)}</dd>
         </div>
         <div className="flex">
-          <dt className="w-40 font-medium text-white">Last Login:</dt>
+          <dt className="w-36 font-medium text-white">Last Login:</dt>
           <dd>{formatDate(viewer.lastLogin)}</dd>
         </div>
         <div className="flex">
-          <dt className="w-40 font-medium text-white">Receive Emails:</dt>
+          <dt className="w-36 font-medium text-white">Receive Emails:</dt>
           <dd>{viewer.receiveEmailComms ? "Yes" : "No"}</dd>
         </div>
       </dl>
@@ -174,12 +174,12 @@ export default function SettingsProfileSection(
             </div> */}
 
             {/* API Token */}
-            <div className="bg-gray-700  rounded-md">
+            <div className="bg-darken border border-customGreen-dark  rounded-md">
               <h3 className="mt-1 ml-2 text-base font-semibold text-customGreen">
                 API Token
               </h3>
               <div className=" p-4">
-                <div className="flex items-center gap-2 bg-gray-800 text-gray-300 px-2 py-1 rounded font-mono text-xs break-words ">
+                <div className="flex items-center gap-2 bg-black text-gray-300 px-2 py-1 rounded font-mono text-xs break-words ">
                   <span className="flex-1 truncate">
                     {apiTokenVisible
                       ? viewer.apiToken
