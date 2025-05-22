@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ChevronUpIcon, ChevronDownIcon } from "@heroicons/react/20/solid";
 
 interface Filter {
   type: "search" | "dropdown";
@@ -25,7 +26,7 @@ export default function FilterableList<T>({
   fields,
   filters,
   renderRow,
-  resultsPerPage: initialResultsPerPage = 10,
+  resultsPerPage: initialResultsPerPage = 18,
   defaultFieldSort = 0,
   defaultSortOrder = "asc",
   fieldLabels = {},
@@ -46,10 +47,10 @@ export default function FilterableList<T>({
   // Sorting logic
   const handleSort = (field: string) => {
     if (field === sortField) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      setSortOrder(sortOrder === "desc" ? "asc" : "desc");
     } else {
       setSortField(field);
-      setSortOrder("asc");
+      setSortOrder("desc");
     }
   };
 
@@ -157,7 +158,9 @@ export default function FilterableList<T>({
   const getClassName = (field: string) => fieldClasses[field] || "";
 
   return (
-    <div className={`flex flex-col bg-customBackgroundColor1 ${classes}`}>
+    <div
+      className={`flex flex-col bg-customBackgroundColor1 h-full ${classes}`}
+    >
       {/* Filter button */}
       <button
         onClick={() => setShowFilterMenu(!showFilterMenu)}
@@ -240,7 +243,7 @@ export default function FilterableList<T>({
         {fields.map((field, index) => (
           <button
             key={index}
-            className={`text-left font-bold text-lg text-customGreen hover:text-gray-400 ${getClassName(
+            className={` flex justify-between text-left font-bold text-lg text-customGreen hover:text-white  border-l border-customGreen pl-2  ${getClassName(
               field
             )}`}
             onClick={() => handleSort(field)}
@@ -248,40 +251,47 @@ export default function FilterableList<T>({
             {fieldLabels[field]
               ? fieldLabels[field]?.toUpperCase()
               : String(field).toUpperCase()}
+            {field === sortField ? (
+              sortOrder === "asc" ? (
+                <ChevronUpIcon className="h-6 w-6 mr-2" />
+              ) : (
+                <ChevronDownIcon className="h-6 w-6 mr-2" />
+              )
+            ) : null}
           </button>
         ))}
       </div>
 
       {/* Data Rows */}
       <div
-        className="flex-grow mb-4 "
-        style={{ minHeight: `${pageSize * 56}px` }}
+        className="h-full flex-grow mb-4 "
+        style={{ minHeight: `${pageSize * 40}px` }}
       >
         <ul className="text-white">
           {paginatedData.map((item, index) =>
             item ? (
               <li
                 key={index}
-                className="mb-2 h-14 shadow shadow-black bg-customBackgroundColor3D1"
+                className={`h-12 py-3 shadow-md border border-transparent  hover:border-b-customGreen ${index % 2 ? "bg-darken" : "bg-darken-4"}`}
               >
                 {renderRow(item, index)}
               </li>
             ) : (
-              <li key={index} className="mb-2 h-14">
+              <li key={index} className=" p-2 h-12">
                 Invalid Data
               </li> // Handle nulls or invalid data
             )
           )}
           {Array.from({ length: pageSize - paginatedData.length }).map(
             (_, index) => (
-              <li key={`empty-${index}`} className="mb-2 h-14"></li>
+              <li key={`empty-${index}`} className="h-12"></li>
             )
           )}
         </ul>
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex flex-wrap justify-center items-center mt-4 p-4 border-t border-gray-900">
+      <div className="flex flex-wrap justify-center items-center mt-4 p-4 border-t border-gray-700">
         <div className="flex">
           <button
             onClick={() => setCurrentPage(() => 1)}

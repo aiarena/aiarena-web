@@ -37,6 +37,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
                   name
                 }
               }
+              status
             }
           }
           totalCount
@@ -61,7 +62,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
     viewer.requestMatchesLimit - viewer.requestMatchesCountLeft;
 
   return (
-    <div>
+    <div className="h-full]">
       <div className="flex flex-wrap-reverse w-fullitems-start">
         {/* Display request limit and requests left */}
         <div className="flex gap-4 flex-wrap pb-4">
@@ -110,8 +111,8 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           "result.type": "Result",
         }}
         fieldClasses={{
-          id: "hidden md:block",
-          firstStarted: "hidden sm:block",
+          id: "hidden md:flex",
+          firstStarted: "hidden sm:flex",
         }}
         filters={[
           {
@@ -121,62 +122,40 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
             placeholder: "Search all fields...",
           },
         ]}
-        renderRow={(item) => (
-          <div className="block p-4 hover:bg-gray-800 bg-gray-900 rounded transition flex justify-between items-center shadow-md border border-gray-700">
+        renderRow={(match) => (
+          <div className="block flex justify-between items-center ">
             <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
               <a
-                className=" hidden md:block text-left font-semibold text-gray-200 truncate"
-                href={`/matches/${extractRelayID(item.id, "MatchType")}`}
+                className=" hidden md:flex text-left font-semibold text-gray-200 truncate"
+                href={`/matches/${extractRelayID(match.id, "MatchType")}`}
               >
-                {item.id}
+                {match.id}
               </a>
 
-              <p className="hidden sm:block text-left text-gray-200  truncate">
-                {item.firstStarted != undefined
-                  ? formatDateISO(item.firstStarted)
-                  : "In Queue"}
+              <p className="hidden sm:flex text-left text-gray-200  truncate">
+                {formatDateISO(match.firstStarted)}
               </p>
               <a
                 className=" text-left text-customGreen truncate "
-                href={`/bots/${extractRelayID(item.participant1?.id, "BotType")}`}
+                href={`/bots/${extractRelayID(match.participant1?.id, "BotType")}`}
               >
-                {item.participant1?.name || ""}
+                {match.participant1?.name}
               </a>
               <a
                 className=" text-left text-customGreen truncate "
-                href={`/bots/${extractRelayID(item.participant2?.id, "BotType")}`}
+                href={`/bots/${extractRelayID(match.participant2?.id, "BotType")}`}
               >
-                {item.participant2?.name || ""}
+                {match.participant2?.name}
               </a>
 
               <p className=" text-left text-gray-200  truncate">
-                {item.result?.type}
+                {match.result?.type}
               </p>
             </div>
           </div>
         )}
       />
-      {/* In-Progress Matches */}
-      {/* <div className="bg-gray-700 p-4 rounded-md space-y-3">
-        <h3 className="text-lg font-semibold text-customGreen">In-Progress Requests</h3>
-        {inProgressMatches.length > 0 ? (
-          <ul className="space-y-2">
-            {inProgressMatches.map((match) => (
-              <li
-                key={match.id}
-                className="p-3 bg-gray-800 rounded-md border border-gray-600 text-gray-300 text-sm flex flex-col sm:flex-row sm:justify-between sm:items-center"
-              >
-                <span>
-                  <span className="font-bold">Opponent:</span> {match.opponent}
-                </span>
-                <span className="text-xs text-gray-400 mt-1 sm:mt-0 sm:ml-2">{match.status}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-gray-400 text-sm">No in-progress match requests.</p>
-        )}
-      </div> */}
+
       <RequestMatchModal
         isOpen={isRequestMatchModalOpen}
         onClose={() => setIsRequestMatchModalOpen(false)}
