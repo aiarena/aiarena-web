@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import LoadingSpinnerGray from "../_display/LoadingSpinnerGray";
+import WideButton from "./WideButton";
 
 interface FormProps {
   handleSubmit: (e: React.FormEvent) => void;
@@ -17,13 +17,7 @@ export default function Form({
   return (
     <form className="space-y-4" onSubmit={handleSubmit}>
       {children}
-      <button
-        disabled={loading}
-        type="submit"
-        className="w-full bg-customGreen text-white flex justify-center py-2 rounded "
-      >
-        {loading ? <LoadingSpinnerGray /> : submitTitle}
-      </button>
+      <WideButton title={submitTitle} loading={loading} type="submit" />
     </form>
   );
 }

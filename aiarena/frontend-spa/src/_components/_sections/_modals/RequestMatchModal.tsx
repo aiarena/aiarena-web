@@ -8,6 +8,7 @@ import { RequestMatchModalSpecificMapQuery } from "./__generated__/RequestMatchM
 import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModalMapPoolQuery.graphql";
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
+import Form from "@/_components/_props/Form";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -287,28 +288,64 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       .filter(Boolean) as Option[];
   }, [mapPoolData]);
 
-  const [requestMatch] = useMutation<RequestMatchModalMutation>(graphql`
-    mutation RequestMatchModalMutation($input: RequestMatchInput!) {
-      requestMatch(input: $input) {
-        match {
-          id
-        }
-        errors {
-          field
-          messages
+  const [requestMatch, updating] = useMutation<RequestMatchModalMutation>(
+    graphql`
+      mutation RequestMatchModalMutation($input: RequestMatchInput!) {
+        requestMatch(input: $input) {
+          match {
+            id
+          }
+          errors {
+            field
+            messages
+          }
         }
       }
-    }
-  `);
+    `
+  );
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "requestMatch",
     "Match Request Updated!"
   );
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    requestMatch({
+      variables: {
+        input: {
+          bot1: bot1SearchOrSelect.select,
+          bot2: bot2SearchOrSelect.select,
+          matchCount: matchCount,
+          mapSelectionType: mapSelectionType,
+          chosenMap:
+            mapSelectionType === "specific_map"
+              ? specificMapSearchOrSelect.select
+              : undefined,
+          mapPool:
+            mapSelectionType === "map_pool"
+              ? mapPoolSearchOrSelect.select
+              : undefined,
+        },
+      },
+      onCompleted: (...args) => {
+        const success = onCompleted(...args);
+        if (success) {
+          onClose();
+        }
+      },
+      onError,
+    });
+  };
+
   return (
     <Modal onClose={onClose} isOpen={isOpen} title="Request Match">
-      <div className="space-y-4">
+      <Form
+        handleSubmit={handleSubmit}
+        submitTitle="Upload Bot"
+        loading={updating}
+      >
         <div className="mb-4">
           <label className="block text-left font-medium mb-1">Bot 1</label>
           <SelectSearchList
@@ -357,18 +394,20 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           </div>
           <div className="block">
             <button
+              type="button"
               onClick={() => {
                 setMapSelectionType("specific_map");
               }}
-              className={`rounded-lg  ${mapSelectionType == "specific_map" ? "bg-customGreen-dark " : null} p-2`}
+              className={` border-2 border-customGreen-dark rounded-lg  ${mapSelectionType == "specific_map" ? "bg-customGreen-dark " : "hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Specific Map
             </button>{" "}
             <button
+              type="button"
               onClick={() => {
                 setMapSelectionType("map_pool");
               }}
-              className={`rounded-lg ${mapSelectionType == "map_pool" ? "bg-customGreen-dark" : null} p-2`}
+              className={` border-2 border-customGreen-dark rounded-lg ${mapSelectionType == "map_pool" ? "bg-customGreen-dark" : "hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Map Pool
             </button>
@@ -422,40 +461,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         </div>
         <br />
         <br />
-        <button
-          onClick={() => {
-            requestMatch({
-              variables: {
-                input: {
-                  bot1: bot1SearchOrSelect.select,
-                  bot2: bot2SearchOrSelect.select,
-                  matchCount: matchCount,
-                  mapSelectionType: mapSelectionType,
-
-                  chosenMap:
-                    mapSelectionType == "specific_map"
-                      ? specificMapSearchOrSelect.select
-                      : undefined,
-                  mapPool:
-                    mapSelectionType == "map_pool"
-                      ? mapPoolSearchOrSelect.select
-                      : undefined,
-                },
-              },
-              onCompleted: (...args) => {
-                const success = onCompleted(...args);
-                if (success) {
-                  onClose();
-                }
-              },
-              onError,
-            });
-          }}
-          className="w-full bg-customGreen-dark text-white py-2 rounded mt-12"
-        >
-          Request match
-        </button>
-      </div>
+      </Form>
     </Modal>
   );
 }
