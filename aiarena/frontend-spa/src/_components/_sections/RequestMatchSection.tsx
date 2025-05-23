@@ -42,16 +42,6 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           }
           totalCount
         }
-        user {
-          bots {
-            edges {
-              node {
-                id
-                ...ProfileBot_bot
-              }
-            }
-          }
-        }
       }
     `,
     props.viewer
@@ -68,7 +58,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           <div className="block">
             <p className="pb-1">
               <span
-                className={`${viewer.requestMatchesCountLeft > 5 ? "text-customGreen" : ""}
+                className={`
                   
                   ${viewer.requestMatchesCountLeft <= 5 && viewer.requestMatchesCountLeft > 0 ? "text-yellow-500" : ""}
                   ${viewer.requestMatchesCountLeft <= 0 ? "text-red-400" : ""}
