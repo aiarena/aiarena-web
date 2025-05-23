@@ -207,7 +207,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
             }
           })
           .map((bot) => (
-            <li key={bot.id}>
+            <li key={bot.id} id={bot.id}>
               <ProfileBot bot={bot} />
             </li>
           ))}

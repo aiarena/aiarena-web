@@ -6,6 +6,7 @@ import { getNodes } from "@/_lib/relayHelpers";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import { UploadBotModalMutation } from "./__generated__/UploadBotModalMutation.graphql";
 import Form from "@/_components/_props/Form";
+import { useNavigate } from "react-router";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -46,6 +47,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
     `,
     {}
   );
+
   const bot_races = getNodes(data.botRace);
 
   const [name, setName] = useState("");
@@ -54,7 +56,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
 
   const [botDataEnabled, setBotDataEnabled] = useState(false);
-
+  const navigate = useNavigate();
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "uploadBot",
     "Bot Uploaded Successfully!"
@@ -63,6 +65,9 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
   const [uploadBot, updating] = useMutation<UploadBotModalMutation>(graphql`
     mutation UploadBotModalMutation($input: UploadBotInput!, $userId: ID!) {
       uploadBot(input: $input) {
+        bot {
+          id
+        }
         node(id: $userId) {
           ... on UserType {
             ...ProfileBotOverviewList_user
@@ -75,6 +80,14 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
       }
     }
   `);
+
+  const resetAllStateFields = () => {
+    setName("");
+    setRace("P");
+    setType(Object.keys(BOT_TYPES)[0]);
+    setBotZipFile(null);
+    setBotDataEnabled(false);
+  };
 
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,7 +111,12 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
       onCompleted: (...args) => {
         const success = onCompleted(...args);
         if (success) {
+          resetAllStateFields();
           onClose();
+          const botId = args[0]?.uploadBot?.bot?.id;
+          if (botId) {
+            navigate(`#${botId}`);
+          }
         }
       },
       onError,
