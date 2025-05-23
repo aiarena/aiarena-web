@@ -53,7 +53,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
   return (
     <div className={`${sideNavbar ? "flex" : ""}`}>
       {sideNavbar ? (
-        <aside className="w-1/12 min-w-[12em] bg-gray-900 border-r border-gray-700">
+        <aside className="w-1/12 min-w-[12em] bg-darken-6 border-r border-gray-700">
           <div
             className="sticky flex flex-col"
             style={{ top: `${navbarHeight}px` }}
@@ -65,7 +65,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
                 className={({ isActive }) =>
                   `m-2 pl-2 py-2 text-white border-1 shadow shadow-black shadow-sm hover:shadow-md hover:shadow-black duration-300 ease-in-out transform ${
                     isActive
-                      ? "bg-gray-800 text-large border-gray-700 border-b-customGreen border-b-2"
+                      ? "shadow-customGreen text-large border-gray-700 border-b-customGreen border-b-2"
                       : "border-gray-700 hover:border-b-customGreen border-b-2"
                   }`
                 }
@@ -81,7 +81,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
         border-b border-customGreen"
           style={{ top: `${navbarHeight}px` }}
         >
-          <div className="flex flex-wrap justify-center space-x-4 py-4 bg-gray-900">
+          <div className="flex flex-wrap justify-center space-x-4 py-4 bg-darken-6">
             {sideNavbarLinks.map((tab) => (
               <NavLink
                 key={tab.name}
