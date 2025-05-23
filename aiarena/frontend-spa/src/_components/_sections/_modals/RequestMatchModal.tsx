@@ -309,6 +309,27 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     "Match Request Updated!"
   );
 
+  const resetAllStateFields = () => {
+    setBot1SearchTerm("");
+    setBot1IsSearching(false);
+    setBot2SearchTerm("");
+    setBot2IsSearching(false);
+    setMapSelectionType("specific_map");
+    setSpecificMapIsSearching(false);
+    setSpecificMapSearchTerm("");
+    setMapPoolIsSearching(false);
+    setMapPoolSearchTerm("");
+    setMatchCount(1);
+    setBot1SearchOrSelect({ select: "", searchAndDisplay: "" });
+    setBot2SearchOrSelect({ select: "", searchAndDisplay: "" });
+    setSpecificMapSearchOrSelect({ select: "", searchAndDisplay: "" });
+    setMapPoolSearchOrSelect({ select: "", searchAndDisplay: "" });
+    setQueryVariablesBot1({ name: "" });
+    setQueryVariablesBot2({ name: "" });
+    setQueryVariablesSpecificMap({ name: "" });
+    setQueryVariablesMapPool({ name: "" });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -332,6 +353,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       onCompleted: (...args) => {
         const success = onCompleted(...args);
         if (success) {
+          resetAllStateFields();
           onClose();
         }
       },
@@ -343,7 +365,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     <Modal onClose={onClose} isOpen={isOpen} title="Request Match">
       <Form
         handleSubmit={handleSubmit}
-        submitTitle="Upload Bot"
+        submitTitle="Request Match"
         loading={updating}
       >
         <div className="mb-4">
@@ -357,7 +379,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               if (value.select) {
                 setBot1SearchTerm(value.searchAndDisplay);
               }
-              console.log(value.select);
             }}
             onSearch={handleBot1Search}
             isLoading={bot1IsSearching}
