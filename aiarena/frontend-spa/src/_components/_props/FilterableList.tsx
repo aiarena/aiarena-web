@@ -246,7 +246,7 @@ export default function FilterableList<T>({
         {fields.map((field, index) => (
           <button
             key={index}
-            className={`py-2 flex justify-between text-left font-bold text-lg text-customGreen hover:text-white bg-darken  border-l border-customGreen pl-2  ${getClassName(
+            className={`py-2 flex justify-between text-left font-bold text-lg text-customGreen hover:text-white bg-darken  border-l border-customGreen hover:border-white pl-2  ${getClassName(
               field
             )}`}
             onClick={() => handleSort(field)}
