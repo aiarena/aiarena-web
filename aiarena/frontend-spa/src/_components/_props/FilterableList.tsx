@@ -12,6 +12,7 @@ interface FilterableListProps<T> {
   data: (T | null | undefined)[];
   fields: string[];
   filters: Filter[];
+  hideMenu?: boolean;
   renderRow: (item: T, index: number) => React.ReactNode;
   resultsPerPage?: number;
   defaultFieldSort?: number;
@@ -26,6 +27,7 @@ export default function FilterableList<T>({
   fields,
   filters,
   renderRow,
+  hideMenu = false,
   resultsPerPage: initialResultsPerPage = 18,
   defaultFieldSort = 0,
   defaultSortOrder = "asc",
@@ -162,13 +164,14 @@ export default function FilterableList<T>({
       className={`flex flex-col bg-customBackgroundColor1 h-full ${classes}`}
     >
       {/* Filter button */}
-      <button
-        onClick={() => setShowFilterMenu(!showFilterMenu)}
-        className="shadow shadow-black mb-4 bg-customGreen-dark text-white p-2 rounded hover:bg-customGreenDarken1 w-[8em]"
-      >
-        {showFilterMenu ? "Hide Filters" : "Show Filters"}
-      </button>
-
+      {!hideMenu ? (
+        <button
+          onClick={() => setShowFilterMenu(!showFilterMenu)}
+          className="shadow shadow-black mb-4 bg-customGreen-dark text-white p-2 rounded hover:bg-customGreenDarken1 w-[8em]"
+        >
+          {showFilterMenu ? "Hide Filters" : "Show Filters"}
+        </button>
+      ) : null}
       {/* Filters Menu */}
       {showFilterMenu && (
         <div className="bg-gray-800 p-4 rounded mb-4">
@@ -238,12 +241,12 @@ export default function FilterableList<T>({
 
       {/* Sorting Header Fields */}
       <div
-        className={`grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))] text-white mb-4 font-bold`}
+        className={`grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))] text-white font-bold`}
       >
         {fields.map((field, index) => (
           <button
             key={index}
-            className={` flex justify-between text-left font-bold text-lg text-customGreen hover:text-white  border-l border-customGreen pl-2  ${getClassName(
+            className={`py-2 flex justify-between text-left font-bold text-lg text-customGreen hover:text-white bg-darken  border-l border-customGreen pl-2  ${getClassName(
               field
             )}`}
             onClick={() => handleSort(field)}
@@ -291,7 +294,7 @@ export default function FilterableList<T>({
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex flex-wrap justify-center items-center mt-4 p-4 border-t border-gray-700">
+      <div className="flex flex-wrap justify-center items-center mt-4 p-4">
         <div className="flex">
           <button
             onClick={() => setCurrentPage(() => 1)}
