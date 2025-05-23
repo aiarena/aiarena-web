@@ -94,7 +94,9 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
           <div className="block">
             <p className="pb-1 ">
               <span
-                className={`pb-1 ${activeBotParticipations == viewer.activeBotsLimit ? "text-red-400" : ""}`}
+                className={`pb-1 ${activeBotParticipations == viewer.activeBotsLimit ? "text-red-400" : ""}
+                   ${viewer.activeBotsLimit && viewer.activeBotsLimit - activeBotParticipations == 1 ? "text-yellow-500" : ""}
+                   `}
               >
                 {activeBotParticipations}
               </span>{" "}
