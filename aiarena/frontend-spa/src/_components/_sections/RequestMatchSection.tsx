@@ -56,7 +56,6 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
     `,
     props.viewer
   );
-
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
   const matchRequestsUsed =
     viewer.requestMatchesLimit - viewer.requestMatchesCountLeft;
@@ -83,6 +82,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
             <WantMore />
           </div>
         </div>
+
         <div className="flex gap-4 ml-auto ">
           <MainButton
             onClick={() => setIsRequestMatchModalOpen(true)}
@@ -94,20 +94,24 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
       <FilterableList
         classes="pt-4"
         data={getNodes(viewer.requestedMatches)}
+        hideMenu={true}
         fields={[
+          "status",
           "id",
-          "firstStarted",
+
           "participant1.name",
           "participant2.name",
+          "firstStarted",
           "result.type",
         ]} // Pass nested field as string
-        defaultFieldSort={1}
+        defaultFieldSort={0}
         defaultSortOrder="desc"
         fieldLabels={{
+          status: "Status",
           id: "Match ID",
-          firstStarted: "Started",
           "participant1.name": "Player 1",
           "participant2.name": "Player 2",
+          firstStarted: "Started",
           "result.type": "Result",
         }}
         fieldClasses={{
@@ -125,6 +129,9 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         renderRow={(match) => (
           <div className="block flex justify-between items-center ">
             <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
+              <p className="hidden sm:flex text-left text-gray-200  truncate">
+                {match.status}
+              </p>
               <a
                 className=" hidden md:flex text-left font-semibold text-gray-200 truncate"
                 href={`/matches/${extractRelayID(match.id, "MatchType")}`}
@@ -132,9 +139,6 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
                 {match.id}
               </a>
 
-              <p className="hidden sm:flex text-left text-gray-200  truncate">
-                {formatDateISO(match.firstStarted)}
-              </p>
               <a
                 className=" text-left text-customGreen truncate "
                 href={`/bots/${extractRelayID(match.participant1?.id, "BotType")}`}
@@ -147,7 +151,11 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
               >
                 {match.participant2?.name}
               </a>
-
+              <p className="hidden sm:flex text-left text-gray-200  truncate">
+                {match.status != "Queued"
+                  ? formatDateISO(match.firstStarted)
+                  : ""}
+              </p>
               <p className=" text-left text-gray-200  truncate">
                 {match.result?.type}
               </p>
