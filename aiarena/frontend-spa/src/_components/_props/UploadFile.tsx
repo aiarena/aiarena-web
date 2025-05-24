@@ -8,7 +8,7 @@ interface FileUploadProps {
   required?: boolean;
 }
 
-export const FileUpload: React.FC<FileUploadProps> = ({
+export const UploadFile: React.FC<FileUploadProps> = ({
   accept = ".zip",
   file,
   setFile,

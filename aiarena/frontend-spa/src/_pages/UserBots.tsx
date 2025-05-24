@@ -1,16 +1,16 @@
 import { Suspense } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
-import { ProfileBotOverviewList } from "@/_components/_sections/ProfileBotOverviewList";
+import { UserBotsSection } from "@/_components/_sections/UserBotsSection";
 
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
+import { UserBotsQuery } from "./__generated__/UserBotsQuery.graphql";
 
 export default function UserBots() {
-  const data = useLazyLoadQuery<ProfileQuery>(
+  const data = useLazyLoadQuery<UserBotsQuery>(
     graphql`
       query UserBotsQuery {
         viewer {
-          ...ProfileBotOverviewList_viewer
+          ...UserBotsSection_viewer
         }
       }
     `,
@@ -25,7 +25,7 @@ export default function UserBots() {
   return (
     <>
       <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-        <ProfileBotOverviewList viewer={data.viewer} />
+        <UserBotsSection viewer={data.viewer} />
       </Suspense>
     </>
   );

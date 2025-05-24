@@ -1,30 +1,29 @@
 import React, { useState } from "react";
 
 import { graphql, useFragment } from "react-relay";
-import { ProfileBotOverviewList_viewer$key } from "./__generated__/ProfileBotOverviewList_viewer.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
 import ProfileBot from "./ProfileBot";
-import { ProfileBotOverviewList_user$key } from "./__generated__/ProfileBotOverviewList_user.graphql";
+
 import Searchbar from "../_props/Searchbar";
 import Dropdown from "../_props/Dropdown";
 import DropdownButton from "../_props/DropdownButton";
 import WantMore from "../_display/WantMore";
+import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
+import { UserBotsSection_user$key } from "./__generated__/UserBotsSection_user.graphql";
 
-interface ProfileBotOverviewListProps {
-  viewer: ProfileBotOverviewList_viewer$key;
+interface UserBotsSectionProps {
+  viewer: UserBotsSection_viewer$key;
 }
 
-export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
-  props
-) => {
+export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
   const viewer = useFragment(
     graphql`
-      fragment ProfileBotOverviewList_viewer on ViewerType {
+      fragment UserBotsSection_viewer on ViewerType {
         activeBotsLimit
         user {
-          ...ProfileBotOverviewList_user
+          ...UserBotsSection_user
         }
       }
     `,
@@ -33,7 +32,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
 
   const userData = useFragment(
     graphql`
-      fragment ProfileBotOverviewList_user on UserType {
+      fragment UserBotsSection_user on UserType {
         bots {
           edges {
             node {
@@ -61,7 +60,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
         }
       }
     `,
-    viewer.user as ProfileBotOverviewList_user$key
+    viewer.user as UserBotsSection_user$key
   );
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);

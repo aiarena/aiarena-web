@@ -1,16 +1,16 @@
 import { Suspense } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
-import RequestMatchSection from "@/_components/_sections/RequestMatchSection";
 
+import UserSettingsSection from "@/_components/_sections/UserSettingsSection";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
+import { UserSettingsQuery } from "./__generated__/UserSettingsQuery.graphql";
 
-export default function MatchRequests() {
-  const data = useLazyLoadQuery<ProfileQuery>(
+export default function UserSettings() {
+  const data = useLazyLoadQuery<UserSettingsQuery>(
     graphql`
-      query MatchRequestsQuery {
+      query UserSettingsQuery {
         viewer {
-          ...RequestMatchSection_viewer
+          ...UserSettingsSection_viewer
         }
       }
     `,
@@ -25,7 +25,7 @@ export default function MatchRequests() {
   return (
     <>
       <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-        <RequestMatchSection viewer={data.viewer} />
+        <UserSettingsSection viewer={data.viewer} />
       </Suspense>
     </>
   );

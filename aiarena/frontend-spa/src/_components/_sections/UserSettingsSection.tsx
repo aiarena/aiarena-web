@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
-import { SettingsProfileSection_viewer$key } from "./__generated__/SettingsProfileSection_viewer.graphql";
 import AvatarWithBorder from "../_display/AvatarWithBorder";
 import SectionDivider from "../_display/SectionDivider";
 import { formatDate } from "@/_lib/dateUtils";
@@ -10,17 +9,16 @@ import {
   EyeSlashIcon,
 } from "@heroicons/react/20/solid";
 import { useSnackbar } from "notistack";
+import { UserSettingsSection_viewer$key } from "./__generated__/UserSettingsSection_viewer.graphql";
 
-interface SettingsProfileSectionProps {
-  viewer: SettingsProfileSection_viewer$key;
+interface UserSettingsSectionProps {
+  viewer: UserSettingsSection_viewer$key;
 }
 
-export default function SettingsProfileSection(
-  props: SettingsProfileSectionProps
-) {
+export default function UserSettingsSection(props: UserSettingsSectionProps) {
   const viewer = useFragment(
     graphql`
-      fragment SettingsProfileSection_viewer on ViewerType {
+      fragment UserSettingsSection_viewer on ViewerType {
         apiToken
         receiveEmailComms
         lastLogin

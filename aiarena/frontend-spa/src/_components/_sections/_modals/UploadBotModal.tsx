@@ -7,7 +7,7 @@ import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import { UploadBotModalMutation } from "./__generated__/UploadBotModalMutation.graphql";
 import Form from "@/_components/_props/Form";
 import { useNavigate } from "react-router";
-import { FileUpload } from "@/_components/_props/FileUpload";
+import { UploadFile } from "@/_components/_props/UploadFile";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -71,7 +71,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
         }
         node(id: $userId) {
           ... on UserType {
-            ...ProfileBotOverviewList_user
+            ...UserBotsSection_user
           }
         }
         errors {
@@ -156,7 +156,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             }}
           /> */}
           <span className="text-gray-300">Bot ZIP:</span>
-          <FileUpload
+          <UploadFile
             accept=".zip"
             file={botZipFile}
             setFile={setBotZipFile}

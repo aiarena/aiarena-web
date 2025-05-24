@@ -14,7 +14,7 @@ import {
   FolderOpenIcon, // Download Data
 } from "@heroicons/react/20/solid";
 import WideButton from "@/_components/_props/WideButton";
-import { FileUpload } from "@/_components/_props/FileUpload";
+import { UploadFile } from "@/_components/_props/UploadFile";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -155,7 +155,7 @@ export default function BotSettingsModal({
                   Download Bot Zip
                 </button>
 
-                <FileUpload
+                <UploadFile
                   accept=".zip"
                   file={botZipFile}
                   setFile={setBotZipFile}

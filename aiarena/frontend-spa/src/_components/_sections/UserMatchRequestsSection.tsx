@@ -1,21 +1,23 @@
 import { formatDateISO } from "@/_lib/dateUtils";
 import { graphql, useFragment } from "react-relay";
-import { RequestMatchSection_viewer$key } from "./__generated__/RequestMatchSection_viewer.graphql";
 import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
 import FilterableList from "../_props/FilterableList";
 import RequestMatchModal from "./_modals/RequestMatchModal";
 import { useState } from "react";
 import MainButton from "../_props/MainButton";
 import WantMore from "../_display/WantMore";
+import { UserMatchRequestsSection_viewer$key } from "./__generated__/UserMatchRequestsSection_viewer.graphql";
 
-interface RequestMatchesSectionProps {
-  viewer: RequestMatchSection_viewer$key;
+interface UserMatchRequestsSectionProps {
+  viewer: UserMatchRequestsSection_viewer$key;
 }
 
-export default function RequestMatchSection(props: RequestMatchesSectionProps) {
+export default function UserMatchRequestsSection(
+  props: UserMatchRequestsSectionProps
+) {
   const viewer = useFragment(
     graphql`
-      fragment RequestMatchSection_viewer on ViewerType {
+      fragment UserMatchRequestsSection_viewer on ViewerType {
         requestMatchesLimit
         requestMatchesCountLeft
         requestedMatches {
