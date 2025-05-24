@@ -411,7 +411,11 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               value={matchCount}
               type="number"
               onChange={(e) => setMatchCount(parseInt(e.target.value))}
-            ></input>
+              aria-describedby="match-count-help"
+            />
+            <div id="match-count-help" className="sr-only">
+              Number of games to play between selected bots
+            </div>
           </div>
           <div className="block">
             <button
@@ -419,7 +423,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               onClick={() => {
                 setMapSelectionType("specific_map");
               }}
-              className={` border-2 rounded-lg  ${mapSelectionType == "specific_map" ? "border-customGreen bg-transparent" : "border-gray-700 bg-darken hover:bg-transparent hover:border-customGreen"} p-2`}
+              className={` border-2 rounded-lg  ${mapSelectionType == "specific_map" ? "border-customGreen-dark bg-customGreen-dark " : "border-gray-700 bg-darken hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Specific Map
             </button>{" "}
@@ -428,7 +432,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               onClick={() => {
                 setMapSelectionType("map_pool");
               }}
-              className={` border-2  rounded-lg ${mapSelectionType == "map_pool" ? "border-customGreen bg-transparent" : "border-gray-700 bg-darken hover:bg-transparent hover:border-customGreen"} p-2`}
+              className={` border-2  rounded-lg ${mapSelectionType == "map_pool" ? "border-customGreen bg-customGreen-dark" : "border-gray-700 bg-darken hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Map Pool
             </button>

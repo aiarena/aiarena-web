@@ -130,85 +130,130 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
         submitTitle="Upload Bot"
         loading={updating}
       >
-        <label className="block">
-          <span className="text-gray-300">Name:</span>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            className="w-full p-2"
-          />
-        </label>
+        <fieldset>
+          <legend className="sr-only">Bot Upload Information</legend>
 
-        <label className="block">
-          {/* <span className="text-gray-300">Bot ZIP:</span>
-          <input
-            type="file"
-            className="w-full p-2 "
-            required
-            onChange={(e) => {
-              if (e.target.files != null) {
-                setBotZipFile(e.target.files[0]);
-              } else {
-                setBotZipFile(null);
-              }
-            }}
-          /> */}
-          <span className="text-gray-300">Bot ZIP:</span>
-          <UploadFile
-            accept=".zip"
-            file={botZipFile}
-            setFile={setBotZipFile}
-            required
-          />
-        </label>
+          <div className="block mb-4">
+            <label htmlFor="bot-name" className="block mb-2">
+              <span className="text-gray-300">Name:</span>
+            </label>
+            <input
+              id="bot-name"
+              name="bot-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              autoComplete="off"
+              className="w-full p-2"
+              aria-describedby="bot-name-help"
+              placeholder="Enter your bot's name"
+            />
+            <div id="bot-name-help" className="sr-only">
+              Choose a unique name for your bot
+            </div>
+          </div>
 
-        <label className="mb-4 inline-flex items-center">
-          <span className="text-gray-300">Bot Data:</span>
-          <input
-            type="checkbox"
-            checked={botDataEnabled}
-            onChange={(e) => setBotDataEnabled(e.target.checked)}
-            className="ml-2 w-5 h-5"
-          />
-        </label>
+          <div className="block mb-4">
+            <label htmlFor="bot-zip" className="block mb-2">
+              <span className="text-gray-300">Bot ZIP:</span>
+            </label>
+            <UploadFile
+              id="bot-zip"
+              accept=".zip"
+              file={botZipFile}
+              setFile={setBotZipFile}
+              required
+              aria-describedby="bot-zip-help"
+            />
+            <div id="bot-zip-help" className="sr-only">
+              Upload a ZIP file containing your bot's code and resources
+            </div>
+          </div>
 
-        <label className="block">
-          <span className="text-gray-300">Plays Race:</span>
-          <select
-            value={race}
-            required
-            onChange={(e) => {
-              setRace(e.target.value as Race);
-            }}
-            className="w-full p-2"
-          >
-            {bot_races.map((bot_race) => (
-              <option key={bot_race.id} value={bot_race.label}>
-                {bot_race.name}
+          <div className="mb-4">
+            <fieldset>
+              <div className="inline-flex items-center">
+                <label htmlFor="bot-data-enabled" className="text-gray-300">
+                  Enable Bot Data:
+                </label>
+                <input
+                  id="bot-data-enabled"
+                  name="bot-data-enabled"
+                  type="checkbox"
+                  checked={botDataEnabled}
+                  onChange={(e) => setBotDataEnabled(e.target.checked)}
+                  className="w-5 h-5 ml-2"
+                  aria-describedby="bot-data-help"
+                />
+              </div>
+              <div id="bot-data-help" className="sr-only">
+                Allow your bot to store and access persistent data between
+                matches
+              </div>
+            </fieldset>
+          </div>
+
+          <div className="block mb-4">
+            <label htmlFor="bot-race" className="block mb-2">
+              <span className="text-gray-300">Plays Race:</span>
+            </label>
+            <select
+              id="bot-race"
+              name="bot-race"
+              value={race}
+              required
+              onChange={(e) => {
+                setRace(e.target.value as Race);
+              }}
+              autoComplete="off"
+              className="w-full p-2"
+              aria-describedby="bot-race-help"
+            >
+              <option value="" disabled>
+                Select a race
               </option>
-            ))}
-          </select>
-        </label>
+              {bot_races.map((bot_race) => (
+                <option key={bot_race.id} value={bot_race.label}>
+                  {bot_race.name}
+                </option>
+              ))}
+            </select>
+            <div id="bot-race-help" className="sr-only">
+              Choose which game race your bot is designed to play
+            </div>
+          </div>
 
-        <label className="block">
-          <span className="text-gray-300">Type:</span>
-          <select
-            required={true}
-            value={type}
-            onChange={(e) => {
-              setType(e.target.value);
-            }}
-            className="w-full p-2"
-          >
-            {Object.entries(BOT_TYPES).map(([label, value]) => (
-              <option key={label} value={label}>
-                {value}
+          <div className="block mb-4">
+            <label htmlFor="bot-type" className="block mb-2">
+              <span className="text-gray-300">Type:</span>
+            </label>
+            <select
+              id="bot-type"
+              name="bot-type"
+              required={true}
+              value={type}
+              onChange={(e) => {
+                setType(e.target.value);
+              }}
+              autoComplete="off"
+              className="w-full p-2"
+              aria-describedby="bot-type-help"
+            >
+              <option value="" disabled>
+                Select bot type
               </option>
-            ))}
-          </select>
-        </label>
+              {Object.entries(BOT_TYPES).map(([label, value]) => (
+                <option key={label} value={label}>
+                  {value}
+                </option>
+              ))}
+            </select>
+            <div id="bot-type-help" className="sr-only">
+              Select the type of bot you are uploading
+            </div>
+          </div>
+        </fieldset>
       </Form>
     </Modal>
   );
