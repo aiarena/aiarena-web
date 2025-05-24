@@ -3,7 +3,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
 import { ProfileBotOverviewList } from "@/_components/_sections/ProfileBotOverviewList";
 
-import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
 export default function UserBots() {
   const data = useLazyLoadQuery<ProfileQuery>(
@@ -24,7 +24,7 @@ export default function UserBots() {
 
   return (
     <>
-      <Suspense fallback={<LoadingSpinnerGray />}>
+      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
         <ProfileBotOverviewList viewer={data.viewer} />
       </Suspense>
     </>

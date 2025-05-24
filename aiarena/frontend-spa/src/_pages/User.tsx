@@ -3,7 +3,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
 
 import SettingsProfileSection from "@/_components/_sections/SettingsProfileSection";
-import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
 export default function User() {
   const data = useLazyLoadQuery<ProfileQuery>(
@@ -24,7 +24,7 @@ export default function User() {
 
   return (
     <>
-      <Suspense fallback={<LoadingSpinnerGray />}>
+      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
         <SettingsProfileSection viewer={data.viewer} />
       </Suspense>
     </>

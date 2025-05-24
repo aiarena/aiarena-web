@@ -7,6 +7,7 @@ import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import { UploadBotModalMutation } from "./__generated__/UploadBotModalMutation.graphql";
 import Form from "@/_components/_props/Form";
 import { useNavigate } from "react-router";
+import { FileUpload } from "@/_components/_props/FileUpload";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -141,7 +142,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
         </label>
 
         <label className="block">
-          <span className="text-gray-300">Bot ZIP:</span>
+          {/* <span className="text-gray-300">Bot ZIP:</span>
           <input
             type="file"
             className="w-full p-2 "
@@ -153,16 +154,23 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
                 setBotZipFile(null);
               }
             }}
+          /> */}
+          <span className="text-gray-300">Bot ZIP:</span>
+          <FileUpload
+            accept=".zip"
+            file={botZipFile}
+            setFile={setBotZipFile}
+            required
           />
         </label>
 
-        <label className="block">
-          <span className="text-gray-300">Bot Data Enabled:</span>
+        <label className="mb-4 inline-flex items-center">
+          <span className="text-gray-300">Bot Data:</span>
           <input
             type="checkbox"
             checked={botDataEnabled}
             onChange={(e) => setBotDataEnabled(e.target.checked)}
-            className="ml-2"
+            className="ml-2 w-5 h-5"
           />
         </label>
 

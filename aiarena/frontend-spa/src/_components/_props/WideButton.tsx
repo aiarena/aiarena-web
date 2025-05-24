@@ -1,4 +1,4 @@
-import LoadingSpinnerGray from "../_display/LoadingSpinnerGray";
+import LoadingSpinner from "../_display/LoadingSpinnerGray";
 
 interface WideButtonProps {
   loading?: boolean;
@@ -6,23 +6,28 @@ interface WideButtonProps {
   type?: "button" | "submit" | "reset" | undefined;
   onClick?: () => void;
   style?: string;
+  disabled?: boolean;
 }
 
 export default function WideButton({
   loading = false,
   title,
   type = "button",
+  disabled = false,
   onClick,
   style,
 }: WideButtonProps) {
   return (
     <button
-      disabled={loading}
+      disabled={loading || disabled}
       type={type}
       onClick={onClick}
-      className={`w-full shadow-sm shadow-black hover:shadow-none border-2 border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform ${style} ${loading ? "py-2.5" : "py-2"}`}
+      className={`flex justify-center items-center w-full shadow-sm shadow-black border-2 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform
+        ${disabled ? "bg-gray-700 border-gray-700 hover:bg-gray-700 hover:border-gray-700" : "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent "} 
+        ${loading ? "py-2.5" : "py-2"}
+        ${style} `}
     >
-      {loading ? <LoadingSpinnerGray /> : title}
+      {loading ? <LoadingSpinner color="light-gray" /> : title}
     </button>
   );
 }

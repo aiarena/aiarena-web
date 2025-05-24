@@ -70,10 +70,10 @@ export default function BotBiographyModal({
           <MarkdownEditor value={biography} setValue={setBiography} />
         </div>
         <WideButton
-          style={`${!hasUnsavedWikiChanges ? "bg-gray-700 border-gray-700 hover:bg-gray-700 hover:border-gray-700" : ""}`}
           title="Save"
           loading={updating}
           type="button"
+          disabled={!hasUnsavedWikiChanges}
           onClick={() => {
             updateBot({
               variables: {

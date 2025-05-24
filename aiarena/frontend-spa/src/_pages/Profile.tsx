@@ -6,7 +6,7 @@ import { ProfileQuery } from "./__generated__/ProfileQuery.graphql";
 import { ProfileBotOverviewList } from "@/_components/_sections/ProfileBotOverviewList";
 import RequestMatchSection from "@/_components/_sections/RequestMatchSection";
 import SettingsProfileSection from "@/_components/_sections/SettingsProfileSection";
-import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
 export default function Profile() {
   const data = useLazyLoadQuery<ProfileQuery>(
@@ -48,7 +48,7 @@ export default function Profile() {
           <div className="mt-8">
             {activeTab === "Bots" && (
               <div id="bot-overview">
-                <Suspense fallback={<LoadingSpinnerGray />}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <ProfileBotOverviewList viewer={data.viewer} />
                 </Suspense>
               </div>
@@ -56,7 +56,7 @@ export default function Profile() {
 
             {activeTab === "Requested Matches" && (
               <div id="matches">
-                <Suspense fallback={<LoadingSpinnerGray />}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <RequestMatchSection viewer={data.viewer} />
                 </Suspense>
               </div>
@@ -64,7 +64,7 @@ export default function Profile() {
 
             {data && activeTab === "Settings" && (
               <div id="settigns">
-                <Suspense fallback={<LoadingSpinnerGray />}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <SettingsProfileSection viewer={data.viewer} />
                 </Suspense>
               </div>

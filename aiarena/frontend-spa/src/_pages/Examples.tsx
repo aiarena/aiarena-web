@@ -1,5 +1,5 @@
 import ActiveDot from "@/_components/_display/ActiveDot";
-import LoadingSpinnerGray from "@/_components/_display/LoadingSpinnerGray";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import SectionDivider from "@/_components/_display/SectionDivider";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
@@ -58,7 +58,7 @@ export default function Examples() {
       </div>
       <div className="p-10 space-y-4">
         <h4>Loading Spinners</h4>
-        <LoadingSpinnerGray />
+        <LoadingSpinner />
       </div>
 
       <div className="p-10 space-y-4">

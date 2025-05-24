@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
-import LoadingSpinnerGray from "../_display/LoadingSpinnerGray";
+import LoadingSpinner from "../_display/LoadingSpinnerGray";
 
 // Define types for our component
 interface Option {
@@ -123,7 +123,7 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
           onClick={toggleDropdown}
         >
           {isLoading ? (
-            <LoadingSpinnerGray />
+            <LoadingSpinner />
           ) : (
             <svg
               xmlns="http://www.w3.org/2000/svg"

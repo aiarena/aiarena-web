@@ -3,12 +3,14 @@ interface SectionDividerProps {
   darken?: 1 | 2 | 3 | 9;
   className?: string;
   color?: "customGreen" | "gray" | "gradient";
+  height?: 1 | 2 | 3 | 4;
 }
 
 const SectionDivider = ({
   title,
   darken,
   className,
+  height = 2,
   color = "customGreen",
 }: SectionDividerProps) => {
   const bgClass = {
@@ -22,8 +24,19 @@ const SectionDivider = ({
   return (
     <div className={`relative w-full ${className} `}>
       <div
-        className={`absolute left-0 w-full h-[2px] shadow shadow-black ${color == "customGreen" ? "bg-customGreen" : ""} ${color == "gray" ? "bg-slate-700" : ""} ${color == "gradient" ? "bg-[linear-gradient(100deg,rgba(134,194,50,1)_0%,rgb(0,0,0,1)_80%)]" : ""}  ${bgClass}`}
+        className={`absolute left-0 w-full 
+          ${height == 1 ? "h-[1px]" : ""}
+          ${height == 2 ? "h-[2px]" : ""}
+          ${height == 3 ? "h-[3px]" : ""}
+          ${height == 4 ? "h-[4px]" : ""}
+          
+          shadow shadow-black 
+          ${color == "customGreen" ? "bg-customGreen" : ""} 
+          ${color == "gray" ? "bg-slate-700" : ""} 
+          ${color == "gradient" ? "bg-[linear-gradient(100deg,rgb(134,194,50,0.1)_0%,rgb(134,194,50,0.3)_80%)]" : ""}  
+          ${bgClass}`}
       ></div>
+
       {title ? (
         <div className="relative mx-auto max-w-[40em]">
           <div

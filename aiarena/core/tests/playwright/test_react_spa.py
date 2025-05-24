@@ -60,8 +60,8 @@ def test_spa_userbots_shows_active_competition_participations(
             buffer=generated_python_file.read(),
         )
     )
-    page.get_by_label("Bot Data Enabled:").check()
-    expect(page.get_by_label("Bot Data Enabled:")).to_be_checked()
+    page.get_by_label("Bot Data:").check()
+    expect(page.get_by_label("Bot Data:")).to_be_checked()
 
     page.get_by_label("Plays Race:").select_option("Protoss")
     expect(page.get_by_label("Plays Race:")).to_have_value("P")
