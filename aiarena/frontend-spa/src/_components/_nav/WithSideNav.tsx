@@ -103,6 +103,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
 
       <main
         className={`${sideNavbar ? "flex-1" : "sticky top-0"} overflow-y-auto p-8 min-h-[90vh]`}
+        role="main"
       >
         {children}
       </main>

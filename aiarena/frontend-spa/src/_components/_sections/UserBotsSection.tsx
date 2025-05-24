@@ -86,7 +86,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
   const [searchBarValue, setSearchBarValue] = useState("");
 
   return (
-    <div className="">
+    <section aria-labelledby="user-bots-heading">
       <div className="flex flex-wrap-reverse w-fullitems-start">
         {/* Display active competition limit and current active competitions */}
         <div className="flex gap-4 flex-wrap pb-4">
@@ -105,7 +105,11 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
             <WantMore />
           </div>
         </div>
-        <div className="flex gap-4 ml-auto ">
+        <div
+          className="flex gap-4 ml-auto "
+          role="group"
+          aria-label="Bot filtering and sorting controls"
+        >
           <Dropdown title={useSort}>
             {activeBotParticipations > 0 ? (
               <DropdownButton
@@ -140,60 +144,45 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
             }}
             value={searchBarValue}
             placeholder="Search your bots..."
+            aria-label="Search bots by name"
           />
 
-          <div>
+          <div role="group" aria-label="Bot actions">
             <div className="hidden md:block">
               <MainButton
                 onClick={() => setUploadBotModalOpen(true)}
                 text="Upload Bot"
+                aria-label="Upload a new bot"
               />
             </div>
             <div className="block md:hidden">
               <MainButton
                 onClick={() => setUploadBotModalOpen(true)}
                 text="+"
+                aria-label="Upload a new bot"
               />
             </div>
           </div>
         </div>
       </div>
-
-      <ul className="space-y-12">
-        {getNodes(userData?.bots)
-          .sort((a, b) => {
-            switch (useSort) {
-              case "Zip Updated":
-                return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
-              case "Created":
-                return a.created <= b.created ? 0 : -1;
-              case "Trophies":
-                return (a.trophies?.edges?.length || 0) <=
-                  (b.trophies?.edges?.length || 0)
-                  ? 0
-                  : -1;
-              case "Active Competitions":
-                return (a.competitionParticipations?.edges?.filter(
-                  (comp) => comp?.node?.active == true
-                ).length || 0) <=
-                  (b.competitionParticipations?.edges.filter(
-                    (comp) => comp?.node?.active == true
-                  ).length || 0)
-                  ? 0
-                  : -1;
-
-              default:
-                if (searchBarValue.trim().length > 0) {
-                  const pattern = searchBarValue?.trim();
-
-                  const regex = new RegExp(pattern, "i");
-                  const aMatches = regex.test(a.name) ? 0 : -1;
-                  const bMatches = regex.test(b.name) ? 0 : -1;
-
-                  return bMatches - aMatches;
-                } else if (activeBotParticipations == 0) {
+      <div role="region" aria-labelledby="bots-list-heading" aria-live="polite">
+        <h2 id="bots-list-heading" className="sr-only">
+          Your Bots List
+        </h2>
+        <ul className="space-y-12">
+          {getNodes(userData?.bots)
+            .sort((a, b) => {
+              switch (useSort) {
+                case "Zip Updated":
                   return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
-                } else {
+                case "Created":
+                  return a.created <= b.created ? 0 : -1;
+                case "Trophies":
+                  return (a.trophies?.edges?.length || 0) <=
+                    (b.trophies?.edges?.length || 0)
+                    ? 0
+                    : -1;
+                case "Active Competitions":
                   return (a.competitionParticipations?.edges?.filter(
                     (comp) => comp?.node?.active == true
                   ).length || 0) <=
@@ -202,19 +191,43 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
                     ).length || 0)
                     ? 0
                     : -1;
-                }
-            }
-          })
-          .map((bot) => (
-            <li key={bot.id} id={bot.id}>
-              <ProfileBot bot={bot} />
-            </li>
-          ))}
-      </ul>
+
+                default:
+                  if (searchBarValue.trim().length > 0) {
+                    const pattern = searchBarValue?.trim();
+
+                    const regex = new RegExp(pattern, "i");
+                    const aMatches = regex.test(a.name) ? 0 : -1;
+                    const bMatches = regex.test(b.name) ? 0 : -1;
+
+                    return bMatches - aMatches;
+                  } else if (activeBotParticipations == 0) {
+                    return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
+                  } else {
+                    return (a.competitionParticipations?.edges?.filter(
+                      (comp) => comp?.node?.active == true
+                    ).length || 0) <=
+                      (b.competitionParticipations?.edges.filter(
+                        (comp) => comp?.node?.active == true
+                      ).length || 0)
+                      ? 0
+                      : -1;
+                  }
+              }
+            })
+            .map((bot) => (
+              <li key={bot.id} id={bot.id} role="listitem">
+                <ProfileBot bot={bot} />
+              </li>
+            ))}
+        </ul>
+      </div>
       <UploadBotModal
         isOpen={isUploadBotModalOpen}
         onClose={() => setUploadBotModalOpen(false)}
+        aria-labelledby="upload-bot-modal-title"
+        aria-describedby="upload-bot-modal-description"
       />
-    </div>
+    </section>
   );
 };

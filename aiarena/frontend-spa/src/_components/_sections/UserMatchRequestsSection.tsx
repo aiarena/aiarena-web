@@ -53,7 +53,10 @@ export default function UserMatchRequestsSection(
     viewer.requestMatchesLimit - viewer.requestMatchesCountLeft;
 
   return (
-    <div className="h-full]">
+    <section className="h-full" aria-labelledby="match-requests-heading">
+      <h2 id="match-requests-heading" className="sr-only">
+        Match Requests
+      </h2>
       <div className="flex flex-wrap-reverse w-fullitems-start">
         {/* Display request limit and requests left */}
         <div className="flex gap-4 flex-wrap pb-4">
@@ -65,6 +68,7 @@ export default function UserMatchRequestsSection(
                   ${viewer.requestMatchesCountLeft <= 5 && viewer.requestMatchesCountLeft > 0 ? "text-yellow-500" : ""}
                   ${viewer.requestMatchesCountLeft <= 0 ? "text-red-400" : ""}
                   `}
+                aria-label={`${matchRequestsUsed} match requests used out of ${viewer.requestMatchesLimit} monthly limit. ${viewer.requestMatchesCountLeft} requests remaining.`}
               >
                 {" "}
                 {matchRequestsUsed}
@@ -79,88 +83,117 @@ export default function UserMatchRequestsSection(
           <MainButton
             onClick={() => setIsRequestMatchModalOpen(true)}
             text="Request New Match"
+            aria-label="Request a new match between bots"
+            aria-describedby={
+              viewer.requestMatchesCountLeft <= 0
+                ? "no-requests-left"
+                : undefined
+            }
           />
         </div>
       </div>
+      <div role="region" aria-labelledby="match-requests-table-heading">
+        <h3 id="match-requests-table-heading" className="sr-only">
+          Match Requests Table
+        </h3>
+        <FilterableList
+          classes="mt-4 shadow-lg shadow-black bg-darken-2"
+          data={getNodes(viewer.requestedMatches)}
+          hideMenu={true}
+          fields={[
+            "status",
+            "id",
 
-      <FilterableList
-        classes="mt-4 shadow-lg shadow-black bg-darken-2"
-        data={getNodes(viewer.requestedMatches)}
-        hideMenu={true}
-        fields={[
-          "status",
-          "id",
+            "participant1.name",
+            "participant2.name",
+            "firstStarted",
+            "result.type",
+          ]} // Pass nested field as string
+          defaultFieldSort={0}
+          defaultSortOrder="desc"
+          fieldLabels={{
+            status: "Status",
+            id: "Match ID",
+            "participant1.name": "Player 1",
+            "participant2.name": "Player 2",
+            firstStarted: "Started",
+            "result.type": "Result",
+          }}
+          fieldClasses={{
+            status: "hidden md:flex",
+            id: "hidden md:flex",
+            firstStarted: "hidden sm:flex",
+          }}
+          filters={[
+            {
+              type: "search",
+              label: "Search",
+              field: "all",
+              placeholder: "Search all fields...",
+            },
+          ]}
+          renderRow={(match) => (
+            <div className="block flex justify-between items-center" role="row">
+              <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))] w-full">
+                <p
+                  className="pl-2 hidden md:flex text-left text-gray-200 truncate"
+                  role="cell"
+                  aria-label={`Match status: ${match.status}`}
+                >
+                  {match.status}
+                </p>
+                <a
+                  className="pl-2 hidden md:flex text-left font-semibold text-gray-200 truncate focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-opacity-50"
+                  href={`/matches/${extractRelayID(match.id, "MatchType")}`}
+                  role="cell"
+                  aria-label={`View match details for match ID ${match.id}`}
+                >
+                  {match.id}
+                </a>
 
-          "participant1.name",
-          "participant2.name",
-          "firstStarted",
-          "result.type",
-        ]} // Pass nested field as string
-        defaultFieldSort={0}
-        defaultSortOrder="desc"
-        fieldLabels={{
-          status: "Status",
-          id: "Match ID",
-          "participant1.name": "Player 1",
-          "participant2.name": "Player 2",
-          firstStarted: "Started",
-          "result.type": "Result",
-        }}
-        fieldClasses={{
-          status: "hidden md:flex",
-          id: "hidden md:flex",
-          firstStarted: "hidden sm:flex",
-        }}
-        filters={[
-          {
-            type: "search",
-            label: "Search",
-            field: "all",
-            placeholder: "Search all fields...",
-          },
-        ]}
-        renderRow={(match) => (
-          <div className="block flex justify-between items-center ">
-            <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
-              <p className="pl-2 hidden md:flex text-left text-gray-200  truncate">
-                {match.status}
-              </p>
-              <a
-                className="pl-2 hidden md:flex text-left font-semibold text-gray-200 truncate"
-                href={`/matches/${extractRelayID(match.id, "MatchType")}`}
-              >
-                {match.id}
-              </a>
-
-              <a
-                className="pl-2 text-left text-customGreen truncate "
-                href={`/bots/${extractRelayID(match.participant1?.id, "BotType")}`}
-              >
-                {match.participant1?.name}
-              </a>
-              <a
-                className="pl-2 text-left text-customGreen truncate "
-                href={`/bots/${extractRelayID(match.participant2?.id, "BotType")}`}
-              >
-                {match.participant2?.name}
-              </a>
-              <p className="pl-2 hidden sm:flex text-left text-gray-200  truncate">
-                {match.status != "Queued"
-                  ? formatDateISO(match.firstStarted)
-                  : ""}
-              </p>
-              <p className="pl-2 text-left text-gray-200  truncate">
-                {match.result?.type}
-              </p>
+                <a
+                  className="pl-2 text-left text-customGreen truncate focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-opacity-50"
+                  href={`/bots/${extractRelayID(match.participant1?.id, "BotType")}`}
+                  role="cell"
+                  aria-label={`View bot profile for ${match.participant1?.name}, participant 1`}
+                >
+                  {match.participant1?.name}
+                </a>
+                <a
+                  className="pl-2 text-left text-customGreen truncate focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-opacity-50"
+                  href={`/bots/${extractRelayID(match.participant2?.id, "BotType")}`}
+                  role="cell"
+                  aria-label={`View bot profile for ${match.participant2?.name}, participant 2`}
+                >
+                  {match.participant2?.name}
+                </a>
+                <p
+                  className="pl-2 hidden sm:flex text-left text-gray-200 truncate"
+                  role="cell"
+                  aria-label={`Match started: ${match.status !== "Queued" && match.firstStarted ? formatDateISO(match.firstStarted) : "Not yet started"}`}
+                >
+                  {match.status !== "Queued"
+                    ? formatDateISO(match.firstStarted)
+                    : ""}
+                </p>
+                <p
+                  className="pl-2 text-left text-gray-200 truncate"
+                  role="cell"
+                  aria-label={`Match result: ${match.result?.type || "No result yet"}`}
+                >
+                  {match.result?.type}
+                </p>
+              </div>
             </div>
-          </div>
-        )}
-      />
+          )}
+          aria-label={`Table of ${getNodes(viewer.requestedMatches).length} match requests`}
+        />
+      </div>
 
       <RequestMatchModal
         isOpen={isRequestMatchModalOpen}
         onClose={() => setIsRequestMatchModalOpen(false)}
       />
-    </div>
+    </section>
   );
 }

@@ -53,16 +53,20 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
 
   const StatusInfo = () => {
     return (
-      <dl className="ml-4 text-sm text-gray-300 space-y-2">
-        <div className="flex">
+      <dl
+        className="ml-4 text-sm text-gray-300 space-y-2"
+        role="list"
+        aria-label="Account information"
+      >
+        <div className="flex" role="listitem">
           <dt className="w-36 font-medium text-white">Date Joined:</dt>
           <dd>{formatDate(viewer.dateJoined)}</dd>
         </div>
-        <div className="flex">
+        <div className="flex" role="listitem">
           <dt className="w-36 font-medium text-white">Last Login:</dt>
           <dd>{formatDate(viewer.lastLogin)}</dd>
         </div>
-        <div className="flex">
+        <div className="flex" role="listitem">
           <dt className="w-36 font-medium text-white">Receive Emails:</dt>
           <dd>{viewer.receiveEmailComms ? "Yes" : "No"}</dd>
         </div>
@@ -71,7 +75,10 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
   };
 
   return (
-    <div className="">
+    <section className="" aria-labelledby="user-settings-heading">
+      <h2 id="user-settings-heading" className="sr-only">
+        User Settings and Profile
+      </h2>
       {/* sidesection */}
       <div className="lg:flex lg:flex-row lg:gap-4">
         <div className="relative p-2 ">
@@ -221,6 +228,6 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
