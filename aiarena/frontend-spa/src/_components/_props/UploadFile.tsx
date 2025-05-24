@@ -1,4 +1,7 @@
-import { ArrowUpOnSquareStackIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowUpOnSquareStackIcon,
+  Square2StackIcon,
+} from "@heroicons/react/24/outline";
 import React, { useRef } from "react";
 
 interface FileUploadProps {
@@ -38,7 +41,10 @@ export const UploadFile: React.FC<FileUploadProps> = ({
           ${file ? "border-customGreen bg-darken-3" : "border-neutral-500 bg-neutral-900 hover:border-customGreen hover:bg-neutral-800"}`}
       >
         {file ? (
-          <p className="text-sm truncate">{file.name}</p>
+          <>
+            <Square2StackIcon className="mx-auto mb-2 h-6 w-6 text-customGreen" />
+            <p className="text-sm text-customGreen truncate">{file.name}</p>
+          </>
         ) : (
           <>
             <ArrowUpOnSquareStackIcon className="mx-auto mb-2 h-6 w-6 text-gray-400" />
