@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import { formatDate } from "@/_lib/dateUtils";
-import BotSettingsModal from "./_modals/bot_settings_modal/BotSettingsModal";
-import { BotHeaderSection_bot$key } from "./__generated__/BotHeaderSection_bot.graphql";
-import UnderlineButton from "../_props/UnderlineButton";
+import BotSettingsModal from "../../_sections/_modals/bot_settings_modal/BotSettingsModal";
+import UnderlineButton from "../../_props/UnderlineButton";
 import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
-import BotAllParticipationsModal from "./_modals/BotAllParticipationsModal";
-import BotTrophiesModal from "./_modals/BotTrophiesModal";
+import BotAllParticipationsModal from "../../_sections/_modals/BotAllParticipationsModal";
+import BotTrophiesModal from "../../_sections/_modals/BotTrophiesModal";
 import { TrophyIcon, CogIcon } from "@heroicons/react/20/solid";
+import { UserBotHeader_bot$key } from "./__generated__/UserBotHeader_bot.graphql";
 
-export interface BotHeaderSectionProps {
-  bot: BotHeaderSection_bot$key;
+export interface UserBotHeaderProps {
+  bot: UserBotHeader_bot$key;
 }
 
-export default function BotHeaderSection(props: BotHeaderSectionProps) {
+export default function UserBotHeader(props: UserBotHeaderProps) {
   const bot = useFragment(
     graphql`
-      fragment BotHeaderSection_bot on BotType {
+      fragment UserBotHeader_bot on BotType {
         id
         name
         created

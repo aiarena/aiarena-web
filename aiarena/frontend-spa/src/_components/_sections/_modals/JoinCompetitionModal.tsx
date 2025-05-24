@@ -77,7 +77,7 @@ export default function JoinCompetitionModal({
         updateCompetitionParticipation(input: $input) {
           node(id: $botId) {
             ... on BotType {
-              ...ProfileBot_bot
+              ...UserBot_bot
             }
           }
           errors {

@@ -2,22 +2,20 @@ import { Suspense, useState } from "react";
 
 import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
-import SquareButton from "../_props/SquareButton";
-import { BotCompetitionSection_bot$key } from "./__generated__/BotCompetitionSection_bot.graphql";
-import JoinCompetitionModal from "./_modals/JoinCompetitionModal";
-import ActiveDot from "../_display/ActiveDot";
-import SuspenseGetLoading from "../_props/SuspenseGetLoading";
+import ActiveDot from "../ActiveDot";
+import SquareButton from "@/_components/_props/SquareButton";
+import JoinCompetitionModal from "@/_components/_sections/_modals/JoinCompetitionModal";
+import SuspenseGetLoading from "@/_components/_props/SuspenseGetLoading";
+import { UserBotCompetitions_bot$key } from "./__generated__/UserBotCompetitions_bot.graphql";
 
-interface BotCompetitionSectionProps {
-  bot: BotCompetitionSection_bot$key;
+interface UserBotCompetitionProps {
+  bot: UserBotCompetitions_bot$key;
 }
 
-export default function BotCompetitionsSection(
-  props: BotCompetitionSectionProps
-) {
+export default function UserBotCompetitions(props: UserBotCompetitionProps) {
   const bot = useFragment(
     graphql`
-      fragment BotCompetitionSection_bot on BotType {
+      fragment UserBotCompetitions_bot on BotType {
         id
         name
         competitionParticipations {

@@ -4,7 +4,7 @@ import { graphql, useFragment } from "react-relay";
 import { getNodes } from "@/_lib/relayHelpers";
 import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
-import ProfileBot from "./ProfileBot";
+import ProfileBot from "../_display/userbot/UserBot";
 
 import Searchbar from "../_props/Searchbar";
 import Dropdown from "../_props/Dropdown";
@@ -54,7 +54,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
                   }
                 }
               }
-              ...ProfileBot_bot
+              ...UserBot_bot
             }
           }
         }

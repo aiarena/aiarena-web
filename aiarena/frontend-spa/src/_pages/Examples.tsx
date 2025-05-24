@@ -5,7 +5,7 @@ import WrappedTitle from "@/_components/_display/WrappedTitle";
 import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
 import MainButton from "@/_components/_props/MainButton";
 import SquareButton from "@/_components/_props/SquareButton";
-import ProfileBot from "@/_components/_sections/ProfileBot";
+import ProfileBot from "@/_components/_display/userbot/UserBot";
 import { useState } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import rehypeSanitize from "rehype-sanitize";
@@ -23,7 +23,7 @@ export default function Examples() {
       query ExamplesQuery($id: ID!) {
         node(id: $id) {
           ... on BotType {
-            ...ProfileBot_bot
+            ...UserBot_bot
           }
         }
       }
