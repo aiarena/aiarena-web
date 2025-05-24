@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
   );
 
   return (
-    <footer className=" text-white ">
+    <footer className=" text-white bg-darken">
       <SectionDivider />
       <div className="pt-12 container mx-auto px-4 flex flex-col md:flex-row md:flex-wrap justify-between items-start">
         <SupportersComponent stats={data.stats} />
@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
       {getFeatureFlags().examples && (
         <SquareButton href="examples" text="UI Examples" />
       )}
-      <footer className="p-4 bg-[linear-gradient(90deg,rgba(134,194,50,1)_0%,rgba(50,120,30,1)_100%)] text-center">
+      <footer className="p-1 bg-[linear-gradient(120deg,rgba(134,194,50,1)_0%,rgba(94,140,30,1)_50%)] text-center">
         © {new Date().getFullYear()} AI Arena. All rights reserved.
       </footer>
     </footer>

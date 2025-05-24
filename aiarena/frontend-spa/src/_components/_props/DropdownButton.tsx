@@ -16,7 +16,7 @@ export default function DropdownButton({
 
   return (
     <button
-      className="w-full flex justify-between items-center px-3 py-2 text-left hover:bg-slate-600 transition"
+      className="w-full flex justify-between items-center px-3 py-2 text-left hover:bg-neutral-700 transition"
       onClick={handleClick}
     >
       <span>{title}</span>

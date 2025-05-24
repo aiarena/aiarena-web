@@ -63,7 +63,7 @@ export default function SquareButton({
           width: calc(100% + 8px);
           height: calc(100% + 8px);
           border: 4px solid transparent;
-          border-radius: 10px;
+          border-radius: 7px;
           animation: highlight 1s linear infinite;
           animation-delay: 0.15s;
         }
@@ -71,7 +71,7 @@ export default function SquareButton({
       <div className="relative inline-block">
         <button
           onClick={handleClick}
-          className={`${className} shadow shadow-black shadow-sm hover:shadow-md hover:shadow-black relative z-10 hover:border-2 border-2 border-customGreen-dark bg-customGreen-dark hover:bg-transparent hover:border-customGreen text-white py-1 px-2 rounded-md  transition duration-300 ease-in-out transform`}
+          className={`${className} shadow-sm shadow-black hover:shadow-none border-2 border-customGreen bg-darken-2 hover:border-customGreen hover:bg-neutral-800 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform`}
           //   disabled={isLoading}
         >
           {text}

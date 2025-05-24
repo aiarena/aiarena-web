@@ -104,7 +104,7 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
 
   return (
     <div
-      className={`relative w-full text-gray-300 bg-gray-900 ${className}`}
+      className={`relative w-full text-gray-300 ${className}`}
       ref={dropdownRef}
     >
       <div className="relative">
@@ -147,7 +147,7 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
 
       {isOpen && (
         <div
-          className={`absolute z-10 w-full mt-1 bg-gray-900  border border-gray-600  rounded-md shadow-lg ${heightClassMap[maxHeight]} overflow-auto`}
+          className={`absolute z-10 w-full mt-1 bg-neutral-900  border border-gray-600  rounded-md shadow-lg ${heightClassMap[maxHeight]} overflow-auto`}
         >
           {isLoading ? (
             <div className="px-4 py-2  flex items-center">
@@ -159,7 +159,7 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
               {options.map((option) => (
                 <li
                   key={option.id}
-                  className="px-4 py-2 cursor-pointer hover:bg-slate-700"
+                  className="px-4 py-2 cursor-pointer hover:bg-neutral-700"
                   onClick={() => handleOptionSelect(option)}
                 >
                   {option.label}

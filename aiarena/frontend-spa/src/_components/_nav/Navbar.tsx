@@ -41,7 +41,7 @@ function Navbar() {
 
   return (
     <>
-      <nav className="w-full bg-neutral-900 px-2 text-white sticky top-0 z-50">
+      <nav className="w-full bg-neutral-900  px-2 text-white sticky top-0 z-50 border-b border-gray-700">
         <div className="flex justify-between md:p-3 md:flex ">
           <a
             href={navLinks[0].path}

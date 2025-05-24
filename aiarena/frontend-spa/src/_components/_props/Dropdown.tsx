@@ -44,7 +44,7 @@ export default function Dropdown({ title, children }: DropdownProps) {
       <div>
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="inline-flex w-full justify-center gap-x-1.5 rounded-md  px-3 py-3 font-semibold bg-gray-900  shadow-xs ring-1 ring-gray-700 focus:outline-none focus:ring-customGreen focus:ring-2 ring-inset"
+          className="inline-flex w-full justify-center gap-x-1.5 rounded-md  px-3 py-3 font-semibold bg-neutral-900 ring-neutral-600 shadow-xs ring-1 ring-gray-700 focus:outline-none focus:ring-customGreen focus:ring-2 ring-inset"
         >
           {title}
           <ChevronDownIcon
@@ -55,7 +55,7 @@ export default function Dropdown({ title, children }: DropdownProps) {
       </div>
 
       {isOpen && (
-        <div className="absolute left-0 right-auto mt-2 max-w-screen-sm w-56 border-2 border-customGreen rounded-md bg-gray-900 shadow-lg ring-1 ring-black/5 focus:outline-none transition duration-100 ease-out z-50 overflow-x-auto">
+        <div className="absolute left-0 right-auto mt-2 max-w-screen-sm w-56 border-2 border-customGreen rounded-md bg-neutral-900 shadow-lg ring-1 ring-neutral-800 focus:outline-none transition duration-100 ease-out z-45 overflow-x-auto">
           <div className="py-1 flex flex-col">{enhancedChildren}</div>
         </div>
       )}

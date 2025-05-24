@@ -44,7 +44,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
   const [isAllParticipationsModalOpen, setAllParticipationsModalOpen] =
     useState(false);
   return (
-    <div className="p-4 border-b border-gray-600 bg-gray-900 rounded-t-lg">
+    <div className="p-4 border-b border-gray-800 bg-[linear-gradient(240deg,rgb(0,0,0,0.3)_0%,rgba(0,0,0,0.9)_100%)]  rounded-t-lg">
       <div className="text-left space-y-2">
         <div className="flex justify-between flsex-wrap">
           <div className="flex items-center flex-wrap">
@@ -57,7 +57,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
             </a>
 
             <div
-              className="flex items-center cursor-pointer hover:bg-slate-700 rounded p-1 ml-2"
+              className="flex items-center cursor-pointer hover:bg-neutral-700 rounded p-1 ml-2"
               onClick={() => setTrophiesModalOpen(true)}
               title="Bot Trophies"
             >
@@ -76,7 +76,7 @@ export default function BotHeaderSection(props: BotHeaderSectionProps) {
           {/* Settings Button */}
 
           <div
-            className="cursor-pointer hover:bg-slate-700 py-1 px-2 ml-2 flex justify-center rounded-md border-slate-700 border"
+            className="cursor-pointer hover:bg-neutral-700 py-1 px-2 ml-2 flex justify-center rounded-md"
             onClick={() => setSettingsModalOpen(true)}
             title="Bot Settings"
           >

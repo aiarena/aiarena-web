@@ -82,7 +82,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
       </div>
 
       <FilterableList
-        classes="pt-4"
+        classes="mt-4 shadow-lg shadow-black bg-darken-2"
         data={getNodes(viewer.requestedMatches)}
         hideMenu={true}
         fields={[
@@ -120,34 +120,34 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
         renderRow={(match) => (
           <div className="block flex justify-between items-center ">
             <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))]  w-full">
-              <p className="hidden md:flex text-left text-gray-200  truncate">
+              <p className="pl-2 hidden md:flex text-left text-gray-200  truncate">
                 {match.status}
               </p>
               <a
-                className=" hidden md:flex text-left font-semibold text-gray-200 truncate"
+                className="pl-2 hidden md:flex text-left font-semibold text-gray-200 truncate"
                 href={`/matches/${extractRelayID(match.id, "MatchType")}`}
               >
                 {match.id}
               </a>
 
               <a
-                className=" text-left text-customGreen truncate "
+                className="pl-2 text-left text-customGreen truncate "
                 href={`/bots/${extractRelayID(match.participant1?.id, "BotType")}`}
               >
                 {match.participant1?.name}
               </a>
               <a
-                className=" text-left text-customGreen truncate "
+                className="pl-2 text-left text-customGreen truncate "
                 href={`/bots/${extractRelayID(match.participant2?.id, "BotType")}`}
               >
                 {match.participant2?.name}
               </a>
-              <p className="hidden sm:flex text-left text-gray-200  truncate">
+              <p className="pl-2 hidden sm:flex text-left text-gray-200  truncate">
                 {match.status != "Queued"
                   ? formatDateISO(match.firstStarted)
                   : ""}
               </p>
-              <p className=" text-left text-gray-200  truncate">
+              <p className="pl-2 text-left text-gray-200  truncate">
                 {match.result?.type}
               </p>
             </div>

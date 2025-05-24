@@ -6,6 +6,7 @@ import { graphql, useFragment, useMutation } from "react-relay";
 import { BotBiographyModal_bot$key } from "./__generated__/BotBiographyModal_bot.graphql";
 import { BotBiographyModalMutation } from "./__generated__/BotBiographyModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
+import WideButton from "@/_components/_props/WideButton";
 
 interface BotBiographyModalProps {
   bot: BotBiographyModal_bot$key;
@@ -68,9 +69,11 @@ export default function BotBiographyModal({
         <div className="h-[80vh] pb-4">
           <MarkdownEditor value={biography} setValue={setBiography} />
         </div>
-        <button
-          className={`w-full text-white py-2 rounded ${hasUnsavedWikiChanges ? "bg-customGreen" : "bg-slate-500"}`}
-          disabled={updating}
+        <WideButton
+          style={`${!hasUnsavedWikiChanges ? "bg-gray-700 border-gray-700 hover:bg-gray-700 hover:border-gray-700" : ""}`}
+          title="Save"
+          loading={updating}
+          type="button"
           onClick={() => {
             updateBot({
               variables: {
@@ -85,9 +88,7 @@ export default function BotBiographyModal({
               onError,
             });
           }}
-        >
-          Save
-        </button>
+        />
       </Modal>
     </>
   );

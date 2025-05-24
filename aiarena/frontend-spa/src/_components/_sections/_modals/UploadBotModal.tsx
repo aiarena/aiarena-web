@@ -136,7 +136,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full bg-gray-700 text-white p-2 rounded"
+            className="w-full p-2"
           />
         </label>
 
@@ -144,7 +144,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
           <span className="text-gray-300">Bot ZIP:</span>
           <input
             type="file"
-            className="w-full bg-gray-700 text-white p-2 rounded"
+            className="w-full p-2 "
             required
             onChange={(e) => {
               if (e.target.files != null) {
@@ -174,7 +174,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             onChange={(e) => {
               setRace(e.target.value as Race);
             }}
-            className="w-full bg-gray-700 text-white p-2 rounded"
+            className="w-full p-2"
           >
             {bot_races.map((bot_race) => (
               <option key={bot_race.id} value={bot_race.label}>
@@ -192,7 +192,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             onChange={(e) => {
               setType(e.target.value);
             }}
-            className="w-full bg-gray-700 text-white p-2 rounded"
+            className="w-full p-2"
           >
             {Object.entries(BOT_TYPES).map(([label, value]) => (
               <option key={label} value={label}>

@@ -136,14 +136,14 @@ export default function JoinCompetitionModal({
           openCompetitions.length > 0 &&
           openCompetitions.map((comp) => (
             <div
-              className="flex items-center space-x-2 border border-gray-600 rounded-md p-2 justify-between"
+              className="flex items-center space-x-2 border border-neutral-600 shadow-lg shadow-black rounded-md p-3 justify-between bg-darken-4"
               key={comp.id}
             >
               <div className="block">
                 <div>
                   <a
                     href={`/competitions/${extractRelayID(comp.id, "CompetitionType")}`}
-                    className="text-sm font-semibold"
+                    className="font-bold"
                   >
                     {comp.name}
                   </a>

@@ -57,11 +57,11 @@ export default function BotCompetitionsSection(
   const hasCompetitions = activeCompetitions.length > 0;
 
   return (
-    <div className="p-2">
+    <div className="p-2 bg-darken-4 rounded-b-lg ">
       {/* Competitions Header */}
       <div
         className={`${
-          hasCompetitions ? " mb-2 border-b border-gray-600 pb-2 " : ""
+          hasCompetitions ? " mb-2 border-b  border-gray-800 pb-2 " : ""
         } flex justify-between flex-wrap w-full gap-4`}
       >
         {hasCompetitions ? (
@@ -83,11 +83,11 @@ export default function BotCompetitionsSection(
       </div>
 
       {/* List Active Competitions */}
-      <div className="space-y-4">
+      <div className="space-y-4 ">
         {activeCompetitions.map((participation) => (
           <div
             key={participation.id}
-            className="border border-gray-600 rounded-lg bg-gray-700 transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="border border-neutral-700 rounded-lg transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4 "
           >
             {/* Left Column: Competition Name & Stats */}
             <div className="space-y-2">

@@ -87,7 +87,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
   const [searchBarValue, setSearchBarValue] = useState("");
 
   return (
-    <div className="bg-customBackgroundColor1">
+    <div className="">
       <div className="flex flex-wrap-reverse w-fullitems-start">
         {/* Display active competition limit and current active competitions */}
         <div className="flex gap-4 flex-wrap pb-4">

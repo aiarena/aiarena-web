@@ -36,57 +36,51 @@ export default function MainButton({
   };
 
   return (
-    <>
+    <div className="relative inline-block">
       <style>{`
-        @keyframes highlight {
-          0% {
-            border-color: transparent;
-            border-bottom-color: var(
-               --color-customGreen
-            ); /* Start from the bottom */
-          }
-          25% {
-            border-left-color: var(
-               --color-customGreen
-            ); /* Move to the left */
-          }
-          50% {
-            border-top-color: var( --color-customGreen); /* Then the top */
-          }
-          75% {
-            border-right-color: var(
-               --color-customGreen
-            ); /* Finish at the right */
-          }
-          100% {
-            border-color: transparent;
-            border-bottom-color: var(
-              --color-customGreen
-            ); /* Loop back to the bottom */
-          }
+      @keyframes highlight-mainbutton {
+        0% {
+          border-color: transparent;
+          border-bottom-color: var(--color-customGreen, #00ff88);
         }
-        .animate-highlight {
-          position: absolute;
-          top: -4px;
-          left: -4px;
-          width: calc(100% + 8px);
-          height: calc(100% + 8px);
-          border: 4px solid transparent;
-          border-radius: 9999px;
-          animation: highlight 1s linear infinite;
-          animation-delay: 0.15s;
+        25% {
+          border-left-color: var(--color-customGreen, #00ff88);
         }
-      `}</style>
-      <div className="relative inline-block">
-        <button
-          onClick={handleClick}
-          className={`${className} shadow shadow-black shadow-sm hover:shadow-lg hover:shadow-black relative z-10 hover:border-4 border-4 border-customGreen-dark bg-customGreen-dark hover:bg-transparent hover:border-customGreen text-white font-semibold py-2 px-6 rounded-full  transition duration-300 ease-in-out transform`}
-          //   disabled={isLoading}
-        >
-          {text}
-        </button>
-        {isLoading && <div className="animate-highlight"></div>}
-      </div>
-    </>
+        50% {
+          border-top-color: var(--color-customGreen, #00ff88);
+        }
+        75% {
+          border-right-color: var(--color-customGreen, #00ff88);
+        }
+        100% {
+          border-color: transparent;
+          border-bottom-color: var(--color-customGreen, #00ff88);
+        }
+      }
+
+      .animate-highlight-mainbutton {
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        width: calc(100% + 8px);
+        height: calc(100% + 8px);
+        border: 4px solid transparent;
+        border-radius: 9999px;
+        animation: highlight 1s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+        box-sizing: border-box;
+      }
+    `}</style>
+
+      <button
+        onClick={handleClick}
+        className={`relative z-10 ${className ?? ""} shadow-sm shadow-black hover:shadow-none border-3 border-customGreen bg-darken-2 hover:bg-transparent text-white font-semibold py-2 px-6 rounded-full transition duration-300 ease-in-out transform`}
+      >
+        {text}
+      </button>
+
+      {isLoading && <div className="animate-highlight-mainbutton"></div>}
+    </div>
   );
 }

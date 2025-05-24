@@ -174,7 +174,7 @@ export default function SettingsProfileSection(
             </div> */}
 
             {/* API Token */}
-            <div className="bg-darken border border-customGreen-dark  rounded-md">
+            <div className="bg-darken-2 border border-neutral-600 shadow-lg shadow-black rounded-md">
               <h3 className="mt-1 ml-2 text-base font-semibold text-customGreen">
                 API Token
               </h3>

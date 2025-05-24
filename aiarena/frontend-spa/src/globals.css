@@ -18,6 +18,7 @@
 
   --color-customGreen: rgba(134, 194, 50, 1);
   --color-customGreen-dark: rgba(94, 140, 30, 1);
+  --color-customComplimentary: rgba(121, 61, 205, 1);
   --color-darken: rgba(0, 0, 0, 0.3);
   --color-darken-2: rgba(0, 0, 0, 0.4);
   --color-darken-3: rgba(0, 0, 0, 0.5);
@@ -31,7 +32,7 @@
   --gradient-green1: linear-gradient(
     90deg,
     rgba(134, 194, 50, 1) 0%,
-    rgba(50, 120, 30, 1) 100%
+    rgba(94, 140, 30, 1) 100%
   );
 }
 
@@ -80,10 +81,10 @@
     font-size: var(--text-xl);
   }
   input {
-    @apply pl-4 mr-2 focus:ring-customGreen focus:outline-none focus:ring-2 rounded-md bg-gray-900 border border-gray-700 gap-3;
+    @apply pl-4 mr-2 focus:ring-customGreen focus:outline-none focus:ring-2 rounded-md bg-neutral-900 border border-neutral-600 gap-3;
   }
   select {
-    @apply focus:ring-customGreen focus:outline-none focus:ring-2;
+    @apply pl-4 mr-2 focus:ring-customGreen focus:outline-none focus:ring-2 rounded-md bg-neutral-900 border border-neutral-600  gap-3;
   }
 }
 

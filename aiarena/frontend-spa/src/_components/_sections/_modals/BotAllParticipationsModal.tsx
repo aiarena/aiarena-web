@@ -57,34 +57,63 @@ export default function BotAllParticipationsModal({
           botCompetitionParticipations.length > 0 &&
           botCompetitionParticipations.map((participation) => (
             <div
-              className="flex items-center space-x-2 border border-gray-600 rounded-md p-2 justify-between"
+              className="flex items-center space-x-2 border border-neutral-600 shadow-lg shadow-black rounded-md p-4 justify-between bg-darken-4"
               key={participation.id}
             >
               <div className="block w-full">
-                <div className="flex justify-between">
+                <div className="flex justify-between flex-wrap">
                   <div>
                     <a
                       href={`/competitions/${extractRelayID(participation.competition.id, "CompetitionType")}`}
-                      className="text-sm font-semibold"
+                      className="font-bold"
                     >
                       {participation.competition.name}
                     </a>
-                    <p>
-                      Opened: {formatDate(participation.competition.dateOpened)}
-                    </p>
-                    <p>
-                      Closed:{" "}
-                      {participation.competition.dateClosed != null
-                        ? formatDate(participation.competition.dateClosed)
-                        : ""}
-                    </p>
-                    <p> Status: {participation.competition.status}</p>
+
+                    <dl className="ml-4 text-sm text-gray-300 space-y-2">
+                      <div className="flex">
+                        <dt className="font-medium text-white w-20 ">
+                          Status:
+                        </dt>
+                        <dd> {participation.competition.status}</dd>
+                      </div>
+                      <div className="flex">
+                        <dt className="font-medium text-white w-20 ">
+                          Opened:{" "}
+                        </dt>
+                        <dd>
+                          {formatDate(participation.competition.dateOpened)}
+                        </dd>
+                      </div>
+                      <div className="flex">
+                        <dt className="font-medium text-white w-20 ">
+                          Closed:{" "}
+                        </dt>
+                        <dd>
+                          {participation.competition.dateClosed != null
+                            ? formatDate(participation.competition.dateClosed)
+                            : ""}
+                        </dd>
+                      </div>
+                    </dl>
                   </div>
 
-                  <div className="pr-2">
-                    <p> Division: {participation.divisionNum}</p>
+                  <div className="ml-4  pt-4">
+                    <dl className=" text-sm text-gray-300 space-y-2">
+                      <div className="flex">
+                        <dt className="font-medium text-white w-30 ">
+                          Division:{" "}
+                        </dt>
+                        <dd> {participation.divisionNum}</dd>
+                      </div>
+                      <div className="flex">
+                        <dt className="font-medium text-white w-30 ">
+                          Win Percentage:{" "}
+                        </dt>
+                        <dd>{participation.winPerc.toFixed(2)}%</dd>
+                      </div>
+                    </dl>
 
-                    <p> Win Percentage: {participation.winPerc.toFixed(2)}%</p>
                     <a
                       href={`/competitions/stats/${extractRelayID(participation.id, "CompetitionParticipationType")}`}
                     >

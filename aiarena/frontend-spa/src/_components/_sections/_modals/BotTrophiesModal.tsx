@@ -44,7 +44,7 @@ export default function BotTrophiesModal(props: TrophiesModalProps) {
             {trophies.map((trophy, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center bg-gray-800 p-3 border border-gray-600 rounded-md"
+                className="flex flex-col items-center p-3 bg-darken-6 border border-customGreen shadow-lg shadow-customGreen-dark rounded-md"
               >
                 <div className="w-12 h-12 relative mb-2">
                   <img
@@ -61,7 +61,7 @@ export default function BotTrophiesModal(props: TrophiesModalProps) {
           </div>
         ) : (
           <div className="text-center">
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-gray-300 mb-4">
               No trophies yet. Compete in competitions to earn trophies.
             </p>
           </div>

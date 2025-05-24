@@ -74,7 +74,7 @@ export default function BotSettingsModal({
       <Modal onClose={onClose} isOpen={isOpen} title={`Settings - ${bot.name}`}>
         <div className="space-y-4">
           <button
-            className="bg-customGreen text-white py-2 px-4 rounded w-full"
+            className="bg-customGreen-dark text-white py-2 px-4 rounded w-full"
             onClick={() => setBiographyModalOpen(true)}
           >
             Edit Bot Biography
@@ -82,7 +82,7 @@ export default function BotSettingsModal({
 
           <h3 className="text-lg font-bold text-gray-200">Bot Settings</h3>
           <button
-            className="bg-customGreen text-white py-2 px-4 rounded w-full"
+            className="bg-customGreen-dark text-white py-2 px-4 rounded w-full"
             onClick={() => handleDownload(bot.botZip)}
             disabled={bot.botZip == "{}"}
           >
@@ -104,7 +104,7 @@ export default function BotSettingsModal({
             />
           </label>
           <button
-            className={`w-full text-white py-2 rounded ${botZipFile ? "bg-customGreen" : "bg-slate-500"}`}
+            className={`w-full text-white py-2 rounded ${botZipFile ? "bg-customGreen-dark" : "bg-slate-500"}`}
             onClick={() => {
               if (!botZipFile) return;
               updateBot({

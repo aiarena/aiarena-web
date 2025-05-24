@@ -419,7 +419,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               onClick={() => {
                 setMapSelectionType("specific_map");
               }}
-              className={` border-2 rounded-lg  ${mapSelectionType == "specific_map" ? "border-customGreen-dark bg-customGreen-dark " : "border-gray-700 hover:bg-transparent hover:border-customGreen"} p-2`}
+              className={` border-2 rounded-lg  ${mapSelectionType == "specific_map" ? "border-customGreen-dark bg-customGreen-dark " : "border-gray-700 bg-darken hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Specific Map
             </button>{" "}
@@ -428,7 +428,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               onClick={() => {
                 setMapSelectionType("map_pool");
               }}
-              className={` border-2  rounded-lg ${mapSelectionType == "map_pool" ? "border-customGreen-dark bg-customGreen-dark" : "border-gray-700 hover:bg-transparent hover:border-customGreen"} p-2`}
+              className={` border-2  rounded-lg ${mapSelectionType == "map_pool" ? "border-customGreen-dark bg-customGreen-dark" : "border-gray-700 bg-darken hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Map Pool
             </button>
@@ -436,7 +436,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         </div>
         <div>
           {mapSelectionType == "specific_map" ? (
-            <div className="mb-4">
+            <div className="mb-16">
               <label className="block text-left font-medium mb-1">
                 Specific Map
               </label>
@@ -458,7 +458,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             </div>
           ) : null}
           {mapSelectionType == "map_pool" ? (
-            <div className="mb-4">
+            <div className="mb-16">
               <label className="block text-left font-medium mb-1">
                 Map pool
               </label>
