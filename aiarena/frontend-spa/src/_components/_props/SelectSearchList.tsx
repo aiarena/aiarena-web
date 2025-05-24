@@ -45,7 +45,6 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
 
   // Initialize display value from prop
   useEffect(() => {
-    console.log(options);
     if (searchOrSelect?.searchAndDisplay) {
       setSearchTerm(searchOrSelect.searchAndDisplay);
     } else if (searchOrSelect?.select) {
