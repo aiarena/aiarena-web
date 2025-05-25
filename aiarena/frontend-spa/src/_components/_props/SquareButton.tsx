@@ -10,6 +10,7 @@ interface SquareButtonProps {
   isLoading?: boolean;
   disabled?: boolean;
   children?: React.ReactNode;
+  textColor?: "bright" | "dim";
 }
 
 export default function SquareButton({
@@ -21,6 +22,7 @@ export default function SquareButton({
   isLoading,
   disabled,
   children,
+  textColor = "bright",
 }: SquareButtonProps) {
   const navigate = useNavigate();
 
@@ -77,7 +79,7 @@ export default function SquareButton({
       <div className={`relative inline-block ${outerClassName}`}>
         <button
           onClick={handleClick}
-          className={` flex justify-center items-center w-full shadow-sm shadow-black border-1 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform
+          className={` flex justify-center items-center w-full shadow-sm shadow-black border-1 ${textColor == "bright" ? "text-white" : ""}${textColor == "dim" ? "text-gray-200" : ""} font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform
             ${
               !disabled
                 ? "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"

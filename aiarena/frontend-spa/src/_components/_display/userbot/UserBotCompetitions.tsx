@@ -78,6 +78,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
           text="Edit Competitions"
           onClick={() => setJoinCompetitionModalOpen(true)}
           isLoading={isJoinCompetitionModalLoading}
+          textColor="dim"
         />
       </div>
 
@@ -151,7 +152,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                     d="M10 8l6 4-6 4V8z"
                   />
                 </svg>
-                <span className="font-bold ">Matches:</span>
+                <span className="font-bold">Matches:</span>
                 <span className="">{participation.matchCount}</span>
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
