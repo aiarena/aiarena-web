@@ -8,14 +8,15 @@ import BiographyModal from "./BotBiographyModal";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import {
   ArrowUpOnSquareStackIcon,
-  ArrowDownOnSquareStackIcon, // Download Zip
-  // ArrowUpOnSquareIcon, // Upload Data
-  // ArrowDownOnSquareIcon,
-  FolderOpenIcon, // Download Data
+  ArrowDownOnSquareStackIcon,
+  FolderOpenIcon,
+  ArrowUpOnSquareIcon,
+  ArrowDownOnSquareIcon,
 } from "@heroicons/react/20/solid";
 import WideButton from "@/_components/_props/WideButton";
 import { UploadFile } from "@/_components/_props/UploadFile";
 import SectionDivider from "@/_components/_display/SectionDivider";
+import SquareButton from "@/_components/_props/SquareButton";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -67,6 +68,8 @@ export default function BotSettingsModal({
   `);
 
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
+  const [botDataFile, setBotDataFile] = useState<File | null>(null);
+
   const [isBiographyModalOpen, setBiographyModalOpen] = useState(false);
   // const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -161,6 +164,7 @@ export default function BotSettingsModal({
                   accept=".zip"
                   file={botZipFile}
                   setFile={setBotZipFile}
+                  id={"bot-zip-file-upload"}
                 />
 
                 <button
@@ -192,59 +196,67 @@ export default function BotSettingsModal({
                 </button>
               </div>
 
-              {/* add bot data here */}
-              {/* <div className="min-w-[40%]">
-                <h3 className="text-xl font-bold text-customGreen-light flex pb-2">
-                  <ArrowUpOnSquareIcon className="size-5 m-1" />
+              {/* Bot Data */}
+              <div className="min-w-[40%]">
+                <div className="flex items-center gap-2  pb-4">
+                  <h3 className="text-xl font-bold text-customGreen-light flex">
+                    <FolderOpenIcon className="size-5 m-1" />
                   Bot Data
                 </h3>
+                  <a
+                    href="/wiki/bot-development/#wiki-toc-bot-memory-the-data-folder"
+                    target="_blank"
+                    className="pt-1"
+                  >
+                    Wiki
+                  </a>
+                </div>
 
-                <button
-                  className="mb-8 flex justify-center items-center w-full shadow-sm shadow-black border-2 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
-                  onClick={() => handleDownload(bot.botZip)}
-                  disabled={bot.botZip == "{}"}
+                <SquareButton
+                  disabled={!bot.botData}
+                  onClick={() =>
+                    bot.botData ? handleDownload(bot.botData) : null
+                  }
+                  outerClassName="w-full mb-8"
                 >
                   <ArrowDownOnSquareStackIcon
-                    className="size-6 mr-2"
-                    title="Download ZIP"
+                    className="size-6 mr-1"
+                    title="Download Data"
                   />
-                  Download Bot Zip
-                </button>
+                  Download Bot Data
+                </SquareButton>
 
-                <FileUpload
+                <UploadFile
                   accept=".zip"
-                  file={botZipFile}
-                  setFile={setBotZipFile}
+                  file={botDataFile}
+                  setFile={setBotDataFile}
+                  id={"bot-data-file-upload"}
                 />
-
-                <button
-                  className={`mt-4 flex justify-center items-center w-full shadow-sm shadow-black border-2 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform ${
-                    botZipFile
-                      ? "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
-                      : "bg-gray-700 border-gray-700 hover:bg-gray-700 hover:border-gray-700 cursor-not-allowed"
-                  }`}
+                <SquareButton
+                  disabled={!botDataFile}
                   onClick={() => {
-                    if (!botZipFile) return;
+                    if (!botDataFile) return;
                     updateBot({
                       variables: {
-                        input: { id: bot.id, botZip: null },
+                        input: { id: bot.id, botData: null },
                       },
                       uploadables: {
-                        "input.botZip": botZipFile,
+                        "input.botData": botDataFile,
                       },
                       onCompleted: (...args) => {
                         const success = onCompleted(...args);
-                        if (success) setBotZipFile(null);
+                        if (success) setBotDataFile(null);
                         onCompleted(...args);
                       },
                       onError,
                     });
                   }}
+                  outerClassName="w-full mt-4"
                 >
-                  <ArrowUpOnSquareStackIcon className="size-5" />
-                  Upload Bot Zip
-                </button>
-              </div> */}
+                  <ArrowUpOnSquareStackIcon className="size-5 mr-1" />
+                  Upload Bot Data
+                </SquareButton>
+              </div>
             </div>
           </div>
         </div>
