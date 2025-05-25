@@ -11,13 +11,15 @@ export default function MarkdownEditor({
   setValue,
 }: MarkDownEditorProps) {
   return (
-    <MDEditor
-      style={{ minHeight: "100%", flex: 1 }}
-      value={value}
-      onChange={(val) => setValue(val ?? "")}
-      previewOptions={{
-        rehypePlugins: [[rehypeSanitize]],
-      }}
-    />
+    <div data-color-mode="dark" className="h-full w-full">
+      <MDEditor
+        style={{ minHeight: "100%", flex: 1 }}
+        value={value}
+        onChange={(val) => setValue(val ?? "")}
+        previewOptions={{
+          rehypePlugins: [[rehypeSanitize]],
+        }}
+      />
+    </div>
   );
 }
