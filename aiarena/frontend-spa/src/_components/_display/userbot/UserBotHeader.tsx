@@ -76,15 +76,16 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
           {/* Settings Button */}
 
           <div
-            className="cursor-pointer hover:bg-neutral-700 py-1 px-2 ml-2 flex justify-center rounded-md"
+            className="cursor-pointer hover:bg-neutral-700 py-1 px-2 ml-2 flex justify-center rounded-md gap-2 border border-neutral-600 items-center shadow-md shadow-black"
             onClick={() => setSettingsModalOpen(true)}
             title="Bot Settings"
           >
             <CogIcon
               aria-label="Settings icon"
-              className="size-6  text-white"
+              className="size-5  text-white"
               role="img"
-            />
+            />{" "}
+            Settings
           </div>
         </div>
 
