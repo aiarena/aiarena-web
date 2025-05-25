@@ -7,6 +7,7 @@ import SquareButton from "@/_components/_props/SquareButton";
 import JoinCompetitionModal from "@/_components/_sections/_modals/JoinCompetitionModal";
 import SuspenseGetLoading from "@/_components/_props/SuspenseGetLoading";
 import { UserBotCompetitions_bot$key } from "./__generated__/UserBotCompetitions_bot.graphql";
+import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
 
 interface UserBotCompetitionProps {
   bot: UserBotCompetitions_bot$key;
@@ -85,7 +86,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
         {activeCompetitions.map((participation) => (
           <div
             key={participation.id}
-            className="border border-neutral-700 rounded-lg transition-all shadow-md shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4 "
+            className="border border-neutral-700 rounded-sm transition-all shadow-lg shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4 "
           >
             {/* Left Column: Competition Name & Stats */}
             <div className="space-y-2">
@@ -152,10 +153,6 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                 </svg>
                 <span className="font-bold ">Matches:</span>
                 <span className="">{participation.matchCount}</span>
-                <span className="pl-4 font-bold">Crashes:</span>
-                <span className="text-red-500 font-medium">
-                  {participation.crashCount}
-                </span>
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
                 <svg
@@ -182,24 +179,14 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                 </span>
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-red-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 8v4m0 4h.01M2.93 4.49l8.61 15.01a1 1 0 001.74 0l8.61-15.01a1 1 0 00-.87-1.5H3.8a1 1 0 00-.87 1.5z"
-                  />
-                </svg>
+                <ExclamationTriangleIcon
+                  aria-label="Danger icon"
+                  className=" size-5 text-red-500"
+                  role="img"
+                />
                 <span className="font-bold">Crashes:</span>
                 <span className="text-red-500 font-medium">
-                  {" "}
-                  {(participation.crashPerc ?? 0).toFixed(1)}%
+                  {participation.crashCount}
                 </span>
               </div>
               <a
