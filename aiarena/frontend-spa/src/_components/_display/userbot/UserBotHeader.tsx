@@ -57,7 +57,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
             </a>
 
             <div
-              className="flex items-center cursor-pointer hover:bg-neutral-700 rounded p-1 ml-2"
+              className="flex items-center cursor-pointer hover:bg-neutral-800 rounded p-1 ml-2 border border-transparent hover:border-neutral-700"
               onClick={() => setTrophiesModalOpen(true)}
               title="Bot Trophies"
             >
@@ -76,7 +76,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
           {/* Settings Button */}
 
           <div
-            className="cursor-pointer hover:bg-neutral-700 py-1 px-2 ml-2 flex justify-center rounded-md gap-2 border border-neutral-600 items-center shadow-md shadow-black"
+            className="cursor-pointer hover:bg-neutral-800 hover:border-neutral-500 py-1 px-2 ml-2 flex justify-center rounded-md gap-2 border border-neutral-600 items-center shadow-sm shadow-black"
             onClick={() => setSettingsModalOpen(true)}
             title="Bot Settings"
           >
