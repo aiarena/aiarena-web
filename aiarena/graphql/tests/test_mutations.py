@@ -745,7 +745,7 @@ class TestUpdateBot(GraphQLTest):
         }
     """
 
-    def test_update_bot_success(self, user, bot):
+    def test_update_bot_success(self, user, bot, python_zip_file):
         """
         Test updating a bot with all fields set to True.
         """
@@ -757,6 +757,9 @@ class TestUpdateBot(GraphQLTest):
         assert bot.bot_data_publicly_downloadable is False
         assert bot.get_wiki_article().current_revision.content == ""
 
+        old_bot_zip_hash = bot.bot_zip
+        old_bot_data_hash = bot.bot_data
+
         self.mutate(
             login_user=user,
             expected_status=200,
@@ -767,7 +770,13 @@ class TestUpdateBot(GraphQLTest):
                     "botDataEnabled": True,
                     "botDataPubliclyDownloadable": True,
                     "wikiArticle": "#1Some Content",
+                    "botZip": None,
+                    "botData": None,
                 }
+            },
+            files={
+                "input.botZip": python_zip_file(),
+                "input.botData": python_zip_file(),
             },
         )
 
@@ -777,6 +786,30 @@ class TestUpdateBot(GraphQLTest):
         assert bot.bot_data_enabled is True
         assert bot.bot_data_publicly_downloadable is True
         assert bot.get_wiki_article().current_revision.content == "#1Some Content"
+        assert bot.bot_zip != old_bot_zip_hash
+        assert bot.bot_data != old_bot_data_hash
+
+    def test_update_bot_invalid_bot_zip(self, user, bot, invalid_python_zip_file):
+        """
+        Test updating a bot with an invalid bot Zip.
+        """
+
+        self.mutate(
+            login_user=user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "id": self.to_global_id(BotType, bot.id),
+                    "botZip": None,
+                }
+            },
+            files={
+                "input.botZip": invalid_python_zip_file(),
+            },
+            expected_errors_like=[
+                "Incorrect bot zip file structure. A bot of type python would need to have a file in the zip file root named run.py"
+            ],
+        )
 
     def test_update_bot_unauthorized(self, user, other_user, bot):
         """
