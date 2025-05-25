@@ -23,7 +23,7 @@ export default function WideButton({
       type={type}
       onClick={onClick}
       className={`flex justify-center items-center w-full shadow-sm shadow-black border-2 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform
-        ${disabled ? "bg-gray-700 border-gray-700 hover:bg-gray-700 hover:border-gray-700" : "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent "} 
+        ${disabled ? "bg-darken border-gray-700 hover:bg-bg-darken hover:border-gray-700" : "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent "} 
         ${loading ? "py-2.5" : "py-2"}
         ${style} `}
     >
