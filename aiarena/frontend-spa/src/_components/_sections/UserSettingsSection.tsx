@@ -213,13 +213,10 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
                 </div>
 
                 <div className="flex gap-4 mt-2 text-sm">
-                  <a
-                    href="/wiki/data-api/"
-                    className="text-blue-300 hover:underline"
-                  >
+                  <a href="/wiki/data-api/" target="_blank">
                     Wiki
                   </a>
-                  <a href="/api/" className="text-blue-300 hover:underline">
+                  <a href="/api/" target="_blank">
                     API Endpoints
                   </a>
                 </div>
