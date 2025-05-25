@@ -3,18 +3,24 @@ import { useNavigate } from "react-router";
 
 interface SquareButtonProps {
   href?: string;
-  text: string;
+  text?: string;
   className?: string;
+  outerClassName?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   isLoading?: boolean;
+  disabled?: boolean;
+  children?: React.ReactNode;
 }
 
 export default function SquareButton({
   href,
   text,
   className,
+  outerClassName,
   onClick,
   isLoading,
+  disabled,
+  children,
 }: SquareButtonProps) {
   const navigate = useNavigate();
 
@@ -68,12 +74,19 @@ export default function SquareButton({
           animation-delay: 0.15s;
         }
       `}</style>
-      <div className="relative inline-block">
+      <div className={`relative inline-block ${outerClassName}`}>
         <button
           onClick={handleClick}
-          className={`${className} shadow-sm shadow-black hover:shadow-customGreen border-1 border-customGreen bg-darken-2 hover:border-customGreen hover:bg-neutral-800 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform`}
-          disabled={isLoading}
+          className={` flex justify-center items-center w-full shadow-sm shadow-black border-1 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform
+            ${
+              !disabled
+                ? "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
+                : "bg-darken border-gray-700 hover:bg-darken hover:border-gray-700 "
+            }
+            ${className}`}
+          disabled={isLoading || disabled}
         >
+          {children}
           {text}
         </button>
         {isLoading && <div className="animate-highlight"></div>}
