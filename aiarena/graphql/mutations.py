@@ -267,6 +267,7 @@ class UpdateBotInput(CleanedInputType):
     bot_data_publicly_downloadable = graphene.Boolean()
     wiki_article = graphene.String()
     bot_zip = Upload()
+    bot_data = Upload()
 
     class Meta:
         required_fields = ["id"]
