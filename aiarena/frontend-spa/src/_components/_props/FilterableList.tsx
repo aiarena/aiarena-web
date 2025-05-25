@@ -28,7 +28,7 @@ export default function FilterableList<T>({
   filters,
   renderRow,
   hideMenu = false,
-  resultsPerPage: initialResultsPerPage = 18,
+  resultsPerPage: initialResultsPerPage = 13,
   defaultFieldSort = 0,
   defaultSortOrder = "asc",
   fieldLabels = {},
@@ -246,7 +246,7 @@ export default function FilterableList<T>({
         {fields.map((field, index) => (
           <button
             key={index}
-            className={`py-2 flex justify-between text-left font-bold text-lg text-customGreen hover:text-white bg-darken-6  border-l border-customGreen hover:border-white pl-2  ${getClassName(
+            className={`py-2 flex justify-between text-left font-bold text-lg text-customGreen hover:text-white bg-darken-5  border-l border-customGreen hover:border-white pl-2  ${getClassName(
               field
             )}`}
             onClick={() => handleSort(field)}
