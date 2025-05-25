@@ -182,11 +182,13 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
               <div className="flex items-center space-x-2 flex-wrap">
                 <ExclamationTriangleIcon
                   aria-label="Danger icon"
-                  className=" size-5 text-red-500"
+                  className={`size-5 ${participation.crashCount > 0 ? "text-red-500" : "text-gray-300"}`}
                   role="img"
                 />
                 <span className="font-bold">Crashes:</span>
-                <span className="text-red-500 font-medium">
+                <span
+                  className={`${participation.crashCount > 0 ? "text-red-500" : "text-gray-300"} font-medium `}
+                >
                   {participation.crashCount}
                 </span>
               </div>
