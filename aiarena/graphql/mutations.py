@@ -30,17 +30,10 @@ from aiarena.graphql.types import (
 )
 
 
-# if we have a method of displaying a meaningful errormessage if incorrect enum is supplied, this would be better
-# class MapSelectionTypeEnum(graphene.Enum):
-#     specific_map = "specific_map"
-#     map_pool = "map_pool"
-
-
 class RequestMatchInput(CleanedInputType):
     bot1: Bot = graphene.ID()
     bot2: Bot = graphene.ID()
     match_count = graphene.Int()
-    # map_selection_type = MapSelectionTypeEnum()
     map_selection_type = graphene.String()
     map_pool: MapPool = graphene.ID(default=None)
     chosen_map: Map = graphene.ID(default=None)
