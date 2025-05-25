@@ -58,7 +58,10 @@ export default function Examples() {
       </div>
       <div className="p-10 space-y-4">
         <h4>Loading Spinners</h4>
-        <LoadingSpinner />
+        <LoadingSpinner color="white" />
+        <LoadingSpinner color="light-gray" />
+        <LoadingSpinner color="gray" />
+        <LoadingSpinner color="black" />
       </div>
 
       <div className="p-10 space-y-4">
