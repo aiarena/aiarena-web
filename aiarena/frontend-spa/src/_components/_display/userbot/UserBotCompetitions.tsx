@@ -7,7 +7,7 @@ import SquareButton from "@/_components/_props/SquareButton";
 import JoinCompetitionModal from "@/_components/_sections/_modals/JoinCompetitionModal";
 import SuspenseGetLoading from "@/_components/_props/SuspenseGetLoading";
 import { UserBotCompetitions_bot$key } from "./__generated__/UserBotCompetitions_bot.graphql";
-import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 interface UserBotCompetitionProps {
   bot: UserBotCompetitions_bot$key;
