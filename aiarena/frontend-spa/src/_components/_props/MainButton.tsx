@@ -75,7 +75,7 @@ export default function MainButton({
 
       <button
         onClick={handleClick}
-        className={`relative z-10 ${className ?? ""} shadow-sm shadow-black hover:shadow-customGreen border-3 border-customGreen bg-darken-2 hover:bg-transparent text-white font-semibold py-2 px-6 rounded-full transition duration-300 ease-in-out transform`}
+        className={`relative z-10 ${className ?? ""} shadow-sm shadow-black hover:shadow-customGreen border-3 border-customGreen bg-darken-2 hover:bg-transparent text-white font-semibold py-2 px-6 rounded-full transition duration-300 ease-in-out transform backdrop-blur-sm`}
       >
         {text}
       </button>

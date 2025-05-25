@@ -70,7 +70,7 @@ export default function SquareButton({
           left: -4px;
           width: calc(100% + 8px);
           height: calc(100% + 8px);
-          border: 4px solid transparent;
+          border: 2px solid transparent;
           border-radius: 7px;
           animation: highlight 1s linear infinite;
           animation-delay: 0.15s;
@@ -79,7 +79,7 @@ export default function SquareButton({
       <div className={`relative inline-block ${outerClassName}`}>
         <button
           onClick={handleClick}
-          className={` flex justify-center items-center w-full shadow-sm shadow-black border-1 ${textColor == "bright" ? "text-white" : ""}${textColor == "dim" ? "text-gray-200" : ""} font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform
+          className={` flex justify-center items-center w-full shadow-sm shadow-black border-2 ${textColor == "bright" ? "text-white" : ""}${textColor == "dim" ? "text-gray-200" : ""} font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform backdrop-blur-sm
             ${
               !disabled
                 ? "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
