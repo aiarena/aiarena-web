@@ -15,6 +15,7 @@ import {
 } from "@heroicons/react/20/solid";
 import WideButton from "@/_components/_props/WideButton";
 import { UploadFile } from "@/_components/_props/UploadFile";
+import SectionDivider from "@/_components/_display/SectionDivider";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -135,7 +136,8 @@ export default function BotSettingsModal({
               </label>
             </div>
           </div>
-          <div>
+          <SectionDivider color="gray" />
+          <div className="pt-4">
             <div className="pb-4 flex items-center justify-between gap-8 flex-wrap">
               <div className="min-w-[40%]">
                 <h3 className="text-xl font-bold text-customGreen-light flex pb-2">

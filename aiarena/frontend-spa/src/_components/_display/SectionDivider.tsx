@@ -32,7 +32,7 @@ const SectionDivider = ({
           
           shadow shadow-black 
           ${color == "customGreen" ? "bg-customGreen" : ""} 
-          ${color == "gray" ? "bg-slate-700" : ""} 
+          ${color == "gray" ? "bg-neutral-700" : ""} 
           ${color == "gradient" ? "bg-[linear-gradient(100deg,rgb(134,194,50,0.1)_0%,rgb(134,194,50,0.3)_80%)]" : ""}  
           ${bgClass}`}
       ></div>
