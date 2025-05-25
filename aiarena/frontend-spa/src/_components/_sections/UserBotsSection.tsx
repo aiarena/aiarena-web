@@ -4,7 +4,6 @@ import { graphql, useFragment } from "react-relay";
 import { getNodes } from "@/_lib/relayHelpers";
 import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
-import ProfileBot from "../_display/userbot/UserBot";
 
 import Searchbar from "../_props/Searchbar";
 import Dropdown from "../_props/Dropdown";
@@ -12,6 +11,7 @@ import DropdownButton from "../_props/DropdownButton";
 import WantMore from "../_display/WantMore";
 import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
 import { UserBotsSection_user$key } from "./__generated__/UserBotsSection_user.graphql";
+import UserBot from "../_display/userbot/UserBot";
 
 interface UserBotsSectionProps {
   viewer: UserBotsSection_viewer$key;
@@ -217,7 +217,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
             })
             .map((bot) => (
               <li key={bot.id} id={bot.id} role="listitem">
-                <ProfileBot bot={bot} />
+                <UserBot bot={bot} />
               </li>
             ))}
         </ul>
