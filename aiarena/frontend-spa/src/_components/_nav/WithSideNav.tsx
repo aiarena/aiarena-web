@@ -63,7 +63,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
                 key={tab.name}
                 to={tab.path}
                 className={({ isActive }) =>
-                  `m-2 pl-2 py-2 text-white border-1 shadow shadow-black shadow-sm hover:shadow-customGreen-dark duration-300 ease-in-out transform ${
+                  `m-2 pl-2 py-2 text-white border-1 shadow shadow-black shadow-sm hover:shadow-customGreen-dark duration-300 ease-in-out transform  backdrop-blur-sm ${
                     isActive
                       ? "text-large border-gray-700 border-b-customGreen border-b-2"
                       : "border-gray-700 hover:border-b-customGreen border-b-2"
