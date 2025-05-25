@@ -97,7 +97,7 @@ export default function UserMatchRequestsSection(
           Match Requests Table
         </h3>
         <FilterableList
-          classes="mt-4 shadow-lg shadow-black bg-darken-2"
+          classes="mt-4 shadow-lg shadow-black bg-darken-2 backdrop-blur-sm"
           data={getNodes(viewer.requestedMatches)}
           hideMenu={true}
           fields={[
