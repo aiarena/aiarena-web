@@ -71,7 +71,6 @@ export default function BotSettingsModal({
   const [botDataFile, setBotDataFile] = useState<File | null>(null);
 
   const [isBiographyModalOpen, setBiographyModalOpen] = useState(false);
-  // const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleDownload = (url: string) => {
     window.location.href = `/${url}`;
@@ -91,9 +90,32 @@ export default function BotSettingsModal({
             title="Edit Bot Biography"
           />
           <div className="items-center mt-2">
+            <div className=" mt-2">
+              <label className="text-gray-300 flex items-center">
+                Bot Zip Publicly Downloadable:
+                <input
+                  type="checkbox"
+                  checked={bot.botZipPubliclyDownloadable}
+                  onChange={() =>
+                    updateBot({
+                      variables: {
+                        input: {
+                          id: bot.id,
+                          botZipPubliclyDownloadable:
+                            !bot.botZipPubliclyDownloadable,
+                        },
+                      },
+                    })
+                  }
+                  disabled={updating}
+                  className="ml-2 w-5 h-5"
+                />
+              </label>
+            </div>
+
             <div className="flex items-center mt-2">
               <label className="text-gray-300 flex items-center">
-                Bot Data:
+                Store Bot Data:
                 <input
                   type="checkbox"
                   checked={bot.botDataEnabled}
@@ -118,7 +140,7 @@ export default function BotSettingsModal({
             </div>
             <div className=" mt-2">
               <label className="text-gray-300 flex items-center">
-                Mark Bot Data Publicly Downloadable:
+                Bot Data Publicly Downloadable:
                 <input
                   type="checkbox"
                   checked={bot.botDataPubliclyDownloadable}
@@ -140,25 +162,36 @@ export default function BotSettingsModal({
             </div>
           </div>
           <SectionDivider color="gray" />
+          {/* Bot Data & Bot Zip */}
           <div className="pt-4">
+            {/* Bot Zip */}
             <div className="pb-4 flex items-center justify-between gap-8 flex-wrap">
               <div className="min-w-[40%]">
-                <h3 className="text-xl font-bold text-customGreen-light flex pb-2">
-                  <FolderOpenIcon className="size-5 m-1" />
-                  Bot Zip
-                </h3>
+                <div className="flex items-center  gap-2  pb-4">
+                  <h3 className="text-xl font-bold text-customGreen-light flex">
+                    <FolderOpenIcon className="size-5 m-1" />
+                    Bot Zip
+                  </h3>
+                  <a
+                    href="/wiki/bot-development/getting-started/#wiki-toc-bot-zip"
+                    target="_blank"
+                    className="pt-1"
+                  >
+                    Wiki
+                  </a>
+                </div>
 
-                <button
-                  className="mb-8 flex justify-center items-center w-full shadow-sm shadow-black border-2 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
-                  onClick={() => handleDownload(bot.botZip)}
+                <SquareButton
                   disabled={bot.botZip == "{}"}
+                  onClick={() => handleDownload(bot.botZip)}
+                  outerClassName="w-full mb-8"
                 >
-                  <ArrowDownOnSquareStackIcon
+                  <ArrowDownOnSquareIcon
                     className="size-6 mr-2"
                     title="Download ZIP"
                   />
                   Download Bot Zip
-                </button>
+                </SquareButton>
 
                 <UploadFile
                   accept=".zip"
@@ -167,12 +200,8 @@ export default function BotSettingsModal({
                   id={"bot-zip-file-upload"}
                 />
 
-                <button
-                  className={`mt-4 flex justify-center items-center w-full shadow-sm shadow-black border-2 text-white font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform ${
-                    botZipFile
-                      ? "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
-                      : "bg-darken border-gray-700 hover:bg-darken hover:border-gray-700 "
-                  }`}
+                <SquareButton
+                  disabled={!botZipFile}
                   onClick={() => {
                     if (!botZipFile) return;
                     updateBot({
@@ -190,10 +219,11 @@ export default function BotSettingsModal({
                       onError,
                     });
                   }}
+                  outerClassName="w-full mt-4"
                 >
-                  <ArrowUpOnSquareStackIcon className="size-5" />
+                  <ArrowUpOnSquareIcon className="size-5 mr-1" />
                   Upload Bot Zip
-                </button>
+                </SquareButton>
               </div>
 
               {/* Bot Data */}
@@ -201,8 +231,8 @@ export default function BotSettingsModal({
                 <div className="flex items-center gap-2  pb-4">
                   <h3 className="text-xl font-bold text-customGreen-light flex">
                     <FolderOpenIcon className="size-5 m-1" />
-                  Bot Data
-                </h3>
+                    Bot Data
+                  </h3>
                   <a
                     href="/wiki/bot-development/#wiki-toc-bot-memory-the-data-folder"
                     target="_blank"
