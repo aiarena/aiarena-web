@@ -123,12 +123,35 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
       onError,
     });
   };
+
+  const isFormValid = (): boolean => {
+    if (!name.trim()) {
+      return false;
+    }
+    if (!race) {
+      return false;
+    }
+
+    if (!type) {
+      return false;
+    }
+    if (!botZipFile) {
+      return false;
+    }
+    if (!data.viewer?.user?.id) {
+      return false;
+    }
+
+    return true;
+  };
+
   return (
     <Modal onClose={onClose} isOpen={isOpen} title="Upload Bot">
       <Form
         handleSubmit={handleUpload}
         submitTitle="Upload Bot"
         loading={updating}
+        disabled={!isFormValid()}
       >
         <fieldset>
           <legend className="sr-only">Bot Upload Information</legend>
