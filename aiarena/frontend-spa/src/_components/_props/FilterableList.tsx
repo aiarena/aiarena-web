@@ -54,6 +54,7 @@ export default function FilterableList<T>({
       setSortField(field);
       setSortOrder("desc");
     }
+    setCurrentPage(1); // Reset to page 1 on sort change
   };
 
   // Handle changes for both search and dropdown filters dynamically
@@ -294,7 +295,7 @@ export default function FilterableList<T>({
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex flex-wrap justify-center items-center mt-4 p-4">
+      <div className="flex flex-wrap justify-center items-center p-4 gap-y-4">
         <div className="flex">
           <button
             onClick={() => setCurrentPage(() => 1)}
