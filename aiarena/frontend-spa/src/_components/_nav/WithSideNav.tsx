@@ -18,7 +18,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
     const calculateNavbarHeight = () => {
       const navbar = document.querySelector("nav");
       if (navbar) {
-        setNavbarHeight(navbar.offsetHeight);
+        setNavbarHeight(navbar.offsetHeight - 1);
       }
     };
 
@@ -77,7 +77,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
         </aside>
       ) : (
         <div
-          className="sticky z-50
+          className="sticky z-49
         border-b border-customGreen"
           style={{ top: `${navbarHeight}px` }}
         >
