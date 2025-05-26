@@ -7,6 +7,7 @@ import { useState } from "react";
 import MainButton from "../_props/MainButton";
 import WantMore from "../_display/WantMore";
 import { UserMatchRequestsSection_viewer$key } from "./__generated__/UserMatchRequestsSection_viewer.graphql";
+import { parseMatchResult } from "@/_lib/parseMatchResult";
 
 interface UserMatchRequestsSectionProps {
   viewer: UserMatchRequestsSection_viewer$key;
@@ -24,6 +25,7 @@ export default function UserMatchRequestsSection(
           edges {
             node {
               id
+              started
               firstStarted
               participant1 {
                 id
@@ -38,6 +40,10 @@ export default function UserMatchRequestsSection(
                 winner {
                   name
                 }
+              }
+              tags
+              map {
+                name
               }
               status
             }
@@ -92,7 +98,11 @@ export default function UserMatchRequestsSection(
           />
         </div>
       </div>
-      <div role="region" aria-labelledby="match-requests-table-heading">
+      <div
+        role="region"
+        aria-labelledby="match-requests-table-heading"
+        className="grow overflow-auto"
+      >
         <h3 id="match-requests-table-heading" className="sr-only">
           Match Requests Table
         </h3>
@@ -103,10 +113,11 @@ export default function UserMatchRequestsSection(
           fields={[
             "status",
             "id",
-
             "participant1.name",
             "participant2.name",
-            "firstStarted",
+            "map.name",
+            "tags",
+            "started",
             "result.type",
           ]} // Pass nested field as string
           defaultFieldSort={0}
@@ -116,13 +127,17 @@ export default function UserMatchRequestsSection(
             id: "Match ID",
             "participant1.name": "Player 1",
             "participant2.name": "Player 2",
-            firstStarted: "Started",
+            "map.name": "Map",
+            tags: "Tags",
+            started: "Started",
             "result.type": "Result",
           }}
           fieldClasses={{
             status: "hidden md:flex",
             id: "hidden md:flex",
-            firstStarted: "hidden sm:flex",
+            "map.name": "hidden lg:flex",
+            tags: "hidden lg:flex",
+            started: "hidden sm:flex",
           }}
           filters={[
             {
@@ -148,7 +163,7 @@ export default function UserMatchRequestsSection(
                   role="cell"
                   aria-label={`View match details for match ID ${match.id}`}
                 >
-                  {match.id}
+                  {extractRelayID(match.id, "MatchType")}
                 </a>
 
                 <a
@@ -168,9 +183,23 @@ export default function UserMatchRequestsSection(
                   {match.participant2?.name}
                 </a>
                 <p
+                  className="pl-2 text-left hidden lg:flex text-gray-200 truncate"
+                  role="cell"
+                  aria-label={`Map: ${match.map.name}`}
+                >
+                  {match.map.name}
+                </p>
+                <p
+                  className="pl-2 text-left hidden lg:flex text-gray-200 truncate"
+                  role="cell"
+                  aria-label={`Tags: ${match.tags}`}
+                >
+                  {match.tags && match.tags.join(", ")}
+                </p>
+                <p
                   className="pl-2 hidden sm:flex text-left text-gray-200 truncate"
                   role="cell"
-                  aria-label={`Match started: ${match.status !== "Queued" && match.firstStarted ? formatDateISO(match.firstStarted) : "Not yet started"}`}
+                  aria-label={`Match started: ${match.status !== "Queued" && match.started ? formatDateISO(match.started) : "Not yet started"}`}
                 >
                   {match.status !== "Queued"
                     ? formatDateISO(match.firstStarted)
@@ -181,7 +210,10 @@ export default function UserMatchRequestsSection(
                   role="cell"
                   aria-label={`Match result: ${match.result?.type || "No result yet"}`}
                 >
-                  {match.result?.type}
+                  {parseMatchResult(
+                    match.result?.type,
+                    match.result?.winner?.name
+                  )}
                 </p>
               </div>
             </div>
