@@ -7,7 +7,6 @@ import django_filters
 import graphene
 from avatar.models import Avatar
 from django_filters import FilterSet, OrderingFilter
-from graphene.relay import Node
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
 from rest_framework.authtoken.models import Token
@@ -15,7 +14,7 @@ from rest_framework.authtoken.models import Token
 from aiarena.core import models
 from aiarena.core.models import BotRace, Result, User
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits
-from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID, get_viewer_or_none_from_info
+from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
 class UserType(DjangoObjectTypeWithUID):
@@ -245,7 +244,6 @@ class NewsType(DjangoObjectTypeWithUID):
 class ViewerType(graphene.ObjectType):
     # This is the private viewer user type.
     # Put data only the logged in user should be able view here.
-    id = graphene.ID(required=True)
     user = graphene.Field("aiarena.graphql.UserType")
     api_token = graphene.String()
     email = graphene.String()
@@ -258,10 +256,6 @@ class ViewerType(graphene.ObjectType):
     date_joined = graphene.DateTime()
     first_name = graphene.String()
     last_name = graphene.String()
-
-    @staticmethod
-    def resolve_id(root: models.User, info, **args):
-        return Node.to_global_id("ViewerType", root.id)
 
     @staticmethod
     def resolve_user(root: models.User, info, **args):
@@ -442,7 +436,9 @@ class Query(graphene.ObjectType):
 
     @staticmethod
     def resolve_viewer(root, info, **args):
-        return get_viewer_or_none_from_info(info)
+        if info.context.user.is_authenticated:
+            return info.context.user
+        return None
 
     @staticmethod
     def resolve_bots(root, info, **args):
