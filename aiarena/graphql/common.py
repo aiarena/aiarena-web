@@ -255,3 +255,7 @@ def parse_deep_errors(e):
 
 def raise_graphql_error_from_exception(e):
     raise GraphQLError("; ".join(parse_deep_errors(e)))
+
+
+def get_viewer_or_none_from_info(info):
+    return info.context.user if info.context.user.is_authenticated else None

@@ -292,8 +292,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     graphql`
       mutation RequestMatchModalMutation($input: RequestMatchInput!) {
         requestMatch(input: $input) {
-          match {
-            id
+          viewer {
+            ...UserMatchRequestsSection_viewer
           }
           errors {
             field

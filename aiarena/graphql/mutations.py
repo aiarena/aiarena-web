@@ -17,6 +17,7 @@ from aiarena.core.services.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import (
     CleanedInputMutation,
     CleanedInputType,
+    get_viewer_or_none_from_info,
     raise_for_access,
     raise_graphql_error_from_exception,
 )
@@ -90,6 +91,7 @@ class RequestMatchInput(CleanedInputType):
 
 class RequestMatch(CleanedInputMutation):
     match = graphene.List(MatchType)
+    viewer = graphene.Field("aiarena.graphql.ViewerType")
 
     class Meta:
         input_class = RequestMatchInput
@@ -112,7 +114,7 @@ class RequestMatch(CleanedInputMutation):
                 chosen_map=input_object.chosen_map,
             )
 
-            return cls(errors=[], match=matches)
+            return cls(errors=[], match=matches, viewer=get_viewer_or_none_from_info(info))
 
         except Exception as e:
             raise GraphQLError(f"Error requesting match: {str(e)}")
