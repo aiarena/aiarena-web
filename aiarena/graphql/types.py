@@ -187,13 +187,21 @@ class RoundsType(DjangoObjectTypeWithUID):
         ]
 
 
+class MapFilterSet(FilterSet):
+    name = django_filters.CharFilter(lookup_expr="icontains")
+
+    class Meta:
+        model = models.Map
+        fields = ["name"]
+
+
 class MapType(DjangoObjectTypeWithUID):
     download_link = graphene.String()
 
     class Meta:
         model = models.Map
         fields = ["name", "game_mode", "enabled"]
-        filter_fields = ["name"]
+        filterset_class = MapFilterSet
 
     @staticmethod
     def resolve_download_link(root: models.Map, info, **args):
@@ -324,6 +332,7 @@ class MatchParticipationType(DjangoObjectTypeWithUID):
 
 class MapPoolFilterSet(FilterSet):
     order_by = OrderingFilter(fields=["enabled"])
+    name = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = models.MapPool
