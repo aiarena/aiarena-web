@@ -212,7 +212,8 @@ export default function UserMatchRequestsSection(
                 >
                   {parseMatchResult(
                     match.result?.type,
-                    match.result?.winner?.name
+                    match.participant1?.name,
+                    match.participant2?.name
                   )}
                 </p>
               </div>
