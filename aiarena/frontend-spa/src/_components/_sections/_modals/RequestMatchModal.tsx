@@ -1,34 +1,20 @@
-import React, { Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "@/_components/_props/Modal";
-import {
-  graphql,
-  useLazyLoadQuery,
-  useMutation,
-  useQueryLoader,
-} from "react-relay";
-import SelectSearchList from "@/_components/_props/SelectSearchList";
+import { graphql, useMutation, useQueryLoader } from "react-relay";
+
 import { RequestMatchModalBot1Query } from "./__generated__/RequestMatchModalBot1Query.graphql";
-import { RequestMatchModalBot2Query } from "./__generated__/RequestMatchModalBot2Query.graphql";
-import { RequestMatchModalSpecificMapQuery } from "./__generated__/RequestMatchModalSpecificMapQuery.graphql";
-import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModalMapPoolQuery.graphql";
+
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import Form from "@/_components/_props/Form";
 import SelectSearchListV2 from "@/_components/_props/SelectSearchListv2";
+import { RequestMatchModalBot2Query } from "./__generated__/RequestMatchModalBot2Query.graphql";
+import { RequestMatchModalSpecificMapQuery } from "./__generated__/RequestMatchModalSpecificMapQuery.graphql";
+import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModalMapPoolQuery.graphql";
 
 interface UploadBotModal {
   isOpen: boolean;
   onClose: () => void;
-}
-
-interface Option {
-  id: string;
-  label: string;
-}
-
-interface SearchOrSelectValue {
-  select: string;
-  searchAndDisplay: string;
 }
 
 interface UploadBotModal {
@@ -37,109 +23,29 @@ interface UploadBotModal {
 }
 
 export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
-  const [bot1IsSearching, setBot1IsSearching] = useState(false);
-  const [bot1SearchTerm, setBot1SearchTerm] = useState("");
-
-  const [bot2IsSearching, setBot2IsSearching] = useState(false);
-  const [bot2SearchTerm, setBot2SearchTerm] = useState("");
-
   const [mapSelectionType, setMapSelectionType] = useState("specific_map");
-
-  const [specificMapIsSearching, setSpecificMapIsSearching] = useState(false);
-  const [specificMapSearchTerm, setSpecificMapSearchTerm] = useState("");
-
-  const [mapPoolIsSearching, setMapPoolIsSearching] = useState(false);
-  const [mapPoolSearchTerm, setMapPoolSearchTerm] = useState("");
-
   const [matchCount, setMatchCount] = useState(1);
 
-  const [bot1SearchOrSelect, setBot1SearchOrSelect] =
-    useState<SearchOrSelectValue>({
-      select: "",
-      searchAndDisplay: "",
-    });
-
-  const [bot2SearchOrSelect, setBot2SearchOrSelect] =
-    useState<SearchOrSelectValue>({
-      select: "",
-      searchAndDisplay: "",
-    });
-
-  const [specificMapSearchOrSelect, setSpecificMapSearchOrSelect] =
-    useState<SearchOrSelectValue>({
-      select: "",
-      searchAndDisplay: "",
-    });
-
-  const [mapPoolSearchOrSelect, setMapPoolSearchOrSelect] =
-    useState<SearchOrSelectValue>({
-      select: "",
-      searchAndDisplay: "",
-    });
-
-  const [queryVariablesBot1, setQueryVariablesBot1] = useState({ name: "" });
   const [queryVariablesBot1Refactor, setQueryVariablesBot1Refactor] =
     useState("");
   const [selectedBot1Refactor, setSelectedBot1Refactor] = useState("");
-  const [queryVariablesBot2, setQueryVariablesBot2] = useState({ name: "" });
-  const [queryVariablesSpecificMap, setQueryVariablesSpecificMap] = useState({
-    name: "",
-  });
-  const [queryVariablesMapPool, setQueryVariablesMapPool] = useState({
-    name: "",
-  });
 
-  const handleBot1Search = (term: string) => {
-    setBot1IsSearching(true);
-    setBot1SearchTerm(term);
-  };
+  const [queryVariablesBot2Refactor, setQueryVariablesBot2Refactor] =
+    useState("");
+  const [selectedBot2Refactor, setSelectedBot2Refactor] = useState("");
 
-  const handleBot2Search = (term: string) => {
-    setBot2IsSearching(true);
-    setBot2SearchTerm(term);
-  };
+  const [
+    queryVariablesSpecificMapRefactor,
+    setQueryVariablesSpecificMapRefactor,
+  ] = useState("");
 
-  const handleSpecificMapSearch = (term: string) => {
-    setSpecificMapIsSearching(true);
-    setSpecificMapSearchTerm(term);
-  };
+  const [selectedSpecificMapRefactor, setSelectedSpecificMapRefactor] =
+    useState("");
 
-  const handleMapPoolSearch = (term: string) => {
-    setMapPoolIsSearching(true);
-    setMapPoolSearchTerm(term);
-  };
+  const [queryVariablesMapPoolRefactor, setQueryVariablesMapPoolRefactor] =
+    useState("");
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setQueryVariablesBot1({ name: bot1SearchTerm });
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [bot1SearchTerm]);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setQueryVariablesBot2({ name: bot2SearchTerm });
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [bot2SearchTerm]);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setQueryVariablesSpecificMap({ name: specificMapSearchTerm });
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [specificMapSearchTerm]);
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setQueryVariablesMapPool({ name: mapPoolSearchTerm });
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [mapPoolSearchTerm]);
+  const [selectedMapPoolRefactor, setSelectedMapPoolRefactor] = useState("");
 
   const bot1Query = graphql`
     query RequestMatchModalBot1Query($name: String) {
@@ -160,170 +66,74 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     }
   `;
 
-  const [queryRef, loadQuery] =
+  const [bot1QueryRef, loadBot1Query] =
     useQueryLoader<RequestMatchModalBot1Query>(bot1Query);
 
   useEffect(() => {
-    loadQuery({ name: queryVariablesBot1Refactor });
-    console.log("loading query");
-  }, [queryVariablesBot1Refactor, loadQuery]);
+    loadBot1Query({ name: queryVariablesBot1Refactor });
+  }, [queryVariablesBot1Refactor, loadBot1Query]);
 
-  // const bot1Data = useLazyLoadQuery<RequestMatchModalBot1Query>(
-  //   graphql`
-  //     query RequestMatchModalBot1Query($name: String) {
-  //       bots(name: $name, first: 10) {
-  //         edges {
-  //           node {
-  //             id
-  //             name
-  //             created
-  //             botZipUpdated
-  //             user {
-  //               id
-  //               username
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   `,
-  //   queryVariablesBot1
-  // );
-
-  const bot2Data = useLazyLoadQuery<RequestMatchModalBot2Query>(
-    graphql`
-      query RequestMatchModalBot2Query($name: String) {
-        bots(name: $name, first: 10) {
-          edges {
-            node {
+  const bot2Query = graphql`
+    query RequestMatchModalBot2Query($name: String) {
+      bots(name: $name, first: 10) {
+        edges {
+          node {
+            id
+            name
+            created
+            botZipUpdated
+            user {
               id
-              name
-              created
-              botZipUpdated
-              user {
-                id
-                username
-              }
+              username
             }
           }
         }
       }
-    `,
-    queryVariablesBot2
-  );
+    }
+  `;
 
-  const specificMapData = useLazyLoadQuery<RequestMatchModalSpecificMapQuery>(
-    graphql`
-      query RequestMatchModalSpecificMapQuery($name: String) {
-        maps(name: $name, first: 10) {
-          edges {
-            node {
-              id
-              name
-            }
+  const [bot2QueryRef, loadBot2Query] =
+    useQueryLoader<RequestMatchModalBot2Query>(bot2Query);
+  useEffect(() => {
+    loadBot2Query({ name: queryVariablesBot2Refactor });
+  }, [queryVariablesBot2Refactor, loadBot2Query]);
+
+  const specificMapQuery = graphql`
+    query RequestMatchModalSpecificMapQuery($name: String) {
+      maps(name: $name, first: 10) {
+        edges {
+          node {
+            id
+            name
           }
         }
       }
-    `,
-    queryVariablesSpecificMap
-  );
+    }
+  `;
 
-  const mapPoolData = useLazyLoadQuery<RequestMatchModalMapPoolQuery>(
-    graphql`
-      query RequestMatchModalMapPoolQuery($name: String) {
-        mapPools(name: $name, first: 10) {
-          edges {
-            node {
-              id
-              name
-            }
+  const [specificMapQueryRef, loadSpecificMapQuery] =
+    useQueryLoader<RequestMatchModalSpecificMapQuery>(specificMapQuery);
+  useEffect(() => {
+    loadSpecificMapQuery({ name: queryVariablesSpecificMapRefactor });
+  }, [queryVariablesSpecificMapRefactor, loadSpecificMapQuery]);
+
+  const mapPoolQuery = graphql`
+    query RequestMatchModalMapPoolQuery($name: String) {
+      mapPools(name: $name, first: 10) {
+        edges {
+          node {
+            id
+            name
           }
         }
       }
-    `,
-    queryVariablesMapPool
-  );
-
-  // React.useEffect(() => {
-  //   if (bot1Data) {
-  //     setBot1IsSearching(false);
-  //   }
-  // }, [bot1Data]);
-
-  // React.useEffect(() => {
-  //   if (bot2Data) {
-  //     setBot2IsSearching(false);
-  //   }
-  // }, [bot2Data]);
-  // React.useEffect(() => {
-  //   if (specificMapData) {
-  //     setSpecificMapIsSearching(false);
-  //   }
-  // }, [specificMapData]);
-
-  // React.useEffect(() => {
-  //   if (mapPoolData) {
-  //     setMapPoolIsSearching(false);
-  //   }
-  // }, [mapPoolData]);
-
-  // const bot1Options = React.useMemo(() => {
-  //   if (!bot1Data?.bots?.edges) return [];
-
-  //   return bot1Data.bots.edges
-  //     .map((edge) => {
-  //       if (!edge?.node) return null;
-  //       const bot = edge.node;
-  //       return {
-  //         id: bot.id,
-  //         label: `${bot.name} (by ${bot.user?.username || "Unknown"})`,
-  //       };
-  //     })
-  //     .filter(Boolean) as Option[];
-  // }, [bot1Data]);
-
-  const bot2Options = React.useMemo(() => {
-    if (!bot2Data?.bots?.edges) return [];
-
-    return bot2Data.bots.edges
-      .map((edge) => {
-        if (!edge?.node) return null;
-        const bot = edge.node;
-        return {
-          id: bot.id,
-          label: `${bot.name} (by ${bot.user?.username || "Unknown"})`,
-        };
-      })
-      .filter(Boolean) as Option[];
-  }, [bot2Data]);
-  const specificMapOptions = React.useMemo(() => {
-    if (!specificMapData?.maps?.edges) return [];
-
-    return specificMapData.maps.edges
-      .map((edge) => {
-        if (!edge?.node) return null;
-        const map = edge.node;
-        return {
-          id: map.id,
-          label: `${map.name}`,
-        };
-      })
-      .filter(Boolean) as Option[];
-  }, [specificMapData]);
-  const mapPoolOptions = React.useMemo(() => {
-    if (!mapPoolData?.mapPools?.edges) return [];
-
-    return mapPoolData.mapPools.edges
-      .map((edge) => {
-        if (!edge?.node) return null;
-        const mapPool = edge.node;
-        return {
-          id: mapPool.id,
-          label: `${mapPool.name}`,
-        };
-      })
-      .filter(Boolean) as Option[];
-  }, [mapPoolData]);
+    }
+  `;
+  const [mapPoolQueryRef, loadMapPoolQuery] =
+    useQueryLoader<RequestMatchModalMapPoolQuery>(mapPoolQuery);
+  useEffect(() => {
+    loadMapPoolQuery({ name: queryVariablesMapPoolRefactor });
+  }, [queryVariablesMapPoolRefactor, loadMapPoolQuery]);
 
   const [requestMatch, updating] = useMutation<RequestMatchModalMutation>(
     graphql`
@@ -347,24 +157,20 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   );
 
   const resetAllStateFields = () => {
-    setBot1SearchTerm("");
-    setBot1IsSearching(false);
-    setBot2SearchTerm("");
-    setBot2IsSearching(false);
     setMapSelectionType("specific_map");
-    setSpecificMapIsSearching(false);
-    setSpecificMapSearchTerm("");
-    setMapPoolIsSearching(false);
-    setMapPoolSearchTerm("");
     setMatchCount(1);
-    setBot1SearchOrSelect({ select: "", searchAndDisplay: "" });
-    setBot2SearchOrSelect({ select: "", searchAndDisplay: "" });
-    setSpecificMapSearchOrSelect({ select: "", searchAndDisplay: "" });
-    setMapPoolSearchOrSelect({ select: "", searchAndDisplay: "" });
-    setQueryVariablesBot1({ name: "" });
-    setQueryVariablesBot2({ name: "" });
-    setQueryVariablesSpecificMap({ name: "" });
-    setQueryVariablesMapPool({ name: "" });
+
+    setQueryVariablesBot1Refactor("");
+    setSelectedBot1Refactor("");
+
+    setQueryVariablesBot2Refactor("");
+    setSelectedBot2Refactor("");
+
+    setQueryVariablesSpecificMapRefactor("");
+    setSelectedSpecificMapRefactor("");
+
+    setQueryVariablesMapPoolRefactor("");
+    setSelectedMapPoolRefactor("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -374,16 +180,16 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       variables: {
         input: {
           bot1: selectedBot1Refactor,
-          bot2: bot2SearchOrSelect.select,
+          bot2: selectedBot2Refactor,
           matchCount: matchCount,
           mapSelectionType: mapSelectionType,
           chosenMap:
             mapSelectionType === "specific_map"
-              ? specificMapSearchOrSelect.select
+              ? selectedSpecificMapRefactor
               : undefined,
           mapPool:
             mapSelectionType === "map_pool"
-              ? mapPoolSearchOrSelect.select
+              ? selectedMapPoolRefactor
               : undefined,
         },
       },
@@ -398,7 +204,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     });
   };
   const isFormValid = (): boolean => {
-    if (!selectedBot1Refactor || !bot2SearchOrSelect.select) {
+    if (!selectedBot1Refactor || !selectedBot2Refactor) {
       return false;
     }
     if (!matchCount || matchCount < 1) {
@@ -406,11 +212,11 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     }
 
     if (mapSelectionType === "specific_map") {
-      if (!specificMapSearchOrSelect.select) {
+      if (!selectedSpecificMapRefactor) {
         return false;
       }
     } else if (mapSelectionType === "map_pool") {
-      if (!mapPoolSearchOrSelect.select) {
+      if (!selectedMapPoolRefactor) {
         return false;
       }
     } else {
@@ -430,65 +236,36 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       >
         <div className="mb-4">
           <label className="block text-left font-medium mb-1">Bot 1</label>
-          {queryRef ? (
+          {bot1QueryRef ? (
             <SelectSearchListV2
               query={bot1Query}
-              dataRef={queryRef}
+              dataRef={bot1QueryRef}
               dataPath="bots.edges"
               onChangeRefactor={(value) => {
                 setQueryVariablesBot1Refactor(value);
-                // set new searrchterm
-                // setBot1SearchOrSelect(value);
-                // if (value.select) {
-                //   setBot1SearchTerm(value.searchAndDisplay);
-                // }
               }}
               onSelectRefactor={(value) => {
                 setSelectedBot1Refactor(value);
               }}
-              // selectedValue: string;
-
-              searchOrSelect={bot1SearchOrSelect}
-              onChange={(value) => {
-                setBot1SearchOrSelect(value);
-
-                if (value.select) {
-                  setBot1SearchTerm(value.searchAndDisplay);
-                }
-              }}
-              onSearch={handleBot1Search}
               placeholder="Search for bots..."
             />
           ) : null}
-          {/* <SelectSearchList
-            options={bot1Options}
-            searchOrSelect={bot1SearchOrSelect}
-            onChange={(value) => {
-              setBot1SearchOrSelect(value);
 
-              if (value.select) {
-                setBot1SearchTerm(value.searchAndDisplay);
-              }
-            }}
-            onSearch={handleBot1Search}
-            isLoading={bot1IsSearching}
-            placeholder="Search for bots..."
-          /> */}
           <label className="block text-left font-medium mb-1">Bot 2</label>
-          <SelectSearchList
-            options={bot2Options}
-            searchOrSelect={bot2SearchOrSelect}
-            onChange={(value) => {
-              setBot2SearchOrSelect(value);
-
-              if (value.select) {
-                setBot2SearchTerm(value.searchAndDisplay);
-              }
-            }}
-            onSearch={handleBot2Search}
-            isLoading={bot2IsSearching}
-            placeholder="Search for bots..."
-          />
+          {bot2QueryRef ? (
+            <SelectSearchListV2
+              query={bot2Query}
+              dataRef={bot2QueryRef}
+              dataPath="bots.edges"
+              onChangeRefactor={(value) => {
+                setQueryVariablesBot2Refactor(value);
+              }}
+              onSelectRefactor={(value) => {
+                setSelectedBot2Refactor(value);
+              }}
+              placeholder="Search for bots..."
+            />
+          ) : null}
         </div>
         <div className="mb-4"></div>{" "}
         <div className=" flex flex-wrap gap-4">
@@ -536,21 +313,21 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <label className="block text-left font-medium mb-1">
                 Specific Map
               </label>
-              <SelectSearchList
-                options={specificMapOptions}
-                searchOrSelect={specificMapSearchOrSelect}
-                onChange={(value) => {
-                  setSpecificMapSearchOrSelect(value);
-
-                  if (value.select) {
-                    setSpecificMapSearchTerm(value.searchAndDisplay);
-                  }
-                }}
-                onSearch={handleSpecificMapSearch}
-                isLoading={specificMapIsSearching}
-                placeholder="Search for specific map..."
-                maxHeight="small"
-              />
+              {specificMapQueryRef ? (
+                <SelectSearchListV2
+                  query={specificMapQuery}
+                  dataRef={specificMapQueryRef}
+                  dataPath="maps.edges"
+                  onChangeRefactor={(value) => {
+                    setQueryVariablesSpecificMapRefactor(value);
+                  }}
+                  onSelectRefactor={(value) => {
+                    setSelectedSpecificMapRefactor(value);
+                  }}
+                  placeholder="Search for specific map..."
+                  maxHeight="small"
+                />
+              ) : null}
             </div>
           ) : null}
           {mapSelectionType == "map_pool" ? (
@@ -558,21 +335,21 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <label className="block text-left font-medium mb-1">
                 Map pool
               </label>
-              <SelectSearchList
-                options={mapPoolOptions}
-                searchOrSelect={mapPoolSearchOrSelect}
-                onChange={(value) => {
-                  setMapPoolSearchOrSelect(value);
-
-                  if (value.select) {
-                    setMapPoolSearchTerm(value.searchAndDisplay);
-                  }
-                }}
-                onSearch={handleMapPoolSearch}
-                isLoading={mapPoolIsSearching}
-                placeholder="Search for map pool..."
-                maxHeight="small"
-              />
+              {mapPoolQueryRef ? (
+                <SelectSearchListV2
+                  query={mapPoolQuery}
+                  dataRef={mapPoolQueryRef}
+                  dataPath="mapPools.edges"
+                  onChangeRefactor={(value) => {
+                    setQueryVariablesMapPoolRefactor(value);
+                  }}
+                  onSelectRefactor={(value) => {
+                    setSelectedMapPoolRefactor(value);
+                  }}
+                  placeholder="Search for map pool..."
+                  maxHeight="small"
+                />
+              ) : null}
             </div>
           ) : null}
         </div>

@@ -5,37 +5,27 @@ import {
   PreloadedQuery,
   usePreloadedQuery,
 } from "react-relay";
-import { RequestMatchModalBot1Query } from "../_sections/_modals/__generated__/RequestMatchModalBot1Query.graphql";
+import { OperationType } from "relay-runtime";
 
-// Define types for our component
 interface Data {
   id: string;
   label: string;
 }
 
-interface SearchOrSelectValue {
-  select: string;
-  searchAndDisplay: string;
-}
-
-interface SelectSearchProps {
+interface SelectSearchProps<TQuery extends OperationType> {
   query: GraphQLTaggedNode;
-  dataRef: PreloadedQuery<RequestMatchModalBot1Query>;
+  dataRef: PreloadedQuery<TQuery>;
   dataPath: string;
 
   onChangeRefactor: (value: string) => void;
   onSelectRefactor: (value: string) => void;
-  //   selectedValue: string;
 
-  searchOrSelect: SearchOrSelectValue;
-  onChange: (value: SearchOrSelectValue) => void;
-  onSearch: (searchTerm: string) => void;
   maxHeight?: string;
   placeholder?: string;
   className?: string;
 }
 
-const SelectSearchListV2: React.FC<SelectSearchProps> = ({
+const SelectSearchListV2 = <TQuery extends OperationType>({
   query,
   dataRef,
   dataPath,
@@ -43,14 +33,10 @@ const SelectSearchListV2: React.FC<SelectSearchProps> = ({
   onChangeRefactor,
   onSelectRefactor,
 
-  searchOrSelect,
-
-  onChange,
-  onSearch,
   maxHeight = "medium",
   placeholder = "Search or select...",
   className = "",
-}) => {
+}: SelectSearchProps<TQuery>) => {
   function getNestedValue(obj: unknown, path: string): unknown {
     return path.split(".").reduce((acc: unknown, key: string) => {
       if (typeof acc === "object" && acc !== null && key in acc) {
@@ -85,7 +71,7 @@ const SelectSearchListV2: React.FC<SelectSearchProps> = ({
       }
       return [];
     }
-
+    console.log(queryResponse);
     const nodes = getNodesFromPath(queryResponse, dataPath);
 
     return nodes
@@ -106,20 +92,6 @@ const SelectSearchListV2: React.FC<SelectSearchProps> = ({
       .filter(Boolean) as Data[];
   }, [queryResponse, dataPath]);
 
-  useEffect(() => {
-    if (searchOrSelect?.searchAndDisplay) {
-      setInputFieldValue(searchOrSelect.searchAndDisplay);
-    } else if (searchOrSelect?.select) {
-      const selectedOption = data.find(
-        (opt) => opt.id === searchOrSelect.select
-      );
-      if (selectedOption) {
-        setInputFieldValue(selectedOption.label);
-      }
-    }
-  }, [searchOrSelect, data]);
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -150,20 +122,13 @@ const SelectSearchListV2: React.FC<SelectSearchProps> = ({
     setInputFieldValue(value);
     setIsLoading(true);
 
-    // Call onChange immediately for UI update
+    // This is the timeout between entering a value - and executing a search
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
-
-    // Set new timeout for onChangeReborn
     debounceTimeoutRef.current = setTimeout(() => {
       onChangeRefactor(value);
     }, 1000);
-
-    onChange({ select: "", searchAndDisplay: value });
-
-    // Call onSearch to trigger loading state and start the search process
-    onSearch(value);
 
     // Open dropdown if it's not already open
     if (!isOpen) {
@@ -174,7 +139,6 @@ const SelectSearchListV2: React.FC<SelectSearchProps> = ({
   const handleOptionSelect = (option: Data) => {
     setInputFieldValue(option.label);
     onSelectRefactor(option.id);
-    // onChange({ select: option.id, searchAndDisplay: option.label });
     setIsOpen(false);
     inputRef.current?.focus();
   };
