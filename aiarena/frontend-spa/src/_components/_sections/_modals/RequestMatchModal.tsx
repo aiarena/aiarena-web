@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Modal from "@/_components/_props/Modal";
-import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
+import {
+  graphql,
+  useLazyLoadQuery,
+  useMutation,
+  useQueryLoader,
+} from "react-relay";
 import SelectSearchList from "@/_components/_props/SelectSearchList";
 import { RequestMatchModalBot1Query } from "./__generated__/RequestMatchModalBot1Query.graphql";
 import { RequestMatchModalBot2Query } from "./__generated__/RequestMatchModalBot2Query.graphql";
@@ -9,6 +14,7 @@ import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModal
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import Form from "@/_components/_props/Form";
+import SelectSearchListV2 from "@/_components/_props/SelectSearchListv2";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -72,6 +78,9 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     });
 
   const [queryVariablesBot1, setQueryVariablesBot1] = useState({ name: "" });
+  const [queryVariablesBot1Refactor, setQueryVariablesBot1Refactor] =
+    useState("");
+  const [selectedBot1Refactor, setSelectedBot1Refactor] = useState("");
   const [queryVariablesBot2, setQueryVariablesBot2] = useState({ name: "" });
   const [queryVariablesSpecificMap, setQueryVariablesSpecificMap] = useState({
     name: "",
@@ -132,27 +141,54 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     return () => clearTimeout(timer);
   }, [mapPoolSearchTerm]);
 
-  const bot1Data = useLazyLoadQuery<RequestMatchModalBot1Query>(
-    graphql`
-      query RequestMatchModalBot1Query($name: String) {
-        bots(name: $name, first: 10) {
-          edges {
-            node {
+  const bot1Query = graphql`
+    query RequestMatchModalBot1Query($name: String) {
+      bots(name: $name, first: 10) {
+        edges {
+          node {
+            id
+            name
+            created
+            botZipUpdated
+            user {
               id
-              name
-              created
-              botZipUpdated
-              user {
-                id
-                username
-              }
+              username
             }
           }
         }
       }
-    `,
-    queryVariablesBot1
-  );
+    }
+  `;
+
+  const [queryRef, loadQuery] =
+    useQueryLoader<RequestMatchModalBot1Query>(bot1Query);
+
+  useEffect(() => {
+    loadQuery({ name: queryVariablesBot1Refactor });
+    console.log("loading query");
+  }, [queryVariablesBot1Refactor, loadQuery]);
+
+  // const bot1Data = useLazyLoadQuery<RequestMatchModalBot1Query>(
+  //   graphql`
+  //     query RequestMatchModalBot1Query($name: String) {
+  //       bots(name: $name, first: 10) {
+  //         edges {
+  //           node {
+  //             id
+  //             name
+  //             created
+  //             botZipUpdated
+  //             user {
+  //               id
+  //               username
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   `,
+  //   queryVariablesBot1
+  // );
 
   const bot2Data = useLazyLoadQuery<RequestMatchModalBot2Query>(
     graphql`
@@ -208,43 +244,44 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     queryVariablesMapPool
   );
 
-  React.useEffect(() => {
-    if (bot1Data) {
-      setBot1IsSearching(false);
-    }
-  }, [bot1Data]);
+  // React.useEffect(() => {
+  //   if (bot1Data) {
+  //     setBot1IsSearching(false);
+  //   }
+  // }, [bot1Data]);
 
-  React.useEffect(() => {
-    if (bot2Data) {
-      setBot2IsSearching(false);
-    }
-  }, [bot2Data]);
-  React.useEffect(() => {
-    if (specificMapData) {
-      setSpecificMapIsSearching(false);
-    }
-  }, [specificMapData]);
+  // React.useEffect(() => {
+  //   if (bot2Data) {
+  //     setBot2IsSearching(false);
+  //   }
+  // }, [bot2Data]);
+  // React.useEffect(() => {
+  //   if (specificMapData) {
+  //     setSpecificMapIsSearching(false);
+  //   }
+  // }, [specificMapData]);
 
-  React.useEffect(() => {
-    if (mapPoolData) {
-      setMapPoolIsSearching(false);
-    }
-  }, [mapPoolData]);
+  // React.useEffect(() => {
+  //   if (mapPoolData) {
+  //     setMapPoolIsSearching(false);
+  //   }
+  // }, [mapPoolData]);
 
-  const bot1Options = React.useMemo(() => {
-    if (!bot1Data?.bots?.edges) return [];
+  // const bot1Options = React.useMemo(() => {
+  //   if (!bot1Data?.bots?.edges) return [];
 
-    return bot1Data.bots.edges
-      .map((edge) => {
-        if (!edge?.node) return null;
-        const bot = edge.node;
-        return {
-          id: bot.id,
-          label: `${bot.name} (by ${bot.user?.username || "Unknown"})`,
-        };
-      })
-      .filter(Boolean) as Option[];
-  }, [bot1Data]);
+  //   return bot1Data.bots.edges
+  //     .map((edge) => {
+  //       if (!edge?.node) return null;
+  //       const bot = edge.node;
+  //       return {
+  //         id: bot.id,
+  //         label: `${bot.name} (by ${bot.user?.username || "Unknown"})`,
+  //       };
+  //     })
+  //     .filter(Boolean) as Option[];
+  // }, [bot1Data]);
+
   const bot2Options = React.useMemo(() => {
     if (!bot2Data?.bots?.edges) return [];
 
@@ -336,7 +373,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     requestMatch({
       variables: {
         input: {
-          bot1: bot1SearchOrSelect.select,
+          bot1: selectedBot1Refactor,
           bot2: bot2SearchOrSelect.select,
           matchCount: matchCount,
           mapSelectionType: mapSelectionType,
@@ -361,7 +398,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     });
   };
   const isFormValid = (): boolean => {
-    if (!bot1SearchOrSelect.select || !bot2SearchOrSelect.select) {
+    if (!selectedBot1Refactor || !bot2SearchOrSelect.select) {
       return false;
     }
     if (!matchCount || matchCount < 1) {
@@ -393,7 +430,37 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       >
         <div className="mb-4">
           <label className="block text-left font-medium mb-1">Bot 1</label>
-          <SelectSearchList
+          {queryRef ? (
+            <SelectSearchListV2
+              query={bot1Query}
+              dataRef={queryRef}
+              dataPath="bots.edges"
+              onChangeRefactor={(value) => {
+                setQueryVariablesBot1Refactor(value);
+                // set new searrchterm
+                // setBot1SearchOrSelect(value);
+                // if (value.select) {
+                //   setBot1SearchTerm(value.searchAndDisplay);
+                // }
+              }}
+              onSelectRefactor={(value) => {
+                setSelectedBot1Refactor(value);
+              }}
+              // selectedValue: string;
+
+              searchOrSelect={bot1SearchOrSelect}
+              onChange={(value) => {
+                setBot1SearchOrSelect(value);
+
+                if (value.select) {
+                  setBot1SearchTerm(value.searchAndDisplay);
+                }
+              }}
+              onSearch={handleBot1Search}
+              placeholder="Search for bots..."
+            />
+          ) : null}
+          {/* <SelectSearchList
             options={bot1Options}
             searchOrSelect={bot1SearchOrSelect}
             onChange={(value) => {
@@ -406,7 +473,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             onSearch={handleBot1Search}
             isLoading={bot1IsSearching}
             placeholder="Search for bots..."
-          />
+          /> */}
           <label className="block text-left font-medium mb-1">Bot 2</label>
           <SelectSearchList
             options={bot2Options}
