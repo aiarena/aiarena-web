@@ -81,7 +81,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
       </h2>
       {/* sidesection */}
       <div className="lg:flex lg:flex-row lg:gap-4">
-        <div className="relative p-2 ">
+        <div className="relative m-0 md:m-2">
           <div className="flex justify-center">
             {viewer?.user ? (
               <AvatarWithBorder user={viewer.user} size="xl" />
