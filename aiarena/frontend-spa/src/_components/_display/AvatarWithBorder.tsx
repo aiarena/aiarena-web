@@ -31,7 +31,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
     const sizes = {
       sm: {
         avatar: 77,
-        border: 90,
+        border: 88,
         moveBorderRight: 3,
         moveBorderUp: 2,
       },
@@ -43,9 +43,9 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
       },
       xl: {
         avatar: 205,
-        border: 238,
+        border: 236,
         moveBorderRight: 8,
-        moveBorderUp: 5,
+        moveBorderUp: 4,
       },
     };
 
@@ -57,7 +57,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
   const avatarSize = getAvatarSize(props.size);
 
   return (
-    <div className={`m-3  flex items-center justify-center`}>
+    <div className={`m-3 flex items-center justify-center`}>
       <div
         className={`w-[${avatarSize.avatar}px] h-[${avatarSize.avatar}px]  overflow-hidden `}
       >
@@ -76,7 +76,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
           alt={`${formatBorder(user.patreonLevel)} frame`}
           width={avatarSize.border}
           height={avatarSize.border}
-          className={`absolute w-[${avatarSize.border}px] h-[${avatarSize.border}px]  object-contain pointer-events-none`}
+          className={`absolute w-[${avatarSize.border}px] h-[${avatarSize.border}px] object-contain pointer-events-none`}
           style={{
             transform: `translate(${avatarSize.moveBorderRight}px, -${avatarSize.moveBorderUp}px)`,
           }}
