@@ -7,10 +7,11 @@ import { RequestMatchModalBot1Query } from "./__generated__/RequestMatchModalBot
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import Form from "@/_components/_props/Form";
-import SelectSearchListV2 from "@/_components/_props/SelectSearchListv2";
+
 import { RequestMatchModalBot2Query } from "./__generated__/RequestMatchModalBot2Query.graphql";
 import { RequestMatchModalSpecificMapQuery } from "./__generated__/RequestMatchModalSpecificMapQuery.graphql";
 import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModalMapPoolQuery.graphql";
+import SelectSearchList from "@/_components/_props/SelectSearchList";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -26,26 +27,11 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [mapSelectionType, setMapSelectionType] = useState("specific_map");
   const [matchCount, setMatchCount] = useState(1);
 
-  const [queryVariablesBot1Refactor, setQueryVariablesBot1Refactor] =
-    useState("");
-  const [selectedBot1Refactor, setSelectedBot1Refactor] = useState("");
+  //Bot 2 Query
+  // ____________________
 
-  const [queryVariablesBot2Refactor, setQueryVariablesBot2Refactor] =
-    useState("");
-  const [selectedBot2Refactor, setSelectedBot2Refactor] = useState("");
-
-  const [
-    queryVariablesSpecificMapRefactor,
-    setQueryVariablesSpecificMapRefactor,
-  ] = useState("");
-
-  const [selectedSpecificMapRefactor, setSelectedSpecificMapRefactor] =
-    useState("");
-
-  const [queryVariablesMapPoolRefactor, setQueryVariablesMapPoolRefactor] =
-    useState("");
-
-  const [selectedMapPoolRefactor, setSelectedMapPoolRefactor] = useState("");
+  const [queryVariablesBot1, setQueryVariablesBot1] = useState("");
+  const [selectedBot1, setSelectedBot1] = useState("");
 
   const bot1Query = graphql`
     query RequestMatchModalBot1Query($name: String) {
@@ -70,8 +56,14 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     useQueryLoader<RequestMatchModalBot1Query>(bot1Query);
 
   useEffect(() => {
-    loadBot1Query({ name: queryVariablesBot1Refactor });
-  }, [queryVariablesBot1Refactor, loadBot1Query]);
+    loadBot1Query({ name: queryVariablesBot1 });
+  }, [queryVariablesBot1, loadBot1Query]);
+
+  // Bot 2 Query
+  // ____________________
+
+  const [queryVariablesBot2, setQueryVariablesBot2] = useState("");
+  const [selectedBot2, setSelectedBot2] = useState("");
 
   const bot2Query = graphql`
     query RequestMatchModalBot2Query($name: String) {
@@ -95,8 +87,15 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [bot2QueryRef, loadBot2Query] =
     useQueryLoader<RequestMatchModalBot2Query>(bot2Query);
   useEffect(() => {
-    loadBot2Query({ name: queryVariablesBot2Refactor });
-  }, [queryVariablesBot2Refactor, loadBot2Query]);
+    loadBot2Query({ name: queryVariablesBot2 });
+  }, [queryVariablesBot2, loadBot2Query]);
+
+  //Specific Map Query
+  // ____________________
+  const [queryVariablesSpecificMap, setQueryVariablesSpecificMap] =
+    useState("");
+
+  const [selectedSpecificMap, setSelectedSpecificMap] = useState("");
 
   const specificMapQuery = graphql`
     query RequestMatchModalSpecificMapQuery($name: String) {
@@ -114,8 +113,14 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [specificMapQueryRef, loadSpecificMapQuery] =
     useQueryLoader<RequestMatchModalSpecificMapQuery>(specificMapQuery);
   useEffect(() => {
-    loadSpecificMapQuery({ name: queryVariablesSpecificMapRefactor });
-  }, [queryVariablesSpecificMapRefactor, loadSpecificMapQuery]);
+    loadSpecificMapQuery({ name: queryVariablesSpecificMap });
+  }, [queryVariablesSpecificMap, loadSpecificMapQuery]);
+
+  // MapPool Query
+  // ____________________
+  const [queryVariablesMapPool, setQueryVariablesMapPool] = useState("");
+
+  const [selectedMapPool, setSelectedMapPool] = useState("");
 
   const mapPoolQuery = graphql`
     query RequestMatchModalMapPoolQuery($name: String) {
@@ -132,8 +137,10 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [mapPoolQueryRef, loadMapPoolQuery] =
     useQueryLoader<RequestMatchModalMapPoolQuery>(mapPoolQuery);
   useEffect(() => {
-    loadMapPoolQuery({ name: queryVariablesMapPoolRefactor });
-  }, [queryVariablesMapPoolRefactor, loadMapPoolQuery]);
+    loadMapPoolQuery({ name: queryVariablesMapPool });
+  }, [queryVariablesMapPool, loadMapPoolQuery]);
+  // Request Match Query
+  // ____________________
 
   const [requestMatch, updating] = useMutation<RequestMatchModalMutation>(
     graphql`
@@ -160,17 +167,17 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     setMapSelectionType("specific_map");
     setMatchCount(1);
 
-    setQueryVariablesBot1Refactor("");
-    setSelectedBot1Refactor("");
+    setQueryVariablesBot1("");
+    setSelectedBot1("");
 
-    setQueryVariablesBot2Refactor("");
-    setSelectedBot2Refactor("");
+    setQueryVariablesBot2("");
+    setSelectedBot2("");
 
-    setQueryVariablesSpecificMapRefactor("");
-    setSelectedSpecificMapRefactor("");
+    setQueryVariablesSpecificMap("");
+    setSelectedSpecificMap("");
 
-    setQueryVariablesMapPoolRefactor("");
-    setSelectedMapPoolRefactor("");
+    setQueryVariablesMapPool("");
+    setSelectedMapPool("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -179,18 +186,16 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     requestMatch({
       variables: {
         input: {
-          bot1: selectedBot1Refactor,
-          bot2: selectedBot2Refactor,
+          bot1: selectedBot1,
+          bot2: selectedBot2,
           matchCount: matchCount,
           mapSelectionType: mapSelectionType,
           chosenMap:
             mapSelectionType === "specific_map"
-              ? selectedSpecificMapRefactor
+              ? selectedSpecificMap
               : undefined,
           mapPool:
-            mapSelectionType === "map_pool"
-              ? selectedMapPoolRefactor
-              : undefined,
+            mapSelectionType === "map_pool" ? selectedMapPool : undefined,
         },
       },
       onCompleted: (...args) => {
@@ -204,7 +209,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     });
   };
   const isFormValid = (): boolean => {
-    if (!selectedBot1Refactor || !selectedBot2Refactor) {
+    if (!selectedBot1 || !selectedBot2) {
       return false;
     }
     if (!matchCount || matchCount < 1) {
@@ -212,11 +217,11 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     }
 
     if (mapSelectionType === "specific_map") {
-      if (!selectedSpecificMapRefactor) {
+      if (!selectedSpecificMap) {
         return false;
       }
     } else if (mapSelectionType === "map_pool") {
-      if (!selectedMapPoolRefactor) {
+      if (!selectedMapPool) {
         return false;
       }
     } else {
@@ -237,15 +242,15 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         <div className="mb-4">
           <label className="block text-left font-medium mb-1">Bot 1</label>
           {bot1QueryRef ? (
-            <SelectSearchListV2
+            <SelectSearchList
               query={bot1Query}
               dataRef={bot1QueryRef}
               dataPath="bots.edges"
-              onChangeRefactor={(value) => {
-                setQueryVariablesBot1Refactor(value);
+              onChange={(value) => {
+                setQueryVariablesBot1(value);
               }}
-              onSelectRefactor={(value) => {
-                setSelectedBot1Refactor(value);
+              onSelect={(value) => {
+                setSelectedBot1(value);
               }}
               placeholder="Search for bots..."
             />
@@ -253,15 +258,15 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
 
           <label className="block text-left font-medium mb-1">Bot 2</label>
           {bot2QueryRef ? (
-            <SelectSearchListV2
+            <SelectSearchList
               query={bot2Query}
               dataRef={bot2QueryRef}
               dataPath="bots.edges"
-              onChangeRefactor={(value) => {
-                setQueryVariablesBot2Refactor(value);
+              onChange={(value) => {
+                setQueryVariablesBot2(value);
               }}
-              onSelectRefactor={(value) => {
-                setSelectedBot2Refactor(value);
+              onSelect={(value) => {
+                setSelectedBot2(value);
               }}
               placeholder="Search for bots..."
             />
@@ -314,15 +319,15 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                 Specific Map
               </label>
               {specificMapQueryRef ? (
-                <SelectSearchListV2
+                <SelectSearchList
                   query={specificMapQuery}
                   dataRef={specificMapQueryRef}
                   dataPath="maps.edges"
-                  onChangeRefactor={(value) => {
-                    setQueryVariablesSpecificMapRefactor(value);
+                  onChange={(value) => {
+                    setQueryVariablesSpecificMap(value);
                   }}
-                  onSelectRefactor={(value) => {
-                    setSelectedSpecificMapRefactor(value);
+                  onSelect={(value) => {
+                    setSelectedSpecificMap(value);
                   }}
                   placeholder="Search for specific map..."
                   maxHeight="small"
@@ -336,15 +341,15 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                 Map pool
               </label>
               {mapPoolQueryRef ? (
-                <SelectSearchListV2
+                <SelectSearchList
                   query={mapPoolQuery}
                   dataRef={mapPoolQueryRef}
                   dataPath="mapPools.edges"
-                  onChangeRefactor={(value) => {
-                    setQueryVariablesMapPoolRefactor(value);
+                  onChange={(value) => {
+                    setQueryVariablesMapPool(value);
                   }}
-                  onSelectRefactor={(value) => {
-                    setSelectedMapPoolRefactor(value);
+                  onSelect={(value) => {
+                    setSelectedMapPool(value);
                   }}
                   placeholder="Search for map pool..."
                   maxHeight="small"

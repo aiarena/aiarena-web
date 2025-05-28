@@ -1,63 +1,99 @@
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
+import {
+  GraphQLTaggedNode,
+  PreloadedQuery,
+  usePreloadedQuery,
+} from "react-relay";
+import { OperationType } from "relay-runtime";
 
-// Define types for our component
-interface Option {
+interface Data {
   id: string;
   label: string;
 }
 
-interface SearchOrSelectValue {
-  select: string;
-  searchAndDisplay: string;
-}
+interface SelectSearchProps<TQuery extends OperationType> {
+  query: GraphQLTaggedNode;
+  dataRef: PreloadedQuery<TQuery>;
+  dataPath: string;
 
-interface SelectSearchProps {
-  options: Option[];
-  searchOrSelect: SearchOrSelectValue;
-  onChange: (value: SearchOrSelectValue) => void;
-  onSearch: (searchTerm: string) => void;
+  onChange: (value: string) => void;
+  onSelect: (value: string) => void;
+
   maxHeight?: string;
-  isLoading?: boolean;
   placeholder?: string;
   className?: string;
+  searchTimeout?: number;
 }
 
-const SelectSearchList: React.FC<SelectSearchProps> = ({
-  options,
-  searchOrSelect,
+const SelectSearchList = <TQuery extends OperationType>({
+  query,
+  dataRef,
+  dataPath,
+
   onChange,
-  onSearch,
+  onSelect,
+
   maxHeight = "medium",
-  isLoading = false,
   placeholder = "Search or select...",
   className = "",
-}) => {
+  searchTimeout = 1000,
+}: SelectSearchProps<TQuery>) => {
+  function getNestedValue(obj: unknown, path: string): unknown {
+    return path.split(".").reduce((acc: unknown, key: string) => {
+      if (typeof acc === "object" && acc !== null && key in acc) {
+        return (acc as Record<string, unknown>)[key];
+      }
+      return undefined;
+    }, obj);
+  }
+
   const heightClassMap: Record<string, string> = {
     small: "max-h-36",
     medium: "max-h-48",
     large: "max-h-64",
   };
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const [inputFieldValue, setInputFieldValue] = useState<string>("");
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize display value from prop
-  useEffect(() => {
-    if (searchOrSelect?.searchAndDisplay) {
-      setSearchTerm(searchOrSelect.searchAndDisplay);
-    } else if (searchOrSelect?.select) {
-      const selectedOption = options.find(
-        (opt) => opt.id === searchOrSelect.select
-      );
-      if (selectedOption) {
-        setSearchTerm(selectedOption.label);
-      }
-    }
-  }, [searchOrSelect, options]);
+  const [isLoading, setIsLoading] = useState(false);
+  const queryResponse = usePreloadedQuery(query, dataRef);
 
-  // Close dropdown when clicking outside
+  const data = React.useMemo(() => {
+    function getNodesFromPath(response: unknown, path: string): unknown[] {
+      const value = getNestedValue(response, path);
+      if (Array.isArray(value)) {
+        return value.map((e) =>
+          typeof e === "object" && e !== null && "node" in e ? e.node : e
+        );
+      }
+      return [];
+    }
+
+    const nodes = getNodesFromPath(queryResponse, dataPath);
+
+    return nodes
+      .map((item) => {
+        if (
+          typeof item === "object" &&
+          item !== null &&
+          "id" in item &&
+          "name" in item
+        ) {
+          return {
+            id: item.id,
+            label: item.name,
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as Data[];
+  }, [queryResponse, dataPath]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -74,15 +110,27 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (data) {
+      setIsLoading(false);
+    }
+  }, [data]);
+
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setSearchTerm(value);
 
-    // Call onChange immediately for UI update
-    onChange({ select: "", searchAndDisplay: value });
+    setInputFieldValue(value);
+    setIsLoading(true);
 
-    // Call onSearch to trigger loading state and start the search process
-    onSearch(value);
+    // This is the timeout between entering a value - and executing a search
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = setTimeout(() => {
+      onChange(value);
+    }, searchTimeout);
 
     // Open dropdown if it's not already open
     if (!isOpen) {
@@ -90,9 +138,9 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
     }
   };
 
-  const handleOptionSelect = (option: Option) => {
-    setSearchTerm(option.label);
-    onChange({ select: option.id, searchAndDisplay: option.label });
+  const handleOptionSelect = (option: Data) => {
+    setInputFieldValue(option.label);
+    onSelect(option.id);
     setIsOpen(false);
     inputRef.current?.focus();
   };
@@ -112,7 +160,7 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
           type="text"
           className="w-full px-4 py-2 text-left"
           placeholder={placeholder}
-          value={searchTerm}
+          value={inputFieldValue}
           onChange={handleInputChange}
           onClick={() => setIsOpen(true)}
         />
@@ -153,9 +201,9 @@ const SelectSearchList: React.FC<SelectSearchProps> = ({
               <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
               Loading...
             </div>
-          ) : options.length > 0 ? (
+          ) : data.length > 0 ? (
             <ul className="py-1 text-left">
-              {options.map((option) => (
+              {data.map((option) => (
                 <li
                   key={option.id}
                   className="px-4 py-2 cursor-pointer hover:bg-neutral-700"
