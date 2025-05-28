@@ -66,6 +66,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
           alt="User avatar"
           width={avatarSize.avatar}
           height={avatarSize.avatar}
+          className="bg-white"
         />
       </div>
 
