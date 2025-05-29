@@ -97,28 +97,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       onError,
     });
   };
-  const isFormValid = (): boolean => {
-    if (!selectedBot1 || !selectedBot2) {
-      return false;
-    }
-    if (!matchCount || matchCount < 1) {
-      return false;
-    }
-
-    if (mapSelectionType === "specific_map") {
-      if (!selectedSpecificMap) {
-        return false;
-      }
-    } else if (mapSelectionType === "map_pool") {
-      if (!selectedMapPool) {
-        return false;
-      }
-    } else {
-      return false;
-    }
-
-    return true;
-  };
 
   return (
     <Modal onClose={onClose} isOpen={isOpen} title="Request Match">
@@ -126,7 +104,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         handleSubmit={handleSubmit}
         submitTitle="Request Match"
         loading={updating}
-        disabled={!isFormValid()}
       >
         <div className="mb-4 flex flex-col gap-2">
           <div className="flex flex-col gap-1">
