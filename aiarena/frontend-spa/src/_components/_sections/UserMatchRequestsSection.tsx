@@ -129,7 +129,7 @@ export default function UserMatchRequestsSection(
           defaultSortOrder="desc"
           fieldLabels={{
             status: "Status",
-            id: "Match ID",
+            displayId: "Match ID",
             "participant1.name": "Player 1",
             "participant2.name": "Player 2",
             "map.name": "Map",
@@ -139,7 +139,7 @@ export default function UserMatchRequestsSection(
           }}
           fieldClasses={{
             status: "hidden md:flex",
-            id: "hidden md:flex",
+            displayId: "hidden md:flex",
             "map.name": "hidden lg:flex",
             tags: "hidden lg:flex",
             started: "hidden sm:flex",
