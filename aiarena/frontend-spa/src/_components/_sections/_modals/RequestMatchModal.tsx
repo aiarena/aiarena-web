@@ -5,12 +5,14 @@ import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMuta
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import Form from "@/_components/_props/Form";
 
-import { RequestMatchModalSpecificMapQuery } from "./__generated__/RequestMatchModalSpecificMapQuery.graphql";
 import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModalMapPoolQuery.graphql";
 import SelectSearchList from "@/_components/_props/SelectSearchList";
 import BotSearchList, {
   BotType,
 } from "@/_components/_sections/_modals/BotSearchList.tsx";
+import MapSearchList, {
+  MapType,
+} from "@/_components/_sections/_modals/MapSearchList.tsx";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -38,29 +40,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
 
   //Specific Map Query
   // ____________________
-  const [queryVariablesSpecificMap, setQueryVariablesSpecificMap] =
-    useState("");
-
-  const [selectedSpecificMap, setSelectedSpecificMap] = useState("");
-
-  const specificMapQuery = graphql`
-    query RequestMatchModalSpecificMapQuery($name: String) {
-      maps(name: $name, first: 10) {
-        edges {
-          node {
-            id
-            name
-          }
-        }
-      }
-    }
-  `;
-
-  const [specificMapQueryRef, loadSpecificMapQuery] =
-    useQueryLoader<RequestMatchModalSpecificMapQuery>(specificMapQuery);
-  useEffect(() => {
-    loadSpecificMapQuery({ name: queryVariablesSpecificMap });
-  }, [queryVariablesSpecificMap, loadSpecificMapQuery]);
+  const [selectedSpecificMap, setSelectedSpecificMap] =
+    useState<MapType | null>(null);
 
   // MapPool Query
   // ____________________
@@ -116,8 +97,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     setSelectedBot1(null);
     setSelectedBot2(null);
 
-    setQueryVariablesSpecificMap("");
-    setSelectedSpecificMap("");
+    setSelectedSpecificMap(null);
 
     setQueryVariablesMapPool("");
     setSelectedMapPool("");
@@ -135,7 +115,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           mapSelectionType: mapSelectionType,
           chosenMap:
             mapSelectionType === "specific_map"
-              ? selectedSpecificMap
+              ? selectedSpecificMap?.id
               : undefined,
           mapPool:
             mapSelectionType === "map_pool" ? selectedMapPool : undefined,
@@ -238,21 +218,10 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <label className="block text-left font-medium mb-1">
                 Specific Map
               </label>
-              {specificMapQueryRef ? (
-                <SelectSearchList
-                  query={specificMapQuery}
-                  dataRef={specificMapQueryRef}
-                  dataPath="maps.edges"
-                  onChange={(value) => {
-                    setQueryVariablesSpecificMap(value);
-                  }}
-                  onSelect={(value) => {
-                    setSelectedSpecificMap(value);
-                  }}
-                  placeholder="Search for specific map..."
-                  maxHeight="small"
-                />
-              ) : null}
+              <MapSearchList
+                value={selectedSpecificMap}
+                setValue={setSelectedSpecificMap}
+              />
             </div>
           ) : null}
           {mapSelectionType == "map_pool" ? (
