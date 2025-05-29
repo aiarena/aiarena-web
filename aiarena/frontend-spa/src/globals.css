@@ -86,6 +86,9 @@
   select {
     @apply pl-4 mr-2 focus:ring-customGreen focus:outline-none focus:ring-2 rounded-md bg-neutral-900 border border-neutral-600  gap-3;
   }
+  button {
+    @apply cursor-pointer;
+  }
 }
 
 body {
@@ -101,10 +104,6 @@ a {
 
 a:hover {
   color: white;
-  cursor: pointer;
-}
-
-button:hover {
   cursor: pointer;
 }
 

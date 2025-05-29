@@ -16,7 +16,7 @@ interface SquareButtonProps {
 export default function SquareButton({
   href,
   text,
-  className,
+  className = "",
   outerClassName,
   onClick,
   isLoading,
@@ -83,7 +83,7 @@ export default function SquareButton({
             ${
               !disabled
                 ? "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
-                : "bg-darken border-gray-700 hover:bg-darken hover:border-gray-700 "
+                : "bg-darken border-gray-700 hover:bg-darken hover:border-gray-700 cursor-not-allowed"
             }
             ${className}`}
           disabled={isLoading || disabled}
