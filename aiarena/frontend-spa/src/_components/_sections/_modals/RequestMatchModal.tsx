@@ -43,6 +43,9 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     graphql`
       mutation RequestMatchModalMutation($input: RequestMatchInput!) {
         requestMatch(input: $input) {
+          viewer {
+            ...UserMatchRequestsSection_viewer
+          }
           match {
             id
           }
