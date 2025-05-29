@@ -181,10 +181,9 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             <input
               className="w-16"
               value={matchCount}
-              type="number"
-              min="1"
-              step="1"
-              onChange={(e) => setMatchCount(parseInt(e.target.value))}
+              onChange={(e) =>
+                setMatchCount(parseInt(e.target.value.replace(/\D/g, "")) || 1)
+              }
               aria-describedby="match-count-help"
             />
             <div id="match-count-help" className="sr-only">
