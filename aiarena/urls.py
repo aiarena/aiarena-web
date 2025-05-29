@@ -116,6 +116,9 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("sitemap.xml/", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", include("robots.urls")),
     path("private-media/", include(private_storage.urls)),
+    path("dashboard/bots/", core_views.frontend, name="dashboard_bots"),
+    path("dashboard/match-requests/", core_views.frontend, name="dashboard_match_requests"),
+    path("dashboard/profile/", core_views.frontend, name="dashboard_profile"),
     re_path("^dashboard/.*", core_views.frontend, name="dashboard"),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT

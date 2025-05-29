@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 export default function UserRoot() {
   const navigate = useNavigate();
   useEffect(() => {
-    navigate("userbots");
+    navigate("bots");
   }, [navigate]);
 
   return (

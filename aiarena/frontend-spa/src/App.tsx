@@ -17,9 +17,9 @@ export default function App() {
         <Route path="competitions" element={<NotImplemented />} />
         <Route path="about" element={<NotImplemented />} />
         <Route path="status" element={<NotImplemented />} />
-        <Route path="userbots" element={<UserBots />} />
-        <Route path="matchrequests" element={<MatchRequests />} />
-        <Route path="user" element={<UserSettings />} />
+        <Route path="bots" element={<UserBots />} />
+        <Route path="match-requests" element={<MatchRequests />} />
+        <Route path="profile" element={<UserSettings />} />
         {getFeatureFlags().examples && (
           <Route path="examples" element={<Examples />} />
         )}
