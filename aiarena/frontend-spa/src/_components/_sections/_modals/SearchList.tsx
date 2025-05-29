@@ -57,6 +57,7 @@ export default function SearchList({
       <ComboboxOptions
         anchor="bottom"
         transition
+        modal={false}
         className={clsx(
           "w-(--input-width)",
           "rounded-sm",
