@@ -160,6 +160,8 @@ REST_FRAMEWORK = {
 GRAPHENE = {
     "SCHEMA": "aiarena.schema.schema",
     "SCHEMA_OUTPUT": APP_DIR / "schema.graphql",
+    "ATOMIC_MUTATIONS": True,
+    "ATOMIC_REQUESTS": True,
 }
 
 CACHES = {
