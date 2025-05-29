@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import SectionDivider from "../_display/SectionDivider";
 import BackgroundTexture from "../_display/BackgroundTexture";
@@ -20,6 +20,14 @@ const Modal = ({
   keepUnsetOnClose,
   size = "m",
 }: ModalProps) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      modalRef.current.focus();
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -38,6 +46,10 @@ const Modal = ({
       <div
         className={` rounded-lg shadow-md w-full ${size == "m" ? "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl" : null} ${size == "l" ? "max-w-screen" : null}`}
         onClick={(e) => e.stopPropagation()}
+        ref={modalRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
       >
         <BackgroundTexture className="rounded-lg border-1 border-neutral-700">
           <div className=" max-h-screen ">
