@@ -3,18 +3,10 @@ import { fetchQuery, graphql } from "react-relay";
 import RelayEnvironment from "@/_lib/RelayEnvironment.ts";
 import { getNodes } from "@/_lib/relayHelpers.ts";
 import {
-  Combobox,
-  ComboboxButton,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-} from "@headlessui/react";
-import clsx from "clsx";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import {
   BotSearchListQuery,
   BotSearchListQuery$data,
 } from "./__generated__/BotSearchListQuery.graphql";
+import SearchList from "@/_components/_sections/_modals/SearchList.tsx";
 
 export type BotType = NonNullable<
   NonNullable<
@@ -55,63 +47,12 @@ export default function BotSearchList({ value, setValue }: BotSearchListProps) {
   }, [query]);
 
   return (
-    <Combobox value={value} onChange={setValue} immediate>
-      <div className="relative">
-        <ComboboxInput
-          className={clsx(
-            "bg-neutral-900",
-            "border",
-            "border-neutral-600",
-            "pl-4",
-            "pr-8",
-            "py-2",
-            "rounded-sm",
-            "text-white",
-            "w-full",
-          )}
-          placeholder="Search for bots..."
-          displayValue={(bot: BotType) => bot?.name}
-          onChange={(event) => setQuery(event.target.value)}
-        />
-        <ComboboxButton
-          className={clsx("absolute", "inset-y-0", "right-0", "px-2.5")}
-        >
-          <ChevronDownIcon className={clsx("size-4 ", "fill-white")} />
-        </ComboboxButton>
-      </div>
-
-      <ComboboxOptions
-        anchor="bottom"
-        transition
-        className={clsx(
-          "w-(--input-width)",
-          "rounded-sm",
-          "border",
-          "border-white/5",
-          "bg-neutral-900",
-          "p-1",
-          "[--anchor-gap:--spacing(1)]",
-          "z-100",
-        )}
-      >
-        {options.map((bot: BotType) => (
-          <ComboboxOption
-            key={bot.id}
-            value={bot}
-            className={clsx(
-              "cursor-pointer",
-              "rounded-sm",
-              "px-4",
-              "py-2",
-              "select-none",
-              "data-focus:bg-white/10",
-              "text-white",
-            )}
-          >
-            {bot.name}
-          </ComboboxOption>
-        ))}
-      </ComboboxOptions>
-    </Combobox>
+    <SearchList
+      value={value}
+      setValue={(newValue) => setValue(newValue as BotType)}
+      options={options}
+      setQuery={setQuery}
+      displayValue={(bot) => (bot as BotType)?.name}
+    />
   );
 }
