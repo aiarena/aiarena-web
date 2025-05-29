@@ -58,6 +58,11 @@ export default function UserMatchRequestsSection(
   const matchRequestsUsed =
     viewer.requestMatchesLimit - viewer.requestMatchesCountLeft;
 
+  const parsedData = getNodes(viewer.requestedMatches).map((item) => ({
+    ...item,
+    displayId: extractRelayID(item.id, "MatchType"),
+  }));
+
   return (
     <section className="h-full" aria-labelledby="match-requests-heading">
       <h2 id="match-requests-heading" className="sr-only">
@@ -108,11 +113,11 @@ export default function UserMatchRequestsSection(
         </h3>
         <FilterableList
           classes="mt-4 shadow-lg shadow-black bg-darken-2 backdrop-blur-sm"
-          data={getNodes(viewer.requestedMatches)}
+          data={parsedData}
           hideMenu={true}
           fields={[
             "status",
-            "id",
+            "displayId",
             "participant1.name",
             "participant2.name",
             "map.name",
@@ -163,7 +168,7 @@ export default function UserMatchRequestsSection(
                   role="cell"
                   aria-label={`View match details for match ID ${match.id}`}
                 >
-                  {extractRelayID(match.id, "MatchType")}
+                  {match.displayId}
                 </a>
 
                 <a
