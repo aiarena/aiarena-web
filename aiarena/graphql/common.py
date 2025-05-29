@@ -68,6 +68,7 @@ class CleanedInputMutation(graphene.Mutation):
 
     errors = graphene.List(graphene.NonNull(ErrorType), required=True)
     node = graphene.relay.Node.Field()
+    viewer = graphene.Field("aiarena.graphql.ViewerType")
 
     @classmethod
     def __init_subclass_with_meta__(
@@ -215,6 +216,12 @@ class CleanedInputMutation(graphene.Mutation):
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object):
         raise NotImplementedError()
+
+    @staticmethod
+    def resolve_viewer(root, info, **args):
+        if info.context.user.is_authenticated:
+            return info.context.user
+        return None
 
 
 class CleanedInputTypeOptions(InputObjectTypeOptions):
