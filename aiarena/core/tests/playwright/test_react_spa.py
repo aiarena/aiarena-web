@@ -20,11 +20,7 @@ def test_spa_nav_to_django(page: Page, bh: BrowserHelper):
 
 
 def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admin_user, all_bot_races):
-    page.goto(bh.reverse("login"))
-    page.get_by_label("Username:").fill("billy")
-    page.get_by_label("Password:").fill("guest")
-    page.get_by_role("button", name="Log in").click()
-    expect(page.locator("#sidebar-items")).to_contain_text("Logged in: billy")
+    bh.log_in(user, page)
 
     page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.get_by_role("button", name="Upload Bot")).to_be_visible()
@@ -39,11 +35,7 @@ def test_spa_userbots_shows_active_competition_participations(
     all_bot_races,
 ):
     generated_python_file = python_zip_file()
-    page.goto(bh.reverse("login"))
-    page.get_by_label("Username:").fill("billy")
-    page.get_by_label("Password:").fill("guest")
-    page.get_by_role("button", name="Log in").click()
-    expect(page.locator("#sidebar-items")).to_contain_text("Logged in: billy")
+    bh.log_in(user, page)
 
     page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.get_by_role("button", name="Upload Bot")).to_be_visible()

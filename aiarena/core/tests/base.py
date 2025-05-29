@@ -7,6 +7,7 @@ from django.test import Client
 from django.urls import reverse
 
 import graphene
+from playwright.sync_api import Page, expect
 from pytest_django.live_server_helper import LiveServer
 
 from aiarena.core.models import WebsiteUser
@@ -23,7 +24,14 @@ class BrowserHelper:
         if not parsed.netloc:
             live = urlparse(self.live_server.url)
             parsed = parsed._replace(scheme=live.scheme, netloc=live.netloc)
-        return urlunparse(parsed)
+        return str(urlunparse(parsed))
+
+    def log_in(self, user: WebsiteUser, page: Page):
+        page.goto(self.reverse("login"))
+        page.get_by_label("Username:").fill("billy")
+        page.get_by_label("Password:").fill("guest")
+        page.get_by_role("button", name="Log in").click()
+        expect(page.locator("#sidebar-items")).to_contain_text(f"Logged in: {user.username}")
 
 
 class GraphQLTest:
