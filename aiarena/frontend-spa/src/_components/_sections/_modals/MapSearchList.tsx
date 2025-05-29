@@ -53,6 +53,7 @@ export default function MapSearchList({ value, setValue }: MapSearchListProps) {
       options={options}
       setQuery={setQuery}
       displayValue={(map) => (map as MapType)?.name}
+      placeholder="Search maps..."
     />
   );
 }

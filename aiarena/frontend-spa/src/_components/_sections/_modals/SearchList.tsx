@@ -19,6 +19,7 @@ interface SearchListProps {
   options: SearchListOption[];
   setQuery: (newValue: string) => void;
   displayValue: (option: SearchListOption) => string;
+  placeholder: string;
 }
 
 export default function SearchList({
@@ -27,6 +28,7 @@ export default function SearchList({
   options,
   setQuery,
   displayValue,
+  placeholder,
 }: SearchListProps) {
   return (
     <Combobox value={value} onChange={setValue} immediate>
@@ -43,7 +45,7 @@ export default function SearchList({
             "text-white",
             "w-full",
           )}
-          placeholder="Search for bots..."
+          placeholder={placeholder}
           displayValue={displayValue}
           onChange={(event) => setQuery(event.target.value)}
         />

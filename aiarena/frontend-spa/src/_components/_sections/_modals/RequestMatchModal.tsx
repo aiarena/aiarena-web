@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Modal from "@/_components/_props/Modal";
-import { graphql, useMutation, useQueryLoader } from "react-relay";
+import { graphql, useMutation } from "react-relay";
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import Form from "@/_components/_props/Form";
 
-import { RequestMatchModalMapPoolQuery } from "./__generated__/RequestMatchModalMapPoolQuery.graphql";
-import SelectSearchList from "@/_components/_props/SelectSearchList";
 import BotSearchList, {
   BotType,
 } from "@/_components/_sections/_modals/BotSearchList.tsx";
 import MapSearchList, {
   MapType,
 } from "@/_components/_sections/_modals/MapSearchList.tsx";
+import MapPoolSearchList, {
+  MapPoolType,
+} from "@/_components/_sections/_modals/MapPoolSearchList.tsx";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -27,45 +28,14 @@ interface UploadBotModal {
 export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [mapSelectionType, setMapSelectionType] = useState("specific_map");
   const [matchCount, setMatchCount] = useState(1);
-
-  //Bot 2 Query
-  // ____________________
-
   const [selectedBot1, setSelectedBot1] = useState<BotType | null>(null);
-
-  // Bot 2 Query
-  // ____________________
-
   const [selectedBot2, setSelectedBot2] = useState<BotType | null>(null);
-
-  //Specific Map Query
-  // ____________________
   const [selectedSpecificMap, setSelectedSpecificMap] =
     useState<MapType | null>(null);
+  const [selectedMapPool, setSelectedMapPool] = useState<MapPoolType | null>(
+    null,
+  );
 
-  // MapPool Query
-  // ____________________
-  const [queryVariablesMapPool, setQueryVariablesMapPool] = useState("");
-
-  const [selectedMapPool, setSelectedMapPool] = useState("");
-
-  const mapPoolQuery = graphql`
-    query RequestMatchModalMapPoolQuery($name: String) {
-      mapPools(name: $name, first: 10) {
-        edges {
-          node {
-            id
-            name
-          }
-        }
-      }
-    }
-  `;
-  const [mapPoolQueryRef, loadMapPoolQuery] =
-    useQueryLoader<RequestMatchModalMapPoolQuery>(mapPoolQuery);
-  useEffect(() => {
-    loadMapPoolQuery({ name: queryVariablesMapPool });
-  }, [queryVariablesMapPool, loadMapPoolQuery]);
   // Request Match Query
   // ____________________
 
@@ -93,14 +63,10 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const resetAllStateFields = () => {
     setMapSelectionType("specific_map");
     setMatchCount(1);
-
     setSelectedBot1(null);
     setSelectedBot2(null);
-
     setSelectedSpecificMap(null);
-
-    setQueryVariablesMapPool("");
-    setSelectedMapPool("");
+    setSelectedMapPool(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -118,7 +84,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               ? selectedSpecificMap?.id
               : undefined,
           mapPool:
-            mapSelectionType === "map_pool" ? selectedMapPool : undefined,
+            mapSelectionType === "map_pool" ? selectedMapPool?.id : undefined,
         },
       },
       onCompleted: (...args) => {
@@ -228,21 +194,10 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <label className="block text-left font-medium mb-1">
                 Map pool
               </label>
-              {mapPoolQueryRef ? (
-                <SelectSearchList
-                  query={mapPoolQuery}
-                  dataRef={mapPoolQueryRef}
-                  dataPath="mapPools.edges"
-                  onChange={(value) => {
-                    setQueryVariablesMapPool(value);
-                  }}
-                  onSelect={(value) => {
-                    setSelectedMapPool(value);
-                  }}
-                  placeholder="Search for map pool..."
-                  maxHeight="small"
-                />
-              ) : null}
+              <MapPoolSearchList
+                value={selectedMapPool}
+                setValue={setSelectedMapPool}
+              />
             </div>
           ) : null}
         </div>
