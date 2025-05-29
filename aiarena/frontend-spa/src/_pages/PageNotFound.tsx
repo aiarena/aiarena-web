@@ -9,7 +9,7 @@ export default function PageNotFound() {
       >
         404
         <span
-          className="bg-customGreen px-3 py-1 text-sm font-semibold tracking-normal rounded rotate-6 absolute top-16 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+          className="border-4  border-customGreen bg-neutral-900 px-3 py-1 text-sm font-semibold tracking-normal rounded rotate-6 absolute top-16 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
           aria-hidden="true"
         >
           Page Not Found
@@ -20,7 +20,7 @@ export default function PageNotFound() {
       </p>
       <Link to="/dashboard/">
         <span
-          className="hover:border-4 border-4 border-customGreen bg-customGreen hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform"
+          className="hover:border-4 border-4 border-customGreen bg-neutral-900 hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform"
           aria-label="Navigate back to the main dashboard with your bots"
         >
           Back to Bots
