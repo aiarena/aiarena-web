@@ -169,7 +169,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           ) : null}
           {mapSelectionType == "map_pool" ? (
             <label className="mb-16 font-medium flex flex-col gap-1">
-              <span>Map Pool</span>
+              <span>Map pool</span>
               <MapPoolSearchList
                 value={selectedMapPool}
                 setValue={setSelectedMapPool}
