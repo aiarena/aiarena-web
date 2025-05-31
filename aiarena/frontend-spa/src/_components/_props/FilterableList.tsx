@@ -39,10 +39,10 @@ export default function FilterableList<T>({
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">(defaultSortOrder);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterStates, setFilterStates] = useState<{ [key: string]: string }>(
-    {},
+    {}
   );
   const [resultsPerPage, setResultsPerPage] = useState<number>(
-    initialResultsPerPage,
+    initialResultsPerPage
   );
   const [showFilterMenu, setShowFilterMenu] = useState<boolean>(false);
 
@@ -80,7 +80,7 @@ export default function FilterableList<T>({
         return fields.some(
           (field) =>
             getNestedValue(item, field) &&
-            searchRegex.test(String(getNestedValue(item, field))),
+            searchRegex.test(String(getNestedValue(item, field)))
         );
       } else if (filter.type === "dropdown") {
         return filterValue
@@ -108,10 +108,10 @@ export default function FilterableList<T>({
 
     // Safely access the sortField values using the getNestedValue function
     const valueA = String(
-      getNestedValue(a, String(sortField)) || "",
+      getNestedValue(a, String(sortField)) || ""
     ).toLowerCase();
     const valueB = String(
-      getNestedValue(b, String(sortField)) || "",
+      getNestedValue(b, String(sortField)) || ""
     ).toLowerCase();
 
     // Compare the string values based on sortOrder
@@ -127,13 +127,13 @@ export default function FilterableList<T>({
 
   const paginatedData = sortedData.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize,
+    currentPage * pageSize
   );
   const totalPages = Math.ceil(filteredData.length / pageSize);
 
   // Ensure current page is valid
   useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
+    if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
   }, [totalPages, currentPage]);
@@ -146,7 +146,7 @@ export default function FilterableList<T>({
   };
 
   const handleChangeResultsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = Number(event.target.value);
     if (!isNaN(value) && value >= 1) {
@@ -208,10 +208,10 @@ export default function FilterableList<T>({
                 new Set(
                   data
                     .map(
-                      (item) => item && String(item[filter.field as keyof T]),
+                      (item) => item && String(item[filter.field as keyof T])
                     )
-                    .filter((value) => value),
-                ),
+                    .filter((value) => value)
+                )
               );
 
               return (
@@ -248,7 +248,7 @@ export default function FilterableList<T>({
           <button
             key={index}
             className={`py-2 flex justify-between text-left font-bold text-lg text-customGreen hover:text-white bg-darken-5  border-l border-customGreen hover:border-white pl-2  ${getClassName(
-              field,
+              field
             )}`}
             onClick={() => handleSort(field)}
           >
@@ -284,12 +284,12 @@ export default function FilterableList<T>({
               <li key={index} className=" p-2 h-12">
                 Invalid Data
               </li> // Handle nulls or invalid data
-            ),
+            )
           )}
           {Array.from({ length: pageSize - paginatedData.length }).map(
             (_, index) => (
               <li key={`empty-${index}`} className="h-12"></li>
-            ),
+            )
           )}
         </ul>
       </div>
@@ -299,7 +299,7 @@ export default function FilterableList<T>({
         <div className="flex">
           <button
             onClick={() => setCurrentPage(() => 1)}
-            disabled={currentPage === 1 || totalPages == 0}
+            disabled={currentPage === 1}
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === 1
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
@@ -310,7 +310,7 @@ export default function FilterableList<T>({
           </button>
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1 || totalPages == 0}
+            disabled={currentPage === 1}
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === 1
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
@@ -334,7 +334,7 @@ export default function FilterableList<T>({
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
-            disabled={currentPage === totalPages || totalPages == 0}
+            disabled={currentPage === totalPages}
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === totalPages
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
@@ -345,7 +345,7 @@ export default function FilterableList<T>({
           </button>
           <button
             onClick={() => setCurrentPage(() => totalPages)}
-            disabled={currentPage === totalPages || totalPages == 0}
+            disabled={currentPage === totalPages}
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === totalPages
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
