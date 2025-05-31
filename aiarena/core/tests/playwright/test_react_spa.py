@@ -8,20 +8,21 @@ pytestmark = [pytest.mark.playwright]
 
 
 def test_spa_redirect_to_django_login_if_no_user(page: Page, bh: BrowserHelper):
-    page.goto(bh.reverse("dashboard_bots"))
+    page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.get_by_label("Username")).to_be_visible()
     expect(page.get_by_label("Password")).to_be_visible()
 
 
 def test_spa_nav_to_django(page: Page, bh: BrowserHelper):
-    page.goto(bh.reverse("dashboard_bots"))
+    page.goto(f"{bh.live_server.url}/dashboard/userbots")
     page.get_by_role("link", name="Home").click()
     expect(page.locator("text=Welcome to AI Arena!")).to_be_visible()
 
 
 def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admin_user, all_bot_races):
     bh.log_in(user, page)
-    page.goto(bh.reverse("dashboard_bots"))
+
+    page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.get_by_role("button", name="Upload Bot")).to_be_visible()
 
 
@@ -35,7 +36,8 @@ def test_spa_userbots_shows_active_competition_participations(
 ):
     generated_python_file = python_zip_file()
     bh.log_in(user, page)
-    page.goto(bh.reverse("dashboard_bots"))
+
+    page.goto(f"{bh.live_server.url}/dashboard/userbots")
     expect(page.get_by_role("button", name="Upload Bot")).to_be_visible()
     page.get_by_role("button", name="Upload Bot").click()
 
