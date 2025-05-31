@@ -106,14 +106,14 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         loading={updating}
       >
         <div className="mb-4 flex flex-col gap-2">
-          <label className="flex flex-col gap-1 font-medium">
-            <span>Bot 1</span>
+          <div className="flex flex-col gap-1">
+            <label className="block text-left font-medium">Bot 1</label>
             <BotSearchList value={selectedBot1} setValue={setSelectedBot1} />
-          </label>
-          <label className="flex flex-col gap-1 font-medium">
-            <span>Bot 2</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="block text-left font-medium">Bot 2</label>
             <BotSearchList value={selectedBot2} setValue={setSelectedBot2} />
-          </label>
+          </div>
         </div>
         <div className="mb-4"></div>{" "}
         <div className=" flex flex-wrap gap-4">
@@ -156,22 +156,26 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         </div>
         <div>
           {mapSelectionType == "specific_map" ? (
-            <label className="mb-16 font-medium flex flex-col gap-1">
-              <span>Specific Map</span>
+            <div className="mb-16">
+              <label className="block text-left font-medium mb-1">
+                Specific Map
+              </label>
               <MapSearchList
                 value={selectedSpecificMap}
                 setValue={setSelectedSpecificMap}
               />
-            </label>
+            </div>
           ) : null}
           {mapSelectionType == "map_pool" ? (
-            <label className="mb-16 font-medium flex flex-col gap-1">
-              <span>Map pool</span>
+            <div className="mb-16">
+              <label className="block text-left font-medium mb-1">
+                Map pool
+              </label>
               <MapPoolSearchList
                 value={selectedMapPool}
                 setValue={setSelectedMapPool}
               />
-            </label>
+            </div>
           ) : null}
         </div>
       </Form>
