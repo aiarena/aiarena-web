@@ -156,12 +156,12 @@ def prepare_images():
     build_graphql_schema(environment, img="dev")
     build_frontend()
 
-    # frontend_tag = f"frontend-{build_number}-{docker.ARCH_AMD64}"
-    # docker.build_image(
-    #     "frontend",
-    #     tag=frontend_tag,
-    #     arch=docker.ARCH_AMD64,
-    # )
+    frontend_tag = f"frontend-{build_number}-{docker.ARCH_AMD64}"
+    docker.build_image(
+        "frontend",
+        tag=frontend_tag,
+        arch=docker.ARCH_AMD64,
+    )
 
     cloud_tag = f"cloud-{build_number}-{docker.ARCH_AMD64}"
     docker.build_image(
@@ -172,13 +172,13 @@ def prepare_images():
     )
 
     cloud_images = aws.push_images("cloud", [cloud_tag])
-    # frontend_images = aws.push_images("frontend", [frontend_tag])
+    frontend_images = aws.push_images("frontend", [frontend_tag])
     set_github_actions_output(
         "images",
         json.dumps(
             {
                 "cloud_images": cloud_images,
-                # "frontend_images": frontend_images,
+                "frontend_images": frontend_images,
             }
         ),
     )
@@ -192,7 +192,7 @@ def ecs():
     environment, build_number = deploy_environment()
     images = json.loads(os.environ.get("PREPARED_IMAGES"))
 
-    # aws.push_manifest("frontend", "latest", images["frontend_images"])
+    aws.push_manifest("frontend", "latest", images["frontend_images"])
     aws.push_manifest("cloud", "latest", images["cloud_images"])
 
     # Prepare different environment with root db user for migrations. This is
