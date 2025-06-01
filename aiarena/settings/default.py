@@ -562,6 +562,10 @@ if crontab:
             "task": "aiarena.core.tasks.celery_queue_monitoring",
             "schedule": timedelta(seconds=13),
         },
+        "competitions_monitoring": {
+            "task": "aiarena.core.tasks.competitions_monitoring",
+            "schedule": timedelta(minutes=1),
+        },
         "refresh_patreon_tiers": {
             "task": "aiarena.core.tasks.refresh_patreon_tiers",
             "schedule": crontab(minute=0, hour=0),  # Every day at 00:00

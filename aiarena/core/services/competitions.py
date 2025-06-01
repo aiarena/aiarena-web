@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.db.models import Count
+
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -32,3 +34,13 @@ class Competitions:
     @staticmethod
     def has_reached_maximum_active_rounds(competition: Competition):
         return competition.round_set.filter(complete=False).count() >= competition.max_active_rounds
+
+    @staticmethod
+    def bot_type_stats(competition: Competition):
+        type_to_participant_count = {
+            competition["bot__type"]: competition["total"]
+            for competition in competition.participations.values("bot__type").annotate(total=Count("bot__type"))
+        }
+        for _, bot_type in Bot.TYPES:
+            type_to_participant_count.setdefault(bot_type, 0)
+        return type_to_participant_count
