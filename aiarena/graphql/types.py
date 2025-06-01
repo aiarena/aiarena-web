@@ -368,7 +368,7 @@ class ViewerType(graphene.ObjectType):
     # This is the private viewer user type.
     # Put data only the logged in user should be able view here.
     user = graphene.Field("aiarena.graphql.UserType")
-    id = graphene.ID()
+    id = graphene.ID(required=True)
     api_token = graphene.String()
     email = graphene.String()
     active_bots_limit = graphene.Int()
