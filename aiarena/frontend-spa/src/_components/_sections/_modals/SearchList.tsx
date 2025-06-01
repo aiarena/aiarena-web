@@ -20,6 +20,7 @@ interface SearchListProps {
   setQuery: (newValue: string) => void;
   displayValue: (option: SearchListOption) => string;
   placeholder: string;
+  autocomplete?: "off" | "on";
 }
 
 export default function SearchList({
@@ -29,6 +30,7 @@ export default function SearchList({
   setQuery,
   displayValue,
   placeholder,
+  autocomplete = "off",
 }: SearchListProps) {
   return (
     <Combobox value={value} onChange={setValue} immediate>
@@ -43,11 +45,12 @@ export default function SearchList({
             "py-2",
             "rounded-sm",
             "text-white",
-            "w-full",
+            "w-full"
           )}
           placeholder={placeholder}
           displayValue={displayValue}
           onChange={(event) => setQuery(event.target.value)}
+          autoComplete={autocomplete}
         />
         <ComboboxButton
           className={clsx("absolute", "inset-y-0", "right-0", "px-2.5")}
@@ -68,7 +71,7 @@ export default function SearchList({
           "bg-neutral-900",
           "p-1",
           "[--anchor-gap:--spacing(1)]",
-          "z-100",
+          "z-100"
         )}
       >
         {options.map((bot: SearchListOption) => (
@@ -82,7 +85,7 @@ export default function SearchList({
               "py-2",
               "select-none",
               "data-focus:bg-white/10",
-              "text-white",
+              "text-white"
             )}
           >
             {displayValue(bot)}
