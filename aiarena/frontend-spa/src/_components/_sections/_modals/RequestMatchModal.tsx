@@ -116,7 +116,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
 
           <label className="flex flex-col gap-1 font-medium">
             <span>Bot 2</span>
-
             <BotSearchList value={selectedBot2} setValue={setSelectedBot2} />
           </label>
         </div>

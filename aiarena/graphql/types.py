@@ -218,6 +218,7 @@ class MapType(DjangoObjectTypeWithUID):
         model = models.Map
         fields = ["name", "game_mode", "enabled"]
         filterset_class = MapFilterSet
+        connection_class = CountingConnection
 
     @staticmethod
     def resolve_download_link(root: models.Map, info, **args):

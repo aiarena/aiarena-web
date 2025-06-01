@@ -22,6 +22,7 @@ interface BotSearchListProps {
 export default function BotSearchList({ value, setValue }: BotSearchListProps) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState<BotType[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
 
   useEffect(() => {
     fetchQuery<BotSearchListQuery>(
@@ -29,6 +30,7 @@ export default function BotSearchList({ value, setValue }: BotSearchListProps) {
       graphql`
         query BotSearchListQuery($name: String) {
           bots(name: $name, first: 10) {
+            totalCount
             edges {
               node {
                 id
@@ -39,10 +41,12 @@ export default function BotSearchList({ value, setValue }: BotSearchListProps) {
         }
       `,
       { name: query },
+      { fetchPolicy: "store-or-network" },
     )
       .toPromise()
       .then((data) => {
         setOptions(getNodes(data?.bots));
+        setTotal(data?.bots?.totalCount ?? null);
       });
   }, [query]);
 
@@ -53,7 +57,7 @@ export default function BotSearchList({ value, setValue }: BotSearchListProps) {
       options={options}
       setQuery={setQuery}
       displayValue={(bot) => (bot as BotType)?.name}
-      placeholder="Search bots..."
+      placeholder={total ? `Type to search ${total} bots...` : ""}
     />
   );
 }

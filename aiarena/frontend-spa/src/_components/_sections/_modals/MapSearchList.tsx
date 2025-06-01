@@ -22,6 +22,7 @@ interface MapSearchListProps {
 export default function MapSearchList({ value, setValue }: MapSearchListProps) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState<MapType[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
 
   useEffect(() => {
     fetchQuery<MapSearchListQuery>(
@@ -29,6 +30,7 @@ export default function MapSearchList({ value, setValue }: MapSearchListProps) {
       graphql`
         query MapSearchListQuery($name: String) {
           maps(name: $name, first: 10) {
+            totalCount
             edges {
               node {
                 id
@@ -39,10 +41,12 @@ export default function MapSearchList({ value, setValue }: MapSearchListProps) {
         }
       `,
       { name: query },
+      { fetchPolicy: "store-or-network" },
     )
       .toPromise()
       .then((data) => {
         setOptions(getNodes(data?.maps));
+        setTotal(data?.maps?.totalCount ?? null);
       });
   }, [query]);
 
@@ -53,7 +57,7 @@ export default function MapSearchList({ value, setValue }: MapSearchListProps) {
       options={options}
       setQuery={setQuery}
       displayValue={(map) => (map as MapType)?.name}
-      placeholder="Search maps..."
+      placeholder={total ? `Type to search ${total} maps...` : ""}
     />
   );
 }

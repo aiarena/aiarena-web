@@ -25,6 +25,7 @@ export default function MapPoolSearchList({
 }: MapPoolSearchListProps) {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState<MapPoolType[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
 
   useEffect(() => {
     fetchQuery<MapPoolSearchListQuery>(
@@ -32,6 +33,7 @@ export default function MapPoolSearchList({
       graphql`
         query MapPoolSearchListQuery($name: String) {
           mapPools(name: $name, first: 10) {
+            totalCount
             edges {
               node {
                 id
@@ -42,10 +44,12 @@ export default function MapPoolSearchList({
         }
       `,
       { name: query },
+      { fetchPolicy: "store-or-network" },
     )
       .toPromise()
       .then((data) => {
         setOptions(getNodes(data?.mapPools));
+        setTotal(data?.mapPools?.totalCount ?? null);
       });
   }, [query]);
 
@@ -56,7 +60,7 @@ export default function MapPoolSearchList({
       options={options}
       setQuery={setQuery}
       displayValue={(mapPool) => (mapPool as MapPoolType)?.name}
-      placeholder="Search map pools..."
+      placeholder={total ? `Type to search ${total} map pools...` : ""}
     />
   );
 }
