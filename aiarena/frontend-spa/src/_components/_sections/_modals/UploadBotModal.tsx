@@ -17,7 +17,6 @@ interface UploadBotModal {
 type Race = "P" | "R" | "T" | "Z";
 
 const BOT_TYPES: Record<string, string> = {
-  cppwin32: "C++ (Windows)",
   cpplinux: "C++ (Linux)",
   dotnetcore: ".NET Core",
   java: "Java",

@@ -45,6 +45,7 @@ class Bot(models.Model, LockableModelMixin):
         ("R", "Random"),
     )
     TYPES = (  # todo: update display names. capitalize etc
+        # cppwin32 is a legacy option that we no longer actively support, but it's existance in types is still required
         ("cppwin32", "cppwin32"),
         ("cpplinux", "cpplinux"),
         ("dotnetcore", "dotnetcore"),
