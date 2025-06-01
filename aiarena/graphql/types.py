@@ -17,37 +17,22 @@ from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
-class UserType(DjangoObjectTypeWithUID):
-    # This is the public user type.
-    # put data everyone should be able view here.
-
-    bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
-    avatar_url = graphene.String()
+class BotRaceType(DjangoObjectTypeWithUID):
+    name = graphene.String()
 
     class Meta:
-        model = models.User
+        model = models.BotRace
         fields = [
             "id",
-            "username",
-            "patreon_level",
-            "date_joined",
+            "label",
+            "name",
         ]
         filter_fields = []
+        connection_class = CountingConnection
 
     @staticmethod
-    def resolve_bots(root: models.User, info, **args):
-        return root.bots.all()
-
-    @staticmethod
-    def resolve_avatar_url(root: models.User, info):
-        avatar_instance = Avatar.objects.filter(user=root).order_by("-primary", "-date_uploaded").first()
-
-        if avatar_instance:
-            avatar_url = avatar_instance.get_absolute_url()
-            return info.context.build_absolute_uri(avatar_url)
-            # We can also return "avatar_url" if we want a relative url
-            # return  avatar_url
-        return None  # Return None if no avatar exists. However, we probably want to return the default avatar.
+    def resolve_name(root: BotRace, info, **args):
+        return root.get_label_display()
 
 
 class BotFilterSet(FilterSet):
@@ -110,40 +95,32 @@ class BotType(DjangoObjectTypeWithUID):
         return root.plays_race
 
 
-class BotRaceType(DjangoObjectTypeWithUID):
-    name = graphene.String()
+class CompetitionType(DjangoObjectTypeWithUID):
+    url = graphene.String()
+    participants = DjangoConnectionField("aiarena.graphql.CompetitionParticipationType")
+    rounds = DjangoConnectionField("aiarena.graphql.RoundsType")
+    maps = DjangoConnectionField("aiarena.graphql.MapType")
 
     class Meta:
-        model = models.BotRace
+        model = models.Competition
         fields = [
-            "id",
-            "label",
             "name",
+            "type",
+            "date_created",
+            "date_opened",
+            "date_closed",
+            "status",
         ]
-        filter_fields = []
+        filter_fields = ["status"]
         connection_class = CountingConnection
 
     @staticmethod
-    def resolve_name(root: BotRace, info, **args):
-        return root.get_label_display()
+    def resolve_url(root: models.Competition, info, **args):
+        return root.get_absolute_url()
 
-
-class TrophyType(DjangoObjectTypeWithUID):
-    trophy_icon_name = graphene.String()
-    trophy_icon_image = graphene.String()
-
-    class Meta:
-        model = models.Trophy
-        fields = [
-            "name",
-            "bot",
-        ]
-
-    def resolve_trophy_icon_name(root: models.Trophy, info):
-        return root.icon.name if root.icon else None
-
-    def resolve_trophy_icon_image(root: models.Trophy, info):
-        return root.icon.image.url if root.icon and root.icon.image else None
+    @staticmethod
+    def resolve_participants(root: models.Competition, info, **args):
+        return Ladders.get_competition_display_full_rankings(root).calculate_trend(root)
 
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
@@ -176,15 +153,54 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
         return 0
 
 
-class RoundsType(DjangoObjectTypeWithUID):
+class MatchParticipationFilterSet(FilterSet):
+    order_by = OrderingFilter(fields=["match__started", "result"])
+
     class Meta:
-        model = models.Round
-        fields = [
-            "number",
-            "started",
-            "finished",
-            "complete",
-        ]
+        model = models.MatchParticipation
+        fields = ["order_by"]
+
+
+class MatchParticipationType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.MatchParticipation
+        fields = ["elo_change", "avg_step_time", "result", "bot", "match"]
+        filterset_class = MatchParticipationFilterSet
+        connection_class = CountingConnection
+
+
+class MatchType(DjangoObjectTypeWithUID):
+    participant1 = graphene.Field("aiarena.graphql.BotType")
+    participant2 = graphene.Field("aiarena.graphql.BotType")
+    status = graphene.String()
+    result = graphene.Field("aiarena.graphql.ResultType")
+    tags = graphene.List(graphene.String)
+
+    class Meta:
+        model = models.Match
+        fields = ["result", "map", "created", "started", "first_started", "requested_by", "tags"]
+        filter_fields = []
+        connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_participant1(root: models.Match, info, **args):
+        return root.participant1.bot
+
+    @staticmethod
+    def resolve_participant2(root: models.Match, info, **args):
+        return root.participant2.bot
+
+    @staticmethod
+    def resolve_status(root: models.Match, info, **args):
+        return root.status
+
+    @staticmethod
+    def resolve_result(root: models.Match, info, **args):
+        return root.result
+
+    @staticmethod
+    def resolve_tags(root: models.Match, info, **args):
+        return [tag.tag.name for tag in root.tags.all()]
 
 
 class MapFilterSet(FilterSet):
@@ -208,32 +224,21 @@ class MapType(DjangoObjectTypeWithUID):
         return info.context.build_absolute_uri(root.file.url)
 
 
-class CompetitionType(DjangoObjectTypeWithUID):
-    url = graphene.String()
-    participants = DjangoConnectionField("aiarena.graphql.CompetitionParticipationType")
-    rounds = DjangoConnectionField("aiarena.graphql.RoundsType")
-    maps = DjangoConnectionField("aiarena.graphql.MapType")
+class MapPoolFilterSet(FilterSet):
+    order_by = OrderingFilter(fields=["enabled"])
+    name = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
-        model = models.Competition
-        fields = [
-            "name",
-            "type",
-            "date_created",
-            "date_opened",
-            "date_closed",
-            "status",
-        ]
-        filter_fields = ["status"]
+        model = models.MapPool
+        fields = ["name", "order_by"]
+
+
+class MapPoolType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.MapPool
+        fields = ["name", "maps", "enabled", "created"]
+        filterset_class = MapPoolFilterSet
         connection_class = CountingConnection
-
-    @staticmethod
-    def resolve_url(root: models.Competition, info, **args):
-        return root.get_absolute_url()
-
-    @staticmethod
-    def resolve_participants(root: models.Competition, info, **args):
-        return Ladders.get_competition_display_full_rankings(root).calculate_trend(root)
 
 
 class NewsType(DjangoObjectTypeWithUID):
@@ -247,6 +252,116 @@ class NewsType(DjangoObjectTypeWithUID):
         ]
         filter_fields = []
         connection_class = CountingConnection
+
+
+class ResultType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.Result
+        fields = [
+            "winner",
+            "type",
+            "created",
+            "replay_file",
+            "game_steps",
+            "submitted_by",
+        ]
+        filter_fields = []
+        connection_class = CountingConnection
+
+
+class RoundsType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.Round
+        fields = [
+            "number",
+            "started",
+            "finished",
+            "complete",
+        ]
+
+
+class StatsType(graphene.ObjectType):
+    match_count_1h = graphene.Int()
+    match_count_24h = graphene.Int()
+    arenaclients = graphene.Int()
+    random_supporter = graphene.Field("aiarena.graphql.UserType")
+    build_number = graphene.String()
+    date_time = graphene.DateTime()
+
+    @staticmethod
+    def resolve_match_count_1h(root, info, **args):
+        return Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=1)).count()
+
+    @staticmethod
+    def resolve_match_count_24h(root, info, **args):
+        return Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=24)).count()
+
+    @staticmethod
+    def resolve_arenaclients(root, info, **args):
+        return User.objects.only("id").filter(type="ARENA_CLIENT", is_active=True).count()
+
+    @staticmethod
+    def resolve_random_supporter(root, info, **args):
+        return User.random_supporter()
+
+    @staticmethod
+    def resolve_build_number(root, info, **args):
+        return settings.BUILD_NUMBER
+
+    @staticmethod
+    def resolve_date_time(root, info, **args):
+        return timezone.now()
+
+
+class TrophyType(DjangoObjectTypeWithUID):
+    trophy_icon_name = graphene.String()
+    trophy_icon_image = graphene.String()
+
+    class Meta:
+        model = models.Trophy
+        fields = [
+            "name",
+            "bot",
+        ]
+
+    def resolve_trophy_icon_name(root: models.Trophy, info):
+        return root.icon.name if root.icon else None
+
+    def resolve_trophy_icon_image(root: models.Trophy, info):
+        return root.icon.image.url if root.icon and root.icon.image else None
+
+
+class UserType(DjangoObjectTypeWithUID):
+    # This is the public user type.
+    # put data everyone should be able view here.
+
+    bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
+    avatar_url = graphene.String()
+
+    class Meta:
+        model = models.User
+        fields = [
+            "id",
+            "username",
+            "patreon_level",
+            "date_joined",
+        ]
+        filter_fields = []
+
+    @staticmethod
+    def resolve_bots(root: models.User, info, **args):
+        return root.bots.all()
+
+    @staticmethod
+    def resolve_avatar_url(root: models.User, info):
+        avatar_instance = Avatar.objects.filter(user=root).order_by("-primary", "-date_uploaded").first()
+
+        if avatar_instance:
+            avatar_url = avatar_instance.get_absolute_url()
+            return info.context.build_absolute_uri(avatar_url)
+            # We can also return "avatar_url" if we want a relative url
+            # return  avatar_url
+        return None  # Return None if no avatar exists. However, we probably want to return the default avatar.
 
 
 class ViewerType(graphene.ObjectType):
@@ -314,138 +429,21 @@ class ViewerType(graphene.ObjectType):
         return root.last_name
 
 
-class MatchParticipationFilterSet(FilterSet):
-    order_by = OrderingFilter(fields=["match__started", "result"])
-
-    class Meta:
-        model = models.MatchParticipation
-        fields = ["order_by"]
-
-
-class MatchParticipationType(DjangoObjectTypeWithUID):
-    class Meta:
-        model = models.MatchParticipation
-        fields = ["elo_change", "avg_step_time", "result", "bot", "match"]
-        filterset_class = MatchParticipationFilterSet
-        connection_class = CountingConnection
-
-
-class MapPoolFilterSet(FilterSet):
-    order_by = OrderingFilter(fields=["enabled"])
-    name = django_filters.CharFilter(lookup_expr="icontains")
-
-    class Meta:
-        model = models.MapPool
-        fields = ["name", "order_by"]
-
-
-class MapPoolType(DjangoObjectTypeWithUID):
-    class Meta:
-        model = models.MapPool
-        fields = ["name", "maps", "enabled"]
-        filterset_class = MapPoolFilterSet
-        connection_class = CountingConnection
-
-
-class MatchType(DjangoObjectTypeWithUID):
-    participant1 = graphene.Field("aiarena.graphql.BotType")
-    participant2 = graphene.Field("aiarena.graphql.BotType")
-    status = graphene.String()
-    result = graphene.Field("aiarena.graphql.ResultType")
-    tags = graphene.List(graphene.String)
-
-    class Meta:
-        model = models.Match
-        fields = ["result", "map", "created", "started", "first_started", "requested_by", "tags"]
-        filter_fields = []
-        connection_class = CountingConnection
-
-    @staticmethod
-    def resolve_participant1(root: models.Match, info, **args):
-        return root.participant1.bot
-
-    @staticmethod
-    def resolve_participant2(root: models.Match, info, **args):
-        return root.participant2.bot
-
-    @staticmethod
-    def resolve_status(root: models.Match, info, **args):
-        return root.status
-
-    @staticmethod
-    def resolve_result(root: models.Match, info, **args):
-        return root.result
-
-    @staticmethod
-    def resolve_tags(root: models.Match, info, **args):
-        return [tag.tag.name for tag in root.tags.all()]
-
-
-class ResultType(DjangoObjectTypeWithUID):
-    class Meta:
-        model = models.Result
-        fields = [
-            "winner",
-            "type",
-            "created",
-            "replay_file",
-            "game_steps",
-            "submitted_by",
-        ]
-        filter_fields = []
-        connection_class = CountingConnection
-
-
-class StatsType(graphene.ObjectType):
-    match_count_1h = graphene.Int()
-    match_count_24h = graphene.Int()
-    arenaclients = graphene.Int()
-    random_supporter = graphene.Field("aiarena.graphql.UserType")
-    build_number = graphene.String()
-    date_time = graphene.DateTime()
-
-    @staticmethod
-    def resolve_match_count_1h(root, info, **args):
-        return Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=1)).count()
-
-    @staticmethod
-    def resolve_match_count_24h(root, info, **args):
-        return Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=24)).count()
-
-    @staticmethod
-    def resolve_arenaclients(root, info, **args):
-        return User.objects.only("id").filter(type="ARENA_CLIENT", is_active=True).count()
-
-    @staticmethod
-    def resolve_random_supporter(root, info, **args):
-        return User.random_supporter()
-
-    @staticmethod
-    def resolve_build_number(root, info, **args):
-        return settings.BUILD_NUMBER
-
-    @staticmethod
-    def resolve_date_time(root, info, **args):
-        return timezone.now()
-
-
 class Query(graphene.ObjectType):
-    node = graphene.relay.Node.Field()
-    viewer = graphene.Field("aiarena.graphql.ViewerType")
-    competitions = DjangoFilterConnectionField("aiarena.graphql.CompetitionType")
-    bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
-    news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
-    users = DjangoFilterConnectionField("aiarena.graphql.UserType")
-    maps = DjangoFilterConnectionField("aiarena.graphql.MapType")
-    map_pools = DjangoFilterConnectionField("aiarena.graphql.MapPoolType")
-    stats = graphene.Field(StatsType)
     bot_race = DjangoFilterConnectionField("aiarena.graphql.BotRaceType")
+    bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
+    competitions = DjangoFilterConnectionField("aiarena.graphql.CompetitionType")
+    map_pools = DjangoFilterConnectionField("aiarena.graphql.MapPoolType")
+    maps = DjangoFilterConnectionField("aiarena.graphql.MapType")
+    news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
+    node = graphene.relay.Node.Field()
+    stats = graphene.Field(StatsType)
+    users = DjangoFilterConnectionField("aiarena.graphql.UserType")
+    viewer = graphene.Field("aiarena.graphql.ViewerType")
 
     @staticmethod
-    def resolve_viewer(root, info, **args):
-        if info.context.user.is_authenticated:
-            return info.context.user
-        return None
+    def resolve_bot_race(root, info, **args):
+        return models.BotRace.objects.all()
 
     @staticmethod
     def resolve_bots(root, info, **args):
@@ -456,26 +454,27 @@ class Query(graphene.ObjectType):
         return models.Competition.objects.all()
 
     @staticmethod
-    def resolve_news(root, info, **args):
-        return models.News.objects.all().order_by("-created")
-
-    @staticmethod
-    def resolve_users(root, info, **args):
-        return models.User.objects.all()
+    def resolve_map_pools(root, info, **args):
+        return models.MapPool.objects.all()
 
     @staticmethod
     def resolve_maps(root, info, **args):
         return models.Map.objects.all()
 
     @staticmethod
-    def resolve_map_pools(root, info, **args):
-        return models.MapPool.objects.all()
+    def resolve_news(root, info, **args):
+        return models.News.objects.all().order_by("-created")
 
     @staticmethod
     def resolve_stats(root, info, **args):
         return StatsType()
 
-    # rename bot_races
     @staticmethod
-    def resolve_bot_race(root, info, **args):
-        return models.BotRace.objects.all()
+    def resolve_users(root, info, **args):
+        return models.User.objects.all()
+
+    @staticmethod
+    def resolve_viewer(root, info, **args):
+        if info.context.user.is_authenticated:
+            return info.context.user
+        return None
