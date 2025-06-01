@@ -236,7 +236,7 @@ class MapPoolFilterSet(FilterSet):
 class MapPoolType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.MapPool
-        fields = ["name", "maps", "enabled", "created"]
+        fields = ["name", "maps", "enabled"]
         filterset_class = MapPoolFilterSet
         connection_class = CountingConnection
 
