@@ -462,7 +462,7 @@ class Query(graphene.ObjectType):
 
     @staticmethod
     def resolve_map_pools(root, info, **args):
-        return models.MapPool.objects.all()
+        return models.MapPool.objects.all().order_by("-id")
 
     @staticmethod
     def resolve_maps(root, info, **args):
