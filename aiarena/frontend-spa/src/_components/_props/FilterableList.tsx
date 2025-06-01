@@ -133,7 +133,7 @@ export default function FilterableList<T>({
 
   // Ensure current page is valid
   useEffect(() => {
-    if (currentPage > totalPages) {
+    if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
     }
   }, [totalPages, currentPage]);
@@ -334,7 +334,7 @@ export default function FilterableList<T>({
             onClick={() =>
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || totalPages == 0}
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === totalPages
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
@@ -345,7 +345,7 @@ export default function FilterableList<T>({
           </button>
           <button
             onClick={() => setCurrentPage(() => totalPages)}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || totalPages == 0}
             className={`px-3 py-1 rounded mx-1 ${
               currentPage === totalPages
                 ? "bg-gray-700 text-gray-500 cursor-not-allowed"
