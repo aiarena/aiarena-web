@@ -244,7 +244,7 @@ export default function BotSettingsModal({
                   Bot Data
                 </h3>
                 <a
-                  href="/wiki/bot-development/#wiki-toc-bot-memory-the-data-folder"
+                  href="/wiki/bot-development/getting-started/#wiki-toc-bot-data"
                   target="_blank"
                   className="pt-1"
                 >
