@@ -153,7 +153,7 @@ export default function UserMatchRequestsSection(
             },
           ]}
           renderRow={(match) => (
-            <div className="block flex justify-between items-center" role="row">
+            <div className="flex justify-between items-center" role="row">
               <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))] w-full">
                 <p
                   className="pl-2 hidden md:flex text-left text-gray-200 truncate"
