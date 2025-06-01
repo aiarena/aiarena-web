@@ -37,7 +37,7 @@ def test_spa_userbots_shows_active_competition_participations(
     generated_python_file = python_zip_file()
     bh.log_in(user, page)
 
-    page.goto(f"{bh.live_server.url}/dashboard/bots")
+    page.goto(bh.reverse("dashboard_bots"))
     expect(page.get_by_role("button", name="Upload Bot")).to_be_visible()
     page.get_by_role("button", name="Upload Bot").click()
 
