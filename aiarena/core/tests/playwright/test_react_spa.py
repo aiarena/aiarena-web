@@ -66,3 +66,48 @@ def test_spa_userbots_shows_active_competition_participations(
     expect(page.locator("form").get_by_role("button", name="Upload Bot")).not_to_be_visible()
     expect(page.get_by_text("Bot Uploaded Successfully!")).to_be_visible()
     expect(page.get_by_text("robo-her0")).to_be_visible()
+
+
+@pytest.mark.parametrize(
+    "map_type",
+    ["Specific Map", "Map Pool"],
+)
+def test_request_match_form(
+    page: Page,
+    bh: BrowserHelper,
+    user,
+    bot,
+    other_bot,
+    map,
+    map_pool,
+    map_type,
+):
+    bh.log_in(user, page)
+    page.goto(bh.reverse("dashboard_match_requests"))
+
+    page.get_by_role("button", name="Request New Match").click()
+
+    page.get_by_role("combobox", name="Bot 1").click()
+    page.get_by_role("option", name=bot.name, exact=True).click()
+
+    page.get_by_role("combobox", name="Bot 2").click()
+    page.get_by_role("option", name=other_bot.name, exact=True).click()
+
+    # Mode switch button
+    page.get_by_role("button", name=map_type).click()
+
+    # Combobox
+    page.get_by_role("combobox", name=map_type).click()
+    page.get_by_role(
+        "option",
+        name=map.name if map_type == "Specific Map" else map_pool.name,
+    ).click()
+
+    page.get_by_role("button", name="Request Match").click()
+
+    match = page.get_by_role("listitem").filter(has_text="Queued")
+    expect(match).to_be_visible()
+    expect(match.get_by_role("cell", name="Match status: Queued")).to_be_visible()
+    expect(match.get_by_role("cell", name=f"View bot profile for {bot.name}")).to_be_visible()
+    expect(match.get_by_role("cell", name=f"View bot profile for {other_bot.name}")).to_be_visible()
+    expect(match.get_by_role("cell", name=f"Map: {map.name}")).to_be_visible()
