@@ -117,7 +117,7 @@ export default function BotSettingsModal({
             </label>
           </div>
           <SectionDivider color="gray" className="pb-4" />
-          <div className="pb-4 flex items-center justify-between gap-8 flex-wrap items-start ">
+          <div className="pb-4 flex justify-between gap-8 flex-wrap items-start ">
             {/* Bot Data & Bot Zip */}
 
             <div className="w-full md:w-[45%]">
@@ -172,7 +172,7 @@ export default function BotSettingsModal({
           </div>
           <SectionDivider color="gray" className="pb-4" />
 
-          <div className="pb-4 flex items-center justify-between gap-8 flex-wrap items-start ">
+          <div className="pb-4 flex justify-between gap-8 flex-wrap items-start ">
             {/* Bot Data & Bot Zip */}
 
             <div className="w-full md:w-[40%]">
