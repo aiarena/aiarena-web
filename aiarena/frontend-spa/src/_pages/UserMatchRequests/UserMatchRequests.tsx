@@ -1,9 +1,5 @@
-import { Suspense } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-
 import RequestMatchSection from "@/_components/_sections/UserMatchRequestsSection";
-
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import { UserMatchRequestsQuery } from "./__generated__/UserMatchRequestsQuery.graphql";
 
 export default function UserMatchRequests() {
@@ -25,9 +21,7 @@ export default function UserMatchRequests() {
 
   return (
     <>
-      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-        <RequestMatchSection viewer={data.viewer} />
-      </Suspense>
+      <RequestMatchSection viewer={data.viewer} />
     </>
   );
 }
