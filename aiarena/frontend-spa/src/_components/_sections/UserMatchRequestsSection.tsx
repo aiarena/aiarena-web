@@ -106,13 +106,13 @@ export default function UserMatchRequestsSection(
       <div
         role="region"
         aria-labelledby="match-requests-table-heading"
-        className="grow overflow-auto"
+        className="grow overflow-auto rounded-xl border-1 border-neutral-700 shadow-lg shadow-black bg-darken-2 backdrop-blur-sm "
       >
         <h3 id="match-requests-table-heading" className="sr-only">
           Match Requests Table
         </h3>
         <FilterableList
-          classes="mt-4 shadow-lg shadow-black bg-darken-2 backdrop-blur-sm"
+          classes="mt-4 py-4 pb-10"
           data={parsedData}
           hideMenu={true}
           fields={[

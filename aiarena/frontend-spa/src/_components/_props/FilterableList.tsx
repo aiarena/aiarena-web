@@ -300,10 +300,10 @@ export default function FilterableList<T>({
           <button
             onClick={() => setCurrentPage(() => 1)}
             disabled={currentPage === 1}
-            className={`px-3 py-1 rounded mx-1 ${
+            className={`px-3 py-1 rounded mx-1 shadow-sm shadow-black border-2 backdrop-blur-sm ${
               currentPage === 1
-                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "shadow shadow-black bg-customGreen-dark text-white"
+                ? "bg-darken border-gray-700 hover:bg-bg-darken hover:border-gray-700 cursor-not-allowed"
+                : "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
             }`}
           >
             {"<<"}
@@ -311,10 +311,10 @@ export default function FilterableList<T>({
           <button
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
-            className={`px-3 py-1 rounded mx-1 ${
+            className={`px-3 py-1 rounded mx-1 shadow-sm shadow-black border-2 backdrop-blur-sm ${
               currentPage === 1
-                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "shadow shadow-black bg-customGreen-dark text-white"
+                ? "bg-darken border-gray-700 hover:bg-bg-darken hover:border-gray-700 cursor-not-allowed"
+                : "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
             }`}
           >
             {"<"}
@@ -335,10 +335,10 @@ export default function FilterableList<T>({
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             disabled={currentPage === totalPages || totalPages == 0}
-            className={`px-3 py-1 rounded mx-1 ${
+            className={`px-3 py-1 rounded mx-1 shadow-sm shadow-black border-2 backdrop-blur-sm ${
               currentPage === totalPages
-                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "shadow shadow-black bg-customGreen-dark text-white"
+                ? "bg-darken border-gray-700 hover:bg-bg-darken hover:border-gray-700 cursor-not-allowed"
+                : "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
             }`}
           >
             {">"}
@@ -346,10 +346,10 @@ export default function FilterableList<T>({
           <button
             onClick={() => setCurrentPage(() => totalPages)}
             disabled={currentPage === totalPages || totalPages == 0}
-            className={`px-3 py-1 rounded mx-1 ${
+            className={`px-3 py-1 rounded mx-1 shadow-sm shadow-black border-2 backdrop-blur-sm ${
               currentPage === totalPages
-                ? "bg-gray-700 text-gray-500 cursor-not-allowed"
-                : "shadow shadow-black bg-customGreen-dark text-white"
+                ? "bg-darken border-gray-700 hover:bg-bg-darken hover:border-gray-700 cursor-not-allowed"
+                : "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
             }`}
           >
             {">>"}
