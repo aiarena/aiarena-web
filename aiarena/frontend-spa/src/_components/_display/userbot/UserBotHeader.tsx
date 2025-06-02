@@ -2,9 +2,7 @@ import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import { formatDate } from "@/_lib/dateUtils";
 import BotSettingsModal from "../../_sections/_modals/bot_settings_modal/BotSettingsModal";
-import UnderlineButton from "../../_props/UnderlineButton";
 import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
-import BotAllParticipationsModal from "../../_sections/_modals/BotAllParticipationsModal";
 import BotTrophiesModal from "../../_sections/_modals/BotTrophiesModal";
 import { TrophyIcon, CogIcon } from "@heroicons/react/20/solid";
 import { UserBotHeader_bot$key } from "./__generated__/UserBotHeader_bot.graphql";
@@ -41,8 +39,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
 
   const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
   const [isSettingsModalOpen, setSettingsModalOpen] = useState(false);
-  const [isAllParticipationsModalOpen, setAllParticipationsModalOpen] =
-    useState(false);
+
   return (
     <div className="p-4 border-b border-gray-800 bg-[linear-gradient(240deg,rgb(0,0,0,0.3)_0%,rgba(0,0,0,0.9)_100%)]  rounded-t-lg">
       <div className="text-left space-y-2">
@@ -109,16 +106,6 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
               </p>
             )}
           </div>
-          {/* Right list */}
-          <div>
-            <UnderlineButton
-              onClick={() => {
-                setAllParticipationsModalOpen(true);
-              }}
-            >
-              View all participations
-            </UnderlineButton>
-          </div>
         </div>
       </div>
 
@@ -132,13 +119,6 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
         />
       )}
 
-      {isAllParticipationsModalOpen && (
-        <BotAllParticipationsModal
-          bot={bot}
-          isOpen={isAllParticipationsModalOpen}
-          onClose={() => setAllParticipationsModalOpen(false)}
-        />
-      )}
       {isTrophiesModalOpen && (
         <BotTrophiesModal
           bot={bot}
