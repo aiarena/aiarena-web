@@ -159,6 +159,7 @@ export default function UserMatchRequestsSection(
                   className="pl-2 hidden md:flex text-left text-gray-200 truncate"
                   role="cell"
                   aria-label={`Match status: ${match.status}`}
+                  title={`${match.status}`}
                 >
                   {match.status}
                 </p>
@@ -167,6 +168,7 @@ export default function UserMatchRequestsSection(
                   href={`/matches/${extractRelayID(match.id, "MatchType")}`}
                   role="cell"
                   aria-label={`View match details for match ID ${match.id}`}
+                  title={`${match.displayId}`}
                 >
                   {match.displayId}
                 </a>
@@ -176,6 +178,7 @@ export default function UserMatchRequestsSection(
                   href={`/bots/${extractRelayID(match.participant1?.id, "BotType")}`}
                   role="cell"
                   aria-label={`View bot profile for ${match.participant1?.name}, participant 1`}
+                  title={`${match.participant1?.name}`}
                 >
                   {match.participant1?.name}
                 </a>
@@ -184,6 +187,7 @@ export default function UserMatchRequestsSection(
                   href={`/bots/${extractRelayID(match.participant2?.id, "BotType")}`}
                   role="cell"
                   aria-label={`View bot profile for ${match.participant2?.name}, participant 2`}
+                  title={`${match.participant2?.name}`}
                 >
                   {match.participant2?.name}
                 </a>
@@ -191,6 +195,7 @@ export default function UserMatchRequestsSection(
                   className="pl-2 text-left hidden lg:flex text-gray-200 truncate"
                   role="cell"
                   aria-label={`Map: ${match.map.name}`}
+                  title={`${match.map.name}`}
                 >
                   {match.map.name}
                 </p>
@@ -198,6 +203,7 @@ export default function UserMatchRequestsSection(
                   className="pl-2 text-left hidden lg:flex text-gray-200 truncate"
                   role="cell"
                   aria-label={`Tags: ${match.tags}`}
+                  title={`${match.tags}`}
                 >
                   {match.tags && match.tags.join(", ")}
                 </p>
@@ -205,6 +211,11 @@ export default function UserMatchRequestsSection(
                   className="pl-2 hidden sm:flex text-left text-gray-200 truncate"
                   role="cell"
                   aria-label={`Match started: ${match.status !== "Queued" && match.started ? formatDateISO(match.started) : "Not yet started"}`}
+                  title={`${
+                    match.status !== "Queued"
+                      ? formatDateISO(match.firstStarted)
+                      : ""
+                  }`}
                 >
                   {match.status !== "Queued"
                     ? formatDateISO(match.firstStarted)
@@ -214,6 +225,11 @@ export default function UserMatchRequestsSection(
                   className="pl-2 text-left text-gray-200 truncate"
                   role="cell"
                   aria-label={`Match result: ${match.result?.type || "No result yet"}`}
+                  title={`${parseMatchResult(
+                    match.result?.type,
+                    match.participant1?.name,
+                    match.participant2?.name
+                  )}`}
                 >
                   {parseMatchResult(
                     match.result?.type,
