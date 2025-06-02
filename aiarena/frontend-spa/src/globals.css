@@ -107,6 +107,11 @@ a:hover {
   cursor: pointer;
 }
 
+.combobox-options {
+  max-height: 20em !important;
+  overflow-y: auto;
+}
+
 /* a:hover .video-overlay {
   position: absolute;
   top: 50%;

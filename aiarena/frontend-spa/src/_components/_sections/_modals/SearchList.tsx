@@ -71,8 +71,10 @@ export default function SearchList({
           "bg-neutral-900",
           "p-1",
           "[--anchor-gap:--spacing(1)]",
-          "z-100"
+          "z-100",
+          "combobox-options"
         )}
+        //  Using a CSS class -combobox-options- with !important to controll box height
       >
         {options.map((bot: SearchListOption) => (
           <ComboboxOption
