@@ -29,7 +29,7 @@ export default function BotSearchList({ value, setValue }: BotSearchListProps) {
       RelayEnvironment,
       graphql`
         query BotSearchListQuery($name: String) {
-          bots(name: $name, first: 10) {
+          bots(name: $name, first: 30) {
             totalCount
             edges {
               node {
@@ -41,7 +41,7 @@ export default function BotSearchList({ value, setValue }: BotSearchListProps) {
         }
       `,
       { name: query },
-      { fetchPolicy: "store-or-network" },
+      { fetchPolicy: "store-or-network" }
     )
       .toPromise()
       .then((data) => {

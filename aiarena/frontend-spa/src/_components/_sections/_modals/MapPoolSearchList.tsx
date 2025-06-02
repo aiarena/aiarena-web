@@ -32,7 +32,7 @@ export default function MapPoolSearchList({
       RelayEnvironment,
       graphql`
         query MapPoolSearchListQuery($name: String) {
-          mapPools(name: $name, first: 10) {
+          mapPools(name: $name, first: 30) {
             totalCount
             edges {
               node {
@@ -44,7 +44,7 @@ export default function MapPoolSearchList({
         }
       `,
       { name: query },
-      { fetchPolicy: "store-or-network" },
+      { fetchPolicy: "store-or-network" }
     )
       .toPromise()
       .then((data) => {
