@@ -3,28 +3,16 @@ import { footerLinks } from "@/_data/footerLinks";
 import SocialComponent from "./_footer_parts/SocialNavItem";
 import SupportersComponent from "./_footer_parts/Supporters";
 import SectionDivider from "../_display/SectionDivider";
-import { graphql, useLazyLoadQuery } from "react-relay";
-import { FooterQuery } from "./__generated__/FooterQuery.graphql";
 import SquareButton from "../_props/SquareButton";
 import { getFeatureFlags } from "@/_data/featureFlags";
 
 const Footer: React.FC = () => {
-  const data = useLazyLoadQuery<FooterQuery>(
-    graphql`
-      query FooterQuery {
-        stats {
-          ...SupportersComponent_stats
-        }
-      }
-    `,
-    {}
-  );
-
   return (
     <footer className=" text-white bg-darken">
       <SectionDivider />
       <div className="pt-12 container mx-auto px-4 flex flex-col md:flex-row md:flex-wrap justify-between items-start">
-        <SupportersComponent stats={data.stats} />
+        <SupportersComponent />
+
         <SocialComponent links={footerLinks.socialLinks} />
       </div>
 

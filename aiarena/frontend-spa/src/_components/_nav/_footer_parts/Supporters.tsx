@@ -1,34 +1,21 @@
-import React from "react";
+import React, { Suspense } from "react";
 
 import { Link } from "react-router";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
-import { graphql, useFragment } from "react-relay";
-import { SupportersComponent_stats$key } from "./__generated__/SupportersComponent_stats.graphql";
+import RandomSupporter from "@/_components/_display/RandomSupporter";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
-interface SupportersComponentProps {
-  stats: SupportersComponent_stats$key | undefined | null;
-}
-
-const SupportersComponent: React.FC<SupportersComponentProps> = (props) => {
-  const stats = useFragment(
-    graphql`
-      fragment SupportersComponent_stats on StatsType {
-        randomSupporter {
-          username
-          id
-        }
-      }
-    `,
-    props.stats
-  );
-
+const SupportersComponent: React.FC = () => {
   return (
     <div className="mb-16 px-8 text-center flex-1 mx-auto">
       <WrappedTitle title="Funded by You" />
-      <p className="text-lg mb-6 text-xl font-bold">
-        {stats?.randomSupporter?.username}
-      </p>
+      <div className="justify-center flex">
+        <Suspense fallback={<LoadingSpinner />}>
+          <RandomSupporter />
+        </Suspense>
+      </div>
+
       <p className="text-lg mb-6">
         Thank you for your support! <br /> Your contributions help us keep
         going.
