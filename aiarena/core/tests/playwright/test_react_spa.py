@@ -23,7 +23,7 @@ def test_spa_userbots_shows_create_bot(page: Page, bh: BrowserHelper, user, admi
     bh.log_in(user, page)
 
     page.goto(bh.reverse("dashboard_bots"))
-    expect(page.get_by_role("button", name="Upload Bot")).to_be_visible()
+    expect(page.get_by_role("button", name="Upload Agent")).to_be_visible()
 
 
 def test_spa_userbots_shows_active_competition_participations(
@@ -38,22 +38,22 @@ def test_spa_userbots_shows_active_competition_participations(
     bh.log_in(user, page)
 
     page.goto(bh.reverse("dashboard_bots"))
-    expect(page.get_by_role("button", name="Upload Bot")).to_be_visible()
-    page.get_by_role("button", name="Upload Bot").click()
+    expect(page.get_by_role("button", name="Upload Agent")).to_be_visible()
+    page.get_by_role("button", name="Upload Agent").click()
 
     # Fill in the form
     page.get_by_label("Name:").fill("robo-her0")
     expect(page.get_by_label("Name:")).to_have_value("robo-her0")
 
-    page.get_by_label("Bot ZIP:").set_input_files(
+    page.get_by_label("Agent ZIP:").set_input_files(
         FilePayload(
             name=generated_python_file.name,
             mimeType=generated_python_file.content_type,
             buffer=generated_python_file.read(),
         )
     )
-    page.get_by_label("Bot Data:").check()
-    expect(page.get_by_label("Bot Data:")).to_be_checked()
+    page.get_by_label("Agent Data:").check()
+    expect(page.get_by_label("Agent Data:")).to_be_checked()
 
     page.get_by_label("Plays Race:").select_option("Protoss")
     expect(page.get_by_label("Plays Race:")).to_have_value("P")
@@ -61,10 +61,10 @@ def test_spa_userbots_shows_active_competition_participations(
     page.get_by_label("Type:").select_option("python")
     expect(page.get_by_label("Type:")).to_have_value("python")
 
-    page.locator("form").get_by_role("button", name="Upload Bot").click()
+    page.locator("form").get_by_role("button", name="Upload Agent").click()
 
-    expect(page.locator("form").get_by_role("button", name="Upload Bot")).not_to_be_visible()
-    expect(page.get_by_text("Bot Uploaded Successfully!")).to_be_visible()
+    expect(page.locator("form").get_by_role("button", name="Upload Agent")).not_to_be_visible()
+    expect(page.get_by_text("Agent Uploaded Successfully!")).to_be_visible()
     expect(page.get_by_text("robo-her0")).to_be_visible()
 
 
@@ -87,10 +87,10 @@ def test_request_match_form(
 
     page.get_by_role("button", name="Request New Match").click()
 
-    page.get_by_label("Bot 1").click()
+    page.get_by_label("Agent 1").click()
     page.get_by_role("option", name=bot.name, exact=True).click()
 
-    page.get_by_label("Bot 2").click()
+    page.get_by_label("Agent 2").click()
     page.get_by_role("option", name=other_bot.name, exact=True).click()
 
     # Mode switch button
