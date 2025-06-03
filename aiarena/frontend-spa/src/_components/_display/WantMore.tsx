@@ -3,7 +3,11 @@ export default function WantMore() {
     <p>
       <i>
         Want more? Consider{" "}
-        <a className="cursor-pointer" href={"https://www.patreon.com/aiarena"}>
+        <a
+          className="cursor-pointer"
+          target="_blank"
+          href={"https://www.patreon.com/aiarena"}
+        >
           supporting us
         </a>
         .
