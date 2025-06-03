@@ -78,8 +78,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     requestMatch({
       variables: {
         input: {
-          bot1: selectedBot1?.id,
-          bot2: selectedBot2?.id,
+          agent1: selectedBot1?.id,
+          agent2: selectedBot2?.id,
           matchCount: matchCount,
           mapSelectionType: mapSelectionType,
           chosenMap:
