@@ -33,7 +33,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [selectedSpecificMap, setSelectedSpecificMap] =
     useState<MapType | null>(null);
   const [selectedMapPool, setSelectedMapPool] = useState<MapPoolType | null>(
-    null,
+    null
   );
 
   // Request Match Query
@@ -55,12 +55,12 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           }
         }
       }
-    `,
+    `
   );
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "requestMatch",
-    "Match Requested!",
+    "Match Requested!"
   );
 
   const resetAllStateFields = () => {
@@ -110,12 +110,12 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       >
         <div className="mb-4 flex flex-col gap-2">
           <label className="flex flex-col gap-1 ">
-            <span className="font-medium">Bot 1</span>
+            <span className="font-medium">Agent 1</span>
             <BotSearchList value={selectedBot1} setValue={setSelectedBot1} />
           </label>
 
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Bot 2</span>
+            <span className="font-medium">Agent 2</span>
             <BotSearchList value={selectedBot2} setValue={setSelectedBot2} />
           </label>
         </div>
@@ -134,7 +134,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               aria-describedby="match-count-help"
             />
             <div id="match-count-help" className="sr-only">
-              Number of games to play between selected bots
+              Number of games to play between selected agents
             </div>
           </div>
           <div className="block">

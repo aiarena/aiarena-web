@@ -108,7 +108,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
         <div
           className="flex gap-4 ml-auto "
           role="group"
-          aria-label="Bot filtering and sorting controls"
+          aria-label="Agent filtering and sorting controls"
         >
           <Dropdown title={useSort}>
             {activeBotParticipations > 0 ? (
@@ -143,23 +143,23 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
               setUseSort("Sort By");
             }}
             value={searchBarValue}
-            placeholder="Search your bots..."
-            aria-label="Search bots by name"
+            placeholder="Search your Agents..."
+            aria-label="Search Agents by name"
           />
 
-          <div role="group" aria-label="Bot actions">
+          <div role="group" aria-label="Agent actions">
             <div className="hidden md:block">
               <MainButton
                 onClick={() => setUploadBotModalOpen(true)}
-                text="Upload Bot"
-                aria-label="Upload a new bot"
+                text="Upload Agent"
+                aria-label="Upload a new Agent"
               />
             </div>
             <div className="block md:hidden">
               <MainButton
                 onClick={() => setUploadBotModalOpen(true)}
                 text="+"
-                aria-label="Upload a new bot"
+                aria-label="Upload a new Agent"
               />
             </div>
           </div>
@@ -167,7 +167,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
       </div>
       <div role="region" aria-labelledby="bots-list-heading" aria-live="polite">
         <h2 id="bots-list-heading" className="sr-only">
-          Your Bots List
+          Your Agents List
         </h2>
         <ul className="space-y-12">
           {getNodes(userData?.bots)

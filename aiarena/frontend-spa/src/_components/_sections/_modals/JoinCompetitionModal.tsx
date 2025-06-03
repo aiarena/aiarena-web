@@ -89,7 +89,7 @@ export default function JoinCompetitionModal({
     `);
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateCompetitionParticipation",
-    "Bot Participation Updated!"
+    "Agent Participation Updated!"
   );
 
   const openCompetitions = getNodes(competition_data.competitions).filter(

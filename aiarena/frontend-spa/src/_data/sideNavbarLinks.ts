@@ -1,6 +1,6 @@
 export const sideNavbarLinks = [
   {
-    name: "Bots",
+    name: "Agents",
     path: "bots",
   },
   {

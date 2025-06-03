@@ -80,8 +80,8 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
           </h4>
         ) : (
           <p className="ml-2 text-left pt-2 text-sm font-semibold text-gray-400">
-            Your bot is not currently participating in any active competitions,
-            consider joining a competition.
+            Your agent is not currently participating in any active
+            competitions, consider joining a competition.
           </p>
         )}
         <div className="flex flex-wrap gap-4">

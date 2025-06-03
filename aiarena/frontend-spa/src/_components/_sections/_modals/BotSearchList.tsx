@@ -57,7 +57,7 @@ export default function BotSearchList({ value, setValue }: BotSearchListProps) {
       options={options}
       setQuery={setQuery}
       displayValue={(bot) => (bot as BotType)?.name}
-      placeholder={total ? `Type to search ${total} bots...` : ""}
+      placeholder={total ? `Type to search ${total} agents...` : ""}
     />
   );
 }
