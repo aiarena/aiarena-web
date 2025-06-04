@@ -13,7 +13,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
 from aiarena.core.models import BotRace, Result, User
-from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits
+from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits, Users
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
@@ -372,7 +372,8 @@ class ViewerType(graphene.ObjectType):
     id = graphene.ID(required=True)
     api_token = graphene.String()
     email = graphene.String()
-    active_bots_limit = graphene.Int()
+    active_bot_participations = graphene.Int()
+    active_bot_participation_limit = graphene.Int()
     request_matches_limit = graphene.Int(required=True)
     request_matches_count_left = graphene.Int(required=True)
     requested_matches = DjangoConnectionField("aiarena.graphql.MatchType")
@@ -400,7 +401,11 @@ class ViewerType(graphene.ObjectType):
         return root.email
 
     @staticmethod
-    def resolve_active_bots_limit(root: models.User, info, **args):
+    def resolve_active_bot_participations(root: models.User, info, **args):
+        return Users.get_total_active_competition_participations(root)
+
+    @staticmethod
+    def resolve_active_bot_participation_limit(root: models.User, info, **args):
         return SupporterBenefits.get_active_bots_limit(root)
 
     @staticmethod
