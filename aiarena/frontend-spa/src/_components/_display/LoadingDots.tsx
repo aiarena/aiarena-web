@@ -1,4 +1,3 @@
-import React from "react";
 interface DotsProps {
   offset: number;
 }
@@ -39,7 +38,7 @@ export default function LoadingDots({
   dotCount?: number;
   className?: string;
 }) {
-  const dots = Array.from({ length: dotCount }).map((k, i) => (
+  const dots = Array.from({ length: dotCount }).map((_, i) => (
     <Dot key={i} offset={i / 3} />
   ));
 
