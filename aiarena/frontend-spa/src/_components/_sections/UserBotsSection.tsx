@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment, usePaginationFragment } from "react-relay";
 import { getNodes } from "@/_lib/relayHelpers";
 import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
@@ -12,6 +12,9 @@ import WantMore from "../_display/WantMore";
 import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
 import { UserBotsSection_user$key } from "./__generated__/UserBotsSection_user.graphql";
 import UserBot from "../_display/userbot/UserBot";
+
+import { useInfiniteScroll } from "../_hooks/useInfiniteScroll";
+import LoadingDots from "../_display/LoadingDots";
 
 interface UserBotsSectionProps {
   viewer: UserBotsSection_viewer$key;
@@ -29,11 +32,21 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
     `,
     props.viewer
   );
-
-  const userData = useFragment(
+  const {
+    data: userData,
+    loadNext,
+    hasNext,
+    isLoadingNext,
+  } = usePaginationFragment(
     graphql`
-      fragment UserBotsSection_user on UserType {
-        bots {
+      fragment UserBotsSection_user on UserType
+      @argumentDefinitions(
+        cursor: { type: "String" }
+        first: { type: "Int", defaultValue: 3 }
+      )
+      @refetchable(queryName: "UserBotsSectionPaginationQuery") {
+        bots(first: $first, after: $cursor)
+          @connection(key: "UserBotsSection_user_bots") {
           edges {
             node {
               id
@@ -62,6 +75,8 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
     `,
     viewer.user as UserBotsSection_user$key
   );
+
+  const { loadMoreRef } = useInfiniteScroll(() => loadNext(5), hasNext);
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
 
@@ -221,7 +236,13 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
               </li>
             ))}
         </ul>
+        {(hasNext || isLoadingNext) && (
+          <div className="flex justify-center mt-8" ref={loadMoreRef}>
+            <LoadingDots />
+          </div>
+        )}
       </div>
+
       <UploadBotModal
         isOpen={isUploadBotModalOpen}
         onClose={() => setUploadBotModalOpen(false)}
