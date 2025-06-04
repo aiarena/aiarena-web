@@ -10,6 +10,8 @@ import { UserBotCompetitions_bot$key } from "./__generated__/UserBotCompetitions
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
 import { getDotColor } from "@/_lib/getDotColor";
+import Trend from "../Trend";
+import LoadingDots from "../LoadingDots";
 
 interface UserBotCompetitionProps {
   bot: UserBotCompetitions_bot$key;
@@ -35,10 +37,12 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
               divisionNum
               crashPerc
               crashCount
-              trend
               matchCount
               winPerc
               lossPerc
+              ...Trend_competitionParticipation
+              # ...Trend_competitionParticipation @defer
+              #  Update to relay 19.0 for using defer - this will defer fetching the query - and will improve our loadtime.
             }
           }
         }
@@ -108,54 +112,51 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
 
       {/* List Active Competitions */}
       <div className="space-y-4 ">
-        {displayCompetitions.map((participation) => {
+        {displayCompetitions.map((competitionParticipation) => {
           const dotColor = getDotColor(
-            participation.active,
-            participation.competition.status ?? ""
+            competitionParticipation.active,
+            competitionParticipation.competition.status ?? ""
           );
 
           return (
             <div
-              key={participation.id}
+              key={competitionParticipation.id}
               className="border border-neutral-700 rounded-sm transition-all shadow-lg shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4 "
             >
               {/* Left Column: Competition Name & Stats */}
               <div className="space-y-2">
                 <div className="flex items-center space-x-2 border-b border-gray-600 pb-2">
                   <div
-                    title={`Competition Status: ${participation.competition.status} \nParticipating: ${participation.active ? "Yes" : "No"}`}
+                    title={`Competition Status: ${competitionParticipation.competition.status} \nParticipating: ${competitionParticipation.active ? "Yes" : "No"}`}
                   >
                     <ActiveDot color={dotColor} />
                   </div>
                   <a
-                    href={`/competitions/${extractRelayID(participation.competition.id, "CompetitionType")}`}
+                    href={`/competitions/${extractRelayID(competitionParticipation.competition.id, "CompetitionType")}`}
                     className="text-sm font-semibold"
                   >
-                    {participation.competition.name}
+                    {competitionParticipation.competition.name}
                   </a>
                 </div>
                 <div className="text-sm text-left flex flex-wrap ">
                   <span className="font-bold text-gray-300 mr-4 block ">
                     Division:{" "}
                     <span className="font-normal">
-                      {participation.divisionNum}
+                      {competitionParticipation.divisionNum}
                     </span>
                   </span>
                   <span className="font-bold text-gray-300 mr-4 block">
                     Current ELO:{" "}
-                    <span className="font-normal">{participation.elo}</span>
+                    <span className="font-normal">
+                      {competitionParticipation.elo}
+                    </span>
                   </span>
                   <span className="font-bold text-gray-300 mr-4 block">
-                    Trend:{" "}
-                    <span
-                      className={`font-normal ${
-                        (participation.trend ?? 0) > 0 ? "text-customGreen" : ""
-                      }${
-                        (participation.trend ?? 0) === 0 ? "text-gray-300" : ""
-                      }${(participation.trend ?? 0) < 0 ? "text-red-500" : ""}`}
-                    >
-                      {participation.trend ?? 0}
-                    </span>
+                    <Suspense fallback={<LoadingDots />}>
+                      <Trend
+                        competitionParticipation={competitionParticipation}
+                      />
+                    </Suspense>
                   </span>
                 </div>
               </div>
@@ -184,7 +185,9 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                     />
                   </svg>
                   <span className="font-bold">Matches:</span>
-                  <span className="">{participation.matchCount}</span>
+                  <span className="">
+                    {competitionParticipation.matchCount}
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2 flex-wrap">
                   <svg
@@ -203,28 +206,28 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                   </svg>
                   <span className="font-bold">Win/Loss:</span>
                   <span className="text-customGreen font-medium">
-                    {(participation.winPerc ?? 0).toFixed(1)}%
+                    {(competitionParticipation.winPerc ?? 0).toFixed(1)}%
                   </span>
                   <span>/</span>
                   <span className="text-red-500 font-medium">
-                    {(participation.lossPerc ?? 0).toFixed(1)}%
+                    {(competitionParticipation.lossPerc ?? 0).toFixed(1)}%
                   </span>
                 </div>
                 <div className="flex items-center space-x-2 flex-wrap">
                   <ExclamationTriangleIcon
                     aria-label="Danger icon"
-                    className={`size-5 ${participation.crashCount > 0 ? "text-red-500" : "text-gray-300"}`}
+                    className={`size-5 ${competitionParticipation.crashCount > 0 ? "text-red-500" : "text-gray-300"}`}
                     role="img"
                   />
                   <span className="font-bold">Crashes:</span>
                   <span
-                    className={`${participation.crashCount > 0 ? "text-red-500" : "text-gray-300"} font-medium `}
+                    className={`${competitionParticipation.crashCount > 0 ? "text-red-500" : "text-gray-300"} font-medium `}
                   >
-                    {participation.crashCount}
+                    {competitionParticipation.crashCount}
                   </span>
                 </div>
                 <a
-                  href={`/competitions/stats/${extractRelayID(participation.id, "CompetitionParticipationType")}`}
+                  href={`/competitions/stats/${extractRelayID(competitionParticipation.id, "CompetitionParticipationType")}`}
                 >
                   Explore more stats
                 </a>
