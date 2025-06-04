@@ -70,7 +70,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
         }
         node(id: $userId) {
           ... on UserType {
-            ...UserBotsSection_user
+            ...UserBotsList_user
           }
         }
         errors {

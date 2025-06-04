@@ -1,20 +1,17 @@
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 
-import { graphql, useFragment, usePaginationFragment } from "react-relay";
-import { getNodes } from "@/_lib/relayHelpers";
+import { graphql, useFragment } from "react-relay";
 import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
 
 import Searchbar from "../_props/Searchbar";
-import Dropdown from "../_props/Dropdown";
-import DropdownButton from "../_props/DropdownButton";
+// import Dropdown from "../_props/Dropdown";
+// import DropdownButton from "../_props/DropdownButton";
 import WantMore from "../_display/WantMore";
 import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
-import { UserBotsSection_user$key } from "./__generated__/UserBotsSection_user.graphql";
-import UserBot from "../_display/userbot/UserBot";
 
-import { useInfiniteScroll } from "../_hooks/useInfiniteScroll";
-import LoadingDots from "../_display/LoadingDots";
+import UserBotsList from "./UserBotsList";
+import LoadingSpinner from "../_display/LoadingSpinnerGray";
 
 interface UserBotsSectionProps {
   viewer: UserBotsSection_viewer$key;
@@ -24,80 +21,19 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
   const viewer = useFragment(
     graphql`
       fragment UserBotsSection_viewer on ViewerType {
-        activeBotsLimit
+        activeBotParticipations
+        activeBotParticipationLimit
+
         user {
-          ...UserBotsSection_user
+          ...UserBotsList_user
         }
       }
     `,
     props.viewer
   );
-  const {
-    data: userData,
-    loadNext,
-    hasNext,
-    isLoadingNext,
-  } = usePaginationFragment(
-    graphql`
-      fragment UserBotsSection_user on UserType
-      @argumentDefinitions(
-        cursor: { type: "String" }
-        first: { type: "Int", defaultValue: 3 }
-      )
-      @refetchable(queryName: "UserBotsSectionPaginationQuery") {
-        bots(first: $first, after: $cursor)
-          @connection(key: "UserBotsSection_user_bots") {
-          edges {
-            node {
-              id
-              botZipUpdated
-              created
-              name
-              trophies {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              competitionParticipations {
-                edges {
-                  node {
-                    active
-                  }
-                }
-              }
-              ...UserBot_bot
-            }
-          }
-        }
-      }
-    `,
-    viewer.user as UserBotsSection_user$key
-  );
-
-  const { loadMoreRef } = useInfiniteScroll(() => loadNext(5), hasNext);
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
-
-  const activeBotParticipations = getNodes(userData?.bots).reduce(
-    (total, item) => {
-      const activeCount =
-        getNodes(item.competitionParticipations).filter(
-          (participation) => participation.active
-        ).length || 0;
-      return total + activeCount;
-    },
-    0
-  );
-
-  const totalTrophies = getNodes(userData?.bots).reduce((total, item) => {
-    const trophyCount = getNodes(item.trophies).length || 0;
-    return total + trophyCount;
-  }, 0);
-
-  const [useSort, setUseSort] = useState("Sort By");
-
+  // const [useSort, setUseSort] = useState("");
   const [searchBarValue, setSearchBarValue] = useState("");
 
   return (
@@ -106,15 +42,16 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
         {/* Display active competition limit and current active competitions */}
         <div className="flex gap-4 flex-wrap pb-4">
           <div className="block">
+            {/*  Below section can also be deffered with Relay 19.0 */}
             <p className="pb-1 ">
               <span
-                className={`pb-1 ${activeBotParticipations == viewer.activeBotsLimit ? "text-red-400" : ""}
-                   ${viewer.activeBotsLimit && viewer.activeBotsLimit - activeBotParticipations == 1 ? "text-yellow-500" : ""}
+                className={`pb-1 ${viewer.activeBotParticipations == viewer.activeBotParticipationLimit ? "text-red-400" : ""}
+                   ${viewer.activeBotParticipationLimit && viewer.activeBotParticipations && viewer.activeBotParticipationLimit - viewer.activeBotParticipations == 1 ? "text-yellow-500" : ""}
                    `}
               >
-                {activeBotParticipations}
+                {viewer.activeBotParticipations}
               </span>{" "}
-              / {viewer.activeBotsLimit} {""}
+              / {viewer.activeBotParticipationLimit} {""}
               active competition participations.
             </p>
             <WantMore />
@@ -125,15 +62,12 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           role="group"
           aria-label="Agent filtering and sorting controls"
         >
-          <Dropdown title={useSort}>
-            {activeBotParticipations > 0 ? (
-              <DropdownButton
-                onClick={() => setUseSort("Active Competitions")}
-                title={"Active Competitions"}
-              />
-            ) : (
-              <></>
-            )}
+          {/* <Dropdown title={useSort}>
+            <DropdownButton
+              onClick={() => setUseSort("Active Competitions")}
+              title={"Active Competitions"}
+            />
+
             <DropdownButton
               onClick={() => setUseSort("Zip Updated")}
               title={"Zip Updated"}
@@ -142,20 +76,17 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
               onClick={() => setUseSort("Created")}
               title={"Created"}
             />
-            {totalTrophies > 0 ? (
-              <DropdownButton
-                onClick={() => setUseSort("Trophies")}
-                title={"Trophies"}
-              />
-            ) : (
-              <></>
-            )}
-          </Dropdown>
+
+            <DropdownButton
+              onClick={() => setUseSort("Trophies")}
+              title={"Trophies"}
+            />
+          </Dropdown> */}
 
           <Searchbar
             onChange={(e) => {
               setSearchBarValue(e.target.value);
-              setUseSort("Sort By");
+              // setUseSort("Sort By");
             }}
             value={searchBarValue}
             placeholder="Search your Agents..."
@@ -180,69 +111,13 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           </div>
         </div>
       </div>
-      <div role="region" aria-labelledby="bots-list-heading" aria-live="polite">
-        <h2 id="bots-list-heading" className="sr-only">
-          Your Agents List
-        </h2>
-        <ul className="space-y-12">
-          {getNodes(userData?.bots)
-            .sort((a, b) => {
-              switch (useSort) {
-                case "Zip Updated":
-                  return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
-                case "Created":
-                  return a.created <= b.created ? 0 : -1;
-                case "Trophies":
-                  return (a.trophies?.edges?.length || 0) <=
-                    (b.trophies?.edges?.length || 0)
-                    ? 0
-                    : -1;
-                case "Active Competitions":
-                  return (a.competitionParticipations?.edges?.filter(
-                    (comp) => comp?.node?.active == true
-                  ).length || 0) <=
-                    (b.competitionParticipations?.edges.filter(
-                      (comp) => comp?.node?.active == true
-                    ).length || 0)
-                    ? 0
-                    : -1;
-
-                default:
-                  if (searchBarValue.trim().length > 0) {
-                    const pattern = searchBarValue?.trim();
-
-                    const regex = new RegExp(pattern, "i");
-                    const aMatches = regex.test(a.name) ? 0 : -1;
-                    const bMatches = regex.test(b.name) ? 0 : -1;
-
-                    return bMatches - aMatches;
-                  } else if (activeBotParticipations == 0) {
-                    return a.botZipUpdated <= b.botZipUpdated ? 0 : -1;
-                  } else {
-                    return (a.competitionParticipations?.edges?.filter(
-                      (comp) => comp?.node?.active == true
-                    ).length || 0) <=
-                      (b.competitionParticipations?.edges.filter(
-                        (comp) => comp?.node?.active == true
-                      ).length || 0)
-                      ? 0
-                      : -1;
-                  }
-              }
-            })
-            .map((bot) => (
-              <li key={bot.id} id={bot.id} role="listitem">
-                <UserBot bot={bot} />
-              </li>
-            ))}
-        </ul>
-        {(hasNext || isLoadingNext) && (
-          <div className="flex justify-center mt-8" ref={loadMoreRef}>
-            <LoadingDots />
-          </div>
+      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+        {viewer.user ? (
+          <UserBotsList user={viewer.user} searchBarValue={searchBarValue} />
+        ) : (
+          <></>
         )}
-      </div>
-
+      </Suspense>
       <UploadBotModal
         isOpen={isUploadBotModalOpen}
         onClose={() => setUploadBotModalOpen(false)}
