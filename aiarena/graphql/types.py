@@ -43,7 +43,8 @@ class BotFilterSet(FilterSet):
             "bot_zip_updated",
             "total_competition_participations",
             "total_active_competition_participations",
-        ]
+        ],
+        method="filter_order_by",
     )
     user_id = graphene.ID()
     name = django_filters.CharFilter(lookup_expr="icontains")
@@ -52,30 +53,21 @@ class BotFilterSet(FilterSet):
         model = models.Bot
         fields = ["name", "user_id", "order_by"]
 
-    def append_competition_participation_filter(self, queryset, order_fields):
+    def filter_order_by(self, queryset, name, value):
+        order_fields = value if isinstance(value, list) else [value]
+
         if any("total_competition_participations" in f for f in order_fields):
             queryset = queryset.annotate(total_competition_participations=Count("competition_participations"))
-        return queryset
 
-    def append_active_competition_participation_filter(self, queryset, order_fields):
         if any("total_active_competition_participations" in f for f in order_fields):
             queryset = queryset.annotate(
                 total_active_competition_participations=Count(
-                    "competition_participations", filter=Q(competition_participations__active=True)
+                    "competition_participations",
+                    filter=Q(competition_participations__active=True),
                 )
             )
-        return queryset
 
-    def filter_queryset(self, queryset):
-        order_fields = self.data.get("order_by") or self.data.get("orderBy") or []
-
-        if isinstance(order_fields, str):
-            order_fields = [order_fields]
-
-        queryset = self.append_competition_participation_filter(queryset, order_fields)
-        queryset = self.append_active_competition_participation_filter(queryset, order_fields)
-
-        return super().filter_queryset(queryset)
+        return queryset.order_by(*order_fields)
 
 
 class BotType(DjangoObjectTypeWithUID):
