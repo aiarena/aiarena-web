@@ -26,6 +26,18 @@
   --color-darken-5: rgba(0, 0, 0, 0.7);
   --color-darken-6: rgba(0, 0, 0, 0.8);
   --color-transparent: rgba(0, 0, 0, 0);
+
+  --animate-border-fade-in-out: borderFade 4s ease-in-out infinite;
+
+  @keyframes borderFade {
+    0%,
+    100% {
+      border-color: transparent;
+    }
+    50% {
+      border-color: currentColor;
+    }
+  }
 }
 
 @theme inline {
