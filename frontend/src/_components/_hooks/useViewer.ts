@@ -32,7 +32,8 @@ export const useViewer = (): Viewer | null => {
           }
           apiToken
           email
-          activeBotsLimit
+          activeBotParticipations
+          activeBotParticipationLimit
           requestMatchesLimit
           requestMatchesCountLeft
         }
