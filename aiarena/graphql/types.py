@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.db.models import Count, Q
 from django.utils import timezone
 
 import django_filters
@@ -38,7 +39,10 @@ class BotRaceType(DjangoObjectTypeWithUID):
 class BotFilterSet(FilterSet):
     order_by = OrderingFilter(
         fields=[
+            "created",
             "bot_zip_updated",
+            "total_competition_participations",
+            "total_active_competition_participations",
         ]
     )
     user_id = graphene.ID()
@@ -47,6 +51,31 @@ class BotFilterSet(FilterSet):
     class Meta:
         model = models.Bot
         fields = ["name", "user_id", "order_by"]
+
+    def append_competition_participation_filter(self, queryset, order_fields):
+        if any("total_competition_participations" in f for f in order_fields):
+            queryset = queryset.annotate(total_competition_participations=Count("competition_participations"))
+        return queryset
+
+    def append_active_competition_participation_filter(self, queryset, order_fields):
+        if any("total_active_competition_participations" in f for f in order_fields):
+            queryset = queryset.annotate(
+                total_active_competition_participations=Count(
+                    "competition_participations", filter=Q(competition_participations__active=True)
+                )
+            )
+        return queryset
+
+    def filter_queryset(self, queryset):
+        order_fields = self.data.get("order_by") or self.data.get("orderBy") or []
+
+        if isinstance(order_fields, str):
+            order_fields = [order_fields]
+
+        queryset = self.append_competition_participation_filter(queryset, order_fields)
+        queryset = self.append_active_competition_participation_filter(queryset, order_fields)
+
+        return super().filter_queryset(queryset)
 
 
 class BotType(DjangoObjectTypeWithUID):
