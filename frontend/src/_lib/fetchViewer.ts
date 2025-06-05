@@ -11,7 +11,8 @@ export const fetchViewer = async () => {
       viewer {
         apiToken
         email
-        activeBotsLimit
+        activeBotParticipations
+        activeBotParticipationLimit
         requestMatchesLimit
         requestMatchesCountLeft
         user {
