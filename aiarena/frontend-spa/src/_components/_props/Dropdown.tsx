@@ -4,12 +4,17 @@ import { DropdownButtonProps } from "./DropdownButton";
 
 interface DropdownProps {
   title: string;
+  isLoading: boolean;
   children:
     | ReactElement<DropdownButtonProps>
     | ReactElement<DropdownButtonProps>[];
 }
 
-export default function Dropdown({ title, children }: DropdownProps) {
+export default function Dropdown({
+  title,
+  children,
+  isLoading,
+}: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +49,11 @@ export default function Dropdown({ title, children }: DropdownProps) {
       <div>
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="inline-flex w-full justify-center gap-x-1.5 rounded-md  px-3 py-3 font-semibold bg-neutral-900 ring-neutral-600 shadow-xs ring-1 ring-gray-700 focus:outline-none focus:ring-customGreen focus:ring-2 ring-inset"
+          className={`inline-flex w-full justify-center gap-x-1.5 rounded-md  px-3 py-3 font-semibold bg-neutral-900 shadow-xs  border ring-1 ring-gray-700 focus:outline-none focus:ring-customGreen focus:ring-2 ring-inset ${
+            isLoading
+              ? "border-customGreen animate-border-fade-in-out  "
+              : "border-neutral-600"
+          }`}
         >
           {title}
           <ChevronDownIcon

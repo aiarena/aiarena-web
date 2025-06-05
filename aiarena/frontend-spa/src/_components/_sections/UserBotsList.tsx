@@ -6,11 +6,13 @@ import { graphql, usePaginationFragment } from "react-relay";
 import { useInfiniteScroll } from "../_hooks/useInfiniteScroll";
 
 import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
-import { useDebouncedSearch } from "../_hooks/useDebouncedSearch";
+import { useDebouncedQuery } from "../_hooks/useDebouncedSearch";
 
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;
+  orderBy: string;
+  onLoadingChange: (isLoading: boolean) => void;
 }
 
 export default function UserBotsList(props: UserBotsListProps) {
@@ -26,10 +28,11 @@ export default function UserBotsList(props: UserBotsListProps) {
       @argumentDefinitions(
         cursor: { type: "String" }
         name: { type: "String" }
+        orderBy: { type: "String" }
         first: { type: "Int", defaultValue: 20 }
       )
       @refetchable(queryName: "UserBotsListPaginationQuery") {
-        bots(first: $first, after: $cursor, name: $name)
+        bots(first: $first, after: $cursor, name: $name, orderBy: $orderBy)
           @connection(key: "UserBotsSection_user_bots") {
           edges {
             node {
@@ -44,9 +47,15 @@ export default function UserBotsList(props: UserBotsListProps) {
     props.user as UserBotsList_user$key
   );
 
-  useDebouncedSearch(props.searchBarValue, 500, (value) => {
-    refetch({ name: value });
-  });
+  useDebouncedQuery(
+    props.searchBarValue,
+    props.orderBy,
+    500,
+    (value, orderBy) => {
+      refetch({ name: value, orderBy: orderBy });
+    },
+    props.onLoadingChange
+  );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(20), hasNext);
 
@@ -55,6 +64,7 @@ export default function UserBotsList(props: UserBotsListProps) {
       <h2 id="bots-list-heading" className="sr-only">
         Your Agents List
       </h2>
+
       <ul className="space-y-12">
         {getNodes(userData?.bots).map((bot) => (
           <li key={bot.id} id={bot.id} role="listitem">
