@@ -144,6 +144,7 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             "active",
         ]
         filter_fields = []
+        connection_class = CountingConnection
 
     @staticmethod
     def resolve_trend(root: models.CompetitionParticipation, info, **args):
