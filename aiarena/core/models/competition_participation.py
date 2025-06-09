@@ -86,6 +86,9 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
 
     objects = CompetitionParticipationSet.as_manager()
 
+    class Meta:
+        unique_together = ("competition", "bot")
+
     def validate_unique(self, exclude=None):
         if self.active:
             from ..services import SupporterBenefits  # avoid circular import
