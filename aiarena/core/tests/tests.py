@@ -75,14 +75,29 @@ class BotTestCase(LoggedInMixin, TestCase):
         cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=False)
         cp.full_clean()
 
-        # this should trip the validation
+        """
+        Try to activate a bot for a user that already has 4 active participations
+        """
         with self.assertRaisesMessage(
             ValidationError,
             "Too many active participations already exist for this user."
             " You are allowed 4 active participations in competitions.",
         ):
-            cp = CompetitionParticipation.objects.create(competition=competition, bot=inactive_bot, active=True)
-            cp.full_clean()
+            cp.active = True
+            cp.full_clean()  # causes validation to run
+
+        """
+        Try to join a bot to a new competition for a user that already has 4 active participations
+        """
+        game_mode = GameMode.objects.get()
+        another_competition = self._create_open_competition(game_mode.id, name="Another Competition")
+        with self.assertRaisesMessage(
+            ValidationError,
+            "Too many active participations already exist for this user."
+            " You are allowed 4 active participations in competitions.",
+        ):
+            cp = CompetitionParticipation.objects.create(competition=another_competition, bot=inactive_bot, active=True)
+            cp.full_clean()  # causes validation to run
 
         # test updating bot_zip
         with open(TestAssetPaths.test_bot_zip_updated_path, "rb") as bot_zip_updated:
