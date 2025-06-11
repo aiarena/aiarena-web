@@ -42,7 +42,6 @@ class BotFilterSet(FilterSet):
         fields=[
             "created",
             "bot_zip_updated",
-            "total_competition_participations",
             "total_active_competition_participations",
         ],
         method="filter_order_by",
@@ -56,9 +55,6 @@ class BotFilterSet(FilterSet):
 
     def filter_order_by(self, queryset, name, value):
         order_fields = value if isinstance(value, list) else [value]
-
-        if any("total_competition_participations" in f for f in order_fields):
-            queryset = queryset.annotate(total_competition_participations=Count("competition_participations"))
 
         if any("total_active_competition_participations" in f for f in order_fields):
             queryset = queryset.annotate(
