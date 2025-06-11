@@ -192,7 +192,6 @@ class MatchFilterSet(FilterSet):
     order_by = OrderingFilter(
         fields=[
             "id",
-            "status",
             "participant1__bot__name",
             "participant2__bot__name",
             "result__type",
