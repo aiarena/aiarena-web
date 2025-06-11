@@ -21,6 +21,7 @@
     "@headlessui/react": "^2.2.2",
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.4",
+    "@tanstack/react-table": "^8.21.3",
     "@uiw/react-md-editor": "^4.0.6",
     "notistack": "^3.0.2",
     "react": "^18.3.1",

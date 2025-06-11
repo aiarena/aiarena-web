@@ -1,13 +1,11 @@
-import { formatDateISO } from "@/_lib/dateUtils";
 import { graphql, useFragment } from "react-relay";
-import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
-import FilterableList from "../_props/FilterableList";
 import RequestMatchModal from "./_modals/RequestMatchModal";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import MainButton from "../_props/MainButton";
 import WantMore from "../_display/WantMore";
 import { UserMatchRequestsSection_viewer$key } from "./__generated__/UserMatchRequestsSection_viewer.graphql";
-import { parseMatchResult } from "@/_lib/parseMatchResult";
+import MatchRequestsTable from "../_props/MatchRequestsTable";
+import LoadingSpinner from "../_display/LoadingSpinnerGray";
 
 interface UserMatchRequestsSectionProps {
   viewer: UserMatchRequestsSection_viewer$key;
@@ -21,35 +19,7 @@ export default function UserMatchRequestsSection(
       fragment UserMatchRequestsSection_viewer on Viewer {
         requestMatchesLimit
         requestMatchesCountLeft
-        requestedMatches {
-          edges {
-            node {
-              id
-              started
-              firstStarted
-              participant1 {
-                id
-                name
-              }
-              participant2 {
-                id
-                name
-              }
-              result {
-                type
-                winner {
-                  name
-                }
-              }
-              tags
-              map {
-                name
-              }
-              status
-            }
-          }
-          totalCount
-        }
+        ...MatchRequestsTable_viewer
       }
     `,
     props.viewer
@@ -57,11 +27,6 @@ export default function UserMatchRequestsSection(
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
   const matchRequestsUsed =
     viewer.requestMatchesLimit - viewer.requestMatchesCountLeft;
-
-  const parsedData = getNodes(viewer.requestedMatches).map((item) => ({
-    ...item,
-    displayId: extractRelayID(item.id, "MatchType"),
-  }));
 
   return (
     <section className="h-full" aria-labelledby="match-requests-heading">
@@ -103,145 +68,13 @@ export default function UserMatchRequestsSection(
           />
         </div>
       </div>
-      <div
-        role="region"
-        aria-labelledby="match-requests-table-heading"
-        className="grow overflow-auto rounded-xl border-1 border-neutral-700 shadow-lg shadow-black bg-darken-2 backdrop-blur-sm "
-      >
+      <div role="region" aria-labelledby="match-requests-table-heading">
         <h3 id="match-requests-table-heading" className="sr-only">
           Match Requests Table
         </h3>
-        <FilterableList
-          classes="mt-4 py-4 pb-10"
-          data={parsedData}
-          hideMenu={true}
-          fields={[
-            "status",
-            "displayId",
-            "participant1.name",
-            "participant2.name",
-            "map.name",
-            "tags",
-            "started",
-            "result.type",
-          ]} // Pass nested field as string
-          defaultFieldSort={0}
-          defaultSortOrder="desc"
-          fieldLabels={{
-            status: "Status",
-            displayId: "Match ID",
-            "participant1.name": "Agent 1",
-            "participant2.name": "Agent 2",
-            "map.name": "Map",
-            tags: "Tags",
-            started: "Started",
-            "result.type": "Result",
-          }}
-          fieldClasses={{
-            status: "hidden md:flex",
-            displayId: "hidden md:flex",
-            "map.name": "hidden lg:flex",
-            tags: "hidden lg:flex",
-            started: "hidden sm:flex",
-          }}
-          filters={[
-            {
-              type: "search",
-              label: "Search",
-              field: "all",
-              placeholder: "Search all fields...",
-            },
-          ]}
-          renderRow={(match) => (
-            <div className="flex justify-between items-center" role="row">
-              <div className="grid grid-cols-[repeat(auto-fit,_minmax(0,_1fr))] w-full">
-                <p
-                  className="pl-2 hidden md:flex text-left text-gray-200 truncate"
-                  role="cell"
-                  aria-label={`Match status: ${match.status}`}
-                  title={`${match.status}`}
-                >
-                  {match.status}
-                </p>
-                <a
-                  className="pl-2 hidden md:flex text-left font-semibold text-gray-200 truncate focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-opacity-50"
-                  href={`/matches/${extractRelayID(match.id, "MatchType")}`}
-                  role="cell"
-                  aria-label={`View match details for match ID ${match.id}`}
-                  title={`${match.displayId}`}
-                >
-                  {match.displayId}
-                </a>
-
-                <a
-                  className="pl-2 text-left text-customGreen truncate focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-opacity-50"
-                  href={`/bots/${extractRelayID(match.participant1?.id, "BotType")}`}
-                  role="cell"
-                  aria-label={`View bot profile for ${match.participant1?.name}, participant 1`}
-                  title={`${match.participant1?.name}`}
-                >
-                  {match.participant1?.name}
-                </a>
-                <a
-                  className="pl-2 text-left text-customGreen truncate focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-opacity-50"
-                  href={`/bots/${extractRelayID(match.participant2?.id, "BotType")}`}
-                  role="cell"
-                  aria-label={`View bot profile for ${match.participant2?.name}, participant 2`}
-                  title={`${match.participant2?.name}`}
-                >
-                  {match.participant2?.name}
-                </a>
-                <p
-                  className="pl-2 text-left hidden lg:flex text-gray-200 truncate"
-                  role="cell"
-                  aria-label={`Map: ${match.map.name}`}
-                  title={`${match.map.name}`}
-                >
-                  {match.map.name}
-                </p>
-                <p
-                  className="pl-2 text-left hidden lg:flex text-gray-200 truncate"
-                  role="cell"
-                  aria-label={`Tags: ${match.tags}`}
-                  title={`${match.tags}`}
-                >
-                  {match.tags && match.tags.join(", ")}
-                </p>
-                <p
-                  className="pl-2 hidden sm:flex text-left text-gray-200 truncate"
-                  role="cell"
-                  aria-label={`Match started: ${match.status !== "Queued" && match.started ? formatDateISO(match.started) : "Not yet started"}`}
-                  title={`${
-                    match.status !== "Queued"
-                      ? formatDateISO(match.firstStarted)
-                      : ""
-                  }`}
-                >
-                  {match.status !== "Queued"
-                    ? formatDateISO(match.firstStarted)
-                    : ""}
-                </p>
-                <p
-                  className="pl-2 text-left text-gray-200 truncate"
-                  role="cell"
-                  aria-label={`Match result: ${match.result?.type || "No result yet"}`}
-                  title={`${parseMatchResult(
-                    match.result?.type,
-                    match.participant1?.name,
-                    match.participant2?.name
-                  )}`}
-                >
-                  {parseMatchResult(
-                    match.result?.type,
-                    match.participant1?.name,
-                    match.participant2?.name
-                  )}
-                </p>
-              </div>
-            </div>
-          )}
-          aria-label={`Table of ${getNodes(viewer.requestedMatches).length} match requests`}
-        />
+        <Suspense fallback={<LoadingSpinner />}>
+          <MatchRequestsTable viewer={viewer} />
+        </Suspense>
       </div>
 
       <RequestMatchModal
