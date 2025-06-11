@@ -20,7 +20,7 @@ interface UserBotsSectionProps {
 export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
   const viewer = useFragment(
     graphql`
-      fragment UserBotsSection_viewer on ViewerType {
+      fragment UserBotsSection_viewer on Viewer {
         activeBotParticipations
         activeBotParticipationLimit
 

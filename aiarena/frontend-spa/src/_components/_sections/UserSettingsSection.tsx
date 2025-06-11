@@ -18,7 +18,7 @@ interface UserSettingsSectionProps {
 export default function UserSettingsSection(props: UserSettingsSectionProps) {
   const viewer = useFragment(
     graphql`
-      fragment UserSettingsSection_viewer on ViewerType {
+      fragment UserSettingsSection_viewer on Viewer {
         apiToken
         receiveEmailComms
         lastLogin

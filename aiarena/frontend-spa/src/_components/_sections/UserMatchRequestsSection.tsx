@@ -18,7 +18,7 @@ export default function UserMatchRequestsSection(
 ) {
   const viewer = useFragment(
     graphql`
-      fragment UserMatchRequestsSection_viewer on ViewerType {
+      fragment UserMatchRequestsSection_viewer on Viewer {
         requestMatchesLimit
         requestMatchesCountLeft
         requestedMatches {

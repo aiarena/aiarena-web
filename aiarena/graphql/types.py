@@ -387,7 +387,7 @@ class UserType(DjangoObjectTypeWithUID):
         return None  # Return None if no avatar exists. However, we probably want to return the default avatar.
 
 
-class ViewerType(graphene.ObjectType):
+class Viewer(graphene.ObjectType):
     # This is the private viewer user type.
     # Put data only the logged in user should be able view here.
     user = graphene.Field("aiarena.graphql.UserType")
@@ -473,7 +473,7 @@ class Query(graphene.ObjectType):
     node = graphene.relay.Node.Field()
     stats = graphene.Field(StatsType)
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
-    viewer = graphene.Field("aiarena.graphql.ViewerType")
+    viewer = graphene.Field("aiarena.graphql.Viewer")
 
     @staticmethod
     def resolve_bot_race(root, info, **args):
