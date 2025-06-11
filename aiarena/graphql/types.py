@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.conf import settings
-from django.db.models import CharField, OuterRef, Subquery
+from django.db.models import CharField, Count, OuterRef, Q, Subquery
 from django.db.models.functions import Lower
 from django.utils import timezone
 
@@ -38,12 +38,37 @@ class BotRaceType(DjangoObjectTypeWithUID):
 
 
 class BotFilterSet(FilterSet):
+    order_by = OrderingFilter(
+        fields=[
+            "created",
+            "bot_zip_updated",
+            "total_competition_participations",
+            "total_active_competition_participations",
+        ],
+        method="filter_order_by",
+    )
     user_id = graphene.ID()
     name = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = models.Bot
-        fields = ["name", "user_id"]
+        fields = ["name", "user_id", "order_by"]
+
+    def filter_order_by(self, queryset, name, value):
+        order_fields = value if isinstance(value, list) else [value]
+
+        if any("total_competition_participations" in f for f in order_fields):
+            queryset = queryset.annotate(total_competition_participations=Count("competition_participations"))
+
+        if any("total_active_competition_participations" in f for f in order_fields):
+            queryset = queryset.annotate(
+                total_active_competition_participations=Count(
+                    "competition_participations",
+                    filter=Q(competition_participations__active=True),
+                )
+            )
+
+        return queryset.order_by(*order_fields)
 
 
 class BotType(DjangoObjectTypeWithUID):

@@ -5,6 +5,8 @@ import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
 
 import Searchbar from "../_props/Searchbar";
+import Dropdown from "../_props/Dropdown";
+import DropdownButton from "../_props/DropdownButton";
 import WantMore from "../_display/WantMore";
 import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
 
@@ -32,6 +34,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
   const [searchBarValue, setSearchBarValue] = useState("");
+  const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
   const [filterLoading, setFilterLoading] = useState(false);
 
   return (
@@ -60,6 +63,36 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           role="group"
           aria-label="Agent filtering and sorting controls"
         >
+          <Dropdown title={orderBy.display} isLoading={filterLoading}>
+            <DropdownButton
+              onClick={() =>
+                setOrderBy({
+                  display: "Active Participations",
+                  value: "-total_active_competition_participations",
+                })
+              }
+              title={"Active Participations"}
+            />
+
+            <DropdownButton
+              onClick={() =>
+                setOrderBy({
+                  display: "Last Zip Updated",
+                  value: "-bot_zip_updated",
+                })
+              }
+              title={"Last Zip Updated"}
+            />
+            <DropdownButton
+              onClick={() =>
+                setOrderBy({
+                  display: "First Created",
+                  value: "created",
+                })
+              }
+              title={"First Created"}
+            />
+          </Dropdown>
           <Searchbar
             onChange={(e) => {
               setSearchBarValue(e.target.value);
@@ -94,6 +127,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           <UserBotsList
             user={viewer.user}
             searchBarValue={searchBarValue}
+            orderBy={orderBy.value}
             onLoadingChange={setFilterLoading}
           />
         ) : (
