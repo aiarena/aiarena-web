@@ -14,7 +14,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
-from aiarena.core.models import BotRace, Result, User
+from aiarena.core.models import BotRace, MatchParticipation, Result, User
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits, Users
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
@@ -38,37 +38,12 @@ class BotRaceType(DjangoObjectTypeWithUID):
 
 
 class BotFilterSet(FilterSet):
-    order_by = OrderingFilter(
-        fields=[
-            "created",
-            "bot_zip_updated",
-            "total_competition_participations",
-            "total_active_competition_participations",
-        ],
-        method="filter_order_by",
-    )
     user_id = graphene.ID()
     name = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = models.Bot
-        fields = ["name", "user_id", "order_by"]
-
-    def filter_order_by(self, queryset, name, value):
-        order_fields = value if isinstance(value, list) else [value]
-
-        if any("total_competition_participations" in f for f in order_fields):
-            queryset = queryset.annotate(total_competition_participations=Count("competition_participations"))
-
-        if any("total_active_competition_participations" in f for f in order_fields):
-            queryset = queryset.annotate(
-                total_active_competition_participations=Count(
-                    "competition_participations",
-                    filter=Q(competition_participations__active=True),
-                )
-            )
-
-        return queryset.order_by(*order_fields)
+        fields = ["name", "user_id"]
 
 
 class BotType(DjangoObjectTypeWithUID):
@@ -425,7 +400,7 @@ class UserType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_bots(root: models.User, info, **args):
-        return root.bots.all()
+        return root.bots.order_by("-bot_zip_updated")
 
     @staticmethod
     def resolve_avatar_url(root: models.User, info):

@@ -1,20 +1,16 @@
 import { useEffect, useRef } from "react";
 
-export function useDebouncedQuery(
-  searchValue: string,
-  orderBy: string,
+export function useDebounced<T>(
+  value: T,
   delay: number,
-  onDebounced: (value: string, orderBy: string) => void,
+  onDebounced: (value: T) => void,
   onLoadingChange?: (isLoading: boolean) => void
 ): void {
-  const lastSearchRef = useRef(searchValue);
-  const lastOrderByRef = useRef(orderBy);
+  const lastSearchRef = useRef(value);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const hasChanged =
-      lastSearchRef.current !== searchValue ||
-      lastOrderByRef.current !== orderBy;
+    const hasChanged = lastSearchRef.current !== value;
 
     if (!hasChanged) return;
 
@@ -23,15 +19,14 @@ export function useDebouncedQuery(
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     timeoutRef.current = setTimeout(() => {
-      lastSearchRef.current = searchValue;
-      lastOrderByRef.current = orderBy;
+      lastSearchRef.current = value;
 
-      onDebounced(searchValue, orderBy);
+      onDebounced(value);
       onLoadingChange?.(false);
     }, delay);
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [searchValue, orderBy, delay, onDebounced, onLoadingChange]);
+  }, [value, delay, onDebounced, onLoadingChange]);
 }
