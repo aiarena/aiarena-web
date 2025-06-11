@@ -20,7 +20,7 @@ export function getNodes<T>(
 }
 
 
-export function extractRelayID(base64Id: string | undefined | null, expectedType: string) {
+export function getIDFromBase64(base64Id: string | undefined | null, expectedType: string) {
     if (base64Id == null || base64Id == undefined) {
         return null
     }

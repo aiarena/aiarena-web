@@ -1,9 +1,9 @@
-import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
 import Modal from "@/_components/_props/Modal";
 
 import { BotAllParticipationsModal_bot$key } from "./__generated__/BotAllParticipationsModal_bot.graphql";
-import { formatDate } from "@/_lib/dateUtils";
+import { getDateToLocale } from "@/_lib/dateUtils";
 
 interface BotAllParticipationsModalProps {
   bot: BotAllParticipationsModal_bot$key;
@@ -64,7 +64,7 @@ export default function BotAllParticipationsModal({
                 <div className="flex justify-between flex-wrap">
                   <div>
                     <a
-                      href={`/competitions/${extractRelayID(participation.competition.id, "CompetitionType")}`}
+                      href={`/competitions/${getIDFromBase64(participation.competition.id, "CompetitionType")}`}
                       className="font-bold"
                     >
                       {participation.competition.name}
@@ -82,7 +82,9 @@ export default function BotAllParticipationsModal({
                           Opened:{" "}
                         </dt>
                         <dd>
-                          {formatDate(participation.competition.dateOpened)}
+                          {getDateToLocale(
+                            participation.competition.dateOpened
+                          )}
                         </dd>
                       </div>
                       <div className="flex">
@@ -91,7 +93,9 @@ export default function BotAllParticipationsModal({
                         </dt>
                         <dd>
                           {participation.competition.dateClosed != null
-                            ? formatDate(participation.competition.dateClosed)
+                            ? getDateToLocale(
+                                participation.competition.dateClosed
+                              )
                             : ""}
                         </dd>
                       </div>
@@ -115,7 +119,7 @@ export default function BotAllParticipationsModal({
                     </dl>
 
                     <a
-                      href={`/competitions/stats/${extractRelayID(participation.id, "CompetitionParticipationType")}`}
+                      href={`/competitions/stats/${getIDFromBase64(participation.id, "CompetitionParticipationType")}`}
                     >
                       Explore more stats
                     </a>

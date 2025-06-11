@@ -1,4 +1,4 @@
-export function parseMatchResult(
+export function getMatchResultParsed(
   result: string | undefined,
   player1: string | undefined,
   player2: string | undefined
@@ -20,6 +20,7 @@ export function parseMatchResult(
     PLAYER2RACEMISMATCH: `${player2} Race Mismatch`,
     PLAYER2SURRENDER: `${player2} Surrender`,
     TIE: "Tie",
+    "": "",
   };
 
   return resultOptions[result] || "";

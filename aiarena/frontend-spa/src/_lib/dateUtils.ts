@@ -1,5 +1,5 @@
 // For displaying data to users
-export const formatDate = (dateString: string, locale = "en-GB") => {
+export const getDateToLocale = (dateString: string, locale = "en-GB") => {
   if (!dateString) {
     return ""
   }
@@ -16,7 +16,7 @@ export const formatDate = (dateString: string, locale = "en-GB") => {
 }
 
 // For internal uses
-export const formatDateISO = (dateString: string): string => {
+export const getDateTimeISOString = (dateString: string): string => {
   if (!dateString) {
     return ""
   }

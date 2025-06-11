@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
-import { formatDate } from "@/_lib/dateUtils";
+import { getDateToLocale } from "@/_lib/dateUtils";
 import BotSettingsModal from "../../_sections/_modals/bot_settings_modal/BotSettingsModal";
-import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import BotTrophiesModal from "../../_sections/_modals/BotTrophiesModal";
 import { TrophyIcon, CogIcon } from "@heroicons/react/20/solid";
 import { UserBotHeader_bot$key } from "./__generated__/UserBotHeader_bot.graphql";
@@ -47,8 +47,8 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
           <div className="flex items-center flex-wrap">
             {/* Bot Name */}
             <a
-              href={`/bots/${extractRelayID(bot.id, "BotType")}`}
-              className="font-bold text-lg text-customGreen font-gugi font-light"
+              href={`/bots/${getIDFromBase64(bot.id, "BotType")}`}
+              className="text-lg text-customGreen font-gugi font-light"
             >
               {bot.name}
             </a>
@@ -102,7 +102,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
             {bot.botZipUpdated && (
               <p className="text-sm text-gray-400">
                 <span className="font-bold">Zip Updated:</span>{" "}
-                {formatDate(bot.botZipUpdated)}
+                {getDateToLocale(bot.botZipUpdated)}
               </p>
             )}
           </div>
