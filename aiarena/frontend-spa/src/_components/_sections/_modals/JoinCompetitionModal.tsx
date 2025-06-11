@@ -1,4 +1,4 @@
-import { extractRelayID, getNodes } from "@/_lib/relayHelpers";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import {
   graphql,
   useFragment,
@@ -142,7 +142,7 @@ export default function JoinCompetitionModal({
               <div className="block">
                 <div>
                   <a
-                    href={`/competitions/${extractRelayID(comp.id, "CompetitionType")}`}
+                    href={`/competitions/${getIDFromBase64(comp.id, "CompetitionType")}`}
                     className="font-bold"
                   >
                     {comp.name}
