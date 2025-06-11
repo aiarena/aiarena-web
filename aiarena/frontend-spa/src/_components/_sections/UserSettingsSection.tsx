@@ -2,7 +2,7 @@ import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import AvatarWithBorder from "../_display/AvatarWithBorder";
 import SectionDivider from "../_display/SectionDivider";
-import { formatDate } from "@/_lib/dateUtils";
+import { getDateToLocale } from "@/_lib/dateUtils";
 import {
   ClipboardDocumentIcon,
   EyeIcon,
@@ -18,7 +18,7 @@ interface UserSettingsSectionProps {
 export default function UserSettingsSection(props: UserSettingsSectionProps) {
   const viewer = useFragment(
     graphql`
-      fragment UserSettingsSection_viewer on ViewerType {
+      fragment UserSettingsSection_viewer on Viewer {
         apiToken
         receiveEmailComms
         lastLogin
@@ -60,11 +60,11 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
       >
         <div className="flex" role="listitem">
           <dt className="w-36 font-medium text-white">Date Joined:</dt>
-          <dd>{formatDate(viewer.dateJoined)}</dd>
+          <dd>{getDateToLocale(viewer.dateJoined)}</dd>
         </div>
         <div className="flex" role="listitem">
           <dt className="w-36 font-medium text-white">Last Login:</dt>
-          <dd>{formatDate(viewer.lastLogin)}</dd>
+          <dd>{getDateToLocale(viewer.lastLogin)}</dd>
         </div>
         <div className="flex" role="listitem">
           <dt className="w-36 font-medium text-white">Receive Emails:</dt>

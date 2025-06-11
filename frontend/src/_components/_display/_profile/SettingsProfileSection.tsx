@@ -12,7 +12,7 @@ export default function SettingsProfileSection(
 ) {
   const viewer = useFragment(
     graphql`
-      fragment SettingsProfileSection_viewer on ViewerType {
+      fragment SettingsProfileSection_viewer on Viewer {
         apiToken
         user {
           username

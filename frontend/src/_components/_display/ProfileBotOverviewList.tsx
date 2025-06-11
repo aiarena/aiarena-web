@@ -15,7 +15,7 @@ export const ProfileBotOverviewList: React.FC<ProfileBotOverviewListProps> = (
 ) => {
   const viewer = useFragment(
     graphql`
-      fragment ProfileBotOverviewList_viewer on ViewerType {
+      fragment ProfileBotOverviewList_viewer on Viewer {
         activeBotParticipations
         activeBotParticipationLimit
         user {

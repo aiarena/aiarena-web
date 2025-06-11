@@ -16,7 +16,7 @@ interface RequestMatchesSectionProps {
 export default function RequestMatchSection(props: RequestMatchesSectionProps) {
   const viewer = useFragment(
     graphql`
-      fragment RequestMatchSection_viewer on ViewerType {
+      fragment RequestMatchSection_viewer on Viewer {
         requestMatchesLimit
         requestMatchesCountLeft
         requestedMatches {

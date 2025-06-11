@@ -1,7 +1,8 @@
 from datetime import timedelta
 
 from django.conf import settings
-from django.db.models import Count, Q
+from django.db.models import CharField, OuterRef, Subquery
+from django.db.models.functions import Lower
 from django.utils import timezone
 
 import django_filters
@@ -13,7 +14,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
-from aiarena.core.models import BotRace, Result, User
+from aiarena.core.models import BotRace, MatchParticipation, Result, User
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits, Users
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
@@ -37,37 +38,12 @@ class BotRaceType(DjangoObjectTypeWithUID):
 
 
 class BotFilterSet(FilterSet):
-    order_by = OrderingFilter(
-        fields=[
-            "created",
-            "bot_zip_updated",
-            "total_competition_participations",
-            "total_active_competition_participations",
-        ],
-        method="filter_order_by",
-    )
     user_id = graphene.ID()
     name = django_filters.CharFilter(lookup_expr="icontains")
 
     class Meta:
         model = models.Bot
-        fields = ["name", "user_id", "order_by"]
-
-    def filter_order_by(self, queryset, name, value):
-        order_fields = value if isinstance(value, list) else [value]
-
-        if any("total_competition_participations" in f for f in order_fields):
-            queryset = queryset.annotate(total_competition_participations=Count("competition_participations"))
-
-        if any("total_active_competition_participations" in f for f in order_fields):
-            queryset = queryset.annotate(
-                total_active_competition_participations=Count(
-                    "competition_participations",
-                    filter=Q(competition_participations__active=True),
-                )
-            )
-
-        return queryset.order_by(*order_fields)
+        fields = ["name", "user_id"]
 
 
 class BotType(DjangoObjectTypeWithUID):
@@ -191,6 +167,48 @@ class MatchParticipationType(DjangoObjectTypeWithUID):
         connection_class = CountingConnection
 
 
+class MatchFilterSet(FilterSet):
+    order_by = OrderingFilter(
+        fields=[
+            "id",
+            "status",
+            "participant1__bot__name",
+            "participant2__bot__name",
+            "result__type",
+            "map__name",
+            "first_started",
+            "tags",
+        ],
+        method="filter_order_by",
+    )
+
+    class Meta:
+        model = models.Match
+        fields = ["order_by"]
+
+    def filter_order_by(self, queryset, name, value):
+        order_fields = value if isinstance(value, list) else [value]
+        if any("participant1__bot__name" in f for f in order_fields):
+            subquery = (
+                MatchParticipation.objects.filter(match=OuterRef("pk"), participant_number=1)
+                .annotate(lower_name=Lower("bot__name"))
+                .values("lower_name")[:1]
+            )
+            queryset = queryset.annotate(participant1_name=Subquery(subquery, output_field=CharField()))
+            order_fields = [f.replace("participant1__bot__name", "participant1_name") for f in order_fields]
+
+        if any("participant2__bot__name" in f for f in order_fields):
+            subquery = (
+                MatchParticipation.objects.filter(match=OuterRef("pk"), participant_number=2)
+                .annotate(lower_name=Lower("bot__name"))
+                .values("lower_name")[:1]
+            )
+            queryset = queryset.annotate(participant2_name=Subquery(subquery, output_field=CharField()))
+            order_fields = [f.replace("participant2__bot__name", "participant2_name") for f in order_fields]
+
+        return queryset.order_by(*order_fields)
+
+
 class MatchType(DjangoObjectTypeWithUID):
     participant1 = graphene.Field("aiarena.graphql.BotType")
     participant2 = graphene.Field("aiarena.graphql.BotType")
@@ -200,8 +218,17 @@ class MatchType(DjangoObjectTypeWithUID):
 
     class Meta:
         model = models.Match
-        fields = ["result", "map", "created", "started", "first_started", "requested_by", "tags"]
-        filter_fields = []
+        fields = [
+            "status",
+            "result",
+            "map",
+            "created",
+            "started",
+            "first_started",
+            "requested_by",
+            "tags",
+        ]
+        filterset_class = MatchFilterSet
         connection_class = CountingConnection
 
     @staticmethod
@@ -373,7 +400,7 @@ class UserType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_bots(root: models.User, info, **args):
-        return root.bots.all()
+        return root.bots.order_by("-bot_zip_updated")
 
     @staticmethod
     def resolve_avatar_url(root: models.User, info):
@@ -387,7 +414,7 @@ class UserType(DjangoObjectTypeWithUID):
         return None  # Return None if no avatar exists. However, we probably want to return the default avatar.
 
 
-class ViewerType(graphene.ObjectType):
+class Viewer(graphene.ObjectType):
     # This is the private viewer user type.
     # Put data only the logged in user should be able view here.
     user = graphene.Field("aiarena.graphql.UserType")
@@ -398,7 +425,7 @@ class ViewerType(graphene.ObjectType):
     active_bot_participation_limit = graphene.Int()
     request_matches_limit = graphene.Int(required=True)
     request_matches_count_left = graphene.Int(required=True)
-    requested_matches = DjangoConnectionField("aiarena.graphql.MatchType")
+    requested_matches = DjangoFilterConnectionField("aiarena.graphql.MatchType", filterset_class=MatchFilterSet)
     receive_email_comms = graphene.Boolean()
     last_login = graphene.DateTime()
     date_joined = graphene.DateTime()
@@ -440,7 +467,7 @@ class ViewerType(graphene.ObjectType):
 
     @staticmethod
     def resolve_requested_matches(root: models.User, info, **args):
-        return root.requested_matches.order_by("-first_started")
+        return root.requested_matches.order_by("-first_started", "-id")
 
     @staticmethod
     def resolve_receive_email_comms(root: models.User, info):
@@ -469,11 +496,12 @@ class Query(graphene.ObjectType):
     competitions = DjangoFilterConnectionField("aiarena.graphql.CompetitionType")
     map_pools = DjangoFilterConnectionField("aiarena.graphql.MapPoolType")
     maps = DjangoFilterConnectionField("aiarena.graphql.MapType")
+    match = DjangoFilterConnectionField("aiarena.graphql.MatchType")
     news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
     node = graphene.relay.Node.Field()
     stats = graphene.Field(StatsType)
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
-    viewer = graphene.Field("aiarena.graphql.ViewerType")
+    viewer = graphene.Field("aiarena.graphql.Viewer")
 
     @staticmethod
     def resolve_bot_race(root, info, **args):
@@ -494,6 +522,10 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_maps(root, info, **args):
         return models.Map.objects.all()
+
+    @staticmethod
+    def resolve_match(root, info, **args):
+        return models.Match.objects.all()
 
     @staticmethod
     def resolve_news(root, info, **args):

@@ -87,10 +87,10 @@ def test_request_match_form(
 
     page.get_by_role("button", name="Request New Match").click()
 
-    page.get_by_label("Agent 1").click()
+    page.locator("#agent1-name").click()
     page.get_by_role("option", name=bot.name, exact=True).click()
 
-    page.get_by_label("Agent 2").click()
+    page.locator("#agent2-name").click()
     page.get_by_role("option", name=other_bot.name, exact=True).click()
 
     # Mode switch button

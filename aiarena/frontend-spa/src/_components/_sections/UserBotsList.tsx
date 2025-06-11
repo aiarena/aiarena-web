@@ -6,12 +6,12 @@ import { graphql, usePaginationFragment } from "react-relay";
 import { useInfiniteScroll } from "../_hooks/useInfiniteScroll";
 
 import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
-import { useDebouncedQuery } from "../_hooks/useDebouncedSearch";
+import { useDebounced } from "../_hooks/useDebouncedSearch";
 
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;
-  orderBy: string;
+
   onLoadingChange: (isLoading: boolean) => void;
 }
 
@@ -20,7 +20,6 @@ export default function UserBotsList(props: UserBotsListProps) {
     data: userData,
     loadNext,
     hasNext,
-    isLoadingNext,
     refetch,
   } = usePaginationFragment(
     graphql`
@@ -28,11 +27,11 @@ export default function UserBotsList(props: UserBotsListProps) {
       @argumentDefinitions(
         cursor: { type: "String" }
         name: { type: "String" }
-        orderBy: { type: "String" }
+
         first: { type: "Int", defaultValue: 20 }
       )
       @refetchable(queryName: "UserBotsListPaginationQuery") {
-        bots(first: $first, after: $cursor, name: $name, orderBy: $orderBy)
+        bots(first: $first, after: $cursor, name: $name)
           @connection(key: "UserBotsSection_user_bots") {
           edges {
             node {
@@ -47,12 +46,11 @@ export default function UserBotsList(props: UserBotsListProps) {
     props.user as UserBotsList_user$key
   );
 
-  useDebouncedQuery(
+  useDebounced(
     props.searchBarValue,
-    props.orderBy,
     500,
-    (value, orderBy) => {
-      refetch({ name: value, orderBy: orderBy });
+    (value) => {
+      refetch({ name: value });
     },
     props.onLoadingChange
   );
@@ -72,7 +70,7 @@ export default function UserBotsList(props: UserBotsListProps) {
           </li>
         ))}
       </ul>
-      {(hasNext || isLoadingNext) && (
+      {hasNext && (
         <div className="flex justify-center mt-8" ref={loadMoreRef}>
           <LoadingDots />
         </div>

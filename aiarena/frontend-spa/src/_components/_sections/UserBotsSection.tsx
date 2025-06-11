@@ -5,8 +5,6 @@ import MainButton from "../_props/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
 
 import Searchbar from "../_props/Searchbar";
-import Dropdown from "../_props/Dropdown";
-import DropdownButton from "../_props/DropdownButton";
 import WantMore from "../_display/WantMore";
 import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
 
@@ -20,7 +18,7 @@ interface UserBotsSectionProps {
 export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
   const viewer = useFragment(
     graphql`
-      fragment UserBotsSection_viewer on ViewerType {
+      fragment UserBotsSection_viewer on Viewer {
         activeBotParticipations
         activeBotParticipationLimit
 
@@ -33,7 +31,6 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
   );
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
-  const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
   const [searchBarValue, setSearchBarValue] = useState("");
   const [filterLoading, setFilterLoading] = useState(false);
 
@@ -63,47 +60,6 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           role="group"
           aria-label="Agent filtering and sorting controls"
         >
-          <Dropdown title={orderBy.display} isLoading={filterLoading}>
-            <DropdownButton
-              onClick={() =>
-                setOrderBy({
-                  display: "Total Participations",
-                  value: "-total_competition_participations",
-                })
-              }
-              title={"Total Participations"}
-            />
-
-            <DropdownButton
-              onClick={() =>
-                setOrderBy({
-                  display: "Active Participations",
-                  value: "-total_active_competition_participations",
-                })
-              }
-              title={"Active Participations"}
-            />
-
-            <DropdownButton
-              onClick={() =>
-                setOrderBy({
-                  display: "Last Zip Updated",
-                  value: "-bot_zip_updated",
-                })
-              }
-              title={"Last Zip Updated"}
-            />
-            <DropdownButton
-              onClick={() =>
-                setOrderBy({
-                  display: "First Created",
-                  value: "created",
-                })
-              }
-              title={"First Created"}
-            />
-          </Dropdown>
-
           <Searchbar
             onChange={(e) => {
               setSearchBarValue(e.target.value);
@@ -138,7 +94,6 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           <UserBotsList
             user={viewer.user}
             searchBarValue={searchBarValue}
-            orderBy={orderBy.value}
             onLoadingChange={setFilterLoading}
           />
         ) : (
