@@ -1,36 +1,40 @@
-class BotNotInMatchException(Exception):
+class AIArenaException(Exception):
     pass
 
 
-class BotAlreadyInMatchException(Exception):
+class BotNotInMatchException(AIArenaException):
     pass
 
 
-class CompetitionPaused(Exception):
+class BotAlreadyInMatchException(AIArenaException):
+    pass
+
+
+class CompetitionPaused(AIArenaException):
     def __init__(self):
         super().__init__("This competition is paused.")
 
 
-class CompetitionClosing(Exception):
+class CompetitionClosing(AIArenaException):
     def __init__(self):
         super().__init__("This competition is closing.")
 
 
-class NoMaps(Exception):
+class NoMaps(AIArenaException):
     def __init__(self):
         super().__init__("There are no active maps available for a match.")
 
 
-class NotEnoughAvailableBots(Exception):
+class NotEnoughAvailableBots(AIArenaException):
     def __init__(self):
         super().__init__("Not enough available bots for a match. Wait until more bots become available.")
 
 
-class MaxActiveRounds(Exception):
+class MaxActiveRounds(AIArenaException):
     def __init__(self):
         super().__init__("This competition has reached it's maximum active rounds.")
 
 
-class MatchRequestException(Exception):
+class MatchRequestException(AIArenaException):
     def __init__(self, message):
         super().__init__(message)
