@@ -15,6 +15,7 @@ from .competition_list import CompetitionList
 from .competition_participation_list import CompetitionParticipationList
 from .competition_participation_update import CompetitionParticipationUpdate
 from .frontend import frontend
+from .graphql import CustomGraphQLView
 from .health_check import health_check, health_check_with_db
 from .http_500 import http_500
 from .index import Index
