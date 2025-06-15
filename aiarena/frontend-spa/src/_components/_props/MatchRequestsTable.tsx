@@ -13,7 +13,7 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
 import LoadingDots from "../_display/LoadingDots";
 import { useInfiniteScroll } from "../_hooks/useInfiniteScroll";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
@@ -22,6 +22,7 @@ import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 
 interface MatchRequestsTableProps {
   viewer: MatchRequestsTable_viewer$key;
+  loading: boolean;
 }
 
 export default function MatchRequestsTable(props: MatchRequestsTableProps) {
@@ -198,7 +199,10 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
 
   return (
     <div>
-      <TableContainer table={table} />
+      <Suspense fallback={<LoadingDots />}>
+        <TableContainer table={table} loading={props.loading} />
+      </Suspense>
+
       {hasNext && (
         <div className="flex justify-center mt-8" ref={loadMoreRef}>
           <LoadingDots />

@@ -6,16 +6,18 @@ import LoadingSpinner from "../_display/LoadingSpinnerGray";
 interface TableContainerProps<T> {
   table: Table<T>;
   className?: string;
+  loading: boolean;
 }
 
 export function TableContainer<T>({
   table,
   className,
+  loading,
 }: TableContainerProps<T>) {
   const allColumns = table.getAllLeafColumns();
   return (
-    <div className={` ${className ?? ""}`}>
-      {/* Toggle Visibility */}
+    <div className={` ${className ?? ""} ${loading ? "animate-pulse" : ""}`}>
+      {/* Column toggles */}
       <div className="mb-4 flex flex-wrap gap-4 text-white">
         {allColumns.map((column) => (
           <label key={column.id} className="flex items-center space-x-2">
@@ -36,7 +38,7 @@ export function TableContainer<T>({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded backdrop-blur-lg  ">
+      <div className="overflow-x-auto rounded backdrop-blur-lg">
         <table className="w-full border-collapse min-w-max">
           <thead className="bg-darken-2 text-white">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -50,16 +52,17 @@ export function TableContainer<T>({
                   >
                     <div className="inline-flex items-center gap-1 w-full justify-between h-full">
                       <div
-                        className="p-3 inline-flex items-center gap-1 w-full justify-between cursor-pointer mr-5   group hover:text-white"
+                        className="p-3 inline-flex items-center gap-1 w-full justify-between cursor-pointer mr-5 group hover:text-white"
                         {...(header.column.getCanSort()
-                          ? { onClick: header.column.getToggleSortingHandler() }
+                          ? {
+                              onClick: header.column.getToggleSortingHandler(),
+                            }
                           : {})}
                       >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-
                         {header.column.getCanSort() && (
                           <>
                             {header.column.getIsSorted() === "asc" ? (
@@ -89,7 +92,11 @@ export function TableContainer<T>({
                               }`}
                         >
                           <div
-                            className={` w-[1px] h-full  ${header.column.getIsResizing() ? "bg-white" : "bg-customGreen"} `}
+                            className={` w-[1px] h-full  ${
+                              header.column.getIsResizing()
+                                ? "bg-white"
+                                : "bg-customGreen"
+                            }`}
                           ></div>
                         </div>
                       )}
