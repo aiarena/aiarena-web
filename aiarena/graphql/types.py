@@ -196,7 +196,7 @@ class MatchFilterSet(FilterSet):
             "participant2__bot__name",
             "result__type",
             "map__name",
-            "first_started",
+            "started",
             "tags",
         ],
         method="filter_order_by",
@@ -244,7 +244,6 @@ class MatchType(DjangoObjectTypeWithUID):
             "map",
             "created",
             "started",
-            "first_started",
             "requested_by",
             "tags",
         ]
@@ -487,7 +486,7 @@ class Viewer(graphene.ObjectType):
 
     @staticmethod
     def resolve_requested_matches(root: models.User, info, **args):
-        return root.requested_matches.order_by("-first_started", "-id")
+        return root.requested_matches.order_by("-started", "-id")
 
     @staticmethod
     def resolve_receive_email_comms(root: models.User, info):

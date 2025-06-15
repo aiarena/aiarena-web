@@ -46,7 +46,6 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
             node {
               id
               started
-              firstStarted
               participant1 {
                 id
                 name
@@ -136,8 +135,8 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.firstStarted ?? "A", {
-        id: "firstStarted",
+      columnHelper.accessor((row) => row.started ?? "A", {
+        id: "started",
         header: "Started",
         cell: (info) => {
           const getTime = getDateTimeISOString(info.getValue());
@@ -174,7 +173,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       participant2: "participant2__bot__name",
       result: "result__type",
       map: "map__name",
-      firstStarted: "first_started",
+      started: "started",
       tags: "tags",
     };
 
