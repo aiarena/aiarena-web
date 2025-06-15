@@ -5,13 +5,15 @@ import { UserMatchRequestsQuery } from "./__generated__/UserMatchRequestsQuery.g
 export default function UserMatchRequests() {
   const data = useLazyLoadQuery<UserMatchRequestsQuery>(
     graphql`
-      query UserMatchRequestsQuery {
+      query UserMatchRequestsQuery($orderBy: String) {
         viewer {
-          ...UserMatchRequestsSection_viewer
+          ...UserMatchRequestsSection_viewer @arguments(orderBy: $orderBy)
         }
       }
     `,
-    {}
+    {
+      orderBy: "",
+    }
   );
 
   if (!data.viewer) {

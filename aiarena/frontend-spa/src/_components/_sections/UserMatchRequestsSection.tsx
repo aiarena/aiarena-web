@@ -15,9 +15,10 @@ export default function UserMatchRequestsSection(
 ) {
   const viewer = useFragment(
     graphql`
-      fragment UserMatchRequestsSection_viewer on Viewer {
+      fragment UserMatchRequestsSection_viewer on Viewer
+      @argumentDefinitions(orderBy: { type: "String" }) {
         ...UserMatchRequestsHeaderSection_viewer
-        ...MatchRequestsTable_viewer
+        ...MatchRequestsTable_viewer @arguments(orderBy: $orderBy)
       }
     `,
     props.viewer
