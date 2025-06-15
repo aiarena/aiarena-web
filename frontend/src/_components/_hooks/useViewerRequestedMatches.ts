@@ -4,7 +4,7 @@ import { useViewerRequestedMatchesQuery } from "./__generated__/useViewerRequest
 
 export interface ViewerRequestedMatch {
   id: string;
-  firstStarted: string;
+  started: string;
   participant1: {
     id: string;
     name: string;
@@ -28,7 +28,7 @@ export const useViewerRequestedMatches = (): ViewerRequestedMatch[] => {
             edges {
               node {
                 id
-                firstStarted
+                started
                 participant1 {
                   id
                   name
@@ -56,7 +56,7 @@ export const useViewerRequestedMatches = (): ViewerRequestedMatch[] => {
 
   return matchNodes.map((node) => ({
     id: node.id,
-    firstStarted: String(node.firstStarted),
+    started: String(node.started),
     participant1: node.participant1
       ? { name: node.participant1.name, id: node.participant1.id }
       : null,
@@ -65,9 +65,9 @@ export const useViewerRequestedMatches = (): ViewerRequestedMatch[] => {
       : null,
     result: node.result
       ? {
-          type: node.result.type,
-          winner: node.result.winner ? { name: node.result.winner.name } : null,
-        }
+        type: node.result.type,
+        winner: node.result.winner ? { name: node.result.winner.name } : null,
+      }
       : null,
   }));
 };

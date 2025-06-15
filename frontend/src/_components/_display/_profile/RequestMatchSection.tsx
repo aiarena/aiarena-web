@@ -23,7 +23,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
           edges {
             node {
               id
-              firstStarted
+              started
               participant1 {
                 id
                 name
@@ -108,18 +108,12 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
       </div>
       <FilterableList
         data={getNodes(viewer.requestedMatches)}
-        fields={[
-          "id",
-          "firstStarted",
-          "participant1",
-          "participant2",
-          "result",
-        ]} // Pass nested field as string
+        fields={["id", "started", "participant1", "participant2", "result"]} // Pass nested field as string
         defaultFieldSort={1}
         defaultSortOrder="desc"
         fieldLabels={{
           id: "Match ID",
-          firstStarted: "Started",
+          started: "Started",
           participant1: "Player 1",
           participant2: "Player 2",
           result: "Result",
@@ -151,7 +145,7 @@ export default function RequestMatchSection(props: RequestMatchesSectionProps) {
                 {item.id}
               </span>
               <span className="text-left text-gray-200  truncate">
-                {formatDateISO(item.firstStarted)}
+                {formatDateISO(item.started)}
               </span>
               <Link href={`/bots/${item.participant1?.id}`}>
                 <span className="bg-blue hidden sm:block text-left text-customGreen truncate ">
