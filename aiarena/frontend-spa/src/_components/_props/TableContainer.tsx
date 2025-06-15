@@ -40,7 +40,7 @@ export function TableContainer<T>({
       {/* Table */}
       <div className="overflow-x-auto rounded backdrop-blur-lg">
         <table className="w-full border-collapse min-w-max">
-          <thead className="bg-darken-2 text-white">
+          <thead className="bg-darken-2 text-white ">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -53,7 +53,7 @@ export function TableContainer<T>({
                     <div className="inline-flex items-center gap-1 w-full justify-between h-full">
                       <div
                         className="p-3 inline-flex items-center gap-1 w-full justify-between cursor-pointer mr-5 group hover:text-white"
-                        {...(header.column.getCanSort()
+                        {...(header.column.getCanSort() && !loading
                           ? {
                               onClick: header.column.getToggleSortingHandler(),
                             }
