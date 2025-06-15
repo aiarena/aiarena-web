@@ -6,7 +6,6 @@ import { getNodes } from "@/_lib/relayHelpers";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import { UploadBotModalMutation } from "./__generated__/UploadBotModalMutation.graphql";
 import Form from "@/_components/_props/Form";
-import { useNavigate } from "react-router";
 import { UploadFile } from "@/_components/_props/UploadFile";
 
 interface UploadBotModal {
@@ -56,7 +55,6 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
 
   const [botDataEnabled, setBotDataEnabled] = useState(false);
-  const navigate = useNavigate();
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "uploadBot",
     "Agent Uploaded Successfully!"
@@ -113,10 +111,6 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
         if (success) {
           resetAllStateFields();
           onClose();
-          const botId = args[0]?.uploadBot?.bot?.id;
-          if (botId) {
-            navigate(`#${botId}`);
-          }
         }
       },
       onError,
