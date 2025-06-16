@@ -1,12 +1,13 @@
 import { getNodes } from "@/_lib/relayHelpers";
 
 import UserBot from "../_display/userbot/UserBot";
-import LoadingDots from "../_display/LoadingDots";
 import { graphql, usePaginationFragment } from "react-relay";
 import { useInfiniteScroll } from "../_hooks/useInfiniteScroll";
 
 import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
 import { useDebouncedQuery } from "../_hooks/useDebouncedSearch";
+import LoadingMoreItems from "../_display/LoadingMoreItems";
+import NoMoreItems from "../_display/NoMoreItems";
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;
@@ -71,9 +72,13 @@ export default function UserBotsList(props: UserBotsListProps) {
           </li>
         ))}
       </ul>
-      {hasNext && (
-        <div className="flex justify-center mt-8" ref={loadMoreRef}>
-          <LoadingDots />
+      {hasNext ? (
+        <div className="flex justify-center mt-6" ref={loadMoreRef}>
+          <LoadingMoreItems loadingMessage="Loading more Bots..." />
+        </div>
+      ) : (
+        <div className="mt-8">
+          <NoMoreItems />
         </div>
       )}
     </div>

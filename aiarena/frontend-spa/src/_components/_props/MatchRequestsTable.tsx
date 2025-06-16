@@ -19,6 +19,8 @@ import { getDateTimeISOString } from "@/_lib/dateUtils";
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
 import { TableContainer } from "./TableContainer";
 import { parseSort, withAtag } from "@/_lib/tanstack_utils";
+import LoadingMoreItems from "../_display/LoadingMoreItems";
+import NoMoreItems from "../_display/NoMoreItems";
 
 interface MatchRequestsTableProps {
   viewer: MatchRequestsTable_viewer$key;
@@ -233,9 +235,14 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       <Suspense fallback={<LoadingDots />}>
         <TableContainer table={table} loading={props.loading} />
       </Suspense>
-      {hasNext && (
-        <div className="flex justify-center mt-8" ref={loadMoreRef}>
-          <LoadingDots />
+
+      {hasNext ? (
+        <div className="flex justify-center mt-6" ref={loadMoreRef}>
+          <LoadingMoreItems loadingMessage="Loading more Match Requests..." />
+        </div>
+      ) : (
+        <div className="mt-8">
+          <NoMoreItems />
         </div>
       )}
     </div>
