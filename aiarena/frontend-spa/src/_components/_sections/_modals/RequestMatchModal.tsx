@@ -35,10 +35,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [selectedMapPool, setSelectedMapPool] = useState<MapPoolType | null>(
     null
   );
-
-  // Request Match Query
-  // ____________________
-
   const [requestMatch, updating] = useMutation<RequestMatchModalMutation>(
     graphql`
       mutation RequestMatchModalMutation($input: RequestMatchInput!) {
