@@ -142,21 +142,18 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
-      columnHelper.accessor(
-        (row) =>
-          getNodes(row.tags)
-            // .filter((tag) =>
-            //   onlyMyTags ? tag.user.id == data?.user?.id : true
-            // )
-            .map((tag) => tag.tag)
-            .join(", ") ?? "",
-        {
-          id: "tags",
-          header: "Tags",
-          cell: (info) => info.getValue(),
-          meta: { priority: 1 },
-        }
-      ),
+      columnHelper.accessor((row) => getNodes(row.tags) ?? "", {
+        id: "tags",
+        header: "Tags",
+        cell: (info) => {
+          const tags = info.getValue();
+          const filtered = tags.filter((tag) =>
+            onlyMyTags ? tag.user.id === data?.user?.id : true
+          );
+          return filtered.map((tag) => tag?.tag).join(", ");
+        },
+        meta: { priority: 1 },
+      }),
       columnHelper.accessor((row) => row.started ?? "A", {
         id: "started",
         header: "Started",
