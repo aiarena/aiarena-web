@@ -24,6 +24,7 @@ export const withAtag = (label: string, href: string, aria: string) => (
     className="pl-2 text-left font-semibold text-gray-200 truncate focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-opacity-50"
     href={href}
     role="cell"
+    target="_blank"
     aria-label={aria}
     title={`${label}`}
   >
