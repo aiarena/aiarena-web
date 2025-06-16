@@ -26,12 +26,7 @@ interface MatchRequestsTableProps {
 }
 
 export default function MatchRequestsTable(props: MatchRequestsTableProps) {
-  const {
-    data: matchData,
-    loadNext,
-    hasNext,
-    refetch,
-  } = usePaginationFragment(
+  const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment MatchRequestsTable_viewer on Viewer
       @argumentDefinitions(
@@ -40,6 +35,9 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
         orderBy: { type: "String" }
       )
       @refetchable(queryName: "MatchRequestsTablePaginationQuery") {
+        user {
+          id
+        }
         requestedMatches(first: $first, after: $cursor, orderBy: $orderBy)
           @connection(key: "UserMatchRequestsSection_viewer_requestedMatches") {
           edges {
@@ -60,7 +58,18 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
                   name
                 }
               }
-              tags
+              tags {
+                edges {
+                  cursor
+                  node {
+                    id
+                    tag
+                    user {
+                      id
+                    }
+                  }
+                }
+              }
               map {
                 name
               }
@@ -80,9 +89,11 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
     >["node"]
   >;
 
-  const data = useMemo(
-    () => getNodes<MatchType>(matchData?.requestedMatches),
-    [matchData]
+  const [onlyMyTags, setOnlyMyTags] = useState(true);
+
+  const matchData = useMemo(
+    () => getNodes<MatchType>(data?.requestedMatches),
+    [data]
   );
 
   const columnHelper = createColumnHelper<MatchType>();
@@ -129,12 +140,21 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.tags?.join(", ") ?? "", {
-        id: "tags",
-        header: "Tags",
-        cell: (info) => info.getValue(),
-        meta: { priority: 1 },
-      }),
+      columnHelper.accessor(
+        (row) =>
+          getNodes(row.tags)
+            .filter((tag) =>
+              onlyMyTags ? tag.user.id == data?.user?.id : true
+            )
+            .map((tag) => tag.tag)
+            .join(", ") ?? "",
+        {
+          id: "tags",
+          header: "Tags",
+          cell: (info) => info.getValue(),
+          meta: { priority: 1 },
+        }
+      ),
       columnHelper.accessor((row) => row.started ?? "A", {
         id: "started",
         header: "Started",
@@ -160,7 +180,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper, data?.user?.id, onlyMyTags]
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
@@ -182,7 +202,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
   }, [sorting, refetch]);
 
   const table = useReactTable({
-    data,
+    data: matchData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
@@ -198,10 +218,21 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
 
   return (
     <div>
+      <div className="mb-4 flex flex-wrap gap-4 text-white">
+        <label key={"set_my_tags"} className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={onlyMyTags}
+            onChange={() => setOnlyMyTags(!onlyMyTags)}
+            className="accent-customGreen"
+          />
+          <span>Hide Tags by other authors</span>
+        </label>
+      </div>
+
       <Suspense fallback={<LoadingDots />}>
         <TableContainer table={table} loading={props.loading} />
       </Suspense>
-
       {hasNext && (
         <div className="flex justify-center mt-8" ref={loadMoreRef}>
           <LoadingDots />
