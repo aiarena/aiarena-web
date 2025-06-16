@@ -145,9 +145,9 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       columnHelper.accessor(
         (row) =>
           getNodes(row.tags)
-            .filter((tag) =>
-              onlyMyTags ? tag.user.id == data?.user?.id : true
-            )
+            // .filter((tag) =>
+            //   onlyMyTags ? tag.user.id == data?.user?.id : true
+            // )
             .map((tag) => tag.tag)
             .join(", ") ?? "",
         {
