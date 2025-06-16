@@ -26,7 +26,7 @@ interface UploadBotModal {
 }
 
 export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
-  const [mapSelectionType, setMapSelectionType] = useState("specific_map");
+  const [mapSelectionType, setMapSelectionType] = useState("map_pool");
   const [matchCount, setMatchCount] = useState(1);
   const [selectedBot1, setSelectedBot1] = useState<BotType | null>(null);
   const [selectedBot2, setSelectedBot2] = useState<BotType | null>(null);
@@ -60,7 +60,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   );
 
   const resetAllStateFields = () => {
-    setMapSelectionType("specific_map");
+    setMapSelectionType("map_pool");
     setMatchCount(1);
     setSelectedBot1(null);
     setSelectedBot2(null);
@@ -141,39 +141,39 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             <button
               type="button"
               onClick={() => {
+                setMapSelectionType("map_pool");
+              }}
+              className={` border-2 mr-2  rounded-lg  bg-darken ${mapSelectionType == "map_pool" ? "border-customGreen" : "border-gray-700 hover:bg-transparent hover:border-customGreen"} p-2`}
+            >
+              Map Pool
+            </button>
+            <button
+              type="button"
+              onClick={() => {
                 setMapSelectionType("specific_map");
               }}
               className={` border-2 rounded-lg  bg-darken  ${mapSelectionType == "specific_map" ? "border-customGreen" : "border-gray-700  hover:bg-transparent hover:border-customGreen"} p-2`}
             >
               Specific Map
-            </button>{" "}
-            <button
-              type="button"
-              onClick={() => {
-                setMapSelectionType("map_pool");
-              }}
-              className={` border-2  rounded-lg  bg-darken ${mapSelectionType == "map_pool" ? "border-customGreen" : "border-gray-700 hover:bg-transparent hover:border-customGreen"} p-2`}
-            >
-              Map Pool
             </button>
           </div>
         </div>
         <div>
-          {mapSelectionType == "specific_map" ? (
-            <label className="mb-16 flex flex-col gap-1">
-              <span className="font-medium">Specific Map</span>
-              <MapSearchList
-                value={selectedSpecificMap}
-                setValue={setSelectedSpecificMap}
-              />
-            </label>
-          ) : null}
           {mapSelectionType == "map_pool" ? (
             <label className="mb-16 flex flex-col gap-1">
               <span className="font-medium">Map pool</span>
               <MapPoolSearchList
                 value={selectedMapPool}
                 setValue={setSelectedMapPool}
+              />
+            </label>
+          ) : null}
+          {mapSelectionType == "specific_map" ? (
+            <label className="mb-16 flex flex-col gap-1">
+              <span className="font-medium">Specific Map</span>
+              <MapSearchList
+                value={selectedSpecificMap}
+                setValue={setSelectedSpecificMap}
               />
             </label>
           ) : null}
