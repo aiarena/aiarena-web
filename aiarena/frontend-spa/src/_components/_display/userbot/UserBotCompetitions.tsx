@@ -10,9 +10,6 @@ import { UserBotCompetitions_bot$key } from "./__generated__/UserBotCompetitions
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
 import { getDotColor } from "@/_lib/getDotColor";
-import Trend from "../Trend";
-import LoadingDots from "../LoadingDots";
-
 interface UserBotCompetitionProps {
   bot: UserBotCompetitions_bot$key;
 }
@@ -40,7 +37,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
               matchCount
               winPerc
               lossPerc
-              ...Trend_competitionParticipation
+              # ...Trend_competitionParticipation
               # ...Trend_competitionParticipation @defer
               #  Update to relay 19.0 for using defer - this will defer fetching the query - and will improve our loadtime.
             }
@@ -151,13 +148,13 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                       {competitionParticipation.elo}
                     </span>
                   </span>
-                  <span className="font-bold text-gray-300 mr-4 block">
+                  {/* <span className="font-bold text-gray-300 mr-4 block">
                     <Suspense fallback={<LoadingDots />}>
                       <Trend
                         competitionParticipation={competitionParticipation}
                       />
                     </Suspense>
-                  </span>
+                  </span> */}
                 </div>
               </div>
               {/* Right Column: Match Data */}
