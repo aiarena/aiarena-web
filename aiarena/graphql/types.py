@@ -234,7 +234,7 @@ class MatchType(DjangoObjectTypeWithUID):
     participant2 = graphene.Field("aiarena.graphql.BotType")
     status = graphene.String()
     result = graphene.Field("aiarena.graphql.ResultType")
-    tags = graphene.List(graphene.String)
+    tags = DjangoConnectionField("aiarena.graphql.MatchTagType")
 
     class Meta:
         model = models.Match
@@ -245,7 +245,6 @@ class MatchType(DjangoObjectTypeWithUID):
             "created",
             "started",
             "requested_by",
-            "tags",
         ]
         filterset_class = MatchFilterSet
         connection_class = CountingConnection
@@ -266,9 +265,19 @@ class MatchType(DjangoObjectTypeWithUID):
     def resolve_result(root: models.Match, info, **args):
         return root.result
 
+
+class MatchTagType(DjangoObjectTypeWithUID):
+    tag = graphene.String()
+
+    class Meta:
+        model = models.MatchTag
+        fields = ["id", "user"]
+        filter_fields = []
+        connection_class = CountingConnection
+
     @staticmethod
-    def resolve_tags(root: models.Match, info, **args):
-        return [tag.tag.name for tag in root.tags.all()]
+    def resolve_tag(root: models.MatchTag, info, **args):
+        return root.tag.name
 
 
 class MapFilterSet(FilterSet):
