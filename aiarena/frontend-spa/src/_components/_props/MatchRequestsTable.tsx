@@ -98,6 +98,18 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
     [data]
   );
 
+  const formatWinnerName = (
+    winnerName: string | undefined,
+    participantName: string | undefined
+  ) => {
+    let display_value = "";
+    if (participantName === winnerName) {
+      display_value += "👑 ";
+    }
+    display_value += `${participantName}`;
+    return display_value;
+  };
+
   const columnHelper = createColumnHelper<MatchType>();
 
   const columns = useMemo(
@@ -117,23 +129,39 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       columnHelper.accessor((row) => row.participant1?.name || "", {
         id: "participant1",
         header: "Agent 1",
-        cell: (info) =>
-          withAtag(
-            info.getValue() || "",
+        cell: (info) => {
+          const participant1 = info.row.original.participant1;
+          const display_value = formatWinnerName(
+            info.row.original.result?.winner?.name,
+            participant1?.name
+          );
+
+          return withAtag(
+            display_value || "",
             `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`,
             `View bot profile for ${info.getValue()}, Agent 1`
-          ),
+          );
+        },
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.participant2?.name || "", {
         id: "participant2",
         header: "Agent 2",
-        cell: (info) =>
-          withAtag(
-            info.getValue() || "",
-            `/bots/${getIDFromBase64(info.row.original.participant2?.id, "BotType")}`,
-            `View bot profile for ${info.getValue()}, Agent 2`
-          ),
+        cell: (info) => {
+          const participant2 = info.row.original.participant2;
+
+          const display_value = formatWinnerName(
+            info.row.original.result?.winner?.name,
+            info.row.original.participant2?.name
+          );
+
+          return withAtag(
+            display_value || "",
+            `/bots/${getIDFromBase64(participant2?.id, "BotType")}`,
+            `View bot profile for ${participant2?.name}, Agent 2`
+          );
+        },
+
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.map?.name ?? "", {
