@@ -1,16 +1,16 @@
 import { getNodes } from "@/_lib/relayHelpers";
 
-import UserBot from "../_display/userbot/UserBot";
+import UserBot from "../../_display/userbot/UserBot";
 import { graphql, usePaginationFragment } from "react-relay";
-import { useInfiniteScroll } from "../_hooks/useInfiniteScroll";
+import { useInfiniteScroll } from "../../_hooks/useInfiniteScroll";
 
-import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
-import { useDebouncedQuery } from "../_hooks/useDebouncedSearch";
-import LoadingMoreItems from "../_display/LoadingMoreItems";
-import NoMoreItems from "../_display/NoMoreItems";
-import { useRegisterConnectionID } from "../_hooks/useRegisterRelayConnectionID";
-import { CONNECTION_KEYS } from "../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
+import { useDebouncedQuery } from "../../_hooks/useDebouncedSearch";
+import LoadingMoreItems from "../../_display/LoadingMoreItems";
+import NoMoreItems from "../../_display/NoMoreItems";
+import { useRegisterConnectionID } from "../../_hooks/useRegisterRelayConnectionID";
+import { CONNECTION_KEYS } from "../../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 import { startTransition } from "react";
+import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;

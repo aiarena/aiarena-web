@@ -10,7 +10,7 @@ import DropdownButton from "../_props/DropdownButton";
 import WantMore from "../_display/WantMore";
 import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
 
-import UserBotsList from "./UserBotsList";
+import UserBotsList from "./UserBotsSection/UserBotsList";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
 
 interface UserBotsSectionProps {

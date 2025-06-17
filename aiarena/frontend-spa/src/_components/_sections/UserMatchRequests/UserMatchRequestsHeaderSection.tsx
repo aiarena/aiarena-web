@@ -1,17 +1,17 @@
 import { useState } from "react";
-import WantMore from "../_display/WantMore";
-import MainButton from "../_props/MainButton";
+import WantMore from "../../_display/WantMore";
+import MainButton from "../../_props/MainButton";
 import { graphql, useFragment } from "react-relay";
 
-import RequestMatchModal from "./_modals/RequestMatchModal";
+import RequestMatchModal from "../_modals/RequestMatchModal";
 import { UserMatchRequestsHeaderSection_viewer$key } from "./__generated__/UserMatchRequestsHeaderSection_viewer.graphql";
 
-type UserMatchRequestsHeaaderSectionProps = {
+type UserMatchRequestsHeaderSectionProps = {
   viewer: UserMatchRequestsHeaderSection_viewer$key;
 };
 
 export default function UserMatchRequestsHeaderSection(
-  props: UserMatchRequestsHeaaderSectionProps
+  props: UserMatchRequestsHeaderSectionProps
 ) {
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
 

@@ -1,9 +1,9 @@
 import { graphql, useFragment } from "react-relay";
 import { Suspense } from "react";
 import { UserMatchRequestsSection_viewer$key } from "./__generated__/UserMatchRequestsSection_viewer.graphql";
-import MatchRequestsTable from "./MatchRequestsTable";
+import MatchRequestsTable from "./UserMatchRequests/MatchRequestsTable";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
-import UserMatchRequestsHeaderSection from "./UserMatchRequestsHeaderSection";
+import UserMatchRequestsHeaderSection from "./UserMatchRequests/UserMatchRequestsHeaderSection";
 
 interface UserMatchRequestsSectionProps {
   viewer: UserMatchRequestsSection_viewer$key;
