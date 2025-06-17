@@ -13,7 +13,7 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
 import LoadingDots from "../_display/LoadingDots";
 import { useInfiniteScroll } from "../_hooks/useInfiniteScroll";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
@@ -24,7 +24,6 @@ import NoMoreItems from "../_display/NoMoreItems";
 
 interface MatchRequestsTableProps {
   viewer: MatchRequestsTable_viewer$key;
-  loading: boolean;
 }
 
 export default function MatchRequestsTable(props: MatchRequestsTableProps) {
@@ -92,7 +91,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
   >;
 
   const [onlyMyTags, setOnlyMyTags] = useState(true);
-
+  const [isPending, startTransition] = useTransition();
   const matchData = useMemo(
     () => getNodes<MatchType>(data?.requestedMatches),
     [data]
@@ -225,9 +224,10 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       started: "started",
       tags: "tags",
     };
-
+    startTransition(() => {
     const sortString = parseSort(sortingMap, sorting);
     refetch({ orderBy: sortString });
+    });
   }, [sorting, refetch]);
 
   const table = useReactTable({
@@ -260,7 +260,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       </div>
 
       <Suspense fallback={<LoadingDots />}>
-        <TableContainer table={table} loading={props.loading} />
+        <TableContainer table={table} loading={isPending} />
       </Suspense>
 
       {hasNext ? (
