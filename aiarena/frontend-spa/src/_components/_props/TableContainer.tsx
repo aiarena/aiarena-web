@@ -16,7 +16,7 @@ export function TableContainer<T>({
 }: TableContainerProps<T>) {
   const allColumns = table.getAllLeafColumns();
   return (
-    <div className={` ${className ?? ""} ${loading ? "animate-pulse" : ""}`}>
+    <div className={` ${className ?? ""}`}>
       {/* Column toggles */}
       <div className="mb-4 flex flex-wrap gap-4 text-white">
         {allColumns.map((column) => (
@@ -107,7 +107,7 @@ export function TableContainer<T>({
             ))}
           </thead>
           <Suspense fallback={<LoadingSpinner />}>
-            <tbody>
+            <tbody className={`${loading ? "animate-pulse" : ""}`}>
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
