@@ -8,7 +8,7 @@ import {
 import {
   MatchRequestsTable_viewer$data,
   MatchRequestsTable_viewer$key,
-} from "./__generated__/MatchRequestsTable_viewer.graphql";
+} from "../_props/__generated__/MatchRequestsTable_viewer.graphql";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
 import LoadingDots from "../_display/LoadingDots";
@@ -17,7 +17,7 @@ import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
-import { TableContainer } from "./TableContainer";
+import { TableContainer } from "../_props/TableContainer";
 import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 import LoadingMoreItems from "../_display/LoadingMoreItems";
 import NoMoreItems from "../_display/NoMoreItems";
