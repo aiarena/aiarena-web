@@ -10,6 +10,7 @@ import LoadingMoreItems from "../_display/LoadingMoreItems";
 import NoMoreItems from "../_display/NoMoreItems";
 import { useRegisterConnectionID } from "../_hooks/useRegisterRelayConnectionID";
 import { CONNECTION_KEYS } from "../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
+import { startTransition } from "react";
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;
@@ -60,7 +61,9 @@ export default function UserBotsList(props: UserBotsListProps) {
     props.orderBy,
     500,
     (value, orderBy) => {
-      refetch({ name: value, orderBy: orderBy });
+      startTransition(() => {
+        refetch({ name: value, orderBy: orderBy });
+      });
     },
     props.onLoadingChange
   );
