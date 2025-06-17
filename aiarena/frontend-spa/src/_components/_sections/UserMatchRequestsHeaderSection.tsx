@@ -2,8 +2,9 @@ import { useState } from "react";
 import WantMore from "../_display/WantMore";
 import MainButton from "../_props/MainButton";
 import { graphql, useFragment } from "react-relay";
-import { UserMatchRequestsHeaderSection_viewer$key } from "./__generated__/UserMatchRequestsHeaderSection_viewer.graphql";
+
 import RequestMatchModal from "./_modals/RequestMatchModal";
+import { UserMatchRequestsHeaderSection_viewer$key } from "./__generated__/UserMatchRequestsHeaderSection_viewer.graphql";
 
 type UserMatchRequestsHeaaderSectionProps = {
   viewer: UserMatchRequestsHeaderSection_viewer$key;
