@@ -4,6 +4,8 @@ import { graphql, useMutation } from "react-relay";
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import Form from "@/_components/_props/Form";
+import { useRelayConnectionID } from "@/_components/_contexts/RelayConnectionIDContext/useRelayConnectionID";
+import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 
 import BotSearchList, {
   BotType,
@@ -26,6 +28,11 @@ interface UploadBotModal {
 }
 
 export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
+  const { getConnectionID } = useRelayConnectionID();
+  const connectionID = getConnectionID(
+    CONNECTION_KEYS.UserMatchRequestsConnection
+  );
+
   const [mapSelectionType, setMapSelectionType] = useState("map_pool");
   const [matchCount, setMatchCount] = useState(1);
   const [selectedBot1, setSelectedBot1] = useState<BotType | null>(null);
@@ -35,15 +42,49 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [selectedMapPool, setSelectedMapPool] = useState<MapPoolType | null>(
     null
   );
+
   const [requestMatch, updating] = useMutation<RequestMatchModalMutation>(
     graphql`
-      mutation RequestMatchModalMutation($input: RequestMatchInput!) {
+      mutation RequestMatchModalMutation(
+        $input: RequestMatchInput!
+        $connections: [ID!]!
+      ) {
         requestMatch(input: $input) {
-          viewer {
-            ...UserMatchRequestsSection_viewer
-          }
-          match {
+          match
+            @prependNode(
+              connections: $connections
+              edgeTypeName: "MatchTypeEdge"
+            ) {
             id
+            participant1 {
+              id
+              name
+            }
+            participant2 {
+              id
+              name
+            }
+            result {
+              type
+              winner {
+                name
+              }
+            }
+            map {
+              name
+            }
+            tags {
+              edges {
+                node {
+                  id
+                  tag
+                  user {
+                    id
+                  }
+                }
+              }
+            }
+            started
           }
           errors {
             field
@@ -73,6 +114,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
 
     requestMatch({
       variables: {
+        connections: [connectionID],
         input: {
           agent1: selectedBot1?.id,
           agent2: selectedBot2?.id,

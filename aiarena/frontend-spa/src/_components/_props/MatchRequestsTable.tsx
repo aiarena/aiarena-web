@@ -21,6 +21,8 @@ import { TableContainer } from "./TableContainer";
 import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 import LoadingMoreItems from "../_display/LoadingMoreItems";
 import NoMoreItems from "../_display/NoMoreItems";
+import { CONNECTION_KEYS } from "../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
+import { useRegisterConnectionID } from "../_hooks/useRegisterRelayConnectionID";
 
 interface MatchRequestsTableProps {
   viewer: MatchRequestsTable_viewer$key;
@@ -41,6 +43,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
         }
         requestedMatches(first: $first, after: $cursor, orderBy: $orderBy)
           @connection(key: "UserMatchRequestsSection_viewer_requestedMatches") {
+          __id
           edges {
             node {
               id
@@ -80,6 +83,11 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       }
     `,
     props.viewer
+  );
+
+  useRegisterConnectionID(
+    CONNECTION_KEYS.UserMatchRequestsConnection,
+    data?.requestedMatches?.__id
   );
 
   type MatchType = NonNullable<
@@ -227,8 +235,8 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       tags: "tags",
     };
     startTransition(() => {
-    const sortString = parseSort(sortingMap, sorting);
-    refetch({ orderBy: sortString });
+      const sortString = parseSort(sortingMap, sorting);
+      refetch({ orderBy: sortString });
     });
   }, [sorting, refetch]);
 

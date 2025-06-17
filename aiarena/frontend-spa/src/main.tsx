@@ -6,15 +6,18 @@ import { BrowserRouter } from "react-router";
 import { RelayEnvironmentProvider } from "react-relay";
 import environment from "@/_lib/RelayEnvironment";
 import { SnackbarProvider } from "notistack";
+import { RelayConnectionIDProvider } from "./_components/_contexts/RelayConnectionIDContext/RelayConnectionIDContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RelayEnvironmentProvider environment={environment}>
-      <BrowserRouter>
-        <SnackbarProvider>
-          <App />
-        </SnackbarProvider>
-      </BrowserRouter>
+      <RelayConnectionIDProvider>
+        <BrowserRouter>
+          <SnackbarProvider>
+            <App />
+          </SnackbarProvider>
+        </BrowserRouter>
+      </RelayConnectionIDProvider>
     </RelayEnvironmentProvider>
   </StrictMode>
 );

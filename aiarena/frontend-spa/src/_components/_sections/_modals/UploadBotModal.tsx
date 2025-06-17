@@ -7,6 +7,8 @@ import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import { UploadBotModalMutation } from "./__generated__/UploadBotModalMutation.graphql";
 import Form from "@/_components/_props/Form";
 import { UploadFile } from "@/_components/_props/UploadFile";
+import { useRelayConnectionID } from "@/_components/_contexts/RelayConnectionIDContext/useRelayConnectionID";
+import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -24,6 +26,9 @@ const BOT_TYPES: Record<string, string> = {
 };
 
 export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
+  const { getConnectionID } = useRelayConnectionID();
+  const connectionID = getConnectionID(CONNECTION_KEYS.UserBotsConnection);
+
   const data = useLazyLoadQuery<UploadBotModalQuery>(
     graphql`
       query UploadBotModalQuery {
@@ -61,14 +66,33 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
   );
 
   const [uploadBot, updating] = useMutation<UploadBotModalMutation>(graphql`
-    mutation UploadBotModalMutation($input: UploadBotInput!, $userId: ID!) {
+    mutation UploadBotModalMutation(
+      $input: UploadBotInput!
+      $connections: [ID!]!
+    ) {
       uploadBot(input: $input) {
-        bot {
+        bot
+          @prependNode(connections: $connections, edgeTypeName: "BotTypeEdge") {
           id
-        }
-        node(id: $userId) {
-          ... on UserType {
-            ...UserBotsList_user
+          name
+          created
+          type
+          url
+          botData
+          botDataEnabled
+          botDataPubliclyDownloadable
+          botZip
+          botZipPubliclyDownloadable
+          botZipUpdated
+          wikiArticle
+          trophies {
+            edges {
+              node {
+                name
+                trophyIconImage
+                trophyIconName
+              }
+            }
           }
         }
         errors {
@@ -94,7 +118,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
     }
     uploadBot({
       variables: {
-        userId: data.viewer.user.id,
+        connections: [connectionID],
         input: {
           playsRace: race,
           botDataEnabled: botDataEnabled,

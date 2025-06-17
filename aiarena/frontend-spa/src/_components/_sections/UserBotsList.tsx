@@ -8,6 +8,8 @@ import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql
 import { useDebouncedQuery } from "../_hooks/useDebouncedSearch";
 import LoadingMoreItems from "../_display/LoadingMoreItems";
 import NoMoreItems from "../_display/NoMoreItems";
+import { useRegisterConnectionID } from "../_hooks/useRegisterRelayConnectionID";
+import { CONNECTION_KEYS } from "../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;
@@ -34,6 +36,7 @@ export default function UserBotsList(props: UserBotsListProps) {
       @refetchable(queryName: "UserBotsListPaginationQuery") {
         bots(first: $first, after: $cursor, name: $name, orderBy: $orderBy)
           @connection(key: "UserBotsSection_user_bots") {
+          __id
           edges {
             node {
               id
@@ -45,6 +48,11 @@ export default function UserBotsList(props: UserBotsListProps) {
     `,
 
     props.user as UserBotsList_user$key
+  );
+
+  useRegisterConnectionID(
+    CONNECTION_KEYS.UserBotsConnection,
+    userData?.bots?.__id
   );
 
   useDebouncedQuery(
