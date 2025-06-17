@@ -102,12 +102,12 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
     winnerName: string | undefined,
     participantName: string | undefined
   ) => {
-    let display_value = "";
-    if (participantName === winnerName) {
-      display_value += "👑 ";
-    }
-    display_value += `${participantName}`;
-    return display_value;
+    return (
+      <div className="flex items-center gap-2">
+        {participantName === winnerName && <div className="mb-1">👑</div>}
+        <div>{participantName}</div>
+      </div>
+    );
   };
 
   const columnHelper = createColumnHelper<MatchType>();
@@ -137,9 +137,10 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
           );
 
           return withAtag(
-            display_value || "",
+            participant1?.name || "",
             `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`,
-            `View bot profile for ${info.getValue()}, Agent 1`
+            `View bot profile for ${participant1?.name}, Agent 1`,
+            display_value
           );
         },
         meta: { priority: 1 },
@@ -156,9 +157,10 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
           );
 
           return withAtag(
-            display_value || "",
+            participant2?.name || "",
             `/bots/${getIDFromBase64(participant2?.id, "BotType")}`,
-            `View bot profile for ${participant2?.name}, Agent 2`
+            `View bot profile for ${participant2?.name}, Agent 2`,
+            display_value
           );
         },
 
