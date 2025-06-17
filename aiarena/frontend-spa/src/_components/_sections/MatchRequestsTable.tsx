@@ -5,10 +5,7 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  MatchRequestsTable_viewer$data,
-  MatchRequestsTable_viewer$key,
-} from "../_props/__generated__/MatchRequestsTable_viewer.graphql";
+
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
 import LoadingDots from "../_display/LoadingDots";
@@ -23,6 +20,10 @@ import LoadingMoreItems from "../_display/LoadingMoreItems";
 import NoMoreItems from "../_display/NoMoreItems";
 import { CONNECTION_KEYS } from "../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 import { useRegisterConnectionID } from "../_hooks/useRegisterRelayConnectionID";
+import {
+  MatchRequestsTable_viewer$data,
+  MatchRequestsTable_viewer$key,
+} from "./__generated__/MatchRequestsTable_viewer.graphql";
 
 interface MatchRequestsTableProps {
   viewer: MatchRequestsTable_viewer$key;
