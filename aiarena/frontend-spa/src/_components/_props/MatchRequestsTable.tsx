@@ -265,7 +265,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
 
       {hasNext ? (
         <div className="flex justify-center mt-6" ref={loadMoreRef}>
-          <LoadingMoreItems loadingMessage="Loading more Match Requests..." />
+          <LoadingMoreItems loadingMessage="Loading more match requests..." />
         </div>
       ) : (
         <div className="mt-8">

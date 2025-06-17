@@ -74,7 +74,7 @@ export default function UserBotsList(props: UserBotsListProps) {
       </ul>
       {hasNext ? (
         <div className="flex justify-center mt-6" ref={loadMoreRef}>
-          <LoadingMoreItems loadingMessage="Loading more Bots..." />
+          <LoadingMoreItems loadingMessage="Loading more bots..." />
         </div>
       ) : (
         <div className="mt-8">
