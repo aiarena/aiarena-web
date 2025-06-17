@@ -103,7 +103,9 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
   ) => {
     return (
       <div className="flex items-center gap-2">
-        {participantName === winnerName && <div className="mt-[-4px]">👑</div>}
+        {winnerName && participantName === winnerName && (
+          <div className="mt-[-4px]">👑</div>
+        )}
         <div>{participantName}</div>
       </div>
     );
