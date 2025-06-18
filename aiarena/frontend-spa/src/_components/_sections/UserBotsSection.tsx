@@ -2,7 +2,7 @@ import React, { Suspense, useState } from "react";
 
 import { graphql, useFragment } from "react-relay";
 import MainButton from "../_actions/MainButton";
-import UploadBotModal from "./_modals/UploadBotModal";
+import UploadBotModal from "./UserBotsSection/_modals/UploadBotModal";
 
 import Searchbar from "../_actions/Searchbar";
 import Dropdown from "../_actions/Dropdown";

@@ -3,7 +3,7 @@ import WantMore from "../../_display/WantMore";
 import MainButton from "../../_actions/MainButton";
 import { graphql, useFragment } from "react-relay";
 
-import RequestMatchModal from "../_modals/RequestMatchModal";
+import RequestMatchModal from "./_modals/RequestMatchModal";
 import { UserMatchRequestsHeaderSection_viewer$key } from "./__generated__/UserMatchRequestsHeaderSection_viewer.graphql";
 
 type UserMatchRequestsHeaderSectionProps = {

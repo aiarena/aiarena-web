@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
 import { getDateToLocale } from "@/_lib/dateUtils";
-import BotSettingsModal from "../../_sections/_modals/bot_settings_modal/BotSettingsModal";
+import BotSettingsModal from "../../_sections/UserBotsSection/_modals/bot_settings_modal/BotSettingsModal";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
-import BotTrophiesModal from "../../_sections/_modals/BotTrophiesModal";
+import BotTrophiesModal from "../../_sections/UserBotsSection/_modals/BotTrophiesModal";
 import { TrophyIcon, CogIcon } from "@heroicons/react/20/solid";
 import { UserBotHeader_bot$key } from "./__generated__/UserBotHeader_bot.graphql";
 

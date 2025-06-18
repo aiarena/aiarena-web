@@ -6,7 +6,7 @@ import {
   BotSearchListQuery,
   BotSearchListQuery$data,
 } from "./__generated__/BotSearchListQuery.graphql";
-import SearchList from "@/_components/_sections/_modals/SearchList.tsx";
+import SearchList from "@/_components/_actions/SearchList";
 
 export type BotType = NonNullable<
   NonNullable<

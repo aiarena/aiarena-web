@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchQuery, graphql } from "react-relay";
 import RelayEnvironment from "@/_lib/RelayEnvironment.ts";
 import { getNodes } from "@/_lib/relayHelpers.ts";
-import SearchList from "@/_components/_sections/_modals/SearchList.tsx";
+import SearchList from "@/_components/_actions/SearchList";
 import {
   MapPoolSearchListQuery,
   MapPoolSearchListQuery$data,

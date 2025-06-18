@@ -9,13 +9,13 @@ import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContex
 
 import BotSearchList, {
   BotType,
-} from "@/_components/_sections/_modals/BotSearchList.tsx";
+} from "@/_components/_sections/UserMatchRequests/_modals/BotSearchList";
 import MapSearchList, {
   MapType,
-} from "@/_components/_sections/_modals/MapSearchList.tsx";
+} from "@/_components/_sections/UserMatchRequests/_modals/MapSearchList";
 import MapPoolSearchList, {
   MapPoolType,
-} from "@/_components/_sections/_modals/MapPoolSearchList.tsx";
+} from "@/_components/_sections/UserMatchRequests/_modals/MapPoolSearchList";
 
 interface UploadBotModal {
   isOpen: boolean;
