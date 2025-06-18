@@ -54,6 +54,7 @@ export default function SearchList({
         options: options,
       }}
       onChange={setValue}
+      immediate
     >
       <div className="relative">
         <ComboboxInput
@@ -95,9 +96,10 @@ export default function SearchList({
         )}
         onScroll={handleScroll}
       >
-        {({ option: bot }) => (
+        {({ option: option }) => (
           <ComboboxOption
-            value={bot}
+            value={option}
+            key={option.id}
             className={clsx(
               "cursor-pointer",
               "rounded-sm",
@@ -108,7 +110,7 @@ export default function SearchList({
               "text-white"
             )}
           >
-            {bot.name}
+            {displayValue(option)}
           </ComboboxOption>
         )}
       </ComboboxOptions>
