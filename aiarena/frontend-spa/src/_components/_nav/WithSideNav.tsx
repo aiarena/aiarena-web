@@ -19,7 +19,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
     const calculateNavbarHeight = () => {
       const navbar = document.querySelector("nav");
       if (navbar) {
-        setNavbarHeight(navbar.offsetHeight - 1);
+        setNavbarHeight(navbar.offsetHeight);
       }
     };
 
