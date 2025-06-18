@@ -1,63 +1,76 @@
-import { useEffect, useState } from "react";
-import { fetchQuery, graphql } from "react-relay";
-import RelayEnvironment from "@/_lib/RelayEnvironment.ts";
+import { startTransition, useState } from "react";
+import { graphql, usePaginationFragment } from "react-relay";
+
 import { getNodes } from "@/_lib/relayHelpers.ts";
-import {
-  BotSearchListQuery,
-  BotSearchListQuery$data,
-} from "./__generated__/BotSearchListQuery.graphql";
+
+import { useDebouncedSearch } from "@/_components/_hooks/useDebouncedSearch";
 import SearchList from "@/_components/_actions/SearchList";
 
+import {
+  BotSearchList$data,
+  BotSearchList$key,
+} from "./__generated__/BotSearchList.graphql";
+import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
+
 export type BotType = NonNullable<
-  NonNullable<
-    NonNullable<BotSearchListQuery$data["bots"]>["edges"][number]
-  >["node"]
+  NonNullable<NonNullable<BotSearchList$data["bots"]>["edges"][number]>["node"]
 >;
 
 interface BotSearchListProps {
   value: BotType | null;
   setValue: (bot: BotType) => void;
+  relayRootQuery: BotSearchList$key;
 }
 
-export default function BotSearchList({ value, setValue }: BotSearchListProps) {
+export default function BotSearchList({
+  value,
+  setValue,
+  relayRootQuery,
+}: BotSearchListProps) {
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<BotType[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
 
-  useEffect(() => {
-    fetchQuery<BotSearchListQuery>(
-      RelayEnvironment,
-      graphql`
-        query BotSearchListQuery($name: String) {
-          bots(name: $name, first: 30) {
-            totalCount
-            edges {
-              node {
-                id
-                name
-              }
+  const { data, loadNext, hasNext, refetch } = usePaginationFragment(
+    graphql`
+      fragment BotSearchList on Query
+      @argumentDefinitions(
+        cursor: { type: "String" }
+        name: { type: "String" }
+        first: { type: "Int", defaultValue: 50 }
+      )
+      @refetchable(queryName: "BotSearchListPaginationQuery") {
+        bots(first: $first, after: $cursor, name: $name)
+          @connection(key: "RequestMatchModal_query_bots") {
+          totalCount
+          edges {
+            node {
+              id
+              name
             }
           }
         }
-      `,
-      { name: query },
-      { fetchPolicy: "store-or-network" }
-    )
-      .toPromise()
-      .then((data) => {
-        setOptions(getNodes(data?.bots));
-        setTotal(data?.bots?.totalCount ?? null);
-      });
-  }, [query]);
+      }
+    `,
+    relayRootQuery
+  );
+
+  useDebouncedSearch(query, 500, (value) => {
+    startTransition(() => {
+      refetch({ name: value });
+    });
+  });
+
+  const { loadMoreRef } = useInfiniteScroll(() => loadNext(100), hasNext);
 
   return (
     <SearchList
       value={value}
       setValue={(newValue) => setValue(newValue as BotType)}
-      options={options}
+      options={getNodes(data?.bots)}
       setQuery={setQuery}
       displayValue={(bot) => (bot as BotType)?.name}
-      placeholder={total ? `Type to search ${total} agents...` : ""}
+      placeholder={"Type to search agents..."}
+      hasNext={hasNext}
+      loadMoreRef={loadMoreRef}
     />
   );
 }

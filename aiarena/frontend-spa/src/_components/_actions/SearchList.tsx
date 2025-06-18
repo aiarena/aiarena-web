@@ -21,6 +21,9 @@ interface SearchListProps {
   displayValue: (option: SearchListOption) => string;
   placeholder: string;
   autocomplete?: "off" | "on";
+  loadingFetchMore?: boolean;
+  hasNext?: boolean;
+  loadMoreRef?: (node: HTMLDivElement | null) => void;
 }
 
 export default function SearchList({
@@ -31,9 +34,27 @@ export default function SearchList({
   displayValue,
   placeholder,
   autocomplete = "off",
+  hasNext,
+  loadMoreRef,
 }: SearchListProps) {
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    const isInBottom10Percent =
+      scrollTop >= (scrollHeight - clientHeight) * 0.9;
+
+    if (isInBottom10Percent && hasNext && loadMoreRef) {
+      loadMoreRef(e.currentTarget);
+    }
+  };
+
   return (
-    <Combobox value={value} onChange={setValue} immediate>
+    <Combobox
+      value={value}
+      virtual={{
+        options: options,
+      }}
+      onChange={setValue}
+    >
       <div className="relative">
         <ComboboxInput
           className={clsx(
@@ -52,10 +73,8 @@ export default function SearchList({
           onChange={(event) => setQuery(event.target.value)}
           autoComplete={autocomplete}
         />
-        <ComboboxButton
-          className={clsx("absolute", "inset-y-0", "right-0", "px-2.5")}
-        >
-          <ChevronDownIcon className={clsx("size-4 ", "fill-white")} />
+        <ComboboxButton className="absolute inset-y-0 right-0 px-2.5">
+          <ChevronDownIcon className="size-4 fill-white" />
         </ComboboxButton>
       </div>
 
@@ -74,11 +93,10 @@ export default function SearchList({
           "z-100",
           "combobox-options"
         )}
-        //  Using a CSS class -combobox-options- with !important to controll box height
+        onScroll={handleScroll}
       >
-        {options.map((bot: SearchListOption) => (
+        {({ option: bot }) => (
           <ComboboxOption
-            key={bot.id}
             value={bot}
             className={clsx(
               "cursor-pointer",
@@ -90,9 +108,9 @@ export default function SearchList({
               "text-white"
             )}
           >
-            {displayValue(bot)}
+            {bot.name}
           </ComboboxOption>
-        ))}
+        )}
       </ComboboxOptions>
     </Combobox>
   );

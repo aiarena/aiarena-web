@@ -4,7 +4,7 @@ import UserBot from "../../_display/userbot/UserBot";
 import { graphql, usePaginationFragment } from "react-relay";
 import { useInfiniteScroll } from "../../_hooks/useInfiniteScroll";
 
-import { useDebouncedQuery } from "../../_hooks/useDebouncedSearch";
+import { useDebouncedQuery } from "../../_hooks/useDebouncedQuery";
 import LoadingMoreItems from "../../_display/LoadingMoreItems";
 import NoMoreItems from "../../_display/NoMoreItems";
 import { useRegisterConnectionID } from "../../_hooks/useRegisterRelayConnectionID";

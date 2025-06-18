@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "@/_components/_actions/Modal";
-import { graphql, useMutation } from "react-relay";
+import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import Form from "@/_components/_actions/Form";
@@ -17,6 +17,7 @@ import MapPoolSearchList, {
   MapPoolType,
 } from "@/_components/_sections/UserMatchRequests/_modals/MapPoolSearchList";
 import clsx from "clsx";
+import { RequestMatchModalQuery } from "./__generated__/RequestMatchModalQuery.graphql";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -37,6 +38,17 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     useState<MapType | null>(null);
   const [selectedMapPool, setSelectedMapPool] = useState<MapPoolType | null>(
     null
+  );
+
+  const data = useLazyLoadQuery<RequestMatchModalQuery>(
+    graphql`
+      query RequestMatchModalQuery {
+        ...BotSearchList
+        ...MapPoolSearchList
+        ...MapSearchList
+      }
+    `,
+    {}
   );
 
   const [requestMatch, updating] = useMutation<RequestMatchModalMutation>(
@@ -147,14 +159,22 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             <span id="agent1-name" className="font-medium">
               Agent 1
             </span>
-            <BotSearchList value={selectedBot1} setValue={setSelectedBot1} />
+            <BotSearchList
+              value={selectedBot1}
+              setValue={setSelectedBot1}
+              relayRootQuery={data}
+            />
           </label>
 
           <label className="flex flex-col gap-1">
             <span id="agent2-name" className="font-medium">
               Agent 2
             </span>
-            <BotSearchList value={selectedBot2} setValue={setSelectedBot2} />
+            <BotSearchList
+              value={selectedBot2}
+              setValue={setSelectedBot2}
+              relayRootQuery={data}
+            />
           </label>
         </div>
 
@@ -217,6 +237,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <MapPoolSearchList
                 value={selectedMapPool}
                 setValue={setSelectedMapPool}
+                relayRootQuery={data}
               />
             </label>
           ) : null}
@@ -227,6 +248,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <MapSearchList
                 value={selectedSpecificMap}
                 setValue={setSelectedSpecificMap}
+                relayRootQuery={data}
               />
             </label>
           ) : null}

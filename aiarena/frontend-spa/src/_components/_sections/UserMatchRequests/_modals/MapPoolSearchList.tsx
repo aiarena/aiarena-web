@@ -1,66 +1,75 @@
-import { useEffect, useState } from "react";
-import { fetchQuery, graphql } from "react-relay";
-import RelayEnvironment from "@/_lib/RelayEnvironment.ts";
+import { startTransition, useState } from "react";
+import { graphql, usePaginationFragment } from "react-relay";
+
 import { getNodes } from "@/_lib/relayHelpers.ts";
 import SearchList from "@/_components/_actions/SearchList";
+
+import { useDebouncedSearch } from "@/_components/_hooks/useDebouncedSearch";
+import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import {
-  MapPoolSearchListQuery,
-  MapPoolSearchListQuery$data,
-} from "./__generated__/MapPoolSearchListQuery.graphql";
+  MapPoolSearchList$data,
+  MapPoolSearchList$key,
+} from "./__generated__/MapPoolSearchList.graphql";
 
 export type MapPoolType = NonNullable<
   NonNullable<
-    NonNullable<MapPoolSearchListQuery$data["mapPools"]>["edges"][number]
+    NonNullable<MapPoolSearchList$data["mapPools"]>["edges"][number]
   >["node"]
 >;
 
 interface MapPoolSearchListProps {
   value: MapPoolType | null;
   setValue: (mapPool: MapPoolType) => void;
+  relayRootQuery: MapPoolSearchList$key;
 }
 
 export default function MapPoolSearchList({
   value,
   setValue,
+  relayRootQuery,
 }: MapPoolSearchListProps) {
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<MapPoolType[]>([]);
-  const [total, setTotal] = useState<number | null>(null);
 
-  useEffect(() => {
-    fetchQuery<MapPoolSearchListQuery>(
-      RelayEnvironment,
-      graphql`
-        query MapPoolSearchListQuery($name: String) {
-          mapPools(name: $name, first: 30) {
-            totalCount
-            edges {
-              node {
-                id
-                name
-              }
+  const { data, loadNext, hasNext, refetch } = usePaginationFragment(
+    graphql`
+      fragment MapPoolSearchList on Query
+      @argumentDefinitions(
+        cursor: { type: "String" }
+        name: { type: "String" }
+        first: { type: "Int", defaultValue: 50 }
+      )
+      @refetchable(queryName: "MapPoolSearchListPaginationQuery") {
+        mapPools(first: $first, after: $cursor, name: $name)
+          @connection(key: "RequestMatchModal_query_mapPools") {
+          totalCount
+          edges {
+            node {
+              id
+              name
             }
           }
         }
-      `,
-      { name: query },
-      { fetchPolicy: "store-or-network" }
-    )
-      .toPromise()
-      .then((data) => {
-        setOptions(getNodes(data?.mapPools));
-        setTotal(data?.mapPools?.totalCount ?? null);
-      });
-  }, [query]);
+      }
+    `,
+    relayRootQuery
+  );
+  useDebouncedSearch(query, 500, (value) => {
+    startTransition(() => {
+      refetch({ name: value });
+    });
+  });
+  const { loadMoreRef } = useInfiniteScroll(() => loadNext(100), hasNext);
 
   return (
     <SearchList
       value={value}
       setValue={(newValue) => setValue(newValue as MapPoolType)}
-      options={options}
+      options={getNodes(data.mapPools)}
       setQuery={setQuery}
       displayValue={(mapPool) => (mapPool as MapPoolType)?.name}
-      placeholder={total ? `Type to search ${total} map pools...` : ""}
+      placeholder={"Type to search map pools..."}
+      hasNext={hasNext}
+      loadMoreRef={loadMoreRef}
     />
   );
 }
