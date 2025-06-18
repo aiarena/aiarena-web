@@ -60,6 +60,9 @@ export default function UserMatchRequestsHeaderSection(
           onClick={() => setIsRequestMatchModalOpen(true)}
           text="Request New Match"
           aria-label="Request a new match between Agents"
+          aria-describedby={
+            viewer.requestMatchesCountLeft <= 0 ? "no-requests-left" : undefined
+          }
         />
       </div>
       <RequestMatchModal
