@@ -1,8 +1,6 @@
 import { graphql, useFragment } from "react-relay";
-import { Suspense } from "react";
 import { UserMatchRequestsSection_viewer$key } from "./__generated__/UserMatchRequestsSection_viewer.graphql";
 import MatchRequestsTable from "./UserMatchRequests/MatchRequestsTable";
-import LoadingSpinner from "../_display/LoadingSpinnerGray";
 import UserMatchRequestsHeaderSection from "./UserMatchRequests/UserMatchRequestsHeaderSection";
 
 interface UserMatchRequestsSectionProps {
@@ -28,16 +26,15 @@ export default function UserMatchRequestsSection(
       <h2 id="match-requests-heading" className="sr-only">
         Match Requests
       </h2>
-      <Suspense fallback={<LoadingSpinner />}>
-        <UserMatchRequestsHeaderSection viewer={viewer} />
-      </Suspense>
+
+      <UserMatchRequestsHeaderSection viewer={viewer} />
+
       <div role="region" aria-labelledby="match-requests-table-heading">
         <h3 id="match-requests-table-heading" className="sr-only">
           Match Requests Table
         </h3>
-        <Suspense fallback={<LoadingSpinner />}>
-          <MatchRequestsTable viewer={viewer} />
-        </Suspense>
+
+        <MatchRequestsTable viewer={viewer} />
       </div>
     </section>
   );
