@@ -16,11 +16,7 @@ import MapSearchList, {
 import MapPoolSearchList, {
   MapPoolType,
 } from "@/_components/_sections/UserMatchRequests/_modals/MapPoolSearchList";
-
-interface UploadBotModal {
-  isOpen: boolean;
-  onClose: () => void;
-}
+import clsx from "clsx";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -161,8 +157,9 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             <BotSearchList value={selectedBot2} setValue={setSelectedBot2} />
           </label>
         </div>
-        <div className="mb-4"></div>{" "}
-        <div className=" flex flex-wrap gap-4">
+
+        <div className="mb-4"></div>
+        <div className="flex flex-wrap gap-4">
           <div className="flex">
             <label className="block text-left mb-1 pt-2 pr-2 font-medium">
               Match Count:
@@ -179,29 +176,42 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               Number of games to play between selected agents
             </div>
           </div>
+
           <div className="block">
             <button
               type="button"
               onClick={() => {
                 setMapSelectionType("map_pool");
               }}
-              className={` border-2 mr-2  rounded-lg  bg-darken ${mapSelectionType == "map_pool" ? "border-customGreen" : "border-gray-700 hover:bg-transparent hover:border-customGreen"} p-2`}
+              className={clsx(
+                "border-2 mr-2 rounded-lg bg-darken p-2",
+                mapSelectionType === "map_pool"
+                  ? "border-customGreen"
+                  : "border-gray-700 hover:bg-transparent hover:border-customGreen"
+              )}
             >
               Map Pool
             </button>
+
             <button
               type="button"
               onClick={() => {
                 setMapSelectionType("specific_map");
               }}
-              className={` border-2 rounded-lg  bg-darken  ${mapSelectionType == "specific_map" ? "border-customGreen" : "border-gray-700  hover:bg-transparent hover:border-customGreen"} p-2`}
+              className={clsx(
+                "border-2 rounded-lg bg-darken p-2",
+                mapSelectionType === "specific_map"
+                  ? "border-customGreen"
+                  : "border-gray-700 hover:bg-transparent hover:border-customGreen"
+              )}
             >
               Specific Map
             </button>
           </div>
         </div>
+
         <div>
-          {mapSelectionType == "map_pool" ? (
+          {mapSelectionType === "map_pool" ? (
             <label className="mb-16 flex flex-col gap-1">
               <span className="font-medium">Map pool</span>
               <MapPoolSearchList
@@ -210,7 +220,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               />
             </label>
           ) : null}
-          {mapSelectionType == "specific_map" ? (
+
+          {mapSelectionType === "specific_map" ? (
             <label className="mb-16 flex flex-col gap-1">
               <span className="font-medium">Specific Map</span>
               <MapSearchList

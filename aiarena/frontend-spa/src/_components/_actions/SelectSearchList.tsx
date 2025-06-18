@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
+import clsx from "clsx";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
 import {
   GraphQLTaggedNode,
@@ -53,14 +54,15 @@ const SelectSearchList = <TQuery extends OperationType>({
     medium: "max-h-48",
     large: "max-h-64",
   };
-  const [isOpen, setIsOpen] = useState<boolean>(false);
 
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [inputFieldValue, setInputFieldValue] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const [isLoading, setIsLoading] = useState(false);
   const queryResponse = usePreloadedQuery(query, dataRef);
 
   const data = React.useMemo(() => {
@@ -111,31 +113,23 @@ const SelectSearchList = <TQuery extends OperationType>({
   }, []);
 
   useEffect(() => {
-    if (data) {
-      setIsLoading(false);
-    }
+    if (data) setIsLoading(false);
   }, [data]);
-
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-
     setInputFieldValue(value);
     setIsLoading(true);
 
-    // This is the timeout between entering a value - and executing a search
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
+
     debounceTimeoutRef.current = setTimeout(() => {
       onChange(value);
     }, searchTimeout);
 
-    // Open dropdown if it's not already open
-    if (!isOpen) {
-      setIsOpen(true);
-    }
+    if (!isOpen) setIsOpen(true);
   };
 
   const handleOptionSelect = (option: Data) => {
@@ -145,14 +139,14 @@ const SelectSearchList = <TQuery extends OperationType>({
     inputRef.current?.focus();
   };
 
-  const toggleDropdown = (): void => {
+  const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
   return (
     <div
-      className={`relative w-full text-gray-300 ${className}`}
       ref={dropdownRef}
+      className={clsx("relative w-full text-gray-300", className)}
     >
       <div className="relative">
         <input
@@ -194,11 +188,14 @@ const SelectSearchList = <TQuery extends OperationType>({
 
       {isOpen && (
         <div
-          className={`absolute z-10 w-full mt-1 bg-neutral-900  border border-gray-600  rounded-md shadow-lg ${heightClassMap[maxHeight]} overflow-auto`}
+          className={clsx(
+            "absolute z-10 mt-1 w-full overflow-auto rounded-md border border-gray-600 bg-neutral-900 shadow-lg",
+            heightClassMap[maxHeight]
+          )}
         >
           {isLoading ? (
-            <div className="px-4 py-2  flex items-center">
-              <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
+            <div className="flex items-center px-4 py-2">
+              <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent"></div>
               Loading...
             </div>
           ) : data.length > 0 ? (
@@ -206,7 +203,7 @@ const SelectSearchList = <TQuery extends OperationType>({
               {data.map((option) => (
                 <li
                   key={option.id}
-                  className="px-4 py-2 cursor-pointer hover:bg-neutral-700"
+                  className="cursor-pointer px-4 py-2 hover:bg-neutral-700"
                   onClick={() => handleOptionSelect(option)}
                 >
                   {option.label}
@@ -214,7 +211,7 @@ const SelectSearchList = <TQuery extends OperationType>({
               ))}
             </ul>
           ) : (
-            <div className="px-4 py-2 ">No options found</div>
+            <div className="px-4 py-2">No options found</div>
           )}
         </div>
       )}

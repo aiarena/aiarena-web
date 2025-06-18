@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 
 interface Tab {
   name: string;
@@ -27,11 +28,12 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
               e.preventDefault();
               setActiveTab(tab.name);
             }}
-            className={`px-3 py-2 text-sm md:text-base font-semibold ${
+            className={clsx(
+              "px-3 py-2 text-sm md:text-base font-semibold",
               activeTab === tab.name
                 ? "text-customGreen border-b-2 border-customGreen"
                 : "text-gray-200 hover:text-white"
-            }`}
+            )}
           >
             {tab.name}
           </a>

@@ -1,6 +1,7 @@
 import { flexRender, Table } from "@tanstack/react-table";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import { Suspense } from "react";
+import clsx from "clsx";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
 
 interface TableContainerProps<T> {
@@ -15,8 +16,9 @@ export function TableContainer<T>({
   loading,
 }: TableContainerProps<T>) {
   const allColumns = table.getAllLeafColumns();
+
   return (
-    <div className={` ${className ?? ""}`}>
+    <div className={clsx(className)}>
       {/* Column toggles */}
       <div className="mb-4 flex flex-wrap gap-4 text-white">
         {allColumns.map((column) => (
@@ -40,7 +42,7 @@ export function TableContainer<T>({
       {/* Table */}
       <div className="overflow-x-auto rounded backdrop-blur-lg">
         <table className="w-full border-collapse min-w-max">
-          <thead className="bg-darken-2 text-white ">
+          <thead className="bg-darken-2 text-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -52,7 +54,18 @@ export function TableContainer<T>({
                   >
                     <div className="inline-flex items-center gap-1 w-full justify-between h-full">
                       <div
-                        className="p-3 inline-flex items-center gap-1 w-full justify-between cursor-pointer mr-5 group hover:text-white"
+                        className={clsx(
+                          "p-3",
+                          "inline-flex",
+                          "items-center",
+                          "gap-1",
+                          "w-full",
+                          "justify-between",
+                          "cursor-pointer",
+                          "mr-5",
+                          "group",
+                          "hover:text-white"
+                        )}
                         {...(header.column.getCanSort() && !loading
                           ? {
                               onClick: header.column.getToggleSortingHandler(),
@@ -84,19 +97,32 @@ export function TableContainer<T>({
                         <div
                           onMouseDown={header.getResizeHandler()}
                           onTouchStart={header.getResizeHandler()}
-                          className={`absolute border right-0 top-0 bottom-0 w-1 p-2 border-transparent hover:border-r-white 
-                              cursor-col-resize ${
-                                header.column.getIsResizing()
-                                  ? "border-r-white"
-                                  : "border-r-neutral-700"
-                              }`}
+                          className={clsx(
+                            "absolute",
+                            "right-0",
+                            "top-0",
+                            "bottom-0",
+                            "w-1",
+                            "p-2",
+                            "border",
+                            "border-transparent",
+                            "hover:border-r-white",
+                            "cursor-col-resize",
+                            {
+                              "border-r-white": header.column.getIsResizing(),
+                              "border-r-neutral-700":
+                                !header.column.getIsResizing(),
+                            }
+                          )}
                         >
                           <div
-                            className={` w-[1px] h-full  ${
+                            className={clsx(
+                              "w-[1px]",
+                              "h-full",
                               header.column.getIsResizing()
                                 ? "bg-white"
                                 : "bg-customGreen"
-                            }`}
+                            )}
                           ></div>
                         </div>
                       )}
@@ -107,7 +133,7 @@ export function TableContainer<T>({
             ))}
           </thead>
           <Suspense fallback={<LoadingSpinner />}>
-            <tbody className={`${loading ? "animate-pulse" : ""}`}>
+            <tbody className={clsx({ "animate-pulse": loading })}>
               {table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}

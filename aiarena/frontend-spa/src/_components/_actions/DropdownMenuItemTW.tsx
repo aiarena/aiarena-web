@@ -1,4 +1,5 @@
 import { MenuItem } from "@headlessui/react";
+import clsx from "clsx";
 
 export interface DropdownMenuItemTWProps {
   onClick: () => void;
@@ -13,7 +14,14 @@ export default function DropdownMenuItemTW({
   return (
     <MenuItem>
       <button
-        className="w-full flex justify-between items-center px-3 py-2 text-left hover:bg-slate-600 transition"
+        className={clsx(
+          "w-full",
+          "flex justify-between items-center",
+          "px-3 py-2",
+          "text-left",
+          "hover:bg-slate-600",
+          "transition"
+        )}
         onClick={() => onClick()}
       >
         <span>{title}</span>

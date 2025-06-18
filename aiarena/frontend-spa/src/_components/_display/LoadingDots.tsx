@@ -1,6 +1,9 @@
+import clsx from "clsx";
+
 interface DotsProps {
   offset: number;
 }
+
 const Dot = (props: DotsProps) => {
   return (
     <>
@@ -17,7 +20,7 @@ const Dot = (props: DotsProps) => {
         `}
       </style>
       <span
-        className="bg-customGreen mx-1"
+        className={clsx("bg-customGreen", "mx-1")}
         style={{
           width: "10px",
           height: "10px",
@@ -42,5 +45,5 @@ export default function LoadingDots({
     <Dot key={i} offset={i / 3} />
   ));
 
-  return <div className={`flex justify-center ${className}`}>{dots}</div>;
+  return <div className={clsx("flex justify-center", className)}>{dots}</div>;
 }

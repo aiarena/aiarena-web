@@ -1,6 +1,7 @@
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { graphql, useFragment } from "react-relay";
 import { AvatarWithBorder_user$key } from "./__generated__/AvatarWithBorder_user.graphql";
+import clsx from "clsx";
 
 type AvatarWithBorderSizes = "sm" | "lg" | "xl";
 
@@ -57,9 +58,13 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
   const avatarSize = getAvatarSize(props.size);
 
   return (
-    <div className={`m-3 flex items-center justify-center`}>
+    <div className={clsx("m-3", "flex", "items-center", "justify-center")}>
       <div
-        className={`w-[${avatarSize.avatar}px] h-[${avatarSize.avatar}px]  overflow-hidden `}
+        className={clsx(
+          `w-[${avatarSize.avatar}px]`,
+          `h-[${avatarSize.avatar}px]`,
+          "overflow-hidden"
+        )}
       >
         <img
           src={user?.avatarUrl || `${getPublicPrefix()}/${defaultAvatar}`}
@@ -76,7 +81,13 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
           alt={`${formatBorder(user.patreonLevel)} frame`}
           width={avatarSize.border}
           height={avatarSize.border}
-          className={`absolute w-[${avatarSize.border}px] h-[${avatarSize.border}px] object-contain pointer-events-none`}
+          className={clsx(
+            "absolute",
+            `w-[${avatarSize.border}px]`,
+            `h-[${avatarSize.border}px]`,
+            "object-contain",
+            "pointer-events-none"
+          )}
           style={{
             transform: `translate(${avatarSize.moveBorderRight}px, -${avatarSize.moveBorderUp}px)`,
           }}

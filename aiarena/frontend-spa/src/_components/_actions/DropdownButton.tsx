@@ -1,3 +1,5 @@
+import clsx from "clsx";
+
 export interface DropdownButtonProps {
   onClick: () => void;
   title: string;
@@ -16,7 +18,14 @@ export default function DropdownButton({
 
   return (
     <button
-      className="w-full flex justify-between items-center px-3 py-2 text-left hover:bg-neutral-700 transition"
+      className={clsx(
+        "w-full",
+        "flex justify-between items-center",
+        "px-3 py-2",
+        "text-left",
+        "hover:bg-neutral-700",
+        "transition"
+      )}
       onClick={handleClick}
     >
       <span>{title}</span>

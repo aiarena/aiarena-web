@@ -1,6 +1,7 @@
 import { sideNavbarLinks } from "@/_data/sideNavbarLinks";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router";
+import clsx from "clsx";
 
 export default function WithSideNav({ children }: { children: ReactNode }) {
   const [sideNavbar, setSideNavbar] = useState(false);
@@ -51,7 +52,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
   }, [handleWindowResize]);
 
   return (
-    <div className={`${sideNavbar ? "flex" : ""}`}>
+    <div className={clsx(sideNavbar && "flex")}>
       {sideNavbar ? (
         <aside className="w-1/12 min-w-[12em] bg-darken-2 border-r border-gray-700">
           <div
@@ -63,11 +64,12 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
                 key={tab.name}
                 to={tab.path}
                 className={({ isActive }) =>
-                  `m-2 pl-2 py-2 text-white border-1 shadow shadow-black shadow-sm hover:shadow-customGreen-dark duration-300 ease-in-out transform  backdrop-blur-sm ${
+                  clsx(
+                    "m-2 pl-2 py-2 text-white border-1 shadow-black shadow-sm hover:shadow-customGreen-dark duration-300 ease-in-out transform backdrop-blur-sm",
                     isActive
                       ? "text-large border-gray-700 border-b-customGreen border-b-2"
                       : "border-gray-700 hover:border-b-customGreen border-b-2"
-                  }`
+                  )
                 }
               >
                 <p className="text-gray-100 text-l">{tab.name}</p>
@@ -77,8 +79,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
         </aside>
       ) : (
         <div
-          className="sticky z-49
-        border-b border-customGreen"
+          className="sticky z-49 border-b border-customGreen"
           style={{ top: `${navbarHeight}px` }}
         >
           <div className="flex flex-wrap justify-center space-x-4 py-4 bg-black">
@@ -87,11 +88,12 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
                 key={tab.name}
                 to={tab.path}
                 className={({ isActive }) =>
-                  `py-2 text-white font-gugi ${
+                  clsx(
+                    "py-2 text-white font-gugi",
                     isActive
                       ? "border-b-2 border-customGreen"
                       : "border-b-2 border-transparent hover:border-customGreen"
-                  }`
+                  )
                 }
               >
                 {tab.name}
@@ -102,7 +104,10 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
       )}
 
       <main
-        className={`${sideNavbar ? "flex-1" : "sticky top-0"} overflow-y-auto p-8 min-h-[90vh]`}
+        className={clsx(
+          sideNavbar ? "flex-1" : "sticky top-0",
+          "overflow-y-auto p-8 min-h-[90vh]"
+        )}
         role="main"
       >
         {children}

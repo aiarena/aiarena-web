@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import React from "react";
+import clsx from "clsx";
 
 interface FooterNavItemProps {
   icon: string;
@@ -16,17 +17,16 @@ const FooterNavItem: React.FC<FooterNavItemProps> = ({
 }) => {
   return (
     <li>
-      <div className="flex ">
+      <div className="flex">
         <Link to={href} className="hover:underline">
-          <div className="flex ">
+          <div className="flex">
             <img
               src={icon}
               alt={name + "-Icon"}
               width={24}
               height={24}
-              className={`mr-2 w-6 h-6 ${invertIcon ? "invert" : ""}`}
+              className={clsx("mr-2", "w-6", "h-6", invertIcon && "invert")}
             />
-
             {name}
           </div>
         </Link>

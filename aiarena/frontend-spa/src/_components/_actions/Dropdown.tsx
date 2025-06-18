@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, ReactElement } from "react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import clsx from "clsx";
 import { DropdownButtonProps } from "./DropdownButton";
 
 interface DropdownProps {
@@ -34,7 +35,7 @@ export default function Dropdown({
     };
   }, []);
 
-  // injects closeDropdown into the children - so we don't have to pass it as a prop
+  // Injects closeDropdown into children
   const enhancedChildren = React.Children.map(children, (child) => {
     if (React.isValidElement(child)) {
       return React.cloneElement(child, {
@@ -49,22 +50,61 @@ export default function Dropdown({
       <div>
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className={`inline-flex w-full justify-center gap-x-1.5 rounded-md  px-3 py-3 font-semibold bg-neutral-900 shadow-xs  border ring-1 ring-gray-700 focus:outline-none focus:ring-customGreen focus:ring-2 ring-inset ${
-            isLoading
-              ? "border-customGreen animate-border-fade-in-out  "
-              : "border-neutral-600"
-          }`}
+          className={clsx(
+            "inline-flex",
+            "w-full",
+            "justify-center",
+            "gap-x-1.5",
+            "rounded-md",
+            "px-3",
+            "py-3",
+            "font-semibold",
+            "bg-neutral-900",
+            "shadow-xs",
+            "border",
+            "ring-1",
+            "ring-inset",
+            "ring-gray-700",
+            "focus:outline-none",
+            {
+              "border-customGreen animate-border-fade-in-out": isLoading,
+              "border-neutral-600": !isLoading,
+              "focus:ring-customGreen focus:ring-2": true,
+            }
+          )}
         >
           {title}
           <ChevronDownIcon
             aria-hidden="true"
-            className="-mr-1 size-5 text-gray-400"
+            className={clsx("-mr-1", "size-5", "text-gray-400")}
           />
         </button>
       </div>
 
       {isOpen && (
-        <div className="absolute left-0 right-auto mt-2 max-w-screen-sm w-56 border-2 border-customGreen rounded-md bg-neutral-900 shadow-lg ring-1 ring-neutral-800 focus:outline-none transition duration-100 ease-out z-45 overflow-x-auto">
+        <div
+          className={clsx(
+            "absolute",
+            "left-0",
+            "right-auto",
+            "mt-2",
+            "max-w-screen-sm",
+            "w-56",
+            "border-2",
+            "border-customGreen",
+            "rounded-md",
+            "bg-neutral-900",
+            "shadow-lg",
+            "ring-1",
+            "ring-neutral-800",
+            "focus:outline-none",
+            "transition",
+            "duration-100",
+            "ease-out",
+            "z-45",
+            "overflow-x-auto"
+          )}
+        >
           <div className="py-1 flex flex-col">{enhancedChildren}</div>
         </div>
       )}

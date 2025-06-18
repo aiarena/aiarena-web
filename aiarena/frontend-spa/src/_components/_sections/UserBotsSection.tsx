@@ -12,6 +12,7 @@ import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_view
 
 import UserBotsList from "./UserBotsSection/UserBotsList";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
+import clsx from "clsx";
 
 interface UserBotsSectionProps {
   viewer: UserBotsSection_viewer$key;
@@ -44,22 +45,30 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
         <div className="flex gap-4 flex-wrap pb-4">
           <div className="block">
             {/*  Below section can also be deffered with Relay 19.0 */}
-            <p className="pb-1 ">
+            <p className="pb-1">
               <span
-                className={`pb-1 ${viewer.activeBotParticipations == viewer.activeBotParticipationLimit ? "text-red-400" : ""}
-                   ${viewer.activeBotParticipationLimit && viewer.activeBotParticipations && viewer.activeBotParticipationLimit - viewer.activeBotParticipations == 1 ? "text-yellow-500" : ""}
-                   `}
+                className={clsx(
+                  "pb-1",
+                  viewer.activeBotParticipations ===
+                    viewer.activeBotParticipationLimit && "text-red-400",
+                  viewer.activeBotParticipationLimit &&
+                    viewer.activeBotParticipations &&
+                    viewer.activeBotParticipationLimit -
+                      viewer.activeBotParticipations ===
+                      1 &&
+                    "text-yellow-500"
+                )}
               >
                 {viewer.activeBotParticipations}
               </span>{" "}
-              / {viewer.activeBotParticipationLimit} {""}
-              active competition participations.
+              / {viewer.activeBotParticipationLimit} active competition
+              participations.
             </p>
             <WantMore />
           </div>
         </div>
         <div
-          className="flex gap-4 ml-auto "
+          className="flex gap-4 ml-auto"
           role="group"
           aria-label="Agent filtering and sorting controls"
         >

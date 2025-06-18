@@ -2,6 +2,7 @@ import { useState } from "react";
 import WantMore from "../../_display/WantMore";
 import MainButton from "../../_actions/MainButton";
 import { graphql, useFragment } from "react-relay";
+import clsx from "clsx";
 
 import RequestMatchModal from "./_modals/RequestMatchModal";
 import { UserMatchRequestsHeaderSection_viewer$key } from "./__generated__/UserMatchRequestsHeaderSection_viewer.graphql";
@@ -35,11 +36,12 @@ export default function UserMatchRequestsHeaderSection(
         <div className="block">
           <p className="pb-1">
             <span
-              className={`
-                    
-                    ${viewer.requestMatchesCountLeft <= 5 && viewer.requestMatchesCountLeft > 0 ? "text-yellow-500" : ""}
-                    ${viewer.requestMatchesCountLeft <= 0 ? "text-red-400" : ""}
-                    `}
+              className={clsx(
+                viewer.requestMatchesCountLeft <= 5 &&
+                  viewer.requestMatchesCountLeft > 0 &&
+                  "text-yellow-500",
+                viewer.requestMatchesCountLeft <= 0 && "text-red-400"
+              )}
               aria-label={`${matchRequestsUsed} match requests used out of ${viewer.requestMatchesLimit} monthly limit. ${viewer.requestMatchesCountLeft} requests remaining.`}
             >
               {" "}

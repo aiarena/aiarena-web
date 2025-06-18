@@ -1,5 +1,6 @@
 import React, { MouseEventHandler } from "react";
 import { useNavigate } from "react-router";
+import clsx from "clsx";
 
 interface SquareButtonProps {
   href?: string;
@@ -40,28 +41,20 @@ export default function SquareButton({
         @keyframes highlight {
           0% {
             border-color: transparent;
-            border-bottom-color: var(
-               --color-customGreen
-            ); /* Start from the bottom */
+            border-bottom-color: var(--color-customGreen);
           }
           25% {
-            border-left-color: var(
-              --color-customGreen
-            ); /* Move to the left */
+            border-left-color: var(--color-customGreen);
           }
           50% {
-            border-top-color: var( --color-customGreen); /* Then the top */
+            border-top-color: var(--color-customGreen);
           }
           75% {
-            border-right-color: var(
-              --color-customGreen
-            ); /* Finish at the right */
+            border-right-color: var(--color-customGreen);
           }
           100% {
             border-color: transparent;
-            border-bottom-color: var(
-              --color-customGreen
-            ); /* Loop back to the bottom */
+            border-bottom-color: var(--color-customGreen);
           }
         }
         .animate-highlight {
@@ -76,16 +69,21 @@ export default function SquareButton({
           animation-delay: 0.15s;
         }
       `}</style>
-      <div className={`relative inline-block ${outerClassName}`}>
+      <div className={clsx("relative inline-block", outerClassName)}>
         <button
           onClick={handleClick}
-          className={` flex justify-center items-center w-full shadow-sm shadow-black border-2 ${textColor == "bright" ? "text-white" : ""}${textColor == "dim" ? "text-gray-200" : ""} font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform backdrop-blur-sm
-            ${
-              !disabled
-                ? "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent"
-                : "bg-darken border-gray-700 hover:bg-darken hover:border-gray-700 cursor-not-allowed"
-            }
-            ${className}`}
+          className={clsx(
+            "flex justify-center items-center w-full shadow-sm shadow-black border-2 font-semibold py-1 px-2 rounded-sm transition duration-300 ease-in-out transform backdrop-blur-sm",
+            {
+              "text-white": textColor === "bright",
+              "text-gray-200": textColor === "dim",
+              "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent":
+                !disabled,
+              "bg-darken border-gray-700 hover:bg-darken hover:border-gray-700 cursor-not-allowed":
+                disabled,
+            },
+            className
+          )}
           disabled={isLoading || disabled}
         >
           {children}

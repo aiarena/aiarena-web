@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import clsx from "clsx";
 import SectionDivider from "../_display/SectionDivider";
 import BackgroundTexture from "../_display/BackgroundTexture";
 
@@ -44,7 +45,11 @@ const Modal = ({
   return createPortal(
     <div className="fixed inset-0 bg-darken-6 flex items-center justify-center z-50 p-4">
       <div
-        className={` rounded-lg shadow-md w-full ${size == "m" ? "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl" : null} ${size == "l" ? "max-w-screen" : null}`}
+        className={clsx(
+          "rounded-lg shadow-md w-full",
+          size === "m" && "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl",
+          size === "l" && "max-w-screen"
+        )}
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
         tabIndex={-1}
@@ -52,9 +57,9 @@ const Modal = ({
         aria-modal="true"
       >
         <BackgroundTexture className="rounded-lg border-1 border-neutral-700">
-          <div className=" max-h-screen ">
-            <div className="pt-2  px-2 flex items-center justify-between pb-2 bg-darken-4 rounded-t-lg">
-              <p className="text-lg font-bold ml-2 truncate ">{title}</p>
+          <div className="max-h-screen">
+            <div className="pt-2 px-2 flex items-center justify-between pb-2 bg-darken-4 rounded-t-lg">
+              <p className="text-lg font-bold ml-2 truncate">{title}</p>
 
               <button
                 className="text-gray-400 hover:text-gray-200"
@@ -80,7 +85,7 @@ const Modal = ({
               </button>
             </div>
             <SectionDivider color="gradient" className="mb-1" height={1} />
-            <div className="px-6 p-4 pb-10  overflow-y-auto max-h-[90vh]">
+            <div className="px-6 p-4 pb-10 overflow-y-auto max-h-[90vh]">
               {children}
             </div>
           </div>

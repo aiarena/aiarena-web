@@ -3,6 +3,7 @@ import {
   Square2StackIcon,
 } from "@heroicons/react/24/outline";
 import React, { useRef } from "react";
+import clsx from "clsx";
 
 interface FileUploadProps {
   id?: string;
@@ -60,8 +61,13 @@ export const UploadFile: React.FC<FileUploadProps> = ({
             ? `Selected file: ${file.name}. Click to change.`
             : "Click to select file or drag and drop"
         }
-        className={`block cursor-pointer rounded border-2 border-dashed p-6 text-center text-gray-300 transition focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-offset-2 focus:ring-offset-neutral-900
-          ${file ? "border-customGreen bg-darken-3" : "border-neutral-500 bg-neutral-900 hover:border-customGreen hover:bg-neutral-800"}`}
+        className={clsx(
+          "block cursor-pointer rounded border-2 border-dashed p-6 text-center text-gray-300 transition",
+          "focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-offset-2 focus:ring-offset-neutral-900",
+          file
+            ? "border-customGreen bg-darken-3"
+            : "border-neutral-500 bg-neutral-900 hover:border-customGreen hover:bg-neutral-800"
+        )}
       >
         {file ? (
           <>
@@ -69,7 +75,7 @@ export const UploadFile: React.FC<FileUploadProps> = ({
               className="mx-auto mb-2 h-6 w-6 text-customGreen"
               aria-hidden="true"
             />
-            <p className="text-sm text-customGreen truncate" title={file.name}>
+            <p className="truncate text-sm text-customGreen" title={file.name}>
               {file.name}
             </p>
           </>
