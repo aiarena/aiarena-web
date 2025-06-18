@@ -1,6 +1,6 @@
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
-import Modal from "@/_components/_props/Modal";
+import Modal from "@/_components/_actions/Modal";
 
 import { BotAllParticipationsModal_bot$key } from "./__generated__/BotAllParticipationsModal_bot.graphql";
 import { getDateToLocale } from "@/_lib/dateUtils";

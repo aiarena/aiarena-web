@@ -14,7 +14,7 @@ import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
-import { TableContainer } from "../../_props/TableContainer";
+import { TableContainer } from "../../_actions/TableContainer";
 import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 import LoadingMoreItems from "../../_display/LoadingMoreItems";
 import NoMoreItems from "../../_display/NoMoreItems";

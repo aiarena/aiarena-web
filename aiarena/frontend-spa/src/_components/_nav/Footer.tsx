@@ -3,7 +3,7 @@ import { footerLinks } from "@/_data/footerLinks";
 import SocialComponent from "./_footer_parts/SocialNavItem";
 import SupportersComponent from "./_footer_parts/Supporters";
 import SectionDivider from "../_display/SectionDivider";
-import SquareButton from "../_props/SquareButton";
+import SquareButton from "../_actions/SquareButton";
 import { getFeatureFlags } from "@/_data/featureFlags";
 
 const Footer: React.FC = () => {

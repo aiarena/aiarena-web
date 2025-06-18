@@ -3,12 +3,12 @@ import { Suspense, useState } from "react";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
 import ActiveDot from "../ActiveDot";
-import SquareButton from "@/_components/_props/SquareButton";
+import SquareButton from "@/_components/_actions/SquareButton";
 import JoinCompetitionModal from "@/_components/_sections/_modals/JoinCompetitionModal";
-import SuspenseGetLoading from "@/_components/_props/SuspenseGetLoading";
+import SuspenseGetLoading from "@/_components/_actions/SuspenseGetLoading";
 import { UserBotCompetitions_bot$key } from "./__generated__/UserBotCompetitions_bot.graphql";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
+import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import { getDotColor } from "@/_lib/getDotColor";
 interface UserBotCompetitionProps {
   bot: UserBotCompetitions_bot$key;

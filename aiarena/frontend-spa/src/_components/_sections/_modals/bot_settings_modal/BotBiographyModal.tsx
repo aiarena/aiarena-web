@@ -1,12 +1,12 @@
-import MarkdownEditor from "@/_components/_props/MarkdownEditor";
-import Modal from "@/_components/_props/Modal";
+import MarkdownEditor from "@/_components/_actions/MarkdownEditor";
+import Modal from "@/_components/_actions/Modal";
 import { useState } from "react";
 
 import { graphql, useFragment, useMutation } from "react-relay";
 import { BotBiographyModal_bot$key } from "./__generated__/BotBiographyModal_bot.graphql";
 import { BotBiographyModalMutation } from "./__generated__/BotBiographyModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
-import WideButton from "@/_components/_props/WideButton";
+import WideButton from "@/_components/_actions/WideButton";
 
 interface BotBiographyModalProps {
   bot: BotBiographyModal_bot$key;

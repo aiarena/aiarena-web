@@ -1,4 +1,4 @@
-import Modal from "@/_components/_props/Modal";
+import Modal from "@/_components/_actions/Modal";
 import { graphql, useFragment } from "react-relay";
 import { BotTrophiesModal_bot$key } from "./__generated__/BotTrophiesModal_bot.graphql";
 import { getNodes } from "@/_lib/relayHelpers";

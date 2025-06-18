@@ -7,9 +7,9 @@ import {
 } from "react-relay";
 import { JoinCompetitionModal_bot$key } from "./__generated__/JoinCompetitionModal_bot.graphql";
 import { JoinCompetitionModalCompetitionsQuery } from "./__generated__/JoinCompetitionModalCompetitionsQuery.graphql";
-import Modal from "@/_components/_props/Modal";
+import Modal from "@/_components/_actions/Modal";
 import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
-import SimpleToggle from "@/_components/_props/_toggle/SimpleToggle";
+import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 
 interface JoinCompetitionModalProps {

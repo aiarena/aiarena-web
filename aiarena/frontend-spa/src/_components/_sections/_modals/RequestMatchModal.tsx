@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Modal from "@/_components/_props/Modal";
+import Modal from "@/_components/_actions/Modal";
 import { graphql, useMutation } from "react-relay";
 import { RequestMatchModalMutation } from "./__generated__/RequestMatchModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
-import Form from "@/_components/_props/Form";
+import Form from "@/_components/_actions/Form";
 import { useRelayConnectionID } from "@/_components/_contexts/RelayConnectionIDContext/useRelayConnectionID";
 import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 

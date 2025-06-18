@@ -1,12 +1,12 @@
 import React, { Suspense, useState } from "react";
 
 import { graphql, useFragment } from "react-relay";
-import MainButton from "../_props/MainButton";
+import MainButton from "../_actions/MainButton";
 import UploadBotModal from "./_modals/UploadBotModal";
 
-import Searchbar from "../_props/Searchbar";
-import Dropdown from "../_props/Dropdown";
-import DropdownButton from "../_props/DropdownButton";
+import Searchbar from "../_actions/Searchbar";
+import Dropdown from "../_actions/Dropdown";
+import DropdownButton from "../_actions/DropdownButton";
 import WantMore from "../_display/WantMore";
 import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
 

@@ -1,12 +1,12 @@
-import Modal from "@/_components/_props/Modal";
+import Modal from "@/_components/_actions/Modal";
 import { useState } from "react";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay";
 import { UploadBotModalQuery } from "./__generated__/UploadBotModalQuery.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import { UploadBotModalMutation } from "./__generated__/UploadBotModalMutation.graphql";
-import Form from "@/_components/_props/Form";
-import { UploadFile } from "@/_components/_props/UploadFile";
+import Form from "@/_components/_actions/Form";
+import { UploadFile } from "@/_components/_actions/UploadFile";
 import { useRelayConnectionID } from "@/_components/_contexts/RelayConnectionIDContext/useRelayConnectionID";
 import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import WantMore from "../../_display/WantMore";
-import MainButton from "../../_props/MainButton";
+import MainButton from "../../_actions/MainButton";
 import { graphql, useFragment } from "react-relay";
 
 import RequestMatchModal from "../_modals/RequestMatchModal";

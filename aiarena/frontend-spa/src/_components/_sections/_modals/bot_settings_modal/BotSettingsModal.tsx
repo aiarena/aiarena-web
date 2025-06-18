@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { graphql, useFragment, useMutation } from "react-relay";
 import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.graphql";
-import Modal from "@/_components/_props/Modal";
+import Modal from "@/_components/_actions/Modal";
 import { BotSettingsModalMutation } from "./__generated__/BotSettingsModalMutation.graphql";
 import BiographyModal from "./BotBiographyModal";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
@@ -13,10 +13,10 @@ import {
   ArrowUpOnSquareIcon,
   ArrowDownOnSquareIcon,
 } from "@heroicons/react/20/solid";
-import WideButton from "@/_components/_props/WideButton";
-import { UploadFile } from "@/_components/_props/UploadFile";
+import WideButton from "@/_components/_actions/WideButton";
+import { UploadFile } from "@/_components/_actions/UploadFile";
 import SectionDivider from "@/_components/_display/SectionDivider";
-import SquareButton from "@/_components/_props/SquareButton";
+import SquareButton from "@/_components/_actions/SquareButton";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
