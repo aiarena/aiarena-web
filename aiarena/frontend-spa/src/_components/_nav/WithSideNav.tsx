@@ -54,7 +54,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
   return (
     <div className={clsx(sideNavbar && "flex")}>
       {sideNavbar ? (
-        <aside className="w-1/12 min-w-[12em] bg-darken-2 border-r border-gray-700">
+        <aside className="w-1/12 min-w-[12em] bg-darken-2 border-r border-neutral-700">
           <div
             className="sticky flex flex-col"
             style={{ top: `${navbarHeight}px` }}
@@ -67,8 +67,8 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
                   clsx(
                     "m-2 pl-2 py-2 text-white border-1 shadow-black shadow-sm hover:shadow-customGreen-dark duration-300 ease-in-out transform backdrop-blur-sm",
                     isActive
-                      ? "text-large border-gray-700 border-b-customGreen border-b-2"
-                      : "border-gray-700 hover:border-b-customGreen border-b-2"
+                      ? "text-large border-neutral-700 border-b-customGreen border-b-2"
+                      : "border-neutral-700 hover:border-b-customGreen border-b-2"
                   )
                 }
               >
