@@ -140,7 +140,7 @@ export default function UserMatchRequestsTable(
       }),
       columnHelper.accessor((row) => row.participant1?.name || "", {
         id: "participant1",
-        header: "Agent 1",
+        header: "Bot",
         cell: (info) => {
           const participant1 = info.row.original.participant1;
           const display_value = formatWinnerName(
@@ -159,7 +159,7 @@ export default function UserMatchRequestsTable(
       }),
       columnHelper.accessor((row) => row.participant2?.name || "", {
         id: "participant2",
-        header: "Agent 2",
+        header: "Opponent",
         cell: (info) => {
           const participant2 = info.row.original.participant2;
 

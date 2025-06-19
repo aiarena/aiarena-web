@@ -124,8 +124,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       variables: {
         connections: [connectionID],
         input: {
-          agent1: selectedBot1?.id,
-          agent2: selectedBot2?.id,
+          bot1: selectedBot1?.id,
+          bot2: selectedBot2?.id,
           matchCount: matchCount,
           mapSelectionType: mapSelectionType,
           chosenMap:
