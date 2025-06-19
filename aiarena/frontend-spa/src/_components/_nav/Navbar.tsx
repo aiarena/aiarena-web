@@ -39,9 +39,9 @@ function Navbar() {
 
   return (
     <>
-      <nav className="w-full  text-white sticky top-0 z-50 border-b border-gray-700">
+      <nav className="w-full  text-white sticky top-0 z-50 border-b border-gray-700 bg-neutral-700">
         <BackgroundTexture>
-          <div className="flex px-2 justify-between md:p-3 md:flex bg-darken-4">
+          <div className="flex px-2 justify-between md:p-3 md:flex bg-darken-3 md:shadow-sm shadow-black">
             <a
               href={navLinks[0].path}
               className="flex justify-between items-center"
@@ -129,28 +129,27 @@ function Navbar() {
               {/* <div className="ml-auto"><AuthNavBar /></div> */}
             </div>
           </div>
-        </BackgroundTexture>
-        {navbar === true ? (
-          <div className={clsx("md:block", navbar ? "block" : "hidden")}>
-            <ul className="md:h-auto md:flex bg-darken-3 pt-8 h-screen max-h-[calc(100vh-3rem)] overflow-y-auto">
-              {navLinks.map((link, index) => (
-                <li key={index} className="text-l p-2 text-center w-full">
-                  <a
-                    key={index}
-                    href={link.path}
-                    onClick={handleMobileNavItemClick}
-                    className={clsx(
-                      "block w-full bg-darken-3 hover:darken-4 py-2 text-white hover:text-slate-300 border-b-2",
-                      window.location.pathname === link.path
-                        ? "border-customGreen"
-                        : "border-transparent"
-                    )}
-                  >
-                    {link.title}
-                  </a>
+          {navbar === true ? (
+            <div className={clsx("md:block", navbar ? "block" : "hidden")}>
+              <ul className="md:h-auto md:flex bg-darken-3 pt-8 h-screen max-h-[calc(100vh-3rem)] overflow-y-auto">
+                {navLinks.map((link, index) => (
+                  <li key={index} className="text-l p-2 text-center w-full">
+                    <a
+                      key={index}
+                      href={link.path}
+                      onClick={handleMobileNavItemClick}
+                      className={clsx(
+                        "block w-full bg-darken-3 hover:darken-4 py-2 text-white hover:text-slate-300 border-b-2",
+                        window.location.pathname === link.path
+                          ? "border-customGreen"
+                          : "border-transparent"
+                      )}
+                    >
+                      {link.title}
+                    </a>
 
-                  {/* Alternative NavLink block kept as-is (commented) */}
-                  {/* 
+                    {/* Alternative NavLink block kept as-is (commented) */}
+                    {/* 
                   <NavLink
                     key={index}
                     to={link.path}
@@ -167,11 +166,12 @@ function Navbar() {
                     {link.title}
                   </NavLink>
                   */}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </BackgroundTexture>
       </nav>
     </>
   );
