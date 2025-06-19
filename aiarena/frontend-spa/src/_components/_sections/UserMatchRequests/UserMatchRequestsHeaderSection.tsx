@@ -7,6 +7,8 @@ import clsx from "clsx";
 import RequestMatchModal from "./_modals/RequestMatchModal";
 import { UserMatchRequestsHeaderSection_viewer$key } from "./__generated__/UserMatchRequestsHeaderSection_viewer.graphql";
 import LoadingDots from "@/_components/_display/LoadingDots";
+import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
+import WatchYourGamesModal from "./_modals/WatchYourGamesModal";
 
 type UserMatchRequestsHeaderSectionProps = {
   viewer: UserMatchRequestsHeaderSection_viewer$key;
@@ -16,6 +18,8 @@ export default function UserMatchRequestsHeaderSection(
   props: UserMatchRequestsHeaderSectionProps
 ) {
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
+  const [isWatchYourGamesModalOpen, setIsWatchYourGamesModalOpen] =
+    useState(false);
 
   const viewer = useFragment(
     graphql`
@@ -56,6 +60,13 @@ export default function UserMatchRequestsHeaderSection(
         </div>
       </Suspense>
       <div className="flex gap-4 ml-auto ">
+        <div>
+          <WatchYourGamesButton
+            onClick={() => setIsWatchYourGamesModalOpen(true)}
+          >
+            <span>Watch Your Games</span>
+          </WatchYourGamesButton>
+        </div>
         <MainButton
           onClick={() => setIsRequestMatchModalOpen(true)}
           text="Request New Match"
@@ -68,6 +79,11 @@ export default function UserMatchRequestsHeaderSection(
       <RequestMatchModal
         isOpen={isRequestMatchModalOpen}
         onClose={() => setIsRequestMatchModalOpen(false)}
+      />
+
+      <WatchYourGamesModal
+        isOpen={isWatchYourGamesModalOpen}
+        onClose={() => setIsWatchYourGamesModalOpen(false)}
       />
     </div>
   );
