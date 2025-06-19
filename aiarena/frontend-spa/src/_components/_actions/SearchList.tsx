@@ -107,7 +107,8 @@ export default function SearchList({
               "py-2",
               "select-none",
               "data-focus:bg-white/10",
-              "text-white"
+              "text-white",
+              "w-full"
             )}
           >
             {displayValue(option)}
