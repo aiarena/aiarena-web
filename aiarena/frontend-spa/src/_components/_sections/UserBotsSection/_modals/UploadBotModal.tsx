@@ -163,15 +163,15 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
   };
 
   return (
-    <Modal onClose={onClose} isOpen={isOpen} title="Upload Agent">
+    <Modal onClose={onClose} isOpen={isOpen} title="Upload Bot">
       <Form
         handleSubmit={handleUpload}
-        submitTitle="Upload Agent"
+        submitTitle="Upload Bot"
         loading={updating}
         disabled={!isFormValid()}
       >
         <fieldset>
-          <legend className="sr-only">Agent Upload Information</legend>
+          <legend className="sr-only">Bot Upload Information</legend>
 
           <div className="block mb-4">
             <label htmlFor="bot-name" className="block mb-2">
@@ -187,16 +187,16 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
               autoComplete="off"
               className="w-full p-2"
               aria-describedby="bot-name-help"
-              placeholder="Enter your Agents's name"
+              placeholder="Enter your bot's name"
             />
             <div id="bot-name-help" className="sr-only">
-              Choose a unique name for your Agent
+              Choose a unique name for your bot
             </div>
           </div>
 
           <div className="block mb-4">
             <label htmlFor="bot-zip" className="block mb-2">
-              <span className="text-gray-300">Agent ZIP:</span>
+              <span className="text-gray-300">Bot ZIP:</span>
             </label>
             <UploadFile
               id="bot-zip"
@@ -207,7 +207,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
               aria-describedby="bot-zip-help"
             />
             <div id="bot-zip-help" className="sr-only">
-              Upload a ZIP file containing your Agent's code and resources
+              Upload a ZIP file containing your bot's code and resources
             </div>
           </div>
 
@@ -215,7 +215,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
             <fieldset>
               <div className="inline-flex items-center">
                 <label htmlFor="bot-data-enabled" className="text-gray-300">
-                  Enable Agent Data:
+                  Enable Bot Data:
                 </label>
                 <input
                   id="bot-data-enabled"
@@ -228,7 +228,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
                 />
               </div>
               <div id="bot-data-help" className="sr-only">
-                Allow your Agent to store and access persistent data between
+                Allow your bot to store and access persistent data between
                 matches
               </div>
             </fieldset>
@@ -260,7 +260,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
               ))}
             </select>
             <div id="bot-race-help" className="sr-only">
-              Choose which race your Agent is designed to play
+              Choose which game race your bot is designed to play
             </div>
           </div>
 
@@ -281,7 +281,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
               aria-describedby="bot-type-help"
             >
               <option value="" disabled>
-                Select Agent type
+                Select bot type
               </option>
               {Object.entries(BOT_TYPES).map(([label, value]) => (
                 <option key={label} value={label}>
@@ -290,7 +290,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
               ))}
             </select>
             <div id="bot-type-help" className="sr-only">
-              Select the type of Agent you are uploading
+              Select the type of bot you are uploading
             </div>
           </div>
         </fieldset>

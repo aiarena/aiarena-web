@@ -31,11 +31,11 @@ class TestRequestMatch(GraphQLTest):
             expected_status=200,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "specific_map",
                     "chosenMap": self.to_global_id(MapType, map.id),
                     "matchCount": 1,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                 }
             },
         )
@@ -63,10 +63,10 @@ class TestRequestMatch(GraphQLTest):
             expected_status=200,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -88,10 +88,10 @@ class TestRequestMatch(GraphQLTest):
         self.mutate(
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -106,14 +106,14 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "agent2": 999,
+                    "bot2": 999,
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=['Error processing agent2: Unable to parse global ID "999".'],
+            expected_errors_like=['Error processing bot2: Unable to parse global ID "999".'],
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -124,13 +124,13 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_validation_errors={"agent2": ["Required field"]},
+            expected_validation_errors={"bot2": ["Required field"]},
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -141,14 +141,14 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": 999,
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": 999,
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=['Error processing agent1: Unable to parse global ID "999".'],
+            expected_errors_like=['Error processing bot1: Unable to parse global ID "999".'],
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -161,11 +161,11 @@ class TestRequestMatch(GraphQLTest):
                 "input": {
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_validation_errors={"agent1": ["Required field"]},
+            expected_validation_errors={"bot1": ["Required field"]},
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -176,10 +176,10 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "dodecahedron",
                     "matchCount": 1,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -194,9 +194,9 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "matchCount": 1,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -211,10 +211,10 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 500,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -229,9 +229,9 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
@@ -246,10 +246,10 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                     "mapPool": 999,
                 }
             },
@@ -264,10 +264,10 @@ class TestRequestMatch(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "agent1": self.to_global_id(BotType, bot.id),
-                    "agent2": self.to_global_id(BotType, other_bot.id),
+                    "bot1": self.to_global_id(BotType, bot.id),
                     "mapSelectionType": "map_pool",
                     "matchCount": 1,
+                    "bot2": self.to_global_id(BotType, other_bot.id),
                 }
             },
             expected_errors_like=["Either 'mapPool' or 'chosenMap' must be provided."],

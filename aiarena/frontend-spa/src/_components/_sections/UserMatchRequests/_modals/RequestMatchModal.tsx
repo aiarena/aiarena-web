@@ -156,8 +156,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       >
         <div className="mb-4 flex flex-col gap-2">
           <label className="flex flex-col gap-1 ">
-            <span id="agent1-name" className="font-medium">
-              Agent 1
+            <span id="bot-name" className="font-medium">
+              Bot
             </span>
             <BotSearchList
               value={selectedBot1}
@@ -167,8 +167,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           </label>
 
           <label className="flex flex-col gap-1">
-            <span id="agent2-name" className="font-medium">
-              Agent 2
+            <span id="opoonent-name" className="font-medium">
+              Opponent
             </span>
             <BotSearchList
               value={selectedBot2}
@@ -193,7 +193,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               aria-describedby="match-count-help"
             />
             <div id="match-count-help" className="sr-only">
-              Number of games to play between selected agents
+              Number of games to play between selected bots
             </div>
           </div>
 

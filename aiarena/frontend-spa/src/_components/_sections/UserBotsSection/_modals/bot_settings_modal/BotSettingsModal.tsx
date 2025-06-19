@@ -78,7 +78,7 @@ export default function BotSettingsModal({
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateBot",
-    "Agent Settings Updated!"
+    "Bot Settings Updated!"
   );
 
   return (
@@ -87,13 +87,13 @@ export default function BotSettingsModal({
         <div className="space-y-4">
           <WideButton
             onClick={() => setBiographyModalOpen(true)}
-            title="Edit Agent Biography"
+            title="Edit Bot Biography"
           />
           <SectionDivider color="gray" className="pb-1" />
 
           <div className="flex items-center">
             <label className="text-gray-300 flex items-center">
-              Store Agent Data:
+              Store Bot Data:
               <input
                 type="checkbox"
                 checked={bot.botDataEnabled}
@@ -123,7 +123,7 @@ export default function BotSettingsModal({
             <div className="w-full md:w-[45%]">
               <div className="flex items-center mt-2">
                 <label className="text-gray-300 flex items-center">
-                  Agent Zip Publicly Downloadable:
+                  Bot Zip Publicly Downloadable:
                 </label>
                 <input
                   type="checkbox"
@@ -148,7 +148,7 @@ export default function BotSettingsModal({
               {" "}
               <div className="flex items-center mt-2">
                 <label className="text-gray-300 flex items-center">
-                  Agent Data Publicly Downloadable:
+                  Bot Data Publicly Downloadable:
                 </label>
                 <input
                   type="checkbox"
@@ -180,7 +180,7 @@ export default function BotSettingsModal({
               <div className="flex items-center  gap-2  pb-4">
                 <h3 className="text-xl font-bold text-customGreen-light flex">
                   <FolderOpenIcon className="size-5 m-1" />
-                  Agent Zip
+                  Bot Zip
                 </h3>
                 <a
                   href="/wiki/bot-development/getting-started/#wiki-toc-bot-zip"
@@ -200,7 +200,7 @@ export default function BotSettingsModal({
                   className="size-6 mr-2"
                   title="Download ZIP"
                 />
-                Download Agent Zip
+                Download Bot Zip
               </SquareButton>
 
               <UploadFile
@@ -232,7 +232,7 @@ export default function BotSettingsModal({
                 outerClassName="w-full mt-4"
               >
                 <ArrowUpOnSquareIcon className="size-5 mr-1" />
-                Upload Agent Zip
+                Upload Bot Zip
               </SquareButton>
             </div>
 
@@ -241,7 +241,7 @@ export default function BotSettingsModal({
               <div className="flex items-center gap-2  pb-4">
                 <h3 className="text-xl font-bold text-customGreen-light flex">
                   <FolderOpenIcon className="size-5 m-1" />
-                  Agent Data
+                  Bot Data
                 </h3>
                 <a
                   href="/wiki/bot-development/getting-started/#wiki-toc-bot-data"
@@ -263,7 +263,7 @@ export default function BotSettingsModal({
                   className="size-6 mr-1"
                   title="Download Data"
                 />
-                Download Agent Data
+                Download Bot Data
               </SquareButton>
 
               <UploadFile
@@ -294,7 +294,7 @@ export default function BotSettingsModal({
                 outerClassName="w-full mt-4"
               >
                 <ArrowUpOnSquareStackIcon className="size-5 mr-1" />
-                Upload Agent Data
+                Upload Bot Data
               </SquareButton>
             </div>
           </div>

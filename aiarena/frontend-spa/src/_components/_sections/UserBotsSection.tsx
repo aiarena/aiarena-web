@@ -70,7 +70,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
         <div
           className="flex gap-4 ml-auto"
           role="group"
-          aria-label="Agent filtering and sorting controls"
+          aria-label="Bot filtering and sorting controls"
         >
           <Dropdown title={orderBy.display} isLoading={filterLoading}>
             <DropdownButton
@@ -108,23 +108,23 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
             }}
             isLoading={filterLoading}
             value={searchBarValue}
-            placeholder="Search your Agents..."
-            aria-label="Search Agents by name"
+            placeholder="Search your bots..."
+            aria-label="Search bots by name"
           />
 
-          <div role="group" aria-label="Agent actions">
+          <div role="group" aria-label="Bot actions">
             <div className="hidden md:block">
               <MainButton
                 onClick={() => setUploadBotModalOpen(true)}
-                text="Upload Agent"
-                aria-label="Upload a new Agent"
+                text="Upload Bot"
+                aria-label="Upload a new bot"
               />
             </div>
             <div className="block md:hidden">
               <MainButton
                 onClick={() => setUploadBotModalOpen(true)}
                 text="+"
-                aria-label="Upload a new Agent"
+                aria-label="Upload a new bot"
               />
             </div>
           </div>
