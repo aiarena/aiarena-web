@@ -167,7 +167,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           </label>
 
           <label className="flex flex-col gap-1">
-            <span id="opoonent-name" className="font-medium">
+            <span id="opponent-name" className="font-medium">
               Opponent
             </span>
             <BotSearchList
