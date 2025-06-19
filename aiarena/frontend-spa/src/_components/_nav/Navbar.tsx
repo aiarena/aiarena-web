@@ -39,9 +39,9 @@ function Navbar() {
 
   return (
     <>
-      <nav className="w-full  text-white sticky top-0 z-50 border-b bg-neutral-700">
+      <nav className="w-full  text-white sticky top-0 z-50  bg-neutral-700 ">
         <BackgroundTexture>
-          <div className="flex px-2 justify-between md:p-3 md:flex bg-darken-3 md:shadow-sm shadow-black ">
+          <div className="flex px-2 justify-between md:p-3 md:flex bg-darken-3 md:shadow-sm shadow-black border-neutral-700 border-b">
             <a
               href={navLinks[0].path}
               className="flex justify-between items-center"
