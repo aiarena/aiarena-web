@@ -21,24 +21,26 @@ import NoMoreItems from "../../_display/NoMoreItems";
 import { CONNECTION_KEYS } from "../../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 import { useRegisterConnectionID } from "../../_hooks/useRegisterRelayConnectionID";
 import {
-  MatchRequestsTable_viewer$data,
-  MatchRequestsTable_viewer$key,
-} from "./__generated__/MatchRequestsTable_viewer.graphql";
+  UserMatchRequestsTable_viewer$data,
+  UserMatchRequestsTable_viewer$key,
+} from "./__generated__/UserMatchRequestsTable_viewer.graphql";
 
-interface MatchRequestsTableProps {
-  viewer: MatchRequestsTable_viewer$key;
+interface UserMatchRequestsTableProps {
+  viewer: UserMatchRequestsTable_viewer$key;
 }
 
-export default function MatchRequestsTable(props: MatchRequestsTableProps) {
+export default function UserMatchRequestsTable(
+  props: UserMatchRequestsTableProps
+) {
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
-      fragment MatchRequestsTable_viewer on Viewer
+      fragment UserMatchRequestsTable_viewer on Viewer
       @argumentDefinitions(
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
         orderBy: { type: "String" }
       )
-      @refetchable(queryName: "MatchRequestsTablePaginationQuery") {
+      @refetchable(queryName: "UserMatchRequestsTablePaginationQuery") {
         user {
           id
         }
@@ -94,7 +96,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
   type MatchType = NonNullable<
     NonNullable<
       NonNullable<
-        MatchRequestsTable_viewer$data["requestedMatches"]
+        UserMatchRequestsTable_viewer$data["requestedMatches"]
       >["edges"][number]
     >["node"]
   >;

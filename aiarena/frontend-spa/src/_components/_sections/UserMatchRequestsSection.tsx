@@ -1,6 +1,6 @@
 import { graphql, useFragment } from "react-relay";
 import { UserMatchRequestsSection_viewer$key } from "./__generated__/UserMatchRequestsSection_viewer.graphql";
-import MatchRequestsTable from "./UserMatchRequests/MatchRequestsTable";
+import UserMatchRequestsTable from "./UserMatchRequests/UserMatchRequestsTable";
 import UserMatchRequestsHeaderSection from "./UserMatchRequests/UserMatchRequestsHeaderSection";
 
 interface UserMatchRequestsSectionProps {
@@ -15,7 +15,7 @@ export default function UserMatchRequestsSection(
       fragment UserMatchRequestsSection_viewer on Viewer
       @argumentDefinitions(orderBy: { type: "String" }) {
         ...UserMatchRequestsHeaderSection_viewer
-        ...MatchRequestsTable_viewer @arguments(orderBy: $orderBy)
+        ...UserMatchRequestsTable_viewer @arguments(orderBy: $orderBy)
       }
     `,
     props.viewer
@@ -34,7 +34,7 @@ export default function UserMatchRequestsSection(
           Match Requests Table
         </h3>
 
-        <MatchRequestsTable viewer={viewer} />
+        <UserMatchRequestsTable viewer={viewer} />
       </div>
     </section>
   );

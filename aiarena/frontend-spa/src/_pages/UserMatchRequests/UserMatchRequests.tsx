@@ -1,6 +1,7 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
-import RequestMatchSection from "@/_components/_sections/UserMatchRequestsSection";
+
 import { UserMatchRequestsQuery } from "./__generated__/UserMatchRequestsQuery.graphql";
+import UserMatchRequestsSection from "@/_components/_sections/UserMatchRequestsSection";
 
 export default function UserMatchRequests() {
   const data = useLazyLoadQuery<UserMatchRequestsQuery>(
@@ -23,7 +24,7 @@ export default function UserMatchRequests() {
 
   return (
     <>
-      <RequestMatchSection viewer={data.viewer} />
+      <UserMatchRequestsSection viewer={data.viewer} />
     </>
   );
 }
