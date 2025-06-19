@@ -151,7 +151,7 @@ export default function UserMatchRequestsTable(
           return withAtag(
             participant1?.name || "",
             `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`,
-            `View bot profile for ${participant1?.name}, Agent 1`,
+            `View bot profile for ${participant1?.name}, Bot`,
             display_value
           );
         },
@@ -171,7 +171,7 @@ export default function UserMatchRequestsTable(
           return withAtag(
             participant2?.name || "",
             `/bots/${getIDFromBase64(participant2?.id, "BotType")}`,
-            `View bot profile for ${participant2?.name}, Agent 2`,
+            `View bot profile for ${participant2?.name}, Opponent`,
             display_value
           );
         },
@@ -196,7 +196,7 @@ export default function UserMatchRequestsTable(
         },
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.started ?? "A", {
+      columnHelper.accessor((row) => row.started ?? "", {
         id: "started",
         header: "Started",
         cell: (info) => {
@@ -206,7 +206,7 @@ export default function UserMatchRequestsTable(
         meta: { priority: 1 },
       }),
 
-      columnHelper.accessor((row) => row.result?.type || "A", {
+      columnHelper.accessor((row) => row.result?.type || "", {
         id: "result",
         header: "Result",
         cell: (info) => {

@@ -62,7 +62,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
   const [botDataEnabled, setBotDataEnabled] = useState(false);
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "uploadBot",
-    "Agent Uploaded Successfully!"
+    "Bot Uploaded Successfully!"
   );
 
   const [uploadBot, updating] = useMutation<UploadBotModalMutation>(graphql`
