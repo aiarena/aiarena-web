@@ -11,6 +11,7 @@ import Modal from "@/_components/_actions/Modal";
 import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
+import { useEffect } from "react";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
@@ -68,7 +69,7 @@ export default function JoinCompetitionModal({
       {}
     );
 
-  const [updateCompetitionparticipation] =
+  const [updateCompetitionparticipation, updating] =
     useMutation<JoinCompetitionModalMutation>(graphql`
       mutation JoinCompetitionModalMutation(
         $input: UpdateCompetitionParticipationInput!
@@ -125,6 +126,10 @@ export default function JoinCompetitionModal({
     });
   };
 
+  useEffect(() => {
+    console.log(updating);
+  }, [updating]);
+
   return (
     <Modal
       onClose={onClose}
@@ -153,6 +158,7 @@ export default function JoinCompetitionModal({
               <SimpleToggle
                 enabled={hasActiveCompetitionParticipation(comp.id)}
                 onChange={() => handleToggleCompetitionParticipation(comp.id)}
+                disabled={updating}
               />
             </div>
           ))}
