@@ -92,8 +92,8 @@ export default function JoinCompetitionModal({
     "Bot Participation Updated!"
   );
 
-  const openCompetitions = getNodes(competition_data.competitions).filter(
-    (comp) => comp.status == "OPEN"
+  const joinableCompetitions = getNodes(competition_data.competitions).filter(
+    (comp) => comp.status != "CLOSING" && comp.status != "CLOSED"
   );
 
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
@@ -132,9 +132,9 @@ export default function JoinCompetitionModal({
       title={`Edit Competitions - ${bot.name}`}
     >
       <div className="space-y-4">
-        {openCompetitions &&
-          openCompetitions.length > 0 &&
-          openCompetitions.map((comp) => (
+        {joinableCompetitions &&
+          joinableCompetitions.length > 0 &&
+          joinableCompetitions.map((comp) => (
             <div
               className="flex items-center space-x-2 border border-neutral-600 shadow-lg shadow-black rounded-md p-3 justify-between bg-darken-4"
               key={comp.id}
@@ -147,6 +147,7 @@ export default function JoinCompetitionModal({
                   >
                     {comp.name}
                   </a>
+                  <p>{comp.status}</p>
                 </div>
               </div>
               <SimpleToggle

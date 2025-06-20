@@ -23,7 +23,7 @@ export default function WatchYourGamesButton({
   const handleRedirect = (path: string) => {
     try {
       if (/^https?:\/\//.test(path)) {
-        window.open(path, "_blank", "noopener,noreferrer");
+        window.open(path, "_blank");
       } else {
         navigate(path);
       }
