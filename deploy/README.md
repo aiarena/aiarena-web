@@ -22,7 +22,7 @@
 We're running the application code inside of Fargate containers, so to deploy a new version to prod, we need to build a new Docker image, and then update the Fargate containers to use it.
 
 Here's how the deployment process works:
-1. Chagnes are pushed to the `main` branch
+1. Changes are pushed to the `main` branch
 2. GitHub Actions starts running tests/linters and in parallel runs `run.py prepare-images`, which builds an image and pushes it to Elastic Container Registry with a tag like `build-111-amd64`
 3. If all tests/linters passed, `run.py ecs` runs next:
    1. It makes a `latest` alias to the image that we built earlier
