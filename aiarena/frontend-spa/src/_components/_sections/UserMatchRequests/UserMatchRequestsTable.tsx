@@ -280,7 +280,7 @@ export default function UserMatchRequestsTable(
           <TableContainer table={table} loading={isPending} />
         ) : (
           <NoItemsInListMessage>
-            <p>Looks like you don&rsquo;t have any match requests yet.</p>
+            <p>Request your first match, and it will show up here.</p>
           </NoItemsInListMessage>
         )}
       </Suspense>

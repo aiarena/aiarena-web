@@ -12,6 +12,7 @@ import { CONNECTION_KEYS } from "../../_contexts/RelayConnectionIDContext/RelayC
 import { startTransition } from "react";
 import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
+import { socialLinks } from "@/_data/socialLinks";
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;
@@ -88,7 +89,22 @@ export default function UserBotsList(props: UserBotsListProps) {
         </ul>
       ) : (
         <NoItemsInListMessage>
-          <p>Looks like you don&rsquo;t have any bots yet.</p>
+          {/* <p>Looks like you don&rsquo;t have any bots yet.</p> */}
+          <p>
+            Upload your first bot, and it will show up here. <br />
+            Visit our{" "}
+            <a href={socialLinks["discord"]} target="_blank">
+              Discord
+            </a>{" "}
+            or our{" "}
+            <a
+              href={"https://aiarena.net/wiki/bot-development/getting-started/"}
+              target="_blank"
+            >
+              wiki
+            </a>{" "}
+            to get tips on how to get started.
+          </p>
         </NoItemsInListMessage>
       )}
       {hasNext ? (
