@@ -36,5 +36,5 @@ export default function GetGameOfInterest() {
     possibleMatches[0]?.id &&
     getIDFromBase64(possibleMatches[0].id, "MatchType");
 
-  return <>{`!queue ${matchSuggestion ? matchSuggestion : "match_id"}`}</>;
+  return <>{`!queue ${matchSuggestion ? matchSuggestion : "<match_id>"}`}</>;
 }
