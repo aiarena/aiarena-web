@@ -11,6 +11,7 @@ import { useRegisterConnectionID } from "../../_hooks/useRegisterRelayConnection
 import { CONNECTION_KEYS } from "../../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 import { startTransition } from "react";
 import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
+import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;
@@ -69,29 +70,36 @@ export default function UserBotsList(props: UserBotsListProps) {
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(20), hasNext);
+  const bots = getNodes(userData?.bots);
+  const hasItems = bots.length > 0;
 
   return (
     <div role="region" aria-labelledby="bots-list-heading" aria-live="polite">
       <h2 id="bots-list-heading" className="sr-only">
         Your Agents List
       </h2>
-
-      <ul className="space-y-12">
-        {getNodes(userData?.bots).map((bot) => (
-          <li key={bot.id} id={bot.id} role="listitem">
-            <UserBot bot={bot} />
-          </li>
-        ))}
-      </ul>
+      {hasItems ? (
+        <ul className="space-y-12">
+          {bots.map((bot) => (
+            <li key={bot.id} id={bot.id} role="listitem">
+              <UserBot bot={bot} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <NoItemsInListMessage>
+          <p>Looks like you don&rsquo;t have any bots yet.</p>
+        </NoItemsInListMessage>
+      )}
       {hasNext ? (
         <div className="flex justify-center mt-6" ref={loadMoreRef}>
           <LoadingMoreItems loadingMessage="Loading more bots..." />
         </div>
-      ) : (
+      ) : !hasNext && hasItems ? (
         <div className="mt-8">
           <NoMoreItems />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

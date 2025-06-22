@@ -24,6 +24,7 @@ import {
   UserMatchRequestsTable_viewer$data,
   UserMatchRequestsTable_viewer$key,
 } from "./__generated__/UserMatchRequestsTable_viewer.graphql";
+import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 
 interface UserMatchRequestsTableProps {
   viewer: UserMatchRequestsTable_viewer$key;
@@ -258,6 +259,8 @@ export default function UserMatchRequestsTable(
     onSortingChange: setSorting,
   });
 
+  const hasItems = matchData.length > 0;
+
   return (
     <div>
       <div className="mb-4 flex flex-wrap gap-4 text-white">
@@ -273,18 +276,24 @@ export default function UserMatchRequestsTable(
       </div>
 
       <Suspense fallback={<LoadingDots />}>
-        <TableContainer table={table} loading={isPending} />
+        {hasItems ? (
+          <TableContainer table={table} loading={isPending} />
+        ) : (
+          <NoItemsInListMessage>
+            <p>Looks like you don&rsquo;t have any match requests yet.</p>
+          </NoItemsInListMessage>
+        )}
       </Suspense>
 
       {hasNext ? (
         <div className="flex justify-center mt-6" ref={loadMoreRef}>
           <LoadingMoreItems loadingMessage="Loading more match requests..." />
         </div>
-      ) : (
+      ) : !hasNext && hasItems ? (
         <div className="mt-8">
           <NoMoreItems />
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
