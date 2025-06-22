@@ -10,6 +10,11 @@ class BotAlreadyInMatchException(AIArenaException):
     pass
 
 
+class BotUploadsDisabled(AIArenaException):
+    def __init__(self):
+        super().__init__("Bot uploads are currently disabled.")
+
+
 class CompetitionPaused(AIArenaException):
     def __init__(self):
         super().__init__("This competition is paused.")
