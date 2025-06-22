@@ -27,6 +27,9 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
 
         user {
           ...UserBotsList_user
+          bots(first: 20) {
+            totalCount
+          }
         }
       }
     `,
@@ -72,46 +75,50 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           role="group"
           aria-label="Bot filtering and sorting controls"
         >
-          <Dropdown title={orderBy.display} isLoading={filterLoading}>
-            <DropdownButton
-              onClick={() =>
-                setOrderBy({
-                  display: "Active Participations",
-                  value: "-total_active_competition_participations",
-                })
-              }
-              title={"Active Participations"}
-            />
+          {viewer.user?.bots?.totalCount &&
+          viewer.user?.bots?.totalCount >= 3 ? (
+            <>
+              <Dropdown title={orderBy.display} isLoading={filterLoading}>
+                <DropdownButton
+                  onClick={() =>
+                    setOrderBy({
+                      display: "Active Participations",
+                      value: "-total_active_competition_participations",
+                    })
+                  }
+                  title={"Active Participations"}
+                />
 
-            <DropdownButton
-              onClick={() =>
-                setOrderBy({
-                  display: "Last Zip Updated",
-                  value: "-bot_zip_updated",
-                })
-              }
-              title={"Last Zip Updated"}
-            />
-            <DropdownButton
-              onClick={() =>
-                setOrderBy({
-                  display: "First Created",
-                  value: "created",
-                })
-              }
-              title={"First Created"}
-            />
-          </Dropdown>
-          <Searchbar
-            onChange={(e) => {
-              setSearchBarValue(e.target.value);
-            }}
-            isLoading={filterLoading}
-            value={searchBarValue}
-            placeholder="Search your bots..."
-            aria-label="Search bots by name"
-          />
-
+                <DropdownButton
+                  onClick={() =>
+                    setOrderBy({
+                      display: "Last Zip Updated",
+                      value: "-bot_zip_updated",
+                    })
+                  }
+                  title={"Last Zip Updated"}
+                />
+                <DropdownButton
+                  onClick={() =>
+                    setOrderBy({
+                      display: "First Created",
+                      value: "created",
+                    })
+                  }
+                  title={"First Created"}
+                />
+              </Dropdown>
+              <Searchbar
+                onChange={(e) => {
+                  setSearchBarValue(e.target.value);
+                }}
+                isLoading={filterLoading}
+                value={searchBarValue}
+                placeholder="Search your bots..."
+                aria-label="Search bots by name"
+              />
+            </>
+          ) : null}
           <div role="group" aria-label="Bot actions">
             <div className="hidden md:block">
               <MainButton

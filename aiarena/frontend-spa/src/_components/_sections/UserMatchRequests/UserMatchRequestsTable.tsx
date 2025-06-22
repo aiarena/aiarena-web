@@ -264,15 +264,17 @@ export default function UserMatchRequestsTable(
   return (
     <div>
       <div className="mb-4 flex flex-wrap gap-4 text-white">
-        <label key={"set_my_tags"} className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={onlyMyTags}
-            onChange={() => setOnlyMyTags(!onlyMyTags)}
-            className="accent-customGreen"
-          />
-          <span>Hide Tags by other authors</span>
-        </label>
+        {hasItems ? (
+          <label key={"set_my_tags"} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={onlyMyTags}
+              onChange={() => setOnlyMyTags(!onlyMyTags)}
+              className="accent-customGreen"
+            />
+            <span>Hide Tags by other authors</span>
+          </label>
+        ) : null}
       </div>
 
       <Suspense fallback={<LoadingDots />}>
