@@ -16,3 +16,20 @@ class Users:
             user
         ) - Users.get_total_active_competition_participations(user)
         return available_count
+
+    @staticmethod
+    def ban_user(user: User) -> int:
+        """
+        Deactivate the user and disable all their bots' competition participations.
+        Returns the number of participations disabled.
+        """
+        from aiarena.core.models import Bot
+        from aiarena.core.services import Competitions
+
+        user.is_active = False
+        user.save()
+        total_banned = 0
+        bots = Bot.objects.filter(user=user)
+        for bot in bots:
+            total_banned += Competitions.disable_bot_for_all_competitions(bot)
+        return total_banned

@@ -625,3 +625,18 @@ class WebsiteUserAdmin(admin.ModelAdmin):
         "receive_email_comms",
     )
     raw_id_fields = ("groups", "user_permissions")
+    actions = ["ban_users"]
+
+    def ban_users(self, request, queryset):
+        from aiarena.core.services.users import Users
+
+        total_banned = 0
+        for user in queryset:
+            total_banned += Users.ban_user(user)
+        self.message_user(
+            request,
+            f"Banned {queryset.count()} user(s) and disabled {total_banned} bot participations.",
+            messages.SUCCESS,
+        )
+
+    ban_users.short_description = "Ban selected users (deactivate and disable all their bot participations)"
