@@ -21,7 +21,10 @@ const SupportersComponent: React.FC = () => {
         going.
       </p>
       <div className="flex justify-center">
-        <Link to="https://docs.google.com/spreadsheets/d/1wm_oZYPZv6t8urGtOCJ1yFtYjq-9WBixJQqaXQ7kiNc/edit?gid=1303247903#gid=1303247903">
+        <Link
+          to="https://docs.google.com/spreadsheets/d/1wm_oZYPZv6t8urGtOCJ1yFtYjq-9WBixJQqaXQ7kiNc/edit?gid=1303247903#gid=1303247903"
+          target="_blank"
+        >
           <div className="flex items-center">
             <img
               alt="Excel-Icon"

@@ -1,4 +1,5 @@
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import { socialLinks } from "./socialLinks";
 
 export interface FooterLink {
   icon: string;
@@ -27,31 +28,31 @@ export const footerLinks: FooterLinks = {
     {
       icon: `${getPublicPrefix()}/social_icons/discord-icon.svg`,
       name: "Discord",
-      href: "https://discord.com/invite/Emm5Ztz",
+      href: socialLinks["discord"],
       invertIcon: false,
     },
     {
       icon: `${getPublicPrefix()}/social_icons/patreon-icon.svg`,
       name: "Patreon",
-      href: "https://www.patreon.com/aiarena",
+      href: socialLinks["patreon"],
       invertIcon: true,
     },
     {
       icon: `${getPublicPrefix()}/social_icons/github-icon.svg`,
       name: "GitHub",
-      href: "https://github.com/aiarena",
+      href: socialLinks["github"],
       invertIcon: true,
     },
     {
       icon: `${getPublicPrefix()}/social_icons/twitch-tile.svg`,
       name: "Twitch",
-      href: "https://www.twitch.tv/aiarenastream",
+      href: socialLinks["twitch"],
       invertIcon: false,
     },
     {
       icon: `${getPublicPrefix()}/social_icons/youtube-icon.svg`,
       name: "Youtube",
-      href: "https://www.youtube.com/channel/UCMlH43XHsq1TacKm5n4Wbiw",
+      href: socialLinks["youtube"],
       invertIcon: false,
     },
   ],

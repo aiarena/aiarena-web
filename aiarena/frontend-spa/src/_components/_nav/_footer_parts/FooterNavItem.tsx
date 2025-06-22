@@ -18,7 +18,7 @@ const FooterNavItem: React.FC<FooterNavItemProps> = ({
   return (
     <li>
       <div className="flex">
-        <Link to={href} className="hover:underline">
+        <Link to={href} className="hover:underline" target="_blank">
           <div className="flex">
             <img
               src={icon}

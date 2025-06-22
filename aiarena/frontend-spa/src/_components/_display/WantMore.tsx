@@ -1,3 +1,5 @@
+import { socialLinks } from "@/_data/socialLinks";
+
 export default function WantMore() {
   return (
     <p>
@@ -6,7 +8,7 @@ export default function WantMore() {
         <a
           className="cursor-pointer"
           target="_blank"
-          href={"https://www.patreon.com/aiarena"}
+          href={socialLinks["patreon"]}
         >
           supporting us
         </a>
