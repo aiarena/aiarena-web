@@ -33,7 +33,7 @@ from aiarena.core.models import (
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
-from aiarena.core.services import Matches
+from aiarena.core.services import Competitions, Matches
 from aiarena.patreon.models import PatreonAccountBind, PatreonUnlinkedDiscordUID
 
 
@@ -155,13 +155,9 @@ class BotAdmin(admin.ModelAdmin):
     actions = ["disable_active_participations"]
 
     def disable_active_participations(self, request, queryset):
-        from aiarena.core.models import CompetitionParticipation
-
         count = 0
         for bot in queryset:
-            participations = CompetitionParticipation.objects.filter(bot=bot, active=True)
-            updated = participations.update(active=False)
-            count += updated
+            count += Competitions.disable_bot_for_all_competitions(bot)
         self.message_user(
             request, f"Disabled {count} active competition participations for selected bot(s).", messages.SUCCESS
         )

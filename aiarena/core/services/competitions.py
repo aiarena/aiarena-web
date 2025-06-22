@@ -44,3 +44,10 @@ class Competitions:
         for _, bot_type in Bot.TYPES:
             type_to_participant_count.setdefault(bot_type, 0)
         return type_to_participant_count
+
+    @staticmethod
+    def disable_bot_for_all_competitions(bot) -> int:
+        """Disables a bot for all its active competition participations."""
+        participations = CompetitionParticipation.objects.filter(bot=bot, active=True)
+        updated = participations.update(active=False)
+        return updated
