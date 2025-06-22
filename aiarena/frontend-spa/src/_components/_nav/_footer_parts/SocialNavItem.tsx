@@ -2,7 +2,6 @@ import React from "react";
 import FooterNavItem from "./FooterNavItem";
 import { FooterLink } from "@/_data/footerLinks";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
-// import WrappedTitle from "@/_components/_display/WrappedTitle";
 
 interface SocialComponentProps {
   links: FooterLink[];
@@ -15,7 +14,7 @@ const SocialComponent: React.FC<SocialComponentProps> = ({ links }) => {
       <ul className="space-y-2 flex flex-col items-center">
         {links.map((link) => (
           <FooterNavItem
-            key={link.href}
+            key={"footer_social_" + link.name}
             href={link.href}
             name={link.name}
             icon={link.icon}
