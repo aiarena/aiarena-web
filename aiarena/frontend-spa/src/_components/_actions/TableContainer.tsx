@@ -17,6 +17,10 @@ export function TableContainer<T>({
 }: TableContainerProps<T>) {
   const allColumns = table.getAllLeafColumns();
 
+  const visibleColumnCount = allColumns.filter((column) =>
+    column.getIsVisible()
+  ).length;
+
   return (
     <div className={clsx(className)}>
       {/* Column toggles */}
@@ -26,7 +30,11 @@ export function TableContainer<T>({
             <input
               type="checkbox"
               checked={column.getIsVisible()}
-              onChange={column.getToggleVisibilityHandler()}
+              onChange={
+                visibleColumnCount == 1 && column.getIsVisible() == true
+                  ? undefined
+                  : column.getToggleVisibilityHandler()
+              }
               disabled={!column.getCanHide()}
               className="accent-customGreen"
             />
