@@ -20,6 +20,11 @@ class CompetitionClosing(AIArenaException):
         super().__init__("This competition is closing.")
 
 
+class CompetitionClosed(AIArenaException):
+    def __init__(self):
+        super().__init__("This competition is closed.")
+
+
 class NoMaps(AIArenaException):
     def __init__(self):
         super().__init__("There are no active maps available for a match.")
