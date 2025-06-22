@@ -152,6 +152,23 @@ class BotAdmin(admin.ModelAdmin):
         "wiki_article",
     )
     list_select_related = ["user", "plays_race"]
+    actions = ["disable_active_participations"]
+
+    def disable_active_participations(self, request, queryset):
+        from aiarena.core.models import CompetitionParticipation
+
+        count = 0
+        for bot in queryset:
+            participations = CompetitionParticipation.objects.filter(bot=bot, active=True)
+            updated = participations.update(active=False)
+            count += updated
+        self.message_user(
+            request, f"Disabled {count} active competition participations for selected bot(s).", messages.SUCCESS
+        )
+
+    disable_active_participations.short_description = (
+        "Disable all active competition participations for selected bot(s)"
+    )
 
 
 @admin.register(BotCrashLimitAlert)
