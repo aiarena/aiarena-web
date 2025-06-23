@@ -91,7 +91,7 @@ export default function UserBotsList(props: UserBotsListProps) {
         <NoItemsInListMessage>
           {/* <p>Looks like you don&rsquo;t have any bots yet.</p> */}
           <p>
-            Upload your first bot, and it will show up here. <br />
+            Your bots will appear here once you've uploaded them. <br />
             Visit our{" "}
             <a href={socialLinks["discord"]} target="_blank">
               Discord
