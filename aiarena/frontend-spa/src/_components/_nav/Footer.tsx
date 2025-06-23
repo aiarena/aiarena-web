@@ -19,9 +19,6 @@ const Footer: React.FC = () => {
       {getFeatureFlags().examples && (
         <SquareButton href="examples" text="UI Examples" />
       )}
-      <footer className="p-1 bg-[linear-gradient(120deg,rgba(134,194,50,1)_0%,rgba(94,140,30,1)_50%)] text-center">
-        © {new Date().getFullYear()} AI Arena. All rights reserved.
-      </footer>
     </footer>
   );
 };
