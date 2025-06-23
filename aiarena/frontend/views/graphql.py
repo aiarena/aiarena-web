@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from graphene_file_upload.django import FileUploadGraphQLView
 from graphql import GraphQLError
@@ -12,6 +13,7 @@ class CustomGraphQLView(FileUploadGraphQLView):
 
     whitelisted_errors = [
         AIArenaException,
+        ValidationError,
         GraphQLError,
     ]
 
