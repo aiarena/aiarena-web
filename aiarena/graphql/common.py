@@ -260,5 +260,5 @@ def parse_deep_errors(e):
     return [str(e)]
 
 
-def raise_graphql_error_from_exception(e):
-    raise GraphQLError("; ".join(parse_deep_errors(e)))
+def join_deep_errors_to_string(e):
+    return "; ".join(parse_deep_errors(e))

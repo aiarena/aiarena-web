@@ -113,7 +113,11 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=['Error processing bot2: Unable to parse global ID "999".'],
+            expected_validation_errors={
+                "bot2": [
+                    "Bot2 with ID: '999' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+                ]
+            },
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -148,7 +152,11 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=['Error processing bot1: Unable to parse global ID "999".'],
+            expected_validation_errors={
+                "bot1": [
+                    "Bot1 with ID: '999' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+                ]
+            },
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -183,7 +191,7 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=["'mapSelectionType' must be set to 'specific_map' or 'map_pool'."],
+            expected_validation_errors={"__all__": ["'mapSelectionType' must be set to 'specific_map' or 'map_pool'."]},
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -200,7 +208,10 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=["'mapSelectionType' must be set to 'specific_map' or 'map_pool'."],
+            expected_validation_errors={
+                "mapSelectionType": ["Required field"],
+                "__all__": ["'mapSelectionType' must be set to 'specific_map' or 'map_pool'."],
+            },
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -218,7 +229,7 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=["Error requesting match: That number of matches exceeds your match request limit."],
+            expected_errors_like=["That number of matches exceeds your match request limit."],
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -253,7 +264,11 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": 999,
                 }
             },
-            expected_errors_like=['Error processing mapPool: Unable to parse global ID "999".'],
+            expected_validation_errors={
+                "mapPool": [
+                    "Map pool with ID: '999' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+                ]
+            },
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -270,7 +285,7 @@ class TestRequestMatch(GraphQLTest):
                     "bot2": self.to_global_id(BotType, other_bot.id),
                 }
             },
-            expected_errors_like=["Either 'mapPool' or 'chosenMap' must be provided."],
+            expected_validation_errors={"__all__": ["Either 'mapPool' or 'chosenMap' must be provided."]},
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -439,7 +454,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
             },
             expected_validation_errors={
                 "bot": [
-                    'Unable to parse global ID "Abracadabra". Make sure it is a base64 encoded string in the format: "TypeName:id". Exception message: Invalid Global ID'
+                    "Bot with ID: 'Abracadabra' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
                 ]
             },
         )
@@ -460,7 +475,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
             },
             expected_validation_errors={
                 "competition": [
-                    'Unable to parse global ID "Abracadabra". Make sure it is a base64 encoded string in the format: "TypeName:id". Exception message: Invalid Global ID'
+                    "Competition with ID: 'Abracadabra' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
                 ]
             },
         )

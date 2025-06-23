@@ -7,6 +7,7 @@ from graphene_django.types import ErrorType
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from aiarena.core.exceptions import BotUploadsDisabled, CompetitionClosed, CompetitionClosing, MatchRequestException
 from aiarena.core.models.bot import Bot
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.competition import Competition
@@ -17,8 +18,8 @@ from aiarena.core.services.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import (
     CleanedInputMutation,
     CleanedInputType,
+    join_deep_errors_to_string,
     raise_for_access,
-    raise_graphql_error_from_exception,
 )
 from aiarena.graphql.types import (
     BotType,
@@ -48,44 +49,52 @@ class RequestMatchInput(CleanedInputType):
 
     def clean(self, info):
         if not self.map_pool and not self.chosen_map:
-            raise GraphQLError("Either 'mapPool' or 'chosenMap' must be provided.")
+            raise ValidationError("Either 'mapPool' or 'chosenMap' must be provided.")
 
         if self.map_selection_type != "specific_map" and self.map_selection_type != "map_pool":
-            raise GraphQLError("'mapSelectionType' must be set to 'specific_map' or 'map_pool'.")
+            raise ValidationError("'mapSelectionType' must be set to 'specific_map' or 'map_pool'.")
 
         if self.map_selection_type == "specific_map" and not self.chosen_map:
-            raise GraphQLError("If 'mapSelectionType' is set to 'specific_map', a 'chosenMap' must be provided.")
+            raise ValidationError("If 'mapSelectionType' is set to 'specific_map', a 'chosenMap' must be provided.")
 
         if self.map_selection_type == "map_pool" and not self.map_pool:
-            raise GraphQLError("If 'mapSelectionType' is set to 'map_pool', a 'mapPool' must be provided.")
+            raise ValidationError("If 'mapSelectionType' is set to 'map_pool', a 'mapPool' must be provided.")
 
     @staticmethod
     def clean_bot1(bot, info):
         try:
             return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
-        except Exception as e:
-            raise GraphQLError(f"Error processing bot1: {str(e)}")
+        except Exception:
+            raise ValidationError(
+                f"Bot1 with ID: '{bot}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+            )
 
     @staticmethod
     def clean_bot2(bot, info):
         try:
             return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
-        except Exception as e:
-            raise GraphQLError(f"Error processing bot2: {str(e)}")
+        except Exception:
+            raise ValidationError(
+                f"Bot2 with ID: '{bot}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+            )
 
     @staticmethod
     def clean_map_pool(map_pool, info):
         try:
             return graphene.Node.get_node_from_global_id(info=info, global_id=map_pool, only_type=MapPoolType)
-        except Exception as e:
-            raise GraphQLError(f"Error processing mapPool: {str(e)}")
+        except Exception:
+            raise ValidationError(
+                f"Map pool with ID: '{map_pool}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+            )
 
     @staticmethod
     def clean_chosen_map(map, info):
         try:
             return graphene.Node.get_node_from_global_id(info=info, global_id=map, only_type=MapType)
-        except Exception as e:
-            raise GraphQLError(f"Error processing chosenMap: {str(e)}")
+        except Exception:
+            raise ValidationError(
+                f"Map with ID: '{map}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+            )
 
 
 class RequestMatch(CleanedInputMutation):
@@ -114,8 +123,8 @@ class RequestMatch(CleanedInputMutation):
 
             return cls(errors=[], match=matches)
 
-        except Exception as e:
-            raise GraphQLError(f"Error requesting match: {str(e)}")
+        except MatchRequestException as e:
+            raise MatchRequestException(join_deep_errors_to_string(e))
 
 
 class UpdateCompetitionParticipationInput(CleanedInputType):
@@ -130,8 +139,10 @@ class UpdateCompetitionParticipationInput(CleanedInputType):
     def clean_bot(bot, info):
         try:
             return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
-        except Exception as e:
-            raise ValidationError(e)
+        except Exception:
+            raise ValidationError(
+                f"Bot with ID: '{bot}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+            )
 
     @staticmethod
     def clean_competition(competition, info):
@@ -139,11 +150,17 @@ class UpdateCompetitionParticipationInput(CleanedInputType):
             competition: Competition = graphene.Node.get_node_from_global_id(
                 info=info, global_id=competition, only_type=CompetitionType
             )
-        except Exception as e:
-            raise ValidationError(e)
+        except Exception:
+            raise ValidationError(
+                f"Competition with ID: '{competition}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
+            )
 
-        if competition.status in ["closing", "closed"]:
-            raise GraphQLError("This competition is closed.")
+        if competition.status in ["closing"]:
+            raise CompetitionClosing
+
+        if competition.status in ["closed"]:
+            raise CompetitionClosed
+
         return competition
 
 
@@ -178,7 +195,7 @@ class UpdateCompetitionParticipation(CleanedInputMutation):
             return competition_participation
 
         except ValidationError as e:
-            raise_graphql_error_from_exception(e)
+            raise ValidationError(join_deep_errors_to_string(e))
 
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateCompetitionParticipationInput):
@@ -255,7 +272,7 @@ class UploadBot(CleanedInputMutation):
             bot.full_clean()
             bot.save()
         except ValidationError as e:
-            raise_graphql_error_from_exception(e)
+            raise ValidationError(join_deep_errors_to_string(e))
 
         return cls(errors=[], bot=bot)
 
@@ -285,7 +302,7 @@ class UpdateBot(CleanedInputMutation):
         raise_for_access(info, bot)
 
         if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):
-            raise Exception("Bot uploads are currently disabled.")
+            raise BotUploadsDisabled
 
         for attr, value in input_object.items():
             if attr in ["id", "wiki_article"]:
@@ -299,7 +316,7 @@ class UpdateBot(CleanedInputMutation):
             bot.save()
 
         except ValidationError as e:
-            raise_graphql_error_from_exception(e)
+            raise ValidationError(join_deep_errors_to_string(e))
 
         return cls(errors=[], bot=bot)
 
