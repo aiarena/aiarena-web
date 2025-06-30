@@ -432,7 +432,7 @@ REGISTRATION_FORM = "aiarena.frontend.forms.WebsiteUserRegistrationForm"
 DEFAULT_FROM_EMAIL = "noreply@localhost"
 
 # Save emails to file by default. This will be overridden in production.
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_FILE_PATH = "./tmp/emails"
 
 # Redirect to index page on login/logout
