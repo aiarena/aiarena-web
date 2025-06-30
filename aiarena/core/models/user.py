@@ -71,6 +71,11 @@ class User(AbstractUser, LockableModelMixin):
         return self.patreon_level != "none"
 
     @property
+    def can_access_dashboard(self):
+        by_group = self.groups.filter(name="dashboard_access").exists()
+        return self.is_superuser or by_group
+
+    @property
     def is_supporter(self):
         """
         In future this will include logic for determining general support - not just financial.

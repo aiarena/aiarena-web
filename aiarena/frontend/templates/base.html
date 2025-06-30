@@ -32,11 +32,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
             integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A=="
             crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js" 
-            integrity="sha512-gmyeCEegfMr1N1AnZecY87g+wGiL75VmB+Ne1vCVODuTnSO64BYO5vjR/M295zttO7CVfvf4R0E00To9VhIryA==" 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"
+            integrity="sha512-gmyeCEegfMr1N1AnZecY87g+wGiL75VmB+Ne1vCVODuTnSO64BYO5vjR/M295zttO7CVfvf4R0E00To9VhIryA=="
             crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0" 
-            integrity="sha512-R/QOHLpV1Ggq22vfDAWYOaMd5RopHrJNMxi8/lJu8Oihwi4Ho4BRFeiMiCefn9rasajKjnx9/fTQ/xkWnkDACg==" 
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"
+            integrity="sha512-R/QOHLpV1Ggq22vfDAWYOaMd5RopHrJNMxi8/lJu8Oihwi4Ho4BRFeiMiCefn9rasajKjnx9/fTQ/xkWnkDACg=="
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.30.1"
             integrity="sha512-9XUPaxPgKYUymYfFkLG3sWAry0PbqgRAYiRPU7Ymj4TSUjjCzOhMFZAKJGh4FRg0VFNNTOLP6e3Fr66jgkFyyw=="
@@ -44,9 +44,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@%5E1"
             integrity="sha512-hVy4KxCKgnXi2ok7rlnlPma4JHXI1VPQeempoaclV1GwRHrDeaiuS1pI6DVldaj5oh6Opy2XJ2CTljQLPkaMrQ=="
             crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js" 
-            integrity="sha512-Hn1w6YiiFw6p6S2lXv6yKeqTk0PLVzeCwWY9n32beuPjQ5HLcvz5l2QsP+KilEr1ws37rCTw3bZpvfvVIeTh0Q==" 
-            crossorigin="anonymous"></script>          
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"
+            integrity="sha512-Hn1w6YiiFw6p6S2lXv6yKeqTk0PLVzeCwWY9n32beuPjQ5HLcvz5l2QsP+KilEr1ws37rCTw3bZpvfvVIeTh0Q=="
+            crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.css"
           integrity="sha512-p209YNS54RKxuGVBVhL+pZPTioVDcYPZPYYlKWS9qVvQwrlzxBxkR8/48SCP58ieEuBosYiPUS970ixAfI/w/A=="
           crossorigin="anonymous"/>
@@ -67,9 +67,9 @@
 
 <body>
 <div id="page">
-    
+
     <div id="header">
-        
+
         {% if public_banner_message or logged_in_banner_message and user.is_authenticated %}
             <div id="banner-message">
                 <div id="banner-message-content">
@@ -132,7 +132,7 @@
                             <li><a href="{% url 'password_change' %}">{% trans "Change password" %}</a></li>
                             <li><a href="{% url 'logout' %}">{% trans "Log out" %}</a></li>
                             <br />
-                            {% if user.is_superuser %}
+                            {% if user.can_access_dashboard %}
                                 <a id="dashboard-button" href="{% url 'dashboard' %}">⭐ Dashboard ⭐</a>
                             {% endif %}
                         {% else %}
