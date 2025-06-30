@@ -96,7 +96,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
             </label>
           )}
           <SquareButton
-            text="Edit Competitions"
+            text="Edit Participations"
             onClick={() => setJoinCompetitionModalOpen(true)}
             isLoading={isJoinCompetitionModalLoading}
             textColor="dim"

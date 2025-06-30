@@ -83,7 +83,7 @@ export default function BotSettingsModal({
 
   return (
     <>
-      <Modal onClose={onClose} isOpen={isOpen} title={`Settings - ${bot.name}`}>
+      <Modal onClose={onClose} isOpen={isOpen} title={`Edit - ${bot.name}`}>
         <div className="space-y-4">
           <WideButton
             onClick={() => setBiographyModalOpen(true)}
