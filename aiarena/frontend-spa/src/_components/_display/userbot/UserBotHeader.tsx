@@ -48,7 +48,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
             {/* Bot Name */}
             <a
               href={`/bots/${getIDFromBase64(bot.id, "BotType")}`}
-              className="text-lg text-customGreen font-gugi font-light"
+              className="text-lg text-customGreen font-medium"
             >
               {bot.name}
             </a>
