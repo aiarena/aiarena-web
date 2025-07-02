@@ -108,15 +108,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     "Match Requested!"
   );
 
-  const resetAllStateFields = () => {
-    setMapSelectionType("map_pool");
-    setMatchCount(1);
-    setSelectedBot1(null);
-    setSelectedBot2(null);
-    setSelectedSpecificMap(null);
-    setSelectedMapPool(null);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -139,7 +130,6 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
       onCompleted: (...args) => {
         const success = onCompleted(...args);
         if (success) {
-          resetAllStateFields();
           onClose();
         }
       },
