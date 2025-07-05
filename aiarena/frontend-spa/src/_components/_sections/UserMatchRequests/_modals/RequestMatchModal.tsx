@@ -30,15 +30,76 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     CONNECTION_KEYS.UserMatchRequestsConnection
   );
 
-  const [mapSelectionType, setMapSelectionType] = useState("map_pool");
-  const [matchCount, setMatchCount] = useState(1);
-  const [selectedBot1, setSelectedBot1] = useState<BotType | null>(null);
-  const [selectedBot2, setSelectedBot2] = useState<BotType | null>(null);
-  const [selectedSpecificMap, setSelectedSpecificMap] =
-    useState<MapType | null>(null);
-  const [selectedMapPool, setSelectedMapPool] = useState<MapPoolType | null>(
-    null
+  const getBot1 = () => {
+    const bot1 = sessionStorage.getItem("bot1");
+    return bot1 != null ? JSON.parse(bot1) : null;
+  };
+  const getBot2 = () => {
+    const bot2 = sessionStorage.getItem("bot2");
+    return bot2 != null ? JSON.parse(bot2) : null;
+  };
+
+  const getMapSelectionType = () => {
+    const mapSelectionType = sessionStorage.getItem("mapSelectionType");
+    return mapSelectionType != null ? JSON.parse(mapSelectionType) : "map_pool";
+  };
+
+  const getMapPool = () => {
+    const mapPool = sessionStorage.getItem("mapPool");
+    return mapPool != null ? JSON.parse(mapPool) : null;
+  };
+
+  const getSpecificMap = () => {
+    const specificMap = sessionStorage.getItem("selectedMap");
+    return specificMap != null ? JSON.parse(specificMap) : null;
+  };
+
+  const getMatchCount = () => {
+    const matchCount = sessionStorage.getItem("matchCount");
+    return matchCount != null ? JSON.parse(matchCount) : 1;
+  };
+
+  const [mapSelectionType, setMapSelectionType] = useState(
+    getMapSelectionType()
   );
+  const [matchCount, setMatchCount] = useState(getMatchCount());
+  const [selectedBot1, setSelectedBot1] = useState<BotType | null>(getBot1());
+  const [selectedBot2, setSelectedBot2] = useState<BotType | null>(getBot2());
+  const [selectedSpecificMap, setSelectedSpecificMap] =
+    useState<MapType | null>(getSpecificMap());
+  const [selectedMapPool, setSelectedMapPool] = useState<MapPoolType | null>(
+    getMapPool()
+  );
+
+  const setAndSaveBot1 = (bot: BotType | null) => {
+    setSelectedBot1(bot);
+    sessionStorage.setItem("bot1", JSON.stringify(bot));
+  };
+
+  const setAndSaveBot2 = (bot: BotType | null) => {
+    setSelectedBot2(bot);
+    sessionStorage.setItem("bot2", JSON.stringify(bot));
+  };
+
+  const setAndSaveSpecificMap = (map: MapType | null) => {
+    setSelectedSpecificMap(map);
+    sessionStorage.setItem("selectedMap", JSON.stringify(map));
+  };
+
+  const setAndSaveMapPool = (mapPool: MapPoolType | null) => {
+    setSelectedMapPool(mapPool);
+    sessionStorage.setItem("mapPool", JSON.stringify(mapPool));
+  };
+
+  const setAndSaveMapSelectionType = (type: "map_pool" | "specific_map") => {
+    setMapSelectionType(type);
+    sessionStorage.setItem("mapSelectionType", JSON.stringify(type));
+  };
+
+  const setAndSaveMatchCount = (count: number) => {
+    setMatchCount(count);
+    sessionStorage.setItem("matchCount", JSON.stringify(count));
+  };
 
   const data = useLazyLoadQuery<RequestMatchModalQuery>(
     graphql`
@@ -151,7 +212,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             </span>
             <BotSearchList
               value={selectedBot1}
-              setValue={setSelectedBot1}
+              setValue={setAndSaveBot1}
               relayRootQuery={data}
             />
           </label>
@@ -162,7 +223,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             </span>
             <BotSearchList
               value={selectedBot2}
-              setValue={setSelectedBot2}
+              setValue={setAndSaveBot2}
               relayRootQuery={data}
             />
           </label>
@@ -178,9 +239,10 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               className="w-16"
               value={matchCount}
               type="number"
-              onChange={(e) =>
-                setMatchCount(parseInt(e.target.value.replace(/\D/g, "")) || 0)
-              }
+              onChange={(e) => {
+                const value = parseInt(e.target.value.replace(/\D/g, "")) || 0;
+                setAndSaveMatchCount(value);
+              }}
               aria-describedby="match-count-help"
             />
             <div id="match-count-help" className="sr-only">
@@ -192,7 +254,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             <button
               type="button"
               onClick={() => {
-                setMapSelectionType("map_pool");
+                setAndSaveMapSelectionType("map_pool");
               }}
               className={clsx(
                 "border-2 mr-2 rounded-lg bg-darken p-2",
@@ -207,7 +269,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             <button
               type="button"
               onClick={() => {
-                setMapSelectionType("specific_map");
+                setAndSaveMapSelectionType("specific_map");
               }}
               className={clsx(
                 "border-2 rounded-lg bg-darken p-2",
@@ -227,7 +289,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <span className="font-medium">Map pool</span>
               <MapPoolSearchList
                 value={selectedMapPool}
-                setValue={setSelectedMapPool}
+                setValue={setAndSaveMapPool}
                 relayRootQuery={data}
               />
             </label>
@@ -238,7 +300,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               <span className="font-medium">Specific Map</span>
               <MapSearchList
                 value={selectedSpecificMap}
-                setValue={setSelectedSpecificMap}
+                setValue={setAndSaveSpecificMap}
                 relayRootQuery={data}
               />
             </label>
