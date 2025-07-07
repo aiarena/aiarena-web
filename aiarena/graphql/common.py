@@ -237,6 +237,10 @@ class CleanedInputType(InputObjectType):
         super().__init_subclass_with_meta__(_meta=_meta, **options)
 
 
+class AccessDenied(GraphQLError):
+    pass
+
+
 def raise_for_access(info, instance, scopes=None):
     if scopes is None:
         scopes = [permissions.SCOPE_WRITE]
@@ -246,7 +250,7 @@ def raise_for_access(info, instance, scopes=None):
 
     for scope in scopes:
         if not checker.can(scope):
-            raise GraphQLError(f'{user} cannot perform "{scope}" on "{instance}"')
+            raise AccessDenied(f'{user} cannot perform "{scope}" on "{instance}"')
 
 
 def parse_deep_errors(e):
