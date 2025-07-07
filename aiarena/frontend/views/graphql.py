@@ -26,7 +26,7 @@ class CustomGraphQLView(FileUploadGraphQLView):
 
     def _capture_sentry_exceptions(self, errors):
         for error in errors:
-            exc = getattr(error, "original_error", error)
+            exc = getattr(error, "original_error", None) or error
             if isinstance(exc, AccessDenied):
                 continue
             if settings.DEBUG:
@@ -36,7 +36,7 @@ class CustomGraphQLView(FileUploadGraphQLView):
     def format_error(self, error):
         formatted_error = super().format_error(error)
 
-        original_error = getattr(error, "original_error", error)
+        original_error = getattr(error, "original_error", None) or error
         if any(isinstance(original_error, whitelisted_error) for whitelisted_error in self.whitelisted_errors):
             return formatted_error
 
