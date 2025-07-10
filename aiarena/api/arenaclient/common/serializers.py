@@ -1,9 +1,8 @@
 from rest_framework import serializers
 from rest_framework.fields import FileField, FloatField
-from rest_framework.reverse import reverse
 
+from aiarena.api.arenaclient.common.file_utils import get_bot_data_url, get_bot_zip_url
 from aiarena.core.models import ArenaClientStatus, Bot, Map, Match, MatchParticipation, Result
-from aiarena.core.s3_helpers import get_file_s3_url_with_content_disposition, is_s3_file
 from aiarena.core.validators import validate_not_inf, validate_not_nan
 
 
@@ -22,39 +21,10 @@ class BotSerializer(serializers.ModelSerializer):
     plays_race = serializers.CharField(source="plays_race.label")
 
     def get_bot_zip(self, obj):
-        # This is_s3_file check is a quick fix to avoid having to figure out how to restructure the storage backend.
-        # The parameters in get_file_s3_url_with_content_disposition can only be specified with the S3 backend, else
-        # it breaks.
-        if is_s3_file(obj.bot_zip):
-            return get_file_s3_url_with_content_disposition(obj.bot_zip, f"{obj.name}.zip")
-        else:
-            p = MatchParticipation.objects.only("participant_number").get(bot=obj, match_id=self.root.instance.id)
-            return reverse(
-                "match-download-zip",
-                kwargs={"pk": self.root.instance.id, "p_num": p.participant_number},
-                request=self.context["request"],
-            )
+        return get_bot_zip_url(obj, self.root.instance.id, context=self.context)
 
     def get_bot_data(self, obj):
-        p = (
-            MatchParticipation.objects.select_related("bot")
-            .only("use_bot_data", "bot__bot_data", "participant_number")
-            .get(bot=obj, match_id=self.root.instance.id)
-        )
-        if p.use_bot_data and p.bot.bot_data:
-            # This is_s3_file check is a quick fix to avoid having to figure out how to restructure the storage backend.
-            # The parameters in get_file_s3_url_with_content_disposition can only be specified with the S3 backend, else
-            # it breaks.
-            if is_s3_file(obj.bot_data):
-                return get_file_s3_url_with_content_disposition(obj.bot_data, f"{obj.name}_data.zip")
-            else:
-                return reverse(
-                    "match-download-data",
-                    kwargs={"pk": self.root.instance.id, "p_num": p.participant_number},
-                    request=self.context["request"],
-                )
-        else:
-            return None
+        return get_bot_data_url(obj, self.root.instance.id, context=self.context)
 
     class Meta:
         model = Bot
