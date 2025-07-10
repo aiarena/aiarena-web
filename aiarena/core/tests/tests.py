@@ -55,11 +55,6 @@ class BotTestCase(LoggedInMixin, TestCase):
 
         bot1 = Bot.objects.first()
 
-        # test display id regen
-        prev_bot_display_id = bot1.game_display_id
-        bot1.regen_game_display_id()
-        self.assertNotEqual(bot1.game_display_id, prev_bot_display_id)
-
         bot1.refresh_from_db()
         # check hashes
         self.assertEqual(TestAssetPaths.test_bot_zip_hash, bot1.bot_zip_md5hash)

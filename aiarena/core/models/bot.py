@@ -90,10 +90,6 @@ class Bot(models.Model, LockableModelMixin):
             .aggregate(Sum("elo_change"))["elo_change__sum"]
         )
 
-    @property
-    def current_matches(self):
-        return Match.objects.only("id").filter(matchparticipation__bot=self, started__isnull=False, result__isnull=True)
-
     def is_in_match(self, match_id):
         matches = Match.objects.only("id").filter(
             matchparticipation__bot=self, started__isnull=False, result__isnull=True, id=match_id
@@ -110,9 +106,6 @@ class Bot(models.Model, LockableModelMixin):
             "diamond": config.BOT_ZIP_SIZE_LIMIT_IN_MB_DIAMOND_TIER,
         }[self.user.patreon_level]
         return limit if limit is not None else None
-
-    def regen_game_display_id(self):
-        self.game_display_id = uuid.uuid4()
 
     def get_wiki_article(self):
         try:
