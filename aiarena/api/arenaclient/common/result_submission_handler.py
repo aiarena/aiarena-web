@@ -15,6 +15,7 @@ from aiarena.core.models import (
     Match,
     MatchParticipation,
     MatchTag,
+    Result,
     Tag,
 )
 from aiarena.core.services import Bots, BotStatistics
@@ -49,7 +50,7 @@ def handle_result_submission(match_id, result_data):
         result.is_valid(raise_exception=True)
         # validate participants
         p1_instance = match.matchparticipation_set.get(participant_number=1)
-        result_cause = p1_instance.calculate_result_cause(result_data["type"])
+        result_cause = Result.calculate_result_cause(result_data["type"])
         participant1 = SubmitResultParticipationSerializer(
             instance=p1_instance,
             data={

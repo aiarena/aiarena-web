@@ -247,3 +247,22 @@ class Result(models.Model, LockableModelMixin):
         sp1.save()
         sp2.elo -= delta
         sp2.save()
+
+    @staticmethod
+    def calculate_result_cause(result_type):
+        if result_type in ["Player1Win", "Player2Win", "Tie", "Player1Surrender", "Player2Surrender"]:
+            return "game_rules"
+        elif result_type in ["Player1Crash", "Player2Crash"]:
+            return "crash"
+        elif result_type in ["Player1TimeOut", "Player2TimeOut"]:
+            return "timeout"
+        elif result_type in ["Player1RaceMismatch", "Player2RaceMismatch"]:
+            return "race_mismatch"
+        elif result_type == "MatchCancelled":
+            return "match_cancelled"
+        elif result_type == "InitializationError":
+            return "initialization_failure"
+        elif result_type == "Error":
+            return "error"
+        else:
+            raise Exception("Unrecognized result type!")
