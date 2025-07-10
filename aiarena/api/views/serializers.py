@@ -47,6 +47,7 @@ from aiarena.core.models import (
     User,
 )
 from aiarena.core.models.bot_race import BotRace
+from aiarena.core.services import Bots
 from aiarena.patreon.models import PatreonUnlinkedDiscordUID
 
 
@@ -187,7 +188,7 @@ class BotUpdateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_bot_data(self, value):
-        if self.instance.bot_data_is_currently_frozen():
+        if Bots.bot_data_is_frozen(self.instance):
             raise serializers.ValidationError("Cannot edit bot_data when it's frozen (probably in a match)")
         return value
 

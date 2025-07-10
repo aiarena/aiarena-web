@@ -8,7 +8,7 @@ from django.urls import reverse
 from constance import config
 
 from aiarena import settings
-from aiarena.core.models import Bot
+from aiarena.core.models import Bot, Match
 
 
 logger = logging.getLogger(__name__)
@@ -51,13 +51,13 @@ class Bots:
 
     @staticmethod
     def get_available(bots) -> list:
-        return [bot for bot in bots if not bot.bot_data_is_currently_frozen()]
+        return [bot for bot in bots if not Bots.bot_data_is_frozen(bot)]
 
     @staticmethod
     def available_is_more_than(bots, amount: int) -> bool:
         available = 0
         for bot in bots:
-            if not bot.bot_data_is_currently_frozen():
+            if not Bots.bot_data_is_frozen(bot):
                 available += 1
             if available >= amount:
                 return True
@@ -70,8 +70,21 @@ class Bots:
         return Bot.objects.filter(competition_participations__active=True).order_by("?").first()
 
     @staticmethod
-    def get_random_active_bot_excluding(id):
+    def get_random_active_bot_excluding(bot_id_to_exclude: int) -> Bot:
         if Bots.get_active().count() <= 1:
             raise RuntimeError("I am the only bot.")
-        bot = Bots.get_active().exclude(id=id).order_by("?").first()
+        bot = Bots.get_active().exclude(id=bot_id_to_exclude).order_by("?").first()
         return bot
+
+    @staticmethod
+    def bot_data_is_frozen(bot: Bot) -> bool:
+        return (
+            bot.bot_data
+            and Match.objects.filter(
+                matchparticipation__bot=bot,
+                matchparticipation__use_bot_data=True,
+                matchparticipation__update_bot_data=True,
+                started__isnull=False,
+                result__isnull=True,
+            ).exists()
+        )
