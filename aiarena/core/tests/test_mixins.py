@@ -273,15 +273,21 @@ class BaseTestMixin(TestCase):
         game_mode = GameMode.objects.get(name="Melee")
         bots = Bots.get_available(Bot.objects.all())
         MatchRequests.request_match(
-            self.regularUser2, bots[0], bots[0].get_random_active_excluding_self(), game_mode=game_mode
+            self.regularUser2, bots[0], Bots.get_random_active_bot_excluding(bots[0].id), game_mode=game_mode
         )
 
         # generate match requests from regularUser1
         bot = Bots.get_random_active()
-        MatchRequests.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
-        MatchRequests.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
+        MatchRequests.request_match(
+            self.regularUser1, bot, Bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
+        )
+        MatchRequests.request_match(
+            self.regularUser1, bot, Bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
+        )
         bot = Bots.get_random_active()
-        MatchRequests.request_match(self.regularUser1, bot, bot.get_random_active_excluding_self(), game_mode=game_mode)
+        MatchRequests.request_match(
+            self.regularUser1, Bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
+        )
 
         self.test_client.logout()  # child tests can login if they require
 

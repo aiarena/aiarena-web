@@ -68,3 +68,10 @@ class Bots:
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         return Bot.objects.filter(competition_participations__active=True).order_by("?").first()
+
+    @staticmethod
+    def get_random_active_bot_excluding(id):
+        if Bots.get_active().count() <= 1:
+            raise RuntimeError("I am the only bot.")
+        bot = Bots.get_active().exclude(id=id).order_by("?").first()
+        return bot

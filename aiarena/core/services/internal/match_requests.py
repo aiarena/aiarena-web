@@ -5,6 +5,7 @@ from constance import config
 from aiarena.core.models import Map, Match, Result
 
 from ...exceptions import MatchRequestException
+from .. import Bots
 from ..supporter_benefits import SupporterBenefits
 from .maps import Maps
 from .matches import create
@@ -49,7 +50,7 @@ def handle_request_matches(
 
         for _ in range(0, match_count):
             opponent = (
-                bot1.get_random_active_excluding_self()
+                Bots.get_random_active_bot_excluding(bot1.id)
                 if matchup_race == "any"
                 else bot1.get_active_excluding_self().filter(plays_race__label=matchup_race).order_by("?").first()
             )
