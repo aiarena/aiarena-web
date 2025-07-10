@@ -186,12 +186,6 @@ class Bot(models.Model, LockableModelMixin):
 
         return self.bot_data and data_frozen
 
-    @staticmethod
-    def get_random_active():
-        # todo: apparently this is really slow
-        # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
-        return Bot.objects.filter(competition_participations__active=True).order_by("?").first()
-
     def get_random_active_excluding_self(self):
         from ..services import Bots  # avoid circular reference
 
