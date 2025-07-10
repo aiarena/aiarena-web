@@ -286,7 +286,7 @@ class BaseTestMixin(TestCase):
         )
         bot = Bots.get_random_active()
         MatchRequests.request_match(
-            self.regularUser1, Bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
+            self.regularUser1, bot, Bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
         )
 
         self.test_client.logout()  # child tests can login if they require
