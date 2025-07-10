@@ -148,10 +148,7 @@ class Bot(models.Model, LockableModelMixin):
                 "No more bots may be added for this user."
             )
 
-    def validate_bot_zip_file(self, value=None):
-        if not value:
-            value = self.bot_zip
-
+    def validate_bot_zip_file(self, value):
         limit = self.get_bot_zip_limit_in_mb()
         if value.size > limit * 1024 * 1024:  # convert limit to bytes
             raise ValidationError(
@@ -172,7 +169,7 @@ class Bot(models.Model, LockableModelMixin):
 
     def clean(self):
         self.validate_max_bot_count()
-        self.validate_bot_zip_file()
+        self.validate_bot_zip_file(self.bot_zip)
 
     def __str__(self):
         return self.name
