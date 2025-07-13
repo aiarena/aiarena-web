@@ -18,7 +18,6 @@ IMAGES: dict[str, Path] = {
     "env": PROJECT_PATH / "docker/Dockerfile",
     "cloud": PROJECT_PATH / "docker/Dockerfile_cloud",
     "dev": PROJECT_PATH / "docker/Dockerfile_dev",
-    "frontend": PROJECT_PATH / "docker/Dockerfile_frontend",
 }
 
 UWSGI_CONTAINER_NAME = "aiarena-uwsgi"

@@ -156,13 +156,6 @@ def prepare_images():
     build_graphql_schema(environment, img="dev")
     build_frontend()
 
-    frontend_tag = f"frontend-{build_number}-{docker.ARCH_AMD64}"
-    docker.build_image(
-        "frontend",
-        tag=frontend_tag,
-        arch=docker.ARCH_AMD64,
-    )
-
     cloud_tag = f"cloud-{build_number}-{docker.ARCH_AMD64}"
     docker.build_image(
         "cloud",
@@ -172,13 +165,11 @@ def prepare_images():
     )
 
     cloud_images = aws.push_images("cloud", [cloud_tag])
-    frontend_images = aws.push_images("frontend", [frontend_tag])
     set_github_actions_output(
         "images",
         json.dumps(
             {
                 "cloud_images": cloud_images,
-                "frontend_images": frontend_images,
             }
         ),
     )
