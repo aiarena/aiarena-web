@@ -7,11 +7,8 @@ from django.db import models
 from django.db.models import Sum
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 
 from constance import config
 from private_storage.fields import PrivateFileField
@@ -186,26 +183,6 @@ class Bot(models.Model, LockableModelMixin):
         if Bot.objects.all().count() <= 1:
             raise RuntimeError("I am the only bot.")
         return Bot.objects.exclude(id=self.id).order_by("?").first()
-
-    @cached_property
-    def get_absolute_url(self):
-        return reverse("bot", kwargs={"pk": self.pk})
-
-    @cached_property
-    def as_html_link(self):
-        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())}</a>')
-
-    @cached_property
-    def as_truncated_html_link(self):
-        name = escape(self.__str__())
-        limit = 20
-        return mark_safe(
-            f'<a href="{self.get_absolute_url}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>'
-        )
-
-    @cached_property
-    def as_html_link_with_race(self):
-        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())} ({self.plays_race})</a>')
 
     @cached_property
     def expected_executable_filename(self):

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters %}
+{% load i18n core_filters url_utils %}
 
 {% block content %}
     {% with requested_count=requested_matches.count %}
@@ -23,12 +23,12 @@
                             <td>{{ match.as_html_link }}</td>
                             {% for p in match.participants %}
                                 {% if p.participant_number == 1 %}
-                                    <td>{{ p.bot.as_truncated_html_link }}</td>
+                                    <td>{% get_bot_truncated_html_link p.bot %}</td>
                                 {% endif %}
                             {% endfor %}
                             {% for p in match.participants %}
                                 {% if p.participant_number == 2 %}
-                                    <td>{{ p.bot.as_truncated_html_link }}</td>
+                                    <td>{% get_bot_truncated_html_link p.bot %}</td>
                                 {% endif %}
                             {% endfor %}
                             <td>{{ match.map }}</td>
@@ -68,12 +68,12 @@
                             <td>{{ match.as_html_link }}</td>
                             {% for p in match.participants %}
                                 {% if p.participant_number == 1 %}
-                                    <td>{{ p.bot.as_truncated_html_link }}</td>
+                                    <td>{% get_bot_truncated_html_link p.bot %}</td>
                                 {% endif %}
                             {% endfor %}
                             {% for p in match.participants %}
                                 {% if p.participant_number == 2 %}
-                                    <td>{{ p.bot.as_truncated_html_link }}</td>
+                                    <td>{% get_bot_truncated_html_link p.bot %}</td>
                                 {% endif %}
                             {% endfor %}
                             <td>{{ match.map }}</td>

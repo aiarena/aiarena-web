@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n avatar_tags %}
+{% load i18n avatar_tags url_utils %}
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Profile</h2></span><span></span></div>
@@ -75,7 +75,7 @@
         </thead>
         {% for bot in bot_list %}
             <tr>
-                <td>{{ bot.as_truncated_html_link }}</td>
+                <td>{% get_bot_truncated_html_link bot %}</td>
                 <td>{{ bot.plays_race.get_label_display }}</td>
                 <td>{{ bot.type }}</td>
                 <td><a href="{{ bot.bot_zip.url }}" download>Download</a></td>
@@ -119,12 +119,12 @@
                     {% endif %}
                     {% for p in match.participants %}
                         {% if p.participant_number == 1 %}
-                            <td>{{ p.bot.as_truncated_html_link }}</td>
+                            <td>{% get_bot_truncated_html_link p.bot %}</td>
                         {% endif %}
                     {% endfor %}
                     {% for p in match.participants %}
                         {% if p.participant_number == 2 %}
-                            <td>{{ p.bot.as_truncated_html_link }}</td>
+                            <td>{% get_bot_truncated_html_link p.bot %}</td>
                         {% endif %}
                     {% endfor %}
                     <td>{{ match.map }}</td>
@@ -167,12 +167,12 @@
                     <td>{{ match.as_html_link }}</td>
                     {% for p in match.participants %}
                         {% if p.participant_number == 1 %}
-                            <td>{{ p.bot.as_truncated_html_link }}</td>
+                            <td>{% get_bot_truncated_html_link p.bot %}</td>
                         {% endif %}
                     {% endfor %}
                     {% for p in match.participants %}
                         {% if p.participant_number == 2 %}
-                            <td>{{ p.bot.as_truncated_html_link }}</td>
+                            <td>{% get_bot_truncated_html_link p.bot %}</td>
                         {% endif %}
                     {% endfor %}
                     <td>{{ match.map }}</td>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters wiki_tags %}
+{% load i18n core_filters wiki_tags url_utils %}
 
 {% block content %}
 
@@ -111,7 +111,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {{ participant.bot.as_truncated_html_link }}
+                                {% get_bot_truncated_html_link participant.bot %}
                             </td>
                             <td>{{ participant.bot.plays_race.get_label_display }}</td>
                             <td>{{ participant.bot.user.as_truncated_html_link }}</td>

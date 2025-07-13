@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters %}
+{% load i18n core_filters url_utils %}
 {% load humanize %}
 
 {% block content %}
@@ -35,7 +35,7 @@
         </thead>
         {% for bot in bot_list %}
             <tr>
-                <td>{{ bot.as_html_link }}</td>
+                <td>{% get_bot_html_link bot %}</td>
                 <td>{{ bot.type }}</td>
                 <td>{{ bot.plays_race.get_label_display }}</td>
             </tr>
@@ -65,9 +65,9 @@
                     {% if p.participant_number == 1 %}
                         <td style="padding-right: 0">
                             {% if result.winner == p.bot %}
-                                <strong>[{{ p.bot.as_truncated_html_link }}]</strong>
+                                <strong>[{% get_bot_truncated_html_link p.bot %}]</strong>
                             {% else %}
-                                {{ p.bot.as_truncated_html_link }}
+                                {% get_bot_truncated_html_link p.bot %}
                             {% endif %}
                         </td>
 
@@ -96,9 +96,9 @@
                     {% if p.participant_number == 2 %}
                         <td style="padding-right: 0">
                             {% if result.winner == p.bot %}
-                                <strong>[{{ p.bot.as_truncated_html_link }}]</strong>
+                                <strong>[{% get_bot_truncated_html_link p.bot %}]</strong>
                             {% else %}
-                                {{ p.bot.as_truncated_html_link }}
+                                {% get_bot_truncated_html_link p.bot %}
                             {% endif %}
                         </td>
 

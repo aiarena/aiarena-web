@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n url_utils %}
 
 {% block content %}
 
@@ -53,8 +53,8 @@
     {% for match in round.match_set.all %}
         <tr> 
             <td>{{ match.as_html_link }}</td>
-            <td>{{ match.participant1.bot.as_truncated_html_link }}</td>
-            <td>{{ match.participant2.bot.as_truncated_html_link }}</td>
+            <td>{% get_bot_truncated_html_link match.participant1.bot %}</td>
+            <td>{% get_bot_truncated_html_link match.participant2.bot %}</td>
             {% if match.started %}
                 <td>{{ match.started|date:"d. N Y - H:i:s" }}</td>
             {% else %}

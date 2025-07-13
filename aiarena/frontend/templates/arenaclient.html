@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters %}
+{% load i18n core_filters url_utils %}
 {% load humanize %}
 {% block content %}
     <div class="divider"><span></span><span><h2>Arena Client</h2></span><span></span></div>
@@ -38,12 +38,12 @@
                     <td>{{ match.as_html_link }}</td>
                     {% for p in match.participants %}
                         {% if p.participant_number == 1 %}
-                            <td>{{ p.bot.as_truncated_html_link }}</td>
+                            <td>{% get_bot_truncated_html_link p.bot %}</td>
                         {% endif %}
                     {% endfor %}
                     {% for p in match.participants %}
                         {% if p.participant_number == 2 %}
-                            <td>{{ p.bot.as_truncated_html_link }}</td>
+                            <td>{% get_bot_truncated_html_link p.bot %}</td>
                         {% endif %}
                     {% endfor %}
                     <td>{{ match.map }}</td>
@@ -83,9 +83,9 @@
                         {% if p.participant_number == 1 %}
                             <td style="padding-right: 0">
                                 {% if result.winner == p.bot %}
-                                    <strong>[{{ p.bot.as_truncated_html_link }}]</strong>
+                                    <strong>[{% get_bot_truncated_html_link p.bot %}]</strong>
                                 {% else %}
-                                    {{ p.bot.as_truncated_html_link }}
+                                    {% get_bot_truncated_html_link p.bot %}
                                 {% endif %}
                             </td>
 
@@ -115,7 +115,7 @@
                         {% if p.participant_number == 2 %}
                             <td style="padding-right: 0">
                                 {% if result.winner == p.bot %}
-                                    <strong>[{{ p.bot.as_html_link }}]</strong>
+                                    <strong>[{% get_bot_html_link p.bot %}]</strong>
                                 {% else %}
                                     {{ p.bot.as_html_link }}
                                 {% endif %}
