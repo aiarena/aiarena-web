@@ -5,13 +5,9 @@ from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.functional import cached_property
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from aiarena.core.models.mixins import LockableModelMixin
-from aiarena.frontend.templatetags.url_utils import get_absolute_url
 
 
 logger = logging.getLogger(__name__)
@@ -41,22 +37,6 @@ class User(AbstractUser, LockableModelMixin):
     receive_email_comms = models.BooleanField(default=True, blank=True)
     sync_patreon_status = models.BooleanField(default=True, blank=True)
     note = models.TextField(blank=True, null=True)
-
-    @cached_property
-    def as_truncated_html_link(self):
-        name = escape(self.__str__())
-        limit = 20
-
-        if self.type == "WEBSITE_USER":
-            viewname = "author"
-        elif self.type == "ARENA_CLIENT":
-            viewname = "arenaclient"
-        else:
-            raise Exception("This user type does not have a url.")
-
-        return mark_safe(
-            f'<a href="{get_absolute_url(viewname, self)}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>'
-        )
 
     @property
     def has_donated(self):

@@ -23,6 +23,23 @@ def get_bot_truncated_html_link(bot) -> str:
     )
 
 
+@register.simple_tag
+def get_user_truncated_html_link(user):
+    name = escape(user.__str__())
+    limit = 20
+
+    if user.type == "WEBSITE_USER":
+        viewname = "author"
+    elif user.type == "ARENA_CLIENT":
+        viewname = "arenaclient"
+    else:
+        raise Exception("This user type does not have a url.")
+
+    return mark_safe(
+        f'<a href="{get_absolute_url(viewname, user)}">{(name[:limit - 3] + "...") if len(name) > limit else name}</a>'
+    )
+
+
 def get_absolute_url(view_name, model_instance):
     """Returns the absolute URL for a model instance."""
     return reverse(view_name, kwargs={"pk": model_instance.pk})
