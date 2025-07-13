@@ -35,7 +35,7 @@
         </thead>
         {% for bot in bot_list %}
             <tr>
-                <td>{% get_bot_html_link bot %}</td>
+                <td>{% get_html_link "bot" bot %}</td>
                 <td>{{ bot.type }}</td>
                 <td>{{ bot.plays_race.get_label_display }}</td>
             </tr>
@@ -58,7 +58,7 @@
         <tbody>
         {% for result in result_list %}
             <tr>
-                <td>{{ result.match.as_html_link }}</td>
+                <td>{% get_html_link "match" result.match %}</td>
                 <td>{{ result.created|naturaltime|shorten_naturaltime }}</td>
 
                 {% for p in result.match.participants %}

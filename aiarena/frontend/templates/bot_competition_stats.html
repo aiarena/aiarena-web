@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="divider">
-        <span></span><span><h2>{% get_bot_html_link competitionparticipation.bot %} - {{ competitionparticipation.competition.as_html_link }} stats</h2></span><span></span>
+        <span></span><span><h2>{% get_html_link "bot" competitionparticipation.bot %} - {% get_html_link "competition" competitionparticipation.competition %} stats</h2></span><span></span>
     </div>
     <div class="stats_and_graphs">
         <div id="bot_competition_stats">

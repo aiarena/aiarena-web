@@ -89,7 +89,7 @@
                 {% for item in competitions %}
                     <div class="compSlides">
                         <div>
-                            <div style="text-align: center"><h3>{{ item.competition.as_html_link }}</h3></div>
+                            <div style="text-align: center"><h3>{% get_html_link "competition" item.competition %}</h3></div>
                             <table summary="Table containing the top10 bots" id="resultsTable" cellpadding="2px" style="min-width: 400px; text-align: justify">
                                 <thead>
                                 <td style="text-align: center"><strong>Rank</strong></td>
@@ -162,7 +162,7 @@
                 {# newly created bots have same update time as its creation time #}
                 {% if event.is_created_event %}
                     <td nowrap>{{ event.bot_zip_updated|naturaltime|shorten_naturaltime }}</td>
-                    <td style="text-align: left">{{ event.user.as_truncated_html_link }} uploaded a new bot: {{ event.as_truncated_html_link }}.</td>
+                    <td style="text-align: left">{% get_user_truncated_html_link event.user %} uploaded a new bot: {% get_bot_truncated_html_link event %}</td>
                 {% else %}
                     <td nowrap>{{ event.bot_zip_updated|naturaltime|shorten_naturaltime }}</td>
                     <td style="text-align: left">Bot {% get_bot_truncated_html_link event %} was updated.</td>

@@ -4,10 +4,7 @@ from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 
 from wiki.models import Article, ArticleRevision
 
@@ -158,12 +155,6 @@ class Competition(models.Model, LockableModelMixin):
             from . import CompetitionParticipation  # avoid circular reference
 
             CompetitionParticipation.objects.filter(competition=self).update(active=False)
-
-    def get_absolute_url(self):
-        return reverse("competition", kwargs={"pk": self.pk})
-
-    def as_html_link(self):
-        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
 
     @property
     def is_accepting_new_participants(self):

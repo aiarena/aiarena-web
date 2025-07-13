@@ -29,7 +29,7 @@
                 <tbody>
                 <tr>
                     <td><strong>Author</strong></td>
-                    <td>{{ bot.user.as_html_link }}</td>
+                    <td>{% get_html_link "author" bot.user %}</td>
                 </tr>
                 <tr>
                     <td><strong>Race</strong></td>
@@ -156,7 +156,7 @@
             {% if rankings.count > 0 %}
                 {% for competition_participation in rankings %}
                     <tr>
-                        <td>{{ competition_participation.competition.as_html_link }}</td>
+                        <td>{% get_html_link "competition" competition_participation.competition %}</td>
                         {% if competition_participation.competition.date_opened %}
                             <td>{{ competition_participation.competition.date_opened|date:"d. N Y - H:i:s" }}</td>
                         {% else %}
@@ -209,7 +209,7 @@
             <tbody>
             {% for participation in queued_or_in_progress %}
                 <tr>
-                    <td>{{ participation.match.as_html_link }}</td>
+                    <td>{% get_html_link "match" participation.match %}</td>
                     {% for p in participation.match.participants %}
                         {% if p.participant_number == 1 %}
                             <td>{% get_bot_truncated_html_link p.bot %}</td>
@@ -227,7 +227,7 @@
                         <td>queued...</td>
                     {% endif %}
                     {% if participation.match.assigned_to %}
-                        <td>{{ participation.match.assigned_to.as_html_link }}</td>
+                        <td>{% get_html_link "arenaclient" participation.match.assigned_to %}</td>
                     {% else %}
                         <td>queued...</td>
                     {% endif %}

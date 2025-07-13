@@ -14,7 +14,7 @@
         <tbody>
         <tr>
             <td>{{ arenaclient.username }}</td>
-            <td>{{ arenaclient.owner.as_html_link }}</td>
+            <td>{% get_html_link "author" arenaclient.owner %}</td>
             <td>{{ ac_match_count_1h }}</td>
             <td>{{ ac_match_count_24h }}</td>
             <td>{{ ac_match_count }}</td>
@@ -35,7 +35,7 @@
             <tbody>
             {% for match in assigned_matches_list %}
                 <tr>
-                    <td>{{ match.as_html_link }}</td>
+                    <td>{% get_html_link "match" match %}</td>
                     {% for p in match.participants %}
                         {% if p.participant_number == 1 %}
                             <td>{% get_bot_truncated_html_link p.bot %}</td>
@@ -76,7 +76,7 @@
             <tbody>
             {% for result in recent_result_list %}
                 <tr>
-                    <td>{{ result.match.as_html_link }}</td>
+                    <td>{% get_html_link "match" result.match %}</td>
                     <td>{{ result.created|naturaltime|shorten_naturaltime }}</td>
 
                     {% for p in result.match.participants %}
@@ -115,9 +115,9 @@
                         {% if p.participant_number == 2 %}
                             <td style="padding-right: 0">
                                 {% if result.winner == p.bot %}
-                                    <strong>[{% get_bot_html_link p.bot %}]</strong>
+                                    <strong>[{% get_html_link "bot" p.bot %}]</strong>
                                 {% else %}
-                                    {{ p.bot.as_html_link }}
+                                    {% get_html_link "bot" p.bot %}
                                 {% endif %}
                             </td>
 

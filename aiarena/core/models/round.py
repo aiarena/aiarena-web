@@ -3,10 +3,7 @@ import logging
 from django.db import models, transaction
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 
 from .competition import Competition
 from .mixins import LockableModelMixin
@@ -44,12 +41,6 @@ class Round(models.Model, LockableModelMixin):
             self.finished = timezone.now()
             self.save(update_fields=["complete", "finished"])
             self.competition.try_to_close()
-
-    def get_absolute_url(self):
-        return reverse("round", kwargs={"pk": self.pk})
-
-    def as_html_link(self):
-        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
 
 
 @receiver(pre_save, sender=Round)

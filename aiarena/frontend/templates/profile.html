@@ -112,10 +112,10 @@
                 {% for match in requested_matches_in_progress %}
                     <tr>
                     {% if match.assigned_to %}
-                        <td>{{ match.as_html_link }}</td>
+                        <td>{% get_html_link "match" match %}</td>
                     {% else %}
                         <td><input type="checkbox" name="match_selection"
-                                   value="{{ match.id }}">{{ match.as_html_link }}</td>
+                                   value="{{ match.id }}">{% get_html_link "match" match %}</td>
                     {% endif %}
                     {% for p in match.participants %}
                         {% if p.participant_number == 1 %}
@@ -164,7 +164,7 @@
             {% if requested_matches_finished %}
                 {% for match in requested_matches_finished %}
                     <tr>
-                    <td>{{ match.as_html_link }}</td>
+                    <td>{% get_html_link "match" match %}</td>
                     {% for p in match.participants %}
                         {% if p.participant_number == 1 %}
                             <td>{% get_bot_truncated_html_link p.bot %}</td>

@@ -28,14 +28,14 @@
             {% endif %}
 
             {# Bot name #}
-            {% get_bot_html_link match.participant1.bot %}
+            {% get_html_link "bot" match.participant1.bot %}
 
             - VS -
 
             {# Participant 2 #}
 
             {# Bot name #}
-            {% get_bot_html_link match.participant2.bot %}
+            {% get_html_link "bot" match.participant2.bot %}
 
             {% if match.result and not match.requested_by %}
                 {# ELO change #}
@@ -59,7 +59,7 @@
         <h3>On:</h3>
         <h2>{{ match.map }}</h2>
         {% if match.requested_by %}
-            <h4>Requested by {{ match.requested_by.as_html_link }}</h4>
+            <h4>Requested by {% get_html_link "author" match.requested_by %}</h4>
         {% endif %}
 
 
@@ -90,7 +90,7 @@
                 {% endif %}
 
                 {% if match.assigned_to %}
-                    <td>{{ match.assigned_to.as_html_link }}</td>
+                    <td>{% get_html_link "arenaclient" match.assigned_to %}}</td>
                 {% else %}
                     <td>queued...</td>
                 {% endif %}
@@ -139,8 +139,8 @@
             <tr>
                 {# matches don't always have a round #}
                 {% if match.round %}
-                    <td>{{ match.round.competition.as_html_link }}</td>
-                    <td>{{ match.round.as_html_link }}</td>
+                    <td>{% get_html_link "competition" match.round.competition %}</td>
+                    <td>{% get_html_link "round" match.round %}</td>
                 {% else %}
                     <td>--</td>
                     <td>--</td>

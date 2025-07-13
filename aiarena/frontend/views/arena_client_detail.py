@@ -4,11 +4,11 @@ from django.db.models import Prefetch
 from django.utils import timezone
 from django.views.generic import DetailView
 
-from aiarena.core.models import Match, MatchParticipation, Result, User
+from aiarena.core.models import ArenaClient, Match, MatchParticipation, Result
 
 
 class ArenaClientView(DetailView):
-    queryset = User.objects.filter(type="ARENA_CLIENT")
+    queryset = ArenaClient.objects.all()
     template_name = "arenaclient.html"
     context_object_name = "arenaclient"  # change the context name to avoid overriding the current user oontext object
 

@@ -6,6 +6,7 @@ from django.views.generic.detail import SingleObjectMixin
 
 from aiarena.core.models import Match, MatchTag, Tag
 from aiarena.core.utils import parse_tags
+from aiarena.frontend.templatetags.url_utils import get_html_link
 
 
 class MatchDisplay(DetailView):
@@ -23,10 +24,11 @@ class MatchDisplay(DetailView):
 
         others_tags_dict = {}
         for mt in others_tags:
-            if mt.user.as_html_link not in others_tags_dict:
-                others_tags_dict[mt.user.as_html_link] = str(mt.tag)
+            html_link = get_html_link("author", mt.user)
+            if html_link not in others_tags_dict:
+                others_tags_dict[html_link] = str(mt.tag)
             else:
-                others_tags_dict[mt.user.as_html_link] += ", " + str(mt.tag)
+                others_tags_dict[html_link] += ", " + str(mt.tag)
         context["others_tags_dict"] = others_tags_dict
         return context
 

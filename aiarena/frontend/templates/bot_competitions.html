@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n url_utils %}
 
 {% block content %}
     <div class="divider"><span></span><span><h2>{{ bot.name }}: Competitions</h2></span><span></span></div>
@@ -26,7 +26,7 @@
         <tbody>
         {% for cp in competitionparticipation_list %}
             <tr>
-                <td>{{ cp.competition.as_html_link }}</td>
+                <td>{% get_html_link "competition" cp.competition %}</td>
                 <td>{{ cp.active }}</td>
                 <td><a href="{% url 'bot_competition_edit' bot.id cp.pk %}">Edit</a></td>
             </tr>

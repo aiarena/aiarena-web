@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters %}
+{% load i18n core_filters url_utils %}
 {% load humanize %}
 {% block content %}
 <div class="divider"><span></span><span><h2>Arena Clients</h2></span><span></span></div>
@@ -13,8 +13,8 @@
         <tbody>
         {% for arenaclient in arenaclient_list %}
             <tr>
-                <td>{{ arenaclient.as_html_link }}</td>
-                <td>{{ arenaclient.owner.as_html_link }}</td>
+                <td>{% get_html_link "arenaclient" arenaclient %}</td>
+                <td>{% get_html_link "author" arenaclient.owner %}</td>
                 <td>{{ arenaclient.matches_1hr }}</td>
                 <td>{{ arenaclient.matches_24hr }}</td>
             </tr>

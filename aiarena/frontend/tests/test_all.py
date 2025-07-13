@@ -1,6 +1,6 @@
 from django.test import TestCase, TransactionTestCase
 
-from aiarena.core.models import Bot, Competition, Match, Result, Round, User
+from aiarena.core.models import ArenaClient, Bot, Competition, Match, Result, Round
 from aiarena.core.tests.test_mixins import FullDataSetMixin
 
 
@@ -132,7 +132,7 @@ class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
         self.assertEqual(response.status_code, 200)
 
         # arenaclients
-        for arenaclient in User.objects.filter(type="ARENA_CLIENT"):
+        for arenaclient in ArenaClient.objects.all():
             response = self.client.get(f"/arenaclients/{arenaclient.id}/")
             self.assertEqual(response.status_code, 200)
 

@@ -4,11 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.urls import reverse
 from django.utils import timezone
-from django.utils.functional import cached_property
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from aiarena.core.models.mixins import LockableModelMixin
@@ -41,27 +37,6 @@ class User(AbstractUser, LockableModelMixin):
     receive_email_comms = models.BooleanField(default=True, blank=True)
     sync_patreon_status = models.BooleanField(default=True, blank=True)
     note = models.TextField(blank=True, null=True)
-
-    @cached_property
-    def get_absolute_url(self):
-        if self.type == "WEBSITE_USER":
-            return reverse("author", kwargs={"pk": self.pk})
-        elif self.type == "ARENA_CLIENT":
-            return reverse("arenaclient", kwargs={"pk": self.pk})
-        else:
-            raise Exception("This user type does not have a url.")
-
-    @cached_property
-    def as_html_link(self):
-        return mark_safe(f'<a href="{self.get_absolute_url}">{escape(self.__str__())}</a>')
-
-    @cached_property
-    def as_truncated_html_link(self):
-        name = escape(self.__str__())
-        limit = 20
-        return mark_safe(
-            f'<a href="{self.get_absolute_url}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>'
-        )
 
     @property
     def has_donated(self):

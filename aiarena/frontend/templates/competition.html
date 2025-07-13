@@ -114,7 +114,7 @@
                                 {% get_bot_truncated_html_link participant.bot %}
                             </td>
                             <td>{{ participant.bot.plays_race.get_label_display }}</td>
-                            <td>{{ participant.bot.user.as_truncated_html_link }}</td>
+                            <td>{% get_user_truncated_html_link participant.bot.user %}</td>
                             <td>{{ participant.bot.type }}</td>
                             {% if participant.win_perc %}
                                 <td>{{ participant.win_perc|floatformat:2 }}</td>
@@ -181,7 +181,7 @@
             </thead>
             {% for round in round_list %}
                 <tr>
-                    <td>{{ round.as_html_link }}</td>
+                    <td>{% get_html_link "round" round %}</td>
                     {% if competition.date_opened %}
                         <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
                     {% else %}
