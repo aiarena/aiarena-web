@@ -3,9 +3,6 @@ import logging
 from django.db import models
 from django.db.models.signals import m2m_changed, post_delete
 from django.dispatch import receiver
-from django.urls import reverse
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 
 from .map import Map
 from .match_tag import MatchTag
@@ -76,12 +73,6 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
             return "Started"
         else:
             return "Queued"
-
-    def get_absolute_url(self):
-        return reverse("match", kwargs={"pk": self.pk})
-
-    def as_html_link(self):
-        return mark_safe(f'<a href="{self.get_absolute_url()}">{escape(self.__str__())}</a>')
 
 
 @receiver(m2m_changed, sender=Match.tags.through)

@@ -181,7 +181,7 @@
             </thead>
             {% for round in round_list %}
                 <tr>
-                    <td>{{ round.as_html_link }}</td>
+                    <td>{% get_html_link "round" round %}</td>
                     {% if competition.date_opened %}
                         <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
                     {% else %}

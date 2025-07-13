@@ -15,7 +15,7 @@
     </thead>
     <tbody>
     <tr>
-        <td>{{ round.competition.as_html_link }}</td>
+        <td>{% get_html_link "competition" round.competition %}</td>
         <td>{{ round.started|date:"d. N Y - H:i:s" }}</td>
         <td>{{ round.finished|date:"d. N Y - H:i:s" }}</td>
     </tr>
@@ -52,7 +52,7 @@
     </thead>
     {% for match in round.match_set.all %}
         <tr> 
-            <td>{{ match.as_html_link }}</td>
+            <td>{% get_html_link "match" match %}</td>
             <td>{% get_bot_truncated_html_link match.participant1.bot %}</td>
             <td>{% get_bot_truncated_html_link match.participant2.bot %}</td>
             {% if match.started %}
@@ -68,7 +68,7 @@
                 <td>queued...</td>
             {% endif %}
             {% if match.assigned_to %}
-                <td>{{ match.assigned_to.as_html_link }}</td>
+                <td>{% get_html_link "arenaclient" match.assigned_to %}</td>
             {% else %}
                 <td>queued...</td>
             {% endif %}

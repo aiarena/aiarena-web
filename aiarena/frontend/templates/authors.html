@@ -10,7 +10,7 @@
                     <a href="{{ author.id }}">
                         <div class="author-image">{% avatar author 150 %}</div>
                     </a>
-                    <div class="author-name">{{ author.as_html_link }}</div>
+                    <div class="author-name">{% get_html_link "author" author %}</div>
                 </div>
                 <div class="patreon-{{ author.patreon_level }}"></div>
             </div>

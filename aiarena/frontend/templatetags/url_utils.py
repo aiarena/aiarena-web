@@ -28,9 +28,19 @@ def get_absolute_url(view_name, model_instance):
     return reverse(view_name, kwargs={"pk": model_instance.pk})
 
 
+valid_link_types = {
+    "bot",
+    "match",
+    "author",  # for WebsiteUser
+    "arenaclient",
+    "round",
+    "competition",
+}
+
+
 @register.simple_tag
-def get_html_link(model_name: str, model_instance) -> str:
+def get_html_link(link_type: str, model_instance) -> str:
     """Returns an HTML link to a model instance."""
-    url = get_absolute_url(model_name, model_instance)
+    url = get_absolute_url(link_type, model_instance)
     name = escape(str(model_instance))
     return mark_safe(f'<a href="{url}">{name}</a>')

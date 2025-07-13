@@ -20,7 +20,7 @@
                     <tbody>
                     {% for match in requested_matches %}
                         <tr>
-                            <td>{{ match.as_html_link }}</td>
+                            <td>{% get_html_link "match" match %}</td>
                             {% for p in match.participants %}
                                 {% if p.participant_number == 1 %}
                                     <td>{% get_bot_truncated_html_link p.bot %}</td>
@@ -38,7 +38,7 @@
                                 <td>queued...</td>
                             {% endif %}
                             {% if match.assigned_to %}
-                                <td>{{ match.assigned_to.as_html_link }}</td>
+                                <td>{% get_html_link "arenaclient" match.assigned_to %}</td>
                             {% else %}
                                 <td>queued...</td>
                             {% endif %}
@@ -51,7 +51,7 @@
                     <span></span><span><h2><input class="form-control" id="roundFilter" type="text" placeholder="Filter"></h2></span><span></span></div>
             {% for round in round_list %}
                 <div class="divider">
-                    <span></span><span><h2>{{ round.name }} [{{ round.competition.as_html_link }}]</h2></span><span></span></div>
+                    <span></span><span><h2>{{ round.name }} [{% get_html_link "competition" round.competition %}]</h2></span><span></span></div>
                 <table summary="Table containing information for each round" class="row-hover-highlight">
 
                     <thead>
@@ -65,7 +65,7 @@
                 <tbody id="RoundTable">
                     {% for match in round.matches %}
                         <tr>
-                            <td>{{ match.as_html_link }}</td>
+                            <td>{% get_html_link "match" match %}</td>
                             {% for p in match.participants %}
                                 {% if p.participant_number == 1 %}
                                     <td>{% get_bot_truncated_html_link p.bot %}</td>
@@ -83,7 +83,7 @@
                                 <td>queued...</td>
                             {% endif %}
                             {% if match.assigned_to %}
-                                <td>{{ match.assigned_to.as_html_link }}</td>
+                                <td>{% get_html_link "arenaclient" match.assigned_to %}</td>
                             {% else %}
                                 <td>queued...</td>
                             {% endif %}

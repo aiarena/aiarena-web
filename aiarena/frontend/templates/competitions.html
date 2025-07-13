@@ -16,7 +16,7 @@
         <tbody>
         {% for competition in competition_list %}
             <tr>
-                <td>{{ competition.as_html_link }}</td>
+                <td>{% get_html_link "competition" competition %}</td>
                 <td>{{ competition.date_created|date:"d. N Y - H:i:s" }}</td>
                 {% if competition.date_opened %}
                     <td>{{ competition.date_opened|date:"d. N Y - H:i:s" }}</td>
@@ -43,7 +43,7 @@
         <tbody>
         {% for competition in closed_competitions %}
             <tr>
-                <td>{{ competition.as_html_link }}</td>
+                <td>{% get_html_link "competition" competition %}</td>
                 <td>{{ competition.date_created|date:"d. N Y - H:i:s" }}</td>
                 {% if competition.date_opened %}
                     <td>{{ competition.date_opened|date:"d. N Y - H:i:s" }}</td>

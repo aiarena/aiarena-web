@@ -217,7 +217,7 @@
                             <em class="material-icons">favorite</em>
                             <h3>supporters</h3>
                         </div>
-                        Thank you to {{ random_supporter.as_html_link }} for your support!
+                        Thank you to {% get_html_link "author" random_supporter %} for your support!
                     </li>
                 {% endif %}
             </ul>
