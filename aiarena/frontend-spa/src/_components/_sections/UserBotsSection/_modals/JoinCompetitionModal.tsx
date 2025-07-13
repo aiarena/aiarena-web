@@ -148,6 +148,7 @@ export default function JoinCompetitionModal({
                 <div>
                   <a
                     href={`/competitions/${getIDFromBase64(comp.id, "CompetitionType")}`}
+                    target="_blank"
                     className="font-bold"
                   >
                     {comp.name}
