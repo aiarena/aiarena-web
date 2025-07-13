@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters %}
+{% load i18n core_filters url_utils %}
 {% load humanize %}
 {% block content %}
     <div class="divider"><span></span><span><h2>Arena Client</h2></span><span></span></div>
@@ -115,7 +115,7 @@
                         {% if p.participant_number == 2 %}
                             <td style="padding-right: 0">
                                 {% if result.winner == p.bot %}
-                                    <strong>[{{ p.bot.as_html_link }}]</strong>
+                                    <strong>[{% get_bot_html_link p.bot %}]</strong>
                                 {% else %}
                                     {{ p.bot.as_html_link }}
                                 {% endif %}

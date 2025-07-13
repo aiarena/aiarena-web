@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n url_utils %}
 
 {% block content %}
 
@@ -17,7 +17,7 @@
         <tbody>
         {% for bot in bot_list %}
             <tr>
-                <td>{{ bot.as_html_link }}</td>
+                <td>{% get_bot_html_link bot %}</td>
                 <td>{{ bot.user.as_html_link }}</td>
                 <td>{{ bot.plays_race.get_label_display }}</td>
                 <td>{{ bot.type }}</td>

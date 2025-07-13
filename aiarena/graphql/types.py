@@ -16,7 +16,7 @@ from rest_framework.authtoken.models import Token
 from aiarena.core import models
 from aiarena.core.models import BotRace, MatchParticipation, Result, User
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits, Users
-from aiarena.core.url_utils import get_bot_absolute_url
+from aiarena.frontend.templatetags.url_utils import get_bot_absolute_url
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 

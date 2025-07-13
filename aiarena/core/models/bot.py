@@ -19,7 +19,7 @@ from wiki.models import Article, ArticleRevision
 from aiarena.core.utils import calculate_md5_django_filefield
 from aiarena.core.validators import validate_bot_name
 
-from ..url_utils import get_bot_absolute_url
+from ...frontend.templatetags.url_utils import get_bot_absolute_url
 from .bot_race import BotRace
 from .match import Match
 from .mixins import LockableModelMixin
@@ -186,10 +186,6 @@ class Bot(models.Model, LockableModelMixin):
         if Bot.objects.all().count() <= 1:
             raise RuntimeError("I am the only bot.")
         return Bot.objects.exclude(id=self.id).order_by("?").first()
-
-    @cached_property
-    def as_html_link(self):
-        return mark_safe(f'<a href="{get_bot_absolute_url(self)}">{escape(self.__str__())}</a>')
 
     @cached_property
     def as_truncated_html_link(self):

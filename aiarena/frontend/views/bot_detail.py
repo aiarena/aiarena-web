@@ -14,6 +14,7 @@ from aiarena.core.models import Bot, Competition, MatchParticipation, RelativeRe
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.s3_helpers import get_file_url_s3_hack
 from aiarena.frontend.templatetags.core_filters import format_elo_change, result_color_class, step_time_color
+from aiarena.frontend.templatetags.url_utils import get_bot_html_link
 
 
 class FileURLColumn(tables.URLColumn):
@@ -79,7 +80,7 @@ class BotResultTable(tables.Table):
 
     # Custom Column Rendering
     def render_match(self, value):
-        return value.as_html_link
+        return get_bot_html_link(value)
 
     def render_opponent(self, value):
         return value.bot.as_truncated_html_link

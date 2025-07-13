@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n url_utils %}
 
 {% block content %}
     <div class="divider"><span></span><span><h2>Edit Bot</h2></span><span></span></div>
     <div class="registration-form">
-        <h2><em class="material-icons" style="font-size: 48px; vertical-align: -0.35em;">edit</em>{{ bot.as_html_link }}
+        <h2><em class="material-icons" style="font-size: 48px; vertical-align: -0.35em;">edit</em>{% get_bot_html_link bot %}
         </h2>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
