@@ -16,7 +16,7 @@ from rest_framework.authtoken.models import Token
 from aiarena.core import models
 from aiarena.core.models import BotRace, MatchParticipation, Result, User
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits, Users
-from aiarena.frontend.templatetags.url_utils import get_bot_absolute_url
+from aiarena.frontend.templatetags.url_utils import get_absolute_url
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
@@ -95,7 +95,7 @@ class BotType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_url(root: models.Bot, info, **args):
-        return get_bot_absolute_url(root)
+        return get_absolute_url("bot", root)
 
     @staticmethod
     def resolve_competition_participations(root: models.Bot, info, **args):
@@ -135,7 +135,7 @@ class CompetitionType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_url(root: models.Competition, info, **args):
-        return root.get_absolute_url()
+        return get_absolute_url("competition", root)
 
     @staticmethod
     def resolve_participants(root: models.Competition, info, **args):

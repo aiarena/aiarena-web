@@ -15,17 +15,22 @@ def get_bot_absolute_url(bot) -> str:
 
 
 @register.simple_tag
-def get_bot_html_link(bot) -> str:
-    """
-    Returns an HTML link to the bot.
-    """
-    return mark_safe(f'<a href="{get_bot_absolute_url(bot)}">{escape(str(bot))}</a>')
-
-
-@register.simple_tag
 def get_bot_truncated_html_link(bot) -> str:
     name = escape(bot.__str__())
     limit = 20
     return mark_safe(
-        f'<a href="{get_bot_absolute_url(bot)}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>'
+        f'<a href="{get_absolute_url("bot", bot)}">{(name[:limit - 3] + "...") if len(name) > limit else name}</a>'
     )
+
+
+def get_absolute_url(view_name, model_instance):
+    """Returns the absolute URL for a model instance."""
+    return reverse(view_name, kwargs={"pk": model_instance.pk})
+
+
+@register.simple_tag
+def get_html_link(model_name: str, model_instance) -> str:
+    """Returns an HTML link to a model instance."""
+    url = get_absolute_url(model_name, model_instance)
+    name = escape(str(model_instance))
+    return mark_safe(f'<a href="{url}">{name}</a>')

@@ -28,14 +28,14 @@
             {% endif %}
 
             {# Bot name #}
-            {% get_bot_html_link match.participant1.bot %}
+            {% get_html_link "bot" match.participant1.bot %}
 
             - VS -
 
             {# Participant 2 #}
 
             {# Bot name #}
-            {% get_bot_html_link match.participant2.bot %}
+            {% get_html_link "bot" match.participant2.bot %}
 
             {% if match.result and not match.requested_by %}
                 {# ELO change #}
