@@ -183,7 +183,6 @@ def ecs():
     environment, build_number = deploy_environment()
     images = json.loads(os.environ.get("PREPARED_IMAGES"))
 
-    aws.push_manifest("frontend", "latest", images["frontend_images"])
     aws.push_manifest("cloud", "latest", images["cloud_images"])
 
     # Prepare different environment with root db user for migrations. This is
