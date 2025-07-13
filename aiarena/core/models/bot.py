@@ -174,18 +174,6 @@ class Bot(models.Model, LockableModelMixin):
     def __str__(self):
         return self.name
 
-    def bot_data_is_currently_frozen(self):
-        # Check if there's any match where the bot's data is being used and updated
-        data_frozen = Match.objects.filter(
-            matchparticipation__bot=self,
-            matchparticipation__use_bot_data=True,
-            matchparticipation__update_bot_data=True,
-            started__isnull=False,
-            result__isnull=True,
-        ).exists()
-
-        return self.bot_data and data_frozen
-
     def get_active_excluding_self(self):
         """Returns a queryset of active bots, excluding this one."""
         from ..services import Bots  # avoid circular reference
