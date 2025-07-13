@@ -77,7 +77,7 @@ export default function UserBotsList(props: UserBotsListProps) {
   return (
     <div role="region" aria-labelledby="bots-list-heading" aria-live="polite">
       <h2 id="bots-list-heading" className="sr-only">
-        Your Agents List
+        Your Bot List
       </h2>
       {hasItems ? (
         <ul className="space-y-12">

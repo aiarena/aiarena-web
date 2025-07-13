@@ -68,7 +68,7 @@ export default function BotSearchList({
       options={getNodes(data?.bots)}
       setQuery={setQuery}
       displayValue={(bot) => (bot as BotType)?.name}
-      placeholder={"Type to search agents..."}
+      placeholder={"Type to search bots..."}
       hasNext={hasNext}
       loadMoreRef={loadMoreRef}
     />

@@ -70,7 +70,7 @@ export default function UserMatchRequestsHeaderSection(
         <MainButton
           onClick={() => setIsRequestMatchModalOpen(true)}
           text="Request New Match"
-          aria-label="Request a new match between Agents"
+          aria-label="Request a new match between Bots"
           aria-describedby={
             viewer.requestMatchesCountLeft <= 0 ? "no-requests-left" : undefined
           }
