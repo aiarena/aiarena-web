@@ -14,7 +14,7 @@ from aiarena.core.models import Bot, Competition, MatchParticipation, RelativeRe
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.s3_helpers import get_file_url_s3_hack
 from aiarena.frontend.templatetags.core_filters import format_elo_change, result_color_class, step_time_color
-from aiarena.frontend.templatetags.url_utils import get_bot_html_link
+from aiarena.frontend.templatetags.url_utils import get_bot_html_link, get_bot_truncated_html_link
 
 
 class FileURLColumn(tables.URLColumn):
@@ -83,7 +83,7 @@ class BotResultTable(tables.Table):
         return get_bot_html_link(value)
 
     def render_opponent(self, value):
-        return value.bot.as_truncated_html_link
+        return get_bot_truncated_html_link(value.bot)
 
     def render_elo_change(self, record, value):
         return "--" if record.match.requested_by else format_elo_change(value)

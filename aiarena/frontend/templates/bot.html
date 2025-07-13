@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n core_filters wiki_tags %}
+{% load i18n core_filters wiki_tags url_utils %}
 {% load render_table from django_tables2 %}
 
 
@@ -212,12 +212,12 @@
                     <td>{{ participation.match.as_html_link }}</td>
                     {% for p in participation.match.participants %}
                         {% if p.participant_number == 1 %}
-                            <td>{{ p.bot.as_truncated_html_link }}</td>
+                            <td>{% get_bot_truncated_html_link p.bot %}</td>
                         {% endif %}
                     {% endfor %}
                     {% for p in participation.match.participants %}
                         {% if p.participant_number == 2 %}
-                            <td>{{ p.bot.as_truncated_html_link }}</td>
+                            <td>{% get_bot_truncated_html_link p.bot %}</td>
                         {% endif %}
                     {% endfor %}
                     <td>{{ participation.match.map }}</td>

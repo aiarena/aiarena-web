@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 
-def get_bot_absolute_url(bot):
+def get_bot_absolute_url(bot) -> str:
     """
     Returns the absolute URL for a bot.
     """
@@ -15,8 +15,17 @@ def get_bot_absolute_url(bot):
 
 
 @register.simple_tag
-def get_bot_html_link(bot):
+def get_bot_html_link(bot) -> str:
     """
     Returns an HTML link to the bot.
     """
     return mark_safe(f'<a href="{get_bot_absolute_url(bot)}">{escape(str(bot))}</a>')
+
+
+@register.simple_tag
+def get_bot_truncated_html_link(bot) -> str:
+    name = escape(bot.__str__())
+    limit = 20
+    return mark_safe(
+        f'<a href="{get_bot_absolute_url(bot)}">{(name[:limit-3] + "...") if len(name) > limit else name}</a>'
+    )

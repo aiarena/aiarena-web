@@ -175,7 +175,7 @@
             {% if competition_bot_matchups|length > 0 %}
                 {% for bot_matchup in competition_bot_matchups %}
                     <tr style="text-align: right">
-                        <td style="text-align: right">{{ bot_matchup.opponent.bot.as_truncated_html_link }}</td>
+                        <td style="text-align: right">{% get_bot_truncated_html_link bot_matchup.opponent.bot %}</td>
                         <td class="mono"
                             style="text-align: left">{{ bot_matchup.opponent.bot.plays_race.get_label_display }}</td>
                         <td class="mono">{{ bot_matchup.match_count }}</td>
