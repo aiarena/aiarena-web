@@ -80,7 +80,7 @@ class BotResultTable(tables.Table):
 
     # Custom Column Rendering
     def render_match(self, value):
-        return get_html_link("bot", value)
+        return get_html_link("match", value)
 
     def render_opponent(self, value):
         return get_bot_truncated_html_link(value.bot)
