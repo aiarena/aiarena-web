@@ -90,7 +90,7 @@
                 {% endif %}
 
                 {% if match.assigned_to %}
-                    <td>{% get_html_link "arenaclient" match.assigned_to %}}</td>
+                    <td>{{% get_html_link "arenaclient" match.assigned_to %}}</td>
                 {% else %}
                     <td>queued...</td>
                 {% endif %}
