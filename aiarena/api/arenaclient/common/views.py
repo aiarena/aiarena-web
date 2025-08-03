@@ -58,7 +58,7 @@ class MatchViewSet(viewsets.GenericViewSet):
         no_game_available = cache.get("NoGameAvailable", False)
 
         if request.user.is_arenaclient:
-            match = ACCoordinator.next_match(request.user.arenaclient, no_game_available)
+            match = ACCoordinator().next_match(request.user.arenaclient, no_game_available)
             if match:
                 self.load_participants(match)
 

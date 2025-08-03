@@ -37,12 +37,21 @@ logger = logging.getLogger(__name__)
 class ACCoordinator:
     """Coordinates all the Arena Clients and which matches they play."""
 
-    @staticmethod
-    def next_match(arenaclient: ArenaClient, only_unfinished_matches: bool) -> Match | None:
-        if not config.LADDER_ENABLED:
+    def __init__(
+        self,
+        priority_order_cache_time: int = config.COMPETITION_PRIORITY_ORDER_CACHE_TIME,
+        ladder_enabled: bool = config.LADDER_ENABLED,
+        reissue_unfinished_matches: bool = config.REISSUE_UNFINISHED_MATCHES,
+    ):
+        self.priority_order_cache_time = priority_order_cache_time
+        self.ladder_enabled = ladder_enabled
+        self.reissue_unfinished_matches = reissue_unfinished_matches
+
+    def next_match(self, arenaclient: ArenaClient, only_unfinished_matches: bool) -> Match | None:
+        if not self.ladder_enabled:
             raise LadderDisabled()
 
-        if config.REISSUE_UNFINISHED_MATCHES:
+        if self.reissue_unfinished_matches:
             # Check for any unfinished matches assigned to this user. If any are present, return that.
             unfinished_matches = list(
                 Match.objects.only("id", "map")
@@ -59,17 +68,15 @@ class ACCoordinator:
                 return None  # Return None so we don't try to start a new match
 
         # Trying a new match
-        return ACCoordinator._next_new_match(arenaclient)
+        return self._next_new_match(arenaclient)
 
-    @staticmethod
-    def _next_new_match(arenaclient: ArenaClient):
-        requested_match = ACCoordinator._next_requested_match(arenaclient)
+    def _next_new_match(self, arenaclient: ArenaClient):
+        requested_match = self._next_requested_match(arenaclient)
         if requested_match is not None:
             return requested_match
-        return ACCoordinator._next_competition_match(arenaclient)
+        return self._next_competition_match(arenaclient)
 
-    @staticmethod
-    def _next_requested_match(arenaclient: ArenaClient):
+    def _next_requested_match(self, arenaclient: ArenaClient):
         # REQUESTED MATCHES
         with transaction.atomic():
             match = Matches.attempt_to_start_a_requested_match(arenaclient)
@@ -77,9 +84,8 @@ class ACCoordinator:
                 return match  # a match was found - we're done
         return None
 
-    @staticmethod
-    def _next_competition_match(arenaclient: ArenaClient):
-        competition_ids = ACCoordinator._get_competition_priority_order()
+    def _next_competition_match(self, arenaclient: ArenaClient):
+        competition_ids = self._get_competition_priority_order()
         for id in competition_ids:
             competition = Competition.objects.get(id=id)
             # This excludes non-trusted clients from competitions requiring trusted infrastructure
@@ -102,8 +108,7 @@ class ACCoordinator:
 
         return None
 
-    @staticmethod
-    def _get_competition_priority_order():
+    def _get_competition_priority_order(self):
         """
         Returns a list of competition ids in priority order with respect to the current number of active participants
          in each competition verses each competition's share of the most recent 100 matches.
@@ -162,7 +167,7 @@ class ACCoordinator:
                 cache.set(
                     "competition_priority_order",
                     competition_priority_order,
-                    config.COMPETITION_PRIORITY_ORDER_CACHE_TIME,
+                    self.priority_order_cache_time,
                 )
 
         return competition_priority_order
