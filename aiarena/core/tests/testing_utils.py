@@ -71,8 +71,8 @@ def create_arena_clients_with_matching_tokens(stdout, client, num_acs, for_user)
     stdout.write("Creating ACs...100%")
 
 
-def create_open_competition_with_map(client, name: str, type: str, game_mode_id: int, **competition_kwargs):
-    competition = client.create_competition(name, type, game_mode_id, **competition_kwargs)
+def create_open_competition_with_map(client, name: str, game_mode_id: int, **competition_kwargs):
+    competition = client.create_competition(name, game_mode_id, **competition_kwargs)
     with open(TestAssetPaths.test_map_path, "rb") as map:
         map = Map.objects.create(name="test_map1", file=File(map), game_mode_id=game_mode_id)
         map.competitions.add(competition)
@@ -171,7 +171,6 @@ class TestingClient:
     def create_competition(
         self,
         name: str,
-        type: str,
         game_mode_id: int,
         playable_race_ids=None,
         require_trusted_infrastructure=True,
@@ -206,7 +205,6 @@ class TestingClient:
             "_open-competition": "Open competition",
             "competition": competition_id,
             "name": competition.name,  # required by the form
-            "type": competition.type,  # required by the form
             "game_mode": competition.game_mode_id,  # required by the form
             # if this isn't set here, it reverts to false - I don't understand why :(
             "indepth_bot_statistics_enabled": competition.indepth_bot_statistics_enabled,
@@ -223,7 +221,6 @@ class TestingClient:
             "_pause-competition": "Pause competition",
             "competition": competition_id,
             "name": competition.name,  # required by the form
-            "type": competition.type,  # required by the form
             "game_mode": competition.game_mode_id,  # required by the form
         }
         response = self.django_client.post(url, data)
@@ -238,7 +235,6 @@ class TestingClient:
             "_close-competition": "Close competition",
             "competition": competition_id,
             "name": competition.name,  # required by the form
-            "type": competition.type,  # required by the form
             "game_mode": competition.game_mode_id,  # required by the form
         }
         response = self.django_client.post(url, data)

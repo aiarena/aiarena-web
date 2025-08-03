@@ -19,7 +19,7 @@ class LadderMatchStarterTests(TestCase):
         game_mode = GameMode.objects.create(name="testgamemode", game=game)
         BotRace.create_all_races()
         bot_race = BotRace.objects.first()
-        competition = Competition.objects.create(name="testcompetition", type="L", game_mode=game_mode)
+        competition = Competition.objects.create(name="testcompetition", game_mode=game_mode)
         competition.playable_races.add(bot_race)
         competition.open()
         match_map = Map.objects.create(name="testmap", game_mode=game_mode)

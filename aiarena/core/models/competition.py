@@ -16,13 +16,6 @@ from .mixins import LockableModelMixin
 logger = logging.getLogger(__name__)
 
 
-class CompetitionType(models.TextChoices):
-    LEAGUE = "L", "League - Round Robin"
-    # TOURNAMENT = u'T', 'Tournament'
-    # CUSTOM = u'C', 'Custom'
-    # flash_challenge = u'F', 'FlashChallenge'
-
-
 class Competition(models.Model, LockableModelMixin):
     """Represents a competition of play in the context of a ladder"""
 
@@ -40,7 +33,6 @@ class Competition(models.Model, LockableModelMixin):
         ),  # Functionally identical to paused, except not intended to change after this status, other than to be finalized.
     )
     name = models.CharField(max_length=50, unique=True)
-    type = models.CharField(max_length=32, choices=CompetitionType.choices, default=CompetitionType.LEAGUE)
     game_mode = models.ForeignKey(GameMode, on_delete=models.CASCADE, related_name="game_modes")
     date_created = models.DateTimeField(auto_now_add=True, blank=True)
     date_opened = models.DateTimeField(blank=True, null=True)

@@ -32,7 +32,6 @@ bot_race_include_fields = "id", "label"
 competition_include_fields = (
     "id",
     "name",
-    "type",
     "game_mode",
     "date_created",
     "date_opened",

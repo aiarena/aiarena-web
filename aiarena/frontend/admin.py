@@ -223,7 +223,6 @@ class CompetitionAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "name",
-        "type",
         "game_mode",
         "date_created",
         "date_opened",

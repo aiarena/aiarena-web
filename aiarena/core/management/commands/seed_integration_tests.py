@@ -65,7 +65,6 @@ class Command(BaseCommand):
         competition = create_open_competition_with_map(
             client,
             "Competition 1",
-            "L",
             gamemode.id,
             target_n_divisions=2,
             target_division_size=2,

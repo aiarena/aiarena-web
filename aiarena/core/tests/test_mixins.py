@@ -48,7 +48,7 @@ class BaseTestMixin(TestCase):
         return map
 
     def _create_competition(self, gamemode_id: int, name="Competition 1", playable_race_ids=None):
-        competition = Competition.objects.create(name=name, type="L", game_mode_id=gamemode_id)
+        competition = Competition.objects.create(name=name, game_mode_id=gamemode_id)
         if playable_race_ids:
             for race_id in playable_race_ids:
                 competition.playable_races.add(race_id)
@@ -64,7 +64,7 @@ class BaseTestMixin(TestCase):
         gamde_mode = self.test_client.create_gamemode("Melee", game.id)
         BotRace.create_all_races()
         competition = self.test_client.create_competition(
-            "Competition 1", "L", gamde_mode.id, require_trusted_infrastructure=trusted
+            "Competition 1", gamde_mode.id, require_trusted_infrastructure=trusted
         )
         self.test_client.open_competition(competition.id)
         return competition

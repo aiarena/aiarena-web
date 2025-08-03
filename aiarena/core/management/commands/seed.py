@@ -293,7 +293,6 @@ class Command(BaseCommand):
     def create_open_competitions(self, client, gamemode, terran):
         competition1 = client.create_competition(
             "Competition 1",
-            "L",
             gamemode.id,
             target_n_divisions=2,
             target_division_size=2,
@@ -302,8 +301,8 @@ class Command(BaseCommand):
             indepth_bot_statistics_enabled=True,
         )
         client.open_competition(competition1.id)
-        competition2 = client.create_competition("Competition 2", "L", gamemode.id, indepth_bot_statistics_enabled=True)
+        competition2 = client.create_competition("Competition 2", gamemode.id, indepth_bot_statistics_enabled=True)
         client.open_competition(competition2.id)
-        competition3 = client.create_competition("Competition 3 - Terran Only", "L", gamemode.id, {terran.id})
+        competition3 = client.create_competition("Competition 3 - Terran Only", gamemode.id, {terran.id})
         client.open_competition(competition3.id)
         return competition1, competition2, competition3
