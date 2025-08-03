@@ -113,7 +113,6 @@ class ResultSubmission:
 @dataclass
 class ResultSubmissionConfig:
     enable_elo_sanity_check: bool = config.ENABLE_ELO_SANITY_CHECK
-    debug_logging_enabled: bool = config.DEBUG_LOGGING_ENABLED
     bot_consecutive_crash_limit: int = config.BOT_CONSECUTIVE_CRASH_LIMIT
 
 
@@ -254,8 +253,7 @@ def submit_result(
             )
 
         if config.enable_elo_sanity_check:
-            if config.debug_logging_enabled:
-                logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
+            logger.debug("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
 
             # test here to check ELO total and ensure no corruption
             match_competition = result.match.round.competition
@@ -272,11 +270,11 @@ def submit_result(
                     f"ELO SANITY CHECK FAILURE: ELO sum of {actual_elo_sum['elo__sum']} did not match expected value "
                     f"of {expected_elo_sum} upon submission of result {result.id}"
                 )
-            elif config.debug_logging_enabled:
-                logger.info("ENABLE_ELO_SANITY_CHECK passed!")
+            else:
+                logger.debug("ENABLE_ELO_SANITY_CHECK passed!")
 
-        elif config.debug_logging_enabled:
-            logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
+        else:
+            logger.debug("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
         BotStatistics(sp1).update_stats_based_on_result(result, sp2)
         BotStatistics(sp2).update_stats_based_on_result(result, sp1)
