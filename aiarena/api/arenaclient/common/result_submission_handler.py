@@ -110,7 +110,16 @@ class ResultSubmission:
     bot2_tags: list | None
 
 
-def submit_result(result_submission: ResultSubmission):
+@dataclass
+class ResultSubmissionConfig:
+    enable_elo_sanity_check: bool = config.ENABLE_ELO_SANITY_CHECK
+    debug_logging_enabled: bool = config.DEBUG_LOGGING_ENABLED
+    bot_consecutive_crash_limit: int = config.BOT_CONSECUTIVE_CRASH_LIMIT
+
+
+def submit_result(
+    result_submission: ResultSubmission, config: ResultSubmissionConfig = ResultSubmissionConfig()
+) -> Result:
     """
     Processes the result of a match.
     """
@@ -244,8 +253,8 @@ def submit_result(result_submission: ResultSubmission):
                 f"participant2.elo_change: {participant2.elo_change}"
             )
 
-        if config.ENABLE_ELO_SANITY_CHECK:
-            if config.DEBUG_LOGGING_ENABLED:
+        if config.enable_elo_sanity_check:
+            if config.debug_logging_enabled:
                 logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
 
             # test here to check ELO total and ensure no corruption
@@ -263,10 +272,10 @@ def submit_result(result_submission: ResultSubmission):
                     f"ELO SANITY CHECK FAILURE: ELO sum of {actual_elo_sum['elo__sum']} did not match expected value "
                     f"of {expected_elo_sum} upon submission of result {result.id}"
                 )
-            elif config.DEBUG_LOGGING_ENABLED:
+            elif config.debug_logging_enabled:
                 logger.info("ENABLE_ELO_SANITY_CHECK passed!")
 
-        elif config.DEBUG_LOGGING_ENABLED:
+        elif config.debug_logging_enabled:
             logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
         BotStatistics(sp1).update_stats_based_on_result(result, sp2)
@@ -274,20 +283,23 @@ def submit_result(result_submission: ResultSubmission):
 
         if result.is_crash_or_timeout:
             try:
-                run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
+                run_consecutive_crashes_check(
+                    result.get_causing_participant_of_crash_or_timeout_result, config.bot_consecutive_crash_limit
+                )
             except Exception as e:
                 logger.exception(e)
     return result
 
 
-def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
+def run_consecutive_crashes_check(triggering_participation: MatchParticipation, consecutive_crash_limit: int):
     """
     Checks to see whether the last X results for a participant are crashes and, if so, sends an alert.
-    :param triggering_participant: The participant who triggered this check and whose bot we should run the check for.
+    :param triggering_participation: The participant who triggered this check and whose bot we should run the check for.
+    :param consecutive_crash_limit: The number of consecutive crashes to check for.
     :return:
     """
 
-    if config.BOT_CONSECUTIVE_CRASH_LIMIT < 1:
+    if consecutive_crash_limit < 1:
         return  # Check is disabled
 
     if not triggering_participation.bot.competition_participations.filter(active=True).exists():
@@ -296,10 +308,10 @@ def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
     # Get recent match participation records for this bot since its last update
     recent_participations = MatchParticipation.objects.filter(
         bot=triggering_participation.bot, match__result__isnull=False, match__started__gt=F("bot__bot_zip_updated")
-    ).order_by("-match__result__created")[: config.BOT_CONSECUTIVE_CRASH_LIMIT]
+    ).order_by("-match__result__created")[:consecutive_crash_limit]
 
     # if there's not enough participations yet, then exit without action
-    if recent_participations.count() < config.BOT_CONSECUTIVE_CRASH_LIMIT:
+    if recent_participations.count() < consecutive_crash_limit:
         return
 
     # if any of the previous results weren't a crash or already triggered a crash limit alert, then exit without action
