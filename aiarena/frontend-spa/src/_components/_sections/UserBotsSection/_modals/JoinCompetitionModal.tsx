@@ -58,7 +58,6 @@ export default function JoinCompetitionModal({
               node {
                 id
                 name
-                type
                 dateCreated
                 status
               }
