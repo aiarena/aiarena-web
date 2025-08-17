@@ -18,6 +18,7 @@ class ArenaClients(ListView):
         return (
             ArenaClient.objects.select_related("owner")
             .filter(is_active=True)
+            .only("id", "trusted", "owner_id", "owner__id", "owner__username")
             .annotate(matches_1hr=Count("submitted_results", filter=Q(submitted_results__created__gte=one_hour_ago)))
             .annotate(
                 matches_24hr=Count("submitted_results", filter=Q(submitted_results__created__gte=twenty_four_hours_ago))
