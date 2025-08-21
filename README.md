@@ -26,8 +26,11 @@ API endpoints specifically for use by the livestream player to obtain a curated 
 ### /aiarena/frontend
 Django template website frontend
 
+### /aiarena/frontend-spa
+React frontend for the profile dashboard
+
 ### /aiarena/graphql
-GraphQL API currently used by the Next.JS frontend
+GraphQL API used by the React frontend
 
 ### /aiarena/patreon
 A module for linking website users to their patreon counterparts.
