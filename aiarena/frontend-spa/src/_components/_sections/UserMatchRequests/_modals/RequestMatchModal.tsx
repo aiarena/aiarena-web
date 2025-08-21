@@ -71,6 +71,9 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         $connections: [ID!]!
       ) {
         requestMatch(input: $input) {
+          viewer {
+            requestMatchesCountLeft
+          }
           match
             @prependNode(
               connections: $connections
