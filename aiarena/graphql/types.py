@@ -1,3 +1,12 @@
+# =============================================================================
+# If there are any changes made to this file, run the following in the
+# development environment to generate a new schema:
+#
+#     python manage.py graphql_schema
+#
+# (This step happens automatically in CI/CD.)
+# =============================================================================
+
 from datetime import timedelta
 
 from django.conf import settings
