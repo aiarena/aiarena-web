@@ -22,6 +22,7 @@ def frontend(request, *args, extra_settings: dict | None = None, **kwargs):
         request,
         "frontend/frontend.html",
         {
+            "settings": settings,
             "frontend_settings": json.dumps(frontend_settings),
             "user": request.user,
         },

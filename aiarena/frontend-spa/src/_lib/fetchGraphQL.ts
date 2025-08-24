@@ -2,6 +2,7 @@ import {
   Variables, UploadableMap,
 } from "relay-runtime";
 
+const frontendBuildNumber = window.BUILD_NUMBER;
 
 export default async function fetchGraphQL(text: string | null, variables: Variables, uploadables: UploadableMap | null | undefined) {
   let body;
@@ -53,6 +54,11 @@ export default async function fetchGraphQL(text: string | null, variables: Varia
     headers: headers,
     body: body,
   });
+
+  const backendBuildNumber = response.headers.get("BUILD_NUMBER");
+  if (frontendBuildNumber && frontendBuildNumber !== backendBuildNumber) {
+    window.buildNumbersMismatch = true;
+  }
 
   if (response.status >= 500) {
     throw new Error(`Error code ${response.status} when fetching graphql`);

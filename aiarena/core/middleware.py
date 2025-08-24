@@ -70,3 +70,19 @@ def track_harakiri_request(get_response):
         return response
 
     return middleware
+
+
+def build_number(get_response):
+    """
+    Helps to keep frontend and backend versions in sync.
+
+    The frontend compares its own build number with the number returned from
+    API, and if they don't match, it will try to reload the page.
+    """
+
+    def middleware(request):
+        response = get_response(request)
+        response["BUILD_NUMBER"] = str(settings.BUILD_NUMBER or "")
+        return response
+
+    return middleware
