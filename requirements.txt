@@ -30,7 +30,7 @@ docutils<0.17
 drf-yasg @ git+https://github.com/max-muoto/drf-yasg.git@68cc6fa76848d1d0194d847569009eb603e516b2
 graphene-django==3.2.2
 graphene-file-upload @ git+https://github.com/gulfofmaine/graphene-file-upload.git@63fa76ed694a942ef1dcb84abe2974930fc4858d
-matplotlib==3.8.0
+matplotlib==3.10.5
 numpy==1.26.3
 pandas==2.2.2
 pinax-theme-bootstrap==8.0.1
