@@ -42,37 +42,24 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
-    services:
-      postgres:
-        # Docker Hub image
-        image: postgres:15.5
-        # Provide the password for postgres
-        env:
-          POSTGRES_PASSWORD: aiarena
-          POSTGRES_USER: aiarena
-          POSTGRES_DATABASE: test_aiarena
-          POSTGRES_ROOT_PASSWORD: aiarena
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
     steps:
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
-      - uses: shogo82148/actions-setup-redis@v1
-        with:
-          redis-version: '6.x'
-      - run: redis-cli ping
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: 'pip'
+
+      - name: Start database services
+        run: docker compose up -d builtin_db redis
+
+      - name: Wait for services to be ready
+        run: |
+          until docker compose exec builtin_db pg_isready -U roleplay_app; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          until docker compose exec redis redis-cli ping; do
+            echo "Waiting for Redis..."
+            sleep 2
+          done
+
       - name: Install Dependencies
         run: pip install -r requirements.DEVELOPMENT.txt
       - name: Grant aiarena user full access
@@ -98,33 +85,24 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
-    services:
-      postgres:
-        # Docker Hub image
-        image: postgres:15.5
-        # Provide the password for postgres
-        env:
-          POSTGRES_PASSWORD: aiarena
-          POSTGRES_USER: aiarena
-          POSTGRES_DATABASE: test_aiarena
-          POSTGRES_ROOT_PASSWORD: aiarena
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps tcp port 5432 on service container to the host
-          - 5432:5432
     steps:
       #  Repo + Redis
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
-      - uses: shogo82148/actions-setup-redis@v1
-        with:
-          redis-version: '6.x'
-      - run: redis-cli ping
+
+      - name: Start database services
+        run: docker compose up -d builtin_db redis
+
+      - name: Wait for services to be ready
+        run: |
+          until docker compose exec builtin_db pg_isready -U roleplay_app; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
+          until docker compose exec redis redis-cli ping; do
+            echo "Waiting for Redis..."
+            sleep 2
+          done
 
       #  Python Dependencies
       - name: Set up Python
@@ -137,8 +115,8 @@ jobs:
 
       - name: Generate GraphQL Schema
         run: python manage.py graphql_schema
-      
-      #  Node.JS Dependencies  
+
+      #  Node.JS Dependencies
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -155,18 +133,18 @@ jobs:
         run: npm run lint
         working-directory: aiarena/frontend-spa
 
-      - name: Generate Relay artifacts                 
+      - name: Generate Relay artifacts
         run: npm run relay
         working-directory: aiarena/frontend-spa
 
-      - name: Build Vite bundle                     
+      - name: Build Vite bundle
         run: npm run build
         working-directory: aiarena/frontend-spa
 
       - name: Collect static files
         run: python manage.py collectstatic --noinput
 
-      #  Playwright E2E  
+      #  Playwright E2E
       - name: Install Playwright browsers
         run: playwright install --with-deps
       - name: Grant aiarena user full access
@@ -179,9 +157,8 @@ jobs:
         env:
           NOFAKE_REDIS: 1
         run: pytest -m playwright --tracing retain-on-failure --junit-xml test-results/pytest-playwright.xml
-      
-      
-      #   Reports 
+
+      #   Reports
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
         if: always()
