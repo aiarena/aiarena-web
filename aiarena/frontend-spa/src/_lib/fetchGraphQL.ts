@@ -47,7 +47,6 @@ export default async function fetchGraphQL(text: string | null, variables: Varia
       variables,
     });
     headers["Content-Type"] = "application/json";
-    headers["X-CSRFToken"] = window.Settings.csrfToken;
   }
 
   const response = await fetch("/graphql/", {

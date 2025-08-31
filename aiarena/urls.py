@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, re_path
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 
 import debug_toolbar
@@ -61,7 +62,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("accounts/", include("django.contrib.auth.urls")),
     path("", core_views.Index.as_view(), name="home"),
     path("api/", include("aiarena.api.urls")),
-    path("graphql/", core_views.CustomGraphQLView.as_view(graphiql=True), name="graphql"),
+    path("graphql/", csrf_exempt(core_views.CustomGraphQLView.as_view(graphiql=True)), name="graphql"),
     path("results/", core_views.RecentResults.as_view(), name="results"),
     path("arenaclients/", core_views.ArenaClients.as_view(), name="arenaclients"),
     path("arenaclients/<int:pk>/", core_views.ArenaClientView.as_view(), name="arenaclient"),
