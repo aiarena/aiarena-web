@@ -71,7 +71,12 @@ class MatchViewSet(viewsets.GenericViewSet):
         raise NoGameForClient()
 
     # todo: check match is in progress/bot is in this match
-    @action(detail=True, methods=["GET"], name="Download a participant's zip file", url_path="(?P<p_num>\d+)/zip")
+    @action(
+        detail=True,
+        methods=["GET"],
+        name="Download a participant's zip file",
+        url_path=r"(?P<p_num>\d+)/zip",
+    )
     def download_zip(self, request, *args, **kwargs):
         p = MatchParticipation.objects.get(match=kwargs["pk"], participant_number=kwargs["p_num"])
         if p.bot.can_download_bot_zip(request.user):
@@ -82,7 +87,12 @@ class MatchViewSet(viewsets.GenericViewSet):
             raise PermissionDenied("You cannot download that bot zip.")
 
     # todo: check match is in progress/bot is in this match
-    @action(detail=True, methods=["GET"], name="Download a participant's data file", url_path="(?P<p_num>\d+)/data")
+    @action(
+        detail=True,
+        methods=["GET"],
+        name="Download a participant's data file",
+        url_path=r"(?P<p_num>\d+)/data",
+    )
     def download_data(self, request, *args, **kwargs):
         p = MatchParticipation.objects.get(match=kwargs["pk"], participant_number=kwargs["p_num"])
         if p.bot.can_download_bot_data(request.user):
