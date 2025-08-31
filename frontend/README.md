@@ -45,11 +45,20 @@ If you get a watchman error when running npm run relay:
   "relay": "relay-compiler --watch",
 
 
+5. Tests: 
 
+Navigate to the django root - 
+Then run:
 
+```bash 
+  DJANGO_ALLOW_ASYNC_UNSAFE=true pytest -m playwright
+```
 
+Tests are located at: 
+aiarena/core/tests/playwright/test_react_spa.py
 
-
+Traces can be found in CI/CD and viewed with 
+https://trace.playwright.dev/
 
 
 
