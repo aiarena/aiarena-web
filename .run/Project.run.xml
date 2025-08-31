@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Project" type="CompoundRunConfigurationType">
+    <toRun name="aiarena-web" type="Python.DjangoServer" />
+    <toRun name="Databases" type="docker-deploy" />
+    <toRun name="Frontend" type="js.build_tools.npm" />
+    <toRun name="Relay" type="js.build_tools.npm" />
+    <method v="2" />
+  </configuration>
+</component>
