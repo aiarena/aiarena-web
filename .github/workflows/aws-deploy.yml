@@ -62,11 +62,7 @@ jobs:
 
       - name: Install Dependencies
         run: pip install -r requirements.DEVELOPMENT.txt
-      - name: Grant aiarena user full access
-        env:
-          PORT: ${{ job.services.postgres.ports[5432] }}
-        run: |
-          PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
+
       - name: Run Tests
         if:  ${{ !inputs.skip_tests }}
         env:
@@ -147,11 +143,6 @@ jobs:
       #  Playwright E2E
       - name: Install Playwright browsers
         run: playwright install --with-deps
-      - name: Grant aiarena user full access
-        env:
-          PORT: ${{ job.services.postgres.ports[5432] }}
-        run: |
-          PGPASSWORD="aiarena" psql -Uaiarena --host="127.0.0.1" --port "$PORT" -c "ALTER DATABASE aiarena OWNER TO aiarena; GRANT ALL PRIVILEGES ON DATABASE aiarena TO aiarena;";
       - name: Run Tests
         if:  ${{ !inputs.skip_tests }}
         env:
