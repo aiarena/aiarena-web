@@ -753,30 +753,30 @@ Resources:
           {
             "rules": [
               {
-                "rulePriority": 10,
+                "action": {
+                  "type": "expire"
+                },
                 "description": "Purge untagged images",
                 "selection": {
                   "tagStatus": "untagged",
                   "countType": "imageCountMoreThan",
                   "countNumber": 2
                 },
-                "action": {
-                  "type": "expire"
-                }
+                "rulePriority": 10
               },
               {
                 "action": {
                   "type": "expire"
                 },
+                "description": "Remove temporary build images",
                 "selection": {
                   "countType": "imageCountMoreThan",
-                  "countNumber": 3,
+                  "countNumber": 10,
                   "tagStatus": "tagged",
                   "tagPrefixList": [
-                    "build-"
+                    "cloud-"
                   ]
                 },
-                "description": "Remove temporary build images",
                 "rulePriority": 11
               }
             ]
