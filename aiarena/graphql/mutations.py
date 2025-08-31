@@ -4,7 +4,7 @@
 #
 #     python manage.py graphql_schema
 #
-# (This step happens automatically in CI/CD.)
+# (This step happens in CI/CD too.)
 # =============================================================================
 
 from django.contrib.auth import authenticate, login, logout
