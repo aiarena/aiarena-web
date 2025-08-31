@@ -125,9 +125,11 @@ def deploy_environment():
         "AWS_REGION": AWS_REGION,
         "BUILD_NUMBER": build_number,
         "POSTGRES_HOST": aws.db_endpoint(PROJECT_NAME, "MainDB"),
+        "POSTGRES_PORT": 5432,
         "POSTGRES_DATABASE": DB_NAME,
         "POSTGRES_USER": PRODUCTION_DB_USER,
         "REDIS_HOST": aws.cache_cluster_nodes(PROJECT_NAME)[0],
+        "REDIS_PORT": 6379,
         "REDIS_CACHE_DB": "%s" % REDIS_CACHE_DB,
         "C_FORCE_ROOT": "1",  # force Celery to run as root
         "MAINTENANCE_MODE": str(MAINTENANCE_MODE),
