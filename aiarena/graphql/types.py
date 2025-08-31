@@ -133,7 +133,6 @@ class CompetitionType(DjangoObjectTypeWithUID):
         model = models.Competition
         fields = [
             "name",
-            "type",
             "date_created",
             "date_opened",
             "date_closed",
