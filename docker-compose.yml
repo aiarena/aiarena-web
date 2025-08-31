@@ -1,0 +1,34 @@
+services:
+  builtin_db:
+    container_name: aiarena_postgres
+    image: postgres:15
+    platform: linux/amd64
+    environment:
+      POSTGRES_DB: aiarena
+      POSTGRES_USER: aiarena
+      POSTGRES_PASSWORD: aiarena
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      - ./backup/:/backup/
+    ports:
+      - 8832:5432
+    networks:
+      default:
+
+  redis:
+    container_name: aiarena_redis
+    image: redis:7.2.6
+    ports:
+      - 8879:6379
+    networks:
+      default:
+
+volumes:
+  postgresql_data:
+  pycharm_helpers:
+  static:
+  media:
+  ipython_data_local:
+
+networks:
+  default:

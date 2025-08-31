@@ -391,14 +391,28 @@ def _confirm_restore(filename):
 
 @cli.command(help="Restore DB backup locally")
 @click.argument("filename", default="")
+@click.option("--host", default="localhost")
+@click.option("--port", default="8832")
+@click.option("--user", default="aiarena")
+@click.option("--password", default="aiarena")
 @click.option("--s3", "s3", flag_value="s3", default=None)
 @click.option("--quiet", "quiet", flag_value="quiet", default=None)
 @timing
-def restore_backup(filename, s3, quiet):
+def restore_backup(
+    filename,
+    s3,
+    quiet,
+    host,
+    port,
+    user,
+    password,
+):
     """
     For this command to work, you need to have Postgres running,
     and the credentials specified in the DATABASES setting must
     be correct for a user with admin privileges (i.e. create/drop DBs).
+
+    The default credentials / host / port match the local dev docker-compose.
     """
 
     if s3:
@@ -453,15 +467,42 @@ def restore_backup(filename, s3, quiet):
         if not quiet and not _confirm_restore(f"./backup/{filename}"):
             return
 
-    DB_USER = "aiarena"
-    DB_PASSWORD = "aiarena"
-
     echo("Dropping and re-creating the DB...")
-    run(f"dropdb --if-exists -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
-    run(f"createdb -U {DB_USER} {DB_NAME}", env={"PGPASSWORD": DB_PASSWORD})
+    run(
+        [
+            "dropdb",
+            "--if-exists",
+            f"--username={user}",
+            f"--host={host}",
+            f"--port={port}",
+            f"{DB_NAME}",
+        ],
+        env={"PGPASSWORD": password},
+    )
+    run(
+        [
+            "createdb",
+            f"--username={user}",
+            f"--host={host}",
+            f"--port={port}",
+            f"{DB_NAME}",
+        ],
+        env={"PGPASSWORD": password},
+    )
 
     echo("Restoring DB backup...")
-    run(f"pg_restore -U {DB_USER} -d {DB_NAME} --no-acl ./backup/{filename}", env={"PGPASSWORD": DB_PASSWORD})
+    run(
+        [
+            "pg_restore",
+            "--no-acl",
+            f"--username={user}",
+            f"--host={host}",
+            f"--port={port}",
+            f"--dbname={DB_NAME}",
+            f"./backup/{filename}",
+        ],
+        env={"PGPASSWORD": password},
+    )
 
     echo("Done.")
 

@@ -53,7 +53,7 @@ DATABASES = {
         "USER": os.getenv("POSTGRES_USER", "aiarena"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "aiarena"),
         "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),  # set in docker-compose.yml
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),  # default postgres port
+        "PORT": os.getenv("POSTGRES_PORT", "8832"),  # default postgres port
     },
 }
 SQL_TIME_LIMIT = 120  # seconds. Enforced by Slow Query Killer (tm)
@@ -515,7 +515,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Redis
 REDIS_HOST = os.environ.get("REDIS_HOST", "redis")
-REDIS_PORT = int(os.environ.get("REDIS_PORT", 6379))
+REDIS_PORT = int(os.environ.get("REDIS_PORT", 8879))
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
 REDIS_USE_SSL = str_to_bool(os.environ.get("REDIS_USE_SSL", "false"))
 REDIS_CELERY_DB = 0
