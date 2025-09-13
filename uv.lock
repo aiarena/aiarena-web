@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.12.*"
 
 [[package]]
@@ -85,7 +85,7 @@ requires-dist = [
     { name = "confusable-homoglyphs", specifier = "==3.2.0" },
     { name = "django", specifier = "==4.2.20" },
     { name = "django-appconf", specifier = "==1.0.5" },
-    { name = "django-avatar", specifier = "==8.0.0" },
+    { name = "django-avatar", specifier = "==8.0.1" },
     { name = "django-bootstrap-form", specifier = "==3.4" },
     { name = "django-constance", extras = ["redis"], specifier = "==3.1.0" },
     { name = "django-debug-toolbar", specifier = "==3.2.2" },
@@ -534,16 +534,16 @@ wheels = [
 
 [[package]]
 name = "django-avatar"
-version = "8.0.0"
+version = "8.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django-appconf" },
     { name = "dnspython" },
     { name = "pillow" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/ac/703e6f47896c3fca4b6eebc273b1abe6e26db15ea46f5d4c3eec7d0c524f/django-avatar-8.0.0.tar.gz", hash = "sha256:9e5fdea5c8b5749abc1e4d09ed2bba9ff43d8654b24fa277303097f808f027c3", size = 45912, upload-time = "2023-10-16T10:54:19.486Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/58/ad/c741b3665b42266c43e96eb65121ef4e51c4b0295deeef45291a30dfd450/django_avatar-8.0.1.tar.gz", hash = "sha256:2c4550489be08e9e5fe47b6c82afaba111a9c20d83957d5b660c63ea3b0eb5f2", size = 45955, upload-time = "2024-09-05T02:14:41.818Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/9e/ed3f2de82720a8c5357f4b883b0a05ccfd6f6c641d704318f952304960ed/django_avatar-8.0.0-py3-none-any.whl", hash = "sha256:67702e80d348c2b7da09caef183abe92bba60204a384cfc2e88fbe6e9373eea8", size = 67230, upload-time = "2023-10-16T10:54:50.978Z" },
+    { url = "https://files.pythonhosted.org/packages/a1/d8/1de3ce92b7280de7157a86abd98c1f58a5e2a224627460d147cedea3a209/django_avatar-8.0.1-py3-none-any.whl", hash = "sha256:30dd9735890802c7e5c416e707cf049c35f78b86a0f95f60a7dd8ee6de0f0f72", size = 67255, upload-time = "2024-09-05T02:12:39.171Z" },
 ]
 
 [[package]]
