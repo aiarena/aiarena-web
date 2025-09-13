@@ -35,7 +35,7 @@ dependencies = [
     "graphene-django==3.2.2",
     "graphene-file-upload",
     "markdown==3.6",
-    "matplotlib==3.8.0",
+    "matplotlib==3.10.6",
     "numpy==1.26.3",
     "pandas==2.2.2",
     "pinax-theme-bootstrap==8.0.1",
