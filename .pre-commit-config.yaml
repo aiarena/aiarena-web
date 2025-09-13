@@ -3,11 +3,11 @@ repos:
     hooks:
       - id: black
         name: Black
-        entry: black --check
+        entry: uv run black --check
         types: [python]
         language: python
       - id: ruff
         name: ruff
-        entry: ruff
+        entry: uv run ruff
         types: [python]
         language: python
