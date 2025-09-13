@@ -43,7 +43,7 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Run linters
-        uses: pre-commit/action@v3.0.0
+        uses: uv run pre-commit/action@v3.0.0
 
   tests:
     runs-on: ubuntu-latest
