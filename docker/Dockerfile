@@ -15,13 +15,15 @@ RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -
 RUN apt update && apt install -y postgresql-client-15
 
-ADD ./requirements.txt /srv/requirements.txt
-RUN pip install -r /srv/requirements.txt
-
 # Sentry CLI
 RUN curl -sL https://sentry.io/get-cli/ | bash
 
-COPY . /app
+# Only install deps
 WORKDIR /app
+COPY pyproject.toml uv.lock /app/
+RUN uv sync --locked --no-dev
+
+# As a last step, actually copy all the code
+COPY . /app
 
 ENV PYTHONDONTWRITEBYTECODE=1

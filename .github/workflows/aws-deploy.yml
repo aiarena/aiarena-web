@@ -28,13 +28,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-          cache: 'pip'
-      - name: Install Dependencies
-        run: pip install -r requirements.DEVELOPMENT.txt
+          python-version-file: "pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
+
       - name: Run linters
         uses: pre-commit/action@v3.0.0
 
@@ -60,14 +67,25 @@ jobs:
             sleep 2
           done
 
-      - name: Install Dependencies
-        run: pip install -r requirements.DEVELOPMENT.txt
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
 
       - name: Run Tests
         if:  ${{ !inputs.skip_tests }}
         env:
           NOFAKE_REDIS: 1
         run: pytest -m 'not playwright' -n auto --junit-xml test-results/pytest-regular.xml
+
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
         if: always()
@@ -82,7 +100,6 @@ jobs:
     env:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
     steps:
-      #  Repo + Redis
       - name: Checkout repository and submodules
         uses: actions/checkout@v4
 
@@ -100,19 +117,22 @@ jobs:
             sleep 2
           done
 
-      #  Python Dependencies
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-          cache: 'pip'
-      - name: Install Dependencies
-        run: pip install -r requirements.DEVELOPMENT.txt
+          python-version-file: "pyproject.toml"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
 
       - name: Generate GraphQL Schema
         run: python manage.py graphql_schema
 
-      #  Node.JS Dependencies
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -124,7 +144,6 @@ jobs:
         run: npm ci
         working-directory: aiarena/frontend-spa
 
-      #  Front‑end QA
       - name: Lint React code
         run: npm run lint
         working-directory: aiarena/frontend-spa
@@ -158,6 +177,7 @@ jobs:
           fail_on: "nothing"
           files: |
             test-results/pytest-playwright.xml
+
       - name: Upload failure traces
         uses: actions/upload-artifact@v4
         if: failure()
@@ -185,15 +205,18 @@ jobs:
       - name: Confirm AWS identity
         run: aws sts get-caller-identity
 
-      - name: Setup python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version-file: "pyproject.toml"
 
-      - name: Install Dependencies
-        run: |
-          pip install -r ./requirements.LOCAL.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
 
       - name: Prepare image
         id: prepare_images
@@ -210,15 +233,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          cache: 'pip'
+          python-version-file: "pyproject.toml"
 
-      - name: Install Dependencies
-        run: |
-          pip install -r ./requirements.LOCAL.txt
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

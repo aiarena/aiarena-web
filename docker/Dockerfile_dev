@@ -2,6 +2,4 @@ FROM aiarena/env
 
 ENV DJANGO_ENVIRONMENT=DEVELOPMENT
 
-ADD ./requirements.LOCAL.txt /srv/requirements.LOCAL.txt
-ADD ./requirements.DEVELOPMENT.txt /srv/requirements.DEVELOPMENT.txt
-RUN pip install -r /srv/requirements.DEVELOPMENT.txt
+RUN uv sync --locked --dev
