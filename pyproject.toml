@@ -1,7 +1,7 @@
 [project]
 name = "aiarena"
 version = "0.0.0"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "awscli==1.31.6",
     "boto3==1.33.6",
