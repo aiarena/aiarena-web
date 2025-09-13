@@ -15,7 +15,7 @@ dependencies = [
     "django-debug-toolbar==3.2.2",
     "django-dirtyfields==1.9.7",
     "django-discord-bind",
-    "django-extensions==3.2.3",
+    "django-extensions==4.1",
     "django-filter==25.1",
     "django-grappelli==3.0.8",
     "django-pglocks==1.0.4",
