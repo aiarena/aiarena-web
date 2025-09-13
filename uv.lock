@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.12.*"
 
 [[package]]
@@ -140,7 +140,7 @@ dev = [
     { name = "pre-commit", specifier = "==3.3.3" },
     { name = "pytest", specifier = "==8.3.5" },
     { name = "pytest-django", specifier = "==4.11.1" },
-    { name = "pytest-playwright", specifier = "==0.5.0" },
+    { name = "pytest-playwright", specifier = "==0.7.1" },
     { name = "pytest-xdist", specifier = "==3.6.1" },
     { name = "pyyaml", specifier = "==5.3.1" },
     { name = "questionary", specifier = "==2.0.1" },
@@ -1469,7 +1469,7 @@ wheels = [
 
 [[package]]
 name = "pytest-playwright"
-version = "0.5.0"
+version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "playwright" },
@@ -1477,9 +1477,9 @@ dependencies = [
     { name = "pytest-base-url" },
     { name = "python-slugify" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/48/d9/09dacf71ea7f7e791dfb7e981935ae834930d3fbeccbc202667ce01fa372/pytest-playwright-0.5.0.tar.gz", hash = "sha256:f9f5ae8ade2f773e6e2cd85ec6bfff2ab287f7943108b3956fe5971324151622", size = 22484, upload-time = "2024-05-06T22:49:59.775Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a0/1e/9771990bad2b59d37728c4b6f28c234b3badbb2494bd72d54a6e2a988e23/pytest_playwright-0.7.1.tar.gz", hash = "sha256:94b551b2677ecdc16284fcd6a4f0045eafda47a60e74410f3fe4d8260e12cabf", size = 16769, upload-time = "2025-09-08T08:10:53.765Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ca/27/2dd504765e76d05ad612eac8bf4f5fe1149542ee69abb0497ebb2c8e27a5/pytest_playwright-0.5.0-py3-none-any.whl", hash = "sha256:b382c870384419c025d66aea14518bab71fb9e79917d4808692cde70d8c5216a", size = 12013, upload-time = "2024-05-06T22:50:01.656Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/59/373da90ce6a1a46ca6a449bf16cea11a3c6e269814eb60e7668526350b95/pytest_playwright-0.7.1-py3-none-any.whl", hash = "sha256:fcc46510fb75f8eba6df3bc8e84e4e902483d92be98075f20b9d160651a36d90", size = 16754, upload-time = "2025-09-08T08:10:55.92Z" },
 ]
 
 [[package]]
