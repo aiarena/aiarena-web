@@ -85,7 +85,7 @@ graphene-file-upload = { git = "https://github.com/gulfofmaine/graphene-file-upl
 
 [dependency-groups]
 dev = [
-    "aws-encryption-sdk==4.0.0",
+    "aws-encryption-sdk==4.0.3",
     "awscli==1.31.6",
     "boto3==1.33.6",
     "click==8.1.3",
