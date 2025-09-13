@@ -1,13 +1,13 @@
 repos:
   - repo: local
     hooks:
-      - id: black
-        name: Black
-        entry: uv run black --check
+      - id: ruff-format
+        name: ruff formatting
+        entry: uv run ruff format --check --diff
         types: [python]
         language: python
-      - id: ruff
-        name: ruff
-        entry: uv run ruff
+      - id: ruff-lint
+        name: ruff linting
+        entry: uv run ruff check --output-format=github .
         types: [python]
         language: python
