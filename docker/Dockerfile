@@ -1,5 +1,7 @@
 FROM python:3.12.7-slim-bullseye
 
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
+
 RUN apt update && apt install -y \
         build-essential \
         lsb-release \
