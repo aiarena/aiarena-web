@@ -99,7 +99,7 @@ dev = [
     "pytest-xdist==3.6.1",
     "pyyaml==5.3.1",
     "questionary==2.0.1",
-    "ruff==0.0.264",
+    "ruff==0.13.0",
     "sarge==0.1.7.post1",
     "werkzeug==3.1.3",
 ]
