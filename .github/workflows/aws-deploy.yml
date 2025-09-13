@@ -161,7 +161,7 @@ jobs:
 
       #  Playwright E2E
       - name: Install Playwright browsers
-        run: playwright install --with-deps
+        run: uv run playwright install --with-deps
       - name: Run Tests
         if:  ${{ !inputs.skip_tests }}
         env:
