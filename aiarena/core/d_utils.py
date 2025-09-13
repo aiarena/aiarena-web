@@ -18,8 +18,8 @@ class GroupConcat(Aggregate):
     def __init__(self, expression, ordering=None, separator=",", **extra):
         super().__init__(
             expression,
-            ordering=" ORDER BY %s" % ordering if ordering is not None else "",
-            separator=' SEPARATOR "%s"' % separator,
+            ordering=f" ORDER BY {ordering}" if ordering is not None else "",
+            separator=f' SEPARATOR "{separator}"',
             output_field=TextField(),
             **extra,
         )

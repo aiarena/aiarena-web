@@ -556,7 +556,7 @@ class TrophyIconAdmin(admin.ModelAdmin):
         """
         Used to display the image in the admin panel
         """
-        return mark_safe('<img src="%s" width="150" height="150" />' % (obj.image.url))
+        return mark_safe(f'<img src="{obj.image.url}" width="150" height="150" />')
 
     image_preview.short_description = "Preview"
 

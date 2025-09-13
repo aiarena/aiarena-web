@@ -130,7 +130,7 @@ def deploy_environment():
         "POSTGRES_USER": PRODUCTION_DB_USER,
         "REDIS_HOST": aws.cache_cluster_nodes(PROJECT_NAME)[0],
         "REDIS_PORT": "6379",
-        "REDIS_CACHE_DB": "%s" % REDIS_CACHE_DB,
+        "REDIS_CACHE_DB": REDIS_CACHE_DB,
         "C_FORCE_ROOT": "1",  # force Celery to run as root
         "MAINTENANCE_MODE": str(MAINTENANCE_MODE),
         "DJANGO_ALLOW_ASYNC_UNSAFE": "1",

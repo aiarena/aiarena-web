@@ -87,18 +87,18 @@ def run(
 
 
 def run_with_retry(cmd, count=20, sleep=1, **kwargs):
-    echo("Trying: %s" % cmd)
+    echo(f"Trying: {cmd}")
     for i in range(1, count + 1):
         if i > 1:
             time.sleep(sleep)
-        echo("Attempt #%s" % i)
+        echo(f"Attempt #{i}")
         try:
             result = run(cmd, **kwargs)
-            echo("Attempt #%s was successful" % i)
+            echo(f"Attempt #{i} was successful")
             return result
         except RuntimeError:
             if i == count:
-                echo("All %s attempts failed" % count)
+                echo(f"All {count} attempts failed")
                 raise
 
 

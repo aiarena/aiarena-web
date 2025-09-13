@@ -73,9 +73,9 @@ class UserProfile(LoginRequiredMixin, DetailView):
             for match in matches:
                 result = cancel(match.id, request.user)
                 if result == CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
-                    raise Exception('Match "%s" does not exist' % match.id)
+                    raise Exception(f'Match "{match.id}" does not exist')
                 elif result == CancelResult.RESULT_ALREADY_EXISTS:
-                    raise Exception('A result already exists for match "%s"' % match.id)
+                    raise Exception(f'A result already exists for match "{match.id}"')
                 message += f"<a href='{reverse('match', kwargs={'pk': match.id})}'>{match.id}</a>, "
             message = message[:-2] + " cancelled."
             messages.success(self.request, mark_safe(message))

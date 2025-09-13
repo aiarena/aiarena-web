@@ -61,7 +61,7 @@ class BaseService(Service):
     Service with defaults for this project
     """
 
-    name_prefix = "%s-" % PROJECT_NAME
+    name_prefix = f"{PROJECT_NAME}-"
     default_cluster_name = "ECSCluster"
     default_capacity_provider_strategy = [
         {
@@ -98,7 +98,7 @@ class BaseTask(Task):
     Task with defaults for this project
     """
 
-    family_prefix = "%s-" % PROJECT_NAME
+    family_prefix = f"{PROJECT_NAME}-"
     default_image = image_url.format(image="cloud")
 
 

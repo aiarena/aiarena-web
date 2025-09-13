@@ -38,7 +38,7 @@ def format_elo_change(value):
     if value is None or value == 0:
         return "0"
     else:
-        return "%+d" % value
+        return f"{value:+d}"
 
 
 def smooth_timedelta(timedeltaobj):

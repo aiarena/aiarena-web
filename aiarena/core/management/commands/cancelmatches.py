@@ -33,4 +33,4 @@ class Command(BaseCommand):
             Matches.cancel(match_id)
         except Exception as e:
             raise CommandError(e)
-        self.stdout.write(self.style.SUCCESS('Successfully marked match "%s" with MatchCancelled' % match_id))
+        self.stdout.write(self.style.SUCCESS(f'Successfully marked match "{match_id}" with MatchCancelled'))

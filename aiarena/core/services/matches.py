@@ -43,11 +43,11 @@ class Matches:
                 match = Match.objects.select_for_update().get(pk=match_id)
                 result = cancel(match.id, None)
                 if result == CancelResult.MATCH_DOES_NOT_EXIST:  # should basically not happen, but just in case
-                    raise Exception('Match "%s" does not exist' % match_id)
+                    raise Exception(f'Match "{match_id}" does not exist')
                 elif result == CancelResult.RESULT_ALREADY_EXISTS:
-                    raise Exception('A result already exists for match "%s"' % match_id)
+                    raise Exception(f'A result already exists for match "{match_id}"')
         except Match.DoesNotExist:
-            raise Exception('Match "%s" does not exist' % match_id)
+            raise Exception(f'Match "{match_id}" does not exist')
 
     # todo: have arena client check in with web service in order to delay this
     @staticmethod

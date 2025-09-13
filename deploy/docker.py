@@ -14,7 +14,7 @@ def cli(cmd, **kwargs):
     """
     Shortcut for docker.
     """
-    return run("docker %s" % cmd, **kwargs)
+    return run(f"docker {cmd}", **kwargs)
 
 
 def is_compose_v2() -> bool:
@@ -87,18 +87,18 @@ def build_image(
 def remove_unused_local_images():
     unused_images = cli("images -f dangling=true -q", capture_stdout=True).stdout_lines
     if unused_images:
-        echo("Removing %s unused image(s)" % len(unused_images))
+        echo(f"Removing {len(unused_images)} unused image(s)")
         try:
-            cli("rmi %s" % " ".join(unused_images))
+            cli(f"rmi {' '.join(unused_images)}")
         except RuntimeError:
             echo("Oops, one of those images is actually used, skipping..")
 
 
 def remove_container(name):
-    cont_ids = cli("ps -aq --filter name=%s" % name, capture_stdout=True).stdout_lines
+    cont_ids = cli(f"ps -aq --filter name={name}", capture_stdout=True).stdout_lines
     if cont_ids:
-        echo("Removing container: %s" % name)
-        cli("rm -f %s" % " ".join(cont_ids))
+        echo(f"Removing container: {name}")
+        cli(f"rm -f {' '.join(cont_ids)}")
 
 
 def dev_container_run(cmd, extra_mappings=None, workdir=None, **kwargs):

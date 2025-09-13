@@ -60,7 +60,6 @@ ignore = [
     "E501",
     "E741",
     "E731",
-    "UP031",  # Want to fix those in the future
 ]
 
 [tool.ruff.lint.isort]

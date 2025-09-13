@@ -28,6 +28,6 @@ class Command(BaseCommand):
                     user = User.objects.select_for_update().get(pk=user_id)
                     migrate_website_user(user)
 
-                self.stdout.write(self.style.SUCCESS('Successfully migrated user "%s"' % user_id))
+                self.stdout.write(self.style.SUCCESS(f'Successfully migrated user "{user_id}"'))
             except User.DoesNotExist:
-                raise CommandError('User "%s" does not exist' % user_id)
+                raise CommandError(f'User "{user_id}" does not exist')
