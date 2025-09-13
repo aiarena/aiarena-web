@@ -5,13 +5,12 @@ import time
 from collections.abc import Iterable
 from functools import wraps
 from pathlib import Path
-from typing import Optional
 
 import sarge
 
 
 # Type for specifying an optional list of filenames mask (e.g. ["*.py"]).
-OptMask = Optional[Iterable[str]]
+OptMask = Iterable[str] | None
 
 
 def timing(func):
