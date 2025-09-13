@@ -98,7 +98,7 @@ dev = [
     "pre-commit==3.3.3",
     "pytest==8.3.5",
     "pytest-django==4.11.1",
-    "pytest-playwright==0.5.0",
+    "pytest-playwright==0.7.1",
     "pytest-xdist==3.6.1",
     "pyyaml==5.3.1",
     "questionary==2.0.1",
