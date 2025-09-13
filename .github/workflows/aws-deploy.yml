@@ -84,7 +84,7 @@ jobs:
         if:  ${{ !inputs.skip_tests }}
         env:
           NOFAKE_REDIS: 1
-        run: pytest -m 'not playwright' -n auto --junit-xml test-results/pytest-regular.xml
+        run: uv run pytest -m 'not playwright' -n auto --junit-xml test-results/pytest-regular.xml
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@c8a70fdde92689bf574202595e1322d3a4de0987
@@ -131,7 +131,7 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Generate GraphQL Schema
-        run: python manage.py graphql_schema
+        run: uv run python manage.py graphql_schema
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -157,7 +157,7 @@ jobs:
         working-directory: aiarena/frontend-spa
 
       - name: Collect static files
-        run: python manage.py collectstatic --noinput
+        run: uv run python manage.py collectstatic --noinput
 
       #  Playwright E2E
       - name: Install Playwright browsers
@@ -166,7 +166,7 @@ jobs:
         if:  ${{ !inputs.skip_tests }}
         env:
           NOFAKE_REDIS: 1
-        run: pytest -m playwright --tracing retain-on-failure --junit-xml test-results/pytest-playwright.xml
+        run: uv run pytest -m playwright --tracing retain-on-failure --junit-xml test-results/pytest-playwright.xml
 
       #   Reports
       - name: Publish Test Results
@@ -223,7 +223,7 @@ jobs:
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           MAINTENANCE_MODE: ${{ vars.MAINTENANCE_MODE }}
-        run: ./run.py prepare-images
+        run: uv run run.py prepare-images
 
   deploy:
     if: github.event_name != 'pull_request'
@@ -257,7 +257,7 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
           PREPARED_IMAGES: ${{ needs.prepare-images.outputs.images }}
           MAINTENANCE_MODE: ${{ vars.MAINTENANCE_MODE }}
-        run: ./run.py ecs
+        run: uv run run.py ecs
 
       - name: Monitor deployment
-        run: ./run.py monitor-ecs
+        run: uv run run.py monitor-ecs
