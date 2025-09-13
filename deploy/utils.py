@@ -68,7 +68,7 @@ def run(
     if code and raise_on_error:
         msg = f'Command failed, exit code {code} - "{cmd}"'
         if capture_stdout and (stdout := result.stdout.read().decode()):
-            msg = f'{msg}\n{"-" * 40}\n{stdout}'
+            msg = f"{msg}\n{'-' * 40}\n{stdout}"
         raise RuntimeError(msg)
     result.json = None
     if result.stdout:
@@ -182,12 +182,9 @@ def django_setting(container_name, setting_name):
     from .settings import PROJECT_PATH
 
     code_dir = PROJECT_PATH / "code"
-    code: str = f"from config import {setting_name}; " f"import json; " f"print(json.dumps({setting_name}));"
+    code: str = f"from config import {setting_name}; import json; print(json.dumps({setting_name}));"
     return run(
-        "docker run --rm "
-        f"-v {code_dir}:/code "
-        f"-i {container_name} "
-        f"bash -c \"cd /code && python -c '{code}'\"",
+        f"docker run --rm -v {code_dir}:/code -i {container_name} bash -c \"cd /code && python -c '{code}'\"",
         capture_stdout=True,
         parse_json=True,
     ).json

@@ -58,7 +58,7 @@ class BotCompetitionStatsDetail(DetailView):
     def __get_winrate_chart_data(self, sp, competition_id):
         winrate_data = EloGraphsGenerator(sp)._get_winrate_data(self.object.bot.id, competition_id)
         winrate_data_with_total = [(x[0], x[1], x[2], x[3], x[4], (x[1] + x[2] + x[3] + x[4])) for x in winrate_data]
-        labels = [f"{winrate[0]}-{winrate[0]+5}" for winrate in winrate_data_with_total]
+        labels = [f"{winrate[0]}-{winrate[0] + 5}" for winrate in winrate_data_with_total]
         if len(labels) > 0:
             if labels[-1] == "30-35":
                 labels[-1] = "30+"

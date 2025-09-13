@@ -183,7 +183,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         for competition in Competition.objects.all():
             with self.assertRaisesMessage(
                 CommandError,
-                f"Competition {competition.id} is not closed! " "It must be closed before it can be finalized.",
+                f"Competition {competition.id} is not closed! It must be closed before it can be finalized.",
             ):
                 out = StringIO()
                 call_command("finalizecompetition", "--competitionid", competition.id, stdout=out)

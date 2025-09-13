@@ -56,6 +56,7 @@ Credits
 The implementation idea is borrowed from https://stackoverflow.com/a/9577670
 
 """
+
 from pathlib import Path
 
 import jinja2

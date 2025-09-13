@@ -72,9 +72,10 @@ class BaseTestMixin(TestCase):
     def _create_bot(self, user, name, plays_race=None):
         if plays_race is None:
             plays_race = BotRace.terran()
-        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip, open(
-            TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb"
-        ) as bot_data:
+        with (
+            open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip,
+            open(TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb") as bot_data,
+        ):
             bot = Bot(
                 user=user,
                 name=name,
@@ -90,9 +91,10 @@ class BaseTestMixin(TestCase):
     def _create_active_bot_for_competition(self, competition_id: int, user, name, plays_race=None, downloadable=False):
         if plays_race is None:
             plays_race = BotRace.terran()
-        with open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip, open(
-            TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb"
-        ) as bot_data:
+        with (
+            open(TestAssetPaths.test_bot_zip_path, "rb") as bot_zip,
+            open(TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb") as bot_data,
+        ):
             bot = Bot(
                 user=user,
                 name=name,
@@ -123,15 +125,14 @@ class BaseTestMixin(TestCase):
         filename = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "test-media/../test-media/testReplay.SC2Replay"
         )
-        with open(filename, "rb") as replay_file, open(
-            TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb"
-        ) as bot1_data, open(TestAssetPaths.test_bot_datas["bot2"][0]["path"], "rb") as bot2_data, open(
-            TestAssetPaths.test_bot1_match_log_path, "rb"
-        ) as bot1_log, open(
-            TestAssetPaths.test_bot2_match_log_path, "rb"
-        ) as bot2_log, open(
-            TestAssetPaths.test_arenaclient_log_path, "rb"
-        ) as arenaclient_log:
+        with (
+            open(filename, "rb") as replay_file,
+            open(TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb") as bot1_data,
+            open(TestAssetPaths.test_bot_datas["bot2"][0]["path"], "rb") as bot2_data,
+            open(TestAssetPaths.test_bot1_match_log_path, "rb") as bot1_log,
+            open(TestAssetPaths.test_bot2_match_log_path, "rb") as bot2_log,
+            open(TestAssetPaths.test_arenaclient_log_path, "rb") as arenaclient_log,
+        ):
             return self.test_ac_api_client.submit_custom_result(
                 match_id,
                 result_type,
@@ -156,15 +157,14 @@ class BaseTestMixin(TestCase):
         filename = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "test-media/../test-media/testReplay.SC2Replay"
         )
-        with open(filename, "rb") as replay_file, open(
-            TestAssetPaths.test_bot_datas["bot1"][1]["path"], "rb"
-        ) as bot1_data, open(TestAssetPaths.test_bot_datas["bot2"][1]["path"], "rb") as bot2_data, open(
-            TestAssetPaths.test_bot1_match_log_path, "rb"
-        ) as bot1_log, open(
-            TestAssetPaths.test_bot2_match_log_path, "rb"
-        ) as bot2_log, open(
-            TestAssetPaths.test_arenaclient_log_path, "rb"
-        ) as arenaclient_log:
+        with (
+            open(filename, "rb") as replay_file,
+            open(TestAssetPaths.test_bot_datas["bot1"][1]["path"], "rb") as bot1_data,
+            open(TestAssetPaths.test_bot_datas["bot2"][1]["path"], "rb") as bot2_data,
+            open(TestAssetPaths.test_bot1_match_log_path, "rb") as bot1_log,
+            open(TestAssetPaths.test_bot2_match_log_path, "rb") as bot2_log,
+            open(TestAssetPaths.test_arenaclient_log_path, "rb") as arenaclient_log,
+        ):
             return self.test_ac_api_client.submit_custom_result(
                 match_id,
                 result_type,
@@ -195,9 +195,10 @@ class BaseTestMixin(TestCase):
         filename = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "test-media/../test-media/testReplay.SC2Replay"
         )
-        with open(filename, "rb") as replay_file, open(
-            TestAssetPaths.test_bot_datas["bot2"][bot_data_set]["path"], "rb"
-        ) as bot2_data:
+        with (
+            open(filename, "rb") as replay_file,
+            open(TestAssetPaths.test_bot_datas["bot2"][bot_data_set]["path"], "rb") as bot2_data,
+        ):
             return self.test_ac_api_client.submit_custom_result(
                 match_id,
                 result_type,
@@ -214,9 +215,10 @@ class BaseTestMixin(TestCase):
         filename = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "test-media/../test-media/testReplay.SC2Replay"
         )
-        with open(filename, "rb") as replay_file, open(
-            TestAssetPaths.test_bot_datas["bot1"][bot_data_set]["path"], "rb"
-        ) as bot1_data:
+        with (
+            open(filename, "rb") as replay_file,
+            open(TestAssetPaths.test_bot_datas["bot1"][bot_data_set]["path"], "rb") as bot1_data,
+        ):
             return self.test_ac_api_client.submit_custom_result(
                 match_id,
                 result_type,
@@ -239,12 +241,13 @@ class BaseTestMixin(TestCase):
         filename = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "test-media/../test-media/testReplay.SC2Replay"
         )
-        with open(filename, "rb"), open(TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb") as bot2_data, open(
-            TestAssetPaths.test_bot_datas["bot2"][0]["path"], "rb"
-        ) as bot1_data, open(TestAssetPaths.test_bot1_match_log_path, "rb") as bot1_log, open(
-            TestAssetPaths.test_bot2_match_log_path, "rb"
-        ) as bot2_log, open(
-            TestAssetPaths.test_arenaclient_log_path, "rb"
+        with (
+            open(filename, "rb"),
+            open(TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb") as bot2_data,
+            open(TestAssetPaths.test_bot_datas["bot2"][0]["path"], "rb") as bot1_data,
+            open(TestAssetPaths.test_bot1_match_log_path, "rb") as bot1_log,
+            open(TestAssetPaths.test_bot2_match_log_path, "rb") as bot2_log,
+            open(TestAssetPaths.test_arenaclient_log_path, "rb"),
         ):
             return self.test_ac_api_client.publish_result(
                 {

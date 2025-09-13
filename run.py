@@ -383,7 +383,7 @@ def production_backup():
 
 def _confirm_restore(filename):
     confirm = input(  # nosec
-        f"Your local DB will be overwritten from {filename}\n" f"Continue (y/N)? ",
+        f"Your local DB will be overwritten from {filename}\nContinue (y/N)? ",
     )
     if confirm.lower() == "y":
         return True

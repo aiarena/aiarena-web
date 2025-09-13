@@ -73,7 +73,7 @@ class Command(BaseCommand):
                     f"participant2.elo_change: {p2.elo_change}"
                 )
 
-            self.stdout.write(f"Recalculating all match ELOs...{count/matches.count()*100}%", ending="\r")
+            self.stdout.write(f"Recalculating all match ELOs...{count / matches.count() * 100}%", ending="\r")
 
         self.stdout.write("Recalculating all match ELOs...done")
         self.stdout.write("Job finished!")

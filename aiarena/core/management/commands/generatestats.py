@@ -21,15 +21,13 @@ class Command(BaseCommand):
         parser.add_argument(
             "--competitionid",
             type=int,
-            help="The competition id to generate stats for. "
-            "If this isn't supplied all "
-            "open competitions will be used",
+            help="The competition id to generate stats for. If this isn't supplied all open competitions will be used",
         )
         parser.add_argument("--allcompetitions", action="store_true", help="Run this for all competition")
         parser.add_argument(
             "--finalize",
             action="store_true",
-            help="Mark the processed competition's stats as finalized. " "Only valid when specifying --competitionid.",
+            help="Mark the processed competition's stats as finalized. Only valid when specifying --competitionid.",
         )
         parser.add_argument(
             "--graphsonly",

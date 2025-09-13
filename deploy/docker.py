@@ -55,7 +55,7 @@ def compose(
     Shortcut for docker-compose.
     """
     return run(
-        ("docker-compose " f"-p {project_name} " f"-f {compose_file} " f"{cmd}"),
+        (f"docker-compose -p {project_name} -f {compose_file} {cmd}"),
         **kwargs,
     )
 

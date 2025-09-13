@@ -162,7 +162,7 @@ def push_manifest(
 ):
     echo(f"Creating manifest: {image}:{manifest_tag} from {ecr_images}")
     manifest_name = f"{registry_url}/{PROJECT_NAME}/{image}:{manifest_tag}"
-    docker.cli(f'manifest create {manifest_name} {" ".join(ecr_images)}', print_cmd=True)
+    docker.cli(f"manifest create {manifest_name} {' '.join(ecr_images)}", print_cmd=True)
     docker.cli(f"manifest push --purge {manifest_name}", print_cmd=True)
 
 
@@ -474,8 +474,7 @@ class ApplicationUpdater:
         new_value,
     ):
         echo(
-            f"{service_name}: {attribute} forces re-creation, "
-            f"current value: {current_value}, new value: {new_value}",
+            f"{service_name}: {attribute} forces re-creation, current value: {current_value}, new value: {new_value}",
         )
 
     def match_service_for_update(self, cluster_name, cluster_id, service_name):
@@ -495,9 +494,7 @@ class ApplicationUpdater:
                 "service": service_name,
                 "cluster": cluster_id,
             },
-        )[
-            "services"
-        ][0]
+        )["services"][0]
 
         task = details["taskDefinition"].split("/")[-1]
         task_family = task.split(":")[0]
@@ -866,14 +863,11 @@ def describe_failed_task(task, severity: str = "FAILED"):
     if "us-gov" in region:
         domain = "console.amazonaws-us-gov.com"
     echo(
-        f'[{severity}] {task["taskDefinitionArn"]}, '
-        f'stopped reason: {task.get("stoppedReason")}, '
-        f'exit code:{task["containers"][0].get("exitCode")}, '
-        f'status reason:{task["containers"][0].get("reason")}',
+        f"[{severity}] {task['taskDefinitionArn']}, "
+        f"stopped reason: {task.get('stoppedReason')}, "
+        f"exit code:{task['containers'][0].get('exitCode')}, "
+        f"status reason:{task['containers'][0].get('reason')}",
     )
     echo(
-        f"More info at: "
-        f"https://{domain}/ecs/home?"
-        f"region={region}#/clusters/{cluster}/tasks/{task_id}"
-        f"/details\n",
+        f"More info at: https://{domain}/ecs/home?region={region}#/clusters/{cluster}/tasks/{task_id}/details\n",
     )

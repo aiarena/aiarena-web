@@ -73,9 +73,9 @@ class GraphQLTest:
         else:
             mutation_data = {}
         actual_errors = {error["field"]: error["messages"] for error in mutation_data.get("errors", [])}
-        assert (
-            actual_errors == expected_validation_errors
-        ), f"Unexpected validation errors: {actual_errors}, expected {expected_validation_errors}"
+        assert actual_errors == expected_validation_errors, (
+            f"Unexpected validation errors: {actual_errors}, expected {expected_validation_errors}"
+        )
 
         return response_data
 
@@ -96,7 +96,7 @@ class GraphQLTest:
         response = self.do_post(self.last_query_client, query, variables, **kwargs)
 
         assert response.status_code == expected_status, (
-            f"Unexpected response status code: {response.status_code}\n" f"Response content: {response.content}"
+            f"Unexpected response status code: {response.status_code}\nResponse content: {response.content}"
         )
 
         content = json.loads(response.content)

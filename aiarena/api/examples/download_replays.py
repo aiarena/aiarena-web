@@ -15,9 +15,9 @@ response = requests.get(f"https://aiarena.net/api/match-participations/?bot={bot
 assert response.status_code == 200, "Unexpected status_code returned from match-participations"
 participation = json.loads(response.text)
 for i in range(len(participation["results"])):
-    print(f'Downloading match {participation["results"][i]["match"]}')
+    print(f"Downloading match {participation['results'][i]['match']}")
     response = requests.get(
-        f'https://aiarena.net/api/results/?match={participation["results"][i]["match"]}', headers=auth
+        f"https://aiarena.net/api/results/?match={participation['results'][i]['match']}", headers=auth
     )
     assert response.status_code == 200, "Unexpected status_code returned from results"
     match_details = json.loads(response.text)

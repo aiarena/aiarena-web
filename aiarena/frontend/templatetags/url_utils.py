@@ -19,7 +19,7 @@ def get_bot_truncated_html_link(bot) -> str:
     name = escape(bot.__str__())
     limit = 20
     return mark_safe(
-        f'<a href="{get_absolute_url("bot", bot)}">{(name[:limit - 3] + "...") if len(name) > limit else name}</a>'
+        f'<a href="{get_absolute_url("bot", bot)}">{(name[: limit - 3] + "...") if len(name) > limit else name}</a>'
     )
 
 
@@ -36,7 +36,7 @@ def get_user_truncated_html_link(user):
         raise Exception("This user type does not have a url.")
 
     return mark_safe(
-        f'<a href="{get_absolute_url(viewname, user)}">{(name[:limit - 3] + "...") if len(name) > limit else name}</a>'
+        f'<a href="{get_absolute_url(viewname, user)}">{(name[: limit - 3] + "...") if len(name) > limit else name}</a>'
     )
 
 

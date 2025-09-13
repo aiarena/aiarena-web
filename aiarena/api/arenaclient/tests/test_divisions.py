@@ -200,10 +200,10 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         CompetitionParticipation.objects.create(bot_id=self.regularUser4Bot2.id, competition_id=competition.id)
         for j in range(3):
             u = User.objects.create_user(
-                username=f"regular_user{100+j}", password="x", email=f"regular_user{100+j}@dev.aiarena.net"
+                username=f"regular_user{100 + j}", password="x", email=f"regular_user{100 + j}@dev.aiarena.net"
             )
             for i in range(3):
-                self._create_active_bot_for_competition(competition.id, u, f"{u.username}Bot{i+1}")
+                self._create_active_bot_for_competition(competition.id, u, f"{u.username}Bot{i + 1}")
         self._complete_cycle(
             competition, [7, 8], {1: _exp_par(7, 4), 2: _exp_par(7, 7), 3: _exp_par(8, 8)}, {1: 21, 2: 21, 3: 28}
         )
@@ -313,10 +313,10 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         # Not more splits
         for j in range(3):
             u = User.objects.create_user(
-                username=f"regular_user{100+j}", password="x", email=f"regular_user{100+j}@dev.aiarena.net"
+                username=f"regular_user{100 + j}", password="x", email=f"regular_user{100 + j}@dev.aiarena.net"
             )
             for i in range(3):
-                self._create_active_bot_for_competition(competition.id, u, f"{u.username}Bot{i+1}")
+                self._create_active_bot_for_competition(competition.id, u, f"{u.username}Bot{i + 1}")
         self._complete_cycle(
             competition, [40, 41, 42], {1: _exp_par(7), 2: _exp_par(8), 3: _exp_par(8)}, {1: 21, 2: 28, 3: 28}
         )

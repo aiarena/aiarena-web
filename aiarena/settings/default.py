@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
+
 import os
 import sys
 from datetime import timedelta
@@ -197,7 +198,7 @@ CONSTANCE_CONFIG = {
     ),
     "REISSUE_UNFINISHED_MATCHES": (
         True,
-        "Whether to reissue previously assigned unfinished matches " "when an arena client requests a match.",
+        "Whether to reissue previously assigned unfinished matches when an arena client requests a match.",
     ),
     "BOT_CONSECUTIVE_CRASH_LIMIT": (
         0,
@@ -228,11 +229,11 @@ CONSTANCE_CONFIG = {
     "ALLOW_REQUESTED_MATCHES": (True, "Whether to allow users to request matches."),
     "MATCH_REQUESTS_PREFILL_MAP_POOL_ID": (
         0,
-        "The ID of the map pool that should be selected by default " "when requesting matches.",
+        "The ID of the map pool that should be selected by default when requesting matches.",
     ),
     "REQUESTED_MATCHES_LIMIT_PERIOD": (
         timedelta(days=30),
-        "The period length for which a user" "s match request limit applies.",
+        "The period length for which a users match request limit applies.",
         timedelta,
     ),
     "BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER": (
@@ -272,7 +273,7 @@ CONSTANCE_CONFIG = {
     ),
     "ENABLE_ELO_SANITY_CHECK": (
         True,
-        "Whether to sanity check the total sum of bot ELO " "on result submission in order to detect ELO corruption.",
+        "Whether to sanity check the total sum of bot ELO on result submission in order to detect ELO corruption.",
     ),
     "BOT_UPLOADS_ENABLED": (True, "Whether authors can upload new bots to the website."),
     "DISCORD_INVITE_LINK": ("", "An invite link to the Discord community server."),
@@ -282,12 +283,12 @@ CONSTANCE_CONFIG = {
     "YOUTUBE_LINK": ("", "Link to YouTube."),
     "ADMIN_CLUSTER_LINK": ("", "Admin link to the cluster management."),
     "ADMIN_WEBSTATS_LINK": ("", "Admin link to view web stats."),
-    "PROJECT_FINANCE_LINK": ("", "Link to the project" "s finance data."),
+    "PROJECT_FINANCE_LINK": ("", "Link to the projects finance data."),
     "PUBLIC_BANNER_MESSAGE": ("", "Message displayed publicly at the top of the website."),
     "LOGGED_IN_BANNER_MESSAGE": ("", "Message displayed to logged in users at the top of the website."),
     "COMPETITION_PRIORITY_ORDER_CACHE_TIME": (
         3600,
-        "In seconds, how long to cache the result of the AC API competition" " priority order calculation.",
+        "In seconds, how long to cache the result of the AC API competition priority order calculation.",
     ),
     "TOP10_CACHE_TIME": (180, "How long to cache top10 competition results for"),
     "NEWS_CACHE_TIME": (300, "How long to cache news for"),

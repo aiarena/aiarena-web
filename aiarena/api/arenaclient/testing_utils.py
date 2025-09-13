@@ -84,15 +84,14 @@ class AcApiTestingClient(APIClient):
         return response
 
     def submit_result(self, match_id: int, type: str) -> Result:
-        with open(TestAssetPaths.test_replay_path, "rb") as replay_file, open(
-            TestAssetPaths.test_arenaclient_log_path, "rb"
-        ) as arenaclient_log, open(TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb") as bot1_data, open(
-            TestAssetPaths.test_bot_datas["bot2"][0]["path"], "rb"
-        ) as bot2_data, open(
-            TestAssetPaths.test_bot1_match_log_path, "rb"
-        ) as bot1_log, open(
-            TestAssetPaths.test_bot2_match_log_path, "rb"
-        ) as bot2_log:
+        with (
+            open(TestAssetPaths.test_replay_path, "rb") as replay_file,
+            open(TestAssetPaths.test_arenaclient_log_path, "rb") as arenaclient_log,
+            open(TestAssetPaths.test_bot_datas["bot1"][0]["path"], "rb") as bot1_data,
+            open(TestAssetPaths.test_bot_datas["bot2"][0]["path"], "rb") as bot2_data,
+            open(TestAssetPaths.test_bot1_match_log_path, "rb") as bot1_log,
+            open(TestAssetPaths.test_bot2_match_log_path, "rb") as bot2_log,
+        ):
             data = {
                 "match": match_id,
                 "type": type,

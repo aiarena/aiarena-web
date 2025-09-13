@@ -38,9 +38,9 @@ class UserProfile(LoginRequiredMixin, DetailView):
         # Add in the user's bots
         context["bot_list"] = self.request.user.bots.all()
         context["max_user_bot_count"] = config.MAX_USER_BOT_COUNT
-        context[
-            "max_active_active_competition_participations_count"
-        ] = SupporterBenefits.get_active_competition_participations_limit_display(self.request.user)
+        context["max_active_active_competition_participations_count"] = (
+            SupporterBenefits.get_active_competition_participations_limit_display(self.request.user)
+        )
         requested_matches = (
             Match.objects.filter(requested_by=self.object)
             .prefetch_related(

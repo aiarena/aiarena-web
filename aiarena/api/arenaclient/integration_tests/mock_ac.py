@@ -121,7 +121,7 @@ class MockArenaClient:
 
     def run_matches(self, num_matches: int):
         for x in range(num_matches):
-            logger.info(f"AC {self._ac_id}: Running match {x+1} of {num_matches}")
+            logger.info(f"AC {self._ac_id}: Running match {x + 1} of {num_matches}")
             self.run_a_match()
 
     def run_a_match(self) -> bool:

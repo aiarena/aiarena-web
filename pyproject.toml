@@ -56,7 +56,14 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 fixable = ["I", "F541", "E712"]
-ignore = ["E501", "E741", "E731"]
+ignore = [
+    "E501",
+    "E741",
+    "E731",
+    "UP031",  # Want to fix those in the future
+    "UP045",  # Want to fix those in the future
+    "UP017"  # Want to fix those in the future
+]
 
 [tool.ruff.lint.isort]
 lines-after-imports = 2
