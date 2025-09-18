@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.12.*"
 
 [[package]]
@@ -106,7 +106,7 @@ requires-dist = [
     { name = "django-tables2", specifier = "==2.7.0" },
     { name = "django-vite", specifier = "==3.1.0" },
     { name = "djangorestframework", specifier = "==3.15.2" },
-    { name = "docutils", specifier = "<0.17" },
+    { name = "docutils", specifier = "<0.23" },
     { name = "drf-yasg", git = "https://github.com/max-muoto/drf-yasg.git?rev=68cc6fa76848d1d0194d847569009eb603e516b2" },
     { name = "graphene-django", specifier = "==3.2.2" },
     { name = "graphene-file-upload", git = "https://github.com/gulfofmaine/graphene-file-upload.git?rev=63fa76ed694a942ef1dcb84abe2974930fc4858d" },
