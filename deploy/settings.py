@@ -104,7 +104,7 @@ class BaseTask(Task):
 
 class WebTask(BaseTask):
     default_cpu = "256"
-    default_memory = "1024"
+    default_memory = "2048"
 
     # noinspection PyUnusedLocal
     def nginx_container(self, env, ports, code_container, name, command=None, hostname=None):
@@ -175,7 +175,7 @@ class CeleryWorkerTask(CeleryTask):
 SERVICES = [
     WebService(
         name="webService",
-        count=4,
+        count=2,
         task=WebTask(
             family="websiteTask",
             command="",
