@@ -64,13 +64,19 @@ def run(
         echo(cmd)
     result = sarge.run(cmd, **kwargs)
     code = result.returncode
+
+    message_parts = []
+    if capture_stdout and (stdout := result.stdout.read().decode()):
+        message_parts.append(stdout)
+    if capture_stderr and (stderr := result.stderr.read().decode()):
+        message_parts.append(stderr)
+
     if code and raise_on_error:
-        msg = f'Command failed, exit code {code} - "{cmd}"'
-        if capture_stdout and (stdout := result.stdout.read().decode()):
-            msg = f"{msg}\n{'-' * 40}\n{stdout}"
-        if capture_stderr and (stderr := result.stderr.read().decode()):
-            msg = f"{msg}\n{'-' * 40}\n{stderr}"
-        raise RuntimeError(msg)
+        message_parts.insert(0, f'Command failed, exit code {code} - "{cmd}"')
+        raise RuntimeError(f"\n{'-' * 40}\n".join(message_parts))
+    else:
+        echo(f"\n{'-' * 40}\n".join(message_parts))
+
     result.json = None
     if result.stdout:
         output = result.stdout.read()
