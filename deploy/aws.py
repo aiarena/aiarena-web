@@ -233,6 +233,7 @@ def execute_command(cluster_id, task_id, command: str, container_name=None, inte
         "ecs execute-command",
         conf,
         parse_output=False,
+        capture_stdout=True,
         capture_stderr=True,
     )
 

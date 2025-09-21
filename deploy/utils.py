@@ -68,6 +68,8 @@ def run(
         msg = f'Command failed, exit code {code} - "{cmd}"'
         if capture_stdout and (stdout := result.stdout.read().decode()):
             msg = f"{msg}\n{'-' * 40}\n{stdout}"
+        if capture_stderr and (stderr := result.stderr.read().decode()):
+            msg = f"{msg}\n{'-' * 40}\n{stderr}"
         raise RuntimeError(msg)
     result.json = None
     if result.stdout:
