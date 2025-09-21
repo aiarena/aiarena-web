@@ -9,8 +9,6 @@ SECRET_KEY = "django-insecure-t*4r1u49=a!ah1!z8ydsaajr!lv-f(@r07lm)-9fro_9&67xqd
 
 ALLOWED_HOSTS = ["*"]
 
-INSTALLED_APPS.append("sslserver")  # noqa: F405
-
 #################################
 # Django Storages & django-private-storage configuration #
 #################################
