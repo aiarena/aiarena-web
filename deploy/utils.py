@@ -74,8 +74,6 @@ def run(
     if code and raise_on_error:
         message_parts.insert(0, f'Command failed, exit code {code} - "{cmd}"')
         raise RuntimeError(f"\n{'-' * 40}\n".join(message_parts))
-    else:
-        echo(f"\n{'-' * 40}\n".join(message_parts))
 
     result.json = None
     if stdout:
