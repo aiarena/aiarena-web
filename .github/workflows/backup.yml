@@ -38,5 +38,5 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Perform production DB backup
-        run: ./run.py production-backup
+        run: uv run run.py production-backup
 
