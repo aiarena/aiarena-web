@@ -22,6 +22,7 @@ permissions:
 
 env:
   DJANGO_ENVIRONMENT: DEVELOPMENT
+  PYTHONUNBUFFERED: 1
 
 jobs:
   linters:

@@ -8,6 +8,10 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  DJANGO_ENVIRONMENT: DEVELOPMENT
+  PYTHONUNBUFFERED: 1
+
 jobs:
   backup:
     name: Backup production DB
