@@ -64,8 +64,13 @@ def run(
         echo(cmd)
     result = sarge.run(cmd, **kwargs)
     code = result.returncode
-    stdout = result.stdout.read().decode()
-    stderr = result.stderr.read().decode()
+
+    stdout = None
+    if result.stdout:
+        stdout = result.stdout.read().decode()
+    stderr = None
+    if result.stderr:
+        stderr = result.stderr.read().decode()
 
     message_parts = []
     if capture_stdout and stdout:
