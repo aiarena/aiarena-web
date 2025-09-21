@@ -78,13 +78,8 @@ def run(
         echo(f"\n{'-' * 40}\n".join(message_parts))
 
     result.json = None
-    if result.stdout:
-        output = result.stdout.read()
-        try:
-            decoded = output.decode()
-        except UnicodeDecodeError:
-            raise RuntimeError(f"Non unicode chars in output: {output}")
-        result.stdout_lines = decoded.split("\n")
+    if stdout:
+        result.stdout_lines = stdout.split("\n")
         if result.stdout_lines[-1] == "":
             result.stdout_lines = result.stdout_lines[:-1]
         if parse_json:
