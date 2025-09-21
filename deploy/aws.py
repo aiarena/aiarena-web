@@ -237,7 +237,8 @@ def execute_command(cluster_id, task_id, command: str, container_name=None, inte
     )
 
 
-def connect_to_ecs_task(cluster_id, task_id, container_name=None):
+def wait_for_task_running(cluster_id, task_id):
+    """Wait for an ECS task to reach RUNNING status."""
     while True:
         tasks = cli(
             "ecs describe-tasks",
@@ -251,6 +252,17 @@ def connect_to_ecs_task(cluster_id, task_id, container_name=None):
 
         echo(f"Task {task_id} has status {task_last_status}, waiting 10s for RUNNING status ")
         time.sleep(10)
+
+
+def connect_to_ecs_task(cluster_id, task_id, container_name=None):
+    wait_for_task_running(cluster_id, task_id)
+
+    # Get task details after it's running
+    tasks = cli(
+        "ecs describe-tasks",
+        {"cluster": cluster_id, "tasks": task_id},
+    )["tasks"]
+    task = tasks[0]
 
     if len(task["containers"]) > 1 and not container_name:
         raise ValueError(
@@ -276,6 +288,63 @@ def connect_to_ecs_task(cluster_id, task_id, container_name=None):
             break
     else:
         raise RuntimeError("Execute agent wasn't available after 10 attempts, giving up :(")
+
+
+def create_one_off_task(
+    cluster_id=None,
+    task_definition_id=None,
+    container_name=None,
+    lifetime_hours=1,
+    *,
+    cpu,
+    memory,
+):
+    """Create a new ECS task and wait for it to be ready for commands."""
+    if not cluster_id:
+        clusters = all_clusters()
+        cluster_id = clusters[0]
+
+    if not task_definition_id:
+        task_definitions_list = task_definitions()
+        task_definition_id = task_definitions_list[0]
+
+    if not container_name:
+        container_names = task_definition_container_names(task_definition_id)
+        container_name = container_names[0]
+
+    cpu = clean_fargate_cpu(cpu)
+    memory = clean_fargate_memory(cpu, memory)
+
+    echo(f"Creating ECS task using {task_definition_id}...")
+    result = cli(
+        "ecs run-task",
+        {
+            "cluster": cluster_id,
+            "capacity-provider-strategy": [
+                {"capacityProvider": "FARGATE_SPOT", "weight": 1},
+            ],
+            "enable-execute-command": "",
+            "task-definition": task_definition_id,
+            "overrides": {
+                "containerOverrides": [
+                    {
+                        "name": container_name,
+                        "command": ["sleep", str(lifetime_hours * 60 * 60)],
+                    },
+                ],
+                "cpu": cpu,
+                "memory": memory,
+            },
+            "network-configuration": get_network_configuration(),
+        },
+    )
+    task_id = result["tasks"][0]["taskArn"].split("/")[-1]
+
+    # Wait for task to be ready
+    echo(f"Waiting for task {task_id} to be ready...")
+    wait_for_task_running(cluster_id, task_id)
+
+    return cluster_id, task_id, container_name
 
 
 def clean_fargate_cpu(value=None):

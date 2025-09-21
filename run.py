@@ -19,7 +19,6 @@ from deploy.settings import (
     PROJECT_NAME,
     PROJECT_PATH,
     SERVICES,
-    UWSGI_CONTAINER_NAME,
 )
 from deploy.utils import echo, env_as_cli_args, run, timing
 
@@ -246,33 +245,14 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
     clusters = aws.all_clusters()
     cluster_id = questionary.select("Choose the ECS cluster", clusters).unsafe_ask()
 
-    cpu = aws.clean_fargate_cpu(cpu)
-    memory = aws.clean_fargate_memory(cpu, memory)
-
-    echo("Running ECS task...")
-    result = aws.cli(
-        "ecs run-task",
-        {
-            "cluster": cluster_id,
-            "capacity-provider-strategy": [
-                {"capacityProvider": "FARGATE_SPOT", "weight": 1},
-            ],
-            "enable-execute-command": "",
-            "task-definition": task_definition_id,
-            "overrides": {
-                "containerOverrides": [
-                    {
-                        "name": container_name,
-                        "command": ["sleep", str(lifetime_hours * 60 * 60)],
-                    },
-                ],
-                "cpu": cpu,
-                "memory": memory,
-            },
-            "network-configuration": aws.get_network_configuration(),
-        },
+    cluster_id, task_id, container_name = aws.create_one_off_task(
+        cluster_id=cluster_id,
+        task_definition_id=task_definition_id,
+        container_name=container_name,
+        lifetime_hours=lifetime_hours,
+        cpu=cpu,
+        memory=memory,
     )
-    task_id = result["tasks"][0]["taskArn"].split("/")[-1]
 
     aws.connect_to_ecs_task(cluster_id, task_id, container_name)
 
@@ -328,57 +308,57 @@ def backup_cmd(**kwargs):
     return f"bash -c '{command}'"
 
 
-def _find_first_task_id():
-    clusters = aws.all_clusters()
-    cluster_id = clusters[0]
-    services = aws.cluster_services(cluster_id)
-    service_id = [service for service in services if "webService" in service][0]
-    tasks = aws.service_tasks(cluster_id, service_id)
-    task_id = list(tasks.values())[0]["id"]
-    return cluster_id, task_id, UWSGI_CONTAINER_NAME
-
-
 @cli.command(help="Make a production DB backup and upload it to S3")
 @timing
 def production_backup():
-    # Pick one of production servers
-    cluster_id, task_id, container_name = _find_first_task_id()
-
-    # Make a DB backup on that server
-    now = datetime.now(UTC).replace(microsecond=0)
-    filename = "{}_{}.dump".format(
-        DB_NAME,
-        now.isoformat("_").replace(":", "-"),
-    )
-    backup_file = f"/tmp/{filename}"  # nosec
-    backup_command = backup_cmd(
-        user=PRODUCTION_DB_ROOT_USER,
-        password=aws.get_secrets()["POSTGRES_ROOT_PASSWORD"],
-        host=aws.db_endpoint(PROJECT_NAME, "MainDB"),
-        db=DB_NAME,
-        filename=backup_file,
+    # Create a new ECS task for backup
+    echo("Spinning up a temporary task for the backup...")
+    cluster_id, task_id, container_name = aws.create_one_off_task(
+        lifetime_hours=1,
+        cpu="256",
+        memory="1024",
     )
 
-    echo(f"Making backup on task_id == {task_id}...")
-    aws.execute_command(
-        cluster_id,
-        task_id,
-        backup_command,
-        container_name=container_name,
-        interactive=True,
-    )
+    try:
+        echo(f"Making backup on task_id == {task_id}...")
+        now = datetime.now(UTC).replace(microsecond=0)
+        filename = "{}_{}.dump".format(
+            DB_NAME,
+            now.isoformat("_").replace(":", "-"),
+        )
+        backup_file = f"/tmp/{filename}"  # nosec
+        backup_command = backup_cmd(
+            user=PRODUCTION_DB_ROOT_USER,
+            password=aws.get_secrets()["POSTGRES_ROOT_PASSWORD"],
+            host=aws.db_endpoint(PROJECT_NAME, "MainDB"),
+            db=DB_NAME,
+            filename=backup_file,
+        )
+        aws.execute_command(
+            cluster_id,
+            task_id,
+            backup_command,
+            container_name=container_name,
+            interactive=True,
+        )
 
-    # Move the backup to S3
-    bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
-
-    echo("Uploading to S3...")
-    aws.execute_command(
-        cluster_id,
-        task_id,
-        f"aws s3 mv {backup_file} s3://{bucket}/",
-        container_name=container_name,
-        interactive=True,
-    )
+        echo("Uploading to S3...")
+        bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
+        aws.execute_command(
+            cluster_id,
+            task_id,
+            f"aws s3 mv {backup_file} s3://{bucket}/",
+            container_name=container_name,
+            interactive=True,
+        )
+    finally:
+        echo(f"Stopping backup task {task_id}...")
+        aws.cli(
+            "ecs stop-task",
+            {"cluster": cluster_id, "task": task_id},
+            parse_output=True,
+        )
+        echo(f"Backup task {task_id} stopped")
 
 
 def _confirm_restore(filename):
