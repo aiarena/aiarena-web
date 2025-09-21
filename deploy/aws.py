@@ -229,13 +229,26 @@ def execute_command(cluster_id, task_id, command: str, container_name=None, inte
     if interactive:
         conf["interactive"] = ""
 
-    cli(
-        "ecs execute-command",
-        conf,
-        parse_output=False,
-        capture_stdout=True,
-        capture_stderr=True,
-    )
+    # Retry logic for when execute agent is not ready yet
+    max_attempts = 10
+    attempts = 0
+    while attempts <= max_attempts:
+        try:
+            cli(
+                "ecs execute-command",
+                conf,
+                parse_output=False,
+                capture_stdout=True,
+                capture_stderr=True,
+            )
+            break  # Success, exit retry loop
+        except RuntimeError as e:
+            if attempts == max_attempts:
+                # Last attempt failed, re-raise the error
+                raise RuntimeError("Execute agent wasn't available after 10 attempts, giving up :(") from e
+            echo("Execute agent not running yet, re-trying in 10s")
+            attempts += 1
+            time.sleep(10)
 
 
 def wait_for_task_running(cluster_id, task_id):
@@ -271,24 +284,13 @@ def connect_to_ecs_task(cluster_id, task_id, container_name=None):
         )
 
     echo(f"Connecting to task_id = {task_id}" + f", container = {container_name}" if container_name else "")
-    attempts = 10
-    while attempts > 0:
-        try:
-            execute_command(
-                cluster_id,
-                task_id,
-                "/bin/bash",
-                container_name=container_name,
-                interactive=True,
-            )
-        except RuntimeError:
-            echo("Execute agent not running yet, re-trying in 10s")
-            time.sleep(10)
-            attempts -= 1
-        else:
-            break
-    else:
-        raise RuntimeError("Execute agent wasn't available after 10 attempts, giving up :(")
+    execute_command(
+        cluster_id,
+        task_id,
+        "/bin/bash",
+        container_name=container_name,
+        interactive=True,
+    )
 
 
 def create_one_off_task(
