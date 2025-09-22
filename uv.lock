@@ -77,7 +77,7 @@ requires-dist = [
     { name = "awscli", specifier = "==1.42.35" },
     { name = "boto3", specifier = "==1.40.35" },
     { name = "celery", specifier = "==5.5.3" },
-    { name = "confusable-homoglyphs", specifier = "==3.2.0" },
+    { name = "confusable-homoglyphs", specifier = "==3.3.1" },
     { name = "django", specifier = "==4.2.24" },
     { name = "django-appconf", specifier = "==1.0.5" },
     { name = "django-avatar", specifier = "==8.0.1" },
@@ -357,11 +357,11 @@ wheels = [
 
 [[package]]
 name = "confusable-homoglyphs"
-version = "3.2.0"
+version = "3.3.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/62/55/0aac1a100d755987e62c12367724b33419ed15921c6a915dc257c886ceff/confusable_homoglyphs-3.2.0.tar.gz", hash = "sha256:3b4a0d9fa510669498820c91a0bfc0c327568cecec90648cf3819d4a6fc6a751", size = 161937, upload-time = "2018-08-31T13:04:04.501Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/10/1358fca1ee2d97d4f2877df9ffbe6d124da666fef3b2f75e771a4c1afee6/confusable_homoglyphs-3.3.1.tar.gz", hash = "sha256:b995001c9b2e1b4cea0cf5f3840a7c79188a8cbbad053d693572bd8c1c1ec460", size = 325480, upload-time = "2024-01-30T10:10:27.47Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a4/38/aadd1c42ae353943cd1523cdd38ffb267ba95861b4e8bb1a559d975ae612/confusable_homoglyphs-3.2.0-py2.py3-none-any.whl", hash = "sha256:e3ce611028d882b74a5faa69e3cbb5bd4dcd9f69936da6e73d33eda42c917944", size = 141197, upload-time = "2018-08-31T13:04:08.055Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/6e/c0fcbb7d341a46cf4241a6aa9e6a737734f0657521fc1bcd074953fe4eea/confusable_homoglyphs-3.3.1-py2.py3-none-any.whl", hash = "sha256:84c92cb79dc7f55aa290d0762b2349abd8dee4c16fbe6f99eac978d394e2e6a1", size = 144755, upload-time = "2024-01-30T10:10:24.857Z" },
 ]
 
 [[package]]
