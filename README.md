@@ -64,7 +64,7 @@ A website for running the aiarena.net infrastructure.
 
     If you used seed data in the previous step, you can log into the website using the accounts below:      
     Admin user: username - devadmin, password - x.  
-    Regular user: username - devuser, password - x.
+    Regular user: username - devuser1, password - x.
         
     <br />
 
