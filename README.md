@@ -56,12 +56,23 @@ A website for running the aiarena.net infrastructure.
     * Seed data - run `uv run manage.py migrate` to apply the database migrations, then `uv run manage.py seed` and optionally `uv run manage.py generatestats`
     * Restore backup - run `uv run run.py restore-backup --s3`. That will download the latest production backup, which will already have the migrations applied.
 
-7. Launch the Website then navigate your browser to `http://127.0.0.1:8000/`
+7. Launching the Website
 
     ```shell
+    uv run manage.py generate_schema
     uv run manage.py runserver
     ```
 
+    In another terminal - navigate to (aiarena-web/aiarena/frontend-spa), then run:
+   ```shell
+    npm run start_relay
+    ```    
+    In yet another terminal - navigate to (aiarena-web/aiarena/frontend-spa), then run:
+   ```shell
+    npm run dev
+    ```    
+    
+    AI Arena should now be available in your browser at `http://127.0.0.1:8000/`
     If you used seed data in the previous step, you can log into the website using the accounts below:      
     Admin user: username - devadmin, password - x.  
     Regular user: username - devuser1, password - x.
