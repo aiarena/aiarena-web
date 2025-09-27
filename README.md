@@ -35,8 +35,12 @@ A website for running the aiarena.net infrastructure.
    
     to install javascript deps.
 
-4. You'll want to set environment variable `DJANGO_ENVIRONMENT` to `DEVELOPMENT`, however that's done in your dev environment.       
+4. Configuring environment variables
 
+You'll want to set environment variable `DJANGO_ENVIRONMENT` to `DEVELOPMENT`. 
+There are several ways to do this - one way is to prefix every command with the variable:
+`DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py runserver`
+    
 5. Set up Postgres and Redis
 
     There is a [docker-compose.yml](./docker-compose.yml) file that's configured to run correct versions of Postgres and Redis. It already ensures that there is a correct user / database created in the Postgres DB. If you want to manually connect to those, look up the credentials in the compose file.
