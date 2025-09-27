@@ -37,9 +37,9 @@ A website for running the aiarena.net infrastructure.
 
 4. Configuring environment variables
 
-You'll want to set environment variable `DJANGO_ENVIRONMENT` to `DEVELOPMENT`. 
-There are several ways to do this - one way is to prefix every command with the variable:
-`DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py runserver`
+    You'll want to set environment variable `DJANGO_ENVIRONMENT` to `DEVELOPMENT`. 
+    There are several ways to do this - one way is to prefix every command with the variable:
+    `DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py runserver`
     
 5. Set up Postgres and Redis
 
