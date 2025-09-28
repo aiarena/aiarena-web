@@ -26,7 +26,7 @@ dependencies = [
     "django-registration-redux==2.10",
     "django-robots==6.1",
     "django-select2==8.4.1",
-    "django-storages==1.13.2",
+    "django-storages==1.14.6",
     "django-tables2==2.7.0",
     "django-vite==3.1.0",
     "djangorestframework==3.15.2",
