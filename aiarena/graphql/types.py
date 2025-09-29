@@ -418,6 +418,26 @@ class TrophyType(DjangoObjectTypeWithUID):
         return root.icon.image.url if root.icon and root.icon.image else None
 
 
+class UserFilterSet(FilterSet):
+    order_by = OrderingFilter(
+        fields=[
+            "date_joined",
+            "username",
+        ],
+        method="filter_order_by",
+    )
+
+    username = django_filters.CharFilter(lookup_expr="icontains")
+
+    class Meta:
+        model = models.User
+        fields = ["username", "order_by"]
+
+    def filter_order_by(self, queryset, name, value):
+        order_fields = value if isinstance(value, list) else [value]
+        return queryset.order_by(*order_fields)
+
+
 class UserType(DjangoObjectTypeWithUID):
     # This is the public user type.
     # put data everyone should be able view here.
@@ -433,7 +453,7 @@ class UserType(DjangoObjectTypeWithUID):
             "patreon_level",
             "date_joined",
         ]
-        filter_fields = []
+        filterset_class = UserFilterSet
 
     @staticmethod
     def resolve_bots(root: models.User, info, **args):

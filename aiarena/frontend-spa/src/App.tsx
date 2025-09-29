@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router";
-import Layout from "@/Layout.tsx";
+import DashboardLayout from "@/DashboardLayout";
 import UserRoot from "./_pages/UserRoot";
 import { getFeatureFlags } from "./_data/featureFlags";
 import Examples from "./_pages/Examples";
@@ -11,19 +11,18 @@ import UserSettingsPage from "./_pages/UserSettings/UserSettingsPage";
 import AuthorsPage from "./_pages/Rework/Authors/Page";
 import BotsPage from "./_pages/Rework/Bots/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
+import RootLayout from "./RootLayout";
 
 export default function App() {
   return (
     <Routes>
-      <Route element={<Layout />} path="dashboard">
-        {getFeatureFlags().reactRework && (
-          <Route path="rework">
-            <Route path="competitions" element={<CompetitionsPage />} />
-            <Route path="bots" element={<BotsPage />} />
-            <Route path="authors" element={<AuthorsPage />} />
-          </Route>
-        )}
+      <Route element={<RootLayout />} path="dashboard/rework">
+        <Route path="competitions" element={<CompetitionsPage />} />
+        <Route path="bots" element={<BotsPage />} />
+        <Route path="authors" element={<AuthorsPage />} />
+      </Route>
 
+      <Route element={<DashboardLayout />} path="dashboard">
         <Route index element={<UserRoot />} />
         <Route path="bots" element={<UserBotsPage />} />
         <Route path="match-requests" element={<UserMatchRequestsPage />} />
