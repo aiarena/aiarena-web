@@ -90,39 +90,41 @@ function Navbar() {
             <div className="ml-40 hidden md:flex justify-between">
               <div className="flex flex-col">
                 <ul className="flex flex-wrap">
-                  {navLinks.map((link, index) => (
-                    <li key={index} className="pb-2 text-l p-2 text-center">
-                      {link.path === "/dashboard/" ? (
-                        <NavLink
-                          key={index}
-                          to={link.path}
-                          className={({ isActive }) =>
-                            clsx(
+                  {navLinks
+                    .filter((it) => it.featureFlag !== false)
+                    .map((link, index) => (
+                      <li key={index} className="pb-2 text-l p-2 text-center">
+                        {link.path === "/dashboard/" ? (
+                          <NavLink
+                            key={index}
+                            to={link.path}
+                            className={({ isActive }) =>
+                              clsx(
+                                "py-2 text-white border-b-2",
+                                isActive
+                                  ? "border-customGreen"
+                                  : "border-transparent hover:border-customGreen"
+                              )
+                            }
+                          >
+                            {link.title}
+                          </NavLink>
+                        ) : (
+                          <a
+                            key={index}
+                            href={link.path}
+                            className={clsx(
                               "py-2 text-white border-b-2",
-                              isActive
+                              window.location.pathname === link.path
                                 ? "border-customGreen"
                                 : "border-transparent hover:border-customGreen"
-                            )
-                          }
-                        >
-                          {link.title}
-                        </NavLink>
-                      ) : (
-                        <a
-                          key={index}
-                          href={link.path}
-                          className={clsx(
-                            "py-2 text-white border-b-2",
-                            window.location.pathname === link.path
-                              ? "border-customGreen"
-                              : "border-transparent hover:border-customGreen"
-                          )}
-                        >
-                          {link.title}
-                        </a>
-                      )}
-                    </li>
-                  ))}
+                            )}
+                          >
+                            {link.title}
+                          </a>
+                        )}
+                      </li>
+                    ))}
                 </ul>
               </div>
 
@@ -132,24 +134,26 @@ function Navbar() {
           {navbar === true ? (
             <div className={clsx("md:block", navbar ? "block" : "hidden")}>
               <ul className="md:h-auto md:flex bg-darken-3 pt-8 h-screen max-h-[calc(100vh-3rem)] overflow-y-auto">
-                {navLinks.map((link, index) => (
-                  <li key={index} className="text-l p-2 text-center w-full">
-                    <a
-                      key={index}
-                      href={link.path}
-                      onClick={handleMobileNavItemClick}
-                      className={clsx(
-                        "block w-full bg-darken-3 hover:darken-4 py-2 text-white hover:text-slate-300 border-b-2",
-                        window.location.pathname === link.path
-                          ? "border-customGreen"
-                          : "border-transparent"
-                      )}
-                    >
-                      {link.title}
-                    </a>
+                {navLinks
+                  .filter((it) => it.featureFlag !== false)
+                  .map((link, index) => (
+                    <li key={index} className="text-l p-2 text-center w-full">
+                      <a
+                        key={index}
+                        href={link.path}
+                        onClick={handleMobileNavItemClick}
+                        className={clsx(
+                          "block w-full bg-darken-3 hover:darken-4 py-2 text-white hover:text-slate-300 border-b-2",
+                          window.location.pathname === link.path
+                            ? "border-customGreen"
+                            : "border-transparent"
+                        )}
+                      >
+                        {link.title}
+                      </a>
 
-                    {/* Alternative NavLink block kept as-is (commented) */}
-                    {/* 
+                      {/* Alternative NavLink block kept as-is (commented) */}
+                      {/* 
                   <NavLink
                     key={index}
                     to={link.path}
@@ -166,8 +170,8 @@ function Navbar() {
                     {link.title}
                   </NavLink>
                   */}
-                  </li>
-                ))}
+                    </li>
+                  ))}
               </ul>
             </div>
           ) : null}

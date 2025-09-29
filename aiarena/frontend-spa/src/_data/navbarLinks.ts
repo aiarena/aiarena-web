@@ -1,3 +1,5 @@
+import { getFeatureFlags } from "./featureFlags";
+
 export const navLinks = [
   {
     title: "Home",
@@ -75,6 +77,27 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+  },
+  {
+    title: "Authors",
+    path: `/dashboard/rework/authors`,
+    showLoggedIn: true,
+    showLoggedOut: true,
+    featureFlag: getFeatureFlags().reactRework,
+  },
+  {
+    title: "Competitions",
+    path: `/dashboard/rework/competitions`,
+    showLoggedIn: true,
+    showLoggedOut: true,
+    featureFlag: getFeatureFlags().reactRework,
+  },
+  {
+    title: "Bots",
+    path: `/dashboard/rework/bots`,
+    showLoggedIn: true,
+    showLoggedOut: true,
+    featureFlag: getFeatureFlags().reactRework,
   },
 ];
 
