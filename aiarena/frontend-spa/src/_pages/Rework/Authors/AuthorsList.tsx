@@ -84,10 +84,7 @@ export default function AuthorsList(props: AuthorsListProps) {
               key={author.id}
               id={author.id}
               role="listitem"
-              className="w-full
-                sm:flex-[1_1_22rem]  
-                md:flex-[1_1_26rem]  
-              "
+              className="w-full sm:flex-[1_1_30rem] xl:max-w-[42rem]"
             >
               <Author author={author} />
             </li>
