@@ -1,15 +1,16 @@
-type FeatureFlags = {
-    examples: boolean;
+const defaultFlags = {
+    examples: false,
+    reactRework: false,
 };
+
+type FeatureFlags = Record<keyof typeof defaultFlags, boolean>;
 
 // Set this to true to override default (show all) DEV behavior - simulate how the site looks in production
 const simulateProductionEnv = false;
 
 export function getFeatureFlags(): FeatureFlags {
     // Feature Flags - false =  hide, true = show
-    const defaultFlags: FeatureFlags = {
-        examples: false,
-    };
+
     // console.log(process.env.NODE_ENV)
     // console.log(import.meta.env.DEV)
     const hideSelectFeatures =
