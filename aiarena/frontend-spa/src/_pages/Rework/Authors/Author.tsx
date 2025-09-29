@@ -1,4 +1,3 @@
-import React from "react";
 import { graphql, useFragment } from "react-relay";
 import { Author_user$key } from "./__generated__/Author_user.graphql";
 import { getDateToLocale } from "@/_lib/dateUtils";
