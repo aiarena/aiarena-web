@@ -423,6 +423,7 @@ class UserFilterSet(FilterSet):
         fields=[
             "date_joined",
             "username",
+            "type",
         ],
         method="filter_order_by",
     )
@@ -431,7 +432,7 @@ class UserFilterSet(FilterSet):
 
     class Meta:
         model = models.User
-        fields = ["username", "order_by"]
+        fields = ["username", "order_by", "type"]
 
     def filter_order_by(self, queryset, name, value):
         order_fields = value if isinstance(value, list) else [value]
@@ -447,12 +448,7 @@ class UserType(DjangoObjectTypeWithUID):
 
     class Meta:
         model = models.User
-        fields = [
-            "id",
-            "username",
-            "patreon_level",
-            "date_joined",
-        ]
+        fields = ["id", "username", "patreon_level", "date_joined", "type"]
         filterset_class = UserFilterSet
 
     @staticmethod

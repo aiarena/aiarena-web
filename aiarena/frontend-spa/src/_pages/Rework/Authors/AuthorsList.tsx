@@ -4,7 +4,7 @@ import { AuthorsList_node$key } from "./__generated__/AuthorsList_node.graphql";
 import { useDebouncedQuery } from "@/_components/_hooks/useDebouncedQuery";
 import { startTransition } from "react";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
-import { getNodes } from "@/_lib/relayHelpers";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import Author from "./Author";
@@ -38,6 +38,7 @@ export default function AuthorsList(props: AuthorsListProps) {
           after: $cursor
           username: $username
           orderBy: $orderBy
+          type: WEBSITE_USER
         ) @connection(key: "AuthorsList_node_users") {
           edges {
             node {
@@ -86,7 +87,9 @@ export default function AuthorsList(props: AuthorsListProps) {
               role="listitem"
               className="w-full sm:flex-[1_1_30rem] xl:max-w-[42rem]"
             >
-              <Author author={author} />
+              <a href={`/authors/${getIDFromBase64(author.id, "UserType")}`}>
+                <Author author={author} />
+              </a>
             </li>
           ))}
         </ul>
