@@ -269,14 +269,14 @@ export default function ResultsTable(props: ResultsTableProps) {
           />
         ) : (
           <NoItemsInListMessage>
-            <p>No Matches meet the criteria...</p>
+            <p>No Results meet the criteria...</p>
           </NoItemsInListMessage>
         )}
       </Suspense>
 
       {hasNext ? (
         <div className="flex justify-center mt-6" ref={loadMoreRef}>
-          <LoadingMoreItems loadingMessage="Loading more match requests..." />
+          <LoadingMoreItems loadingMessage="Loading more results..." />
         </div>
       ) : !hasNext && hasItems ? (
         <div className="mt-8">
