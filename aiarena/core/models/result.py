@@ -86,6 +86,10 @@ class Result(models.Model, LockableModelMixin):
         return time.strftime("%H:%M:%S", time.gmtime(self.game_steps / 22.4))
 
     @cached_property
+    def started(self):
+        return self.match.started
+
+    @cached_property
     def participant1(self):
         return self.match.participant1
 

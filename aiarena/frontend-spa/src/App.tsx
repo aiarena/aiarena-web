@@ -12,6 +12,7 @@ import AuthorsPage from "./_pages/Rework/Authors/Page";
 import BotsPage from "./_pages/Rework/Bots/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
 import RootLayout from "./RootLayout";
+import ResultsPage from "./_pages/Rework/Results/Page";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="competitions" element={<CompetitionsPage />} />
         <Route path="bots" element={<BotsPage />} />
         <Route path="authors" element={<AuthorsPage />} />
+        <Route path="results" element={<ResultsPage />} />
       </Route>
 
       <Route element={<DashboardLayout />} path="dashboard">

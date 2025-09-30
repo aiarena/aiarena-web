@@ -1,0 +1,302 @@
+import { graphql, usePaginationFragment } from "react-relay";
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import clsx from "clsx";
+
+import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
+import { getDateTimeISOString } from "@/_lib/dateUtils";
+
+import { getMatchResultParsed } from "@/_lib/parseMatchResult";
+
+import { parseSort, withAtag } from "@/_lib/tanstack_utils";
+
+import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
+import NoMoreItems from "@/_components/_display/NoMoreItems";
+import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
+import { TableContainer } from "@/_components/_actions/TableContainer";
+import LoadingDots from "@/_components/_display/LoadingDots";
+import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
+import {
+  ResultsTable_node$data,
+  ResultsTable_node$key,
+} from "./__generated__/ResultsTable_node.graphql";
+import { formatWinnerName } from "@/_components/_display/formatWinnerName";
+import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
+import WatchYourGamesModal from "@/_components/_sections/UserMatchRequests/_modals/WatchYourGamesModal";
+
+interface ResultsTableProps {
+  data: ResultsTable_node$key;
+}
+
+export default function ResultsTable(props: ResultsTableProps) {
+  const { data, loadNext, hasNext, refetch } = usePaginationFragment(
+    graphql`
+      fragment ResultsTable_node on Query
+      @refetchable(queryName: "ResultsTablePaginationQuery")
+      @argumentDefinitions(
+        cursor: { type: "String" }
+        first: { type: "Int", defaultValue: 50 }
+        orderBy: { type: "String" }
+      ) {
+        results(first: $first, after: $cursor, orderBy: $orderBy)
+          @connection(key: "ResultsTable_node_results") {
+          edges {
+            node {
+              created
+              gameSteps
+              id
+              participant2 {
+                bot {
+                  id
+                  name
+                }
+                eloChange
+              }
+              replayFile
+              winner {
+                id
+              }
+              type
+              participant1 {
+                bot {
+                  id
+                  name
+                }
+                eloChange
+              }
+              winner {
+                name
+              }
+              started
+              gameTimeFormatted
+            }
+          }
+        }
+      }
+    `,
+    props.data
+  );
+
+  type ResultType = NonNullable<
+    NonNullable<
+      NonNullable<ResultsTable_node$data["results"]>["edges"][number]
+    >["node"]
+  >;
+  const [isWatchYourGamesModalOpen, setIsWatchYourGamesModalOpen] =
+    useState(false);
+  const [onlyMyTags, setOnlyMyTags] = useState(true);
+  const [isPending, startTransition] = useTransition();
+  const matchData = useMemo(() => getNodes<ResultType>(data?.results), [data]);
+
+  const columnHelper = createColumnHelper<ResultType>();
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor((row) => row.id, {
+        id: "id",
+        header: "ID",
+        cell: (info) =>
+          withAtag(
+            getIDFromBase64(info.getValue(), "ResultType") || "",
+            `/matches/${getIDFromBase64(info.getValue(), "ResultType")}`,
+            `View match details for Result ID ${info.getValue()}`
+          ),
+
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.participant1?.bot.name || "", {
+        id: "participant1",
+        header: "Bot",
+        cell: (info) => {
+          const participant1 = info.row.original.participant1;
+          const display_value = formatWinnerName(
+            info.row.original.winner?.name,
+            participant1?.bot.name
+          );
+
+          return withAtag(
+            participant1?.bot.name || "",
+            `/bots/${getIDFromBase64(info.row.original.participant1?.bot.id, "BotType")}`,
+            `View bot profile for ${participant1?.bot.name}, Bot`,
+            display_value,
+            <span
+              className={clsx({
+                "text-red-400":
+                  participant1?.eloChange && participant1?.eloChange < 0,
+              })}
+            >
+              {participant1?.eloChange}
+            </span>
+          );
+        },
+        meta: { priority: 1 },
+      }),
+
+      columnHelper.accessor((row) => row.participant2?.bot.name || "", {
+        id: "participant2",
+        header: "Opponent",
+        cell: (info) => {
+          const participant2 = info.row.original.participant2;
+
+          const display_value = formatWinnerName(
+            info.row.original?.winner?.name,
+            info.row.original.participant2?.bot.name
+          );
+
+          return withAtag(
+            participant2?.bot.name || "",
+            `/bots/${getIDFromBase64(participant2?.bot.id, "BotType")}`,
+            `View bot profile for ${participant2?.bot.name}, Opponent`,
+            display_value,
+            <span
+              className={clsx({
+                "text-red-400":
+                  participant2?.eloChange && participant2?.eloChange < 0,
+              })}
+            >
+              {participant2?.eloChange}
+            </span>
+          );
+        },
+
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.type ?? "", {
+        id: "type",
+        header: "Result",
+        cell: (info) => {
+          const getResult = getMatchResultParsed(
+            info.getValue(),
+            info.row.original.participant1?.bot.name,
+            info.row.original.participant2?.bot.name
+          );
+          return getResult != "" ? getResult : "In Queue";
+        },
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.gameTimeFormatted ?? "", {
+        id: "gameTimeFormatted",
+        header: "Duration",
+        cell: (info) => info.getValue(),
+        meta: { priority: 1 },
+      }),
+
+      columnHelper.accessor((row) => row.started ?? "", {
+        id: "started",
+        header: "Started",
+        cell: (info) => {
+          const getTime = getDateTimeISOString(info.getValue());
+          return getTime !== "" ? getTime : "In Queue";
+        },
+        meta: { priority: 1 },
+      }),
+
+      columnHelper.accessor((row) => row.replayFile || "", {
+        id: "replayFile",
+        header: "Replay",
+        cell: (info) => {
+          const replayFile = info.row.original.replayFile;
+
+          return withAtag(
+            replayFile || "",
+            `/bots/${replayFile}`,
+            `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}, Opponent`,
+            "Download"
+          );
+        },
+
+        meta: { priority: 1 },
+      }),
+    ],
+    [columnHelper]
+  );
+
+  const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  useEffect(() => {
+    const sortingMap: Record<string, string> = {
+      id: "id",
+      participant1: "participant1__name",
+      participant2: "participant2__name",
+      type: "type",
+      gameTimeFormatted: "game_time_formatted",
+      started: "started",
+      replayFile: "replay_file",
+    };
+    startTransition(() => {
+      const sortString = parseSort(sortingMap, sorting);
+      refetch({ orderBy: sortString });
+    });
+  }, [sorting, refetch]);
+
+  const table = useReactTable({
+    data: matchData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    manualSorting: true,
+
+    state: {
+      sorting,
+    },
+
+    onSortingChange: setSorting,
+  });
+
+  const hasItems = matchData.length > 0;
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap gap-4 text-white justify-between">
+        {hasItems ? (
+          <label key={"set_my_tags"} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={onlyMyTags}
+              onChange={() => setOnlyMyTags(!onlyMyTags)}
+              className="accent-customGreen"
+            />
+            <span>Hide Tags by other authors</span>
+          </label>
+        ) : null}
+        <WatchYourGamesButton
+          onClick={() => setIsWatchYourGamesModalOpen(true)}
+        >
+          <span>Watch Replays on Twitch</span>
+        </WatchYourGamesButton>
+      </div>
+
+      <Suspense fallback={<LoadingDots />}>
+        {hasItems ? (
+          <TableContainer table={table} loading={isPending} />
+        ) : (
+          <NoItemsInListMessage>
+            <p>No Matches meet the criteria...</p>
+          </NoItemsInListMessage>
+        )}
+      </Suspense>
+
+      {hasNext ? (
+        <div className="flex justify-center mt-6" ref={loadMoreRef}>
+          <LoadingMoreItems loadingMessage="Loading more match requests..." />
+        </div>
+      ) : !hasNext && hasItems ? (
+        <div className="mt-8">
+          <NoMoreItems />
+        </div>
+      ) : null}
+      <WatchYourGamesModal
+        isOpen={isWatchYourGamesModalOpen}
+        onClose={() => setIsWatchYourGamesModalOpen(false)}
+      />
+    </div>
+  );
+}

@@ -18,7 +18,7 @@ export default function WatchYourGamesModal({
   onClose,
 }: UploadBotModal) {
   return (
-    <Modal onClose={onClose} isOpen={isOpen} title="Watch Games on Twitch">
+    <Modal onClose={onClose} isOpen={isOpen} title="Watch on Twitch">
       <div className="mb-6">
         <ol className="space-y-4 ">
           <li className="flex flex-col gap-2">

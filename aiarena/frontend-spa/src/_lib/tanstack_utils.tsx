@@ -23,18 +23,22 @@ export const withAtag = (
   label: string,
   href: string,
   aria: string,
-  children?: React.ReactNode
+  children?: React.ReactNode,
+  appendOnEnd?: React.ReactNode
 ) => (
-  <a
-    className="font-semibold text-gray-200 truncate"
-    href={href}
-    role="cell"
-    target="_blank"
-    aria-label={aria}
-    title={`${label}`}
-  >
-    {children ? children : label}
-  </a>
+  <span className="flex justify-between">
+    <a
+      className="font-semibold text-gray-200 truncate mr-2"
+      href={href}
+      role="cell"
+      target="_blank"
+      aria-label={aria}
+      title={`${label}`}
+    >
+      {children ? children : label}
+    </a>
+    {appendOnEnd && appendOnEnd}
+  </span>
 );
 
 export const withClickable = (label: string, onClick: () => void) => (

@@ -4,7 +4,6 @@
 #
 #     python manage.py graphql_schema
 #
-# (This step happens in CI/CD too.)
 # =============================================================================
 
 from datetime import timedelta
@@ -341,7 +340,61 @@ class NewsType(DjangoObjectTypeWithUID):
         connection_class = CountingConnection
 
 
+class ResultsFilterSet(FilterSet):
+    order_by = OrderingFilter(
+        fields=[
+            "id",
+            "participant1__name",
+            "participant2__name",
+            "type",
+            "game_time_formatted",
+            "started",
+            "replay_file",
+        ],
+        method="filter_order_by",
+    )
+
+    class Meta:
+        model = models.Result
+        fields = ["order_by"]
+
+    def filter_order_by(self, queryset, name, value):
+        order_fields = value if isinstance(value, list) else [value]
+
+        # Game time is a function of game steps - so we sort by game steps
+        if any("game_time_formatted" in f for f in order_fields):
+            order_fields = [f.replace("game_time_formatted", "game_steps") for f in order_fields]
+
+        if any("started" in f for f in order_fields):
+            order_fields = [f.replace("started", "match__started") for f in order_fields]
+
+        if any("participant1__name" in f for f in order_fields):
+            subquery = (
+                MatchParticipation.objects.filter(match=OuterRef("pk"), participant_number=1)
+                .annotate(lower_name=Lower("bot__name"))
+                .values("lower_name")[:1]
+            )
+            queryset = queryset.annotate(participant1_name=Subquery(subquery, output_field=CharField()))
+            order_fields = [f.replace("participant1__name", "participant1_name") for f in order_fields]
+
+        if any("participant2__name" in f for f in order_fields):
+            subquery = (
+                MatchParticipation.objects.filter(match=OuterRef("pk"), participant_number=2)
+                .annotate(lower_name=Lower("bot__name"))
+                .values("lower_name")[:1]
+            )
+            queryset = queryset.annotate(participant2_name=Subquery(subquery, output_field=CharField()))
+            order_fields = [f.replace("participant2__name", "participant2_name") for f in order_fields]
+
+        return queryset.order_by(*order_fields)
+
+
 class ResultType(DjangoObjectTypeWithUID):
+    started = graphene.DateTime()
+    participant1 = graphene.Field("aiarena.graphql.MatchParticipationType")
+    participant2 = graphene.Field("aiarena.graphql.MatchParticipationType")
+    game_time_formatted = graphene.String()
+
     class Meta:
         model = models.Result
         fields = [
@@ -352,8 +405,24 @@ class ResultType(DjangoObjectTypeWithUID):
             "game_steps",
             "submitted_by",
         ]
-        filter_fields = []
+        filterset_class = ResultsFilterSet
         connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_started(root: models.Result, info, **args):
+        return root.started
+
+    @staticmethod
+    def resolve_participant1(root: models.Result, info, **args):
+        return root.participant1
+
+    @staticmethod
+    def resolve_participant2(root: models.Result, info, **args):
+        return root.participant2
+
+    @staticmethod
+    def resolve_duration_seconds(root: models.Result, info, **args):
+        return root.game_time_formatted
 
 
 class RoundsType(DjangoObjectTypeWithUID):
@@ -552,6 +621,7 @@ class Query(graphene.ObjectType):
     match = DjangoFilterConnectionField("aiarena.graphql.MatchType")
     news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
     node = graphene.relay.Node.Field()
+    results = DjangoFilterConnectionField("aiarena.graphql.ResultType")
     stats = graphene.Field(StatsType)
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
     viewer = graphene.Field("aiarena.graphql.Viewer")
@@ -583,6 +653,10 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_news(root, info, **args):
         return models.News.objects.all().order_by("-created")
+
+    @staticmethod
+    def resolve_results(root, info, **args):
+        return models.Result.objects.all().order_by("-created")
 
     @staticmethod
     def resolve_stats(root, info, **args):

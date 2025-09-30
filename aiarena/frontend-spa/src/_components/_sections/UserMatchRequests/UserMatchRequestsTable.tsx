@@ -25,6 +25,7 @@ import {
   UserMatchRequestsTable_viewer$key,
 } from "./__generated__/UserMatchRequestsTable_viewer.graphql";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
+import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 
 interface UserMatchRequestsTableProps {
   viewer: UserMatchRequestsTable_viewer$key;
@@ -108,20 +109,6 @@ export default function UserMatchRequestsTable(
     () => getNodes<MatchType>(data?.requestedMatches),
     [data]
   );
-
-  const formatWinnerName = (
-    winnerName: string | undefined,
-    participantName: string | undefined
-  ) => {
-    return (
-      <div className="flex items-center gap-2">
-        {winnerName && participantName === winnerName && (
-          <div className="mt-[-4px]">👑</div>
-        )}
-        <div>{participantName}</div>
-      </div>
-    );
-  };
 
   const columnHelper = createColumnHelper<MatchType>();
 
