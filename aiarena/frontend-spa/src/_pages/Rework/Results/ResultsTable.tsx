@@ -28,7 +28,7 @@ import {
 } from "./__generated__/ResultsTable_node.graphql";
 import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
-import WatchYourGamesModal from "@/_components/_sections/UserMatchRequests/_modals/WatchYourGamesModal";
+import WatchGamesModal from "@/_components/_sections/UserMatchRequests/_modals/WatchGamesModal";
 
 interface ResultsTableProps {
   data: ResultsTable_node$key;
@@ -88,9 +88,8 @@ export default function ResultsTable(props: ResultsTableProps) {
       NonNullable<ResultsTable_node$data["results"]>["edges"][number]
     >["node"]
   >;
-  const [isWatchYourGamesModalOpen, setIsWatchYourGamesModalOpen] =
-    useState(false);
-  const [onlyMyTags, setOnlyMyTags] = useState(true);
+  const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
+
   const [isPending, startTransition] = useTransition();
   const matchData = useMemo(() => getNodes<ResultType>(data?.results), [data]);
 
@@ -255,28 +254,19 @@ export default function ResultsTable(props: ResultsTableProps) {
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap gap-4 text-white justify-between">
-        {hasItems ? (
-          <label key={"set_my_tags"} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={onlyMyTags}
-              onChange={() => setOnlyMyTags(!onlyMyTags)}
-              className="accent-customGreen"
-            />
-            <span>Hide Tags by other authors</span>
-          </label>
-        ) : null}
-        <WatchYourGamesButton
-          onClick={() => setIsWatchYourGamesModalOpen(true)}
-        >
-          <span>Watch Replays on Twitch</span>
-        </WatchYourGamesButton>
-      </div>
-
       <Suspense fallback={<LoadingDots />}>
         {hasItems ? (
-          <TableContainer table={table} loading={isPending} />
+          <TableContainer
+            table={table}
+            loading={isPending}
+            appendHeader={
+              <WatchYourGamesButton
+                onClick={() => setIsWatchGamesModalOpen(true)}
+              >
+                <span>Watch Replays on Twitch</span>
+              </WatchYourGamesButton>
+            }
+          />
         ) : (
           <NoItemsInListMessage>
             <p>No Matches meet the criteria...</p>
@@ -293,9 +283,9 @@ export default function ResultsTable(props: ResultsTableProps) {
           <NoMoreItems />
         </div>
       ) : null}
-      <WatchYourGamesModal
-        isOpen={isWatchYourGamesModalOpen}
-        onClose={() => setIsWatchYourGamesModalOpen(false)}
+      <WatchGamesModal
+        isOpen={isWatchGamesModalOpen}
+        onClose={() => setIsWatchGamesModalOpen(false)}
       />
     </div>
   );

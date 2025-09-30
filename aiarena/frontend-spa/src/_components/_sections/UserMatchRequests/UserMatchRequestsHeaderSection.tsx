@@ -8,7 +8,7 @@ import RequestMatchModal from "./_modals/RequestMatchModal";
 import { UserMatchRequestsHeaderSection_viewer$key } from "./__generated__/UserMatchRequestsHeaderSection_viewer.graphql";
 import LoadingDots from "@/_components/_display/LoadingDots";
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
-import WatchYourGamesModal from "./_modals/WatchYourGamesModal";
+import WatchGamesModal from "./_modals/WatchGamesModal";
 
 type UserMatchRequestsHeaderSectionProps = {
   viewer: UserMatchRequestsHeaderSection_viewer$key;
@@ -81,7 +81,7 @@ export default function UserMatchRequestsHeaderSection(
         onClose={() => setIsRequestMatchModalOpen(false)}
       />
 
-      <WatchYourGamesModal
+      <WatchGamesModal
         isOpen={isWatchYourGamesModalOpen}
         onClose={() => setIsWatchYourGamesModalOpen(false)}
       />

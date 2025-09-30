@@ -8,15 +8,12 @@ import { Suspense } from "react";
 
 import LoadingDots from "@/_components/_display/LoadingDots";
 
-interface UploadBotModal {
+interface WatchGamesModal {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function WatchYourGamesModal({
-  isOpen,
-  onClose,
-}: UploadBotModal) {
+export default function WatchGamesModal({ isOpen, onClose }: WatchGamesModal) {
   return (
     <Modal onClose={onClose} isOpen={isOpen} title="Watch on Twitch">
       <div className="mb-6">

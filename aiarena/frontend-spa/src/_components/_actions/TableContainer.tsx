@@ -1,6 +1,6 @@
 import { flexRender, Table } from "@tanstack/react-table";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
-import { Suspense } from "react";
+import { ReactNode, Suspense } from "react";
 import clsx from "clsx";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
 
@@ -8,12 +8,14 @@ interface TableContainerProps<T> {
   table: Table<T>;
   className?: string;
   loading: boolean;
+  appendHeader?: ReactNode;
 }
 
 export function TableContainer<T>({
   table,
   className,
   loading,
+  appendHeader,
 }: TableContainerProps<T>) {
   const allColumns = table.getAllLeafColumns();
 
@@ -24,27 +26,30 @@ export function TableContainer<T>({
   return (
     <div className={clsx(className)}>
       {/* Column toggles */}
-      <div className="mb-4 flex flex-wrap gap-4 text-white">
-        {allColumns.map((column) => (
-          <label key={column.id} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={column.getIsVisible()}
-              onChange={
-                visibleColumnCount == 1 && column.getIsVisible() == true
-                  ? undefined
-                  : column.getToggleVisibilityHandler()
-              }
-              disabled={!column.getCanHide()}
-              className="accent-customGreen"
-            />
-            <span>
-              {typeof column.columnDef.header === "string"
-                ? column.columnDef.header
-                : column.id}
-            </span>
-          </label>
-        ))}
+      <div className="mb-4 flex justify-between">
+        <div className="flex flex-wrap gap-4 text-white">
+          {allColumns.map((column) => (
+            <label key={column.id} className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={column.getIsVisible()}
+                onChange={
+                  visibleColumnCount == 1 && column.getIsVisible() == true
+                    ? undefined
+                    : column.getToggleVisibilityHandler()
+                }
+                disabled={!column.getCanHide()}
+                className="accent-customGreen"
+              />
+              <span>
+                {typeof column.columnDef.header === "string"
+                  ? column.columnDef.header
+                  : column.id}
+              </span>
+            </label>
+          ))}
+        </div>
+        {appendHeader}
       </div>
 
       {/* Table */}
