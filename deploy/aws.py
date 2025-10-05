@@ -295,8 +295,10 @@ def connect_to_ecs_task(cluster_id, task_id, container_name=None):
         raise ValueError(
             "Cannot connect to task because it has more than one container and container_name wasn't specified",
         )
+    elif not container_name:
+        container_name = task["containers"][0]["name"]
 
-    echo(f"Connecting to task_id = {task_id}" + f", container = {container_name}" if container_name else "")
+    echo(f"Connecting to task_id = {task_id}, container = {container_name}")
     execute_command(
         cluster_id,
         task_id,
