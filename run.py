@@ -502,7 +502,7 @@ def build_dev_image():
 def test_secret_leak():
     # try to leak a value from secrets (that's not actually a secret or important)
     # to test the GitHub secret masking
-    secrets_dict = aws.get_secrets("TEST_SECRET")
+    secrets_dict = aws.get_secrets()
     echo(secrets_dict["TEST_SECRET"])
 
 
