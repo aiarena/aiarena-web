@@ -39,7 +39,8 @@ def cli(
     def format_value(value):
         if isinstance(value, str):
             return value
-        return f"'{json.dumps(value, separators=(',', ':'))}'"
+        json_str = json.dumps(value, separators=(",", ":"))
+        return quote(json_str)
 
     if conf is None:
         conf = {}
