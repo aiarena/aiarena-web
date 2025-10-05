@@ -44,6 +44,9 @@ jobs:
       - name: Install the project
         run: uv sync --locked --all-extras --dev
 
+      - name: Try to leak test secret
+        run: uv run run.py test-secret-leak
+
       - name: Run linters
         uses: pre-commit/action@v3.0.0
 
