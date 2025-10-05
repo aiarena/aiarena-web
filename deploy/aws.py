@@ -69,7 +69,18 @@ def cli(
 
 def get_secrets(secret_id="production-env"):
     secret_string = cli("secretsmanager get-secret-value", {"secret-id": secret_id})["SecretString"]
-    return json.loads(secret_string)
+    secrets: dict = json.loads(secret_string)
+
+    # Printing out the special add-mask instruction doesn't show up in
+    # GitHub Actions, and instead makes it so that any occurrences of those
+    # strings are replaced with asterisks in future output. The idea is that
+    # this is the root source of all secret values - they ultimately all come
+    # through here, and it's sufficient to just mask them once.
+    if os.environ.get("MASK_SECRETS") == "1":
+        for secret_value in secrets.values():
+            print(f"::add-mask::{secret_value}")
+
+    return secrets
 
 
 def store_secret(key, value, secret_id="production-env"):

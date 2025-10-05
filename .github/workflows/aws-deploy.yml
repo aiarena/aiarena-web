@@ -23,6 +23,7 @@ permissions:
 env:
   DJANGO_ENVIRONMENT: DEVELOPMENT
   PYTHONUNBUFFERED: 1
+  MASK_SECRETS: 1
 
 jobs:
   linters:
