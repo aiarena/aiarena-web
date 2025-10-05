@@ -299,62 +299,37 @@ def production_attach_to_task(task_id, container_name):
     aws.connect_to_ecs_task(cluster_id, task_id, container_name)
 
 
-def backup_cmd(**kwargs):
-    command = "PGPASSWORD={password} pg_dump -U {user} -h {host} {db} -Fc -f {filename} -v".format(**kwargs)
-    return f"bash -c '{command}'"
-
-
 @cli.command(help="Make a production DB backup and upload it to S3")
 @timing
 def production_backup():
-    # Create a new ECS task for backup
+    now = datetime.now(UTC).replace(microsecond=0)
+    filename = "{}_{}.dump".format(
+        DB_NAME,
+        now.isoformat("_").replace(":", "-"),
+    )
+    backup_file = f"/tmp/{filename}"  # nosec
+    password = aws.get_secrets()["POSTGRES_ROOT_PASSWORD"]
+    host = aws.db_endpoint(PROJECT_NAME, "MainDB")
+    bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
+    pg_dump_cmd = f"PGPASSWORD={password} pg_dump -U {PRODUCTION_DB_ROOT_USER} -h {host} {DB_NAME} -Fc -f {backup_file}"
+    s3_mv_cmd = f"aws s3 mv {backup_file} s3://{bucket}/"
+
     echo("Spinning up a temporary task for the backup...")
     cluster_id, task_id, container_name = aws.create_one_off_task(
-        lifetime_hours=1,
+        custom_command=["bash", "-c", f"{pg_dump_cmd} && {s3_mv_cmd}"],
         cpu="256",
         memory="1024",
     )
 
-    try:
-        echo(f"Making backup on task_id == {task_id}...")
-        now = datetime.now(UTC).replace(microsecond=0)
-        filename = "{}_{}.dump".format(
-            DB_NAME,
-            now.isoformat("_").replace(":", "-"),
-        )
-        backup_file = f"/tmp/{filename}"  # nosec
-        backup_command = backup_cmd(
-            user=PRODUCTION_DB_ROOT_USER,
-            password=aws.get_secrets()["POSTGRES_ROOT_PASSWORD"],
-            host=aws.db_endpoint(PROJECT_NAME, "MainDB"),
-            db=DB_NAME,
-            filename=backup_file,
-        )
-        aws.execute_command(
-            cluster_id,
-            task_id,
-            backup_command,
-            container_name=container_name,
-            interactive=True,
-        )
+    echo(f"Waiting for backup task {task_id} to finish...")
+    aws.wait_for_task_status(cluster_id, task_id, "STOPPED")
+    exit_code = aws.get_task_exit_code(cluster_id, task_id, container_name)
 
-        echo("Uploading to S3...")
-        bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
-        aws.execute_command(
-            cluster_id,
-            task_id,
-            f"aws s3 mv {backup_file} s3://{bucket}/",
-            container_name=container_name,
-            interactive=True,
-        )
-    finally:
-        echo(f"Stopping backup task {task_id}...")
-        aws.cli(
-            "ecs stop-task",
-            {"cluster": cluster_id, "task": task_id},
-            parse_output=True,
-        )
-        echo(f"Backup task {task_id} stopped")
+    echo(f"Logs for task {task_id}:")
+    aws.print_task_logs(cluster_id, task_id, container_name)
+
+    if exit_code != 0:
+        raise RuntimeError(f"Backup task failed with exit code {exit_code}")
 
 
 def _confirm_restore(filename):

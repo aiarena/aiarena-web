@@ -264,8 +264,17 @@ def execute_command(cluster_id, task_id, command: str, container_name=None):
             time.sleep(10)
 
 
-def wait_for_task_status(cluster_id, task_id, status):
+def wait_for_task_status(
+    cluster_id,
+    task_id,
+    status,
+    check_period_seconds=10,
+    give_up_after_seconds=None,
+):
     """Wait for an ECS task to reach a status."""
+
+    t_start = time.time()
+
     while True:
         tasks = cli(
             "ecs describe-tasks",
@@ -277,8 +286,81 @@ def wait_for_task_status(cluster_id, task_id, status):
         if task_last_status == status:
             break
 
-        echo(f"Task {task_id} has status {task_last_status}, waiting 10s for {status} status ")
-        time.sleep(10)
+        # If we're actually waiting for it to stop, we'll break above ^
+        if task_last_status == "STOPPED":
+            raise RuntimeError(f"Task {task_id} in unexpected STOPPED status")
+
+        if give_up_after_seconds and time.time() > t_start + give_up_after_seconds:
+            raise RuntimeError(f"Task {task_id} didn't reach {status} status after {give_up_after_seconds} seconds")
+
+        echo(f"Task {task_id} has status {task_last_status}, waiting {check_period_seconds}s for {status} status ")
+        time.sleep(check_period_seconds)
+
+
+def get_task_exit_code(cluster_id, task_id, container_name):
+    # Check if the task succeeded
+    tasks = cli(
+        "ecs describe-tasks",
+        {"cluster": cluster_id, "tasks": task_id},
+    )["tasks"]
+    task = tasks[0]
+    container = next(c for c in task["containers"] if c["name"] == container_name)
+    return container.get("exitCode")
+
+
+def print_task_logs(cluster_id, task_id, container_name):
+    """Print CloudWatch logs for an ECS task."""
+    # Get task details to find the log configuration
+    tasks = cli(
+        "ecs describe-tasks",
+        {"cluster": cluster_id, "tasks": task_id},
+    )["tasks"]
+    task = tasks[0]
+
+    # Get task definition to find log group
+    task_def = cli(
+        "ecs describe-task-definition",
+        {"task-definition": task["taskDefinitionArn"]},
+    )["taskDefinition"]
+
+    # Find log configuration for the container
+    container_def = next(c for c in task_def["containerDefinitions"] if c["name"] == container_name)
+    log_config = container_def.get("logConfiguration", {})
+
+    if log_config.get("logDriver") != "awslogs":
+        echo("Task is not using CloudWatch logs")
+        return
+
+    options = log_config.get("options", {})
+    log_group = options.get("awslogs-group")
+    log_stream_prefix = options.get("awslogs-stream-prefix", "")
+
+    if not log_group:
+        echo("No log group configured for this task")
+        return
+
+    # Construct log stream name: {prefix}/{container_name}/{task_id}
+    if log_stream_prefix:
+        log_stream = f"{log_stream_prefix}/{container_name}/{task_id}"
+    else:
+        log_stream = f"{container_name}/{task_id}"
+
+    # Fetch logs using filter-log-events (works with AWS CLI v1 and v2)
+    result = cli(
+        "logs filter-log-events",
+        {
+            "log-group-name": log_group,
+            "log-stream-names": log_stream,
+        },
+    )
+
+    events = result.get("events", [])
+    if not events:
+        echo("No logs found for this task")
+        return
+
+    for event in events:
+        echo(event["message"], prefix="")
 
 
 def connect_to_ecs_task(cluster_id, task_id, container_name=None):
@@ -311,6 +393,7 @@ def create_one_off_task(
     cluster_id=None,
     task_definition_id=None,
     container_name=None,
+    custom_command: list[str] | None = None,
     lifetime_hours=1,
     *,
     cpu,
@@ -332,6 +415,11 @@ def create_one_off_task(
     cpu = clean_fargate_cpu(cpu)
     memory = clean_fargate_memory(cpu, memory)
 
+    if custom_command:
+        command = custom_command
+    else:
+        command = ["sleep", str(lifetime_hours * 60 * 60)]
+
     echo(f"Creating ECS task using {task_definition_id}...")
     result = cli(
         "ecs run-task",
@@ -346,7 +434,7 @@ def create_one_off_task(
                 "containerOverrides": [
                     {
                         "name": container_name,
-                        "command": ["sleep", str(lifetime_hours * 60 * 60)],
+                        "command": command,
                     },
                 ],
                 "cpu": cpu,
