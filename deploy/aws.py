@@ -232,14 +232,16 @@ def service_tasks(cluster, service):
     return describe_tasks(cluster, arn_list)
 
 
-def execute_command(cluster_id, task_id, command: str, container_name=None, interactive=True):
-    conf = {"cluster": cluster_id, "task": task_id, "command": f'"{command}"'}
+def execute_command(cluster_id, task_id, command: str, container_name=None):
+    conf = {
+        "cluster": cluster_id,
+        "task": task_id,
+        "command": f'"{command}"',
+        "interactive": "",  # non-interactive mode isn't actually supported
+    }
 
     if container_name:
         conf["container"] = container_name
-
-    if interactive:
-        conf["interactive"] = ""
 
     # Retry logic for when execute agent is not ready yet
     max_attempts = 10
@@ -250,7 +252,6 @@ def execute_command(cluster_id, task_id, command: str, container_name=None, inte
                 "ecs execute-command",
                 conf,
                 parse_output=False,
-                capture_stdout=True,
                 capture_stderr=True,
             )
             break  # Success, exit retry loop
@@ -301,7 +302,6 @@ def connect_to_ecs_task(cluster_id, task_id, container_name=None):
         task_id,
         "/bin/bash",
         container_name=container_name,
-        interactive=True,
     )
 
 
