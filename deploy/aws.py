@@ -262,8 +262,8 @@ def execute_command(cluster_id, task_id, command: str, container_name=None, inte
             time.sleep(10)
 
 
-def wait_for_task_running(cluster_id, task_id):
-    """Wait for an ECS task to reach RUNNING status."""
+def wait_for_task_status(cluster_id, task_id, status):
+    """Wait for an ECS task to reach a status."""
     while True:
         tasks = cli(
             "ecs describe-tasks",
@@ -272,15 +272,15 @@ def wait_for_task_running(cluster_id, task_id):
 
         task = tasks[0]
         task_last_status = task["lastStatus"]
-        if task_last_status == "RUNNING":
+        if task_last_status == status:
             break
 
-        echo(f"Task {task_id} has status {task_last_status}, waiting 10s for RUNNING status ")
+        echo(f"Task {task_id} has status {task_last_status}, waiting 10s for {status} status ")
         time.sleep(10)
 
 
 def connect_to_ecs_task(cluster_id, task_id, container_name=None):
-    wait_for_task_running(cluster_id, task_id)
+    wait_for_task_status(cluster_id, task_id, "RUNNING")
 
     # Get task details after it's running
     tasks = cli(
@@ -356,7 +356,7 @@ def create_one_off_task(
 
     # Wait for task to be ready
     echo(f"Waiting for task {task_id} to be ready...")
-    wait_for_task_running(cluster_id, task_id)
+    wait_for_task_status(cluster_id, task_id, "RUNNING")
 
     return cluster_id, task_id, container_name
 
