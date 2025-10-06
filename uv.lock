@@ -91,7 +91,7 @@ requires-dist = [
     { name = "django-grappelli", specifier = "==3.0.8" },
     { name = "django-pglocks", specifier = "==1.0.4" },
     { name = "django-picklefield", specifier = "==3.1" },
-    { name = "django-private-storage", specifier = "==3.1" },
+    { name = "django-private-storage", specifier = "==3.1.3" },
     { name = "django-random-queryset", specifier = "==0.1.3" },
     { name = "django-redis", specifier = "==5.4.0" },
     { name = "django-registration-redux", specifier = "==2.10" },
@@ -643,11 +643,11 @@ wheels = [
 
 [[package]]
 name = "django-private-storage"
-version = "3.1"
+version = "3.1.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/79/33/2586111e461fbf85fd8f2b006bcc5f5a6398fda20cccaf7c54b355c74391/django-private-storage-3.1.tar.gz", hash = "sha256:e3f0440f5d8f0da0fdb9da0285dad00e279ea43da68324a8aaf0c31c999c8e8c", size = 27391, upload-time = "2023-05-16T10:08:23.775Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/82/d4ce6aa4a7e8d9699cef5e04b0d180f60aeaea71a48720c3bc7c43ea417c/django_private_storage-3.1.3.tar.gz", hash = "sha256:b3d1f4660ddac54ce5576473b093f50e7c04f0d065cb64e9bba2d201885792e6", size = 25488, upload-time = "2025-10-05T11:13:35.655Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5a/c6/add86703cdaba0372f1401973479d01bd3024da46dbc2849e206a970e0be/django_private_storage-3.1-py3-none-any.whl", hash = "sha256:cd11fa3c40e15bf902b3566dde8082c86f1cbb2900115f15c63e4b5278d96fe7", size = 32976, upload-time = "2023-05-16T10:08:22.103Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/44/51d3e9b4bd9375b2690422063dff7b8ecf8cc3ab773828519830e8f2da47/django_private_storage-3.1.3-py3-none-any.whl", hash = "sha256:bac47df9a18be1b0c3c1af4ae903dba1360482ce05579a4f65cdd38adb44fedc", size = 34520, upload-time = "2025-10-05T11:13:34.101Z" },
 ]
 
 [[package]]
