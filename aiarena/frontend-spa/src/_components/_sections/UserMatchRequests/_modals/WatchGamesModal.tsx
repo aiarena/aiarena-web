@@ -28,7 +28,7 @@ export default function WatchGamesModal({ isOpen, onClose }: WatchGamesModal) {
           </li>
           <li className="flex flex-col gap-2">
             <span id="queue-match-command" className="font-medium">
-              Queue your match
+              Queue the match
             </span>
             <CodeBoxCopy>
               <Suspense fallback={<LoadingDots />}>
