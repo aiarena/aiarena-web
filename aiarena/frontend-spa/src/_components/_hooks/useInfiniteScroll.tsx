@@ -2,7 +2,7 @@ import { useCallback, useRef } from "react";
 
 export const useInfiniteScroll = (
   fetchCallback: () => void,
-  hasMore: boolean
+  hasMore: boolean,
 ) => {
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -19,7 +19,7 @@ export const useInfiniteScroll = (
         observer.current.observe(node);
       }
     },
-    [fetchCallback, hasMore]
+    [fetchCallback, hasMore],
   );
 
   return { loadMoreRef };

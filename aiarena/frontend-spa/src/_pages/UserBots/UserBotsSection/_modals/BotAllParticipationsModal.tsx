@@ -41,7 +41,7 @@ export default function BotAllParticipationsModal({
         }
       }
     `,
-    props.bot
+    props.bot,
   );
 
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
@@ -83,7 +83,7 @@ export default function BotAllParticipationsModal({
                         </dt>
                         <dd>
                           {getDateToLocale(
-                            participation.competition.dateOpened
+                            participation.competition.dateOpened,
                           )}
                         </dd>
                       </div>
@@ -94,7 +94,7 @@ export default function BotAllParticipationsModal({
                         <dd>
                           {participation.competition.dateClosed != null
                             ? getDateToLocale(
-                                participation.competition.dateClosed
+                                participation.competition.dateClosed,
                               )
                             : ""}
                         </dd>

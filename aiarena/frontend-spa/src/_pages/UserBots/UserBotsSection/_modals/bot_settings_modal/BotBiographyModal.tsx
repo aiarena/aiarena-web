@@ -27,7 +27,7 @@ export default function BotBiographyModal({
         name
       }
     `,
-    props.bot
+    props.bot,
   );
   const [updateBot, updating] = useMutation<BotBiographyModalMutation>(graphql`
     mutation BotBiographyModalMutation($input: UpdateBotInput!) {
@@ -47,7 +47,7 @@ export default function BotBiographyModal({
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateBot",
-    "Bot Wiki Updated!"
+    "Bot Wiki Updated!",
   );
 
   const hasUnsavedWikiChanges =

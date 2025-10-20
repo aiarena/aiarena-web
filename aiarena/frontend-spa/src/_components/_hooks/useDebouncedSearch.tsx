@@ -4,7 +4,7 @@ export function useDebouncedSearch(
   searchValue: string,
   delay: number,
   onDebounced: (value: string) => void,
-  onLoadingChange?: (isLoading: boolean) => void
+  onLoadingChange?: (isLoading: boolean) => void,
 ): void {
   const lastSearchRef = useRef(searchValue);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);

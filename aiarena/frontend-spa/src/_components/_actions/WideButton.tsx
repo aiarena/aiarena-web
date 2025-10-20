@@ -29,7 +29,7 @@ export default function WideButton({
         disabled
           ? "bg-darken border-gray-700 hover:bg-bg-darken hover:border-gray-700 cursor-not-allowed"
           : "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent",
-        style
+        style,
       )}
     >
       {loading ? <LoadingSpinner color="light-gray" /> : title}

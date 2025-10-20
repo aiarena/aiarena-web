@@ -22,13 +22,13 @@ export default function GetGameOfInterest() {
         }
       }
     `,
-    {}
+    {},
   );
 
   const possibleMatches = getNodes(data.viewer?.requestedMatches).filter(
     (item) => {
       return item.result?.winner?.name ? item.id : false;
-    }
+    },
   );
 
   const matchSuggestion =

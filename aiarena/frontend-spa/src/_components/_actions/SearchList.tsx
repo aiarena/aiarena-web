@@ -67,7 +67,7 @@ export default function SearchList({
             "py-2",
             "rounded-sm",
             "text-white",
-            "w-full"
+            "w-full",
           )}
           placeholder={placeholder}
           displayValue={displayValue}
@@ -92,7 +92,7 @@ export default function SearchList({
           "p-1",
           "[--anchor-gap:--spacing(1)]",
           "z-100",
-          "combobox-options"
+          "combobox-options",
         )}
         onScroll={handleScroll}
       >
@@ -108,7 +108,7 @@ export default function SearchList({
               "select-none",
               "data-focus:bg-white/10",
               "text-white",
-              "w-full"
+              "w-full",
             )}
           >
             {displayValue(option)}

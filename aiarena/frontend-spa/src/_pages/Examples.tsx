@@ -15,7 +15,7 @@ import { ExamplesQuery } from "./__generated__/ExamplesQuery.graphql";
 export default function Examples() {
   const [toggle, setToggle] = useState(true);
   const [markdown, setMarkdown] = useState<string | undefined>(
-    `**Hello world!!!**`
+    `**Hello world!!!**`,
   );
 
   const bot = useLazyLoadQuery<ExamplesQuery>(
@@ -28,7 +28,7 @@ export default function Examples() {
         }
       }
     `,
-    { id: decodeURIComponent("Qm90VHlwZToyNDg=") }
+    { id: decodeURIComponent("Qm90VHlwZToyNDg=") },
   );
 
   return (

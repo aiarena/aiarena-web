@@ -18,7 +18,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
         avatarUrl
       }
     `,
-    props.user
+    props.user,
   );
 
   const defaultAvatar = `/user/default.jpg`;
@@ -63,7 +63,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
         className={clsx(
           `w-[${avatarSize.avatar}px]`,
           `h-[${avatarSize.avatar}px]`,
-          "overflow-hidden"
+          "overflow-hidden",
         )}
       >
         <img
@@ -86,7 +86,7 @@ export default function AvatarWithBorder(props: AvatarWithBorderProps) {
             `w-[${avatarSize.border}px]`,
             `h-[${avatarSize.border}px]`,
             "object-contain",
-            "pointer-events-none"
+            "pointer-events-none",
           )}
           style={{
             transform: `translate(${avatarSize.moveBorderRight}px, -${avatarSize.moveBorderUp}px)`,

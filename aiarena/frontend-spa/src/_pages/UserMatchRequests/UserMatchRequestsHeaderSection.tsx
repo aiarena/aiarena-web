@@ -16,7 +16,7 @@ type UserMatchRequestsHeaderSectionProps = {
 };
 
 export default function UserMatchRequestsHeaderSection(
-  props: UserMatchRequestsHeaderSectionProps
+  props: UserMatchRequestsHeaderSectionProps,
 ) {
   const [isRequestMatchModalOpen, setIsRequestMatchModalOpen] = useState(false);
   const [isWatchYourGamesModalOpen, setIsWatchYourGamesModalOpen] =
@@ -29,7 +29,7 @@ export default function UserMatchRequestsHeaderSection(
         requestMatchesCountLeft
       }
     `,
-    props.viewer
+    props.viewer,
   );
 
   const matchRequestsUsed =
@@ -47,7 +47,7 @@ export default function UserMatchRequestsHeaderSection(
                   viewer.requestMatchesCountLeft <= 5 &&
                     viewer.requestMatchesCountLeft > 0 &&
                     "text-yellow-500",
-                  viewer.requestMatchesCountLeft <= 0 && "text-red-400"
+                  viewer.requestMatchesCountLeft <= 0 && "text-red-400",
                 )}
                 aria-label={`${matchRequestsUsed} match requests used out of ${viewer.requestMatchesLimit} monthly limit. ${viewer.requestMatchesCountLeft} requests remaining.`}
               >

@@ -20,7 +20,7 @@ export default function DropdownMenuItemTW({
           "px-3 py-2",
           "text-left",
           "hover:bg-slate-600",
-          "transition"
+          "transition",
         )}
         onClick={() => onClick()}
       >

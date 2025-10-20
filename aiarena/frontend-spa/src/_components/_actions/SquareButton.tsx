@@ -82,7 +82,7 @@ export default function SquareButton({
               "bg-darken border-gray-700 hover:bg-darken hover:border-gray-700 cursor-not-allowed":
                 disabled,
             },
-            className
+            className,
           )}
           disabled={isLoading || disabled}
         >

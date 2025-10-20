@@ -8,7 +8,7 @@ interface UserMatchRequestsSectionProps {
 }
 
 export default function UserMatchRequestsSection(
-  props: UserMatchRequestsSectionProps
+  props: UserMatchRequestsSectionProps,
 ) {
   const viewer = useFragment(
     graphql`
@@ -18,7 +18,7 @@ export default function UserMatchRequestsSection(
         ...UserMatchRequestsTable_viewer @arguments(orderBy: $orderBy)
       }
     `,
-    props.viewer
+    props.viewer,
   );
 
   return (

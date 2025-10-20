@@ -66,7 +66,7 @@ export const UploadFile: React.FC<FileUploadProps> = ({
           "focus:outline-none focus:ring-2 focus:ring-customGreen focus:ring-offset-2 focus:ring-offset-neutral-900",
           file
             ? "border-customGreen bg-darken-3"
-            : "border-neutral-500 bg-neutral-900 hover:border-customGreen hover:bg-neutral-800"
+            : "border-neutral-500 bg-neutral-900 hover:border-customGreen hover:bg-neutral-800",
         )}
       >
         {file ? (

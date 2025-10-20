@@ -23,7 +23,7 @@ export default function LoadingSpinner({
         color === "gray" && "border-gray-600",
         color === "light-gray" && "border-gray-400",
         color === "white" && "border-white",
-        color === "black" && "border-black"
+        color === "black" && "border-black",
       )}
     />
   );

@@ -1,29 +1,47 @@
 import clsx from "clsx";
+import { useEffect, useState } from "react";
 
 interface SearchbarProps {
   placeholder: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (value: string) => void;
   value: string;
-  isLoading: boolean;
+  isLoading?: boolean;
+  debounceMs?: number;
 }
 
 export default function Searchbar({
   placeholder,
   onChange,
   value,
-  isLoading,
+  isLoading = false,
+  debounceMs = 300,
 }: SearchbarProps) {
+  const [localValue, setLocalValue] = useState(value);
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (localValue !== value) {
+        onChange(localValue);
+      }
+    }, debounceMs);
+
+    return () => clearTimeout(timer);
+  }, [localValue, value, onChange, debounceMs]);
+
   return (
-    <div className="mb-4 max-w-[40em]">
+    <div className="max-w-[40em]">
       <input
         type="text"
-        value={value}
-        onChange={onChange}
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
         className={clsx(
           "w-full",
           "p-3",
-          "mb-2",
           "border",
           "rounded",
           "shadow-sm",
@@ -36,7 +54,7 @@ export default function Searchbar({
           {
             "border-customGreen animate-border-fade-in-out": isLoading,
             "border-neutral-600": !isLoading,
-          }
+          },
         )}
       />
     </div>

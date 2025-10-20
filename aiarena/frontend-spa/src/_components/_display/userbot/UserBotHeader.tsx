@@ -34,7 +34,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
         ...BotTrophiesModal_bot
       }
     `,
-    props.bot
+    props.bot,
   );
 
   const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);

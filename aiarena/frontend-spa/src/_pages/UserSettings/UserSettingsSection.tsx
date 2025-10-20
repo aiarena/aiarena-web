@@ -34,7 +34,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
         }
       }
     `,
-    props.viewer
+    props.viewer,
   );
   const { enqueueSnackbar } = useSnackbar();
   const [apiTokenVisible, setApiTokenVisible] = useState(false);

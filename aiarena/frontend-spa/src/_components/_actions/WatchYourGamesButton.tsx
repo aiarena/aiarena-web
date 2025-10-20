@@ -49,7 +49,7 @@ export default function WatchYourGamesButton({
         "bg-darken-2 px-6 py-2 flex items-center justify-center text-white font-semibold space-x-2",
         fullWidth ? "w-full" : "inline-block",
 
-        className
+        className,
       )}
     >
       {/* shimmer overlay */}

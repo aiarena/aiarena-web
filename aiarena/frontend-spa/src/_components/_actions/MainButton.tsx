@@ -82,7 +82,7 @@ export default function MainButton({
           "shadow-sm shadow-black hover:shadow-customGreen",
           "border-3 border-customGreen bg-darken-2 hover:bg-transparent",
           "transform backdrop-blur-sm",
-          className
+          className,
         )}
       >
         {text}

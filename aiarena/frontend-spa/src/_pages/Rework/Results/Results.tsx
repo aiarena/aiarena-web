@@ -9,7 +9,7 @@ export default function Results() {
         ...ResultsSection_node
       }
     `,
-    {}
+    {},
   );
 
   return (

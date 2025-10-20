@@ -1,10 +1,12 @@
-import {
-  Variables, UploadableMap,
-} from "relay-runtime";
+import { Variables, UploadableMap } from "relay-runtime";
 
 const frontendBuildNumber = window.BUILD_NUMBER;
 
-export default async function fetchGraphQL(text: string | null, variables: Variables, uploadables: UploadableMap | null | undefined) {
+export default async function fetchGraphQL(
+  text: string | null,
+  variables: Variables,
+  uploadables: UploadableMap | null | undefined,
+) {
   let body;
   const headers: { [key: string]: string } = {};
   if (uploadables && Object.keys(uploadables).length !== 0) {

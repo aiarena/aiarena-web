@@ -24,7 +24,7 @@ export default function DropdownButton({
         "px-3 py-2",
         "text-left",
         "hover:bg-neutral-700",
-        "transition"
+        "transition",
       )}
       onClick={handleClick}
     >

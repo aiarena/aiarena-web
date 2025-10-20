@@ -50,7 +50,7 @@ export default function BotSearchList({
         }
       }
     `,
-    relayRootQuery
+    relayRootQuery,
   );
 
   useDebouncedSearch(query, 500, (value) => {

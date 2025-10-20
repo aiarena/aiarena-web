@@ -49,6 +49,10 @@ class BotRaceType(DjangoObjectTypeWithUID):
 class BotFilterSet(FilterSet):
     order_by = OrderingFilter(
         fields=[
+            "name",
+            "user__username",
+            "plays_race",
+            "type",
             "created",
             "bot_zip_updated",
             "total_active_competition_participations",
@@ -56,11 +60,21 @@ class BotFilterSet(FilterSet):
         method="filter_order_by",
     )
     user_id = graphene.ID()
-    name = django_filters.CharFilter(lookup_expr="icontains")
+    name = django_filters.CharFilter(method="filter_name")
+    bot_zip_publicly_downloadable = django_filters.BooleanFilter()
 
     class Meta:
         model = models.Bot
-        fields = ["name", "user_id", "order_by"]
+        fields = [
+            "name",
+            "user_id",
+            "order_by",
+            "bot_zip_publicly_downloadable",
+        ]
+
+    def filter_name(self, queryset, name, value):
+        # Search by both bot name and author username
+        return queryset.filter(Q(name__icontains=value) | Q(user__username__icontains=value))
 
     def filter_order_by(self, queryset, name, value):
         order_fields = value if isinstance(value, list) else [value]

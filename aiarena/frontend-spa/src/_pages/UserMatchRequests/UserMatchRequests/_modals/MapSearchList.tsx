@@ -49,7 +49,7 @@ export default function MapSearchList({
         }
       }
     `,
-    relayRootQuery
+    relayRootQuery,
   );
 
   useDebouncedSearch(query, 500, (value) => {

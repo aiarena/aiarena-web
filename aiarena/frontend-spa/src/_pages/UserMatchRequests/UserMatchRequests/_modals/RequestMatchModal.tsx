@@ -28,7 +28,7 @@ interface UploadBotModal {
 export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const { getConnectionID } = useRelayConnectionID();
   const connectionID = getConnectionID(
-    CONNECTION_KEYS.UserMatchRequestsConnection
+    CONNECTION_KEYS.UserMatchRequestsConnection,
   );
 
   const [mapSelectionType, setMapSelectionType] = useStateWithLocalStorage<
@@ -37,7 +37,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
 
   const [matchCount, setMatchCount] = useStateWithLocalStorage<string>(
     "matchCount",
-    "1"
+    "1",
   );
 
   const [selectedBot1, setSelectedBot1] =
@@ -60,7 +60,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         ...MapSearchList
       }
     `,
-    {}
+    {},
   );
 
   const [requestMatch, updating] = useMutation<RequestMatchModalMutation>(
@@ -115,12 +115,12 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
           }
         }
       }
-    `
+    `,
   );
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "requestMatch",
-    "Match Requested!"
+    "Match Requested!",
   );
 
   const { enqueueSnackbar } = useSnackbar();
@@ -143,7 +143,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
         <span className="overflow-auto">
           {"Match count was 0 or null, we changed it to 1, try re-requesting."}
         </span>,
-        { variant: "error" }
+        { variant: "error" },
       );
       return false;
     }
@@ -155,7 +155,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             "Match count can't be a letter, we removed it for you, try re-requesting."
           }
         </span>,
-        { variant: "error" }
+        { variant: "error" },
       );
       return false;
     }
@@ -256,7 +256,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                 "border-2 mr-2 rounded-lg bg-darken p-2",
                 mapSelectionType === "map_pool"
                   ? "border-customGreen"
-                  : "border-gray-700 hover:bg-transparent hover:border-customGreen"
+                  : "border-gray-700 hover:bg-transparent hover:border-customGreen",
               )}
             >
               Map Pool
@@ -271,7 +271,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                 "border-2 rounded-lg bg-darken p-2",
                 mapSelectionType === "specific_map"
                   ? "border-customGreen"
-                  : "border-gray-700 hover:bg-transparent hover:border-customGreen"
+                  : "border-gray-700 hover:bg-transparent hover:border-customGreen",
               )}
             >
               Specific Map

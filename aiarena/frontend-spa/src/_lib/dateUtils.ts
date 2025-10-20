@@ -1,11 +1,11 @@
 // For displaying data to users
 export const getDateToLocale = (dateString: string, locale = "en-GB") => {
   if (!dateString) {
-    return ""
+    return "";
   }
 
   if (dateString.trim() == "") {
-    return ""
+    return "";
   }
 
   try {
@@ -13,16 +13,16 @@ export const getDateToLocale = (dateString: string, locale = "en-GB") => {
   } catch {
     return "";
   }
-}
+};
 
 // For internal uses
 export const getDateTimeISOString = (dateString: string): string => {
   if (!dateString) {
-    return ""
+    return "";
   }
 
   if (dateString.trim() == "") {
-    return ""
+    return "";
   }
 
   try {

@@ -14,7 +14,7 @@ export default function UserBots() {
         }
       }
     `,
-    {}
+    {},
   );
 
   if (!data.viewer) {

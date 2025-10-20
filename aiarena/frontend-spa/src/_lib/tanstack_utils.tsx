@@ -2,7 +2,7 @@ import { SortingState } from "@tanstack/react-table";
 
 export function parseSort(
   sortingMap: Record<string, string>,
-  sorting: SortingState
+  sorting: SortingState,
 ) {
   let sortField = "";
   let sortPrefix = "";
@@ -24,7 +24,7 @@ export const withAtag = (
   href: string,
   aria: string,
   children?: React.ReactNode,
-  appendOnEnd?: React.ReactNode
+  appendOnEnd?: React.ReactNode,
 ) => (
   <span className="flex justify-between">
     <a

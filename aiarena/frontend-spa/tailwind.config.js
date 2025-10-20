@@ -20,7 +20,6 @@ export default {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
-  
       colors: {
         customGreen: CustomPrimaryVar,
 
@@ -112,7 +111,7 @@ export default {
         ".bg-fancy-texture": {
           "background-size": "50px 50px",
           "background-repeat": "repeat",
-        }
+        },
       };
       addUtilities(newUtilities, ["responsive", "hover"]);
     },

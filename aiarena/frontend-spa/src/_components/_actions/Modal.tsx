@@ -48,7 +48,7 @@ const Modal = ({
         className={clsx(
           "rounded-lg shadow-md w-full",
           size === "m" && "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl",
-          size === "l" && "max-w-screen"
+          size === "l" && "max-w-screen",
         )}
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
@@ -92,7 +92,7 @@ const Modal = ({
         </BackgroundTexture>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 

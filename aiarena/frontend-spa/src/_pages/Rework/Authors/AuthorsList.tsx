@@ -1,8 +1,7 @@
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import { graphql, usePaginationFragment } from "react-relay";
 import { AuthorsList_node$key } from "./__generated__/AuthorsList_node.graphql";
-import { useDebouncedQuery } from "@/_components/_hooks/useDebouncedQuery";
-import { startTransition } from "react";
+import { startTransition, useEffect } from "react";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
@@ -13,8 +12,6 @@ interface AuthorsListProps {
   authors: AuthorsList_node$key;
   searchBarValue: string;
   orderBy: string;
-
-  onLoadingChange: (isLoading: boolean) => void;
 }
 
 export default function AuthorsList(props: AuthorsListProps) {
@@ -50,20 +47,14 @@ export default function AuthorsList(props: AuthorsListProps) {
       }
     `,
 
-    props.authors as AuthorsList_node$key
+    props.authors as AuthorsList_node$key,
   );
 
-  useDebouncedQuery(
-    props.searchBarValue,
-    props.orderBy,
-    500,
-    (value, orderBy) => {
-      startTransition(() => {
-        refetch({ username: value, orderBy: orderBy });
-      });
-    },
-    props.onLoadingChange
-  );
+  useEffect(() => {
+    startTransition(() => {
+      refetch({ username: props.searchBarValue, orderBy: props.orderBy });
+    });
+  }, [props.searchBarValue, props.orderBy, refetch]);
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(20), hasNext);
   const users = getNodes(userData?.users);

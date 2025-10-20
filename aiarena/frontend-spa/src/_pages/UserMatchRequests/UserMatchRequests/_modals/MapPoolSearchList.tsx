@@ -51,7 +51,7 @@ export default function MapPoolSearchList({
         }
       }
     `,
-    relayRootQuery
+    relayRootQuery,
   );
   useDebouncedSearch(query, 500, (value) => {
     startTransition(() => {

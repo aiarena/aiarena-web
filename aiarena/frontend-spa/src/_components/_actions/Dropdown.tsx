@@ -5,7 +5,7 @@ import { DropdownButtonProps } from "./DropdownButton";
 
 interface DropdownProps {
   title: string;
-  isLoading: boolean;
+  isLoading?: boolean;
   children:
     | ReactElement<DropdownButtonProps>
     | ReactElement<DropdownButtonProps>[];
@@ -14,7 +14,7 @@ interface DropdownProps {
 export default function Dropdown({
   title,
   children,
-  isLoading,
+  isLoading = false,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -70,7 +70,7 @@ export default function Dropdown({
               "border-customGreen animate-border-fade-in-out": isLoading,
               "border-neutral-600": !isLoading,
               "focus:ring-customGreen focus:ring-2": true,
-            }
+            },
           )}
         >
           {title}
@@ -102,7 +102,7 @@ export default function Dropdown({
             "duration-100",
             "ease-out",
             "z-45",
-            "overflow-x-auto"
+            "overflow-x-auto",
           )}
         >
           <div className="py-1 flex flex-col">{enhancedChildren}</div>

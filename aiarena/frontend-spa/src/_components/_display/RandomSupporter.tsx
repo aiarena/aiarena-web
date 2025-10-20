@@ -13,7 +13,7 @@ export default function RandomSupporter() {
         }
       }
     `,
-    {}
+    {},
   );
 
   return (

@@ -15,53 +15,47 @@ export default function Authors() {
         ...AuthorsList_node
       }
     `,
-    {}
+    {},
   );
   const [searchBarValue, setSearchBarValue] = useState("");
   const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
-  const [filterLoading, setFilterLoading] = useState(false);
   return (
     <>
       <section aria-labelledby="authors-heading">
         <div className="flex flex-wrap-reverse w-fullitems-start">
           {/* Display active competition limit and current active competitions */}
           <div
-            className="flex gap-4 ml-auto"
+            className="flex gap-4 ml-auto mb-4"
             role="group"
             aria-label="Author filtering and sorting controls"
           >
-            <>
-              <Dropdown title={orderBy.display} isLoading={filterLoading}>
-                <DropdownButton
-                  onClick={() =>
-                    setOrderBy({
-                      display: "Date Joined",
-                      value: "-date_joined",
-                    })
-                  }
-                  title={"Date Joined"}
-                />
-
-                <DropdownButton
-                  onClick={() =>
-                    setOrderBy({
-                      display: "Username",
-                      value: "username",
-                    })
-                  }
-                  title={"Username"}
-                />
-              </Dropdown>
-              <Searchbar
-                onChange={(e) => {
-                  setSearchBarValue(e.target.value);
-                }}
-                isLoading={filterLoading}
-                value={searchBarValue}
-                placeholder="Search all authors..."
-                aria-label="Search author by name"
+            <Dropdown title={orderBy.display}>
+              <DropdownButton
+                onClick={() =>
+                  setOrderBy({
+                    display: "Date Joined",
+                    value: "-date_joined",
+                  })
+                }
+                title={"Date Joined"}
               />
-            </>
+
+              <DropdownButton
+                onClick={() =>
+                  setOrderBy({
+                    display: "Username",
+                    value: "username",
+                  })
+                }
+                title={"Username"}
+              />
+            </Dropdown>
+            <Searchbar
+              onChange={setSearchBarValue}
+              value={searchBarValue}
+              placeholder="Search all authors..."
+              aria-label="Search author by name"
+            />
           </div>
         </div>
 
@@ -70,7 +64,6 @@ export default function Authors() {
             authors={data}
             searchBarValue={searchBarValue}
             orderBy={orderBy.value}
-            onLoadingChange={setFilterLoading}
           />
         </Suspense>
       </section>

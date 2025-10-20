@@ -19,5 +19,5 @@ createRoot(document.getElementById("root")!).render(
         </SmartRouter>
       </RelayConnectionIDProvider>
     </RelayEnvironmentProvider>
-  </StrictMode>
+  </StrictMode>,
 );

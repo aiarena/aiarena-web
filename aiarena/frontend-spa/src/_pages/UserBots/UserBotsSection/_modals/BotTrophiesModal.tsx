@@ -26,7 +26,7 @@ export default function BotTrophiesModal(props: TrophiesModalProps) {
         }
       }
     `,
-    props.bot
+    props.bot,
   );
 
   if (!props.isOpen) return null;

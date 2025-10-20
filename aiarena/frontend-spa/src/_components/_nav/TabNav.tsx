@@ -32,7 +32,7 @@ const TabNavigation: React.FC<TabNavigationProps> = ({
               "px-3 py-2 text-sm md:text-base font-semibold",
               activeTab === tab.name
                 ? "text-customGreen border-b-2 border-customGreen"
-                : "text-gray-200 hover:text-white"
+                : "text-gray-200 hover:text-white",
             )}
           >
             {tab.name}

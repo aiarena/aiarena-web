@@ -18,7 +18,7 @@ export default function UserBot(props: UserBotProps) {
         ...UserBotCompetitions_bot
       }
     `,
-    props.bot
+    props.bot,
   );
   return (
     <div className="rounded-lg text-white  border border-neutral-600 shadow-lg shadow-black backdrop-blur-sm">

@@ -13,7 +13,7 @@ export default function ResultsSection(props: ResultsSectionProps) {
         ...ResultsTable_node
       }
     `,
-    props.data
+    props.data,
   );
 
   return (

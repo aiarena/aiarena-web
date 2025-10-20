@@ -21,7 +21,7 @@ export default function Author(props: AuthorProps) {
         }
       }
     `,
-    props.author
+    props.author,
   );
   return (
     <div className="relative w-full rounded-lg border border-neutral-600 bg-neutral-900/60 text-white shadow-lg shadow-black backdrop-blur p-2">

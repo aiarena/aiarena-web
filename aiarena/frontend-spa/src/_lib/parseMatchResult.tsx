@@ -1,7 +1,7 @@
 export function getMatchResultParsed(
   result: string | undefined,
   player1: string | undefined,
-  player2: string | undefined
+  player2: string | undefined,
 ) {
   if (!result) return "";
 

@@ -13,7 +13,7 @@ export default function Trend(props: TrendProps) {
         trend
       }
     `,
-    props.competitionParticipation
+    props.competitionParticipation,
   );
 
   return (
@@ -26,7 +26,7 @@ export default function Trend(props: TrendProps) {
             "font-normal",
             (competitionParticipation.trend ?? 0) > 0 && "text-customGreen",
             (competitionParticipation.trend ?? 0) === 0 && "text-gray-300",
-            (competitionParticipation.trend ?? 0) < 0 && "text-red-500"
+            (competitionParticipation.trend ?? 0) < 0 && "text-red-500",
           )}
         >
           {competitionParticipation.trend ?? 0}

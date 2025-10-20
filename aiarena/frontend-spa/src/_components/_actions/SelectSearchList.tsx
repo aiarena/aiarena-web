@@ -70,7 +70,7 @@ const SelectSearchList = <TQuery extends OperationType>({
       const value = getNestedValue(response, path);
       if (Array.isArray(value)) {
         return value.map((e) =>
-          typeof e === "object" && e !== null && "node" in e ? e.node : e
+          typeof e === "object" && e !== null && "node" in e ? e.node : e,
         );
       }
       return [];
@@ -190,7 +190,7 @@ const SelectSearchList = <TQuery extends OperationType>({
         <div
           className={clsx(
             "absolute z-10 mt-1 w-full overflow-auto rounded-md border border-gray-600 bg-neutral-900 shadow-lg",
-            heightClassMap[maxHeight]
+            heightClassMap[maxHeight],
           )}
         >
           {isLoading ? (

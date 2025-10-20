@@ -34,13 +34,12 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
         }
       }
     `,
-    props.viewer
+    props.viewer,
   );
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
   const [searchBarValue, setSearchBarValue] = useState("");
   const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
-  const [filterLoading, setFilterLoading] = useState(false);
 
   return (
     <section aria-labelledby="user-bots-heading">
@@ -60,7 +59,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
                     viewer.activeBotParticipationLimit -
                       viewer.activeBotParticipations ===
                       1 &&
-                    "text-yellow-500"
+                    "text-yellow-500",
                 )}
               >
                 {viewer.activeBotParticipations}
@@ -77,9 +76,9 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           aria-label="Bot filtering and sorting controls"
         >
           {viewer.user?.bots?.totalCount &&
-          viewer.user?.bots?.totalCount >= 3 ? (
+          viewer.user?.bots?.totalCount >= 1 ? (
             <>
-              <Dropdown title={orderBy.display} isLoading={filterLoading}>
+              <Dropdown title={orderBy.display}>
                 <DropdownButton
                   onClick={() =>
                     setOrderBy({
@@ -110,11 +109,8 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
                 />
               </Dropdown>
               <Searchbar
-                onChange={(e) => {
-                  setSearchBarValue(e.target.value);
-                }}
-                isLoading={filterLoading}
                 value={searchBarValue}
+                onChange={setSearchBarValue}
                 placeholder="Search your bots..."
                 aria-label="Search bots by name"
               />
@@ -145,7 +141,6 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
             user={viewer.user}
             searchBarValue={searchBarValue}
             orderBy={orderBy.value}
-            onLoadingChange={setFilterLoading}
           />
         ) : (
           <></>

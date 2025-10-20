@@ -103,7 +103,7 @@ function Navbar() {
                                 "py-2 text-white border-b-2",
                                 isActive
                                   ? "border-customGreen"
-                                  : "border-transparent hover:border-customGreen"
+                                  : "border-transparent hover:border-customGreen",
                               )
                             }
                           >
@@ -117,7 +117,7 @@ function Navbar() {
                               "py-2 text-white border-b-2",
                               window.location.pathname === link.path
                                 ? "border-customGreen"
-                                : "border-transparent hover:border-customGreen"
+                                : "border-transparent hover:border-customGreen",
                             )}
                           >
                             {link.title}
@@ -146,7 +146,7 @@ function Navbar() {
                           "block w-full bg-darken-3 hover:darken-4 py-2 text-white hover:text-slate-300 border-b-2",
                           window.location.pathname === link.path
                             ? "border-customGreen"
-                            : "border-transparent"
+                            : "border-transparent",
                         )}
                       >
                         {link.title}

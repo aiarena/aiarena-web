@@ -80,7 +80,7 @@ export default function ResultsTable(props: ResultsTableProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   type ResultType = NonNullable<
@@ -104,7 +104,7 @@ export default function ResultsTable(props: ResultsTableProps) {
           withAtag(
             getIDFromBase64(info.getValue(), "ResultType") || "",
             `/matches/${getIDFromBase64(info.getValue(), "ResultType")}`,
-            `View match details for Result ID ${info.getValue()}`
+            `View match details for Result ID ${info.getValue()}`,
           ),
 
         meta: { priority: 1 },
@@ -116,7 +116,7 @@ export default function ResultsTable(props: ResultsTableProps) {
           const participant1 = info.row.original.participant1;
           const display_value = formatWinnerName(
             info.row.original.winner?.name,
-            participant1?.bot.name
+            participant1?.bot.name,
           );
 
           return withAtag(
@@ -131,7 +131,7 @@ export default function ResultsTable(props: ResultsTableProps) {
               })}
             >
               {participant1?.eloChange}
-            </span>
+            </span>,
           );
         },
         meta: { priority: 1 },
@@ -145,7 +145,7 @@ export default function ResultsTable(props: ResultsTableProps) {
 
           const display_value = formatWinnerName(
             info.row.original?.winner?.name,
-            info.row.original.participant2?.bot.name
+            info.row.original.participant2?.bot.name,
           );
 
           return withAtag(
@@ -160,7 +160,7 @@ export default function ResultsTable(props: ResultsTableProps) {
               })}
             >
               {participant2?.eloChange}
-            </span>
+            </span>,
           );
         },
 
@@ -173,7 +173,7 @@ export default function ResultsTable(props: ResultsTableProps) {
           const getResult = getMatchResultParsed(
             info.getValue(),
             info.row.original.participant1?.bot.name,
-            info.row.original.participant2?.bot.name
+            info.row.original.participant2?.bot.name,
           );
           return getResult != "" ? getResult : "In Queue";
         },
@@ -206,14 +206,14 @@ export default function ResultsTable(props: ResultsTableProps) {
             replayFile || "",
             `/bots/${replayFile}`,
             `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}, Opponent`,
-            "Download"
+            "Download",
           );
         },
 
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);

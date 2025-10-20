@@ -4,21 +4,19 @@ import UserBot from "../../../_components/_display/userbot/UserBot";
 import { graphql, usePaginationFragment } from "react-relay";
 import { useInfiniteScroll } from "../../../_components/_hooks/useInfiniteScroll";
 
-import { useDebouncedQuery } from "../../../_components/_hooks/useDebouncedQuery";
-import LoadingMoreItems from "../../../_components/_display/LoadingMoreItems";
-import NoMoreItems from "../../../_components/_display/NoMoreItems";
-import { useRegisterConnectionID } from "../../../_components/_hooks/useRegisterRelayConnectionID";
-import { CONNECTION_KEYS } from "../../../_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
-import { startTransition } from "react";
+import LoadingMoreItems from "../../_display/LoadingMoreItems";
+import NoMoreItems from "../../_display/NoMoreItems";
+import { useRegisterConnectionID } from "../../_hooks/useRegisterRelayConnectionID";
+import { CONNECTION_KEYS } from "../../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
+import { startTransition, useEffect } from "react";
 import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import { socialLinks } from "@/_data/socialLinks";
+
 interface UserBotsListProps {
   user: UserBotsList_user$key;
   searchBarValue: string;
   orderBy: string;
-
-  onLoadingChange: (isLoading: boolean) => void;
 }
 
 export default function UserBotsList(props: UserBotsListProps) {
@@ -50,25 +48,19 @@ export default function UserBotsList(props: UserBotsListProps) {
       }
     `,
 
-    props.user as UserBotsList_user$key
+    props.user as UserBotsList_user$key,
   );
 
   useRegisterConnectionID(
     CONNECTION_KEYS.UserBotsConnection,
-    userData?.bots?.__id
+    userData?.bots?.__id,
   );
 
-  useDebouncedQuery(
-    props.searchBarValue,
-    props.orderBy,
-    500,
-    (value, orderBy) => {
-      startTransition(() => {
-        refetch({ name: value, orderBy: orderBy });
-      });
-    },
-    props.onLoadingChange
-  );
+  useEffect(() => {
+    startTransition(() => {
+      refetch({ name: props.searchBarValue, orderBy: props.orderBy });
+    });
+  }, [props.searchBarValue, props.orderBy, refetch]);
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(20), hasNext);
   const bots = getNodes(userData?.bots);

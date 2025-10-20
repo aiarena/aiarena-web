@@ -14,7 +14,7 @@ export default function UserMatchRequests() {
     `,
     {
       orderBy: "",
-    }
+    },
   );
 
   if (!data.viewer) {

@@ -20,7 +20,7 @@ export function TableContainer<T>({
   const allColumns = table.getAllLeafColumns();
 
   const visibleColumnCount = allColumns.filter((column) =>
-    column.getIsVisible()
+    column.getIsVisible(),
   ).length;
 
   return (
@@ -34,7 +34,7 @@ export function TableContainer<T>({
                 type="checkbox"
                 checked={column.getIsVisible()}
                 onChange={
-                  visibleColumnCount == 1 && column.getIsVisible() == true
+                  visibleColumnCount == 1 && column.getIsVisible()
                     ? undefined
                     : column.getToggleVisibilityHandler()
                 }
@@ -77,7 +77,7 @@ export function TableContainer<T>({
                           "cursor-pointer",
                           "mr-5",
                           "group",
-                          "hover:text-white"
+                          "hover:text-white",
                         )}
                         {...(header.column.getCanSort() && !loading
                           ? {
@@ -87,7 +87,7 @@ export function TableContainer<T>({
                       >
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                         {header.column.getCanSort() && (
                           <>
@@ -125,7 +125,7 @@ export function TableContainer<T>({
                               "border-r-white": header.column.getIsResizing(),
                               "border-r-neutral-700":
                                 !header.column.getIsResizing(),
-                            }
+                            },
                           )}
                         >
                           <div
@@ -134,7 +134,7 @@ export function TableContainer<T>({
                               "h-full",
                               header.column.getIsResizing()
                                 ? "bg-white"
-                                : "bg-customGreen"
+                                : "bg-customGreen",
                             )}
                           ></div>
                         </div>
@@ -161,7 +161,7 @@ export function TableContainer<T>({
                       <div className="w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </div>
                     </td>
