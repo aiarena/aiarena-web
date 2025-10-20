@@ -1,17 +1,15 @@
 import { getNodes } from "@/_lib/relayHelpers";
-
 import UserBot from "../../../_components/_display/userbot/UserBot";
 import { graphql, usePaginationFragment } from "react-relay";
-import { useInfiniteScroll } from "../../../_components/_hooks/useInfiniteScroll";
-
-import LoadingMoreItems from "../../_display/LoadingMoreItems";
-import NoMoreItems from "../../_display/NoMoreItems";
-import { useRegisterConnectionID } from "../../_hooks/useRegisterRelayConnectionID";
-import { CONNECTION_KEYS } from "../../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
+import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll.tsx";
 import { startTransition, useEffect } from "react";
 import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import { socialLinks } from "@/_data/socialLinks";
+import { useRegisterConnectionID } from "@/_components/_hooks/useRegisterRelayConnectionID";
+import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
+import NoMoreItems from "@/_components/_display/NoMoreItems";
+import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 
 interface UserBotsListProps {
   user: UserBotsList_user$key;
