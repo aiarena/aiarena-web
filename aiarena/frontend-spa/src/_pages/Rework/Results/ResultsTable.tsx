@@ -28,7 +28,7 @@ import {
 } from "./__generated__/ResultsTable_node.graphql";
 import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
-import WatchGamesModal from "@/_components/_sections/UserMatchRequests/_modals/WatchGamesModal";
+import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
 
 interface ResultsTableProps {
   data: ResultsTable_node$key;

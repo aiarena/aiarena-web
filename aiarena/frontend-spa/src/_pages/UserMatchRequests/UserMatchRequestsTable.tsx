@@ -8,24 +8,26 @@ import {
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
-import LoadingDots from "../../_display/LoadingDots";
-import { useInfiniteScroll } from "../../_hooks/useInfiniteScroll";
 import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
-import { TableContainer } from "../../_actions/TableContainer";
+
 import { parseSort, withAtag } from "@/_lib/tanstack_utils";
-import LoadingMoreItems from "../../_display/LoadingMoreItems";
-import NoMoreItems from "../../_display/NoMoreItems";
-import { CONNECTION_KEYS } from "../../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
-import { useRegisterConnectionID } from "../../_hooks/useRegisterRelayConnectionID";
+
 import {
   UserMatchRequestsTable_viewer$data,
   UserMatchRequestsTable_viewer$key,
 } from "./__generated__/UserMatchRequestsTable_viewer.graphql";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import { formatWinnerName } from "@/_components/_display/formatWinnerName";
+import { useRegisterConnectionID } from "@/_components/_hooks/useRegisterRelayConnectionID";
+import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
+import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
+import LoadingDots from "@/_components/_display/LoadingDots";
+import { TableContainer } from "@/_components/_actions/TableContainer";
+import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
+import NoMoreItems from "@/_components/_display/NoMoreItems";
 
 interface UserMatchRequestsTableProps {
   viewer: UserMatchRequestsTable_viewer$key;

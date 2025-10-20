@@ -1,14 +1,14 @@
 import { getNodes } from "@/_lib/relayHelpers";
 
-import UserBot from "../../_display/userbot/UserBot";
+import UserBot from "../../../_components/_display/userbot/UserBot";
 import { graphql, usePaginationFragment } from "react-relay";
-import { useInfiniteScroll } from "../../_hooks/useInfiniteScroll";
+import { useInfiniteScroll } from "../../../_components/_hooks/useInfiniteScroll";
 
-import { useDebouncedQuery } from "../../_hooks/useDebouncedQuery";
-import LoadingMoreItems from "../../_display/LoadingMoreItems";
-import NoMoreItems from "../../_display/NoMoreItems";
-import { useRegisterConnectionID } from "../../_hooks/useRegisterRelayConnectionID";
-import { CONNECTION_KEYS } from "../../_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
+import { useDebouncedQuery } from "../../../_components/_hooks/useDebouncedQuery";
+import LoadingMoreItems from "../../../_components/_display/LoadingMoreItems";
+import NoMoreItems from "../../../_components/_display/NoMoreItems";
+import { useRegisterConnectionID } from "../../../_components/_hooks/useRegisterRelayConnectionID";
+import { CONNECTION_KEYS } from "../../../_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 import { startTransition } from "react";
 import { UserBotsList_user$key } from "./__generated__/UserBotsList_user.graphql";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";

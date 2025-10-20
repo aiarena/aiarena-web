@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { graphql, useFragment } from "react-relay";
-import AvatarWithBorder from "../_display/AvatarWithBorder";
-import SectionDivider from "../_display/SectionDivider";
+
 import { getDateToLocale } from "@/_lib/dateUtils";
 import {
   ClipboardDocumentIcon,
@@ -10,6 +9,8 @@ import {
 } from "@heroicons/react/20/solid";
 import { useSnackbar } from "notistack";
 import { UserSettingsSection_viewer$key } from "./__generated__/UserSettingsSection_viewer.graphql";
+import AvatarWithBorder from "@/_components/_display/AvatarWithBorder";
+import SectionDivider from "@/_components/_display/SectionDivider";
 
 interface UserSettingsSectionProps {
   viewer: UserSettingsSection_viewer$key;

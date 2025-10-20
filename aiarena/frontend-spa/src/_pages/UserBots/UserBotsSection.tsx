@@ -1,18 +1,19 @@
 import React, { Suspense, useState } from "react";
 
 import { graphql, useFragment } from "react-relay";
-import MainButton from "../_actions/MainButton";
 import UploadBotModal from "./UserBotsSection/_modals/UploadBotModal";
 
-import Searchbar from "../_actions/Searchbar";
-import Dropdown from "../_actions/Dropdown";
-import DropdownButton from "../_actions/DropdownButton";
-import WantMore from "../_display/WantMore";
 import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_viewer.graphql";
 
 import UserBotsList from "./UserBotsSection/UserBotsList";
-import LoadingSpinner from "../_display/LoadingSpinnerGray";
+
 import clsx from "clsx";
+import WantMore from "@/_components/_display/WantMore";
+import Dropdown from "@/_components/_actions/Dropdown";
+import DropdownButton from "@/_components/_actions/DropdownButton";
+import Searchbar from "@/_components/_actions/Searchbar";
+import MainButton from "@/_components/_actions/MainButton";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
 interface UserBotsSectionProps {
   viewer: UserBotsSection_viewer$key;

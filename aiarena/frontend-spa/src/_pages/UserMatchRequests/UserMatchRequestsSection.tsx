@@ -1,7 +1,7 @@
 import { graphql, useFragment } from "react-relay";
+import UserMatchRequestsHeaderSection from "./UserMatchRequestsHeaderSection";
+import UserMatchRequestsTable from "./UserMatchRequestsTable";
 import { UserMatchRequestsSection_viewer$key } from "./__generated__/UserMatchRequestsSection_viewer.graphql";
-import UserMatchRequestsTable from "./UserMatchRequests/UserMatchRequestsTable";
-import UserMatchRequestsHeaderSection from "./UserMatchRequests/UserMatchRequestsHeaderSection";
 
 interface UserMatchRequestsSectionProps {
   viewer: UserMatchRequestsSection_viewer$key;

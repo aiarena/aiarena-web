@@ -1,14 +1,15 @@
 import { Suspense, useState } from "react";
-import WantMore from "../../_display/WantMore";
-import MainButton from "../../_actions/MainButton";
+
 import { graphql, useFragment } from "react-relay";
 import clsx from "clsx";
 
-import RequestMatchModal from "./_modals/RequestMatchModal";
 import { UserMatchRequestsHeaderSection_viewer$key } from "./__generated__/UserMatchRequestsHeaderSection_viewer.graphql";
 import LoadingDots from "@/_components/_display/LoadingDots";
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
-import WatchGamesModal from "./_modals/WatchGamesModal";
+import WantMore from "@/_components/_display/WantMore";
+import MainButton from "@/_components/_actions/MainButton";
+import RequestMatchModal from "./UserMatchRequests/_modals/RequestMatchModal";
+import WatchGamesModal from "./UserMatchRequests/_modals/WatchGamesModal";
 
 type UserMatchRequestsHeaderSectionProps = {
   viewer: UserMatchRequestsHeaderSection_viewer$key;

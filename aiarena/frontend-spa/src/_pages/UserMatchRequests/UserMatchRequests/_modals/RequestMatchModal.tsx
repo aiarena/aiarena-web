@@ -8,13 +8,13 @@ import { useRelayConnectionID } from "@/_components/_contexts/RelayConnectionIDC
 import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 import BotSearchList, {
   BotType,
-} from "@/_components/_sections/UserMatchRequests/_modals/BotSearchList";
+} from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/BotSearchList";
 import MapSearchList, {
   MapType,
-} from "@/_components/_sections/UserMatchRequests/_modals/MapSearchList";
+} from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/MapSearchList";
 import MapPoolSearchList, {
   MapPoolType,
-} from "@/_components/_sections/UserMatchRequests/_modals/MapPoolSearchList";
+} from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/MapPoolSearchList";
 import clsx from "clsx";
 import { RequestMatchModalQuery } from "./__generated__/RequestMatchModalQuery.graphql";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";

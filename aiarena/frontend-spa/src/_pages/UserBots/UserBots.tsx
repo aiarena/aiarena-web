@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { UserBotsSection } from "@/_components/_sections/UserBotsSection";
 
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import { UserBotsQuery } from "./__generated__/UserBotsQuery.graphql";
+import { UserBotsSection } from "./UserBotsSection";
 
 export default function UserBots() {
   const data = useLazyLoadQuery<UserBotsQuery>(
