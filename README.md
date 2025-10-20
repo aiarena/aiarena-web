@@ -62,8 +62,25 @@ A website for running the aiarena.net infrastructure.
 
 7. Launching the Website
 
+
+    If the enviornment is not activated - activate it: 
     ```shell
-    uv run manage.py generate_schema
+    source .venv/bin/activate
+    ```
+
+
+
+
+    In the terminal, run: 
+    
+    ```shell
+    docker compose up
+    ```
+
+    In another terminal run:
+
+    ```shell
+    uv run manage.py graphql_schema
     uv run manage.py runserver
     ```
 
@@ -92,6 +109,14 @@ A website for running the aiarena.net infrastructure.
     ```shell
     uv run pre-commit install
     ```
+
+## Setting VS code enviornment variables:
+
+    After creating the venv with UV. navigate to ./venv/bin/activate and add the env export just before "deactivate()":
+    ```shell
+    export DJANGO_ENVIRONMENT=DEVELOPMENT
+    ```
+    Then reactivate the environment with source.
 
 ### Set up AWS access
 
