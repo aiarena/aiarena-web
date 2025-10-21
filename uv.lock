@@ -90,7 +90,7 @@ requires-dist = [
     { name = "django-filter", specifier = "==25.1" },
     { name = "django-grappelli", specifier = "==3.0.8" },
     { name = "django-pglocks", specifier = "==1.0.4" },
-    { name = "django-picklefield", specifier = "==3.1" },
+    { name = "django-picklefield", specifier = "==3.3" },
     { name = "django-private-storage", specifier = "==3.1" },
     { name = "django-random-queryset", specifier = "==0.1.3" },
     { name = "django-redis", specifier = "==5.4.0" },
@@ -631,14 +631,14 @@ sdist = { url = "https://files.pythonhosted.org/packages/59/76/2c7d104151316077d
 
 [[package]]
 name = "django-picklefield"
-version = "3.1"
+version = "3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/92/3a/d759b3546857b1713025fd87dd5bbb582912e71454797db3002305f2559c/django-picklefield-3.1.tar.gz", hash = "sha256:c786cbeda78d6def2b43bff4840d19787809c8909f7ad683961703060398d356", size = 9398, upload-time = "2022-06-18T20:21:09.353Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a6/70/11411d4f528e4fad57a17dae81c85da039feba90c001b64e677fc0925a97/django-picklefield-3.3.tar.gz", hash = "sha256:4e76dd20f2e95ffdaf18d641226ccecc169ff0473b0d6bec746f3ab97c26b8cb", size = 9559, upload-time = "2025-03-13T03:34:12.784Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/02/58990bc1fc987761238382928f00a571b47494384d6bc6b89302422d7a99/django_picklefield-3.1-py3-none-any.whl", hash = "sha256:d77c504df7311e8ec14e8b779f10ca6fec74de6c7f8e2c136e1ef60cf955125d", size = 9478, upload-time = "2022-06-18T20:21:07.454Z" },
+    { url = "https://files.pythonhosted.org/packages/34/e1/988fa6ded7275bb11e373ccd4b708af477f12027d3ee86b7cb5fc5779412/django_picklefield-3.3-py3-none-any.whl", hash = "sha256:d6f6fd94a17177fe0d16b0b452a9860b8a1da97b6e70633ab53ade4975f1ce9a", size = 9565, upload-time = "2025-03-13T03:34:11.209Z" },
 ]
 
 [[package]]
