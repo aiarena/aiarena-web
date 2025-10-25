@@ -25,10 +25,10 @@ export default function Authors() {
   return (
     <>
       <section aria-labelledby="authors-heading">
-        <div className="flex flex-wrap-reverse w-fullitems-start">
+        <div className="flex flex-wrap-reverse w-full items-start">
           {/* Display active competition limit and current active competitions */}
           <div
-            className="flex gap-4 ml-auto mb-4"
+            className="flex gap-4 ml-auto mb-8 flex-wrap"
             role="group"
             aria-label="Author filtering and sorting controls"
           >
