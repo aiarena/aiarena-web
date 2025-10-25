@@ -27,7 +27,7 @@ export default function AuthorsList(props: AuthorsListProps) {
       @refetchable(queryName: "AuthorsListPaginationQuery")
       @argumentDefinitions(
         cursor: { type: "String" }
-        first: { type: "Int", defaultValue: 60 }
+        first: { type: "Int", defaultValue: 70 }
         username: { type: "String" }
         orderBy: { type: "String" }
         onlyWithBots: { type: "Boolean", defaultValue: true }
@@ -63,7 +63,7 @@ export default function AuthorsList(props: AuthorsListProps) {
     });
   }, [props.searchBarValue, props.orderBy, props.onlyWithBots, refetch]);
 
-  const { loadMoreRef } = useInfiniteScroll(() => loadNext(60), hasNext);
+  const { loadMoreRef } = useInfiniteScroll(() => loadNext(70), hasNext);
   const users = getNodes(userData?.users);
   const hasItems = users.length > 0;
 
