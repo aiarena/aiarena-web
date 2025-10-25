@@ -30,7 +30,7 @@ export default function AuthorsList(props: AuthorsListProps) {
         first: { type: "Int", defaultValue: 20 }
         username: { type: "String" }
         orderBy: { type: "String" }
-        onlyWithBots: { type: "Boolean" }
+        onlyWithBots: { type: "Boolean", defaultValue: true }
       ) {
         users(
           first: $first
