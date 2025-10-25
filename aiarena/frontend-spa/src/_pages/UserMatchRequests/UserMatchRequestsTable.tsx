@@ -28,13 +28,14 @@ import LoadingDots from "@/_components/_display/LoadingDots";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
+import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 
 interface UserMatchRequestsTableProps {
   viewer: UserMatchRequestsTable_viewer$key;
 }
 
 export default function UserMatchRequestsTable(
-  props: UserMatchRequestsTableProps,
+  props: UserMatchRequestsTableProps
 ) {
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
@@ -89,12 +90,12 @@ export default function UserMatchRequestsTable(
         }
       }
     `,
-    props.viewer,
+    props.viewer
   );
 
   useRegisterConnectionID(
     CONNECTION_KEYS.UserMatchRequestsConnection,
-    data?.requestedMatches?.__id,
+    data?.requestedMatches?.__id
   );
 
   type MatchType = NonNullable<
@@ -109,7 +110,7 @@ export default function UserMatchRequestsTable(
   const [isPending, startTransition] = useTransition();
   const matchData = useMemo(
     () => getNodes<MatchType>(data?.requestedMatches),
-    [data],
+    [data]
   );
 
   const columnHelper = createColumnHelper<MatchType>();
@@ -123,7 +124,7 @@ export default function UserMatchRequestsTable(
           withAtag(
             getIDFromBase64(info.getValue(), "MatchType") || "",
             `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`,
-            `View match details for match ID ${info.getValue()}`,
+            `View match details for match ID ${info.getValue()}`
           ),
 
         meta: { priority: 1 },
@@ -135,14 +136,14 @@ export default function UserMatchRequestsTable(
           const participant1 = info.row.original.participant1;
           const display_value = formatWinnerName(
             info.row.original.result?.winner?.name,
-            participant1?.name,
+            participant1?.name
           );
 
           return withAtag(
             participant1?.name || "",
             `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`,
             `View bot profile for ${participant1?.name}, Bot`,
-            display_value,
+            display_value
           );
         },
         meta: { priority: 1 },
@@ -155,14 +156,14 @@ export default function UserMatchRequestsTable(
 
           const display_value = formatWinnerName(
             info.row.original.result?.winner?.name,
-            info.row.original.participant2?.name,
+            info.row.original.participant2?.name
           );
 
           return withAtag(
             participant2?.name || "",
             `/bots/${getIDFromBase64(participant2?.id, "BotType")}`,
             `View bot profile for ${participant2?.name}, Opponent`,
-            display_value,
+            display_value
           );
         },
 
@@ -180,7 +181,7 @@ export default function UserMatchRequestsTable(
         cell: (info) => {
           const tags = info.getValue();
           const filtered = tags.filter((tag) =>
-            onlyMyTags ? tag.user.id === data?.user?.id : true,
+            onlyMyTags ? tag.user.id === data?.user?.id : true
           );
           return filtered.map((tag) => tag?.tag).join(", ");
         },
@@ -203,7 +204,7 @@ export default function UserMatchRequestsTable(
           const getResult = getMatchResultParsed(
             info.getValue(),
             info.row.original.participant1?.name,
-            info.row.original.participant2?.name,
+            info.row.original.participant2?.name
           );
           return getResult != "" ? getResult : "In Queue";
         },
@@ -211,7 +212,7 @@ export default function UserMatchRequestsTable(
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper, data?.user?.id, onlyMyTags],
+    [columnHelper, data?.user?.id, onlyMyTags]
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
@@ -252,23 +253,32 @@ export default function UserMatchRequestsTable(
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap gap-4 text-white">
-        {hasItems ? (
-          <label key={"set_my_tags"} className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={onlyMyTags}
-              onChange={() => setOnlyMyTags(!onlyMyTags)}
-              className="accent-customGreen"
-            />
-            <span>Hide Tags by other authors</span>
-          </label>
-        ) : null}
-      </div>
-
       <Suspense fallback={<LoadingDots />}>
         {hasItems ? (
-          <TableContainer table={table} loading={isPending} />
+          <TableContainer
+            table={table}
+            loading={isPending}
+            appendHeader={
+              <div
+                className="flex gap-4  items-center"
+                role="group"
+                aria-label="Bot filtering controls"
+              >
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="downloadable-toggle"
+                    className="text-sm font-medium text-gray-300"
+                  >
+                    Hide Tags by other authors
+                  </label>
+                  <SimpleToggle
+                    enabled={onlyMyTags}
+                    onChange={() => setOnlyMyTags(!onlyMyTags)}
+                  />
+                </div>
+              </div>
+            }
+          />
         ) : (
           <NoItemsInListMessage>
             <p>Request your first match, and it will show up here.</p>

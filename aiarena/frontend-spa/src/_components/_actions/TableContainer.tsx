@@ -59,7 +59,7 @@ export function TableContainer<T>({
               ))}
             </div>
           </TableSettings>
-          <div>{appendHeader}</div>
+          <div className="flex items-center">{appendHeader}</div>
         </div>
 
         <table className="w-full border-collapse min-w-max">
@@ -180,7 +180,7 @@ export function TableContainer<T>({
               </tbody>
             </Suspense>
           ) : (
-            <tbody className="">
+            <tbody>
               <tr>
                 <td
                   colSpan={visibleColumnCount}
