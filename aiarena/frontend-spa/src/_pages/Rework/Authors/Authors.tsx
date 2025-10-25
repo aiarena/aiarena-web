@@ -26,7 +26,6 @@ export default function Authors() {
     <>
       <section aria-labelledby="authors-heading">
         <div className="flex flex-wrap-reverse w-full items-start">
-          {/* Display active competition limit and current active competitions */}
           <div
             className="flex gap-4 ml-auto mb-8 flex-wrap"
             role="group"
