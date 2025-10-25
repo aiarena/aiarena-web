@@ -8,11 +8,16 @@ import {
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
-import { Suspense, useEffect, useMemo, useState, startTransition } from "react";
+import React, {
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+  startTransition,
+} from "react";
 
 import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 
-import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import { TableContainer } from "@/_components/_actions/TableContainer";
@@ -27,6 +32,7 @@ interface BotsTableProps {
   data: BotsTable_node$key;
   searchBarValue: string;
   onlyDownloadable: boolean;
+  appendHeader?: React.ReactNode;
 }
 
 export default function BotsTable(props: BotsTableProps) {
@@ -64,7 +70,7 @@ export default function BotsTable(props: BotsTableProps) {
         }
       }
     `,
-    props.data,
+    props.data
   );
 
   type BotType = NonNullable<
@@ -86,7 +92,7 @@ export default function BotsTable(props: BotsTableProps) {
           withAtag(
             info.getValue(),
             `/bots/${getIDFromBase64(info.row.original.id, "BotType")}`,
-            `View bot profile for ${info.getValue()}`,
+            `View bot profile for ${info.getValue()}`
           ),
         meta: { priority: 1 },
       }),
@@ -97,7 +103,7 @@ export default function BotsTable(props: BotsTableProps) {
           withAtag(
             info.getValue(),
             `/authors/${getIDFromBase64(info.row.original.user.id, "UserType")}`,
-            `View author profile for ${info.getValue()}`,
+            `View author profile for ${info.getValue()}`
           ),
         meta: { priority: 1 },
       }),
@@ -114,7 +120,7 @@ export default function BotsTable(props: BotsTableProps) {
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper],
+    [columnHelper]
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
@@ -157,13 +163,11 @@ export default function BotsTable(props: BotsTableProps) {
   return (
     <div>
       <Suspense fallback={<LoadingDots />}>
-        {hasItems ? (
-          <TableContainer table={table} loading={false} />
-        ) : (
-          <NoItemsInListMessage>
-            <p>No bots meet the criteria...</p>
-          </NoItemsInListMessage>
-        )}
+        <TableContainer
+          table={table}
+          loading={false}
+          appendHeader={props.appendHeader}
+        />
       </Suspense>
 
       {hasNext ? (

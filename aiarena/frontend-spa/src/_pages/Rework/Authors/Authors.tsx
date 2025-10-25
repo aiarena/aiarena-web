@@ -7,6 +7,7 @@ import Dropdown from "@/_components/_actions/Dropdown";
 import DropdownButton from "@/_components/_actions/DropdownButton";
 import Searchbar from "@/_components/_actions/Searchbar";
 import AuthorsList from "./AuthorsList";
+import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 
 export default function Authors() {
   const data = useLazyLoadQuery<AuthorsQuery>(
@@ -15,10 +16,12 @@ export default function Authors() {
         ...AuthorsList_node
       }
     `,
-    {},
+    {}
   );
   const [searchBarValue, setSearchBarValue] = useState("");
   const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
+  const [onlyWithBots, setOnlyWithBots] = useState(false);
+
   return (
     <>
       <section aria-labelledby="authors-heading">
@@ -29,6 +32,15 @@ export default function Authors() {
             role="group"
             aria-label="Author filtering and sorting controls"
           >
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="downloadable-toggle"
+                className="text-sm font-medium text-gray-300"
+              >
+                Only Authors with Bots
+              </label>
+              <SimpleToggle enabled={onlyWithBots} onChange={setOnlyWithBots} />
+            </div>
             <Dropdown title={orderBy.display}>
               <DropdownButton
                 onClick={() =>

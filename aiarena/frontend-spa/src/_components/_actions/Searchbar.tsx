@@ -40,8 +40,8 @@ export default function Searchbar({
         onChange={(e) => setLocalValue(e.target.value)}
         placeholder={placeholder}
         className={clsx(
-          "w-full",
           "p-3",
+          "m-0",
           "border",
           "rounded",
           "shadow-sm",
@@ -54,7 +54,7 @@ export default function Searchbar({
           {
             "border-customGreen animate-border-fade-in-out": isLoading,
             "border-neutral-600": !isLoading,
-          },
+          }
         )}
       />
     </div>

@@ -12,6 +12,7 @@ interface AuthorsListProps {
   authors: AuthorsList_node$key;
   searchBarValue: string;
   orderBy: string;
+  onlyWithBots?: boolean;
 }
 
 export default function AuthorsList(props: AuthorsListProps) {
@@ -47,7 +48,7 @@ export default function AuthorsList(props: AuthorsListProps) {
       }
     `,
 
-    props.authors as AuthorsList_node$key,
+    props.authors as AuthorsList_node$key
   );
 
   useEffect(() => {

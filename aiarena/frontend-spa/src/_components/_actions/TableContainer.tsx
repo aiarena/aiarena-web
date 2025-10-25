@@ -3,6 +3,8 @@ import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import { ReactNode, Suspense } from "react";
 import clsx from "clsx";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
+import TableSettings from "./TableSettings";
+import Divider from "../_display/Divider";
 
 interface TableContainerProps<T> {
   table: Table<T>;
@@ -20,40 +22,46 @@ export function TableContainer<T>({
   const allColumns = table.getAllLeafColumns();
 
   const visibleColumnCount = allColumns.filter((column) =>
-    column.getIsVisible(),
+    column.getIsVisible()
   ).length;
 
   return (
     <div className={clsx(className)}>
-      {/* Column toggles */}
-      <div className="mb-4 flex justify-between">
-        <div className="flex flex-wrap gap-4 text-white">
-          {allColumns.map((column) => (
-            <label key={column.id} className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={column.getIsVisible()}
-                onChange={
-                  visibleColumnCount == 1 && column.getIsVisible()
-                    ? undefined
-                    : column.getToggleVisibilityHandler()
-                }
-                disabled={!column.getCanHide()}
-                className="accent-customGreen"
-              />
-              <span>
-                {typeof column.columnDef.header === "string"
-                  ? column.columnDef.header
-                  : column.id}
-              </span>
-            </label>
-          ))}
-        </div>
-        {appendHeader}
-      </div>
-
       {/* Table */}
-      <div className="overflow-x-auto rounded backdrop-blur-lg">
+
+      <div className="overflow-x-auto rounded-2xl border border-neutral-800 backdrop-blur-lg bg-darken-2  min-h-[80vh]">
+        <div className="flex justify-between m-2">
+          <TableSettings>
+            <div className="text-white">
+              <Divider label="Visible Table Columns" labelPlacement="left" />
+              {allColumns.map((column) => (
+                <label
+                  key={column.id}
+                  className="flex items-center space-x-4 ml-2"
+                >
+                  <input
+                    type="checkbox"
+                    checked={column.getIsVisible()}
+                    onChange={
+                      visibleColumnCount == 1 && column.getIsVisible()
+                        ? undefined
+                        : column.getToggleVisibilityHandler()
+                    }
+                    disabled={!column.getCanHide()}
+                    className="accent-customGreen"
+                  />
+                  <span>
+                    {typeof column.columnDef.header === "string"
+                      ? column.columnDef.header
+                      : column.id}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </TableSettings>
+          <div>{appendHeader}</div>
+        </div>
+
         <table className="w-full border-collapse min-w-max">
           <thead className="bg-darken-2 text-white">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -77,7 +85,7 @@ export function TableContainer<T>({
                           "cursor-pointer",
                           "mr-5",
                           "group",
-                          "hover:text-white",
+                          "hover:text-white"
                         )}
                         {...(header.column.getCanSort() && !loading
                           ? {
@@ -87,7 +95,7 @@ export function TableContainer<T>({
                       >
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext(),
+                          header.getContext()
                         )}
                         {header.column.getCanSort() && (
                           <>
@@ -125,7 +133,7 @@ export function TableContainer<T>({
                               "border-r-white": header.column.getIsResizing(),
                               "border-r-neutral-700":
                                 !header.column.getIsResizing(),
-                            },
+                            }
                           )}
                         >
                           <div
@@ -134,7 +142,7 @@ export function TableContainer<T>({
                               "h-full",
                               header.column.getIsResizing()
                                 ? "bg-white"
-                                : "bg-customGreen",
+                                : "bg-customGreen"
                             )}
                           ></div>
                         </div>
@@ -145,31 +153,44 @@ export function TableContainer<T>({
               </tr>
             ))}
           </thead>
-          <Suspense fallback={<LoadingSpinner />}>
-            <tbody className={clsx({ "animate-pulse": loading })}>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="even:bg-darken-4 odd:bg-darken hover:bg-darken-3 border-b border-gray-700"
+          {table.getRowModel().rows.length != 0 ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <tbody className={clsx({ "animate-pulse": loading })}>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="even:bg-darken-4 odd:bg-darken hover:bg-darken-3 border-b border-gray-700"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        style={{ width: cell.column.getSize() }}
+                        className="p-3 text-white border-t border-darken-2 md:min-w-0 md:max-w-0"
+                      >
+                        <div className="w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </Suspense>
+          ) : (
+            <tbody className="">
+              <tr>
+                <td
+                  colSpan={visibleColumnCount}
+                  className="text-center align-middle h-[30vh]"
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      style={{ width: cell.column.getSize() }}
-                      className="p-3 text-white border-t border-darken-2 md:min-w-0 md:max-w-0"
-                    >
-                      <div className="w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </div>
-                    </td>
-                  ))}
-                </tr>
-              ))}
+                  No results
+                </td>
+              </tr>
             </tbody>
-          </Suspense>
+          )}
         </table>
       </div>
     </div>
