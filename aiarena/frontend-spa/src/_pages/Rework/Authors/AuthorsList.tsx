@@ -77,13 +77,19 @@ export default function AuthorsList(props: AuthorsListProps) {
         Authors List
       </h2>
       {hasItems ? (
-        <ul className="flex flex-wrap gap-12">
+        <ul
+          className="
+      grid gap-12
+      justify-items-center
+      [grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))]
+    "
+        >
           {users.map((author) => (
             <li
               key={author.id}
               id={author.id}
               role="listitem"
-              className="w-full sm:flex-[1_1_30rem] xl:max-w-[42rem] "
+              className="w-full max-w-[42rem]"
             >
               <a href={`/authors/${getIDFromBase64(author.id, "UserType")}`}>
                 <Author author={author} />
