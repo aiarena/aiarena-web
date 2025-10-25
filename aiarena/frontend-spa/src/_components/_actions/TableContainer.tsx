@@ -82,10 +82,13 @@ export function TableContainer<T>({
                           "gap-1",
                           "w-full",
                           "justify-between",
-                          "cursor-pointer",
+
                           "mr-5",
                           "group",
-                          "hover:text-white"
+                          {
+                            "cursor-pointer   hover:text-white":
+                              header.column.getCanSort(),
+                          }
                         )}
                         {...(header.column.getCanSort() && !loading
                           ? {

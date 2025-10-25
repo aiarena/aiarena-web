@@ -354,55 +354,6 @@ class NewsType(DjangoObjectTypeWithUID):
         connection_class = CountingConnection
 
 
-class ResultsFilterSet(FilterSet):
-    order_by = OrderingFilter(
-        fields=[
-            "id",
-            "participant1__name",
-            "participant2__name",
-            "type",
-            "game_time_formatted",
-            "started",
-            "replay_file",
-        ],
-        method="filter_order_by",
-    )
-
-    class Meta:
-        model = models.Result
-        fields = ["order_by"]
-
-    def filter_order_by(self, queryset, name, value):
-        order_fields = value if isinstance(value, list) else [value]
-
-        # Game time is a function of game steps - so we sort by game steps
-        if any("game_time_formatted" in f for f in order_fields):
-            order_fields = [f.replace("game_time_formatted", "game_steps") for f in order_fields]
-
-        if any("started" in f for f in order_fields):
-            order_fields = [f.replace("started", "match__started") for f in order_fields]
-
-        if any("participant1__name" in f for f in order_fields):
-            subquery = (
-                MatchParticipation.objects.filter(match=OuterRef("pk"), participant_number=1)
-                .annotate(lower_name=Lower("bot__name"))
-                .values("lower_name")[:1]
-            )
-            queryset = queryset.annotate(participant1_name=Subquery(subquery, output_field=CharField()))
-            order_fields = [f.replace("participant1__name", "participant1_name") for f in order_fields]
-
-        if any("participant2__name" in f for f in order_fields):
-            subquery = (
-                MatchParticipation.objects.filter(match=OuterRef("pk"), participant_number=2)
-                .annotate(lower_name=Lower("bot__name"))
-                .values("lower_name")[:1]
-            )
-            queryset = queryset.annotate(participant2_name=Subquery(subquery, output_field=CharField()))
-            order_fields = [f.replace("participant2__name", "participant2_name") for f in order_fields]
-
-        return queryset.order_by(*order_fields)
-
-
 class ResultType(DjangoObjectTypeWithUID):
     started = graphene.DateTime()
     participant1 = graphene.Field("aiarena.graphql.MatchParticipationType")
@@ -419,7 +370,7 @@ class ResultType(DjangoObjectTypeWithUID):
             "game_steps",
             "submitted_by",
         ]
-        filterset_class = ResultsFilterSet
+        filter_fields = []
         connection_class = CountingConnection
 
     @staticmethod

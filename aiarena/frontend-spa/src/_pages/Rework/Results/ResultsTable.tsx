@@ -2,19 +2,18 @@ import { graphql, usePaginationFragment } from "react-relay";
 import {
   createColumnHelper,
   getCoreRowModel,
-  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import clsx from "clsx";
 
-import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
+import { Suspense, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
 
-import { parseSort, withAtag } from "@/_lib/tanstack_utils";
+import { withAtag } from "@/_lib/tanstack_utils";
 
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
@@ -35,16 +34,15 @@ interface ResultsTableProps {
 }
 
 export default function ResultsTable(props: ResultsTableProps) {
-  const { data, loadNext, hasNext, refetch } = usePaginationFragment(
+  const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
       fragment ResultsTable_node on Query
       @refetchable(queryName: "ResultsTablePaginationQuery")
       @argumentDefinitions(
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
-        orderBy: { type: "String" }
       ) {
-        results(first: $first, after: $cursor, orderBy: $orderBy)
+        results(first: $first, after: $cursor)
           @connection(key: "ResultsTable_node_results") {
           edges {
             node {
@@ -80,7 +78,7 @@ export default function ResultsTable(props: ResultsTableProps) {
         }
       }
     `,
-    props.data,
+    props.data
   );
 
   type ResultType = NonNullable<
@@ -90,7 +88,7 @@ export default function ResultsTable(props: ResultsTableProps) {
   >;
   const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
 
-  const [isPending, startTransition] = useTransition();
+  const [isPending] = useTransition();
   const matchData = useMemo(() => getNodes<ResultType>(data?.results), [data]);
 
   const columnHelper = createColumnHelper<ResultType>();
@@ -100,11 +98,12 @@ export default function ResultsTable(props: ResultsTableProps) {
       columnHelper.accessor((row) => row.id, {
         id: "id",
         header: "ID",
+        enableSorting: false,
         cell: (info) =>
           withAtag(
             getIDFromBase64(info.getValue(), "ResultType") || "",
             `/matches/${getIDFromBase64(info.getValue(), "ResultType")}`,
-            `View match details for Result ID ${info.getValue()}`,
+            `View match details for Result ID ${info.getValue()}`
           ),
 
         meta: { priority: 1 },
@@ -112,11 +111,12 @@ export default function ResultsTable(props: ResultsTableProps) {
       columnHelper.accessor((row) => row.participant1?.bot.name || "", {
         id: "participant1",
         header: "Bot",
+        enableSorting: false,
         cell: (info) => {
           const participant1 = info.row.original.participant1;
           const display_value = formatWinnerName(
             info.row.original.winner?.name,
-            participant1?.bot.name,
+            participant1?.bot.name
           );
 
           return withAtag(
@@ -131,7 +131,7 @@ export default function ResultsTable(props: ResultsTableProps) {
               })}
             >
               {participant1?.eloChange}
-            </span>,
+            </span>
           );
         },
         meta: { priority: 1 },
@@ -140,12 +140,13 @@ export default function ResultsTable(props: ResultsTableProps) {
       columnHelper.accessor((row) => row.participant2?.bot.name || "", {
         id: "participant2",
         header: "Opponent",
+        enableSorting: false,
         cell: (info) => {
           const participant2 = info.row.original.participant2;
 
           const display_value = formatWinnerName(
             info.row.original?.winner?.name,
-            info.row.original.participant2?.bot.name,
+            info.row.original.participant2?.bot.name
           );
 
           return withAtag(
@@ -160,7 +161,7 @@ export default function ResultsTable(props: ResultsTableProps) {
               })}
             >
               {participant2?.eloChange}
-            </span>,
+            </span>
           );
         },
 
@@ -169,11 +170,12 @@ export default function ResultsTable(props: ResultsTableProps) {
       columnHelper.accessor((row) => row.type ?? "", {
         id: "type",
         header: "Result",
+        enableSorting: false,
         cell: (info) => {
           const getResult = getMatchResultParsed(
             info.getValue(),
             info.row.original.participant1?.bot.name,
-            info.row.original.participant2?.bot.name,
+            info.row.original.participant2?.bot.name
           );
           return getResult != "" ? getResult : "In Queue";
         },
@@ -182,6 +184,7 @@ export default function ResultsTable(props: ResultsTableProps) {
       columnHelper.accessor((row) => row.gameTimeFormatted ?? "", {
         id: "gameTimeFormatted",
         header: "Duration",
+        enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
@@ -189,6 +192,7 @@ export default function ResultsTable(props: ResultsTableProps) {
       columnHelper.accessor((row) => row.started ?? "", {
         id: "started",
         header: "Started",
+        enableSorting: false,
         cell: (info) => {
           const getTime = getDateTimeISOString(info.getValue());
           return getTime !== "" ? getTime : "In Queue";
@@ -199,6 +203,7 @@ export default function ResultsTable(props: ResultsTableProps) {
       columnHelper.accessor((row) => row.replayFile || "", {
         id: "replayFile",
         header: "Replay",
+        enableSorting: false,
         cell: (info) => {
           const replayFile = info.row.original.replayFile;
 
@@ -206,34 +211,17 @@ export default function ResultsTable(props: ResultsTableProps) {
             replayFile || "",
             `/bots/${replayFile}`,
             `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}, Opponent`,
-            "Download",
+            "Download"
           );
         },
 
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper],
+    [columnHelper]
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
-  const [sorting, setSorting] = useState<SortingState>([]);
-
-  useEffect(() => {
-    const sortingMap: Record<string, string> = {
-      id: "id",
-      participant1: "participant1__name",
-      participant2: "participant2__name",
-      type: "type",
-      gameTimeFormatted: "game_time_formatted",
-      started: "started",
-      replayFile: "replay_file",
-    };
-    startTransition(() => {
-      const sortString = parseSort(sortingMap, sorting);
-      refetch({ orderBy: sortString });
-    });
-  }, [sorting, refetch]);
 
   const table = useReactTable({
     data: matchData,
@@ -242,12 +230,6 @@ export default function ResultsTable(props: ResultsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
-
-    state: {
-      sorting,
-    },
-
-    onSortingChange: setSorting,
   });
 
   const hasItems = matchData.length > 0;
