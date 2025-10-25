@@ -20,7 +20,7 @@ export default function Authors() {
   );
   const [searchBarValue, setSearchBarValue] = useState("");
   const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
-  const [onlyWithBots, setOnlyWithBots] = useState(false);
+  const [onlyWithBots, setOnlyWithBots] = useState(true);
 
   return (
     <>
@@ -76,6 +76,7 @@ export default function Authors() {
             authors={data}
             searchBarValue={searchBarValue}
             orderBy={orderBy.value}
+            onlyWithBots={onlyWithBots}
           />
         </Suspense>
       </section>

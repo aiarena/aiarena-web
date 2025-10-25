@@ -30,12 +30,14 @@ export default function AuthorsList(props: AuthorsListProps) {
         first: { type: "Int", defaultValue: 20 }
         username: { type: "String" }
         orderBy: { type: "String" }
+        onlyWithBots: { type: "Boolean" }
       ) {
         users(
           first: $first
           after: $cursor
           username: $username
           orderBy: $orderBy
+          onlyWithBots: $onlyWithBots
           type: WEBSITE_USER
         ) @connection(key: "AuthorsList_node_users") {
           edges {
@@ -53,9 +55,13 @@ export default function AuthorsList(props: AuthorsListProps) {
 
   useEffect(() => {
     startTransition(() => {
-      refetch({ username: props.searchBarValue, orderBy: props.orderBy });
+      refetch({
+        username: props.searchBarValue,
+        orderBy: props.orderBy,
+        onlyWithBots: props.onlyWithBots,
+      });
     });
-  }, [props.searchBarValue, props.orderBy, refetch]);
+  }, [props.searchBarValue, props.orderBy, props.onlyWithBots, refetch]);
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(20), hasNext);
   const users = getNodes(userData?.users);
@@ -77,7 +83,7 @@ export default function AuthorsList(props: AuthorsListProps) {
               key={author.id}
               id={author.id}
               role="listitem"
-              className="w-full sm:flex-[1_1_30rem] xl:max-w-[42rem]"
+              className="w-full sm:flex-[1_1_30rem] xl:max-w-[42rem] "
             >
               <a href={`/authors/${getIDFromBase64(author.id, "UserType")}`}>
                 <Author author={author} />

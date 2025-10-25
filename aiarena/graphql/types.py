@@ -463,14 +463,25 @@ class UserFilterSet(FilterSet):
     )
 
     username = django_filters.CharFilter(lookup_expr="icontains")
+    only_with_bots = django_filters.BooleanFilter(method="filter_only_with_bots")
 
     class Meta:
         model = models.User
-        fields = ["username", "order_by", "type"]
+        fields = [
+            "username",
+            "order_by",
+            "type",
+            "only_with_bots",
+        ]
 
     def filter_order_by(self, queryset, name, value):
         order_fields = value if isinstance(value, list) else [value]
         return queryset.order_by(*order_fields)
+
+    def filter_only_with_bots(self, queryset, name, value):
+        if value:
+            return queryset.annotate(bot_count=Count("bots")).filter(bot_count__gt=0)
+        return queryset
 
 
 class UserType(DjangoObjectTypeWithUID):
