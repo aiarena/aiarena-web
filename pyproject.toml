@@ -76,7 +76,7 @@ markers = ["playwright"]
 python_files = ["test_*.py", "tests.py"]
 
 [tool.uv.sources]
-django-discord-bind = { git = "https://github.com/aiarena/django-discord-bind.git", rev = "6c987450c2573ae73537d4ea89ec76679c0418f2" }
+django-discord-bind = { git = "https://github.com/aiarena/django-discord-bind.git", rev = "7f454d4d02593eb40762e95979d85c8cde733de0" }
 drf-yasg = { git = "https://github.com/max-muoto/drf-yasg.git", rev = "68cc6fa76848d1d0194d847569009eb603e516b2" }
 graphene-file-upload = { git = "https://github.com/gulfofmaine/graphene-file-upload.git", rev = "63fa76ed694a942ef1dcb84abe2974930fc4858d" }
 
