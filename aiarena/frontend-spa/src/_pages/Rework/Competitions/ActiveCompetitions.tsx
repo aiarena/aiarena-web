@@ -36,7 +36,7 @@ export default function ActiveCompetitions(props: ActiveCompetitionsProps) {
   const competitions = getNodes(data?.activeCompetitions);
 
   return (
-    <div>
+    <div className="grid gap-8">
       {competitions.map((comp) => {
         return <CompetitionCard key={comp.id} data={comp} />;
       })}
