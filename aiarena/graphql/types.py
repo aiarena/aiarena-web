@@ -399,8 +399,6 @@ class RoundsType(DjangoObjectTypeWithUID):
             "finished",
             "complete",
         ]
-        filter_fields = []
-        connection_class = CountingConnection
 
 
 class StatsType(graphene.ObjectType):
