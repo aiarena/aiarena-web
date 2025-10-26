@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 
 import graphene
 from graphene import InputObjectType
@@ -38,9 +39,10 @@ class CountingConnection(graphene.relay.Connection):
         return result
 
     def resolve_total_count(self, *_) -> int:
-        if hasattr(self, "iterable"):
+        if isinstance(self.iterable, QuerySet):
             return self.iterable.count()
-        return len(self)
+
+        return len(self.iterable)
 
 
 class DjangoObjectTypeWithUID(DjangoObjectType):
