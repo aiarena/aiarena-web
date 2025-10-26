@@ -27,6 +27,7 @@ env:
 
 jobs:
   linters:
+    name: Linters
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +49,7 @@ jobs:
         uses: pre-commit/action@v3.0.0
 
   tests:
+    name: Regular tests
     runs-on: ubuntu-latest
     env:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
@@ -93,11 +95,13 @@ jobs:
         if: always()
         with:
           check_name: "Test Report"
+          check_run: false
           fail_on: "nothing"
           files: |
             test-results/pytest-regular.xml
 
   tests-playwright:
+    name: Playwright tests
     runs-on: ubuntu-latest
     env:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
@@ -176,6 +180,7 @@ jobs:
         if: always()
         with:
           check_name: "Playwright test Report"
+          check_run: false
           fail_on: "nothing"
           files: |
             test-results/pytest-playwright.xml
@@ -189,8 +194,8 @@ jobs:
           retention-days: 30
 
   prepare-images:
+    name: Build & push image to ECR
     if: github.event_name != 'pull_request'
-    name: Build and push production image to ECR
     runs-on: ubuntu-latest
     outputs:
       status_message_id: ${{ steps.slack.outputs.message_id }}
