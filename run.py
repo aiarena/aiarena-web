@@ -166,6 +166,15 @@ def prepare_images():
     )
 
     cloud_images = aws.push_images("cloud", [cloud_tag])
+    echo(
+        f"Saving images to github output: {
+            json.dumps(
+                {
+                    'cloud_images': cloud_images,
+                }
+            )
+        }"
+    )
     set_github_actions_output(
         "images",
         json.dumps(
