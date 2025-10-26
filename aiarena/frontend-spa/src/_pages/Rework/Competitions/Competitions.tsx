@@ -20,15 +20,26 @@ export default function Competitions() {
 
   return (
     <>
-      <section aria-labelledby="authors-heading">
-        <h4>Active Competitions</h4>
-        <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-          <ActiveCompetitions data={data} />
-        </Suspense>
-        <h4>Legacy Competitions</h4>
-        <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-          <CompetitionsTable data={data} />
-        </Suspense>
+      <section
+        aria-labelledby="competitions-heading"
+        className="max-w-7xl mx-auto"
+      >
+        <h2 id="competition-heading" className="sr-only">
+          Competitons
+        </h2>
+
+        <div className="grid mb-16">
+          <h4 className="mb-4">Active Competitions</h4>
+          <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+            <ActiveCompetitions data={data} />
+          </Suspense>
+        </div>
+        <div className="mb-16 ">
+          <h4 className="mb-4">Legacy Competitions</h4>
+          <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+            <CompetitionsTable data={data} />
+          </Suspense>
+        </div>
       </section>
     </>
   );
