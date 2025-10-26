@@ -188,8 +188,6 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_trend(root: models.CompetitionParticipation, info, **args):
-        if hasattr(root, "trend"):
-            return root.trend
         trend_data = models.CompetitionParticipation.objects.filter(id=root.id).calculate_trend(root.competition)
         if trend_data:
             return trend_data[0].trend
