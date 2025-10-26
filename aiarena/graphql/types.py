@@ -141,6 +141,8 @@ class CompetitionType(DjangoObjectTypeWithUID):
     participants = DjangoConnectionField("aiarena.graphql.CompetitionParticipationType")
     rounds = DjangoConnectionField("aiarena.graphql.RoundsType")
     maps = DjangoConnectionField("aiarena.graphql.MapType")
+    game = graphene.String()
+    game_mode = graphene.String()
 
     class Meta:
         model = models.Competition
@@ -153,6 +155,14 @@ class CompetitionType(DjangoObjectTypeWithUID):
         ]
         filter_fields = ["status"]
         connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_game(root: models.Competition, info, **args):
+        return root.game_mode.game
+
+    @staticmethod
+    def resolve_game_mode(root: models.Competition, info, **args):
+        return root.game_mode
 
     @staticmethod
     def resolve_url(root: models.Competition, info, **args):
