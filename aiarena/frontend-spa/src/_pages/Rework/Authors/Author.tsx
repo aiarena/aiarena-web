@@ -39,9 +39,11 @@ export default function Author(props: AuthorProps) {
         </div>
 
         {/* Right side content */}
-        <div className="flex flex-col justify-between flex-1 ml-4 mr-8">
-          <div>
-            <h3 className="text-lg font-semibold">{author.username}</h3>
+        <div className="flex flex-col justify-between flex-1 ml-4 mr-8  min-w-0">
+          <div className="min-w-0">
+            <h3 className="text-lg font-semibold truncate max-w-full">
+              {author.username}
+            </h3>
             <p>
               <span className="font-small text-sm text-gray-300">Joined:</span>{" "}
               <span className="font-small text-sm text-gray-300">
