@@ -12,14 +12,12 @@ import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { withAtag } from "@/_lib/tanstack_utils";
 
-import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingDots from "@/_components/_display/LoadingDots";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 
-import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
 import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
 import {
   CompetitionsTable$data,
@@ -161,24 +159,7 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
   return (
     <div>
       <Suspense fallback={<LoadingDots />}>
-        {hasItems ? (
-          <TableContainer
-            table={table}
-            loading={isPending}
-            minHeight={40}
-            appendHeader={
-              <WatchYourGamesButton
-                onClick={() => setIsWatchGamesModalOpen(true)}
-              >
-                <span>Watch Replays on Twitch</span>
-              </WatchYourGamesButton>
-            }
-          />
-        ) : (
-          <NoItemsInListMessage>
-            <p>No results meet the criteria...</p>
-          </NoItemsInListMessage>
-        )}
+        <TableContainer table={table} loading={isPending} minHeight={40} />
       </Suspense>
 
       {hasNext ? (
