@@ -11,7 +11,6 @@ interface TableContainerProps<T> {
   className?: string;
   loading: boolean;
   appendHeader?: ReactNode;
-  minHeight?: number;
 }
 
 export function TableContainer<T>({
@@ -19,7 +18,6 @@ export function TableContainer<T>({
   className,
   loading,
   appendHeader,
-  minHeight = 80,
 }: TableContainerProps<T>) {
   const allColumns = table.getAllLeafColumns();
 
@@ -31,12 +29,7 @@ export function TableContainer<T>({
     <div className={clsx(className)}>
       {/* Table */}
 
-      <div
-        className={clsx(
-          "overflow-x-auto rounded-2xl border border-neutral-800 backdrop-blur-lg bg-darken-2",
-          `min-h-[${minHeight}vh]`
-        )}
-      >
+      <div className="overflow-x-auto rounded-2xl border border-neutral-800 backdrop-blur-lg bg-darken-2  min-h-[80vh]">
         <div className="flex justify-between m-2">
           <TableSettings>
             <div className="text-white">
@@ -194,10 +187,7 @@ export function TableContainer<T>({
               <tr>
                 <td
                   colSpan={visibleColumnCount}
-                  className={clsx(
-                    "text-center align-middle ",
-                    `h-[${minHeight}vh]`
-                  )}
+                  className="text-center align-middle h-[30vh]"
                 >
                   No results
                 </td>
