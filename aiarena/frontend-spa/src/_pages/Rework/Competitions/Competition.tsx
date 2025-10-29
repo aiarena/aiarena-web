@@ -7,6 +7,9 @@ import type {
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import clsx from "clsx";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import CompetitionParticipantCount from "@/_components/_display/CompetitionParticipantCount";
+import { Suspense } from "react";
+import LoadingDots from "@/_components/_display/LoadingDots";
 
 interface CompetitionCardProps {
   data: CompetitionCard_competition$key;
@@ -27,9 +30,6 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
         rounds {
           totalCount
         }
-        participants {
-          totalCount
-        }
       }
     `,
     data
@@ -37,7 +37,7 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
 
   function getGame(competition: CompetitionCard_competition$data) {
     if (competition.game === "StarCraft II") return "starcraft";
-    return "generic";
+    return "starcraft";
   }
   function getMode(competition: CompetitionCard_competition$data) {
     if (competition.gameMode === "Melee") return "melee";
@@ -77,8 +77,8 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
               {competition.name}
             </h2>
           </div>
-          <div className="grid grid-cols-3 mt-3 w-full">
-            <div className="col-span-2">
+          <div className="grid grid-cols-3 my-3 w-full">
+            <div className="col-span-2 ml-4">
               <div className=" text-gray-300">
                 {competition.game && <span>Game: {competition.game}</span>}
               </div>
@@ -97,12 +97,12 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
               </div>
             </div>
             <div id="populated_stats" className="text-gray-300">
-              <p>
+              <div className="flex items-center gap-2">
                 <span className="text-gray-400">Bots:</span>{" "}
-                <span className="text-white">
-                  {competition.participants?.totalCount ?? 0}
-                </span>
-              </p>
+                <Suspense fallback={<LoadingDots />}>
+                  <CompetitionParticipantCount competitionId={competition.id} />
+                </Suspense>
+              </div>
               <p>
                 <span className="text-gray-400">Round:</span>{" "}
                 <span className="text-white">
