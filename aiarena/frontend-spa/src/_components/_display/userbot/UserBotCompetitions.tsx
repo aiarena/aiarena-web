@@ -141,7 +141,9 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                   <span className="font-bold text-gray-300 mr-4 block">
                     Division:{" "}
                     <span className="font-normal">
-                      {competitionParticipation.divisionNum}
+                      {competitionParticipation.divisionNum == 0
+                        ? "Placements"
+                        : competitionParticipation.divisionNum}
                     </span>
                   </span>
                   <span className="font-bold text-gray-300 mr-4 block">
