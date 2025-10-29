@@ -136,6 +136,32 @@ class BotType(DjangoObjectTypeWithUID):
         return root.plays_race
 
 
+class CompetitionFilterSet(FilterSet):
+    order_by = OrderingFilter(
+        fields=[
+            "name",
+            "date_created",
+            "date_opened",
+            "date_closed",
+        ],
+        method="filter_order_by",
+    )
+    competition_id = graphene.ID()
+    name = django_filters.CharFilter(method="filter_name")
+
+    class Meta:
+        model = models.Competition
+        fields = ["name", "id", "order_by", "status"]
+
+    def filter_name(self, queryset, name, value):
+        return queryset.filter(Q(name__icontains=value))
+
+    def filter_order_by(self, queryset, name, value):
+        order_fields = value if isinstance(value, list) else [value]
+
+        return queryset.order_by(*order_fields)
+
+
 class CompetitionType(DjangoObjectTypeWithUID):
     url = graphene.String()
     participants = DjangoConnectionField("aiarena.graphql.CompetitionParticipationType")
@@ -153,8 +179,12 @@ class CompetitionType(DjangoObjectTypeWithUID):
             "date_closed",
             "status",
         ]
-        filter_fields = ["status"]
+        filterset_class = CompetitionFilterSet
         connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_rounds(root: models.Competition, info, **args):
+        return root.round_set.all()
 
     @staticmethod
     def resolve_game(root: models.Competition, info, **args):
