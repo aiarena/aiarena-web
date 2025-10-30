@@ -99,7 +99,7 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
 
           return withAtag(
             name || "",
-            `/competitions/${getIDFromBase64(info.getValue(), "CompetitionType")}`,
+            `/competitions/${getIDFromBase64(info.row.original.id, "CompetitionType")}`,
             `View competition details for Competition ${name}`
           );
         },
