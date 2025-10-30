@@ -10,7 +10,6 @@ interface CompetitionParticipantCountProps {
 export default function CompetitionParticipantCount(
   props: CompetitionParticipantCountProps
 ) {
-  console.log(props.competitionId);
   const data = useLazyLoadQuery<CompetitionParticipantCountQuery>(
     graphql`
       query CompetitionParticipantCountQuery($id: ID!) {
