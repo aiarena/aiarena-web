@@ -385,8 +385,8 @@ nav .block {
 
 .w-md-editor-text-input,
 .w-md-editor-text-pre .code-line {
-  font-size: 1.3rem !important;
-  line-height: 1.3rem !important;
+  font-size: 1.2rem !important;
+  line-height: 1.2rem !important;
 }
 
 .w-md-editor-text-pre .code-line {
@@ -399,11 +399,11 @@ nav .block {
 }
 
 .w-md-editor-toolbar ul li > button svg {
-  width: 20px !important;
-  height: 20px !important;
+  width: 15px !important;
+  height: 15px !important;
 }
 
 .w-md-editor-preview p {
-  font-size: 1.3rem !important;
-  line-height: 1.3rem !important;
+  font-size: 1.2rem !important;
+  line-height: 1.2rem !important;
 }
