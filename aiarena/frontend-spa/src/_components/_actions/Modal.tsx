@@ -46,7 +46,7 @@ const Modal = ({
     <div className="fixed inset-0 bg-darken-6 flex items-center justify-center z-50 p-4 focus:outline-none">
       <div
         className={clsx(
-          "rounded-lg shadow-md w-full focus:outline-none",
+          "rounded-lg shadow-md w-full",
           size === "m" && "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl",
           size === "l" && "max-w-screen"
         )}
