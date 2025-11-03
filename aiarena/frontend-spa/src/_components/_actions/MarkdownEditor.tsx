@@ -16,10 +16,6 @@ export default function MarkdownEditor({
         style={{ minHeight: "100%", flex: 1 }}
         value={value}
         onChange={(val) => setValue(val ?? "")}
-        textareaProps={{
-          placeholder:
-            "Start writing your biography here — a preview will be appear to the right",
-        }}
         previewOptions={{
           rehypePlugins: [[rehypeSanitize]],
         }}

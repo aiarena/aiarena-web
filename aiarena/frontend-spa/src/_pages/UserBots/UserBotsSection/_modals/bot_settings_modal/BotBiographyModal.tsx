@@ -7,7 +7,6 @@ import { BotBiographyModal_bot$key } from "./__generated__/BotBiographyModal_bot
 import { BotBiographyModalMutation } from "./__generated__/BotBiographyModalMutation.graphql";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import WideButton from "@/_components/_actions/WideButton";
-import useUnsavedSince from "@/_components/_hooks/useUnsavedSince";
 
 interface BotBiographyModalProps {
   bot: BotBiographyModal_bot$key;
@@ -28,7 +27,7 @@ export default function BotBiographyModal({
         name
       }
     `,
-    props.bot
+    props.bot,
   );
   const [updateBot, updating] = useMutation<BotBiographyModalMutation>(graphql`
     mutation BotBiographyModalMutation($input: UpdateBotInput!) {
@@ -48,7 +47,7 @@ export default function BotBiographyModal({
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateBot",
-    "Bot Wiki Updated!"
+    "Bot Wiki Updated!",
   );
 
   const hasUnsavedWikiChanges =
@@ -58,13 +57,6 @@ export default function BotBiographyModal({
       return s.replace(/\r\n/g, "\n");
     }
   }
-
-  const { seconds, resetBaseline } = useUnsavedSince(hasUnsavedWikiChanges);
-
-  const statusText = hasUnsavedWikiChanges
-    ? `You have unsaved changes. Last saved ${seconds} seconds ago.`
-    : "You have no unsaved changes.";
-
   return (
     <>
       <Modal
@@ -74,32 +66,29 @@ export default function BotBiographyModal({
         title={`${bot.name} - Biography`}
         size="l"
       >
-        <div className="h-[80vh] pb-20">
+        <div className="h-[80vh] pb-4">
           <MarkdownEditor value={biography} setValue={setBiography} />
-          <p className="py-4 pl-2 text-gray-300">{statusText}</p>
-
-          <WideButton
-            title="Save"
-            loading={updating}
-            type="button"
-            disabled={!hasUnsavedWikiChanges}
-            onClick={() => {
-              updateBot({
-                variables: {
-                  input: {
-                    id: bot.id,
-                    wikiArticle: biography,
-                  },
-                },
-                onCompleted: (...args) => {
-                  onCompleted(...args);
-                  resetBaseline();
-                },
-                onError,
-              });
-            }}
-          />
         </div>
+        <WideButton
+          title="Save"
+          loading={updating}
+          type="button"
+          disabled={!hasUnsavedWikiChanges}
+          onClick={() => {
+            updateBot({
+              variables: {
+                input: {
+                  id: bot.id,
+                  wikiArticle: biography,
+                },
+              },
+              onCompleted: (...args) => {
+                onCompleted(...args);
+              },
+              onError,
+            });
+          }}
+        />
       </Modal>
     </>
   );

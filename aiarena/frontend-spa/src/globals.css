@@ -382,28 +382,3 @@ nav .block {
   );
   clip-path: polygon(0% 100%, 100% 0%, 100% 100%, 0% 100%);
 }
-
-.w-md-editor-text-input,
-.w-md-editor-text-pre .code-line {
-  font-size: 1.3rem !important;
-  line-height: 1.3rem !important;
-}
-
-.w-md-editor-text-pre .code-line {
-  display: block;
-}
-
-.w-md-editor-toolbar ul li > button {
-  padding: 10px 12px !important;
-  min-height: 44px !important;
-}
-
-.w-md-editor-toolbar ul li > button svg {
-  width: 20px !important;
-  height: 20px !important;
-}
-
-.w-md-editor-preview p {
-  font-size: 1.3rem !important;
-  line-height: 1.3rem !important;
-}
