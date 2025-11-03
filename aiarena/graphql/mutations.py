@@ -318,7 +318,7 @@ class UpdateBot(CleanedInputMutation):
                 continue
             setattr(bot, attr, value)
 
-        if hasattr(input_object, "wiki_article"):
+        if input_object.wiki_article:
             Bot.update_bot_wiki_article(bot, input_object.wiki_article, info.context)
         try:
             bot.full_clean()
