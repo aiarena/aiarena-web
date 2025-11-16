@@ -12,7 +12,7 @@ function CardsAndNewsSection() {
       <div className="float-half-left grid gap-8">
         <div>
           <WrappedTitle title="What is AI Arena?" font="font-bold" />
-          <div id="whatisaiarena">
+          <div id="whatisaiarena" className="z-1000">
             The AI Arena ladder provides an environment where Scripted and Deep
             Learning AIs fight in Starcraft 2.
             <br />
@@ -127,18 +127,20 @@ function CapWidth({ children }: { children: ReactNode }) {
 
 export default function LandingPage() {
   return (
-    <div>
-      <Hero />
-      <CapWidth>
-        <div className="grid grid-cols-2 gap-50">
-          <div className="col-span-1">
-            <CardsAndNewsSection />
+    <div className="bg-linear-[90deg,rgba(0,0,0,0)_5%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0)_90%]">
+      <div className="relative z-10">
+        <Hero />
+        <CapWidth>
+          <div className="grid grid-cols-2 gap-50">
+            <div className="col-span-1">
+              <CardsAndNewsSection />
+            </div>
+            <div className="col-span-1">
+              <CompetitionsAndActivity />
+            </div>
           </div>
-          <div className="col-span-1">
-            <CompetitionsAndActivity />
-          </div>
-        </div>
-      </CapWidth>
+        </CapWidth>
+      </div>
     </div>
   );
 }
