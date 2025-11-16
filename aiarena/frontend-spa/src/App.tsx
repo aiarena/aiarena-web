@@ -10,14 +10,16 @@ import UserBotsPage from "./_pages/UserBots/UserBotsPage";
 import UserSettingsPage from "./_pages/UserSettings/UserSettingsPage";
 import AuthorsPage from "./_pages/Rework/Authors/Page";
 import BotsPage from "./_pages/Rework/Bots/Page";
-import CompetitionsPage from "./_pages/Rework/Competitions/Page";
 import RootLayout from "./RootLayout";
 import ResultsPage from "./_pages/Rework/Results/Page";
+import CompetitionsPage from "./_pages/Rework/Competitions/Page";
+import LandingPage from "./_pages/Rework/Landing.tsx/Page";
 
 export default function App() {
   return (
     <Routes>
       <Route element={<RootLayout />} path="dashboard/rework">
+        <Route path="landing" element={<LandingPage />} />
         <Route path="competitions" element={<CompetitionsPage />} />
         <Route path="bots" element={<BotsPage />} />
         <Route path="authors" element={<AuthorsPage />} />
