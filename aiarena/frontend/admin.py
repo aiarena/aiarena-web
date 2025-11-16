@@ -75,6 +75,8 @@ class ArenaClientAdmin(admin.ModelAdmin):
     list_select_related = [
         "owner",
     ]
+    raw_id_fields = ["groups", "user_permissions"]
+    autocomplete_fields = ["owner"]
     actions = ["activate", "deactivate"]
 
     def activate(self, request, queryset):
