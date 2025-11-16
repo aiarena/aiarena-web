@@ -13,7 +13,7 @@ import BotsPage from "./_pages/Rework/Bots/Page";
 import RootLayout from "./RootLayout";
 import ResultsPage from "./_pages/Rework/Results/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
-import LandingPage from "./_pages/Rework/Landing.tsx/Page";
+import LandingPage from "./_pages/Rework/Landing/Page";
 import RootWithPaddingLayout from "./RootWithPaddingLayout";
 
 export default function App() {
