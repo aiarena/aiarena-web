@@ -84,12 +84,20 @@ A website for running the aiarena.net infrastructure.
     uv run manage.py runserver
     ```
 
-    In another terminal - navigate to (aiarena-web/aiarena/frontend-spa), then run:
-   ```shell
+    In another terminal - navigate to aiarena-web/aiarena/frontend-spa 
+    ```shell 
+    cd aiarena/frontend-spa
+    ```
+    then run:
+    ```shell
     npm run start_relay
     ```    
-    In yet another terminal - navigate to (aiarena-web/aiarena/frontend-spa), then run:
-   ```shell
+    In yet another terminal - navigate to aiarena-web/aiarena/frontend-spa
+    ```shell 
+    cd aiarena/frontend-spa
+    ```
+    then run:
+    ```shell
     npm run dev
     ```    
     
