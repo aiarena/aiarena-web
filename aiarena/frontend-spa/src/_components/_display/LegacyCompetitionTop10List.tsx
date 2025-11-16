@@ -78,10 +78,13 @@ const LegacyCompetitonTop10List: React.FC = () => {
           {getNodes(competition.participants).map((participant, idx) => (
             <tr
               key={participant.bot.id}
-              className={clsx("h-10", idx % 2 ? "bg-darken-4" : "bg-darken")}
+              className={clsx(
+                "text-sm h-10",
+                idx % 2 ? "bg-darken-4" : "bg-darken"
+              )}
             >
               <td className="text-center">{idx + 1}</td>
-              <td>
+              <td className="m-auto">
                 <BotIcon user={participant.bot.user} />
               </td>
               <td>
