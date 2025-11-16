@@ -1,0 +1,144 @@
+import LatestNews from "@/_components/_display/LatestNews";
+import LegacyCompetitonTop10List from "@/_components/_display/LegacyCompetitionTop10List";
+import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
+import WrappedTitle from "@/_components/_display/WrappedTitle";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+
+import { ReactNode, Suspense } from "react";
+
+function CardsAndNewsSection() {
+  return (
+    <>
+      <div className="float-half-left grid gap-8">
+        <div>
+          <WrappedTitle title="What is AI Arena?" font="font-bold" />
+          <div id="whatisaiarena">
+            The AI Arena ladder provides an environment where Scripted and Deep
+            Learning AIs fight in Starcraft 2.
+            <br />
+            <br />
+            Matches are run 24/7 and <a href="/stream/">streamed</a> to various
+            live-stream platforms.
+          </div>
+        </div>
+        <div>
+          {" "}
+          <WrappedTitle title="Problems?" font="font-bold" />
+          <div id="problems">
+            Any problems with the website can be reported in our
+            <a href="https://discord.gg/Emm5Ztz"> Discord</a>.
+          </div>
+        </div>
+        <div>
+          <WrappedTitle title="Want to help out?" font="font-bold" />
+          <div id="contribute">
+            Refer to the <a href="https://aiarena.net/wiki/contribute/">wiki</a>{" "}
+            on ways to contribute.
+          </div>
+        </div>
+        <LatestNews />
+      </div>
+    </>
+  );
+}
+
+function CompetitionsAndActivity() {
+  return (
+    <>
+      <div className="float-half-left grid gap-8">
+        <Suspense
+          fallback={
+            <div className="m-auto">
+              <LoadingMoreItems loadingMessage="Loading current competitions..." />
+            </div>
+          }
+        >
+          <LegacyCompetitonTop10List />
+        </Suspense>
+      </div>
+    </>
+  );
+}
+
+function Hero() {
+  return (
+    <div className="min-h-[50vh] flex items-center justify-center">
+      <div>
+        <div>
+          <img
+            className="invert m-auto mb-8"
+            src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
+            alt="AI-arena-logo"
+            height={120}
+            width={120}
+          />
+          <h1 className="text-center pb-4 text-5xl font-gugi font-thin text-customGreen">
+            AI Arena
+          </h1>
+          <WrappedTitle title="Welcome to the Arena" font="font-bold" />
+        </div>
+        <div className="flex justify-center gap-4">
+          <InstructionsCard />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InstructionsCard() {
+  return (
+    <>
+      <div className="border-2 border-customGreen p-4 rounded-md bg-darken-2 grid gap-4">
+        <h3>(Icon) Instructions</h3>
+        <ol className="list-decimal ml-10">
+          <li>
+            <a href="/accounts/register/" target="_blank">
+              Register
+            </a>
+          </li>
+          <li>
+            Read the{" "}
+            <a
+              href="https://aiarena.net/wiki/bot-development/getting-started/"
+              target="_blank"
+            >
+              Getting Started
+            </a>{" "}
+            guide
+          </li>
+          <li>Upload your Bot to the Website and activate it</li>
+        </ol>
+        <p>
+          Your Bot will be added to the pool and starts fighting other Bots on
+          the Ladder.
+        </p>
+      </div>
+    </>
+  );
+}
+
+function CapWidth({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <div className="max-w-[60em] m-auto">{children}</div>
+    </>
+  );
+}
+
+export default function LandingPage() {
+  return (
+    <div>
+      <Hero />
+      <CapWidth>
+        <div className="grid grid-cols-2 gap-50">
+          <div className="col-span-1">
+            <CardsAndNewsSection />
+          </div>
+          <div className="col-span-1">
+            <CompetitionsAndActivity />
+          </div>
+        </div>
+      </CapWidth>
+    </div>
+  );
+}
