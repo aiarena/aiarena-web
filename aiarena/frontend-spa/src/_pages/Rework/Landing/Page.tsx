@@ -1,8 +1,10 @@
 import LatestNews from "@/_components/_display/LatestNews";
+import LegacyActivityList from "@/_components/_display/LegacyActivityList";
 import LegacyCompetitonTop10List from "@/_components/_display/LegacyCompetitionTop10List";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import { ClipboardDocumentListIcon } from "@heroicons/react/16/solid";
 
 import { ReactNode, Suspense } from "react";
 
@@ -54,6 +56,7 @@ function CompetitionsAndActivity() {
           }
         >
           <LegacyCompetitonTop10List />
+          <LegacyActivityList />
         </Suspense>
       </div>
     </>
@@ -89,7 +92,9 @@ function InstructionsCard() {
   return (
     <>
       <div className="border-2 border-customGreen p-4 rounded-md bg-darken-2 grid gap-4">
-        <h3>(Icon) Instructions</h3>
+        <h3 className="flex gap-4">
+          <ClipboardDocumentListIcon width={20} /> Instructions
+        </h3>
         <ol className="list-decimal ml-10">
           <li>
             <a href="/accounts/register/" target="_blank">
@@ -128,10 +133,10 @@ function CapWidth({ children }: { children: ReactNode }) {
 export default function LandingPage() {
   return (
     <div className="bg-linear-[90deg,rgba(0,0,0,0)_5%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0)_90%]">
-      <div className="relative z-10">
+      <div className="relative z-10 pb-10">
         <Hero />
         <CapWidth>
-          <div className="grid grid-cols-2 gap-50">
+          <div className="md:w-full w-[30em] md:grid m-auto grid-cols-2 gap-40">
             <div className="col-span-1">
               <CardsAndNewsSection />
             </div>
