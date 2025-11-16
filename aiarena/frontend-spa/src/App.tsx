@@ -14,11 +14,24 @@ import RootLayout from "./RootLayout";
 import ResultsPage from "./_pages/Rework/Results/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
 import LandingPage from "./_pages/Rework/Landing.tsx/Page";
+import RootWithPaddingLayout from "./RootWithPaddingLayout";
 
 export default function App() {
   return (
     <Routes>
-      <Route element={<RootLayout />} path="dashboard/rework">
+      <Route path="dashboard/rework">
+        <Route element={<RootLayout />}>
+          <Route path="landing" element={<LandingPage />} />
+        </Route>
+        <Route element={<RootWithPaddingLayout />}>
+          <Route path="competitions" element={<CompetitionsPage />} />
+          <Route path="bots" element={<BotsPage />} />
+          <Route path="authors" element={<AuthorsPage />} />
+          <Route path="results" element={<ResultsPage />} />
+        </Route>
+      </Route>
+
+      <Route element={<RootWithPaddingLayout />} path="dashboard/rework">
         <Route path="landing" element={<LandingPage />} />
         <Route path="competitions" element={<CompetitionsPage />} />
         <Route path="bots" element={<BotsPage />} />
