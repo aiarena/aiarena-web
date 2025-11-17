@@ -27,8 +27,8 @@ export default function BotIcon(props: BotIconProps) {
         <img
           src={`${getPublicPrefix()}/bot-icons/${user.patreonLevel.toLowerCase()}.png`}
           alt={`${user.patreonLevel.toLowerCase()} icon`}
-          width={30}
-          height={30}
+          width={22}
+          height={22}
         />
       </div>
     );
