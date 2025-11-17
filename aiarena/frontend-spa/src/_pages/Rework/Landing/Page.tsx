@@ -38,7 +38,15 @@ function CardsAndNewsSection() {
             on ways to contribute.
           </div>
         </div>
-        <LatestNews />
+        <Suspense
+          fallback={
+            <div className="m-auto">
+              <LoadingMoreItems loadingMessage="Loading news..." />
+            </div>
+          }
+        >
+          <LatestNews />
+        </Suspense>
       </div>
     </>
   );
