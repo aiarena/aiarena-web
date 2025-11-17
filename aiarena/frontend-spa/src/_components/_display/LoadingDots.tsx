@@ -1,36 +1,17 @@
 import clsx from "clsx";
 
-interface DotsProps {
+interface DotProps {
   offset: number;
 }
 
-const Dot = (props: DotsProps) => {
+const Dot = ({ offset }: DotProps) => {
   return (
-    <>
-      <style>
-        {`
-          @keyframes sine-wave {
-            0%, 100% { 
-              opacity: 0;
-            }
-            50% { 
-              opacity: 1;
-            }
-          }
-        `}
-      </style>
-      <span
-        className={clsx("bg-customGreen", "mx-1")}
-        style={{
-          width: "10px",
-          height: "10px",
-          borderRadius: "50%",
-          display: "inline-block",
-          opacity: 0,
-          animation: `sine-wave 3s ease-in-out infinite ${props.offset}s`,
-        }}
-      ></span>
-    </>
+    <span
+      className={clsx("bg-customGreen mx-1 loading-dot")}
+      style={{
+        animationDelay: `${offset}s`,
+      }}
+    />
   );
 };
 
@@ -42,8 +23,33 @@ export default function LoadingDots({
   className?: string;
 }) {
   const dots = Array.from({ length: dotCount }).map((_, i) => (
-    <Dot key={i} offset={i / 3} />
+    <Dot key={i} offset={i * 0.22} />
   ));
 
-  return <div className={clsx("flex justify-center", className)}>{dots}</div>;
+  return (
+    <>
+      <style>
+        {`
+          @keyframes loading-dots-fast {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+          }
+
+          .loading-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            opacity: 0;
+            animation-name: loading-dots-fast;
+            animation-duration: 1.2s;
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+          }
+        `}
+      </style>
+
+      <div className={clsx("flex justify-center", className)}>{dots}</div>
+    </>
+  );
 }
