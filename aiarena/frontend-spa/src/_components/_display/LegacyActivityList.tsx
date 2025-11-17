@@ -126,7 +126,7 @@ const LegacyActivityList: React.FC = () => {
       <table className="w-full">
         <thead className="bg-customGreen-dark-2 h-9">
           <tr>
-            <th>Time</th>
+            <th className="min-w-[6em]">Time</th>
             <th>Event</th>
           </tr>
         </thead>
@@ -137,7 +137,7 @@ const LegacyActivityList: React.FC = () => {
               <tr
                 key={bot.id}
                 className={clsx(
-                  "text-sm h-10",
+                  "text-xs h-10",
                   idx % 2 ? "bg-darken-4" : "bg-darken"
                 )}
               >
