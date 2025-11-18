@@ -1,14 +1,14 @@
 export function getNodes<T>(
   connection:
     | {
-        readonly edges?: ReadonlyArray<
-          | {
-              readonly node: T | null | undefined;
-            }
-          | null
-          | undefined
-        >;
-      }
+      readonly edges?: ReadonlyArray<
+        | {
+          readonly node: T | null | undefined;
+        }
+        | null
+        | undefined
+      >;
+    }
     | null
     | undefined,
 ): T[] {
@@ -37,6 +37,16 @@ export function getIDFromBase64(
     }
   } catch (error) {
     console.error("Invalid Base64 ID:", error);
+    return null;
+  }
+}
+
+export function getBase64FromID(id: string, type: string) {
+  const raw = `${type}:${id}`;
+  try {
+    return btoa(raw);
+  } catch (error) {
+    console.error("Failed to encode Base64 ID:", error);
     return null;
   }
 }
