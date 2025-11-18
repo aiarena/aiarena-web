@@ -169,6 +169,7 @@ class CompetitionType(DjangoObjectTypeWithUID):
     maps = DjangoConnectionField("aiarena.graphql.MapType")
     game = graphene.String()
     game_mode = graphene.String()
+    wiki_article = graphene.String()
 
     class Meta:
         model = models.Competition
@@ -201,6 +202,10 @@ class CompetitionType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_participants(root: models.Competition, info, **args):
         return Ladders.get_competition_display_full_rankings(root).calculate_trend(root)
+
+    @staticmethod
+    def resolve_wiki_article(root: models.Bot, info, **args):
+        return root.get_wiki_article().current_revision.content
 
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
