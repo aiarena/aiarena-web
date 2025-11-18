@@ -55,7 +55,7 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
     <a
       href={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
       className={clsx(
-        "grid md:grid-cols-1 lg:grid-cols-4 rounded-2xl border border-neutral-700 bg-darken-2 backdrop-blur-sm",
+        "grid md:grid-cols-1 lg:grid-cols-4 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm",
         "shadow-lg shadow-black transition-colors hover:border-customGreen"
       )}
     >
