@@ -33,7 +33,7 @@ export function TableContainer<T>({
 
       <div
         className={clsx(
-          "overflow-x-auto rounded-2xl border border-neutral-800 backdrop-blur-lg bg-darken-2",
+          "overflow-x-auto rounded-2xl border border-neutral-800 backdrop-blur-lg bg-darken-2 shadow-lg shadow-black",
           `min-h-[${minHeight}vh]`
         )}
       >
@@ -89,7 +89,9 @@ export function TableContainer<T>({
                           "gap-1",
                           "w-full",
                           "justify-between",
-
+                          header.column.getCanSort()
+                            ? ""
+                            : "text-white font-medium",
                           "mr-5",
                           "group",
                           {
