@@ -13,10 +13,11 @@ import BotsPage from "./_pages/Rework/Bots/Page";
 import RootLayout from "./RootLayout";
 import ResultsPage from "./_pages/Rework/Results/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
-import CompetitionPage from "./_pages/Rework/_Competition/Page";
+import CompetitionPage from "./_pages/Rework/Competition/Page";
 import LandingPage from "./_pages/Rework/Landing/Page";
 import RootWithPaddingLayout from "./RootWithPaddingLayout";
-import BotPage from "./_pages/Rework/_Bot/Page";
+import BotPage from "./_pages/Rework/Bot/Page";
+import RoundsPage from "./_pages/Rework/_Round/Page";
 
 export default function App() {
   return (
@@ -34,6 +35,7 @@ export default function App() {
           />
           <Route path="bots" element={<BotsPage />} />
           <Route path="bots/:botId" element={<BotPage />} />
+          <Route path="rounds/:roundId" element={<RoundsPage />} />
           <Route path="authors" element={<AuthorsPage />} />
           <Route path="results" element={<ResultsPage />} />
         </Route>
