@@ -15,6 +15,7 @@ import ResultsPage from "./_pages/Rework/Results/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
 import LandingPage from "./_pages/Rework/Landing/Page";
 import RootWithPaddingLayout from "./RootWithPaddingLayout";
+import BotPage from "./_pages/Rework/_Bot/Page";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route element={<RootWithPaddingLayout />}>
           <Route path="competitions" element={<CompetitionsPage />} />
           <Route path="bots" element={<BotsPage />} />
+          <Route path="bots/:botId" element={<BotPage />} />
           <Route path="authors" element={<AuthorsPage />} />
           <Route path="results" element={<ResultsPage />} />
         </Route>

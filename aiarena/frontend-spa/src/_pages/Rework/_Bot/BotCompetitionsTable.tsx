@@ -1,0 +1,169 @@
+import { graphql, usePaginationFragment } from "react-relay";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import {
+  BotCompetitionsTable_bot$data,
+  BotCompetitionsTable_bot$key,
+} from "./__generated__/BotCompetitionsTable_bot.graphql";
+import { Suspense, useMemo } from "react";
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { withAtag } from "@/_lib/tanstack_utils";
+import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
+import LoadingDots from "@/_components/_display/LoadingDots";
+import { TableContainer } from "@/_components/_actions/TableContainer";
+import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
+import NoMoreItems from "@/_components/_display/NoMoreItems";
+
+interface BotCompetitionsTableProps {
+  bot: BotCompetitionsTable_bot$key;
+}
+
+export default function BotCompetitionsTable({
+  bot,
+}: BotCompetitionsTableProps) {
+  const { data, loadNext, hasNext } = usePaginationFragment(
+    graphql`
+      fragment BotCompetitionsTable_bot on BotType
+      @refetchable(queryName: "BotCompetitionTablePaginationQuery")
+      @argumentDefinitions(
+        cursor: { type: "String" }
+        first: { type: "Int", defaultValue: 50 }
+      ) {
+        competitionParticipations(first: $first, after: $cursor)
+          @connection(
+            key: "BotCompetitionsTable_bot_competitionParticipations"
+          ) {
+          edges {
+            node {
+              id
+              elo
+              divisionNum
+              active
+
+              competition {
+                dateOpened
+                dateClosed
+                id
+                name
+              }
+            }
+          }
+        }
+      }
+    `,
+    bot
+  );
+
+  type ParticipationType = NonNullable<
+    NonNullable<
+      NonNullable<
+        BotCompetitionsTable_bot$data["competitionParticipations"]
+      >["edges"][number]
+    >["node"]
+  >;
+
+  const competitionData = useMemo(
+    () => getNodes<ParticipationType>(data?.competitionParticipations),
+    [data]
+  );
+
+  const columnHelper = createColumnHelper<ParticipationType>();
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor((row) => row.competition.name || "", {
+        id: "name",
+        header: "Competition",
+        enableSorting: false,
+        cell: (info) =>
+          withAtag(
+            info.getValue(),
+            `/competitions/${getIDFromBase64(info.row.original.competition.id, "CompetitionType")}`,
+            `View competition ${info.row.original.competition.name}`
+          ),
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.competition.dateOpened ?? "", {
+        id: "dateOpened",
+        header: "Opened",
+        enableSorting: false,
+        cell: (row) => new Date(row.getValue()).toLocaleDateString() || "--",
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.competition.dateClosed ?? "", {
+        id: "dateClosed",
+        header: "Closed",
+        enableSorting: false,
+        cell: (row) => {
+          if (row.getValue()) {
+            return new Date(row.getValue()).toLocaleDateString() || "--";
+          } else {
+            return "--";
+          }
+        },
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.divisionNum ?? "", {
+        id: "divisionNum",
+        header: "Division",
+        enableSorting: false,
+        cell: (info) => info.getValue(),
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.elo ?? "", {
+        id: "elo",
+        header: "ELO",
+        enableSorting: false,
+        cell: (info) => info.getValue(),
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.competition.name || "", {
+        id: "stats",
+        header: "STATSLINK",
+        enableSorting: false,
+        cell: (info) =>
+          withAtag(
+            info.getValue(),
+            `/competitions/${getIDFromBase64(info.row.original.competition.id, "CompetitionType")}`,
+            `View competition ${info.row.original.competition.name}`
+          ),
+        meta: { priority: 1 },
+      }),
+    ],
+    [columnHelper]
+  );
+
+  const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
+
+  const table = useReactTable({
+    data: competitionData,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    manualSorting: true,
+  });
+
+  const hasItems = competitionData.length > 0;
+
+  return (
+    <div>
+      <Suspense fallback={<LoadingDots />}>
+        <TableContainer table={table} loading={false} />
+      </Suspense>
+
+      {hasNext ? (
+        <div className="flex justify-center mt-6" ref={loadMoreRef}>
+          <LoadingMoreItems loadingMessage="Loading more bots..." />
+        </div>
+      ) : !hasNext && hasItems ? (
+        <div className="mt-8">
+          <NoMoreItems />
+        </div>
+      ) : null}
+    </div>
+  );
+}
