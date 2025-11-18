@@ -29,7 +29,7 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
       fragment AuthorBotsTable_user on UserType
-      @refetchable(queryName: "BotsTablePaginationQuery")
+      @refetchable(queryName: "AuthorBotsTablePaginationQuery")
       @argumentDefinitions(
         cursor: { type: "String" }
         first: { type: "Int" }
@@ -43,7 +43,7 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
           orderBy: $orderBy
           name: $name
           botZipPubliclyDownloadable: $botZipPubliclyDownloadable
-        ) @connection(key: "BotsTable_node_bots") {
+        ) @connection(key: "AuthorBotsTable_node_bots") {
           edges {
             node {
               id
