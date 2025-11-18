@@ -8,7 +8,6 @@ import {
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
 import { Suspense, useMemo, useState, useTransition } from "react";
-import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { withAtag } from "@/_lib/tanstack_utils";
 
@@ -123,20 +122,14 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
         id: "dateCreated",
         header: "Created",
         enableSorting: false,
-        cell: (info) => {
-          const getTime = getDateTimeISOString(info.getValue());
-          return getTime;
-        },
+        cell: (info) => new Date(info.getValue()).toLocaleDateString(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.dateClosed ?? "", {
         id: "dateClosed",
         header: "Closed",
         enableSorting: false,
-        cell: (info) => {
-          const getTime = getDateTimeISOString(info.getValue());
-          return getTime !== "" ? getTime : "";
-        },
+        cell: (info) => new Date(info.getValue()).toLocaleDateString(),
         meta: { priority: 1 },
       }),
     ],
