@@ -5,6 +5,7 @@ import { getNodes } from "@/_lib/relayHelpers";
 
 interface TrophiesModalProps {
   bot: BotTrophiesModal_bot$key;
+  noItemsMessage?: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -26,7 +27,7 @@ export default function BotTrophiesModal(props: TrophiesModalProps) {
         }
       }
     `,
-    props.bot,
+    props.bot
   );
 
   if (!props.isOpen) return null;
@@ -49,7 +50,7 @@ export default function BotTrophiesModal(props: TrophiesModalProps) {
                 <div className="w-12 h-12 relative mb-2">
                   <img
                     src={`${trophy.trophyIconImage}`}
-                    alt={trophy.name}
+                    alt={"Tropy"}
                     style={{ objectFit: "contain" }}
                   />
                 </div>
@@ -62,7 +63,8 @@ export default function BotTrophiesModal(props: TrophiesModalProps) {
         ) : (
           <div className="text-center">
             <p className="text-sm text-gray-300 mb-4">
-              No trophies yet. Compete in competitions to earn trophies.
+              {props.noItemsMessage ||
+                "No trophies yet. Compete in competitions to earn trophies."}
             </p>
           </div>
         )}
