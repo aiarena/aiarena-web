@@ -408,3 +408,19 @@ nav .block {
   font-size: 1.2rem !important;
   line-height: 1.2rem !important;
 }
+
+.w-md-editor {
+  border: none !important;
+  box-shadow: none !important;
+}
+.wmde-markdown a {
+  color: rgba(134, 194, 50, 1) !important;
+}
+
+.wmde-markdown {
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+
+.wmde-markdown ul {
+  list-style: inside;
+}
