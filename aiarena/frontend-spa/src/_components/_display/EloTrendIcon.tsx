@@ -9,7 +9,6 @@ export default function EloTrendIcon({
 }: {
   trend: number | null | undefined;
 }) {
-  console.log(trend);
   if (trend) {
     return (
       <span>
@@ -23,6 +22,10 @@ export default function EloTrendIcon({
       </span>
     );
   } else {
-    return <span />;
+    return (
+      <span>
+        <ArrowRightIcon height={22} width={22} />
+      </span>
+    );
   }
 }
