@@ -185,7 +185,7 @@ class CompetitionType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_rounds(root: models.Competition, info, **args):
-        return root.round_set.all()
+        return root.round_set.all().order_by("-started")
 
     @staticmethod
     def resolve_game(root: models.Competition, info, **args):
