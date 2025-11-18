@@ -307,14 +307,7 @@ class MatchType(DjangoObjectTypeWithUID):
 
     class Meta:
         model = models.Match
-        fields = [
-            "status",
-            "result",
-            "map",
-            "created",
-            "started",
-            "requested_by",
-        ]
+        fields = ["status", "result", "map", "created", "started", "requested_by", "assigned_to"]
         filterset_class = MatchFilterSet
         connection_class = CountingConnection
 
@@ -438,6 +431,8 @@ class ResultType(DjangoObjectTypeWithUID):
 
 
 class RoundsType(DjangoObjectTypeWithUID):
+    matches = DjangoConnectionField(MatchType)
+
     class Meta:
         model = models.Round
         fields = [
@@ -445,9 +440,14 @@ class RoundsType(DjangoObjectTypeWithUID):
             "started",
             "finished",
             "complete",
+            "competition",
         ]
         filter_fields = []
         connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_matches(root: models.Round, info, **kwargs):
+        return root.match_set.all()
 
 
 class StatsType(graphene.ObjectType):
@@ -647,6 +647,7 @@ class Query(graphene.ObjectType):
     news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
     node = graphene.relay.Node.Field()
     results = DjangoFilterConnectionField("aiarena.graphql.ResultType")
+    rounds = DjangoFilterConnectionField("aiarena.graphql.RoundsType")
     stats = graphene.Field(StatsType)
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
     viewer = graphene.Field("aiarena.graphql.Viewer")
@@ -682,6 +683,10 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_results(root, info, **args):
         return models.Result.objects.all().order_by("-created")
+
+    @staticmethod
+    def resolve_rounds(root, info, **args):
+        return models.Round.objects.all().order_by("-started")
 
     @staticmethod
     def resolve_stats(root, info, **args):
