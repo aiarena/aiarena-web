@@ -13,6 +13,7 @@ import BotsPage from "./_pages/Rework/Bots/Page";
 import RootLayout from "./RootLayout";
 import ResultsPage from "./_pages/Rework/Results/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
+import CompetitionPage from "./_pages/Rework/_Competition/Page";
 import LandingPage from "./_pages/Rework/Landing/Page";
 import RootWithPaddingLayout from "./RootWithPaddingLayout";
 import BotPage from "./_pages/Rework/_Bot/Page";
@@ -24,8 +25,13 @@ export default function App() {
         <Route element={<RootLayout />}>
           <Route path="landing" element={<LandingPage />} />
         </Route>
+
         <Route element={<RootWithPaddingLayout />}>
           <Route path="competitions" element={<CompetitionsPage />} />
+          <Route
+            path="competitions/:competitionId"
+            element={<CompetitionPage />}
+          />
           <Route path="bots" element={<BotsPage />} />
           <Route path="bots/:botId" element={<BotPage />} />
           <Route path="authors" element={<AuthorsPage />} />
