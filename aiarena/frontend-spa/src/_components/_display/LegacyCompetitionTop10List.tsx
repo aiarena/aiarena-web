@@ -40,9 +40,12 @@ const LegacyCompetitonTop10List: React.FC = () => {
     `,
     {}
   );
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (!data.competitions)
+    return <div>Unable to load competitions right now...</div>;
 
   const activeCompetitions = getNodes(data.competitions);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleDotClick = (index: number) => {
     setCurrentIndex(index);

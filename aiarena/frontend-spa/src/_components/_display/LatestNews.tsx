@@ -24,9 +24,11 @@ const LatestNews: React.FC = () => {
     `,
     {}
   );
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (!data.news) return <div>Unable to load news right now...</div>;
 
   const newsData = getNodes(data.news);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleDotClick = (index: number) => {
     setCurrentIndex(index);

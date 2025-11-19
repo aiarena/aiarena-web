@@ -27,6 +27,7 @@ const LegacyActivityList: React.FC = () => {
     `,
     {}
   );
+  if (!data.bots) return <div>Unable to activity right now...</div>;
 
   function timeAgoShort(
     from: Date | number | string,
