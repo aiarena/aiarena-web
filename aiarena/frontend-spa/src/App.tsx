@@ -19,6 +19,7 @@ import RootWithPaddingLayout from "./RootWithPaddingLayout";
 import BotPage from "./_pages/Rework/Bot/Page";
 import RoundsPage from "./_pages/Rework/_Round/Page";
 import AuthorPage from "./_pages/Rework/_Author/Page";
+import MatchPage from "./_pages/Rework/_Match/Page";
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="bots" element={<BotsPage />} />
           <Route path="bots/:botId" element={<BotPage />} />
           <Route path="rounds/:roundId" element={<RoundsPage />} />
+          <Route path="matches/:matchId" element={<MatchPage />} />
           <Route path="authors" element={<AuthorsPage />} />
           <Route path="authors/:userId" element={<AuthorPage />} />
           <Route path="results" element={<ResultsPage />} />
