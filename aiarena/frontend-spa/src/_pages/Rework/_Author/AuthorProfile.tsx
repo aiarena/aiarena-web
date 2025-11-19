@@ -23,6 +23,7 @@ export default function AuthorProfile(props: AuthorProps) {
               trophies {
                 edges {
                   node {
+                    name
                     trophyIconName
                     trophyIconImage
                   }
@@ -36,6 +37,7 @@ export default function AuthorProfile(props: AuthorProps) {
     props.author
   );
   const bots = getNodes(author?.bots);
+  const trophies = bots.flatMap((bot) => getNodes(bot.trophies));
 
   return (
     <div className="relative w-full rounded-lg border border-neutral-800 bg-darken-2 text-white shadow-lg shadow-black backdrop-blur p-2 mb-8">
@@ -67,32 +69,33 @@ export default function AuthorProfile(props: AuthorProps) {
 
           <div className="mt-3 space-y-1 text-md text-gray-300">
             <p>
-              <span className="font-medium text-white">Trophies:</span>{" "}
-              <div className="flex flex-wrap m-4 mr-0">
-                {bots.map((bot, idy) => {
-                  const botTrophies = getNodes(bot.trophies);
-
-                  return (
-                    botTrophies?.map((trophy, idx) => (
-                      <div
-                        key={`${idx} ${idy}`}
-                        className=" p-3 bg-darken-6 border border-customGreen shadow-lg shadow-customGreen-dark rounded-md"
-                      >
-                        <div className="w-12 h-12  mb-2">
-                          <img
-                            src={`${trophy.trophyIconImage}`}
-                            alt={"Tropy"}
-                            style={{ objectFit: "contain" }}
-                          />
+              {trophies.length > 0 && (
+                <>
+                  <span className="font-medium text-white">Trophies:</span>
+                  <div className="flex flex-wrap m-4 mr-0 gap-2">
+                    {trophies.map((trophy, idx) => {
+                      return (
+                        <div
+                          key={`${idx}`}
+                          className=" p-3 bg-darken-6 border border-customGreen shadow-lg shadow-customGreen-dark rounded-md"
+                          title={trophy.name}
+                        >
+                          <div className="w-12 h-12  mb-2">
+                            <img
+                              src={`${trophy.trophyIconImage}`}
+                              alt={"Tropy"}
+                              style={{ objectFit: "contain" }}
+                            />
+                          </div>
+                          <p className="text-xs text-gray-300 text-center truncate max-w-12">
+                            {trophy.name}
+                          </p>
                         </div>
-                        <p className="text-xs text-gray-300">
-                          {trophy.trophyIconName}
-                        </p>
-                      </div>
-                    )) ?? null
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </p>
           </div>
         </div>
