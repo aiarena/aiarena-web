@@ -1,6 +1,7 @@
 import LatestNews from "@/_components/_display/LatestNews";
 import LegacyActivityList from "@/_components/_display/LegacyActivityList";
 import LegacyCompetitonTop10List from "@/_components/_display/LegacyCompetitionTop10List";
+import LegacyStats from "@/_components/_display/LegacyStats";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
@@ -46,6 +47,7 @@ function CardsAndNewsSection() {
           }
         >
           <LatestNews />
+          <LegacyStats />
         </Suspense>
       </div>
     </>
