@@ -307,7 +307,7 @@ class MatchType(DjangoObjectTypeWithUID):
 
     class Meta:
         model = models.Match
-        fields = ["status", "result", "map", "created", "started", "requested_by", "assigned_to"]
+        fields = ["status", "result", "map", "created", "started", "requested_by", "assigned_to", "round"]
         filterset_class = MatchFilterSet
         connection_class = CountingConnection
 
