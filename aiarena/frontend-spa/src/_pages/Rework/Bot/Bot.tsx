@@ -6,6 +6,7 @@ import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import { Suspense } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import BotCompetitionsTable from "./BotCompetitionsTable";
+import FetchError from "@/_components/_display/FetchError";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
@@ -22,7 +23,10 @@ export default function Bot() {
     `,
     { id: getBase64FromID(botId!, "BotType") || "" }
   );
-  if (!data.node) return <div>Bot not found</div>;
+  if (!data.node) {
+    return <FetchError type="bot" />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto">
       <h4 className="mb-4">Bot information</h4>

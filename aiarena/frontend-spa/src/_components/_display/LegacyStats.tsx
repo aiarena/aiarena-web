@@ -1,6 +1,7 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
 import WrappedTitle from "./WrappedTitle";
 import { LegacyStatsQuery } from "./__generated__/LegacyStatsQuery.graphql";
+import FetchError from "./FetchError";
 
 const LegacyStats: React.FC = () => {
   const data = useLazyLoadQuery<LegacyStatsQuery>(
@@ -19,9 +20,8 @@ const LegacyStats: React.FC = () => {
   );
 
   if (!data.stats) {
-    return <div>Unable to load stats right now...</div>;
+    return <FetchError type="stats" />;
   }
-
   const { arenaclients, buildNumber, dateTime, matchCount1h, matchCount24h } =
     data.stats;
 

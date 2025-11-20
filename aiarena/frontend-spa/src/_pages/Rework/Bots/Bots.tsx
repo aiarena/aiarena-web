@@ -6,6 +6,7 @@ import { BotsQuery } from "./__generated__/BotsQuery.graphql";
 import Searchbar from "@/_components/_actions/Searchbar";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import BotsTable from "./BotsTable";
+import FetchError from "@/_components/_display/FetchError";
 
 export default function Bots() {
   const data = useLazyLoadQuery<BotsQuery>(
@@ -18,6 +19,10 @@ export default function Bots() {
   );
   const [searchBarValue, setSearchBarValue] = useState("");
   const [onlyDownloadable, setOnlyDownloadable] = useState(false);
+
+  if (!data) {
+    return <FetchError type="bots" />;
+  }
 
   return (
     <>

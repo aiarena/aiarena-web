@@ -7,6 +7,7 @@ import CompetitionInformationSection from "./CompetitionInformationSection";
 import { CompetitionQuery } from "./__generated__/CompetitionQuery.graphql";
 import RankingsSection from "./RankingsSection";
 import { CompetitionRankingQuery } from "./__generated__/CompetitionRankingQuery.graphql";
+import FetchError from "@/_components/_display/FetchError";
 
 export default function Competition() {
   const { competitionId } = useParams<{ competitionId: string }>();
@@ -36,8 +37,13 @@ export default function Competition() {
     `,
     { id: getBase64FromID(competitionId!, "CompetitionType") || "" }
   );
-  if (!data.node) return <div>Competition not found</div>;
+  if (!data.node) {
+    return <FetchError type="competition" />;
+  }
 
+  if (!rankings.node) {
+    return <FetchError type="rankings" />;
+  }
   return (
     <div className="max-w-7xl mx-auto">
       <Suspense fallback={<LoadingSpinner color="light-gray" />}>

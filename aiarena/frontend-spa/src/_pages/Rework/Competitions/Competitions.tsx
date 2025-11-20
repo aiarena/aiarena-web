@@ -6,6 +6,7 @@ import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import CompetitionsTable from "./CompetitionsTable";
 import ActiveCompetitions from "./ActiveCompetitions";
 import { CompetitionsQuery } from "./__generated__/CompetitionsQuery.graphql";
+import FetchError from "@/_components/_display/FetchError";
 
 export default function Competitions() {
   const data = useLazyLoadQuery<CompetitionsQuery>(
@@ -17,6 +18,10 @@ export default function Competitions() {
     `,
     {}
   );
+
+  if (!data) {
+    return <FetchError type="competitions" />;
+  }
 
   return (
     <>

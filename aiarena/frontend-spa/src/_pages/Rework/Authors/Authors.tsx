@@ -8,6 +8,7 @@ import DropdownButton from "@/_components/_actions/DropdownButton";
 import Searchbar from "@/_components/_actions/Searchbar";
 import AuthorsList from "./AuthorsList";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
+import FetchError from "@/_components/_display/FetchError";
 
 export default function Authors() {
   const data = useLazyLoadQuery<AuthorsQuery>(
@@ -21,6 +22,10 @@ export default function Authors() {
   const [searchBarValue, setSearchBarValue] = useState("");
   const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
   const [onlyWithBots, setOnlyWithBots] = useState(true);
+
+  if (!data) {
+    return <FetchError type="authors" />;
+  }
 
   return (
     <>

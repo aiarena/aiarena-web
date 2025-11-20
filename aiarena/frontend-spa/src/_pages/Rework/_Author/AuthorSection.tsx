@@ -5,6 +5,7 @@ import { graphql } from "relay-runtime";
 import AuthorProfile from "./AuthorProfile";
 import { AuthorSectionQuery } from "./__generated__/AuthorSectionQuery.graphql";
 import AuthorBotsTable from "./AuthorBots";
+import FetchError from "@/_components/_display/FetchError";
 
 export default function AuthorSection() {
   const { userId: authorId } = useParams<{ userId: string }>();
@@ -21,8 +22,9 @@ export default function AuthorSection() {
     `,
     { id: getBase64FromID(authorId!, "UserType") || "" }
   );
-
-  if (!data.node) return <div>Author not found</div>;
+  if (!data.node) {
+    return <FetchError type="author" />;
+  }
 
   return (
     <>

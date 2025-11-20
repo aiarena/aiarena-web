@@ -4,6 +4,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { LatestNewsQuery } from "./__generated__/LatestNewsQuery.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
 import WrappedTitle from "./WrappedTitle";
+import FetchError from "./FetchError";
 
 const LatestNews: React.FC = () => {
   const data = useLazyLoadQuery<LatestNewsQuery>(
@@ -26,7 +27,9 @@ const LatestNews: React.FC = () => {
   );
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  if (!data.news) return <div>Unable to load news right now...</div>;
+  if (!data.news) {
+    return <FetchError type="news" />;
+  }
 
   const newsData = getNodes(data.news);
 

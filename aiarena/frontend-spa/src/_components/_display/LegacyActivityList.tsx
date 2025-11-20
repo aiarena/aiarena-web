@@ -4,6 +4,7 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import WrappedTitle from "./WrappedTitle";
 import clsx from "clsx";
 import { LegacyActivityListQuery } from "./__generated__/LegacyActivityListQuery.graphql";
+import FetchError from "./FetchError";
 
 const LegacyActivityList: React.FC = () => {
   const data = useLazyLoadQuery<LegacyActivityListQuery>(
@@ -27,8 +28,9 @@ const LegacyActivityList: React.FC = () => {
     `,
     {}
   );
-  if (!data.bots) return <div>Unable to activity right now...</div>;
-
+  if (!data.bots) {
+    return <FetchError type="bots" />;
+  }
   function timeAgoShort(
     from: Date | number | string,
     to: Date | number = Date.now()

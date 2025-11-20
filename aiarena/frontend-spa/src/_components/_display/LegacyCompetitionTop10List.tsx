@@ -7,6 +7,7 @@ import BotIcon from "./BotIcon";
 import clsx from "clsx";
 
 import EloTrendIcon from "./EloTrendIcon";
+import FetchError from "./FetchError";
 
 const LegacyCompetitonTop10List: React.FC = () => {
   const data = useLazyLoadQuery<LegacyCompetitionTop10ListQuery>(
@@ -42,8 +43,9 @@ const LegacyCompetitonTop10List: React.FC = () => {
   );
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  if (!data.competitions)
-    return <div>Unable to load competitions right now...</div>;
+  if (!data.competitions) {
+    return <FetchError type="competitions" />;
+  }
 
   const activeCompetitions = getNodes(data.competitions);
 
