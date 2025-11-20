@@ -147,6 +147,16 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         meta: { priority: 1 },
       }),
 
+      columnHelper.accessor((row) => row.winPerc ?? "", {
+        id: "winPerc",
+        header: "Win %",
+        enableSorting: false,
+        cell: (info) => {
+          return `${Math.trunc(info.getValue())} %`;
+        },
+        meta: { priority: 1 },
+      }),
+
       columnHelper.accessor((row) => row.id || "", {
         id: "stats",
         header: "Stats",
