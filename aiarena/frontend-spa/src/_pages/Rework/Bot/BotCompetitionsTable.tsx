@@ -42,7 +42,7 @@ export default function BotCompetitionsTable({
               elo
               divisionNum
               active
-
+              winPerc
               competition {
                 dateOpened
                 dateClosed
@@ -125,6 +125,15 @@ export default function BotCompetitionsTable({
         header: "ELO",
         enableSorting: false,
         cell: (info) => info.getValue(),
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.winPerc ?? "", {
+        id: "winPerc",
+        header: "Win %",
+        enableSorting: false,
+        cell: (info) => {
+          return `${Math.trunc(info.getValue())} %`;
+        },
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.id || "", {
