@@ -107,6 +107,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "aiarena.core.middleware.response_timing_metrics",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
