@@ -10,7 +10,7 @@ const LatestNews: React.FC = () => {
   const data = useLazyLoadQuery<LatestNewsQuery>(
     graphql`
       query LatestNewsQuery {
-        news(last: 12) {
+        news {
           edges {
             node {
               id
@@ -40,17 +40,18 @@ const LatestNews: React.FC = () => {
   const currentNewsItem = newsData[currentIndex];
 
   return (
-    <div>
+    <div className="max-w-100">
       <WrappedTitle title="News" font="font-bold" />
       <div className="bg-darken">
-        <div className="flex items-center justify-center relative mb-4 bg-customGreen-dark-2 overflow-ellipsis">
-          <p className=" font-bold text-center px-4 py-2 h-16 line-clamp-2">
-            {" "}
-            {new Date(currentNewsItem.created).toDateString()} -{" "}
+        <div className="flex items-center justify-center relative mb-4 bg-customGreen-dark-2">
+          <p className="font-bold text-center px-4 py-2 truncate">
             {currentNewsItem.title}
           </p>
         </div>
         <div className="m-4">
+          <p className="text-sm break-words h-8 overflow-hidden line-clamp-3">
+            {new Date(currentNewsItem.created).toLocaleDateString()}
+          </p>
           <p className="text-sm break-words h-16 overflow-hidden line-clamp-3">
             {currentNewsItem.text}
           </p>

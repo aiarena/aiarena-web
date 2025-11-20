@@ -15,7 +15,7 @@ function CardsAndNewsSection() {
       <div className="float-half-left grid gap-8">
         <div>
           <WrappedTitle title="What is AI Arena?" font="font-bold" />
-          <div id="whatisaiarena" className="z-1000">
+          <div id="whatisaiarena">
             The AI Arena ladder provides an environment where Scripted and Deep
             Learning AIs fight in Starcraft 2.
             <br />
