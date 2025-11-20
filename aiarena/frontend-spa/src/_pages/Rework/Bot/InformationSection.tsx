@@ -132,28 +132,19 @@ export default function InformationSection({ bot }: InformationSectionProps) {
 
               <hr className="border-neutral-700 my-3" />
 
-              <div className="flex gap-2 items-center mb-4">
+              <div className="flex items-center mb-4">
                 <dt className="w-32 text-gray-400">Bot Zip</dt>
                 <dd className="flex-1 text-gray-100">
                   {hasBotZip && (
                     <>
-                      {!data.botZipPubliclyDownloadable ? (
-                        <a
-                          href={data.botZip}
-                          download=""
-                          className="bg-red-900 block text-center rounded-2xl text-sm p-1"
-                        >
-                          <span className="text-white">
-                            Warning: Private download!
-                          </span>
-                          <span className="flex gap-1 items-center justify-center">
+                      {data.botZipPubliclyDownloadable ? (
+                        <a href={data.botZip} download="" className="text-sm">
+                          <span className="flex gap-1">
                             <ArrowDownCircleIcon height={18} /> Download
                           </span>
                         </a>
                       ) : (
-                        <span className="ml-2 inline-flex items-center rounded-full border border-neutral-700 px-2 py-0.5 text-xs text-gray-300">
-                          "Private"
-                        </span>
+                        <span className="text-gray-300">Private</span>
                       )}
                     </>
                   )}
@@ -165,23 +156,14 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                 <dd className="flex-1 text-gray-100">
                   {hasBotData && (
                     <>
-                      {!data.botDataPubliclyDownloadable ? (
-                        <a
-                          href={data.botData}
-                          download=""
-                          className="bg-red-900 block text-center rounded-2xl text-sm p-1"
-                        >
-                          <span className="text-white">
-                            Warning: Private download!
-                          </span>
-                          <span className="flex gap-1 items-center justify-center">
+                      {data.botDataPubliclyDownloadable ? (
+                        <a href={data.botData} download="" className="text-sm">
+                          <span className="flex gap-1">
                             <ArrowDownCircleIcon height={18} /> Download
                           </span>
                         </a>
                       ) : (
-                        <span className="ml-2 inline-flex items-center rounded-full border border-neutral-700 px-2 py-0.5 text-xs text-gray-300">
-                          "Private"
-                        </span>
+                        <span className="text-gray-300">Private</span>
                       )}
                     </>
                   )}
