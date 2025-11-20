@@ -120,16 +120,18 @@ export default function BotCompetitionsTable({
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.competition.name || "", {
+      columnHelper.accessor((row) => row.id || "", {
         id: "stats",
-        header: "STATSLINK",
+        header: "Stats",
         enableSorting: false,
-        cell: (info) =>
-          withAtag(
-            info.getValue(),
-            `/competitions/${getIDFromBase64(info.row.original.competition.id, "CompetitionType")}`,
-            `View competition ${info.row.original.competition.name}`
-          ),
+        cell: (info) => {
+          console.log(info.getValue());
+          return withAtag(
+            "View Stats",
+            `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,
+            `View stats ${info.getValue()}`
+          );
+        },
         meta: { priority: 1 },
       }),
     ],
