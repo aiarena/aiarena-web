@@ -78,13 +78,13 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
 
   const columns = useMemo(
     () => [
-      // FIX
       columnHelper.accessor((row) => row.elo || "", {
         id: "index",
         header: "Rank",
         enableSorting: false,
         cell: ({ cell }) => cell.row.index + 1,
         meta: { priority: 1 },
+        size: 5,
       }),
       columnHelper.accessor((row) => row.divisionNum ?? "", {
         id: "divisionNum",
@@ -92,6 +92,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
+        size: 5,
       }),
       columnHelper.accessor((row) => row.bot.name || "", {
         id: "name",
@@ -108,6 +109,13 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
       columnHelper.accessor((row) => row.bot.playsRace ?? "", {
         id: "playsRace",
         header: "Race",
+        enableSorting: false,
+        cell: (row) => row.getValue() || "--",
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.bot.type ?? "", {
+        id: "type",
+        header: "Type",
         enableSorting: false,
         cell: (row) => row.getValue() || "--",
         meta: { priority: 1 },
@@ -145,6 +153,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         },
 
         meta: { priority: 1 },
+        size: 100,
       }),
 
       columnHelper.accessor((row) => row.winPerc ?? "", {
@@ -155,6 +164,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           return `${Math.trunc(info.getValue())} %`;
         },
         meta: { priority: 1 },
+        size: 90,
       }),
 
       columnHelper.accessor((row) => row.id || "", {
