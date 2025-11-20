@@ -44,7 +44,7 @@ const LegacyStats: React.FC = () => {
   ];
 
   return (
-    <div>
+    <div className="mb-8">
       <WrappedTitle title="Stats" font="font-bold" />
 
       <table className="w-full mt-2">
