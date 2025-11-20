@@ -110,7 +110,14 @@ export default function BotCompetitionsTable({
         id: "divisionNum",
         header: "Division",
         enableSorting: false,
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          const division = info.getValue();
+          if (division !== 0) {
+            return info.getValue();
+          } else {
+            return "";
+          }
+        },
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.elo ?? "", {
