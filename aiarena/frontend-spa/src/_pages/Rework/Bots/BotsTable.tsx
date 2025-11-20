@@ -88,6 +88,7 @@ export default function BotsTable(props: BotsTableProps) {
       columnHelper.accessor((row) => row.name || "", {
         id: "name",
         header: "Name",
+        enableSorting: false,
         cell: (info) =>
           withAtag(
             info.getValue(),
@@ -99,6 +100,8 @@ export default function BotsTable(props: BotsTableProps) {
       columnHelper.accessor((row) => row.user.username || "", {
         id: "author",
         header: "Author",
+        enableSorting: false,
+
         cell: (info) =>
           withAtag(
             info.getValue(),
@@ -110,12 +113,14 @@ export default function BotsTable(props: BotsTableProps) {
       columnHelper.accessor((row) => row.playsRace ?? "", {
         id: "race",
         header: "Race",
+        enableSorting: false,
         cell: (info) => info.getValue() || "N/A",
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.type ?? "", {
         id: "type",
         header: "Type",
+        enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
