@@ -42,14 +42,13 @@ export default function RoundsTable(props: RoundsTableProps) {
         id
         complete
         number
-        started
-        finished
         matches(first: $first, after: $cursor)
           @connection(key: "RoundsTable_node_matches") {
           edges {
             node {
+              status
               id
-              created
+              started
               participant1 {
                 id
                 name
@@ -61,6 +60,10 @@ export default function RoundsTable(props: RoundsTableProps) {
               assignedTo {
                 username
                 id
+              }
+              result {
+                created
+                replayFile
               }
             }
           }
@@ -123,18 +126,38 @@ export default function RoundsTable(props: RoundsTableProps) {
         },
         meta: { priority: 1 },
       }),
-      columnHelper.accessor(() => data.started ?? "", {
+      columnHelper.accessor((info) => info.started ?? "", {
         id: "started",
         header: "Started",
         enableSorting: false,
-        cell: (info) => getDateTimeISOString(info.getValue()),
+        cell: (info) => {
+          const status = info.row.original.status;
+          if (status === "Started" || status === "Finished") {
+            return getDateTimeISOString(info.getValue());
+          } else if (status === "Queued") {
+            return "In Queue";
+          } else {
+            return "Error";
+          }
+        },
         meta: { priority: 1 },
       }),
-      columnHelper.accessor(() => data.finished ?? "", {
+      columnHelper.accessor((info) => info.result?.created ?? "", {
         id: "finished",
         header: "Finished",
         enableSorting: false,
-        cell: (info) => getDateTimeISOString(info.getValue()),
+        cell: (info) => {
+          const status = info.row.original.status;
+          if (status === "Finished") {
+            return getDateTimeISOString(info.getValue());
+          } else if (status === "Started") {
+            return "In Progress...";
+          } else if (status === "Queued") {
+            return "In Queue";
+          } else {
+            return "Error";
+          }
+        },
         meta: { priority: 1 },
       }),
 
@@ -143,17 +166,26 @@ export default function RoundsTable(props: RoundsTableProps) {
         header: "Assigned to",
         enableSorting: false,
         cell: (info) => {
-          return withAtag(
-            info.row.original.assignedTo?.username || "",
-            `/bots/${getIDFromBase64(info.row.original.assignedTo?.id, "UserType")}`,
-            `Visit userprofile for ${info.row.original.assignedTo?.id}`
-          );
+          const status = info.row.original.status;
+          if (status === "Finished") {
+            return withAtag(
+              info.row.original.assignedTo?.username || "",
+              `/bots/${getIDFromBase64(info.row.original.assignedTo?.id, "UserType")}`,
+              `Visit userprofile for ${info.row.original.assignedTo?.id}`
+            );
+          } else if (status === "Started") {
+            return "In Progress...";
+          } else if (status === "Queued") {
+            return "In Queue";
+          } else {
+            return "Error";
+          }
         },
 
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper, data.started, data.finished]
+    [columnHelper]
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
