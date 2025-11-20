@@ -4,7 +4,6 @@ import {
   CompetitionRoundsModal_competition$data,
   CompetitionRoundsModal_competition$key,
 } from "./__generated__/CompetitionRoundsModal_competition.graphql";
-import Competition from "../Competition";
 import { Suspense, useMemo } from "react";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import {
@@ -119,7 +118,7 @@ export default function CompetitionRoundsModal(
     <Modal
       onClose={props.onClose}
       isOpen={props.isOpen}
-      title={`Rounds - ${Competition.name}`}
+      title={`Rounds - ${data.name}`}
     >
       <div>
         <Suspense fallback={<LoadingDots />}>
