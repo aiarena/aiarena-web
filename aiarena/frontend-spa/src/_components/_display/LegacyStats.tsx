@@ -40,7 +40,7 @@ const LegacyStats: React.FC = () => {
     { label: "Arena clients", value: arenaclients ?? 0 },
     { label: "Matches last hour", value: matchCount1h ?? 0 },
     { label: "Matches last 24h", value: matchCount24h ?? 0 },
-    { label: "Updated", value: formattedDateTime },
+    { label: "Server Time", value: formattedDateTime },
   ];
 
   return (
