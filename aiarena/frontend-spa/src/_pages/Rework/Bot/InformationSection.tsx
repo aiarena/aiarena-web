@@ -151,7 +151,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                 </dd>
               </div>
 
-              <div className="flex gap-2 items-center mb-4">
+              <div className="flex items-center mb-4">
                 <dt className="w-32 text-gray-400">Bot Data</dt>
                 <dd className="flex-1 text-gray-100">
                   {hasBotData && (
