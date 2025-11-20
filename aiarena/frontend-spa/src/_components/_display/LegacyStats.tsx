@@ -1,4 +1,3 @@
-import React from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import WrappedTitle from "./WrappedTitle";
 import { LegacyStatsQuery } from "./__generated__/LegacyStatsQuery.graphql";

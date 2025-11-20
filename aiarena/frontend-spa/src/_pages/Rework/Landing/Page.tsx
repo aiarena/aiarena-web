@@ -47,6 +47,14 @@ function CardsAndNewsSection() {
           }
         >
           <LatestNews />
+        </Suspense>
+        <Suspense
+          fallback={
+            <div className="m-auto">
+              <LoadingMoreItems loadingMessage="Loading stats..." />
+            </div>
+          }
+        >
           <LegacyStats />
         </Suspense>
       </div>
