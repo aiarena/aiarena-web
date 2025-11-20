@@ -1,4 +1,3 @@
-import React from "react";
 import { graphql, useFragment } from "react-relay";
 import { MatchInfo_match$key } from "./__generated__/MatchInfo_match.graphql";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
