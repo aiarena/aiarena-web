@@ -590,7 +590,12 @@ class Viewer(graphene.ObjectType):
 
     @staticmethod
     def resolve_api_token(root: models.User, info):
-        return Token.objects.get(user=info.context.user)
+        try:
+            token = Token.objects.get(user=info.context.user)
+        except Token.DoesNotExist:
+            token = "no token - contact us"
+
+        return token
 
     @staticmethod
     def resolve_email(root: models.User, info):
