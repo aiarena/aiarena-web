@@ -5,6 +5,7 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.urls import Resolver404, resolve
+from django.utils.timezone import now
 
 
 def maintenance(get_response):
@@ -67,6 +68,41 @@ def track_harakiri_request(get_response):
         environ["TRACK_REQUEST_FINISHED"] = "0"
         response = get_response(request)
         environ["TRACK_REQUEST_FINISHED"] = "1"
+        return response
+
+    return middleware
+
+
+def response_timing_metrics(get_response):
+    def middleware(request):
+        if nginx_timing := request.headers.get("Request-Received-At"):
+            queue_start = float(nginx_timing)
+        else:
+            queue_start = None
+
+        start = now().timestamp()
+
+        response = get_response(request)
+
+        server_timings = []
+
+        time_in_django = (now().timestamp() - start) * 1000
+        server_timings.append(
+            f'time_in_django;desc="Time in django";dur={time_in_django}',
+        )
+
+        if queue_start is not None:
+            time_in_queue = (start - queue_start) * 1000
+            server_timings.append(
+                f'time_in_queue;desc="Time in queue";dur={time_in_queue}',
+            )
+            total_time = time_in_django + time_in_queue
+            server_timings.append(
+                f'total_time;desc="Total time";dur={total_time}',
+            )
+
+        response.headers["Server-Timing"] = ",".join(server_timings)
+
         return response
 
     return middleware
