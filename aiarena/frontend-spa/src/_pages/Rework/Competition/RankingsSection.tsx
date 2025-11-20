@@ -149,14 +149,16 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
 
       columnHelper.accessor((row) => row.id || "", {
         id: "stats",
-        header: "STATSLINK",
+        header: "Stats",
         enableSorting: false,
-        cell: (info) =>
-          withAtag(
-            info.getValue(),
-            `/competitions/${getIDFromBase64(info.getValue(), "CompetitionType")}`,
-            `View competition ${info.getValue()}`
-          ),
+        cell: (info) => {
+          console.log(info.getValue());
+          return withAtag(
+            "View Stats",
+            `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,
+            `View stats ${info.getValue()}`
+          );
+        },
         meta: { priority: 1 },
       }),
     ],
