@@ -224,7 +224,12 @@ class BotDetail(DetailView):
         context = super().get_context_data(**kwargs)
 
         # Create Table
-        results_qs = RelativeResult.objects.filter(bot=self.object).order_by("-me__id")
+        results_qs = (
+            RelativeResult.objects.select_related("match", "me__bot", "opponent__bot")
+            .defer("me__bot__bot_data")
+            .filter(bot=self.object)
+            .order_by("-me__id")
+        )
 
         # specially construct the url, in case we're using S3
         context["bot_zip_url"] = self.get_bot_zip_url()
