@@ -151,7 +151,7 @@ function CapWidth({ children }: { children: ReactNode }) {
 export default function LandingPage() {
   return (
     <div className="bg-linear-[90deg,rgba(0,0,0,0)_5%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0)_90%]">
-      <div className="relative z-10 pb-10 pt-20">
+      <div className="relative z-10 pb-10 md:pt-0 pt-20">
         <Hero />
         <CapWidth>
           <div className="md:w-full md:grid m-auto grid-cols-2 gap-40">
