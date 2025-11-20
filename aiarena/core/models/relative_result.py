@@ -9,6 +9,7 @@ from private_storage.fields import PrivateFileField
 
 from aiarena.core.models.competition import Competition
 
+from .bot import Bot
 from .match import Match
 from .match_participation import MatchParticipation
 
@@ -24,6 +25,7 @@ class RelativeResult(models.Model):
     """
 
     me = models.ForeignKey(MatchParticipation, on_delete=models.DO_NOTHING, related_name="relative_result_me")
+    bot = models.ForeignKey(Bot, on_delete=models.DO_NOTHING, db_column="bot_id")
     match = models.ForeignKey(Match, on_delete=models.DO_NOTHING, related_name="relative_result_match")
     started = models.DateTimeField()
     opponent = models.ForeignKey(

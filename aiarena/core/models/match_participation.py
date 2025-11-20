@@ -55,6 +55,11 @@ class MatchParticipation(models.Model, LockableModelMixin):
     match_log_has_been_cleaned = models.BooleanField(default=True)
     """This is set to true when the match log file is deleted by the cleanup job."""
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["bot", "-id"], name="core_matchpart_bot_id_desc"),
+        ]
+
     def __str__(self):
         return self.bot.name
 
