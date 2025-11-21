@@ -175,7 +175,7 @@ class CeleryWorkerTask(CeleryTask):
 SERVICES = [
     WebService(
         name="webService",
-        count=4,
+        count=8,
         task=WebTask(
             family="websiteTask",
             command="",
