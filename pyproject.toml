@@ -46,7 +46,7 @@ dependencies = [
     "six==1.16.0",
     "uwsgi==2.0.30",
     "wheel==0.45.1",
-    "wiki==0.11.1",
+    "wiki==0.12.2",
 ]
 
 [tool.ruff]
