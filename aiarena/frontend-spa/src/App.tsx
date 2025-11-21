@@ -25,6 +25,16 @@ import CompetitionParticipationPage from "./_pages/Rework/CompetitionParticipati
 export default function App() {
   return (
     <Routes>
+      <Route element={<RootWithPaddingLayout />}>
+        <Route path="authors" element={<AuthorsPage />} />
+        <Route
+          path="competitions/:competitionId"
+          element={<CompetitionPage />}
+        />
+        <Route path="rounds/:roundId" element={<RoundsPage />} />
+        <Route path="bots" element={<BotsPage />} />
+      </Route>
+
       <Route path="dashboard/rework">
         <Route element={<RootLayout />}>
           <Route path="landing" element={<LandingPage />} />
@@ -32,15 +42,8 @@ export default function App() {
 
         <Route element={<RootWithPaddingLayout />}>
           <Route path="competitions" element={<CompetitionsPage />} />
-          <Route
-            path="competitions/:competitionId"
-            element={<CompetitionPage />}
-          />
-          <Route path="bots" element={<BotsPage />} />
-          <Route path="bots/:botId" element={<BotPage />} />
-          <Route path="rounds/:roundId" element={<RoundsPage />} />
           <Route path="matches/:matchId" element={<MatchPage />} />
-          <Route path="authors" element={<AuthorsPage />} />
+          <Route path="bots/:botId" element={<BotPage />} />
           <Route path="authors/:userId" element={<AuthorPage />} />
           <Route path="results" element={<ResultsPage />} />
         </Route>
