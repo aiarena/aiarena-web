@@ -4,6 +4,7 @@ import os
 import time
 import tracemalloc
 from collections import Counter
+from statistics import quantiles
 
 from django.conf import settings
 from django.core import management
@@ -18,6 +19,7 @@ from redis import Redis
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from aiarena.celery import app
+from aiarena.core.middleware import raw_time_spent_in_queue_key
 from aiarena.core.models import Competition
 from aiarena.core.services import Competitions
 from aiarena.core.utils import ReprJSONEncoder, monitoring_minute_key, sql
@@ -268,6 +270,62 @@ def competitions_monitoring():
                 for bot_type, total in Competitions.bot_type_stats(competition).items()
             ],
         )
+
+
+def _calc_percentile(data: list, percentile: int):
+    assert 0 < percentile < 100, "Please provide a percentile as a number between 0 and 100"
+    assert data
+    # Need at least 2 data points for quantiles()
+    if len(data) == 1:
+        return data[0]
+    top_percent = 100 - percentile
+    assert 100 % top_percent == 0, f"Cannot calculate exact {percentile} percentile, please select a divisible number"
+    n = 100 // top_percent
+    return round(quantiles(data, n=n, method="inclusive")[n - 2], 3)
+
+
+@app.task(ignore_result=True)
+def request_queue_monitoring():
+    # Record percentiles of raw request time spent in queue
+    key = raw_time_spent_in_queue_key(minutes_from_now=-1)
+    timings = [float(m) for m in celery_redis.lrange(key, 0, -1)]
+    if not timings:
+        return
+
+    cloudwatch.put_metric_data(
+        Namespace="RequestQueue",
+        MetricData=[
+            {
+                "MetricName": "TimeInQueue",
+                "Dimensions": [{"Name": "Percentile", "Value": "P50"}],
+                "Value": _calc_percentile(timings, 50),
+                "Unit": "Seconds",
+                "Timestamp": datetime.datetime.now(),
+            },
+            {
+                "MetricName": "TimeInQueue",
+                "Dimensions": [{"Name": "Percentile", "Value": "P75"}],
+                "Value": _calc_percentile(timings, 75),
+                "Unit": "Seconds",
+                "Timestamp": datetime.datetime.now(),
+            },
+            {
+                "MetricName": "TimeInQueue",
+                "Dimensions": [{"Name": "Percentile", "Value": "P95"}],
+                "Value": _calc_percentile(timings, 95),
+                "Unit": "Seconds",
+                "Timestamp": datetime.datetime.now(),
+            },
+            {
+                "MetricName": "TimeInQueue",
+                "Dimensions": [{"Name": "Percentile", "Value": "P99"}],
+                "Value": _calc_percentile(timings, 99),
+                "Unit": "Seconds",
+                "Timestamp": datetime.datetime.now(),
+            },
+        ],
+    )
+    celery_redis.delete(key)
 
 
 @app.task(ignore_result=True)

@@ -7,6 +7,13 @@ from django.shortcuts import render
 from django.urls import Resolver404, resolve
 from django.utils.timezone import now
 
+from redis import Redis
+
+from aiarena.core.utils import monitoring_minute_key
+
+
+celery_redis = Redis.from_url(settings.CELERY_BROKER_URL)
+
 
 def maintenance(get_response):
     def middleware(request):
@@ -73,6 +80,11 @@ def track_harakiri_request(get_response):
     return middleware
 
 
+def raw_time_spent_in_queue_key(minutes_from_now=0):
+    minute_key = monitoring_minute_key(minutes_from_now)
+    return f"{settings.REQUEST_MONITORING_PREFIX}:raw:{minute_key}"
+
+
 def response_timing_metrics(get_response):
     def middleware(request):
         if nginx_timing := request.headers.get("Request-Received-At"):
@@ -100,6 +112,11 @@ def response_timing_metrics(get_response):
             server_timings.append(
                 f'total_time;desc="Total time";dur={total_time}',
             )
+
+            # Record the time in queue to NewRelic
+            raw_key = raw_time_spent_in_queue_key()
+            celery_redis.lpush(raw_key, time_in_queue)
+            celery_redis.expire(raw_key, 5 * 60)
 
         response.headers["Server-Timing"] = ",".join(server_timings)
 

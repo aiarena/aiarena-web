@@ -559,6 +559,10 @@ if crontab:
             "task": "aiarena.core.tasks.kill_slow_queries",
             "schedule": timedelta(seconds=15),
         },
+        "request_queue_monitoring": {
+            "task": "aiarena.core.tasks.request_queue_monitoring",
+            "schedule": timedelta(seconds=17),
+        },
         "celery_queue_monitoring": {
             "task": "aiarena.core.tasks.celery_queue_monitoring",
             "schedule": timedelta(seconds=13),
@@ -590,6 +594,8 @@ CELERY_MONITORING_CACHE_ALIAS = "default"
 CELERY_MONITORING_TRACK_PREFIX = "task_track"
 CELERY_MONITORING_STAT_PREFIX = "task_stat"
 TRACK_TASKS_MEMORY = True
+
+REQUEST_MONITORING_PREFIX = "request_monitoring"
 
 # User Settings
 MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER = 4
