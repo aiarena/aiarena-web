@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.12.*"
 
 [[package]]
@@ -83,7 +83,7 @@ requires-dist = [
     { name = "django-avatar", specifier = "==8.0.1" },
     { name = "django-bootstrap-form", specifier = "==3.4" },
     { name = "django-constance", extras = ["redis"], specifier = "==3.1.0" },
-    { name = "django-debug-toolbar", specifier = "==3.2.2" },
+    { name = "django-debug-toolbar", specifier = "==6.0.0" },
     { name = "django-dirtyfields", specifier = "==1.9.7" },
     { name = "django-discord-bind", git = "https://github.com/aiarena/django-discord-bind.git?rev=7f454d4d02593eb40762e95979d85c8cde733de0" },
     { name = "django-extensions", specifier = "==4.1" },
@@ -504,15 +504,15 @@ redis = [
 
 [[package]]
 name = "django-debug-toolbar"
-version = "3.2.2"
+version = "6.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "sqlparse" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9d/ab/2d08e6fe8790789f3d9cdf3abd5b4fccad27db8cc43c45a880f9c260d639/django-debug-toolbar-3.2.2.tar.gz", hash = "sha256:8c5b13795d4040008ee69ba82dcdd259c49db346cf7d0de6e561a49d191f0860", size = 117685, upload-time = "2021-08-14T15:17:12.903Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/d5/5fc90234532088aeec5faa48d5b09951cc7eab6626030ed427d3bd8cd9bc/django_debug_toolbar-6.0.0.tar.gz", hash = "sha256:6eb9fa6f4a5884bf04004700ffb5a44043f1fff38784447fc52c1633448c8c14", size = 305331, upload-time = "2025-07-25T13:11:48.68Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/67/57/9785d6a6ef376f19cb6552865f6d9e3175468ff5c28887d07fbea8ba634c/django_debug_toolbar-3.2.2-py3-none-any.whl", hash = "sha256:d7bab7573fab35b0fd029163371b7182f5826c13da69734beb675c761d06a4d3", size = 200785, upload-time = "2021-08-14T15:16:57.89Z" },
+    { url = "https://files.pythonhosted.org/packages/05/b5/4724a8c18fcc5b09dca7b7a0e70c34208317bb110075ad12484d6588ae91/django_debug_toolbar-6.0.0-py3-none-any.whl", hash = "sha256:0cf2cac5c307b77d6e143c914e5c6592df53ffe34642d93929e5ef095ae56841", size = 266967, upload-time = "2025-07-25T13:11:47.265Z" },
 ]
 
 [[package]]
