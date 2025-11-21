@@ -45,10 +45,14 @@ class Match(models.Model, LockableModelMixin, RandomManagerMixin):
 
     @property
     def participant1(self):
+        if hasattr(self, "_participant1_list"):
+            return self._participant1_list[0] if self._participant1_list else None
         return self.matchparticipation_set.get(participant_number=1)
 
     @property
     def participant2(self):
+        if hasattr(self, "_participant2_list"):
+            return self._participant2_list[0] if self._participant2_list else None
         return self.matchparticipation_set.get(participant_number=2)
 
     @property
