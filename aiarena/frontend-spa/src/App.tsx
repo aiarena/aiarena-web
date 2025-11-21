@@ -20,6 +20,7 @@ import BotPage from "./_pages/Rework/Bot/Page";
 import RoundsPage from "./_pages/Rework/_Round/Page";
 import AuthorPage from "./_pages/Rework/_Author/Page";
 import MatchPage from "./_pages/Rework/_Match/Page";
+import CompetitionParticipationPage from "./_pages/Rework/CompetitionParticipation/Page";
 
 export default function App() {
   return (
@@ -51,6 +52,10 @@ export default function App() {
         <Route path="bots" element={<BotsPage />} />
         <Route path="authors" element={<AuthorsPage />} />
         <Route path="results" element={<ResultsPage />} />
+        <Route
+          path="competition-participation/:id"
+          element={<CompetitionParticipationPage />}
+        />
       </Route>
 
       <Route element={<DashboardLayout />} path="dashboard">

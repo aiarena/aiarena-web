@@ -208,8 +208,50 @@ class CompetitionType(DjangoObjectTypeWithUID):
         return root.get_wiki_article().current_revision.content
 
 
+class CompetitionBotMapStatsType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.CompetitionBotMapStats
+        fields = [
+            "map",
+            "match_count",
+            "win_count",
+            "win_perc",
+            "loss_count",
+            "loss_perc",
+            "tie_count",
+            "tie_perc",
+            "crash_count",
+            "crash_perc",
+            "updated",
+        ]
+        filter_fields = []
+        connection_class = CountingConnection
+
+
+class CompetitionBotMatchupStatsType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.CompetitionBotMatchupStats
+        fields = [
+            "opponent",
+            "match_count",
+            "win_count",
+            "win_perc",
+            "loss_count",
+            "loss_perc",
+            "tie_count",
+            "tie_perc",
+            "crash_count",
+            "crash_perc",
+            "updated",
+        ]
+        filter_fields = []
+        connection_class = CountingConnection
+
+
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()
+    competition_map_stats = DjangoConnectionField("aiarena.graphql.CompetitionBotMapStatsType")
+    competition_matchup_stats = DjangoConnectionField("aiarena.graphql.CompetitionBotMatchupStatsType")
 
     class Meta:
         model = models.CompetitionParticipation
@@ -239,6 +281,19 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
         if trend_data:
             return trend_data[0].trend
         return 0
+
+    @staticmethod
+    def resolve_competition_map_stats(root: models.CompetitionParticipation, info, **args):
+        return root.competition_map_stats.select_related("map").order_by("map__name")
+
+    @staticmethod
+    def resolve_competition_matchup_stats(root: models.CompetitionParticipation, info, **args):
+        return (
+            root.competition_matchup_stats.filter(opponent__competition=root.competition)
+            .order_by("-win_perc")
+            .distinct()
+            .select_related("opponent__bot", "opponent__bot__plays_race")
+        )
 
 
 class MatchParticipationFilterSet(FilterSet):
