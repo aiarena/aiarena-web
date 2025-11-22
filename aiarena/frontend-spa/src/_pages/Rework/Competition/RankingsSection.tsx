@@ -128,7 +128,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         cell: (info) =>
           withAtag(
             "",
-            `/users/${getIDFromBase64(info.row.original.bot.user.id, "UserType")}`,
+            `/authors/${getIDFromBase64(info.row.original.bot.user.id, "UserType")}`,
             `View user profile for ${info.row.original.bot.user.username}`,
             <span className="flex gap-1 items-center">
               <BotIcon user={info.row.original.bot.user} /> {info.getValue()}
