@@ -68,145 +68,153 @@ export function TableContainer<T>({
           </TableSettings>
           <div className="flex items-center">{appendHeader}</div>
         </div>
-
-        <table className="w-full border-collapse min-w-max">
-          <thead className="bg-darken-2 text-white">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    style={{ position: "relative", width: header.getSize() }}
-                    className="text-left select-none border-b border-customGreen font-bold text-customGreen flex-nowrap"
-                  >
-                    <div className="inline-flex items-center gap-1 w-full justify-between h-full">
-                      <div
-                        className={clsx(
-                          "p-3",
-                          "inline-flex",
-                          "items-center",
-                          "gap-1",
-                          "w-full",
-                          "justify-between",
-                          header.column.getCanSort()
-                            ? ""
-                            : "text-white font-medium",
-                          "mr-5",
-                          "group",
-                          {
-                            "cursor-pointer   hover:text-white":
-                              header.column.getCanSort(),
-                          }
-                        )}
-                        {...(header.column.getCanSort() && !loading
-                          ? {
-                              onClick: header.column.getToggleSortingHandler(),
-                            }
-                          : {})}
+        <div className="overflow-x-auto rotate-180 scrollbar-black">
+          <div className="rotate-180 min-w-max">
+            <table className="w-full border-collapse min-w-max">
+              <thead className="bg-darken-2 text-white">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        style={{
+                          position: "relative",
+                          width: header.getSize(),
+                        }}
+                        className="text-left select-none border-b border-customGreen font-bold text-customGreen flex-nowrap"
                       >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                        {header.column.getCanSort() && (
-                          <>
-                            {header.column.getIsSorted() === "asc" ? (
-                              <span>
-                                <ArrowUpIcon className="size-5 group-hover:hidden" />
-                                <ArrowDownIcon className="size-5 hidden group-hover:inline" />
-                              </span>
-                            ) : header.column.getIsSorted() === "desc" ? (
-                              <span>
-                                <ArrowDownIcon className="size-5 opacity-100 group-hover:opacity-0" />
-                              </span>
-                            ) : (
-                              <ArrowUpIcon className="size-5 opacity-0 group-hover:opacity-100" />
-                            )}
-                          </>
-                        )}
-                      </div>
-                      {header.column.getCanResize() && (
-                        <div
-                          onMouseDown={header.getResizeHandler()}
-                          onTouchStart={header.getResizeHandler()}
-                          className={clsx(
-                            "absolute",
-                            "right-0",
-                            "top-0",
-                            "bottom-0",
-                            "w-1",
-                            "p-2",
-                            "border",
-                            "border-transparent",
-                            "hover:border-r-white",
-                            "cursor-col-resize",
-                            {
-                              "border-r-white": header.column.getIsResizing(),
-                              "border-r-neutral-700":
-                                !header.column.getIsResizing(),
-                            }
-                          )}
-                        >
+                        <div className="inline-flex items-center gap-1 w-full justify-between h-full">
                           <div
                             className={clsx(
-                              "w-[1px]",
-                              "h-full",
-                              header.column.getIsResizing()
-                                ? "bg-white"
-                                : "bg-customGreen"
+                              "p-3",
+                              "inline-flex",
+                              "items-center",
+                              "gap-1",
+                              "w-full",
+                              "justify-between",
+                              header.column.getCanSort()
+                                ? ""
+                                : "text-white font-medium",
+                              "mr-5",
+                              "group",
+                              {
+                                "cursor-pointer   hover:text-white":
+                                  header.column.getCanSort(),
+                              }
                             )}
-                          ></div>
-                        </div>
-                      )}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          {table.getRowModel().rows.length != 0 ? (
-            <Suspense fallback={<LoadingSpinner />}>
-              <tbody className={clsx({ "animate-pulse": loading })}>
-                {table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="even:bg-darken-4 odd:bg-darken hover:bg-darken-3 border-b border-gray-700"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        style={{ width: cell.column.getSize() }}
-                        className="p-3 text-white border-t border-darken-2 md:min-w-0 md:max-w-0"
-                      >
-                        <div className="w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
+                            {...(header.column.getCanSort() && !loading
+                              ? {
+                                  onClick:
+                                    header.column.getToggleSortingHandler(),
+                                }
+                              : {})}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                            {header.column.getCanSort() && (
+                              <>
+                                {header.column.getIsSorted() === "asc" ? (
+                                  <span>
+                                    <ArrowUpIcon className="size-5 group-hover:hidden" />
+                                    <ArrowDownIcon className="size-5 hidden group-hover:inline" />
+                                  </span>
+                                ) : header.column.getIsSorted() === "desc" ? (
+                                  <span>
+                                    <ArrowDownIcon className="size-5 opacity-100 group-hover:opacity-0" />
+                                  </span>
+                                ) : (
+                                  <ArrowUpIcon className="size-5 opacity-0 group-hover:opacity-100" />
+                                )}
+                              </>
+                            )}
+                          </div>
+                          {header.column.getCanResize() && (
+                            <div
+                              onMouseDown={header.getResizeHandler()}
+                              onTouchStart={header.getResizeHandler()}
+                              className={clsx(
+                                "absolute",
+                                "right-0",
+                                "top-0",
+                                "bottom-0",
+                                "w-1",
+                                "p-2",
+                                "border",
+                                "border-transparent",
+                                "hover:border-r-white",
+                                "cursor-col-resize",
+                                {
+                                  "border-r-white":
+                                    header.column.getIsResizing(),
+                                  "border-r-neutral-700":
+                                    !header.column.getIsResizing(),
+                                }
+                              )}
+                            >
+                              <div
+                                className={clsx(
+                                  "w-[1px]",
+                                  "h-full",
+                                  header.column.getIsResizing()
+                                    ? "bg-white"
+                                    : "bg-customGreen"
+                                )}
+                              ></div>
+                            </div>
                           )}
                         </div>
-                      </td>
+                      </th>
                     ))}
                   </tr>
                 ))}
-              </tbody>
-            </Suspense>
-          ) : (
-            <tbody>
-              <tr>
-                <td
-                  colSpan={visibleColumnCount}
-                  className={clsx(
-                    "text-center align-middle ",
-                    `h-[${minHeight}vh]`
-                  )}
-                >
-                  No results
-                </td>
-              </tr>
-            </tbody>
-          )}
-        </table>
+              </thead>
+              {table.getRowModel().rows.length != 0 ? (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <tbody className={clsx({ "animate-pulse": loading })}>
+                    {table.getRowModel().rows.map((row) => (
+                      <tr
+                        key={row.id}
+                        className="even:bg-darken-4 odd:bg-darken hover:bg-darken-3 border-b border-gray-700"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <td
+                            key={cell.id}
+                            style={{ width: cell.column.getSize() }}
+                            className="p-3 text-white border-t border-darken-2 md:min-w-0 md:max-w-0"
+                          >
+                            <div className="w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </div>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </Suspense>
+              ) : (
+                <tbody>
+                  <tr>
+                    <td
+                      colSpan={visibleColumnCount}
+                      className={clsx(
+                        "text-center align-middle ",
+                        `h-[${minHeight}vh]`
+                      )}
+                    >
+                      No results
+                    </td>
+                  </tr>
+                </tbody>
+              )}
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
