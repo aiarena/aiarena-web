@@ -13,6 +13,7 @@ export default function MatchInfo(props: MatchDecalProps) {
   const match = useFragment(
     graphql`
       fragment MatchDecal_match on MatchType {
+        id
         map {
           downloadLink
           name
@@ -66,6 +67,21 @@ export default function MatchInfo(props: MatchDecalProps) {
 
   return (
     <div className="mb-8 rounded-2xl border border-neutral-800 bg-darken-2 p-4 sm:p-5 shadow-lg shadow-black">
+      <h2 id="match-heading" className="sr-only">
+        Match {match.id}
+      </h2>
+
+      <div className="items-baseline gap-2 mb-6">
+        <div className="flex">
+          <h2
+            id="bot-information-heading"
+            className="text-xl sm:text-2xl font-semibold text-white"
+          >
+            Match {getIDFromBase64(match.id, "MatchType")}
+          </h2>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
         <div className="flex items-center gap-2">
           <div className="inline-flex items-center justify-center rounded-full bg-neutral-900/80 border border-customGreen p-1.5 shadow-black mr-2">
@@ -75,9 +91,6 @@ export default function MatchInfo(props: MatchDecalProps) {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs uppercase tracking-wide text-gray-400">
-              Match Result
-            </span>
             <span className="text-xl font-semibold text-white">
               {winnerName ? `${winnerName} won the match` : "Match completed"}
             </span>
