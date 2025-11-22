@@ -24,6 +24,27 @@ interface RankingsSectionProps {
   competition: RankingsSection_competition$key;
 }
 
+type ParticipationType = NonNullable<
+  NonNullable<
+    NonNullable<
+      RankingsSection_competition$data["participants"]
+    >["edges"][number]
+  >["node"]
+>;
+
+type ParticipantRow = ParticipationType & {
+  __kind: "participant";
+  rank: number;
+};
+
+type DivisionHeaderRow = {
+  __kind: "divisionHeader";
+  divisionNum: ParticipationType["divisionNum"];
+  id: string;
+};
+
+export type RankingsRow = ParticipantRow | DivisionHeaderRow;
+
 export default function RankingsSection({ competition }: RankingsSectionProps) {
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
@@ -61,130 +82,179 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
     competition
   );
 
-  type ParticipationType = NonNullable<
-    NonNullable<
-      NonNullable<
-        RankingsSection_competition$data["participants"]
-      >["edges"][number]
-    >["node"]
-  >;
-
   const rankingsData = useMemo(
     () => getNodes<ParticipationType>(data?.participants),
     [data]
   );
 
-  const columnHelper = createColumnHelper<ParticipationType>();
+  const tableData: RankingsRow[] = useMemo(() => {
+    if (!rankingsData) return [];
 
+    const result: RankingsRow[] = [];
+    let lastDivision: number | null = null;
+    let rank = 0;
+
+    for (const row of rankingsData) {
+      const division = row.divisionNum ?? null;
+
+      if (division !== lastDivision) {
+        result.push({
+          __kind: "divisionHeader",
+          divisionNum: division,
+          id: `division-header-${division ?? "none"}`,
+        });
+        lastDivision = division;
+      }
+
+      rank += 1;
+      result.push({
+        ...row,
+        __kind: "participant",
+        rank,
+      });
+    }
+
+    return result;
+  }, [rankingsData]);
+
+  const columnHelper = createColumnHelper<RankingsRow>();
   const columns = useMemo(
     () => [
-      columnHelper.accessor((row) => row.elo || "", {
+      columnHelper.display({
         id: "index",
         header: "Rank",
         enableSorting: false,
-        cell: ({ cell }) => cell.row.index + 1,
+        cell: ({ row }) => {
+          const original = row.original;
+          if (original.__kind !== "participant") return null;
+          return original.rank;
+        },
         meta: { priority: 1 },
         size: 5,
       }),
-      columnHelper.accessor((row) => row.bot.name || "", {
+
+      columnHelper.display({
         id: "name",
         header: "Name",
         enableSorting: false,
-        cell: (info) =>
-          withAtag(
-            info.getValue(),
-            `/bots/${getIDFromBase64(info.row.original.bot.id, "BotType")}`,
-            `View bot profile for ${info.row.original.bot.name}`
-          ),
+        cell: (info) => {
+          const original = info.row.original;
+          if (original.__kind !== "participant") return null;
+
+          const bot = original.bot;
+          return withAtag(
+            bot.name ?? "",
+            `/bots/${getIDFromBase64(bot.id, "BotType")}`,
+            `View bot profile for ${bot.name}`
+          );
+        },
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.elo ?? "", {
+
+      columnHelper.display({
         id: "elo",
         header: "ELO",
         enableSorting: false,
-
         cell: (info) => {
-          const eloChange = info.row.original.trend;
+          const original = info.row.original;
+          if (original.__kind !== "participant") return null;
+
+          const elo = original.elo ?? "";
+          const eloChange = original.trend;
           return (
             <span
-              className="flex items-center gap-1 "
+              className="flex items-center gap-1"
               title={`ELO changed ${eloChange} in the last 30 games`}
             >
-              {info.getValue()}
+              {elo}
               <EloTrendIcon trend={eloChange} />
             </span>
           );
         },
-
         meta: { priority: 1 },
         size: 100,
       }),
-      columnHelper.accessor((row) => row.bot.playsRace ?? "", {
+
+      columnHelper.display({
         id: "playsRace",
         header: "Race",
         enableSorting: false,
-        cell: (row) => row.getValue() || "--",
+        cell: ({ row }) => {
+          const original = row.original;
+          if (original.__kind !== "participant") return null;
+          return original.bot.playsRace ?? "--";
+        },
         meta: { priority: 4 },
       }),
-      columnHelper.accessor((row) => row.bot.type ?? "", {
+
+      columnHelper.display({
         id: "type",
         header: "Type",
         enableSorting: false,
-        cell: (row) => row.getValue() || "--",
+        cell: ({ row }) => {
+          const original = row.original;
+          if (original.__kind !== "participant") return null;
+          return original.bot.type ?? "--";
+        },
         meta: { priority: 4 },
       }),
-      columnHelper.accessor((row) => row.bot.user.username ?? "", {
+
+      columnHelper.display({
         id: "username",
         header: "Author",
         enableSorting: false,
+        cell: (info) => {
+          const original = info.row.original;
+          if (original.__kind !== "participant") return null;
 
-        cell: (info) =>
-          withAtag(
+          const user = original.bot.user;
+          return withAtag(
             "",
-            `/authors/${getIDFromBase64(info.row.original.bot.user.id, "UserType")}`,
-            `View user profile for ${info.row.original.bot.user.username}`,
+            `/authors/${getIDFromBase64(user.id, "UserType")}`,
+            `View user profile for ${user.username}`,
             <span className="flex gap-1 items-center">
-              <BotIcon user={info.row.original.bot.user} /> {info.getValue()}
+              <BotIcon user={user} /> {user.username}
             </span>
-          ),
-
+          );
+        },
         meta: { priority: 3 },
       }),
 
-      columnHelper.accessor((row) => row.winPerc ?? "", {
+      columnHelper.display({
         id: "winPerc",
         header: "Win %",
         enableSorting: false,
         cell: (info) => {
-          return `${Math.trunc(info.getValue())} %`;
+          const original = info.row.original;
+          if (original.__kind !== "participant") return null;
+
+          const val = original.winPerc ?? 0;
+          return `${Math.trunc(val)} %`;
         },
         meta: { priority: 3 },
         size: 90,
       }),
 
-      columnHelper.accessor((row) => row.id || "", {
+      columnHelper.display({
         id: "stats",
         header: "Stats",
         enableSorting: false,
         cell: (info) => {
+          const original = info.row.original;
+          if (original.__kind !== "participant") return null;
+
           return withAtag(
             "View Stats",
-            `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,
-            `View stats ${info.getValue()}`
+            `/competitions/stats/${getIDFromBase64(
+              original.id,
+              "CompetitionParticipationType"
+            )}`,
+            `View stats ${original.id}`
           );
         },
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.divisionNum ?? "", {
-        id: "divisionNum",
-        header: "Division",
-        enableSorting: false,
-        cell: (info) => info.getValue(),
-        meta: { priority: 3 },
-        size: 5,
-      }),
     ],
-
     [columnHelper]
   );
 
@@ -192,7 +262,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
-    data: rankingsData,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,

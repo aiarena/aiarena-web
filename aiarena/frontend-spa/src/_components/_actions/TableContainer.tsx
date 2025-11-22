@@ -14,6 +14,20 @@ interface TableContainerProps<T> {
   minHeight?: number;
 }
 
+// division header row type guard and type
+type DivisionHeaderRowShape = {
+  __kind: "divisionHeader";
+  divisionNum: number | null | undefined;
+};
+function isDivisionHeaderRow<T>(row: T): row is T & DivisionHeaderRowShape {
+  if (typeof row !== "object" || row === null) return false;
+  if (!("__kind" in row)) return false;
+
+  const candidate = row as { __kind?: unknown };
+
+  return candidate.__kind === "divisionHeader";
+}
+
 export function TableContainer<T>({
   table,
   className,
@@ -174,27 +188,51 @@ export function TableContainer<T>({
               {table.getRowModel().rows.length != 0 ? (
                 <Suspense fallback={<LoadingSpinner />}>
                   <tbody className={clsx({ "animate-pulse": loading })}>
-                    {table.getRowModel().rows.map((row) => (
-                      <tr
-                        key={row.id}
-                        className="even:bg-darken-4 odd:bg-darken hover:bg-darken-3 border-b border-gray-700"
-                      >
-                        {row.getVisibleCells().map((cell) => (
-                          <td
-                            key={cell.id}
-                            style={{ width: cell.column.getSize() }}
-                            className="p-3 text-white border-t border-darken-2 md:min-w-0 md:max-w-0"
-                          >
-                            <div className="w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap">
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext()
-                              )}
-                            </div>
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
+                    {table.getRowModel().rows.map((row) => {
+                      const original = row.original;
+
+                      // Division header row
+                      if (isDivisionHeaderRow(original)) {
+                        const label =
+                          original.divisionNum != null
+                            ? original.divisionNum
+                            : "--";
+
+                        return (
+                          <tr key={row.id}>
+                            <td
+                              colSpan={visibleColumnCount}
+                              className="text-l font-semibold tracking-widest uppercase text-neutral-200 border-y border-neutral-800 py-3 pl-3"
+                            >
+                              Division {label}
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      // Normal data row
+                      return (
+                        <tr
+                          key={row.id}
+                          className="even:bg-darken-4 odd:bg-darken hover:bg-darken-3 border-b border-gray-700"
+                        >
+                          {row.getVisibleCells().map((cell) => (
+                            <td
+                              key={cell.id}
+                              style={{ width: cell.column.getSize() }}
+                              className="p-3 text-white border-t border-darken-2 md:min-w-0 md:max-w-0"
+                            >
+                              <div className="w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap">
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </div>
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </Suspense>
               ) : (
