@@ -86,14 +86,6 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         meta: { priority: 1 },
         size: 5,
       }),
-      columnHelper.accessor((row) => row.divisionNum ?? "", {
-        id: "divisionNum",
-        header: "Division",
-        enableSorting: false,
-        cell: (info) => info.getValue(),
-        meta: { priority: 1 },
-        size: 5,
-      }),
       columnHelper.accessor((row) => row.bot.name || "", {
         id: "name",
         header: "Name",
@@ -106,38 +98,6 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           ),
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.bot.playsRace ?? "", {
-        id: "playsRace",
-        header: "Race",
-        enableSorting: false,
-        cell: (row) => row.getValue() || "--",
-        meta: { priority: 1 },
-      }),
-      columnHelper.accessor((row) => row.bot.type ?? "", {
-        id: "type",
-        header: "Type",
-        enableSorting: false,
-        cell: (row) => row.getValue() || "--",
-        meta: { priority: 1 },
-      }),
-      columnHelper.accessor((row) => row.bot.user.username ?? "", {
-        id: "username",
-        header: "Author",
-        enableSorting: false,
-
-        cell: (info) =>
-          withAtag(
-            "",
-            `/authors/${getIDFromBase64(info.row.original.bot.user.id, "UserType")}`,
-            `View user profile for ${info.row.original.bot.user.username}`,
-            <span className="flex gap-1 items-center">
-              <BotIcon user={info.row.original.bot.user} /> {info.getValue()}
-            </span>
-          ),
-
-        meta: { priority: 1 },
-      }),
-
       columnHelper.accessor((row) => row.elo ?? "", {
         id: "elo",
         header: "ELO",
@@ -159,6 +119,37 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         meta: { priority: 1 },
         size: 100,
       }),
+      columnHelper.accessor((row) => row.bot.playsRace ?? "", {
+        id: "playsRace",
+        header: "Race",
+        enableSorting: false,
+        cell: (row) => row.getValue() || "--",
+        meta: { priority: 4 },
+      }),
+      columnHelper.accessor((row) => row.bot.type ?? "", {
+        id: "type",
+        header: "Type",
+        enableSorting: false,
+        cell: (row) => row.getValue() || "--",
+        meta: { priority: 4 },
+      }),
+      columnHelper.accessor((row) => row.bot.user.username ?? "", {
+        id: "username",
+        header: "Author",
+        enableSorting: false,
+
+        cell: (info) =>
+          withAtag(
+            "",
+            `/authors/${getIDFromBase64(info.row.original.bot.user.id, "UserType")}`,
+            `View user profile for ${info.row.original.bot.user.username}`,
+            <span className="flex gap-1 items-center">
+              <BotIcon user={info.row.original.bot.user} /> {info.getValue()}
+            </span>
+          ),
+
+        meta: { priority: 3 },
+      }),
 
       columnHelper.accessor((row) => row.winPerc ?? "", {
         id: "winPerc",
@@ -167,7 +158,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         cell: (info) => {
           return `${Math.trunc(info.getValue())} %`;
         },
-        meta: { priority: 1 },
+        meta: { priority: 3 },
         size: 90,
       }),
 
@@ -184,7 +175,16 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         },
         meta: { priority: 1 },
       }),
+      columnHelper.accessor((row) => row.divisionNum ?? "", {
+        id: "divisionNum",
+        header: "Division",
+        enableSorting: false,
+        cell: (info) => info.getValue(),
+        meta: { priority: 3 },
+        size: 5,
+      }),
     ],
+
     [columnHelper]
   );
 
