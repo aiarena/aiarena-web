@@ -56,7 +56,7 @@ export default function App() {
         <Route path="authors" element={<AuthorsPage />} />
         <Route path="results" element={<ResultsPage />} />
         <Route
-          path="competition-participation/:id"
+          path="competitions/stats/:id/:slug?"
           element={<CompetitionParticipationPage />}
         />
       </Route>

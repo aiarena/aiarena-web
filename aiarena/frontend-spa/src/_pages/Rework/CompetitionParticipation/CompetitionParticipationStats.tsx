@@ -2,6 +2,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { CompetitionParticipationStatsQuery } from "./__generated__/CompetitionParticipationStatsQuery.graphql";
 import MapStatsTable from "./MapStatsTable";
 import MatchupStatsTable from "./MatchupStatsTable";
+import { getBase64FromID } from "@/_lib/relayHelpers";
 
 interface CompetitionParticipationStatsProps {
   id: string;
@@ -31,7 +32,7 @@ export default function CompetitionParticipationStats(
         }
       }
     `,
-    { id: props.id }
+    { id: getBase64FromID(props.id!, "CompetitionParticipationType") || "" }
   );
 
   if (!data.node) {
