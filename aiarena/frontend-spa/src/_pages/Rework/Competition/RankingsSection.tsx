@@ -144,10 +144,14 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         enableSorting: false,
 
         cell: (info) => {
+          const eloChange = info.row.original.trend;
           return (
-            <span className="flex items-center gap-1">
+            <span
+              className="flex items-center gap-1 "
+              title={`ELO changed ${eloChange} in the last 30 games`}
+            >
               {info.getValue()}
-              <EloTrendIcon trend={info.row.original.trend} />
+              <EloTrendIcon trend={eloChange} />
             </span>
           );
         },
@@ -172,7 +176,6 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         header: "Stats",
         enableSorting: false,
         cell: (info) => {
-          console.log(info.getValue());
           return withAtag(
             "View Stats",
             `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,
