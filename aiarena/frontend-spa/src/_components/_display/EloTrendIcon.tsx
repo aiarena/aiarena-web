@@ -13,9 +13,17 @@ export default function EloTrendIcon({
     return (
       <span>
         {trend >= 15 ? (
-          <ArrowTrendingUpIcon height={22} width={22} />
+          <ArrowTrendingUpIcon
+            height={22}
+            width={22}
+            className="text-customGreen"
+          />
         ) : trend <= -15 ? (
-          <ArrowTrendingDownIcon height={22} width={22} />
+          <ArrowTrendingDownIcon
+            height={22}
+            width={22}
+            className="text-red-400"
+          />
         ) : (
           <ArrowRightIcon height={22} width={22} />
         )}
