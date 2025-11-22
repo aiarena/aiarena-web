@@ -10,7 +10,7 @@ export default function RootWithPaddingLayout() {
         <Navbar />
 
         <main
-          className={clsx("flex-1 overflow-y-auto p-8 min-h-[90vh]")}
+          className={clsx("flex-1 overflow-y-auto p-4 md:p-8 min-h-[90vh]")}
           role="main"
         >
           <Outlet />
