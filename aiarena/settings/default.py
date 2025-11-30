@@ -208,12 +208,6 @@ CONSTANCE_CONFIG = {
     ),
     "ADMIN_EMAIL": ("admin@aiarena.net", "Address for sending an email to site admin."),
     "MAX_USER_BOT_COUNT": (20, "Maximum bots a user can have uploaded."),
-    "DEBUG_LOGGING_ENABLED": (
-        False,
-        "Enable debug logging. "
-        "This will log extra data for debugging throughout the website. "
-        "It will also propagate the setting to the arena clients",
-    ),
     "GETTING_STARTED_URL": (
         "https://aiarena.net/wiki/getting-started/",
         "The URL to send new users to in order to get started.",
@@ -302,7 +296,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "MAX_USER_BOT_COUNT",
     ),
     "General": (
-        "DEBUG_LOGGING_ENABLED",
         "GETTING_STARTED_URL",
         "HOUSE_BOTS_USER_ID",
         "ALLOW_REQUESTED_MATCHES",
