@@ -15,6 +15,7 @@ from .user import User
 
 logger = logging.getLogger(__name__)
 ELO = Elo(settings.ELO_K)
+STEPS_PER_SECOND = 22.4
 
 # todo: move sanity checking to DB constraints:
 # https://docs.djangoproject.com/en/3.0/ref/models/options/#constraints
@@ -83,7 +84,7 @@ class Result(models.Model, LockableModelMixin):
 
     @cached_property
     def game_time_formatted(self):
-        return time.strftime("%H:%M:%S", time.gmtime(self.game_steps / 22.4))
+        return time.strftime("%H:%M:%S", time.gmtime(self.game_steps / STEPS_PER_SECOND))
 
     @cached_property
     def started(self):
