@@ -209,7 +209,11 @@ export function TableContainer<T>({
                               colSpan={visibleColumnCount}
                               className="text-l font-semibold tracking-widest uppercase text-neutral-200 border-y border-neutral-800 py-3 pl-3"
                             >
-                              Division {label}
+                              {label == 0 ? (
+                                <span>Awaiting entry</span>
+                              ) : (
+                                <span>Division {label}</span>
+                              )}
                             </td>
                           </tr>
                         );
