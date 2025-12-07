@@ -61,7 +61,7 @@ function CardsAndNewsSection() {
             on ways to contribute.
           </div>
         </div>
-        <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={370} />}>
+        <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={410} />}>
           <LatestNews />
         </Suspense>
         <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={200} />}>

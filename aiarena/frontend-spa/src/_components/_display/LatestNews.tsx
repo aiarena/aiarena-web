@@ -42,7 +42,7 @@ const LatestNews: React.FC = () => {
   return (
     <div className="max-w-100">
       <WrappedTitle title="News" font="font-bold" />
-      <div className="bg-darken">
+      <div className="bg-darken pb-8">
         <div className="flex items-center justify-center relative mb-4 bg-customGreen-dark-2">
           <p className="font-bold text-center px-4 py-2 truncate">
             {currentNewsItem.title}
