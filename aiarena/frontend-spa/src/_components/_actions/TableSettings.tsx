@@ -55,7 +55,6 @@ export default function TableSettings({ children }: TableSettingsProps) {
           )}
         >
           <ChartBarIcon
-            aria-hidden="true"
             className={clsx(
               "-mr-1",
               "size-5",
