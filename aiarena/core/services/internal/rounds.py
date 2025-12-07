@@ -7,7 +7,8 @@ def update_round_if_completed(round: Round):
     """
     If all the matches have been run, mark this round as complete
     """
-    if round.complete:  # check this first to avoid unnecessary DB queries
+    if round.complete:  # round.mark_complete() will check this, but do it here to avoid unnecessary DB queries
+        # Nothing should call this method on an already completed round. Highlight the bug.
         raise ValueError(f"Round {round.id} is already complete")
 
     if _not_all_matches_have_a_result(round):

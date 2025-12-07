@@ -32,6 +32,7 @@ class Round(models.Model, LockableModelMixin):
         Mark this round as complete and set the finished timestamp.
         """
         if self.complete:
+            # Nothing should call this method on an already completed round. Highlight the bug.
             raise ValueError(f"Round {self.id} is already complete")
 
         self.complete = True
