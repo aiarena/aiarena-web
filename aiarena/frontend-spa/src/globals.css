@@ -429,7 +429,6 @@ nav .block {
 /* EndOf Markdown editor styles */
 
 /* Scrollbar Black Theme styles */
-
 .scrollbar-black::-webkit-scrollbar {
   height: 10px;
 }
@@ -446,10 +445,4 @@ nav .block {
 .scrollbar-black::-webkit-scrollbar-thumb:hover {
   background: #666666;
 }
-
-.scrollbar-black {
-  scrollbar-color: #888 #000;
-  scrollbar-width: thin;
-}
-
 /* EndOf Scrollbar Black Theme styles */
