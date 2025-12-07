@@ -62,7 +62,11 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
               bot {
                 id
                 name
-                playsRace
+                playsRace {
+                  name
+                  label
+                  id
+                }
                 user {
                   id
                   username
@@ -182,7 +186,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         cell: ({ row }) => {
           const original = row.original;
           if (original.__kind !== "participant") return null;
-          return original.bot.playsRace ?? "--";
+          return original.bot.playsRace.name ?? "--";
         },
         meta: { priority: 4 },
       }),

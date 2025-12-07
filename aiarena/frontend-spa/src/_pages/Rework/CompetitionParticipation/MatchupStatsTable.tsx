@@ -7,8 +7,8 @@ import {
 import { useMemo } from "react";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import { MatchupStatsTable_node$key } from "./__generated__/MatchupStatsTable_node.graphql";
-import {  withAtag } from "@/_lib/tanstack_utils";
-import {getIDFromBase64, getNodes} from "@/_lib/relayHelpers";
+import { withAtag } from "@/_lib/tanstack_utils";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
 interface MatchupStatsTableProps {
   data: MatchupStatsTable_node$key;
@@ -26,7 +26,11 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
                 bot {
                   id
                   name
-                  playsRace
+                  playsRace {
+                    name
+                    label
+                    id
+                  }
                 }
               }
               matchCount
@@ -47,7 +51,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
   );
 
   const matchupStats = getNodes(data.competitionMatchupStats);
-  const columnHelper = createColumnHelper<typeof matchupStats[number]>();
+  const columnHelper = createColumnHelper<(typeof matchupStats)[number]>();
 
   const columns = useMemo(
     () => [
@@ -62,7 +66,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
           ),
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.opponent.bot.playsRace ?? "", {
+      columnHelper.accessor((row) => row.opponent.bot.playsRace.name ?? "", {
         id: "race",
         header: "Race",
         cell: (info) => (
@@ -73,17 +77,13 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
       columnHelper.accessor((row) => row.matchCount, {
         id: "matches",
         header: "Matches",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.winCount, {
         id: "win",
         header: "Win",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.winPerc, {
@@ -97,9 +97,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
       columnHelper.accessor((row) => row.lossCount, {
         id: "loss",
         header: "Loss",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.lossPerc, {
@@ -113,9 +111,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
       columnHelper.accessor((row) => row.tieCount, {
         id: "tie",
         header: "Tie",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.tiePerc, {
@@ -129,9 +125,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
       columnHelper.accessor((row) => row.crashCount, {
         id: "crash",
         header: "Crash",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.crashPerc, {

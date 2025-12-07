@@ -20,7 +20,11 @@ export default function InformationSection({ bot }: InformationSectionProps) {
       fragment InformationSection_bot on BotType {
         id
         name
-        playsRace
+        playsRace {
+          name
+          label
+          id
+        }
         created
         type
         botZip
@@ -110,7 +114,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Race</dt>
                 <dd className="flex-1 text-gray-100">
-                  {data.playsRace || "--"}
+                  {data.playsRace.name || "--"}
                 </dd>
               </div>
               <div className="flex gap-2">

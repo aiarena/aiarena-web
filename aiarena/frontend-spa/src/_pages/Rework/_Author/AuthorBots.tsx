@@ -49,7 +49,11 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
               id
               name
               type
-              playsRace
+              playsRace {
+                name
+                label
+                id
+              }
               user {
                 id
                 username
@@ -101,7 +105,7 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
         cell: (info) => info.getValue() || "0",
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.playsRace ?? "", {
+      columnHelper.accessor((row) => row.playsRace.name ?? "", {
         id: "race",
         header: "Race",
         enableSorting: false,

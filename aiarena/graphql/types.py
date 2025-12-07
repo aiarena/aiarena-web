@@ -95,7 +95,6 @@ class BotType(DjangoObjectTypeWithUID):
     competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
     wiki_article = graphene.String()
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
-    plays_race = graphene.String()
     trophies = DjangoConnectionField("aiarena.graphql.TrophyType")
 
     class Meta:
@@ -111,6 +110,7 @@ class BotType(DjangoObjectTypeWithUID):
             "bot_data",
             "bot_data_publicly_downloadable",
             "type",
+            "plays_race",
         ]
         filterset_class = BotFilterSet
         connection_class = CountingConnection
@@ -130,10 +130,6 @@ class BotType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_match_participations(root: models.Bot, info, **args):
         return root.matchparticipation_set.all()
-
-    @staticmethod
-    def resolve_plays_race(root: models.Bot, info, **args):
-        return root.plays_race
 
 
 class CompetitionFilterSet(FilterSet):

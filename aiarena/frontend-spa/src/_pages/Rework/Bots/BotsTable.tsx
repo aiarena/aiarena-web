@@ -59,7 +59,11 @@ export default function BotsTable(props: BotsTableProps) {
               id
               name
               type
-              playsRace
+              playsRace {
+                name
+                label
+                id
+              }
               user {
                 id
                 username
@@ -110,7 +114,7 @@ export default function BotsTable(props: BotsTableProps) {
           ),
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.playsRace ?? "", {
+      columnHelper.accessor((row) => row.playsRace.name ?? "", {
         id: "race",
         header: "Race",
         enableSorting: false,
