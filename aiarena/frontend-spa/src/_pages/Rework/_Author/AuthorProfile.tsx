@@ -41,14 +41,6 @@ export default function AuthorProfile(props: AuthorProps) {
 
   return (
     <div className="relative w-full rounded-lg border border-neutral-800 bg-darken-2 text-white shadow-lg shadow-black backdrop-blur p-2 mb-8">
-      {author?.patreonLevel && author.patreonLevel !== "NONE" && (
-        <div className="absolute -top-3 -right-2">
-          <span className="inline-block rounded-full bg-neutral-900 shadow-black border-customGreen border-1 px-2 py-0.5 text-xs font-medium text-customGreen">
-            Supporter
-          </span>
-        </div>
-      )}
-
       <div className="flex items-start gap-2">
         <div className="flex flex-col items-center">
           <AvatarWithBorder user={author} size="lg" />
