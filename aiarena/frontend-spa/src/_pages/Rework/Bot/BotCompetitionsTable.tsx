@@ -141,7 +141,6 @@ export default function BotCompetitionsTable({
         header: "Stats",
         enableSorting: false,
         cell: (info) => {
-          console.log(info.getValue());
           return withAtag(
             "View Stats",
             `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,

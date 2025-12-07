@@ -5,11 +5,11 @@
 #     python manage.py graphql_schema
 #
 # =============================================================================
-
 from datetime import timedelta
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 from django.conf import settings
-from django.db.models import CharField, Count, OuterRef, Q, Subquery
+from django.db.models import CharField, Count, IntegerField, OuterRef, Prefetch, Q, Subquery
 from django.db.models.functions import Lower
 from django.utils import timezone
 
@@ -19,12 +19,15 @@ from avatar.models import Avatar
 from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
+from graphql_relay import from_global_id
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
 from aiarena.core.models import BotRace, MatchParticipation, Result, User
+from aiarena.core.models.result import STEPS_PER_SECOND
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits, Users
 from aiarena.frontend.templatetags.url_utils import get_absolute_url
+from aiarena.frontend.views.bot_detail import RelativeResultFilter
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
@@ -293,19 +296,182 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
 
 
 class MatchParticipationFilterSet(FilterSet):
-    order_by = OrderingFilter(fields=["match__started", "result"])
+    order_by = OrderingFilter(
+        fields=[
+            "id",
+        ],
+        method="filter_order_by",
+    )
+    opponent_id = django_filters.CharFilter(method="filter_opponent_id")
+    opponent_plays_race = django_filters.ChoiceFilter(
+        field_name="plays_race",
+        method="filter_opponent_plays_race",
+        choices=models.Bot.RACES,
+    )
+
+    result = django_filters.ChoiceFilter(field_name="result", choices=models.MatchParticipation.RESULT_TYPES)
+    cause = django_filters.ChoiceFilter(field_name="result_cause", choices=models.MatchParticipation.CAUSE_TYPES)
+
+    avg_step_time_min = django_filters.NumberFilter(method="filter_avg_step_time_min")
+    avg_step_time_max = django_filters.NumberFilter(method="filter_avg_step_time_max")
+
+    game_time_min = django_filters.NumberFilter(method="filter_game_time_min")
+    game_time_max = django_filters.NumberFilter(method="filter_game_time_max")
+
+    match_type = django_filters.ChoiceFilter(
+        choices=RelativeResultFilter.MATCH_TYPES,
+        method="filter_match_type",
+    )
+    map_name = django_filters.CharFilter(field_name="match__map__name", lookup_expr="icontains")
+    competition_id = django_filters.CharFilter(method="filter_competition")
 
     class Meta:
         model = models.MatchParticipation
-        fields = ["order_by"]
+        fields = [
+            "order_by",
+            "result",
+            "cause",
+            "avg_step_time_min",
+            "avg_step_time_max",
+            "game_time_min",
+            "game_time_max",
+            "map_name",
+            "competition_id",
+            "opponent_plays_race",
+        ]
+
+    def filter_order_by(self, queryset, name, value):
+        order_fields = value if isinstance(value, list) else [value]
+        return queryset.order_by(*order_fields)
+
+    @property
+    def qs(self):
+        qs = super().qs
+
+        qs = qs.select_related(
+            "bot",
+            "match",
+            "match__map",
+            "match__round",
+            "match__round__competition",
+            "match__result",
+        )
+
+        qs = qs.prefetch_related(
+            Prefetch(
+                "match__matchparticipation_set",
+                queryset=models.MatchParticipation.objects.select_related("bot"),
+            )
+        )
+
+        return qs
+
+    def _with_opponent_annotation(self, queryset):
+        opponent_qs = models.MatchParticipation.objects.filter(match=OuterRef("match_id")).exclude(pk=OuterRef("pk"))
+
+        return queryset.annotate(
+            opponent_name=Subquery(
+                opponent_qs.annotate(lower_name=Lower("bot__name")).values("lower_name")[:1],
+                output_field=CharField(),
+            ),
+            opponent_plays_race=Subquery(opponent_qs.values("bot__plays_race")[:1]),
+            opponent_id=Subquery(
+                opponent_qs.values("bot__id")[:1],
+                output_field=IntegerField(),
+            ),
+        )
+
+    def filter_opponent_id(self, queryset, name, value):
+        if not value:
+            return queryset
+        try:
+            _type, db_id = from_global_id(value)
+            value = db_id
+        except Exception:
+            pass
+        try:
+            value = int(value)
+        except (TypeError, ValueError):
+            return queryset.none()
+
+        qs = self._with_opponent_annotation(queryset)
+        return qs.filter(opponent_id=value)
+
+    def filter_opponent_name(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        qs = self._with_opponent_annotation(queryset)
+        return qs.filter(opponent_name__icontains=value)
+
+    def filter_opponent_plays_race(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        qs = self._with_opponent_annotation(queryset)
+        race_id = BotRace.objects.get(label=value)
+        return qs.filter(opponent_plays_race=race_id)
+
+    def filter_competition(self, queryset, name, value):
+        _type, db_id = from_global_id(value)
+        return queryset.filter(match__round__competition_id=db_id)
+
+    def filter_avg_step_time_min(self, queryset, name, value):
+        if value is None:
+            return queryset
+
+        seconds = value / Decimal("1000")
+        return queryset.filter(avg_step_time__gte=seconds)
+
+    def filter_avg_step_time_max(self, queryset, name, value):
+        if value is None:
+            return queryset
+
+        seconds = value / Decimal("1000")
+        return queryset.filter(avg_step_time__lte=seconds)
+
+    def filter_game_time_min(self, queryset, name, value):
+        if value is None:
+            return queryset
+
+        sec = Decimal(value)
+        steps_dec = sec * Decimal(STEPS_PER_SECOND)
+        steps_min = steps_dec.to_integral_value(rounding=ROUND_CEILING)
+
+        return queryset.filter(match__result__game_steps__gte=int(steps_min))
+
+    def filter_game_time_max(self, queryset, name, value):
+        if value is None:
+            return queryset
+
+        sec = Decimal(value)
+        steps_dec = sec * Decimal(STEPS_PER_SECOND)
+        steps_max = steps_dec.to_integral_value(rounding=ROUND_FLOOR)
+
+        return queryset.filter(match__result__game_steps__lte=int(steps_max))
+
+    def filter_match_type(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        if value == "requested":
+            return queryset.filter(match__requested_by__isnull=False)
+
+        if value == "competition":
+            return queryset.filter(match__round__isnull=False)
+
+        return queryset
 
 
 class MatchParticipationType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.MatchParticipation
-        fields = ["elo_change", "avg_step_time", "result", "bot", "match"]
+        fields = ["elo_change", "avg_step_time", "result", "bot", "match", "match_log", "result_cause"]
         filterset_class = MatchParticipationFilterSet
         connection_class = CountingConnection
+
+    def resolve_opponent_plays_race_enum(self, info):
+        return self.opponent_plays_race
 
 
 class MatchFilterSet(FilterSet):
@@ -347,6 +513,24 @@ class MatchFilterSet(FilterSet):
             order_fields = [f.replace("participant2__bot__name", "participant2_name") for f in order_fields]
 
         return queryset.order_by(*order_fields)
+
+    @property
+    def qs(self):
+        qs = super().qs
+
+        qs = qs.select_related(
+            "result",
+            "map",
+            "round",
+            "round__competition",
+        ).prefetch_related(
+            Prefetch(
+                "matchparticipation_set",
+                queryset=MatchParticipation.objects.select_related("bot"),
+            )
+        )
+
+        return qs
 
 
 class MatchType(DjangoObjectTypeWithUID):
@@ -707,6 +891,7 @@ class Query(graphene.ObjectType):
     stats = graphene.Field(StatsType)
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
     viewer = graphene.Field("aiarena.graphql.Viewer")
+    match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
 
     @staticmethod
     def resolve_bot_race(root, info, **args):
