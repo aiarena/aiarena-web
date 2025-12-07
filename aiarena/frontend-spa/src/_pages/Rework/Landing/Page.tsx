@@ -2,12 +2,34 @@ import LatestNews from "@/_components/_display/LatestNews";
 import LegacyActivityList from "@/_components/_display/LegacyActivityList";
 import LegacyCompetitonTop10List from "@/_components/_display/LegacyCompetitionTop10List";
 import LegacyStats from "@/_components/_display/LegacyStats";
-import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { ClipboardDocumentListIcon } from "@heroicons/react/16/solid";
 
 import { ReactNode, Suspense } from "react";
+
+import "react-loading-skeleton/dist/skeleton.css";
+import DisplaySkeletonBlock from "@/_components/_display/_skeletons/DisplaySkeletonBlock";
+
+export default function LandingPage() {
+  return (
+    <div className="bg-linear-[90deg,rgba(0,0,0,0)_5%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0)_90%]">
+      <div className="relative z-10 pb-10 md:pt-0 pt-20">
+        <Hero />
+        <CapWidth>
+          <div className="md:w-full md:grid m-auto grid-cols-2 gap-40">
+            <div className="col-span-1">
+              <CardsAndNewsSection />
+            </div>
+            <div className="col-span-1">
+              <CompetitionsAndActivity />
+            </div>
+          </div>
+        </CapWidth>
+      </div>
+    </div>
+  );
+}
 
 function CardsAndNewsSection() {
   return (
@@ -39,22 +61,10 @@ function CardsAndNewsSection() {
             on ways to contribute.
           </div>
         </div>
-        <Suspense
-          fallback={
-            <div className="m-auto">
-              <LoadingMoreItems loadingMessage="Loading news..." />
-            </div>
-          }
-        >
+        <Suspense fallback={<DisplaySkeletonBlock height={500} />}>
           <LatestNews />
         </Suspense>
-        <Suspense
-          fallback={
-            <div className="m-auto">
-              <LoadingMoreItems loadingMessage="Loading stats..." />
-            </div>
-          }
-        >
+        <Suspense fallback={<DisplaySkeletonBlock />}>
           <LegacyStats />
         </Suspense>
       </div>
@@ -68,8 +78,10 @@ function CompetitionsAndActivity() {
       <div className="float-half-left grid gap-8">
         <Suspense
           fallback={
-            <div className="m-auto">
-              <LoadingMoreItems loadingMessage="Loading current competitions..." />
+            <div>
+              <DisplaySkeletonBlock height={500} />
+              <div className="py-14"></div>
+              <DisplaySkeletonBlock height={650} />
             </div>
           }
         >
@@ -83,7 +95,7 @@ function CompetitionsAndActivity() {
 
 function Hero() {
   return (
-    <div className="min-h-[50vh] flex items-center justify-center">
+    <div className="min-h-[50vh] flex items-center justify-center mb-8">
       <div>
         <div>
           <img
@@ -145,25 +157,5 @@ function CapWidth({ children }: { children: ReactNode }) {
     <>
       <div className="max-w-[60em] m-auto">{children}</div>
     </>
-  );
-}
-
-export default function LandingPage() {
-  return (
-    <div className="bg-linear-[90deg,rgba(0,0,0,0)_5%,rgba(0,0,0,0.3)_50%,rgba(0,0,0,0)_90%]">
-      <div className="relative z-10 pb-10 md:pt-0 pt-20">
-        <Hero />
-        <CapWidth>
-          <div className="md:w-full md:grid m-auto grid-cols-2 gap-40">
-            <div className="col-span-1">
-              <CardsAndNewsSection />
-            </div>
-            <div className="col-span-1">
-              <CompetitionsAndActivity />
-            </div>
-          </div>
-        </CapWidth>
-      </div>
-    </div>
   );
 }
