@@ -14,7 +14,7 @@ def update_round_if_completed(round: Round):
         return
 
     round.mark_complete(timezone.now())
-    round.save()
+    round.save(update_fields=["complete", "finished"])
 
     # After completing the round, try to close the competition
     round.competition.try_to_close()
