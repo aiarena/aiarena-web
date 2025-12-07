@@ -11,6 +11,7 @@ interface TableContainerProps<T> {
   className?: string;
   loading: boolean;
   appendHeader?: ReactNode;
+  appendLeftHeader?: ReactNode;
   minHeight?: number;
 }
 
@@ -33,6 +34,7 @@ export function TableContainer<T>({
   className,
   loading,
   appendHeader,
+  appendLeftHeader,
   minHeight = 80,
 }: TableContainerProps<T>) {
   const allColumns = table.getAllLeafColumns();
@@ -52,34 +54,37 @@ export function TableContainer<T>({
         )}
       >
         <div className="flex justify-between m-2">
-          <TableSettings>
-            <div className="text-white">
-              <Divider label="Visible Table Columns" labelPlacement="left" />
-              {allColumns.map((column) => (
-                <label
-                  key={column.id}
-                  className="flex items-center space-x-4 ml-2"
-                >
-                  <input
-                    type="checkbox"
-                    checked={column.getIsVisible()}
-                    onChange={
-                      visibleColumnCount == 1 && column.getIsVisible()
-                        ? undefined
-                        : column.getToggleVisibilityHandler()
-                    }
-                    disabled={!column.getCanHide()}
-                    className="accent-customGreen"
-                  />
-                  <span>
-                    {typeof column.columnDef.header === "string"
-                      ? column.columnDef.header
-                      : column.id}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </TableSettings>
+          <div className="flex gap-2">
+            <TableSettings>
+              <div className="text-white">
+                <Divider label="Visible Table Columns" labelPlacement="left" />
+                {allColumns.map((column) => (
+                  <label
+                    key={column.id}
+                    className="flex items-center space-x-4 ml-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={column.getIsVisible()}
+                      onChange={
+                        visibleColumnCount == 1 && column.getIsVisible()
+                          ? undefined
+                          : column.getToggleVisibilityHandler()
+                      }
+                      disabled={!column.getCanHide()}
+                      className="accent-customGreen"
+                    />
+                    <span>
+                      {typeof column.columnDef.header === "string"
+                        ? column.columnDef.header
+                        : column.id}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </TableSettings>
+            <div className="flex items-center">{appendLeftHeader}</div>
+          </div>
           <div className="flex items-center">{appendHeader}</div>
         </div>
         <div className="overflow-x-auto rotate-180 scrollbar-black">
