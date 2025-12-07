@@ -17,7 +17,7 @@ export type MapType = NonNullable<
 
 interface MapSearchListProps {
   value: MapType | null;
-  setValue: (map: MapType) => void;
+  setValue: (map: MapType | null) => void;
   relayRootQuery: MapSearchList$key;
 }
 
@@ -49,7 +49,7 @@ export default function MapSearchList({
         }
       }
     `,
-    relayRootQuery,
+    relayRootQuery
   );
 
   useDebouncedSearch(query, 500, (value) => {

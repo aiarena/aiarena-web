@@ -18,7 +18,7 @@ export type BotType = NonNullable<
 
 interface BotSearchListProps {
   value: BotType | null;
-  setValue: (bot: BotType) => void;
+  setValue: (bot: BotType | null) => void;
   relayRootQuery: BotSearchList$key;
 }
 
@@ -50,7 +50,7 @@ export default function BotSearchList({
         }
       }
     `,
-    relayRootQuery,
+    relayRootQuery
   );
 
   useDebouncedSearch(query, 500, (value) => {
@@ -67,7 +67,7 @@ export default function BotSearchList({
       setValue={(newValue) => setValue(newValue as BotType)}
       options={getNodes(data?.bots)}
       setQuery={setQuery}
-      displayValue={(bot) => (bot as BotType)?.name}
+      displayValue={(bot) => (bot as BotType)?.name || ""}
       placeholder={"Type to search bots..."}
       hasNext={hasNext}
       loadMoreRef={loadMoreRef}

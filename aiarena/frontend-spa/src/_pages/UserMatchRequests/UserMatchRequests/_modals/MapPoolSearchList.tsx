@@ -19,7 +19,7 @@ export type MapPoolType = NonNullable<
 
 interface MapPoolSearchListProps {
   value: MapPoolType | null;
-  setValue: (mapPool: MapPoolType) => void;
+  setValue: (mapPool: MapPoolType | null) => void;
   relayRootQuery: MapPoolSearchList$key;
 }
 
@@ -51,7 +51,7 @@ export default function MapPoolSearchList({
         }
       }
     `,
-    relayRootQuery,
+    relayRootQuery
   );
   useDebouncedSearch(query, 500, (value) => {
     startTransition(() => {
