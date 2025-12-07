@@ -9,7 +9,7 @@ import { ClipboardDocumentListIcon } from "@heroicons/react/16/solid";
 import { ReactNode, Suspense } from "react";
 
 import "react-loading-skeleton/dist/skeleton.css";
-import DisplaySkeletonBlock from "@/_components/_display/_skeletons/DisplaySkeletonBlock";
+import DisplaySkeletonBlockWithTitle from "@/_components/_display/_skeletons/DisplaySkeletonBlockWithTitle";
 
 export default function LandingPage() {
   return (
@@ -61,10 +61,10 @@ function CardsAndNewsSection() {
             on ways to contribute.
           </div>
         </div>
-        <Suspense fallback={<DisplaySkeletonBlock height={500} />}>
+        <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={370} />}>
           <LatestNews />
         </Suspense>
-        <Suspense fallback={<DisplaySkeletonBlock />}>
+        <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={200} />}>
           <LegacyStats />
         </Suspense>
       </div>
@@ -79,9 +79,9 @@ function CompetitionsAndActivity() {
         <Suspense
           fallback={
             <div>
-              <DisplaySkeletonBlock height={500} />
-              <div className="py-14"></div>
-              <DisplaySkeletonBlock height={650} />
+              <DisplaySkeletonBlockWithTitle bodyHeight={500} />
+              <div className="py-6"></div>
+              <DisplaySkeletonBlockWithTitle bodyHeight={610} />
             </div>
           }
         >
