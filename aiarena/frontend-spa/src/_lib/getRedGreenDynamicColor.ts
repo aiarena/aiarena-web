@@ -8,7 +8,7 @@ export default function getRedGreenDynamicColor({
   rangeMax: number;
 }): string {
   if (rangeMin === rangeMax) {
-    // degenerate case: avoid division by zero
+    // avoid division by zero
     return "hsl(60, 100%, 50%)"; // yellow as neutral
   }
 
