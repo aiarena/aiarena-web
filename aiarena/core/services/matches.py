@@ -30,6 +30,7 @@ from aiarena.core.services import Bots
 from aiarena.core.services.competitions import Competitions
 from aiarena.core.services.internal.match_starter import MatchStarter
 from aiarena.core.services.internal.matches import CancelResult, cancel, create
+from aiarena.core.services.internal.rounds import update_round_if_completed
 
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,6 @@ class Matches:
         except Match.DoesNotExist:
             raise Exception(f'Match "{match_id}" does not exist')
 
-    # todo: have arena client check in with web service in order to delay this
     @staticmethod
     def timeout_overtime_bot_games():
         matches_without_result = (
@@ -62,7 +62,7 @@ class Matches:
             match.result = Result.objects.create(type="MatchCancelled", game_steps=0)
             match.save()
             if match.round is not None:  # if the match is part of a round, check for round completion
-                match.round.update_if_completed()
+                update_round_if_completed(match.round)
 
     @staticmethod
     def attempt_to_start_a_requested_match(requesting_ac: ArenaClient):

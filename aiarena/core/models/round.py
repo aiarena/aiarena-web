@@ -1,9 +1,8 @@
 import logging
 
-from django.db import models, transaction
+from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.utils import timezone
 
 from .competition import Competition
 from .mixins import LockableModelMixin
@@ -28,19 +27,16 @@ class Round(models.Model, LockableModelMixin):
     def __str__(self):
         return self.name
 
-    # if all the matches have been run, mark this as complete
-    def update_if_completed(self):
+    def mark_complete(self, finish_timestamp):
+        """
+        Mark this round as complete and set the finished timestamp.
+        """
         if self.complete:
-            return
+            # Nothing should call this method on an already completed round. Highlight the bug.
+            raise ValueError(f"Round {self.id} is already complete")
 
-        if self.match_set.filter(result=None).exists():
-            return
-
-        with transaction.atomic():
-            self.complete = True
-            self.finished = timezone.now()
-            self.save(update_fields=["complete", "finished"])
-            self.competition.try_to_close()
+        self.complete = True
+        self.finished = finish_timestamp
 
 
 @receiver(pre_save, sender=Round)
