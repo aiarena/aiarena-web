@@ -10,7 +10,18 @@ export default function DisplaySkeleton({
   return (
     <SkeletonTheme baseColor="#18191E" highlightColor="#32333B">
       <p>
-        <Skeleton height={height} count={count} />
+        <Skeleton
+          height={height}
+          count={count}
+          customHighlightBackground="
+            linear-gradient(
+              90deg,
+              var(--base-color) 30%,
+              var(--highlight-color) 50%,
+              var(--base-color) 70%
+            )
+          "
+        />
       </p>
     </SkeletonTheme>
   );
