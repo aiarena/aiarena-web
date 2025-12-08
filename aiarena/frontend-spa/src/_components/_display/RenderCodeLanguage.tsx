@@ -4,8 +4,10 @@ import clsx from "clsx";
 
 export default function RenderCodeLanguage({
   type: language,
+  muted,
 }: {
   type: string;
+  muted?: boolean;
 }) {
   const prettyLang = pretty(language);
 
@@ -22,7 +24,7 @@ export default function RenderCodeLanguage({
           title={obj.name}
           className={clsx("mr-2")}
         />
-        <p>{obj.name}</p>
+        <p className={clsx(muted && "text-gray-400")}>{obj.name}</p>
       </span>
     );
   }

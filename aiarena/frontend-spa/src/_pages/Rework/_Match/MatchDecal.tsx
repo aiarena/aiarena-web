@@ -5,6 +5,7 @@ import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 import { TrophyIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
+import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 interface MatchDecalProps {
   match: MatchDecal_match$key;
 }
@@ -31,6 +32,10 @@ export default function MatchInfo(props: MatchDecalProps) {
             bot {
               name
               id
+              type
+              playsRace {
+                name
+              }
             }
           }
           participant2 {
@@ -39,6 +44,10 @@ export default function MatchInfo(props: MatchDecalProps) {
             bot {
               id
               name
+              type
+              playsRace {
+                name
+              }
             }
           }
         }
@@ -67,50 +76,45 @@ export default function MatchInfo(props: MatchDecalProps) {
 
   return (
     <div className="mb-8 rounded-2xl border border-neutral-800 bg-darken-2 p-4 sm:p-5 shadow-lg shadow-black">
-      <h2 id="match-heading" className="sr-only">
-        Match {match.id}
-      </h2>
+      <div className="flex justify-between w-full">
+        <h2 id="match-heading" className="sr-only">
+          Match {match.id}
+        </h2>
 
-      <div className="items-baseline gap-2 mb-6">
-        <div className="flex">
-          <h2
-            id="bot-information-heading"
-            className="text-xl sm:text-2xl font-semibold text-white"
-          >
-            Match {getIDFromBase64(match.id, "MatchType")}
-          </h2>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <div className="inline-flex items-center justify-center rounded-full bg-neutral-900/80 border border-customGreen p-1.5 shadow-black mr-2">
-            <TrophyIcon
-              className="h-5 w-5 text-customGreen"
-              aria-hidden="true"
-            />
+        <div className="items-baseline gap-2 mb-6">
+          <div className="flex">
+            <h2
+              id="bot-information-heading"
+              className="text-xl sm:text-2xl font-semibold text-white"
+            >
+              Match {getIDFromBase64(match.id, "MatchType")}
+            </h2>
           </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-semibold text-white">
-              {winnerName ? `${winnerName} won the match` : "Match completed"}
-            </span>
+        </div>
 
-            <div className="flex gap-2 ml-2">
-              {match.result?.replayFile ? (
-                <a
-                  href={match.result.replayFile}
-                  className="text-customGreen hover:underline"
-                >
-                  Download replay
-                </a>
-              ) : null}
+        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col">
+              <span className="text-xl font-semibold text-white">
+                {winnerName ? `${winnerName} won the match` : "Match completed"}
+              </span>
+
+              <div className="flex gap-2 ml-2 ">
+                {match.result?.replayFile ? (
+                  <a
+                    href={match.result.replayFile}
+                    className="text-customGreen hover:underline"
+                  >
+                    Download replay
+                  </a>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
       </div>
-
       <div className="mt-2 rounded-lg border border-neutral-700 bg-neutral-900/90 p-3 sm:p-4">
-        <div className="flex flex-col items-center gap-2 text-sm sm:text-base text-gray-200 md:flex-row md:justify-between">
+        <div className="flex items-center gap-2 text-sm sm:text-base text-gray-200 flex-row justify-between">
           {/* Participant 1 */}
           <div className="flex flex-col items-center md:items-start gap-1 min-w-0">
             <a
@@ -119,7 +123,8 @@ export default function MatchInfo(props: MatchDecalProps) {
             >
               {formatWinnerName(winnerName, p1.bot.name)}
             </a>
-            <div className="flex items-center gap-1">
+
+            <div className="flex items-center gap-1 mb-4">
               <EloTrendIcon trend={p1.eloChange} />
               <span className={getEloClass(p1.eloChange)}>
                 {p1.eloChange
@@ -129,10 +134,18 @@ export default function MatchInfo(props: MatchDecalProps) {
                   : "0"}
               </span>
             </div>
+            <span className="text-gray-400">{p1.bot.playsRace.name}</span>
+            <RenderCodeLanguage type={`${p1.bot.type}`} muted />
           </div>
 
           {/* VS Divider */}
           <div className="flex flex-col items-center mx-2 my-1 text-xs uppercase tracking-wide text-gray-400">
+            <div className="inline-flex items-center justify-center rounded-full bg-neutral-900/80 border border-customGreen p-1.5 shadow-black mb-2">
+              <TrophyIcon
+                className="h-7 w-7 text-customGreen"
+                aria-hidden="true"
+              />
+            </div>
             <span className="hidden md:inline">VS</span>
             <span className="md:hidden">- VS -</span>
           </div>
@@ -145,7 +158,8 @@ export default function MatchInfo(props: MatchDecalProps) {
             >
               {formatWinnerName(winnerName, p2.bot.name)}
             </a>
-            <div className="flex items-center gap-1">
+
+            <div className="flex items-center gap-1 mb-4">
               <span className={getEloClass(p2.eloChange)}>
                 {p2.eloChange
                   ? p2.eloChange > 0
@@ -155,6 +169,8 @@ export default function MatchInfo(props: MatchDecalProps) {
               </span>
               <EloTrendIcon trend={p2.eloChange} />
             </div>
+            <span className="text-gray-400">{p2.bot.playsRace.name}</span>
+            <RenderCodeLanguage type={`${p2.bot.type}`} muted />
           </div>
         </div>
       </div>
