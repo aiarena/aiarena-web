@@ -6,6 +6,7 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import BotTrophiesModal from "../../../_pages/UserBots/UserBotsSection/_modals/BotTrophiesModal";
 import { TrophyIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { UserBotHeader_bot$key } from "./__generated__/UserBotHeader_bot.graphql";
+import RenderCodeLanguage from "../RenderCodeLanguage";
 
 export interface UserBotHeaderProps {
   bot: UserBotHeader_bot$key;
@@ -34,7 +35,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
         ...BotTrophiesModal_bot
       }
     `,
-    props.bot,
+    props.bot
   );
 
   const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
@@ -95,8 +96,9 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
             </p>
 
             {bot.type && (
-              <p className="text-sm text-gray-400">
-                <span className="font-bold">Type:</span> {bot.type}
+              <p className="text-sm text-gray-400 flex gap-2">
+                <span className="font-bold">Type:</span>
+                <RenderCodeLanguage type={`${bot.type}`} />
               </p>
             )}
             {bot.botZipUpdated && (

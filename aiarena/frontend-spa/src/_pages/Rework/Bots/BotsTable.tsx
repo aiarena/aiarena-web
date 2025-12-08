@@ -27,6 +27,7 @@ import {
   BotsTable_node$data,
   BotsTable_node$key,
 } from "./__generated__/BotsTable_node.graphql";
+import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 
 interface BotsTableProps {
   data: BotsTable_node$key;
@@ -125,7 +126,7 @@ export default function BotsTable(props: BotsTableProps) {
         id: "type",
         header: "Type",
         enableSorting: false,
-        cell: (info) => info.getValue(),
+        cell: (info) => <RenderCodeLanguage type={`${info.getValue()}`} />,
         meta: { priority: 1 },
       }),
     ],

@@ -20,6 +20,7 @@ import {
   AuthorBotsTable_user$data,
   AuthorBotsTable_user$key,
 } from "./__generated__/AuthorBotsTable_user.graphql";
+import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 
 interface AuthorBotsTableProps {
   data: AuthorBotsTable_user$key;
@@ -116,7 +117,7 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
         id: "type",
         header: "Type",
         enableSorting: false,
-        cell: (info) => info.getValue(),
+        cell: (info) => <RenderCodeLanguage type={`${info.getValue()}`} />,
         meta: { priority: 1 },
       }),
     ],

@@ -8,6 +8,7 @@ import BotTrophiesModal from "@/_pages/UserBots/UserBotsSection/_modals/BotTroph
 import { MarkdownDisplay } from "@/_components/_actions/MarkdownDisplay";
 import { ArrowDownCircleIcon } from "@heroicons/react/20/solid";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
+import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 
 interface InformationSectionProps {
   bot: InformationSection_bot$key;
@@ -119,7 +120,9 @@ export default function InformationSection({ bot }: InformationSectionProps) {
               </div>
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Type</dt>
-                <dd className="flex-1 text-gray-100">{data.type || "--"}</dd>
+                <dd className="flex-1 text-gray-100">
+                  <RenderCodeLanguage type={`${data.type || "--"}`} />
+                </dd>
               </div>
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Created</dt>
