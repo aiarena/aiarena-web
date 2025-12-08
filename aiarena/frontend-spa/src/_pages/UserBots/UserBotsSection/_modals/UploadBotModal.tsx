@@ -9,6 +9,7 @@ import Form from "@/_components/_actions/Form";
 import { UploadFile } from "@/_components/_actions/UploadFile";
 import { useRelayConnectionID } from "@/_components/_contexts/RelayConnectionIDContext/useRelayConnectionID";
 import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
+import { BOT_TYPES } from "@/_data/BOT_TYPES";
 
 interface UploadBotModal {
   isOpen: boolean;
@@ -16,14 +17,6 @@ interface UploadBotModal {
 }
 
 type Race = "P" | "R" | "T" | "Z";
-
-const BOT_TYPES: Record<string, string> = {
-  cpplinux: "C++ (Linux)",
-  dotnetcore: ".NET Core",
-  java: "Java",
-  nodejs: "Node.js",
-  python: "Python",
-};
 
 export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
   const { getConnectionID } = useRelayConnectionID();
@@ -49,7 +42,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
         }
       }
     `,
-    {},
+    {}
   );
 
   const bot_races = getNodes(data.botRace);
@@ -62,7 +55,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
   const [botDataEnabled, setBotDataEnabled] = useState(false);
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "uploadBot",
-    "Bot Uploaded Successfully!",
+    "Bot Uploaded Successfully!"
   );
 
   const [uploadBot, updating] = useMutation<UploadBotModalMutation>(graphql`
@@ -285,7 +278,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
               </option>
               {Object.entries(BOT_TYPES).map(([label, value]) => (
                 <option key={label} value={label}>
-                  {value}
+                  {value.name}
                 </option>
               ))}
             </select>

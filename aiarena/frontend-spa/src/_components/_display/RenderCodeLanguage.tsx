@@ -1,15 +1,6 @@
-import { getPublicPrefix } from "@/_lib/getPublicPrefix";
+import { BOT_TYPES } from "@/_data/BOT_TYPES";
 import pretty from "@/_lib/prettifyCapString";
 import clsx from "clsx";
-
-const LanguageIcons: Record<string, string> = {
-  PYTHON: `${getPublicPrefix()}/programming_language_icons/python.svg`,
-  JAVA: `${getPublicPrefix()}/programming_language_icons/java.svg`,
-  CPPLINUX: `${getPublicPrefix()}/programming_language_icons/cpp.svg`,
-  CPPWIN32: `${getPublicPrefix()}/programming_language_icons/cpp.svg`,
-  DOTNETCORE: `${getPublicPrefix()}/programming_language_icons/net.svg`,
-  NODEJS: `${getPublicPrefix()}/programming_language_icons/nodejs.svg`,
-};
 
 export default function RenderCodeLanguage({
   type: language,
@@ -17,22 +8,24 @@ export default function RenderCodeLanguage({
   type: string;
 }) {
   const prettyLang = pretty(language);
-  if (language in LanguageIcons) {
-    const icon = LanguageIcons[language];
+
+  if (language in BOT_TYPES) {
+    const obj = BOT_TYPES[language];
 
     return (
       <span className="flex">
         <img
-          src={icon}
-          alt={prettyLang + "-Icon"}
+          src={obj.image}
+          alt={obj.name + "-Icon"}
           width={24}
           height={24}
-          title={prettyLang}
+          title={obj.name}
           className={clsx("mr-2")}
         />
-        <p>{prettyLang}</p>
+        <p>{obj.name}</p>
       </span>
     );
   }
+
   return <span>{prettyLang}</span>;
 }
