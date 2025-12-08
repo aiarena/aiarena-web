@@ -277,7 +277,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
                 Select bot type
               </option>
               {Object.entries(BOT_TYPES).map(([label, value]) => (
-                <option key={label} value={label}>
+                <option key={label} value={label.toLowerCase()}>
                   {value.name}
                 </option>
               ))}
