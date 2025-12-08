@@ -102,23 +102,30 @@ export default function MatchInfo(props: MatchDecalProps) {
         </div>
 
         <div className="flex items-center justify-between mb-3 flex-wrap">
-          <div className="flex items-center gap-2">
-            <div className="flex flex-col">
-              <span className="text-xl font-semibold text-white">
-                {winnerName ? `${winnerName} won the match` : "Match completed"}
-              </span>
+          <div className="mb-3 flex flex-col gap-1 w-full">
+            <span className="text-xl font-semibold text-white">
+              {winnerName ? (
+                <span className="flex">
+                  <span className="block truncate max-w-80 mr-2 overflow-ellipsis">
+                    {winnerName}
+                  </span>{" "}
+                  won the match
+                </span>
+              ) : (
+                "Match completed"
+              )}
+            </span>
 
-              <div className="flex gap-2 ml-2 ">
-                {match.result?.replayFile ? (
-                  <a
-                    href={match.result.replayFile}
-                    className="text-customGreen hover:underline"
-                  >
-                    Download replay
-                  </a>
-                ) : null}
+            {match.result?.replayFile ? (
+              <div className="w-full flex justify-end">
+                <a
+                  href={match.result.replayFile}
+                  className="text-customGreen hover:underline whitespace-nowrap"
+                >
+                  Download replay
+                </a>
               </div>
-            </div>
+            ) : null}
           </div>
         </div>
       </div>
