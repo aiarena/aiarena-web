@@ -8,7 +8,7 @@ export default function DisplaySkeleton({
   count?: number;
 }) {
   return (
-    <SkeletonTheme baseColor="#18191E" highlightColor="#32333B">
+    <SkeletonTheme baseColor="#18191E" highlightColor="#22232B">
       <p>
         <Skeleton
           height={height}
