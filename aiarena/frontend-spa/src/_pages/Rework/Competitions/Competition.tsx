@@ -1,7 +1,7 @@
 import { graphql, useFragment } from "react-relay";
 
 import type {
-  CompetitionCard_competition$data,
+  // CompetitionCard_competition$data,
   CompetitionCard_competition$key,
 } from "./__generated__/CompetitionCard_competition.graphql";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
@@ -35,41 +35,48 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
     data
   );
 
-  function getGame(competition: CompetitionCard_competition$data) {
-    if (competition.game === "StarCraft II") return "starcraft";
-    return "starcraft";
-  }
-  function getMode(competition: CompetitionCard_competition$data) {
-    if (competition.gameMode === "Melee") return "melee";
-    if (competition.gameMode === "Micro") return "micro";
+  // function getGame(competition: CompetitionCard_competition$data) {
+  //   if (competition.game === "StarCraft II") return "starcraft";
+  //   return "starcraft";
+  // }
+  // function getMode(competition: CompetitionCard_competition$data) {
+  //   if (competition.gameMode === "Melee") return "melee";
+  //   if (competition.gameMode === "Micro") return "micro";
 
-    return "melee";
-  }
-  function getCompetitionImage(competition: CompetitionCard_competition$data) {
-    return `${getGame(competition)}_${getMode(competition)}.webp`;
-  }
+  //   return "melee";
+  // }
+  // function getCompetitionImage(competition: CompetitionCard_competition$data) {
+  //   return `${getGame(competition)}_${getMode(competition)}.webp`;
+  // }
 
-  const imgSrc = `${getPublicPrefix()}/competitions/${getCompetitionImage(competition)}`;
+  // const imgSrc = `${getPublicPrefix()}/competitions/${getCompetitionImage(competition)}`;
+
+  function GenerateCompetitionImage() {
+    return (
+      <span className="w-full text-white flex flex-col items-center justify-center h-full text-center">
+        <img
+          className="invert"
+          src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
+          alt="AI-arena-logo"
+          width={128}
+          height={48}
+        />
+      </span>
+    );
+  }
 
   return (
     <a
       href={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
       className={clsx(
-        "grid md:grid-cols-1 lg:grid-cols-4 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm",
+        "p-2  grid grid-cols-1 lg:grid-cols-4 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm",
         "shadow-lg shadow-black transition-colors hover:border-customGreen"
       )}
     >
-      {/* Col 1: Image (small, fixed) */}
-      <div id="image" className="col-span-1">
-        <img
-          src={imgSrc}
-          alt={competition.name ?? "Competition Image"}
-          className="lg:h-full md:h-[10em] w-full object-cover rounded-t-2xl lg:rounded-tr-none lg:rounded-bl-2xl"
-          loading="lazy"
-        />
+      <div id="image" className="col-span-1 m-4 lg:p-0 md:p-8 p-2">
+        <GenerateCompetitionImage />
       </div>
 
-      {/* Col 2: Main content (tight, truncates) */}
       <div id="content" className="col-span-2 flex min-w-0 gap-8">
         <div id="competition_metadata" className="w-full pl-4">
           <div>
@@ -77,28 +84,27 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
               {competition.name}
             </h2>
           </div>
-          <div className="grid grid-cols-3 my-3 w-full">
-            <div className="col-span-2 ml-4">
-              <div className=" text-gray-300">
-                {competition.game && <span>Game: {competition.game}</span>}
-              </div>
-              <div className=" text-gray-300">
-                {competition.gameMode && (
-                  <span>Mode: {competition.gameMode}</span>
-                )}
-              </div>
-              <div className=" text-gray-300">
-                {competition.gameMode && (
-                  <span>
-                    Started:{" "}
-                    {new Date(competition.dateOpened).toLocaleDateString()}{" "}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div id="populated_stats" className="text-gray-300">
+          <div className="grid sm:grid-cols-2 grid-cols-1 my-3 w-full">
+            <div id="populated_stats" className="text-gray-300 ml-2">
               <div className="flex items-center gap-2">
-                <span className="text-gray-400">Bots:</span>{" "}
+                <span className="text-gray-400">Game:</span>{" "}
+                <span className="text-white">{competition.game}</span>
+              </div>
+              <p>
+                <span className="text-gray-400">Mode:</span>{" "}
+                <span className="text-white">{competition.gameMode}</span>
+              </p>
+              <p>
+                <span className="text-gray-400">Started:</span>{" "}
+                <span className="text-white">
+                  {new Date(competition.dateOpened).toLocaleDateString()}
+                </span>
+              </p>
+            </div>
+
+            <div id="populated_stats" className="text-gray-300 ml-2">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400">Bots:</span>
                 <Suspense fallback={<LoadingDots />}>
                   <CompetitionParticipantCount competitionId={competition.id} />
                 </Suspense>
@@ -118,7 +124,7 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
         </div>
       </div>
 
-      {/* Col 4: Leaderboards (tight) */}
+      {/* Col 4 reserved for new feature */}
       <div id="leaderboards" className="col-span-1"></div>
     </a>
   );
