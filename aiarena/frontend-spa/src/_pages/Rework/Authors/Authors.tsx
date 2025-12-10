@@ -1,7 +1,6 @@
 import { Suspense, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import { AuthorsQuery } from "./__generated__/AuthorsQuery.graphql";
 import Dropdown from "@/_components/_actions/Dropdown";
 import DropdownButton from "@/_components/_actions/DropdownButton";
@@ -9,6 +8,7 @@ import Searchbar from "@/_components/_actions/Searchbar";
 import AuthorsList from "./AuthorsList";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import FetchError from "@/_components/_display/FetchError";
+import DisplaySkeletonAuthorList from "@/_components/_display/_skeletons/DisplaySkeletonAuthorList";
 
 export default function Authors() {
   const data = useLazyLoadQuery<AuthorsQuery>(
@@ -75,7 +75,7 @@ export default function Authors() {
           </div>
         </div>
 
-        <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+        <Suspense fallback={<DisplaySkeletonAuthorList />}>
           <AuthorsList
             authors={data}
             searchBarValue={searchBarValue}
