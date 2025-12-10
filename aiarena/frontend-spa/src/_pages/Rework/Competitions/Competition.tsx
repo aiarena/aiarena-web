@@ -70,7 +70,7 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
       href={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
       className={clsx(
         "p-2  grid grid-cols-1 lg:grid-cols-4 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm",
-        "shadow-lg shadow-black transition-colors hover:border-customGreen"
+        "shadow-lg shadow-black transition hover:scale-102  duration-100  "
       )}
     >
       <div id="image" className="col-span-1 m-4 lg:p-0 md:p-8 p-2">
