@@ -75,7 +75,7 @@ export default function MatchInfo(props: MatchDecalProps) {
 
   return (
     <div className="mb-8 rounded-2xl border border-neutral-800 bg-darken-2 p-4 sm:p-5 shadow-lg shadow-black">
-      <div className="flex justify-between w-full  mb-6">
+      <div className="block sm:flex justify-between w-full  mb-6">
         <h2 id="match-heading" className="sr-only">
           Match {match.id}
         </h2>
@@ -102,12 +102,12 @@ export default function MatchInfo(props: MatchDecalProps) {
 
         <div className="flex items-center justify-between mb-3 flex-wrap">
           <div className="mb-3 flex flex-col gap-1 w-full">
-            <span className="text-xl font-semibold text-white">
+            <span className="text-xl font-semibold text-white ml-auto">
               {winnerName ? (
-                <span className="flex">
+                <span className="flex flex-wrap justify-end">
                   <span className="block truncate max-w-80 mr-2 overflow-ellipsis">
                     {winnerName}
-                  </span>{" "}
+                  </span>
                   won the match
                 </span>
               ) : (
@@ -119,7 +119,7 @@ export default function MatchInfo(props: MatchDecalProps) {
               <div className="w-full flex justify-end">
                 <a
                   href={match.result.replayFile}
-                  className="text-customGreen hover:underline whitespace-nowrap"
+                  className="text-customGreen hover:underline whitespace-nowrap text-lg"
                 >
                   Download replay
                 </a>
@@ -129,7 +129,7 @@ export default function MatchInfo(props: MatchDecalProps) {
         </div>
       </div>
       <div className="mt-2 rounded-lg border border-neutral-700 bg-neutral-900/90 p-3 sm:p-4">
-        <div className="flex items-center gap-2 text-gray-200 flex-row justify-between">
+        <div className="block sm:flex  items-center gap-2 text-gray-200 flex-row justify-between">
           {/* Participant 1 */}
           <div className="font-medium flex flex-col items-center md:items-start gap-1 min-w-0">
             <a
@@ -154,7 +154,7 @@ export default function MatchInfo(props: MatchDecalProps) {
           </div>
 
           {/* VS Divider */}
-          <div className="flex flex-col items-center mx-2 my-1  text-gray-400">
+          <div className="flex flex-col items-center mx-2 my-16 sm:my-1  text-gray-400">
             <div className="inline-flex items-center justify-center rounded-full bg-neutral-900/80 border border-customGreen p-1.5 shadow-black mb-2">
               <TrophyIcon
                 className="h-7 w-7 text-customGreen"
