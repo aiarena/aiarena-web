@@ -15,6 +15,7 @@
     "src": "./src",
     "schema": "../schema.graphql",
     "language": "typescript",
+    "noFutureProofEnums": true,
     "eagerEsModules": true
   },
   "dependencies": {
