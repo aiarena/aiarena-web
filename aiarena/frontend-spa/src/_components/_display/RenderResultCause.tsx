@@ -19,6 +19,7 @@ export function RenderResultCause({
     readableResult?.name === "Initialization Failure" ||
     readableResult?.name === "Crash" ||
     readableResult?.name === "Race Mismatch" ||
+    readableResult?.name === "Timeout" ||
     readableResult?.name === "Error"
   ) {
     return (
