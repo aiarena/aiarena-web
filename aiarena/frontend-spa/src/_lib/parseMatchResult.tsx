@@ -1,11 +1,14 @@
+import { CoreResultTypeChoices } from "@/_pages/UserMatchRequests/__generated__/UserMatchRequestsTable_viewer.graphql";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+
 export function getMatchResultParsed(
-  result: string | undefined,
+  result: CoreResultTypeChoices | undefined,
   player1: string | undefined,
-  player2: string | undefined,
+  player2: string | undefined
 ) {
   if (!result) return "";
 
-  const resultOptions: Record<string, string> = {
+  const resultOptions: Record<CoreResultTypeChoices, string> = {
     MATCHCANCELLED: "Match Cancelled",
     INITIALIZATIONERROR: "Initialization Error",
     ERROR: "Error",
@@ -20,8 +23,25 @@ export function getMatchResultParsed(
     PLAYER2RACEMISMATCH: `${player2} Race Mismatch`,
     PLAYER2SURRENDER: `${player2} Surrender`,
     TIE: "Tie",
-    "": "",
   };
 
-  return resultOptions[result] || "";
+  if (
+    result === "PLAYER1WIN" ||
+    result === "PLAYER2WIN" ||
+    result === "TIE" ||
+    result === "MATCHCANCELLED"
+  ) {
+    return <span>{resultOptions[result] || ""}</span>;
+  }
+
+  return (
+    <>
+      <span className="flex gap-2 items-center text-amber-300 ">
+        <span>
+          <ExclamationTriangleIcon height={20} />
+        </span>
+        <span>{resultOptions[result]}</span>
+      </span>
+    </>
+  );
 }
