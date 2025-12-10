@@ -19,6 +19,7 @@ import {
 } from "./__generated__/RankingsSection_competition.graphql";
 import EloTrendIcon from "@/_components/_display/EloTrendIcon";
 import BotIcon from "@/_components/_display/BotIcon";
+import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 
 interface RankingsSectionProps {
   competition: RankingsSection_competition$key;
@@ -198,7 +199,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         cell: ({ row }) => {
           const original = row.original;
           if (original.__kind !== "participant") return null;
-          return original.bot.type ?? "--";
+          return <RenderCodeLanguage type={`${original.bot.type ?? "--"}`} />;
         },
         meta: { priority: 4 },
       }),
