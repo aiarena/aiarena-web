@@ -7,6 +7,7 @@ interface SearchbarProps {
   value: string;
   isLoading?: boolean;
   debounceMs?: number;
+  classNames?: string;
 }
 
 export default function Searchbar({
@@ -15,6 +16,7 @@ export default function Searchbar({
   value,
   isLoading = false,
   debounceMs = 300,
+  classNames,
 }: SearchbarProps) {
   const [localValue, setLocalValue] = useState(value);
 
@@ -51,6 +53,7 @@ export default function Searchbar({
           "bg-darken-2",
           "text-white",
           "placeholder-neutral-400",
+          classNames && classNames,
           {
             "border-customGreen animate-border-fade-in-out": isLoading,
             "border-neutral-600": !isLoading,
