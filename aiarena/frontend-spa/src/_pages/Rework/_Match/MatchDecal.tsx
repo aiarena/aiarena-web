@@ -62,7 +62,6 @@ export default function MatchInfo(props: MatchDecalProps) {
 
   const getEloClass = (eloChange?: number | null) =>
     clsx(
-      "text-xs sm:text-sm font-medium",
       eloChange && eloChange > 0
         ? "text-customGreen"
         : eloChange && eloChange < 0
@@ -90,7 +89,7 @@ export default function MatchInfo(props: MatchDecalProps) {
               Match {getIDFromBase64(match.id, "MatchType")}
             </h2>
           </div>
-          <span className="ml-2 flex gap-2">
+          <span className="ml-2 flex gap-2 text-lg">
             on{" "}
             <a
               href={`${match.map.downloadLink}`}
@@ -130,18 +129,17 @@ export default function MatchInfo(props: MatchDecalProps) {
         </div>
       </div>
       <div className="mt-2 rounded-lg border border-neutral-700 bg-neutral-900/90 p-3 sm:p-4">
-        <div className="flex items-center gap-2 text-sm sm:text-base text-gray-200 flex-row justify-between">
+        <div className="flex items-center gap-2 text-gray-200 flex-row justify-between">
           {/* Participant 1 */}
-          <div className="flex flex-col items-center md:items-start gap-1 min-w-0">
+          <div className="font-medium flex flex-col items-center md:items-start gap-1 min-w-0">
             <a
               href={`/bots/${getIDFromBase64(p1.bot.id, "BotType")}`}
-              className="font-semibold text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs"
+              className="text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
             >
               {formatWinnerName(winnerName, p1.bot.name)}
             </a>
 
-            <div className="flex items-center gap-1 mb-4">
-              <EloTrendIcon trend={p1.eloChange} />
+            <div className="flex items-center gap-1 mb-4 text-lg">
               <span className={getEloClass(p1.eloChange)}>
                 {p1.eloChange
                   ? p1.eloChange > 0
@@ -149,6 +147,7 @@ export default function MatchInfo(props: MatchDecalProps) {
                     : p1.eloChange
                   : "0"}
               </span>
+              <EloTrendIcon trend={p1.eloChange} />
             </div>
             <span className="text-gray-400">{p1.bot.playsRace.name}</span>
             <RenderCodeLanguage type={`${p1.bot.type}`} muted />
@@ -170,12 +169,12 @@ export default function MatchInfo(props: MatchDecalProps) {
           <div className="flex flex-col items-center md:items-end gap-1 min-w-0">
             <a
               href={`/bots/${getIDFromBase64(p2.bot.id, "BotType")}`}
-              className="font-semibold text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs"
+              className="font-medium text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
             >
               {formatWinnerName(winnerName, p2.bot.name)}
             </a>
 
-            <div className="flex items-center gap-1 mb-4">
+            <div className="flex items-center gap-1 mb-4 text-lg">
               <span className={getEloClass(p2.eloChange)}>
                 {p2.eloChange
                   ? p2.eloChange > 0
