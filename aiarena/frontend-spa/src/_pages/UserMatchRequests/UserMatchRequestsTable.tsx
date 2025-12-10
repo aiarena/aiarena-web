@@ -197,7 +197,7 @@ export default function UserMatchRequestsTable(
         meta: { priority: 1 },
       }),
 
-      columnHelper.accessor((row) => row.result?.type || "", {
+      columnHelper.accessor((row) => row.result?.type, {
         id: "result",
         header: "Result",
         cell: (info) => {
