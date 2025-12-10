@@ -7,7 +7,7 @@ interface NewsBoxProps {
 const NewsBox: React.FC<NewsBoxProps> = ({ videoUrl }) => {
   return (
     <iframe
-      className="m-auto max-w-100 max-h-100 w-full px-8"
+      className="m-auto  w-full h-[250px] p-2"
       src={videoUrl?.replace("youtube.com", "youtube-nocookie.com")}
       referrerPolicy="strict-origin-when-cross-origin"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

@@ -56,7 +56,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
   const competition = activeCompetitions[currentIndex];
 
   return (
-    <div className="max-w-120">
+    <div>
       <WrappedTitle title="Competitions" font="font-bold" />
       <div className="text-center mb-4">
         <a

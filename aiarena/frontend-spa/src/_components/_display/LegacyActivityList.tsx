@@ -126,8 +126,8 @@ const LegacyActivityList: React.FC = () => {
   return (
     <div>
       <WrappedTitle title="Activity" font="font-bold" />
-      <table className="w-full">
-        <thead className="bg-customGreen-dark-2 h-9">
+      <table className="w-full text-sm">
+        <thead className="bg-customGreen-dark-2 h-9 ">
           <tr>
             <th className="min-w-[6em]">Time</th>
             <th>Event</th>
@@ -139,10 +139,7 @@ const LegacyActivityList: React.FC = () => {
             .map((bot, idx) => (
               <tr
                 key={bot.id}
-                className={clsx(
-                  "text-xs h-10",
-                  idx % 2 ? "bg-darken-4" : "bg-darken"
-                )}
+                className={clsx(" h-12", idx % 2 ? "bg-darken-4" : "bg-darken")}
               >
                 <td className="text-center pr-4">
                   {timeAgoShort(bot.botZipUpdated)} ago

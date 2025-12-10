@@ -61,7 +61,7 @@ function CardsAndNewsSection() {
             on ways to contribute.
           </div>
         </div>
-        <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={410} />}>
+        <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={440} />}>
           <LatestNews />
         </Suspense>
         <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={200} />}>
@@ -81,7 +81,7 @@ function CompetitionsAndActivity() {
             <div>
               <DisplaySkeletonBlockWithTitle bodyHeight={500} />
               <div className="py-6"></div>
-              <DisplaySkeletonBlockWithTitle bodyHeight={610} />
+              <DisplaySkeletonBlockWithTitle bodyHeight={730} />
             </div>
           }
         >
@@ -155,7 +155,7 @@ function InstructionsCard() {
 function CapWidth({ children }: { children: ReactNode }) {
   return (
     <>
-      <div className="max-w-[60em] m-auto">{children}</div>
+      <div className="max-w-[70em] m-auto">{children}</div>
     </>
   );
 }
