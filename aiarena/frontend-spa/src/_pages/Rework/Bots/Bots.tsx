@@ -59,6 +59,7 @@ export default function Bots() {
                   value={searchBarValue}
                   placeholder="Search bots by name or author..."
                   aria-label="Search bot by name or author"
+                  classNames="min-w-70"
                 />
               </div>
             }
