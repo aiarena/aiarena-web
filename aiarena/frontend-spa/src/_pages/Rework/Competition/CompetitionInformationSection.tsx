@@ -4,9 +4,9 @@ import { MarkdownDisplay } from "@/_components/_actions/MarkdownDisplay";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 import { CompetitionInformationSection_competition$key } from "./__generated__/CompetitionInformationSection_competition.graphql";
 import { ArrowDownCircleIcon } from "@heroicons/react/20/solid";
-import SquareButton from "@/_components/_actions/SquareButton";
 import { useState } from "react";
 import CompetitionRoundsModal from "./_modals/CompetitionRoundsModal";
+import MutedButton from "@/_components/_actions/MutedButton";
 
 interface CompetitionInformationSectionProps {
   competiton: CompetitionInformationSection_competition$key;
@@ -106,13 +106,14 @@ export default function CompetitionInformationSection({
                 </dd>
               </div>
               <div className="flex gap-2 justify-center">
-                <dt className="w-32 text-gray-400">Rounds</dt>
-                <dd className="flex-1 text-gray-100 font-bold">
-                  <SquareButton
-                    text="View Rounds"
+                <span className="flex-1 text-gray-100 font-bold my-2">
+                  <MutedButton
+                    title="View Rounds"
                     onClick={() => setIsRoundsModalOpen(true)}
-                  />
-                </dd>
+                  >
+                    View Rounds
+                  </MutedButton>
+                </span>
               </div>
 
               <hr className="border-neutral-700 my-3" />

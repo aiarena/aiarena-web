@@ -7,6 +7,7 @@ import BotTrophiesModal from "../../../_pages/UserBots/UserBotsSection/_modals/B
 import { TrophyIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { UserBotHeader_bot$key } from "./__generated__/UserBotHeader_bot.graphql";
 import RenderCodeLanguage from "../RenderCodeLanguage";
+import MutedButton from "@/_components/_actions/MutedButton";
 
 export interface UserBotHeaderProps {
   bot: UserBotHeader_bot$key;
@@ -73,8 +74,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
 
           {/* Settings Button */}
 
-          <div
-            className="cursor-pointer hover:bg-neutral-800 hover:border-neutral-500 py-1 px-2 ml-2 flex justify-center rounded-md gap-2 border border-neutral-600 items-center shadow-sm shadow-black"
+          <MutedButton
             onClick={() => setSettingsModalOpen(true)}
             title="Bot Settings"
           >
@@ -84,7 +84,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
               className="size-5  text-white"
               role="img"
             />
-          </div>
+          </MutedButton>
         </div>
 
         <div className="justify-between flex">
