@@ -176,6 +176,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               id
               result
               resultCause
+              matchLog
               avgStepTime
               eloChange
               bot {
@@ -439,16 +440,36 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           if (info.getValue()) {
             return withAtag(
               "Download",
-              `${info.getValue()}`,
+              `/${info.getValue()}`,
               `Download replay file for Match ${info.row.original.match.id}`,
               <span className="flex items-center gap-1">
-                <ArrowDownCircleIcon height={18} /> Download
+                <ArrowDownCircleIcon height={18} /> Replay
               </span>
             );
           }
         },
         meta: { priority: 1 },
-        size: 110,
+        size: 1,
+      }),
+      columnHelper.accessor((row) => row.matchLog ?? "", {
+        id: "log",
+        header: "Match Log",
+
+        enableSorting: false,
+        cell: (info) => {
+          if (info.getValue() != "") {
+            return withAtag(
+              "Download",
+              `/${info.getValue()}`,
+              `Download match log for Match ${info.row.original.match.id}`,
+              <span className="flex items-center gap-1">
+                <ArrowDownCircleIcon height={18} /> Log
+              </span>
+            );
+          }
+        },
+        meta: { priority: 1 },
+        size: 1,
       }),
     ],
     [columnHelper]

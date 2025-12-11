@@ -487,14 +487,26 @@ class MatchParticipationFilterSet(FilterSet):
 
 
 class MatchParticipationType(DjangoObjectTypeWithUID):
+    match_log = graphene.String()
+
     class Meta:
         model = models.MatchParticipation
-        fields = ["elo_change", "avg_step_time", "result", "bot", "match", "match_log", "result_cause"]
+        fields = ["elo_change", "avg_step_time", "result", "bot", "match", "result_cause"]
         filterset_class = MatchParticipationFilterSet
         connection_class = CountingConnection
 
     def resolve_opponent_plays_race_enum(self, info):
         return self.opponent_plays_race
+
+    def resolve_match_log(self, info):
+        if not self.match_log:
+            return ""
+
+        user = getattr(info.context, "user", None)
+        if user and self.can_download_match_log(user):
+            return str(self.match_log)
+
+        return ""
 
 
 class MatchFilterSet(FilterSet):
