@@ -3,15 +3,17 @@ import InformationSection from "./InformationSection";
 import { BotQuery } from "./__generated__/BotQuery.graphql";
 import { useParams } from "react-router";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import BotCompetitionsTable from "./BotCompetitionsTable";
 import FetchError from "@/_components/_display/FetchError";
 import BotResultsTable from "./BotResultsTable";
 import { BotResultQuery } from "./__generated__/BotResultQuery.graphql";
+import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
+  const [onlyActive, setOnlyActive] = useState(false);
   const data = useLazyLoadQuery<BotQuery>(
     graphql`
       query BotQuery($id: ID!) {
@@ -52,7 +54,27 @@ export default function Bot() {
         </Suspense>
         <h4 className="mb-4">Competition Participations</h4>
         <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-          <BotCompetitionsTable bot={data.node} />
+          <BotCompetitionsTable
+            bot={data.node}
+            onlyActive={onlyActive}
+            appendHeader={
+              <div
+                className="flex gap-4 items-center"
+                role="group"
+                aria-label="Bot filtering controls"
+              >
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="downloadable-toggle"
+                    className="text-sm font-medium text-gray-300"
+                  >
+                    Only active
+                  </label>
+                  <SimpleToggle enabled={onlyActive} onChange={setOnlyActive} />
+                </div>
+              </div>
+            }
+          />
         </Suspense>
         <h4 className="mb-4">Results</h4>
         <Suspense fallback={<LoadingSpinner color="light-gray" />}>

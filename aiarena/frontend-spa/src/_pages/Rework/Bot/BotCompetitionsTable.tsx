@@ -4,13 +4,21 @@ import {
   BotCompetitionsTable_bot$data,
   BotCompetitionsTable_bot$key,
 } from "./__generated__/BotCompetitionsTable_bot.graphql";
-import { Suspense, useMemo } from "react";
+import {
+  ReactNode,
+  startTransition,
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   createColumnHelper,
   getCoreRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { withAtag } from "@/_lib/tanstack_utils";
+import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import LoadingDots from "@/_components/_display/LoadingDots";
 import { TableContainer } from "@/_components/_actions/TableContainer";
@@ -19,20 +27,27 @@ import NoMoreItems from "@/_components/_display/NoMoreItems";
 
 interface BotCompetitionsTableProps {
   bot: BotCompetitionsTable_bot$key;
+  appendHeader?: ReactNode;
+  onlyActive?: boolean | undefined;
 }
 
-export default function BotCompetitionsTable({
-  bot,
-}: BotCompetitionsTableProps) {
-  const { data, loadNext, hasNext } = usePaginationFragment(
+export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
+  const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment BotCompetitionsTable_bot on BotType
       @refetchable(queryName: "BotCompetitionTablePaginationQuery")
       @argumentDefinitions(
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
+        orderBy: { type: "String" }
+        active: { type: "Boolean" }
       ) {
-        competitionParticipations(first: $first, after: $cursor)
+        competitionParticipations(
+          first: $first
+          after: $cursor
+          orderBy: $orderBy
+          active: $active
+        )
           @connection(
             key: "BotCompetitionsTable_bot_competitionParticipations"
           ) {
@@ -54,7 +69,7 @@ export default function BotCompetitionsTable({
         }
       }
     `,
-    bot
+    props.bot
   );
 
   type ParticipationType = NonNullable<
@@ -89,7 +104,6 @@ export default function BotCompetitionsTable({
       columnHelper.accessor((row) => row.competition.dateOpened ?? "", {
         id: "dateOpened",
         header: "Opened",
-        enableSorting: false,
         cell: (row) => new Date(row.getValue()).toLocaleDateString() || "--",
         meta: { priority: 1 },
       }),
@@ -154,6 +168,19 @@ export default function BotCompetitionsTable({
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  useEffect(() => {
+    const sortingMap: Record<string, string> = {
+      dateOpened: "competition__date_opened",
+    };
+    startTransition(() => {
+      const sortString = parseSort(sortingMap, sorting);
+      refetch({
+        orderBy: sortString,
+        active: props.onlyActive == true ? true : undefined,
+      });
+    });
+  }, [sorting, props.onlyActive, refetch]);
 
   const table = useReactTable({
     data: competitionData,
@@ -162,6 +189,11 @@ export default function BotCompetitionsTable({
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    state: {
+      sorting,
+    },
+
+    onSortingChange: setSorting,
   });
 
   const hasItems = competitionData.length > 0;
@@ -169,7 +201,11 @@ export default function BotCompetitionsTable({
   return (
     <div>
       <Suspense fallback={<LoadingDots />}>
-        <TableContainer table={table} loading={false} />
+        <TableContainer
+          table={table}
+          loading={false}
+          appendHeader={props.appendHeader}
+        />
       </Suspense>
 
       {hasNext ? (
