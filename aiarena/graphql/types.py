@@ -247,6 +247,29 @@ class CompetitionBotMatchupStatsType(DjangoObjectTypeWithUID):
         connection_class = CountingConnection
 
 
+class CompetitionParticipationFilterSet(FilterSet):
+    order_by = OrderingFilter(
+        fields=[
+            "competition__date_opened",
+        ],
+        method="filter_order_by",
+    )
+
+    active = django_filters.BooleanFilter()
+    name = django_filters.CharFilter(method="filter_name")
+
+    class Meta:
+        model = models.CompetitionParticipation
+        fields = [
+            "order_by",
+            "active",
+        ]
+
+    def filter_order_by(self, queryset, name, value):
+        order_fields = value if isinstance(value, list) else [value]
+        return queryset.order_by(*order_fields)
+
+
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()
     competition_map_stats = DjangoConnectionField("aiarena.graphql.CompetitionBotMapStatsType")
@@ -269,7 +292,7 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             "bot",
             "active",
         ]
-        filter_fields = []
+        filterset_class = CompetitionParticipationFilterSet
         connection_class = CountingConnection
 
     @staticmethod
