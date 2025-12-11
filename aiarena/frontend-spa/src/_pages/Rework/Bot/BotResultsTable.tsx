@@ -28,10 +28,7 @@ import {
 import ResultsFiltersModal from "./_modals/ResultsFiltersModal";
 import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
-import {
-  ArrowDownCircleIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowDownCircleIcon, FunnelIcon } from "@heroicons/react/24/outline";
 import { CoreBotRaceLabelChoices } from "@/_pages/UserBots/UserBotsSection/_modals/__generated__/UploadBotModalQuery.graphql";
 import EloChange from "@/_components/_display/EloChange";
 import StepTime from "@/_components/_display/RenderStepTime";
@@ -502,9 +499,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
                 ring-1 ring-inset ring-gray-700 focus:outline-none focus:ring-customGreen focus:ring-2"
                 onClick={() => setIsFiltersModalOpen(true)}
               >
-                <MagnifyingGlassIcon
-                  className={clsx("size-5", "text-gray-400")}
-                />
+                <FunnelIcon className={clsx("size-5", "text-gray-400")} />
               </button>
             </>
           }
