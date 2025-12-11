@@ -11,7 +11,6 @@ import Modal from "@/_components/_actions/Modal";
 import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
-import { useEffect } from "react";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
@@ -44,7 +43,7 @@ export default function JoinCompetitionModal({
         }
       }
     `,
-    props.bot,
+    props.bot
   );
 
   // TODO
@@ -65,7 +64,7 @@ export default function JoinCompetitionModal({
           }
         }
       `,
-      {},
+      {}
     );
 
   const [updateCompetitionparticipation, updating] =
@@ -92,11 +91,11 @@ export default function JoinCompetitionModal({
     `);
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateCompetitionParticipation",
-    "Bot Participation Updated!",
+    "Bot Participation Updated!"
   );
 
   const joinableCompetitions = getNodes(competition_data.competitions).filter(
-    (comp) => comp.status != "CLOSING" && comp.status != "CLOSED",
+    (comp) => comp.status != "CLOSING" && comp.status != "CLOSED"
   );
 
   const botCompetitionParticipations = getNodes(bot.competitionParticipations);
@@ -106,7 +105,7 @@ export default function JoinCompetitionModal({
       botCompetitionParticipations?.some(
         (participation) =>
           competitionId === participation.competition.id &&
-          participation.active === true,
+          participation.active === true
       ) || false
     );
   };
@@ -127,10 +126,6 @@ export default function JoinCompetitionModal({
       onError,
     });
   };
-
-  useEffect(() => {
-    console.log(updating);
-  }, [updating]);
 
   return (
     <Modal
