@@ -377,7 +377,6 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           header: "Elo +/-",
           enableSorting: false,
           cell: (info) => {
-            console.log("elochange ", info.row);
             return <EloChange delta={info.getValue()} />;
           },
           meta: { priority: 1 },
