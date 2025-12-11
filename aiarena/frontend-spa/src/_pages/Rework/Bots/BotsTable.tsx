@@ -8,12 +8,13 @@ import {
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
-import React, {
+import {
   Suspense,
   useEffect,
   useMemo,
   useState,
   startTransition,
+  ReactNode,
 } from "react";
 
 import { parseSort, withAtag } from "@/_lib/tanstack_utils";
@@ -33,7 +34,7 @@ interface BotsTableProps {
   data: BotsTable_node$key;
   searchBarValue: string;
   onlyDownloadable: boolean;
-  appendHeader?: React.ReactNode;
+  appendHeader?: ReactNode;
 }
 
 export default function BotsTable(props: BotsTableProps) {
@@ -148,7 +149,8 @@ export default function BotsTable(props: BotsTableProps) {
       refetch({
         orderBy: sortString,
         name: props.searchBarValue,
-        botZipPubliclyDownloadable: props.onlyDownloadable,
+        botZipPubliclyDownloadable:
+          props.onlyDownloadable == true ? true : undefined,
       });
     });
   }, [sorting, props.searchBarValue, props.onlyDownloadable, refetch]);
