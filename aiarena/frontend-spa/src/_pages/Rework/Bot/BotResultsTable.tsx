@@ -194,10 +194,16 @@ export default function BotResultsTable(props: BotResultsTableProps) {
                 participant1 {
                   name
                   id
+                  playsRace {
+                    name
+                  }
                 }
                 participant2 {
                   name
                   id
+                  playsRace {
+                    name
+                  }
                 }
                 map {
                   id
@@ -294,7 +300,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             `View match details for Match ID ${info.getValue()}`
           ),
         meta: { priority: 1 },
-        size: 125,
+        size: 100,
       }),
 
       columnHelper.accessor(
@@ -322,6 +328,30 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             );
           },
           meta: { priority: 1 },
+        }
+      ),
+      columnHelper.accessor(
+        (row) =>
+          getOpponent(row.match?.participant1, row.match?.participant1, row.bot)
+            ?.opponent?.name || "",
+        {
+          id: "opponent_race",
+          header: "Opponent Race",
+          enableSorting: false,
+          cell: (info) => {
+            const bot = info.row.original.bot;
+            const participant1 = info.row.original.match?.participant1;
+            const participant2 = info.row.original.match?.participant2;
+            const opponent = getOpponent(
+              participant1,
+              participant2,
+              bot
+            )?.opponent;
+
+            return <span>{opponent?.playsRace.name}</span>;
+          },
+          meta: { priority: 1 },
+          size: 5,
         }
       ),
       columnHelper.accessor((row) => row.result ?? "", {
