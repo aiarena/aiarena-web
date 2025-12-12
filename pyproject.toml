@@ -37,7 +37,7 @@ dependencies = [
     "markdown==3.6",
     "matplotlib==3.8.0",
     "numpy==1.26.3",
-    "pandas==2.2.2",
+    "pandas==2.3.3",
     "pinax-theme-bootstrap==8.0.1",
     "psycopg2-binary==2.9.9",
     "pytz==2022.7.1",
