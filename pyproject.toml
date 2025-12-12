@@ -6,7 +6,7 @@ dependencies = [
     "awscli==1.42.35",
     "boto3==1.40.35",
     "celery==5.5.3",
-    "confusable-homoglyphs==3.2.0",
+    "confusable-homoglyphs==3.3.1",
     "django==4.2.24",
     "django-appconf==1.0.5",
     "django-avatar==8.0.1",
