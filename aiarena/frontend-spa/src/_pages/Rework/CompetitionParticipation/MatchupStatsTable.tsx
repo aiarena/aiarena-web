@@ -6,7 +6,10 @@ import {
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { TableContainer } from "@/_components/_actions/TableContainer";
-import { MatchupStatsTable_node$key } from "./__generated__/MatchupStatsTable_node.graphql";
+import {
+  MatchupStatsTable_node$data,
+  MatchupStatsTable_node$key,
+} from "./__generated__/MatchupStatsTable_node.graphql";
 import { withAtag } from "@/_lib/tanstack_utils";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
@@ -50,14 +53,27 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
     props.data
   );
 
-  const matchupStats = getNodes(data.competitionMatchupStats);
-  const columnHelper = createColumnHelper<(typeof matchupStats)[number]>();
+  type MatchupStatsType = NonNullable<
+    NonNullable<
+      NonNullable<
+        MatchupStatsTable_node$data["competitionMatchupStats"]
+      >["edges"][number]
+    >["node"]
+  >;
+
+  const matchupStatsData = useMemo(
+    () => getNodes<MatchupStatsType>(data?.competitionMatchupStats),
+    [data]
+  );
+
+  const columnHelper = createColumnHelper<MatchupStatsType>();
 
   const columns = useMemo(
     () => [
       columnHelper.accessor((row) => row.opponent.bot.name, {
         id: "opponent",
         header: "Opponent",
+        enableSorting: false,
         cell: (info) =>
           withAtag(
             info.getValue(),
@@ -69,71 +85,74 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
       columnHelper.accessor((row) => row.opponent.bot.playsRace.name ?? "", {
         id: "race",
         header: "Race",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue() || "N/A"}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue() || "N/A",
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.matchCount, {
         id: "matches",
         header: "Matches",
-        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
+        enableSorting: false,
+
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.winCount, {
         id: "win",
         header: "Win",
-        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.winPerc, {
         id: "winPerc",
         header: "%",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue().toFixed(2)}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue().toFixed(2),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.lossCount, {
         id: "loss",
         header: "Loss",
-        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.lossPerc, {
         id: "lossPerc",
         header: "%",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue().toFixed(2)}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue().toFixed(2),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.tieCount, {
         id: "tie",
         header: "Tie",
-        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.tiePerc, {
         id: "tiePerc",
         header: "%",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue().toFixed(2)}</span>
-        ),
+        enableSorting: false,
+
+        cell: (info) => info.getValue().toFixed(2),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.crashCount, {
         id: "crash",
         header: "Crash",
-        cell: (info) => <span className="font-mono">{info.getValue()}</span>,
+        enableSorting: false,
+
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.crashPerc, {
         id: "crashPerc",
         header: "%",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue().toFixed(2)}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue().toFixed(2),
         meta: { priority: 1 },
       }),
     ],
@@ -141,19 +160,18 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
   );
 
   const table = useReactTable({
-    data: matchupStats,
+    data: matchupStatsData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    manualSorting: true,
   });
 
   return (
     <div>
       <div className="divider mb-6">
-        <span></span>
-        <span>
-          <h2 className="text-xl font-semibold">Matchups</h2>
-        </span>
-        <span></span>
+        <h2 className="text-xl font-semibold">Matchups</h2>
       </div>
       <TableContainer table={table} loading={false} />
     </div>
