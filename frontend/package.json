@@ -20,7 +20,7 @@
     "delayed-stream": "^1.0.0",
     "http-proxy": "^1.18.1",
     "jsonwebtoken": "^9.0.2",
-    "next": "^14.2.21",
+    "next": "^14.2.35",
     "postcss": "^8.4.49",
     "react": "18.3.1",
     "react-dom": "18.3.1",
