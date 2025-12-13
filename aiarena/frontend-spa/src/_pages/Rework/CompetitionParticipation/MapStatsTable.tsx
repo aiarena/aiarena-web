@@ -6,13 +6,15 @@ import {
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { TableContainer } from "@/_components/_actions/TableContainer";
-import { MapStatsTable_node$key } from "./__generated__/MapStatsTable_node.graphql";
-import {getNodes} from "@/_lib/relayHelpers.ts";
+import {
+  MapStatsTable_node$data,
+  MapStatsTable_node$key,
+} from "./__generated__/MapStatsTable_node.graphql";
+import { getNodes } from "@/_lib/relayHelpers.ts";
 
 interface MapStatsTableProps {
   data: MapStatsTable_node$key;
 }
-
 
 export default function MapStatsTable(props: MapStatsTableProps) {
   const data = useFragment(
@@ -41,89 +43,94 @@ export default function MapStatsTable(props: MapStatsTableProps) {
     props.data
   );
 
-  const mapStats = getNodes(data.competitionMapStats);
-  const columnHelper = createColumnHelper<typeof mapStats[number]>();
+  type MapStatsType = NonNullable<
+    NonNullable<
+      NonNullable<
+        MapStatsTable_node$data["competitionMapStats"]
+      >["edges"][number]
+    >["node"]
+  >;
+
+  const mapStatsData = useMemo(
+    () => getNodes<MapStatsType>(data?.competitionMapStats),
+    [data]
+  );
+
+  const columnHelper = createColumnHelper<MapStatsType>();
 
   const columns = useMemo(
     () => [
       columnHelper.accessor((row) => row.map.name, {
         id: "map",
         header: "Map",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.matchCount, {
         id: "matches",
         header: "Matches",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.winCount, {
         id: "win",
         header: "Win",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.winPerc, {
         id: "winPerc",
         header: "%",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue().toFixed(2)}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => {
+          info.getValue().toFixed(2);
+        },
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.lossCount, {
         id: "loss",
         header: "Loss",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.lossPerc, {
         id: "lossPerc",
         header: "%",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue().toFixed(2)}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue().toFixed(2),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.tieCount, {
         id: "tie",
         header: "Tie",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.tiePerc, {
         id: "tiePerc",
         header: "%",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue().toFixed(2)}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue().toFixed(2),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.crashCount, {
         id: "crash",
         header: "Crash",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue()}</span>
-        ),
+        enableSorting: false,
+        cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.crashPerc, {
         id: "crashPerc",
         header: "%",
-        cell: (info) => (
-          <span className="font-mono">{info.getValue().toFixed(2)}</span>
-        ),
+        enableSorting: false,
+
+        cell: (info) => info.getValue().toFixed(2),
         meta: { priority: 1 },
       }),
     ],
@@ -131,19 +138,18 @@ export default function MapStatsTable(props: MapStatsTableProps) {
   );
 
   const table = useReactTable({
-    data: mapStats,
+    data: mapStatsData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
+    manualSorting: true,
   });
 
   return (
     <div>
       <div className="divider mb-6">
-        <span></span>
-        <span>
-          <h2 className="text-xl font-semibold">Maps</h2>
-        </span>
-        <span></span>
+        <h2 className="text-xl font-semibold">Maps</h2>
       </div>
       <TableContainer table={table} loading={false} />
     </div>
