@@ -20,6 +20,7 @@ import {
 import EloTrendIcon from "@/_components/_display/EloTrendIcon";
 import BotIcon from "@/_components/_display/BotIcon";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
+import CompetitionParticipationModal from "../CompetitionParticipation/CompetitionParticipationModal";
 
 interface RankingsSectionProps {
   competition: RankingsSection_competition$key;
@@ -47,6 +48,10 @@ type DivisionHeaderRow = {
 export type RankingsRow = ParticipantRow | DivisionHeaderRow;
 
 export default function RankingsSection({ competition }: RankingsSectionProps) {
+  const [isBiographyModalOpen, setBiographyModalOpen] = useState<{
+    state: boolean;
+    id: string | null;
+  }>({ state: false, id: null });
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
       fragment RankingsSection_competition on CompetitionType
@@ -248,14 +253,23 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           const original = info.row.original;
           if (original.__kind !== "participant") return null;
 
-          return withAtag(
-            "View Stats",
-            `/competitions/stats/${getIDFromBase64(
-              original.id,
-              "CompetitionParticipationType"
-            )}`,
-            `View stats ${original.id}`
+          return (
+            <button
+              onClick={() =>
+                setBiographyModalOpen({ state: true, id: original.id })
+              }
+            >
+              Stats
+            </button>
           );
+          // return withAtag(
+          //   "View Stats",
+          //   `/competitions/stats/${getIDFromBase64(
+          //     original.id,
+          //     "CompetitionParticipationType"
+          //   )}`,
+          //   `View stats ${original.id}`
+          // );
         },
         meta: { priority: 1 },
       }),
@@ -298,6 +312,18 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           <NoMoreItems />
         </div>
       ) : null}
+
+      {isBiographyModalOpen.state && isBiographyModalOpen.id != null && (
+        <CompetitionParticipationModal
+          isOpen={isBiographyModalOpen.state}
+          onClose={() => setBiographyModalOpen({ state: false, id: null })}
+          id={getBase64FromID(
+            isBiographyModalOpen.id,
+            "CompetitionParticipationType"
+          )}
+        />
+      )}
     </div>
   );
 }
+import { getBase64FromID } from "@/_lib/relayHelpers";
