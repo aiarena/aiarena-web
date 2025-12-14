@@ -15,7 +15,7 @@
     "@types/react": "18.3.1",
     "@types/react-dom": "18.3.0",
     "autoprefixer": "10.4.20",
-    "axios": "^1.7.9",
+    "axios": "^1.12.0",
     "cookies": "^0.9.1",
     "delayed-stream": "^1.0.0",
     "http-proxy": "^1.18.1",
