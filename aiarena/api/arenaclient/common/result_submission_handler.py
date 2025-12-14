@@ -19,6 +19,7 @@ from aiarena.core.models import (
     Tag,
 )
 from aiarena.core.services import Bots, BotStatistics
+from aiarena.core.services.internal.rounds import update_round_if_completed
 from aiarena.core.utils import parse_tags
 
 from .serializers import (
@@ -213,7 +214,7 @@ def submit_result(result_submission: ResultSubmission):
     result_submission.match.save()
     # Only do these actions if the match is part of a round
     if result.match.round is not None:
-        result.match.round.update_if_completed()
+        update_round_if_completed(result.match.round)
 
         # Update and record ELO figures
         participant1.starting_elo, participant2.starting_elo = result.get_initial_elos

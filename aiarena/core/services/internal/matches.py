@@ -4,6 +4,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from aiarena.core.models import Match, MatchParticipation, Result
+from aiarena.core.services.internal.rounds import update_round_if_completed
 
 
 def create(
@@ -77,4 +78,4 @@ def cancel(match_id, requesting_user):
         match.save()
 
         if match.round is not None:
-            match.round.update_if_completed()
+            update_round_if_completed(match.round)
