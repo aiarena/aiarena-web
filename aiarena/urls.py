@@ -60,7 +60,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("admin/", admin.site.urls),
     path("accounts/", include("registration.backends.default.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
-    path("", core_views.Index.as_view(), name="home"),
+    path("", core_views.frontend, name="home"),
     path("api/", include("aiarena.api.urls")),
     path("graphql/", core_views.CustomGraphQLView.as_view(graphiql=True), name="graphql"),
     path("results/", core_views.RecentResults.as_view(), name="results"),
