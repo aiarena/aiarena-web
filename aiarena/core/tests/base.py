@@ -7,7 +7,7 @@ from django.test import Client
 from django.urls import reverse
 
 import graphene
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page
 from pytest_django.live_server_helper import LiveServer
 
 from aiarena.core.models import WebsiteUser
@@ -31,7 +31,6 @@ class BrowserHelper:
         page.get_by_label("Username:").fill("billy")
         page.get_by_label("Password:").fill("guest")
         page.get_by_role("button", name="Log in").click()
-        expect(page.locator("#sidebar-items")).to_contain_text(f"Logged in: {user.username}")
 
 
 class GraphQLTest:

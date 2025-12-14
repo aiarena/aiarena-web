@@ -34,7 +34,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
         }
       }
     `,
-    props.viewer,
+    props.viewer
   );
   const { enqueueSnackbar } = useSnackbar();
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
@@ -98,9 +98,12 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
         <div className="w-full">
           <div className="lg:block lg:text-left flex justify-center">
             <div className="leading-tight py-4">
-              <p className="font-bold text-2xl lg:block lg:text-left flex justify-center pb-4">
+              <h4
+                className="font-bold text-2xl lg:block lg:text-left flex justify-center pb-4"
+                id="#author-name"
+              >
                 {viewer?.user?.username}
-              </p>
+              </h4>
               {viewer.firstName || viewer.lastName ? (
                 <p className="  lg:block lg:text-left flex justify-center">
                   {viewer.firstName} {viewer.lastName}
