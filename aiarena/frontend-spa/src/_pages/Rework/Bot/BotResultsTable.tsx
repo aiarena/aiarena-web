@@ -35,6 +35,7 @@ import StepTime from "@/_components/_display/RenderStepTime";
 import { RenderResult } from "@/_components/_display/RenderResult";
 import { RenderResultCause } from "@/_components/_display/RenderResultCause";
 import { HardcodedMatchTypeOptions } from "./CustomOptions/MatchTypeOptions";
+import { RenderRace } from "@/_components/_display/RenderRace";
 
 interface BotResultsTableProps {
   data: BotResultsTable_bot$key;
@@ -194,6 +195,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
                   id
                   playsRace {
                     name
+                    label
                   }
                 }
                 participant2 {
@@ -201,6 +203,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
                   id
                   playsRace {
                     name
+                    label
                   }
                 }
                 map {
@@ -346,7 +349,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               bot
             )?.opponent;
 
-            return <span>{opponent?.playsRace.name}</span>;
+            return <RenderRace race={opponent?.playsRace} />;
           },
           meta: { priority: 1 },
           size: 5,

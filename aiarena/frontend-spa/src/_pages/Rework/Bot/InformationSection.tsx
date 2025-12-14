@@ -9,6 +9,7 @@ import { MarkdownDisplay } from "@/_components/_actions/MarkdownDisplay";
 import { ArrowDownCircleIcon } from "@heroicons/react/20/solid";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
+import { RenderRace } from "@/_components/_display/RenderRace";
 
 interface InformationSectionProps {
   bot: InformationSection_bot$key;
@@ -115,7 +116,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Race</dt>
                 <dd className="flex-1 text-gray-100">
-                  {data.playsRace.name || "--"}
+                  <RenderRace race={data?.playsRace} />
                 </dd>
               </div>
               <div className="flex gap-2">

@@ -20,6 +20,7 @@ import {
 import EloTrendIcon from "@/_components/_display/EloTrendIcon";
 import BotIcon from "@/_components/_display/BotIcon";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
+import { RenderRace } from "@/_components/_display/RenderRace";
 
 interface RankingsSectionProps {
   competition: RankingsSection_competition$key;
@@ -187,7 +188,8 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         cell: ({ row }) => {
           const original = row.original;
           if (original.__kind !== "participant") return null;
-          return original.bot.playsRace.name ?? "--";
+
+          return <RenderRace race={original.bot.playsRace} />;
         },
         meta: { priority: 4 },
       }),
