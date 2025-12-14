@@ -100,7 +100,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
             <div className="leading-tight py-4">
               <h4
                 className="font-bold text-2xl lg:block lg:text-left flex justify-center pb-4"
-                id="#author-name"
+                id="author-name"
               >
                 {viewer?.user?.username}
               </h4>

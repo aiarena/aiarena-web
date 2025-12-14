@@ -13,7 +13,7 @@ def test_login(page: Page, bh: BrowserHelper, user, admin_user):
     page.get_by_label("Password:").fill("guest")
     page.get_by_role("button", name="Log in").click()
     page.goto(bh.reverse("dashboard_profile"))
-    expect(page.locator("author-name")).to_contain_text("billy")
+    expect(page.locator("#author-name")).to_contain_text("billy")
 
 
 def test_login_with_wrong_credentials(page: Page, bh: BrowserHelper):
