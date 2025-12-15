@@ -42,7 +42,7 @@ export const navLinks = [
     featureFlag: null,
   },
   {
-    title: "Result",
+    title: "Results",
     path: "/results",
     showLoggedIn: true,
     showLoggedOut: true,
