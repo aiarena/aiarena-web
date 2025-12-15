@@ -85,7 +85,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("authors/<int:pk>/", core_views.frontend, name="author"),
     # path('rounds/', core_views.RoundList.as_view(), name='rounds'), # todo
     path("rounds/<int:pk>/", core_views.frontend, name="round"),
-    path("matches/<int:pk>/", core_views.frontend, name="match"),
+    path("matches/<int:pk>/", core_views.MatchDetail.as_view(), name="match"),
     path("competitions/", core_views.frontend, name="competitions"),
     path("competitions/<int:pk>/", core_views.frontend, name="competition"),
     path("competitions/stats/<int:pk>/", core_views.BotCompetitionStatsDetail.as_view()),
