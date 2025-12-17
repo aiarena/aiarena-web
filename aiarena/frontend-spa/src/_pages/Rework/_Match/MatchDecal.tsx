@@ -41,6 +41,7 @@ export default function MatchInfo(props: MatchDecalProps) {
         result {
           gameTimeFormatted
           replayFile
+          arenaclientLog
           winner {
             name
             id
@@ -143,10 +144,22 @@ export default function MatchInfo(props: MatchDecalProps) {
             {match.result?.replayFile ? (
               <div className="w-full flex justify-end">
                 <a
-                  href={match.result.replayFile}
-                  className="text-customGreen hover:underline whitespace-nowrap text-lg"
+                  download
+                  href={`/${match.result.replayFile}`}
+                  className="text-customGreen hover:underline whitespace-nowrap text-lg flex items-center gap-1"
                 >
-                  Download replay
+                  <ArrowDownCircleIcon height={18} /> Replay
+                </a>
+              </div>
+            ) : null}
+            {match.result?.replayFile ? (
+              <div className="w-full flex justify-end">
+                <a
+                  download
+                  href={`/${match.result.replayFile}`}
+                  className="text-customGreen hover:underline whitespace-nowrap text-lg flex items-center gap-1"
+                >
+                  <ArrowDownCircleIcon height={18} /> Log
                 </a>
               </div>
             ) : null}

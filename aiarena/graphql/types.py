@@ -677,6 +677,7 @@ class ResultType(DjangoObjectTypeWithUID):
             "type",
             "created",
             "replay_file",
+            "arenaclient_log",
             "game_steps",
             "submitted_by",
         ]
