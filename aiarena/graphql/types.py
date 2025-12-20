@@ -669,6 +669,8 @@ class ResultType(DjangoObjectTypeWithUID):
     participant1 = graphene.Field("aiarena.graphql.MatchParticipationType")
     participant2 = graphene.Field("aiarena.graphql.MatchParticipationType")
     game_time_formatted = graphene.String()
+    replay_file = graphene.String()
+    arenaclient_log = graphene.String()
 
     class Meta:
         model = models.Result
@@ -676,13 +678,19 @@ class ResultType(DjangoObjectTypeWithUID):
             "winner",
             "type",
             "created",
-            "replay_file",
-            "arenaclient_log",
             "game_steps",
             "submitted_by",
         ]
         filter_fields = []
         connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_replay_file(root: models.Result, info, **args):
+        return root.replay_file.url
+
+    @staticmethod
+    def resolve_arenaclient_log(root: models.Result, info, **args):
+        return root.arenaclient_log.url
 
     @staticmethod
     def resolve_started(root: models.Result, info, **args):
