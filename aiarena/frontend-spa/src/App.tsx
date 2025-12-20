@@ -35,6 +35,7 @@ export default function App() {
         />
         <Route path="rounds/:roundId" element={<RoundsPage />} />
         <Route path="bots" element={<BotsPage />} />
+        <Route path="matches/:matchId" element={<MatchPage />} />
       </Route>
 
       <Route element={<DashboardLayout />} path="dashboard">
@@ -52,7 +53,6 @@ export default function App() {
           <Route path="" element={<LandingPage />} />
         </Route>
         <Route element={<RootWithPaddingLayout />}>
-          <Route path="matches/:matchId" element={<MatchPage />} />
           <Route path="results" element={<ResultsPage />} />
           <Route path="bots/:botId" element={<BotPage />} />
           <Route
