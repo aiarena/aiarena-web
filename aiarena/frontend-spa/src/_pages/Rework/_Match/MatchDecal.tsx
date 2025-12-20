@@ -80,7 +80,7 @@ export default function MatchInfo(props: MatchDecalProps) {
   const mp1 = match.participant1;
   const p2 = match.result?.participant2;
   const mp2 = match.participant2;
-  const winnerName = match.result?.winner?.name;
+  const winner = match.result?.winner;
 
   const matchFinished = match.status === "Finished";
 
@@ -125,11 +125,14 @@ export default function MatchInfo(props: MatchDecalProps) {
             <span className="text-xl font-semibold text-white ml-auto">
               {matchFinished ? (
                 <>
-                  {winnerName ? (
+                  {winner ? (
                     <span className="flex flex-wrap justify-end">
-                      <span className="block truncate max-w-80 mr-2 overflow-ellipsis">
-                        {winnerName}
-                      </span>
+                      <a
+                        href={`/bots/${getIDFromBase64(winner.id, "BotType")}`}
+                        className="block truncate max-w-80 mr-2 overflow-ellipsis"
+                      >
+                        {winner.name}
+                      </a>
                       won the match
                     </span>
                   ) : (
@@ -159,7 +162,7 @@ export default function MatchInfo(props: MatchDecalProps) {
                   href={`${match.result.arenaclientLog}`}
                   className="text-customGreen hover:underline whitespace-nowrap text-lg flex items-center gap-1"
                 >
-                  <ArrowDownCircleIcon height={18} /> Log
+                  <ArrowDownCircleIcon height={18} /> Logs
                 </a>
               </div>
             ) : null}
@@ -176,7 +179,7 @@ export default function MatchInfo(props: MatchDecalProps) {
                   href={`/bots/${getIDFromBase64(mp1.id, "BotType")}`}
                   className="text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
                 >
-                  {formatWinnerName(winnerName, mp1.name)}
+                  {formatWinnerName(winner?.name, mp1.name)}
                 </a>
                 {p1 && (
                   <div className="flex items-center gap-1 mb-4 text-lg">
@@ -221,7 +224,7 @@ export default function MatchInfo(props: MatchDecalProps) {
                   href={`/bots/${getIDFromBase64(mp2.id, "BotType")}`}
                   className="font-medium text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
                 >
-                  {formatWinnerName(winnerName, mp2.name)}
+                  {formatWinnerName(winner?.name, mp2.name)}
                 </a>
                 {p2 && (
                   <div className="flex items-center gap-1 mb-4 text-lg">
