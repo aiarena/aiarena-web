@@ -69,13 +69,6 @@ export const navLinks = [
     showLoggedOut: true,
     featureFlag: null,
   },
-  {
-    title: "Dashboard",
-    path: `/dashboard/`,
-    showLoggedIn: true,
-    showLoggedOut: true,
-    featureFlag: null,
-  },
 ];
 
 export const navbarTitle = {

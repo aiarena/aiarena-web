@@ -4,6 +4,7 @@ import { NavLink } from "react-router";
 import { navbarTitle, navLinks } from "@/_data/navbarLinks";
 import clsx from "clsx";
 import BackgroundTexture from "../_display/BackgroundTexture";
+import AuthNavbar from "./AuthNavbar";
 
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
@@ -103,7 +104,7 @@ function Navbar() {
                                 "py-2 text-white border-b-2",
                                 isActive
                                   ? "border-customGreen"
-                                  : "border-transparent hover:border-customGreen",
+                                  : "border-transparent hover:border-customGreen"
                               )
                             }
                           >
@@ -117,7 +118,7 @@ function Navbar() {
                               "py-2 text-white border-b-2",
                               window.location.pathname === link.path
                                 ? "border-customGreen"
-                                : "border-transparent hover:border-customGreen",
+                                : "border-transparent hover:border-customGreen"
                             )}
                           >
                             {link.title}
@@ -125,10 +126,9 @@ function Navbar() {
                         )}
                       </li>
                     ))}
+                  <AuthNavbar />
                 </ul>
               </div>
-
-              {/* <div className="ml-auto"><AuthNavBar /></div> */}
             </div>
           </div>
           {navbar === true ? (
@@ -146,7 +146,7 @@ function Navbar() {
                           "block w-full bg-darken-3 hover:darken-4 py-2 text-white hover:text-slate-300 border-b-2",
                           window.location.pathname === link.path
                             ? "border-customGreen"
-                            : "border-transparent",
+                            : "border-transparent"
                         )}
                       >
                         {link.title}
