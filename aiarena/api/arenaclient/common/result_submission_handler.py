@@ -18,7 +18,7 @@ from aiarena.core.models import (
     Result,
     Tag,
 )
-from aiarena.core.services import Bots, BotStatistics
+from aiarena.core.services import Bots, bot_statistics
 from aiarena.core.services.internal.rounds import update_round_if_completed
 from aiarena.core.utils import parse_tags
 
@@ -269,8 +269,8 @@ def submit_result(result_submission: ResultSubmission):
         elif config.DEBUG_LOGGING_ENABLED:
             logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
-        BotStatistics().update_stats_based_on_result(sp1, result, sp2)
-        BotStatistics().update_stats_based_on_result(sp2, result, sp1)
+        bot_statistics.update_stats_based_on_result(sp1, result, sp2)
+        bot_statistics.update_stats_based_on_result(sp2, result, sp1)
 
         if result.is_crash_or_timeout:
             try:
