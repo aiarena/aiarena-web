@@ -14,7 +14,7 @@ bots = _BotsClass()
 competitions = _CompetitionsClass()
 ladders = _LaddersClass()
 match_requests = _MatchRequestsClass()
-matches = _MatchesClass()
+matches = _MatchesClass(bots, competitions)
 supporter_benefits = _SupporterBenefitsClass()
 users = _UsersClass()
 
