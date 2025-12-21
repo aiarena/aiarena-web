@@ -13,9 +13,8 @@ def test_spa_redirect_to_django_login_if_no_user(page: Page, bh: BrowserHelper):
     expect(page.get_by_label("Password")).to_be_visible()
 
 
-def test_spa_nav_to_django(page: Page, bh: BrowserHelper):
-    page.goto(bh.reverse("dashboard_bots"))
-    page.get_by_role("link", name="Home").click()
+def test_spa(page: Page, bh: BrowserHelper):
+    page.goto("/")
     expect(page.locator("text=Welcome to AI Arena!")).to_be_visible()
 
 

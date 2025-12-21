@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { navbarTitle, navLinks } from "@/_data/navbarLinks";
 import clsx from "clsx";
 import BackgroundTexture from "../_display/BackgroundTexture";
@@ -43,8 +43,8 @@ function Navbar() {
       <nav className="w-full  text-white sticky top-0 z-50  bg-neutral-700 ">
         <BackgroundTexture>
           <div className="flex px-2 justify-between md:p-3 md:flex bg-darken-3 md:shadow-sm shadow-black border-neutral-700 border-b">
-            <a
-              href={navLinks[0].path}
+            <Link
+              to={navLinks[0].path}
               className="flex justify-between items-center"
             >
               <img
@@ -57,7 +57,7 @@ function Navbar() {
               <h2 className="text-2xl md:pl-5 py-4 md:py-0 pb-5 font-gugi font-light text-customGreen hover:text-white text-center">
                 {navbarTitle.title}
               </h2>
-            </a>
+            </Link>
 
             {/* Phone */}
             <div className="md:hidden py-4">
