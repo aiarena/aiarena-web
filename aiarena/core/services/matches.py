@@ -32,14 +32,14 @@ from .internal.match_starter import MatchStarter
 from .internal.matches import CancelResult, cancel, create
 from .internal.rounds import update_round_if_completed
 
-# TODO: avoid this - inject instead.
-bots_service = Bots()
-competitions_service = Competitions()
-
 logger = logging.getLogger(__name__)
 
 
 class Matches:
+    def __init__(self, bots_service: Bots, competitions_service: Competitions):
+        self.bots_service = bots_service
+        self.competitions_service = competitions_service
+
     def cancel(self, match_id):
         try:
             with transaction.atomic():
@@ -146,7 +146,7 @@ class Matches:
             random.shuffle(available_ladder_matches_to_play)  # ensure the match selection is random
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
-            if bots_service.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
+            if self.bots_service.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
                 return self._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
         return None
 
@@ -300,15 +300,15 @@ class Matches:
         # If none of the previous matches were able to start, and we don't have 2 active bots available,
         # then we give up.
         # todo: does this need to be a select_for_update?
-        active_bots = competitions_service.get_active_bots(competition).select_for_update()
-        if not bots_service.available_is_more_than(active_bots, 2):
+        active_bots = self.competitions_service.get_active_bots(competition).select_for_update()
+        if not self.bots_service.available_is_more_than(active_bots, 2):
             raise NotEnoughAvailableBots()
 
         # If we get to here, then we have
         # - no matches from any existing round we can start
         # - at least 2 active bots available for play
 
-        if competitions_service.has_reached_maximum_active_rounds(competition):
+        if self.competitions_service.has_reached_maximum_active_rounds(competition):
             raise MaxActiveRounds()
         else:  # generate new round
             round = self._attempt_to_generate_new_round(competition)
