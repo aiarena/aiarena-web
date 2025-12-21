@@ -269,8 +269,8 @@ def submit_result(result_submission: ResultSubmission):
         elif config.DEBUG_LOGGING_ENABLED:
             logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
-        BotStatistics(sp1).update_stats_based_on_result(result, sp2)
-        BotStatistics(sp2).update_stats_based_on_result(result, sp1)
+        BotStatistics().update_stats_based_on_result(sp1, result, sp2)
+        BotStatistics().update_stats_based_on_result(sp2, result, sp1)
 
         if result.is_crash_or_timeout:
             try:
