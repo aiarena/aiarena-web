@@ -8,7 +8,7 @@ dependencies = [
     "celery==5.5.3",
     "confusable-homoglyphs==3.2.0",
     "django==4.2.27",
-    "django-appconf==1.0.5",
+    "django-appconf==1.2.0",
     "django-avatar==8.0.1",
     "django-bootstrap-form==3.4",
     "django-constance[redis]==3.1.0",

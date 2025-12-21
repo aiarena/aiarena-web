@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = "==3.12.*"
 
 [[package]]
@@ -79,7 +79,7 @@ requires-dist = [
     { name = "celery", specifier = "==5.5.3" },
     { name = "confusable-homoglyphs", specifier = "==3.2.0" },
     { name = "django", specifier = "==4.2.27" },
-    { name = "django-appconf", specifier = "==1.0.5" },
+    { name = "django-appconf", specifier = "==1.2.0" },
     { name = "django-avatar", specifier = "==8.0.1" },
     { name = "django-bootstrap-form", specifier = "==3.4" },
     { name = "django-constance", extras = ["redis"], specifier = "==3.1.0" },
@@ -440,14 +440,14 @@ wheels = [
 
 [[package]]
 name = "django-appconf"
-version = "1.0.5"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d6/dc/ab95f120aa249f215b1a7925a9062393c039481e1df77b4455e021ae6f67/django-appconf-1.0.5.tar.gz", hash = "sha256:be3db0be6c81fa84742000b89a81c016d70ae66a7ccb620cdef592b1f1a6aaa4", size = 15891, upload-time = "2021-09-24T13:59:15.584Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/a2/e58bec8d7941b914af52a67c35b5709eceed2caa2848f28437f1666ed668/django_appconf-1.2.0.tar.gz", hash = "sha256:15a88d60dd942d6059f467412fe4581db632ef03018a3c183fb415d6fc9e5cec", size = 16127, upload-time = "2025-11-08T15:46:27.304Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/48/95/78c279b7861efd8b0282e9373d40ec7247664bf1246a6cdc9e59d281ceb0/django_appconf-1.0.5-py3-none-any.whl", hash = "sha256:ae9f864ee1958c815a965ed63b3fba4874eec13de10236ba063a788f9a17389d", size = 6433, upload-time = "2021-09-24T13:59:14.214Z" },
+    { url = "https://files.pythonhosted.org/packages/e8/e6/4c34d94dfb74bbcbc489606e61f1924933de30d22c593dd1f429f35fbd7f/django_appconf-1.2.0-py3-none-any.whl", hash = "sha256:b81bce5ef0ceb9d84df48dfb623a32235d941c78cc5e45dbb6947f154ea277f4", size = 6500, upload-time = "2025-11-08T15:46:25.957Z" },
 ]
 
 [[package]]
