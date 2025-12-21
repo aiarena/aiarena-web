@@ -95,7 +95,7 @@ function Navbar() {
                     .filter((it) => it.featureFlag !== false)
                     .map((link, index) => (
                       <li key={index} className="pb-2 text-l p-2 text-center">
-                        {link.path === "/dashboard/" ? (
+                        {link.react === true ? (
                           <NavLink
                             key={index}
                             to={link.path}

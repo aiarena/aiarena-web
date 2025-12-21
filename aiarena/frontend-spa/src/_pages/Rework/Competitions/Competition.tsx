@@ -10,6 +10,7 @@ import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import CompetitionParticipantCount from "@/_components/_display/CompetitionParticipantCount";
 import { Suspense } from "react";
 import LoadingDots from "@/_components/_display/LoadingDots";
+import { Link } from "react-router";
 
 interface CompetitionCardProps {
   data: CompetitionCard_competition$key;
@@ -66,8 +67,8 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
   }
 
   return (
-    <a
-      href={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
+    <Link
+      to={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
       className={clsx(
         "p-2  grid grid-cols-1 lg:grid-cols-4 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm",
         "shadow-lg shadow-black transition hover:scale-102  duration-100  "
@@ -126,6 +127,6 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
 
       {/* Col 4 reserved for new feature */}
       <div id="leaderboards" className="col-span-1"></div>
-    </a>
+    </Link>
   );
 }

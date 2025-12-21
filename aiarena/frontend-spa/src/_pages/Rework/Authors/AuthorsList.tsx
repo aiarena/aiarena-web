@@ -7,6 +7,7 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import Author from "./Author";
+import { Link } from "react-router";
 
 interface AuthorsListProps {
   authors: AuthorsList_node$key;
@@ -91,9 +92,9 @@ export default function AuthorsList(props: AuthorsListProps) {
               role="listitem"
               className="w-full max-w-[42rem]"
             >
-              <a href={`/authors/${getIDFromBase64(author.id, "UserType")}`}>
+              <Link to={`/authors/${getIDFromBase64(author.id, "UserType")}`}>
                 <Author author={author} />
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

@@ -5,6 +5,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Wiki",
@@ -12,6 +13,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+
   },
   {
     title: "Authors",
@@ -19,6 +21,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Bots",
@@ -26,6 +29,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Competitions",
@@ -33,6 +37,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Match Queue",
