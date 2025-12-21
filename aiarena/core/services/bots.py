@@ -47,6 +47,11 @@ class Bots:
     def get_active(self) -> QuerySet:
         return Bot.objects.filter(competition_participations__active=True)
 
+    def get_active_excluding_bot(self, bot: Bot) -> QuerySet:
+        if self.get_active().count() <= 1:
+            raise RuntimeError(f"Bot {bot.id} is the only bot.")
+        return self.get_active().exclude(id=bot.id)
+
     def get_available(self, bots) -> list:
         return [bot for bot in bots if not self.bot_data_is_frozen(bot)]
 
