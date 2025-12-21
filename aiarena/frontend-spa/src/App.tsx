@@ -26,7 +26,7 @@ export default function App() {
   return (
     <Routes>
       <Route element={<RootLayout />}>
-        <Route path="" element={<LandingPage />} />
+        <Route index element={<LandingPage />} />
       </Route>
       <Route element={<RootWithPaddingLayout />}>
         <Route path="authors" element={<AuthorsPage />} />
