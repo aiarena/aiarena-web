@@ -12,7 +12,7 @@ export default function UserSettings() {
         }
       }
     `,
-    {},
+    {}
   );
 
   if (!data.viewer) {

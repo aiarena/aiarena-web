@@ -11,7 +11,8 @@ import { useSnackbar } from "notistack";
 import { UserSettingsSection_viewer$key } from "./__generated__/UserSettingsSection_viewer.graphql";
 import AvatarWithBorder from "@/_components/_display/AvatarWithBorder";
 import SectionDivider from "@/_components/_display/SectionDivider";
-
+import SocialLinkCard from "@/_components/_display/SocialLinkCard";
+import { footerLinks } from "@/_data/footerLinks";
 interface UserSettingsSectionProps {
   viewer: UserSettingsSection_viewer$key;
 }
@@ -26,10 +27,11 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
         dateJoined
         firstName
         lastName
+        linkedDiscord
+        linkedPatreon
         user {
           username
           patreonLevel
-
           ...AvatarWithBorder_user
         }
       }
@@ -39,13 +41,20 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
 
-  // const [discordLinked, setDiscordLinked] = useState(false);
-  // const [patreonLinked, setPatreonLinked] = useState(false);
+  const handleLinkDiscord = () => {
+    window.open("/discord/", "_blank", "noopener,noreferrer");
+  };
+  const handleUnlinkDiscord = () => {
+    window.open("/profile/unlink/discord/", "_blank", "noopener,noreferrer");
+  };
 
-  // const handleLinkDiscord = () => setDiscordLinked(true);
-  // const handleUnlinkDiscord = () => setDiscordLinked(false);
-  // const handleLinkPatreon = () => setPatreonLinked(true);
-  // const handleUnlinkPatreon = () => setPatreonLinked(false);
+  const handleLinkPatreon = () => {
+    window.open("/discord/", "_blank", "noopener,noreferrer");
+  };
+
+  const handleUnlinkPatreon = () => {
+    window.open("/profile/unlink/patreon/", "_blank", "noopener,noreferrer");
+  };
 
   const handleCopyToken = () => {
     navigator.clipboard.writeText(viewer.apiToken ?? "");
@@ -123,70 +132,55 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           </div>
           <SectionDivider className="pb-4" />
           <div className="gap-4 flex flex-col max-w-[26em]">
-            {/* <div className="bg-gray-700 p-4 rounded-md ">
-              <h3 className="text-base font-semibold text-customGreen">
-                Connected Accounts
-              </h3>
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-4 h-4 text-indigo-400"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M20.317 4.369A19.791 19.791 0 0016.845 3c-.247.454-.53 1.047-.721 1.514a17.835 17.835 0 00-4.248 0c-.191-.467-.474-1.06-.721-1.514A19.781 19.781 0 003.683 4.37C.976 9.05 0 13.5 0 17.752c0 0 4.144 3.697 8.298 3.697h.878a7.548 7.548 0 007.547-7.547c0-.056 0-.11-.002-.165 1.102-.794 2.03-1.695 2.805-2.7a19.248 19.248 0 001.79-2.6z" />
-                  </svg>
-                  <span className="text-gray-300">Discord:</span>
-                  {discordLinked ? (
-                    <button
-                      onClick={handleUnlinkDiscord}
-                      className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
-                    >
-                      Unlink
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleLinkDiscord}
-                      className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
-                    >
-                      Link
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-4 h-4 text-red-400"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="12" cy="12" r="9" />
-                  </svg>
-                  <span className="text-gray-300">Patreon:</span>
-                  {patreonLinked ? (
-                    <button
-                      onClick={handleUnlinkPatreon}
-                      className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
-                    >
-                      Unlink
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleLinkPatreon}
-                      className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
-                    >
-                      Link
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div> */}
+            <SocialLinkCard
+              title="Discord"
+              iconPath={
+                footerLinks.socialLinks.find((it) => it.name == "Discord")?.icon
+              }
+            >
+              {viewer.linkedDiscord ? (
+                <button
+                  onClick={handleUnlinkDiscord}
+                  className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
+                >
+                  Unlink
+                </button>
+              ) : (
+                <button
+                  onClick={handleLinkDiscord}
+                  className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
+                >
+                  Link
+                </button>
+              )}
+            </SocialLinkCard>
+            <SocialLinkCard
+              title="Patreon"
+              iconPath={
+                footerLinks.socialLinks.find((it) => it.name == "Patreon")?.icon
+              }
+              invert
+            >
+              {viewer.linkedPatreon ? (
+                <button
+                  onClick={handleUnlinkPatreon}
+                  className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
+                >
+                  Unlink
+                </button>
+              ) : (
+                <button
+                  onClick={handleLinkPatreon}
+                  className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
+                >
+                  Link
+                </button>
+              )}
+            </SocialLinkCard>
 
             {/* API Token */}
             <div className="bg-darken-2 border border-neutral-600 shadow-lg shadow-black rounded-md backdrop-blur-sm">
-              <h3 className="mt-1 ml-2 text-base font-semibold text-customGreen">
-                API Token
-              </h3>
+              <h3 className="mt-1 ml-2 text-base font-semibold ">API Token</h3>
               <div className=" p-4">
                 <div className="flex items-center gap-2 bg-black text-gray-300 px-2 py-1 rounded font-mono text-xs break-words ">
                   <span className="flex-1 truncate">

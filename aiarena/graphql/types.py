@@ -16,6 +16,7 @@ from django.utils import timezone
 import django_filters
 import graphene
 from avatar.models import Avatar
+from discord_bind.models import DiscordUser
 from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
@@ -315,6 +316,21 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             .order_by("-win_perc")
             .distinct()
             .select_related("opponent__bot", "opponent__bot__plays_race")
+        )
+
+
+class DiscordUserType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = DiscordUser
+        fields = (
+            "id",
+            "uid",
+            "username",
+            "discriminator",
+            "avatar",
+            "email",
+            "scope",
+            "expiry",
         )
 
 
@@ -857,6 +873,8 @@ class Viewer(graphene.ObjectType):
     date_joined = graphene.DateTime()
     first_name = graphene.String()
     last_name = graphene.String()
+    linked_discord = graphene.Boolean()
+    linked_patreon = graphene.Boolean()
 
     @staticmethod
     def resolve_id(root: models.User, info, **args):
@@ -919,6 +937,14 @@ class Viewer(graphene.ObjectType):
     @staticmethod
     def resolve_last_name(root: models.User, info):
         return root.last_name
+
+    @staticmethod
+    def resolve_linked_discord(root: models.User, info):
+        return getattr(root, "discord_user", None) is not None
+
+    @staticmethod
+    def resolve_linked_patreon(root: models.User, info):
+        return getattr(root, "patreonaccountbind", None) is not None
 
 
 class Query(graphene.ObjectType):
