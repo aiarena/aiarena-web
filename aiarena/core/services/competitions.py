@@ -4,11 +4,12 @@ from typing import TYPE_CHECKING
 
 from django.db.models import Count
 
+from aiarena.core.services.internal.rounds import update_round_if_completed
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 
-    from aiarena.core.models import Competition
+    from aiarena.core.models import Competition, Round
 
 from aiarena.core.models import Bot, CompetitionParticipation
 
@@ -45,3 +46,6 @@ class Competitions:
         participations = CompetitionParticipation.objects.filter(bot=bot, active=True)
         updated = participations.update(active=False)
         return updated
+
+    def update_competition_round_if_completed(self, round: Round):
+        update_round_if_completed(round)
