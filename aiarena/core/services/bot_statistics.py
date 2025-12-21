@@ -6,7 +6,7 @@ from django_pglocks import advisory_lock
 from aiarena.core.models import CompetitionParticipation, Map, Match, MatchParticipation, Result
 from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
-from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
+from .internal.statistics.elo_graphs_generator import EloGraphsGenerator
 
 
 class BotStatistics:
