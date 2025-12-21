@@ -629,11 +629,11 @@ class WebsiteUserAdmin(admin.ModelAdmin):
     actions = ["ban_users"]
 
     def ban_users(self, request, queryset):
-        from aiarena.core.services.users import Users
+        from aiarena.core.services import users
 
         total_banned = 0
         for user in queryset:
-            total_banned += Users.ban_user(user)
+            total_banned += users.ban_user(user)
         self.message_user(
             request,
             f"Banned {queryset.count()} user(s) and disabled {total_banned} bot participations.",

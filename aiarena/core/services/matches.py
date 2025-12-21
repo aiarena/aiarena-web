@@ -28,9 +28,9 @@ from aiarena.core.models import (
 )
 from .bots import Bots
 from .competitions import Competitions
-from aiarena.core.services.internal.match_starter import MatchStarter
-from aiarena.core.services.internal.matches import CancelResult, cancel, create
-from aiarena.core.services.internal.rounds import update_round_if_completed
+from .internal.match_starter import MatchStarter
+from .internal.matches import CancelResult, cancel, create
+from .internal.rounds import update_round_if_completed
 
 # TODO: avoid this - inject instead.
 bots_service = Bots()

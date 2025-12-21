@@ -4,7 +4,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from aiarena.core.models import Match, MatchParticipation, Result
-from aiarena.core.services.internal.rounds import update_round_if_completed
+from .rounds import update_round_if_completed
 
 
 def create(
