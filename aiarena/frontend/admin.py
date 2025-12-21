@@ -33,7 +33,7 @@ from aiarena.core.models import (
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
-from aiarena.core.services import Competitions, Matches
+from aiarena.core.services import competitions, matches
 from aiarena.patreon.models import PatreonAccountBind, PatreonUnlinkedDiscordUID
 
 
@@ -159,7 +159,7 @@ class BotAdmin(admin.ModelAdmin):
     def disable_active_participations(self, request, queryset):
         count = 0
         for bot in queryset:
-            count += Competitions.disable_bot_for_all_competitions(bot)
+            count += competitions.disable_bot_for_all_competitions(bot)
         self.message_user(
             request, f"Disabled {count} active competition participations for selected bot(s).", messages.SUCCESS
         )
@@ -403,7 +403,7 @@ class MatchAdmin(admin.ModelAdmin):
         Registers a MatchCancelled result for the selected matches.
         """
         for match in queryset:
-            Matches.cancel(match.id)
+            matches.cancel(match.id)
 
     cancel_matches.short_description = "Cancel selected matches"
 

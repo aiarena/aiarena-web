@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from django.core.cache import cache
 from django.dispatch import receiver
 
-from aiarena.core.services.competitions import Competitions
+from aiarena.core.services import competitions
 
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ from aiarena.core.exceptions import (
     NotEnoughAvailableBots,
 )
 from aiarena.core.models import Competition, Match
-from aiarena.core.services import Matches
+from aiarena.core.services import matches
 
 from .exceptions import LadderDisabled
 
@@ -41,7 +41,7 @@ class ACCoordinator:
     def next_requested_match(arenaclient: ArenaClient):
         # REQUESTED MATCHES
         with transaction.atomic():
-            match = Matches.attempt_to_start_a_requested_match(arenaclient)
+            match = matches.attempt_to_start_a_requested_match(arenaclient)
             if match is not None:
                 return match  # a match was found - we're done
         return None
@@ -56,9 +56,9 @@ class ACCoordinator:
                 # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
                 with transaction.atomic():
                     # this call will apply a select for update, so we do it inside an atomic block
-                    if Competitions.check_has_matches_to_play_and_apply_locks(competition):
+                    if competitions.check_has_matches_to_play_and_apply_locks(competition):
                         try:
-                            return Matches.start_next_match_for_competition(arenaclient, competition)
+                            return matches.start_next_match_for_competition(arenaclient, competition)
                         except (
                             NoMaps,
                             NotEnoughAvailableBots,
