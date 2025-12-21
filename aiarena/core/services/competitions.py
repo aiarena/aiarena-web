@@ -6,6 +6,7 @@ from django.db.models import Count
 
 from aiarena.core.services.internal.rounds import update_round_if_completed
 
+
 if TYPE_CHECKING:
     from django.db.models import QuerySet
 

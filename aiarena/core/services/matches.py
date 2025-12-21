@@ -26,11 +26,13 @@ from aiarena.core.models import (
     Result,
     Round,
 )
+
 from .bots import Bots
 from .competitions import Competitions
 from .internal.match_starter import MatchStarter
 from .internal.matches import CancelResult, cancel, create
 from .internal.rounds import update_round_if_completed
+
 
 logger = logging.getLogger(__name__)
 

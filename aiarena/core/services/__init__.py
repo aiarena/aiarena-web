@@ -8,6 +8,7 @@ from .matches import Matches as _MatchesClass
 from .supporter_benefits import SupporterBenefits as _SupporterBenefitsClass
 from .users import Users as _UsersClass
 
+
 arena_clients = _ArenaClientsClass()
 bot_statistics = _BotStatisticsClass()
 bots = _BotsClass()

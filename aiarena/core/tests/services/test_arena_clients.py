@@ -1,5 +1,5 @@
-from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase
 
 from aiarena.core.models import (
     ArenaClient,
@@ -32,9 +32,13 @@ class ArenaClientsServiceTests(TestCase):
         # BotRace and Bots
         self.race = BotRace.objects.create(label="T")
         bot_zip = SimpleUploadedFile("bot.zip", b"zip-bytes")
-        self.bot1 = Bot.objects.create(user=self.bot_user, name="BotOne", plays_race=self.race, type="python", bot_zip=bot_zip)
+        self.bot1 = Bot.objects.create(
+            user=self.bot_user, name="BotOne", plays_race=self.race, type="python", bot_zip=bot_zip
+        )
         bot_zip2 = SimpleUploadedFile("bot2.zip", b"zip-bytes-2")
-        self.bot2 = Bot.objects.create(user=self.bot_user, name="BotTwo", plays_race=self.race, type="python", bot_zip=bot_zip2)
+        self.bot2 = Bot.objects.create(
+            user=self.bot_user, name="BotTwo", plays_race=self.race, type="python", bot_zip=bot_zip2
+        )
 
     def _create_match_with_participants(self, assigned=True, finished=False):
         match = Match.objects.create(map=self.map, assigned_to=self.ac if assigned else None)

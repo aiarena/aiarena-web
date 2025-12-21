@@ -6,6 +6,7 @@ from django_pglocks import advisory_lock
 from aiarena.core.models import CompetitionParticipation, Map, Match, MatchParticipation, Result
 from aiarena.core.models.competition_bot_map_stats import CompetitionBotMapStats
 from aiarena.core.models.competition_bot_matchup_stats import CompetitionBotMatchupStats
+
 from .internal.statistics.elo_graphs_generator import EloGraphsGenerator
 
 
@@ -31,10 +32,11 @@ class BotStatistics:
         """This method updates a bot's existing stats based on a single result.
         This can be done much quicker that regenerating a bot's entire set of stats"""
 
-        if result.type not in self._ignored_result_types and competition_participation.competition.indepth_bot_statistics_enabled:
-            with advisory_lock(
-                f"stats_lock_competitionparticipation_{competition_participation.id}"
-            ) as acquired:
+        if (
+            result.type not in self._ignored_result_types
+            and competition_participation.competition.indepth_bot_statistics_enabled
+        ):
+            with advisory_lock(f"stats_lock_competitionparticipation_{competition_participation.id}") as acquired:
                 if not acquired:
                     raise Exception(
                         "Could not acquire lock on bot statistics for competition participation "
@@ -47,9 +49,7 @@ class BotStatistics:
     def recalculate_stats(self, competition_participation: CompetitionParticipation):
         """This method entirely recalculates a bot's set of stats."""
 
-        with advisory_lock(
-            f"stats_lock_competitionparticipation_{competition_participation.id}"
-        ) as acquired:
+        with advisory_lock(f"stats_lock_competitionparticipation_{competition_participation.id}") as acquired:
             if not acquired:
                 raise Exception(
                     f"Could not acquire lock on bot statistics for competition participation  {str(competition_participation.id)}"
@@ -193,9 +193,9 @@ class BotStatistics:
             matchup_stats.save()
 
     def _recalculate_map_stats(self, participation: CompetitionParticipation):
-        competition_matches = Match.objects.filter(
-            round__competition_id=participation.competition.id
-        ).select_related("map")
+        competition_matches = Match.objects.filter(round__competition_id=participation.competition.id).select_related(
+            "map"
+        )
         maps = Map.objects.filter(id__in=competition_matches.values_list("map_id", flat=True))
 
         for map in maps:
@@ -262,9 +262,7 @@ class BotStatistics:
     def _calculate_matchup_data(self, participation: CompetitionParticipation, opponent_p, result_query):
         return Match.objects.filter(
             Exists(
-                MatchParticipation.objects.filter(
-                    result_query, match_id=OuterRef("id"), bot_id=participation.bot_id
-                )
+                MatchParticipation.objects.filter(result_query, match_id=OuterRef("id"), bot_id=participation.bot_id)
             ),
             Exists(MatchParticipation.objects.filter(match_id=OuterRef("id"), bot_id=opponent_p.bot_id)),
             round__competition=participation.competition_id,
@@ -273,9 +271,7 @@ class BotStatistics:
     def _calculate_map_data(self, participation: CompetitionParticipation, map, result_query):
         return Match.objects.filter(
             Exists(
-                MatchParticipation.objects.filter(
-                    result_query, match_id=OuterRef("id"), bot_id=participation.bot_id
-                )
+                MatchParticipation.objects.filter(result_query, match_id=OuterRef("id"), bot_id=participation.bot_id)
             ),
             map_id=map.id,
             round__competition=participation.competition_id,

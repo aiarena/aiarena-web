@@ -18,7 +18,7 @@ from aiarena.core.models import (
     Result,
     Tag,
 )
-from aiarena.core.services import bots, bot_statistics, competitions
+from aiarena.core.services import bot_statistics, bots, competitions
 from aiarena.core.utils import parse_tags
 
 from .serializers import (

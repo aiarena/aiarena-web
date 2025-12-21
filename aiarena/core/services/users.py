@@ -10,9 +10,9 @@ class Users:
         return active_count
 
     def get_remaining_competition_participations(self, user: User):
-        available_count = supporter_benefits.get_active_bots_limit(user) - self.get_total_active_competition_participations(
+        available_count = supporter_benefits.get_active_bots_limit(
             user
-        )
+        ) - self.get_total_active_competition_participations(user)
         return available_count
 
     def ban_user(self, user: User) -> int:
