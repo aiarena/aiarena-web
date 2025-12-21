@@ -702,11 +702,27 @@ class ResultType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_replay_file(root: models.Result, info, **args):
-        return root.replay_file.url
+        file = getattr(root, "replay_file", None)
+
+        if not file:
+            return None
+
+        try:
+            return file.url
+        except Exception:
+            return None
 
     @staticmethod
     def resolve_arenaclient_log(root: models.Result, info, **args):
-        return root.arenaclient_log.url
+        file = getattr(root, "arenaclient_log", None)
+
+        if not file:
+            return None
+
+        try:
+            return file.url
+        except Exception:
+            return None
 
     @staticmethod
     def resolve_started(root: models.Result, info, **args):
