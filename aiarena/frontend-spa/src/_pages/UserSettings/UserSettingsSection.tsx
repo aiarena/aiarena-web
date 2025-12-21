@@ -114,12 +114,17 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           <dt className="w-36 font-medium text-white">Receive Emails:</dt>
           <dd>{viewer.receiveEmailComms ? "Yes" : "No"}</dd>
         </div>
-        <button
-          onClick={handleLogout}
-          className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400 w-24 flex justify-around"
-        >
-          {!updating ? <p>Logout</p> : <LoadingSpinner color="white" />}
-        </button>
+        <div className="grid gap-4">
+          <a id="change_password" href="/accounts/password_change/">
+            Change password
+          </a>
+          <button
+            onClick={handleLogout}
+            className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400 w-24 flex justify-around"
+          >
+            {!updating ? <p>Logout</p> : <LoadingSpinner color="white" />}
+          </button>
+        </div>
       </dl>
     );
   };
