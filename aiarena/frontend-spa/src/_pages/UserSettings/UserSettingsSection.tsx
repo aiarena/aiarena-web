@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { graphql, useFragment } from "react-relay";
+import { graphql, useFragment, useMutation } from "react-relay";
 
 import { getDateToLocale } from "@/_lib/dateUtils";
 import {
@@ -13,6 +13,9 @@ import AvatarWithBorder from "@/_components/_display/AvatarWithBorder";
 import SectionDivider from "@/_components/_display/SectionDivider";
 import SocialLinkCard from "@/_components/_display/SocialLinkCard";
 import { footerLinks } from "@/_data/footerLinks";
+import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
+import { UserSettingsSectionLogoutMutation } from "./__generated__/UserSettingsSectionLogoutMutation.graphql";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 interface UserSettingsSectionProps {
   viewer: UserSettingsSection_viewer$key;
 }
@@ -38,8 +41,39 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
     `,
     props.viewer
   );
+
+  const [logout, updating] = useMutation<UserSettingsSectionLogoutMutation>(
+    graphql`
+      mutation UserSettingsSectionLogoutMutation {
+        signOut {
+          errors {
+            messages
+            field
+          }
+        }
+      }
+    `
+  );
+
   const { enqueueSnackbar } = useSnackbar();
+  const { onCompleted, onError } = useSnackbarErrorHandlers(
+    "signOut",
+    "Successfully logged out! Redirecting..."
+  );
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
+
+  const handleLogout = () => {
+    logout({
+      variables: {},
+      onCompleted: (...args) => {
+        const success = onCompleted(...args);
+        if (success) {
+          window.location.href = "/";
+        }
+      },
+      onError,
+    });
+  };
 
   const handleLinkDiscord = () => {
     window.open("/discord/", "_blank", "noopener,noreferrer");
@@ -80,6 +114,12 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           <dt className="w-36 font-medium text-white">Receive Emails:</dt>
           <dd>{viewer.receiveEmailComms ? "Yes" : "No"}</dd>
         </div>
+        <button
+          onClick={handleLogout}
+          className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400 w-24 flex justify-around"
+        >
+          {!updating ? <p>Logout</p> : <LoadingSpinner color="white" />}
+        </button>
       </dl>
     );
   };
@@ -101,6 +141,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           <div className="hidden lg:block mt-4">
             <StatusInfo />
           </div>
+          <div className="hidden lg:block mt-4"></div>
         </div>
 
         {/* mainsection */}
