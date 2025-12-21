@@ -26,19 +26,21 @@ from aiarena.core.models import (
     Result,
     Round,
 )
-from aiarena.core.services import Bots
-from aiarena.core.services.competitions import Competitions
+from .bots import Bots
+from .competitions import Competitions
 from aiarena.core.services.internal.match_starter import MatchStarter
 from aiarena.core.services.internal.matches import CancelResult, cancel, create
 from aiarena.core.services.internal.rounds import update_round_if_completed
 
+# TODO: avoid this - inject instead.
+bots_service = Bots()
+competitions_service = Competitions()
 
 logger = logging.getLogger(__name__)
 
 
 class Matches:
-    @staticmethod
-    def cancel(match_id):
+    def cancel(self, match_id):
         try:
             with transaction.atomic():
                 match = Match.objects.select_for_update().get(pk=match_id)
@@ -50,8 +52,7 @@ class Matches:
         except Match.DoesNotExist:
             raise Exception(f'Match "{match_id}" does not exist')
 
-    @staticmethod
-    def timeout_overtime_bot_games():
+    def timeout_overtime_bot_games(self):
         matches_without_result = (
             Match.objects.only("round")
             .select_for_update(of=("self",))
@@ -64,8 +65,7 @@ class Matches:
             if match.round is not None:  # if the match is part of a round, check for round completion
                 update_round_if_completed(match.round)
 
-    @staticmethod
-    def attempt_to_start_a_requested_match(requesting_ac: ArenaClient):
+    def attempt_to_start_a_requested_match(self, requesting_ac: ArenaClient):
         # Try get a requested match
         # Do we want trusted clients to run games not requiring trusted clients?
         matches = (
@@ -76,19 +76,17 @@ class Matches:
             .order_by("created")
         )
         if matches.count() > 0:
-            return Matches._start_and_return_a_match(requesting_ac, matches)
+            return self._start_and_return_a_match(requesting_ac, matches)
         else:
             return None
 
-    @staticmethod
-    def _start_and_return_a_match(requesting_ac: ArenaClient, matches):
+    def _start_and_return_a_match(self, requesting_ac: ArenaClient, matches):
         for match in matches:
             if MatchStarter.start(match, requesting_ac):
                 return match
         return None  # No match was able to start
 
-    @staticmethod
-    def _attempt_to_start_a_ladder_match(requesting_ac: ArenaClient, for_round):
+    def _attempt_to_start_a_ladder_match(self, requesting_ac: ArenaClient, for_round):
         assert requesting_ac is not None
         assert for_round is not None
 
@@ -148,12 +146,11 @@ class Matches:
             random.shuffle(available_ladder_matches_to_play)  # ensure the match selection is random
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
-            if Bots.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
-                return Matches._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
+            if bots_service.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
+                return self._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
         return None
 
-    @staticmethod
-    def _attempt_to_generate_new_round(competition: Competition):
+    def _attempt_to_generate_new_round(self, competition: Competition):
         active_maps = Map.objects.filter(
             competitions__in=[
                 competition,
@@ -269,8 +266,7 @@ class Matches:
 
         return new_round
 
-    @staticmethod
-    def start_next_match_for_competition(requesting_ac: ArenaClient, competition: Competition):
+    def start_next_match_for_competition(self, requesting_ac: ArenaClient, competition: Competition):
         # LADDER MATCHES
         # Get rounds with un-started matches
         # The "IN" is a workaround due to postgresql not allowing "FOR UPDATE" with a DISTINCT clause
@@ -297,26 +293,26 @@ class Matches:
         )
 
         for round in rounds:
-            match = Matches._attempt_to_start_a_ladder_match(requesting_ac, round)
+            match = self._attempt_to_start_a_ladder_match(requesting_ac, round)
             if match is not None:
                 return match  # a match was found - we're done
 
         # If none of the previous matches were able to start, and we don't have 2 active bots available,
         # then we give up.
         # todo: does this need to be a select_for_update?
-        active_bots = Competitions.get_active_bots(competition).select_for_update()
-        if not Bots.available_is_more_than(active_bots, 2):
+        active_bots = competitions_service.get_active_bots(competition).select_for_update()
+        if not bots_service.available_is_more_than(active_bots, 2):
             raise NotEnoughAvailableBots()
 
         # If we get to here, then we have
         # - no matches from any existing round we can start
         # - at least 2 active bots available for play
 
-        if Competitions.has_reached_maximum_active_rounds(competition):
+        if competitions_service.has_reached_maximum_active_rounds(competition):
             raise MaxActiveRounds()
         else:  # generate new round
-            round = Matches._attempt_to_generate_new_round(competition)
-            match = Matches._attempt_to_start_a_ladder_match(requesting_ac, round)
+            round = self._attempt_to_generate_new_round(competition)
+            match = self._attempt_to_start_a_ladder_match(requesting_ac, round)
             if match is None:
                 raise APIException("Failed to start match. There might not be any available participants.")
             else:

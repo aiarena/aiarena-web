@@ -18,7 +18,7 @@ from aiarena.core.models import (
     Result,
     Tag,
 )
-from aiarena.core.services import Bots, bot_statistics
+from aiarena.core.services import bots, bot_statistics
 from aiarena.core.services.internal.rounds import update_round_if_completed
 from aiarena.core.utils import parse_tags
 
@@ -313,4 +313,4 @@ def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
     BotCrashLimitAlert.objects.create(triggering_match_participation=triggering_participation)
 
     # If we get to here, all the results were crashes, so take action
-    Bots.send_crash_alert(triggering_participation.bot)
+    bots.send_crash_alert(triggering_participation.bot)

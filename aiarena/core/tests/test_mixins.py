@@ -21,7 +21,7 @@ from aiarena.core.models import (
     WebsiteUser,
 )
 from aiarena.core.models.bot_race import BotRace
-from aiarena.core.services import MatchRequests
+from aiarena.core.services import match_requests
 from aiarena.core.tests.testing_utils import TestAssetPaths
 
 
@@ -271,25 +271,25 @@ class BaseTestMixin(TestCase):
         self._generate_match_activity()
 
         # generate a bot match request to ensure it doesn't bug things out
-        from aiarena.core.services import Bots  # avoid circular reference
+        from aiarena.core.services import bots
 
         game_mode = GameMode.objects.get(name="Melee")
-        bots = Bots.get_available(Bot.objects.all())
-        MatchRequests.request_match(
-            self.regularUser2, bots[0], Bots.get_random_active_bot_excluding(bots[0].id), game_mode=game_mode
+        bots_list = bots.get_available(Bot.objects.all())
+        match_requests.request_match(
+            self.regularUser2, bots_list[0], bots.get_random_active_bot_excluding(bots_list[0].id), game_mode=game_mode
         )
 
         # generate match requests from regularUser1
-        bot = Bots.get_random_active()
-        MatchRequests.request_match(
-            self.regularUser1, bot, Bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
+        bot = bots.get_random_active()
+        match_requests.request_match(
+            self.regularUser1, bot, bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
         )
-        MatchRequests.request_match(
-            self.regularUser1, bot, Bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
+        match_requests.request_match(
+            self.regularUser1, bot, bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
         )
-        bot = Bots.get_random_active()
-        MatchRequests.request_match(
-            self.regularUser1, bot, Bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
+        bot = bots.get_random_active()
+        match_requests.request_match(
+            self.regularUser1, bot, bots.get_random_active_bot_excluding(bot.id), game_mode=game_mode
         )
 
         self.test_client.logout()  # child tests can login if they require

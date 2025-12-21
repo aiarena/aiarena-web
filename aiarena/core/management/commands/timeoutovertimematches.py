@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from aiarena.core.services import Matches
+from aiarena.core.services import matches
 
 
 class Command(BaseCommand):
@@ -9,4 +9,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         with transaction.atomic():
-            Matches.timeout_overtime_bot_games()
+            matches.timeout_overtime_bot_games()

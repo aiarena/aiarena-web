@@ -4,7 +4,7 @@ from constance import config
 
 from aiarena.core.models import Bot, BotCrashLimitAlert, GameMode, Match, MatchParticipation
 from aiarena.core.models.bot_race import BotRace
-from aiarena.core.services import MatchRequests
+from aiarena.core.services import match_requests
 from aiarena.core.tests.test_mixins import LoggedInMixin
 from aiarena.core.tests.testing_utils import TestAssetPaths
 
@@ -57,7 +57,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         self._check_hashes(bot1, bot2, match["id"], 1)
 
         # test that requested matches don't update bot_data
-        requested_match = MatchRequests.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get())
+        requested_match = match_requests.request_match(self.staffUser1, bot1, bot2, game_mode=GameMode.objects.get())
         match_id = self._post_to_matches().data["id"]
         assert match_id == requested_match.id
         self._post_to_results_bot_datas_set_1(requested_match.id, "Player1Win")

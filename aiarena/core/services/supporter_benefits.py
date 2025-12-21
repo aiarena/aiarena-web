@@ -38,24 +38,20 @@ BENEFITS_MAP = {
 
 
 class SupporterBenefits:
-    @staticmethod
-    def get_active_bots_limit(user: User):
+    def get_active_bots_limit(self, user: User):
         limit = BENEFITS_MAP[user.patreon_level]["active_bots_limit"]
         if limit is None:
             return None  # no limit
         else:
             return limit + user.extra_active_competition_participations
 
-    @staticmethod
-    def get_requested_matches_limit(user: User):
+    def get_requested_matches_limit(self, user: User):
         return BENEFITS_MAP[user.patreon_level]["requested_matches_limit"] + user.extra_periodic_match_requests
 
-    @staticmethod
-    def get_active_competition_participations_limit_display(user: User):
-        limit = SupporterBenefits.get_active_bots_limit(user)
+    def get_active_competition_participations_limit_display(self, user: User):
+        limit = self.get_active_bots_limit(user)
         return "unlimited" if limit is None else limit
 
-    @staticmethod
-    def can_request_match_via_api(user: User) -> (bool, str):
+    def can_request_match_via_api(self, user: User) -> (bool, str):
         allowed = BENEFITS_MAP[user.patreon_level]["can_request_match_via_api"]
         return allowed, "You need to be a supporter to use this feature." if not allowed else None
