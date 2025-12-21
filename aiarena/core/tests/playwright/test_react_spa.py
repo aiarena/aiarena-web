@@ -14,7 +14,7 @@ def test_spa_redirect_to_django_login_if_no_user(page: Page, bh: BrowserHelper):
 
 
 def test_spa(page: Page, bh: BrowserHelper):
-    page.goto("/")
+    page.goto(bh.live_server.url)
     expect(page.locator("text=Welcome to AI Arena!")).to_be_visible()
 
 
