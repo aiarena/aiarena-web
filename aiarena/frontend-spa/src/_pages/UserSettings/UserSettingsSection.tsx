@@ -49,7 +49,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
   };
 
   const handleLinkPatreon = () => {
-    window.open("/discord/", "_blank", "noopener,noreferrer");
+    window.open("/patreon/", "_blank", "noopener,noreferrer");
   };
 
   const handleUnlinkPatreon = () => {
