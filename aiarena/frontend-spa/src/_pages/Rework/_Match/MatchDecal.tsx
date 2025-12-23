@@ -49,6 +49,7 @@ export default function MatchInfo(props: MatchDecalProps) {
           participant1 {
             eloChange
             id
+            matchLog
             bot {
               name
               id
@@ -61,6 +62,7 @@ export default function MatchInfo(props: MatchDecalProps) {
           participant2 {
             eloChange
             id
+            matchLog
             bot {
               id
               name
@@ -166,6 +168,31 @@ export default function MatchInfo(props: MatchDecalProps) {
                 </a>
               </div>
             ) : null}
+
+            {match.result?.participant1?.matchLog && (
+              <div className="w-full flex justify-end">
+                <a
+                  download
+                  href={`${match.result?.participant1?.matchLog}`}
+                  className="text-customGreen hover:underline whitespace-nowrap text-lg flex items-center gap-1"
+                >
+                  <ArrowDownCircleIcon height={18} />{" "}
+                  {match.result?.participant1.bot.name} Logs
+                </a>
+              </div>
+            )}
+            {match.result?.participant2?.matchLog && (
+              <div className="w-full flex justify-end">
+                <a
+                  download
+                  href={`${match.result?.participant2?.matchLog}`}
+                  className="text-customGreen hover:underline whitespace-nowrap text-lg flex items-center gap-1"
+                >
+                  <ArrowDownCircleIcon height={18} />{" "}
+                  {match.result?.participant2.bot.name} Logs
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
