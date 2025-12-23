@@ -66,6 +66,7 @@ export default function MapStatsTable(props: MapStatsTableProps) {
         enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
+        size: 120,
       }),
       columnHelper.accessor((row) => row.matchCount, {
         id: "matches",
@@ -73,65 +74,80 @@ export default function MapStatsTable(props: MapStatsTableProps) {
         enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
+        size: 95,
       }),
       columnHelper.accessor((row) => row.winCount, {
         id: "win",
-        header: "Win",
+        header: "Wins",
         enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
+        size: 95,
       }),
       columnHelper.accessor((row) => row.winPerc, {
         id: "winPerc",
-        header: "%",
+        header: "Win %",
         enableSorting: false,
         cell: (info) => {
-          info.getValue().toFixed(2);
+          return `${info.getValue().toFixed(1)} %`;
         },
         meta: { priority: 1 },
+        size: 95,
       }),
       columnHelper.accessor((row) => row.lossCount, {
         id: "loss",
-        header: "Loss",
+        header: "Losses",
         enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
+        size: 95,
       }),
       columnHelper.accessor((row) => row.lossPerc, {
         id: "lossPerc",
-        header: "%",
+        header: "Loss %",
         enableSorting: false,
-        cell: (info) => info.getValue().toFixed(2),
+        cell: (info) => {
+          return `${info.getValue().toFixed(1)} %`;
+        },
         meta: { priority: 1 },
+        size: 95,
       }),
       columnHelper.accessor((row) => row.tieCount, {
         id: "tie",
-        header: "Tie",
+        header: "Ties",
         enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
+        size: 95,
       }),
       columnHelper.accessor((row) => row.tiePerc, {
         id: "tiePerc",
-        header: "%",
+        header: "Tie %",
         enableSorting: false,
-        cell: (info) => info.getValue().toFixed(2),
+        cell: (info) => {
+          return `${info.getValue().toFixed(1)} %`;
+        },
         meta: { priority: 1 },
+        size: 95,
       }),
       columnHelper.accessor((row) => row.crashCount, {
         id: "crash",
-        header: "Crash",
+        header: "Crashes",
         enableSorting: false,
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
+        size: 95,
       }),
       columnHelper.accessor((row) => row.crashPerc, {
         id: "crashPerc",
-        header: "%",
+        header: "Crash %",
         enableSorting: false,
 
-        cell: (info) => info.getValue().toFixed(2),
+        cell: (info) => {
+          return `${info.getValue().toFixed(1)} %`;
+        },
         meta: { priority: 1 },
+        size: 95,
       }),
     ],
     [columnHelper]

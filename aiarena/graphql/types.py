@@ -292,6 +292,7 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             "division_num",
             "bot",
             "active",
+            "elo_graph",
         ]
         filterset_class = CompetitionParticipationFilterSet
         connection_class = CountingConnection
