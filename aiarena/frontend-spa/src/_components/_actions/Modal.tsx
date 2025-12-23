@@ -11,6 +11,8 @@ interface ModalProps {
   title: string;
   keepUnsetOnClose?: boolean;
   size?: "m" | "l";
+  padding?: number;
+  paddingX?: number;
 }
 
 const Modal = ({
@@ -20,6 +22,8 @@ const Modal = ({
   title,
   keepUnsetOnClose,
   size = "m",
+  padding = 4,
+  paddingX = 6,
 }: ModalProps) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +47,12 @@ const Modal = ({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-darken-6 flex items-center justify-center z-50 p-4 focus:outline-none">
+    <div
+      className={clsx(
+        "fixed inset-0 bg-darken-6 flex items-center justify-center z-50 focus:outline-none",
+        `p-${padding}`
+      )}
+    >
       <div
         className={clsx(
           "rounded-lg shadow-md w-full focus:outline-none",
@@ -85,7 +94,13 @@ const Modal = ({
               </button>
             </div>
             <SectionDivider color="gradient" className="mb-1" height={1} />
-            <div className="px-6 p-4 pb-10 overflow-y-auto max-h-[90vh]">
+            <div
+              className={clsx(
+                "pb-10 overflow-y-auto max-h-[90vh]",
+                `pt-${padding}`,
+                `px-${paddingX}`
+              )}
+            >
               {children}
             </div>
           </div>
