@@ -169,7 +169,7 @@ export default function MatchInfo(props: MatchDecalProps) {
               </div>
             )}
 
-            {match.result?.participant1?.matchLog && (
+            {/* {match.result?.participant1?.matchLog && (
               <div className="w-full flex justify-end">
                 <a
                   download
@@ -192,7 +192,7 @@ export default function MatchInfo(props: MatchDecalProps) {
                   {match.result?.participant2.bot.name} Logs
                 </a>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
