@@ -13,7 +13,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
   const data = useLazyLoadQuery<LegacyCompetitionTop10ListQuery>(
     graphql`
       query LegacyCompetitionTop10ListQuery {
-        competitions(status: OPEN) {
+        competitions(status: OPEN, orderBy: "-date_created") {
           edges {
             node {
               name
