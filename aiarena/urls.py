@@ -60,7 +60,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("admin/", admin.site.urls),
     path("accounts/", include("registration.backends.default.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
-    path("", core_views.Index.as_view(), name="home"),
+    path("", core_views.frontend, name="home"),
     path("api/", include("aiarena.api.urls")),
     path("graphql/", core_views.CustomGraphQLView.as_view(graphiql=True), name="graphql"),
     path("results/", core_views.RecentResults.as_view(), name="results"),
@@ -82,11 +82,11 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     ),
     path("match-logs/<int:pk>/", core_views.MatchLogDownloadView.as_view()),
     path("authors/", core_views.frontend, name="authors"),
-    path("authors/<int:pk>/", core_views.AuthorDetail.as_view(), name="author"),
+    path("authors/<int:pk>/", core_views.frontend, name="author"),
     # path('rounds/', core_views.RoundList.as_view(), name='rounds'), # todo
     path("rounds/<int:pk>/", core_views.frontend, name="round"),
-    path("matches/<int:pk>/", core_views.MatchDetail.as_view(), name="match"),
-    path("competitions/", core_views.CompetitionList.as_view(), name="competitions"),
+    path("matches/<int:pk>/", core_views.frontend, name="match"),
+    path("competitions/", core_views.frontend, name="competitions"),
     path("competitions/<int:pk>/", core_views.frontend, name="competition"),
     path("competitions/stats/<int:pk>/", core_views.BotCompetitionStatsDetail.as_view()),
     path(

@@ -205,6 +205,7 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
           table={table}
           loading={false}
           appendHeader={props.appendHeader}
+          minHeight={20}
         />
       </Suspense>
 

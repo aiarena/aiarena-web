@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
 import { navbarTitle, navLinks } from "@/_data/navbarLinks";
 import clsx from "clsx";
 import BackgroundTexture from "../_display/BackgroundTexture";
+import AuthNavbar from "./AuthNavbar";
 
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
@@ -42,8 +43,8 @@ function Navbar() {
       <nav className="w-full  text-white sticky top-0 z-50  bg-neutral-700 ">
         <BackgroundTexture>
           <div className="flex px-2 justify-between md:p-3 md:flex bg-darken-3 md:shadow-sm shadow-black border-neutral-700 border-b">
-            <a
-              href={navLinks[0].path}
+            <Link
+              to={navLinks[0].path}
               className="flex justify-between items-center"
             >
               <img
@@ -56,7 +57,7 @@ function Navbar() {
               <h2 className="text-2xl md:pl-5 py-4 md:py-0 pb-5 font-gugi font-light text-customGreen hover:text-white text-center">
                 {navbarTitle.title}
               </h2>
-            </a>
+            </Link>
 
             {/* Phone */}
             <div className="md:hidden py-4">
@@ -94,7 +95,7 @@ function Navbar() {
                     .filter((it) => it.featureFlag !== false)
                     .map((link, index) => (
                       <li key={index} className="pb-2 text-l p-2 text-center">
-                        {link.path === "/dashboard/" ? (
+                        {link.react === true ? (
                           <NavLink
                             key={index}
                             to={link.path}
@@ -103,7 +104,7 @@ function Navbar() {
                                 "py-2 text-white border-b-2",
                                 isActive
                                   ? "border-customGreen"
-                                  : "border-transparent hover:border-customGreen",
+                                  : "border-transparent hover:border-customGreen"
                               )
                             }
                           >
@@ -117,7 +118,7 @@ function Navbar() {
                               "py-2 text-white border-b-2",
                               window.location.pathname === link.path
                                 ? "border-customGreen"
-                                : "border-transparent hover:border-customGreen",
+                                : "border-transparent hover:border-customGreen"
                             )}
                           >
                             {link.title}
@@ -125,10 +126,9 @@ function Navbar() {
                         )}
                       </li>
                     ))}
+                  <AuthNavbar />
                 </ul>
               </div>
-
-              {/* <div className="ml-auto"><AuthNavBar /></div> */}
             </div>
           </div>
           {navbar === true ? (
@@ -146,7 +146,7 @@ function Navbar() {
                           "block w-full bg-darken-3 hover:darken-4 py-2 text-white hover:text-slate-300 border-b-2",
                           window.location.pathname === link.path
                             ? "border-customGreen"
-                            : "border-transparent",
+                            : "border-transparent"
                         )}
                       >
                         {link.title}

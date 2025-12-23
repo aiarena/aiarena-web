@@ -249,12 +249,12 @@ export function TableContainer<T>({
                   <tr>
                     <td
                       colSpan={visibleColumnCount}
-                      className={clsx(
-                        "text-center align-middle ",
-                        `h-[${minHeight}vh]`
-                      )}
+                      style={{ height: `${minHeight}vh` }}
+                      className="text-center"
                     >
-                      No results
+                      <div className="flex items-center justify-center h-full text-neutral-400">
+                        No results
+                      </div>
                     </td>
                   </tr>
                 </tbody>

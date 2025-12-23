@@ -11,17 +11,18 @@ export interface GraphqlError {
 
 export interface MutationData {
   [key: string]: unknown;
-  readonly errors?: readonly FormError[] | null | undefined;
+  readonly errors?: readonly (FormError | null | undefined)[] | null | undefined;
 }
 
 export interface BackendErrors {
-  formErrors?: readonly FormError[] | null;
+  formErrors?: readonly (FormError | null | undefined)[] | null;
   graphqlErrors?: readonly GraphqlError[] | null;
   failError?: boolean;
 }
 
 export interface OnCompletedResponse {
   [key: string]: MutationData | undefined | null;
+
 }
 
 export default function useBackendErrors(mutationName: string) {
@@ -32,9 +33,12 @@ export default function useBackendErrors(mutationName: string) {
     response: OnCompletedResponse,
     errors: GraphqlError[] | null,
   ) => {
+    const raw = response[mutationName]?.errors;
+    const formErrors = raw?.filter((e): e is FormError => !!e) ?? [];
+
     if (errors?.length || response[mutationName]?.errors?.length) {
       setBackendErrors({
-        formErrors: response[mutationName]?.errors,
+        formErrors: formErrors,
         graphqlErrors: errors,
       });
       return false;
@@ -73,7 +77,7 @@ export function getMessageList({
   failError,
 }: BackendErrors) {
   const formMessages =
-    formErrors?.map((error) => {
+    formErrors?.filter((e): e is FormError => !!e)?.map((error) => {
       const messages = error.messages.join("; ");
 
       if (error.field === "__all__") {

@@ -45,7 +45,7 @@ export default function BotSettingsModal({
         ...BotBiographyModal_bot
       }
     `,
-    props.bot,
+    props.bot
   );
 
   const [updateBot, updating] = useMutation<BotSettingsModalMutation>(graphql`
@@ -78,7 +78,7 @@ export default function BotSettingsModal({
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateBot",
-    "Bot Settings Updated!",
+    "Bot Settings Updated!"
   );
 
   return (

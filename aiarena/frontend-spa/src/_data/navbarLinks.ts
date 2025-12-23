@@ -5,6 +5,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Wiki",
@@ -12,6 +13,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+
   },
   {
     title: "Authors",
@@ -19,6 +21,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Bots",
@@ -26,6 +29,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Competitions",
@@ -33,6 +37,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Match Queue",
@@ -42,7 +47,7 @@ export const navLinks = [
     featureFlag: null,
   },
   {
-    title: "Result",
+    title: "Results",
     path: "/results",
     showLoggedIn: true,
     showLoggedOut: true,
@@ -65,13 +70,6 @@ export const navLinks = [
   {
     title: "API",
     path: `/api`,
-    showLoggedIn: true,
-    showLoggedOut: true,
-    featureFlag: null,
-  },
-  {
-    title: "Dashboard",
-    path: `/dashboard/`,
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,

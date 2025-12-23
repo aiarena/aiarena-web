@@ -108,7 +108,7 @@ function Hero() {
           <h1 className="text-center pb-4 text-5xl font-gugi font-thin text-customGreen">
             AI Arena
           </h1>
-          <WrappedTitle title="Welcome to the Arena" font="font-bold" />
+          <WrappedTitle title="Welcome to AI Arena!" font="font-bold" />
         </div>
         <div className="flex justify-center gap-4">
           <InstructionsCard />

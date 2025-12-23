@@ -12,7 +12,8 @@ def test_login(page: Page, bh: BrowserHelper, user, admin_user):
     page.get_by_label("Username:").fill("billy")
     page.get_by_label("Password:").fill("guest")
     page.get_by_role("button", name="Log in").click()
-    expect(page.locator("#sidebar-items")).to_contain_text("Logged in: billy")
+    page.goto(bh.reverse("dashboard_profile"))
+    expect(page.get_by_text("billy")).to_be_visible()
 
 
 def test_login_with_wrong_credentials(page: Page, bh: BrowserHelper):

@@ -24,7 +24,7 @@ export default function RenderCodeLanguage({
           title={obj.name}
           className={clsx("mr-2")}
         />
-        <p className={clsx(muted && "text-gray-400")}>{obj.name}</p>
+        <p className={clsx(muted && "text-gray-300")}>{obj.name}</p>
       </span>
     );
   }

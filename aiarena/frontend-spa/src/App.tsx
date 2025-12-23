@@ -25,40 +25,20 @@ import CompetitionParticipationPage from "./_pages/Rework/CompetitionParticipati
 export default function App() {
   return (
     <Routes>
+      <Route element={<RootLayout />}>
+        <Route index element={<LandingPage />} />
+      </Route>
       <Route element={<RootWithPaddingLayout />}>
         <Route path="authors" element={<AuthorsPage />} />
+        <Route path="authors/:userId" element={<AuthorPage />} />
+        <Route path="competitions" element={<CompetitionsPage />} />
         <Route
           path="competitions/:competitionId"
           element={<CompetitionPage />}
         />
         <Route path="rounds/:roundId" element={<RoundsPage />} />
         <Route path="bots" element={<BotsPage />} />
-      </Route>
-
-      <Route path="dashboard/rework">
-        <Route element={<RootLayout />}>
-          <Route path="landing" element={<LandingPage />} />
-        </Route>
-
-        <Route element={<RootWithPaddingLayout />}>
-          <Route path="competitions" element={<CompetitionsPage />} />
-          <Route path="matches/:matchId" element={<MatchPage />} />
-          <Route path="bots/:botId" element={<BotPage />} />
-          <Route path="authors/:userId" element={<AuthorPage />} />
-          <Route path="results" element={<ResultsPage />} />
-        </Route>
-      </Route>
-
-      <Route element={<RootWithPaddingLayout />} path="dashboard/rework">
-        <Route path="landing" element={<LandingPage />} />
-        <Route path="competitions" element={<CompetitionsPage />} />
-        <Route path="bots" element={<BotsPage />} />
-        <Route path="authors" element={<AuthorsPage />} />
-        <Route path="results" element={<ResultsPage />} />
-        <Route
-          path="competitions/stats/:id/:slug?"
-          element={<CompetitionParticipationPage />}
-        />
+        <Route path="matches/:matchId" element={<MatchPage />} />
       </Route>
 
       <Route element={<DashboardLayout />} path="dashboard">
@@ -70,6 +50,16 @@ export default function App() {
           <Route path="examples" element={<Examples />} />
         )}
         <Route path="*" element={<PageNotFound />} />
+      </Route>
+      <Route path="dashboard/rework">
+        <Route element={<RootWithPaddingLayout />}>
+          <Route path="results" element={<ResultsPage />} />
+          <Route path="bots/:botId" element={<BotPage />} />
+          <Route
+            path="competitions/stats/:id/:slug?"
+            element={<CompetitionParticipationPage />}
+          />
+        </Route>
       </Route>
     </Routes>
   );
