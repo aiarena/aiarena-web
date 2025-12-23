@@ -244,12 +244,12 @@ export default function MatchInfo(props: MatchDecalProps) {
           </div>
 
           {/* Participant 2 */}
-          <div className="flex flex-col items-center md:items-end gap-1 min-w-0">
+          <div className="font-medium flex flex-col items-center md:items-end gap-1 min-w-0">
             {mp2 && (
               <>
                 <a
                   href={`/bots/${getIDFromBase64(mp2.id, "BotType")}`}
-                  className="font-medium text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
+                  className="text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
                 >
                   {formatWinnerName(winner?.name, mp2.name)}
                 </a>
