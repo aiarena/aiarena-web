@@ -1,0 +1,112 @@
+import { statsSideNavbarLinks } from "@/_pages/Rework/CompetitionParticipation/CompetitionParticipationStats";
+import clsx from "clsx";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
+export default function WithTabSideButtons({
+  children,
+  activeTab,
+  setActiveTab,
+}: {
+  children: ReactNode;
+  activeTab: (typeof statsSideNavbarLinks)[number]["state"];
+  setActiveTab: Dispatch<
+    SetStateAction<(typeof statsSideNavbarLinks)[number]["state"]>
+  >;
+}) {
+  const [sideNavbar, setSideNavbar] = useState(false);
+  const handleWindowResize = useCallback(() => {
+    if (window.innerWidth >= 920) {
+      setSideNavbar(true);
+    } else {
+      setSideNavbar(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    handleWindowResize();
+
+    const handleResizeWithNavbar = () => {
+      handleWindowResize();
+    };
+
+    const navbar = document.querySelector("nav");
+    let resizeObserver: ResizeObserver | null = null;
+
+    if (navbar) {
+      resizeObserver = new ResizeObserver(() => {});
+      resizeObserver.observe(navbar);
+    }
+
+    window.addEventListener("resize", handleResizeWithNavbar);
+
+    return () => {
+      window.removeEventListener("resize", handleResizeWithNavbar);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
+  }, [handleWindowResize]);
+  return (
+    <div>
+      {" "}
+      <div className={clsx(sideNavbar && "flex")}>
+        {sideNavbar ? (
+          <aside className="w-1/12 min-w-[12em]  border-r border-neutral-700">
+            <div className="sticky flex flex-col">
+              {statsSideNavbarLinks.map((tab) => (
+                <button
+                  key={tab.name}
+                  onClick={() => setActiveTab(tab.state)}
+                  className={clsx(
+                    "my-1  mr-2 pl-2 py-2 text-white border-1 bg-darken-2 shadow-black shadow-sm  duration-300 ease-in-out transform backdrop-blur-sm",
+                    tab.state === activeTab
+                      ? "text-large border-neutral-700 border-b-customGreen border-b-2"
+                      : "border-neutral-700 hover:border-b-customGreen border-b-2"
+                  )}
+                >
+                  <p className="text-gray-100 text-l">{tab.name}</p>
+                </button>
+              ))}
+            </div>
+          </aside>
+        ) : (
+          <div className="sticky z-49 border-b border-customGreen">
+            <div className="flex flex-wrap justify-center space-x-4 py-4 bg-darken-2">
+              {statsSideNavbarLinks.map((tab) => (
+                <button
+                  key={tab.name}
+                  onClick={() => setActiveTab(tab.state)}
+                  className={clsx(
+                    "py-2 text-white font-gugi",
+                    tab.state === activeTab
+                      ? "border-b-2 border-customGreen"
+                      : "border-b-2 border-transparent hover:border-customGreen"
+                  )}
+                >
+                  {tab.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <main
+          className={clsx(
+            sideNavbar ? "flex-1" : "sticky top-0",
+            "overflow-y-auto p-8"
+          )}
+          role="main"
+        >
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
