@@ -13,7 +13,7 @@ export const BOT_TYPES: Record<string, BOT_TYPE> = {
     },
     CPPWIN32: { name: "C++ (Windows)", image: `${getPublicPrefix()}/programming_language_icons/cpp.svg` },
     DOTNETCORE: { name: ".NET Core", image: `${getPublicPrefix()}/programming_language_icons/net.svg` },
-    NODEJS: { name: "Node.JS", image: `${getPublicPrefix()}/programming_language_icons/nodejs_js.svg` },
+    NODEJS: { name: "Node.JS", image: `${getPublicPrefix()}/programming_language_icons/nodejs.svg` },
 };
 
 
