@@ -17,6 +17,7 @@ export default function CompetitionParticipationModal({
   onClose,
   id,
 }: CompetitionParticipationModalProps) {
+  // const [tab, setTab] = useState("");
   const data = useLazyLoadQuery<CompetitionParticipationModalQuery>(
     graphql`
       query CompetitionParticipationModalQuery($id: ID!) {
@@ -43,24 +44,23 @@ export default function CompetitionParticipationModal({
 
   return (
     <>
-      <Modal onClose={onClose} isOpen={isOpen} title={`Edit - "s"`} size="l">
+      <Modal
+        onClose={onClose}
+        isOpen={isOpen}
+        title={`${data?.node?.bot?.name} - ${data?.node?.competition?.name} stats`}
+        size="l"
+        padding={2}
+        paddingX={2}
+      >
         <Suspense fallback={<LoadingDots />}>
           {data?.node ? (
-            <div className="space-y-8">
-              <div className="divider">
-                <span></span>
-                <span>
-                  <h2 className="text-2xl font-semibold">
-                    {data.node.bot?.name} - {data.node.competition?.name} stats
-                  </h2>
-                </span>
-                <span></span>
-              </div>
-
+            // <WithStatsSideButtons>
+            <>
+              {" "}
               <MapStatsTable data={data.node} />
-
               <MatchupStatsTable data={data.node} />
-            </div>
+              {/* </WithStatsSideButtons>  */}
+            </>
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-400">

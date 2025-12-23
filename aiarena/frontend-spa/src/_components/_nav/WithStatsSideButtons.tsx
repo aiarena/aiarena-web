@@ -1,4 +1,4 @@
-import { statsSideNavbarLinks } from "@/_pages/Rework/CompetitionParticipation/CompetitionParticipationStats";
+import { statsSideNavbarLinks } from "@/_pages/Rework/CompetitionParticipation/StatsSideNavbarLinks";
 import clsx from "clsx";
 import {
   Dispatch,
@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 
-export default function WithTabSideButtons({
+export default function WithStatsSideButtons({
   children,
   activeTab,
   setActiveTab,
