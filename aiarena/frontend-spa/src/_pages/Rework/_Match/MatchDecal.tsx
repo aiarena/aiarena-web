@@ -164,16 +164,16 @@ export default function MatchInfo(props: MatchDecalProps) {
                   href={`${match.result.arenaclientLog}`}
                   className="text-customGreen hover:underline whitespace-nowrap text-lg flex items-center gap-1"
                 >
-                  <ArrowDownCircleIcon height={18} /> Logs
+                  <ArrowDownCircleIcon height={18} /> Arenaclient Logs
                 </a>
               </div>
             )}
 
-            {/* {match.result?.participant1?.matchLog && (
+            {match.result?.participant1?.matchLog && (
               <div className="w-full flex justify-end">
                 <a
                   download
-                  href={`${match.result?.participant1?.matchLog}`}
+                  href={`/${match.result?.participant1?.matchLog}`}
                   className="text-customGreen hover:underline whitespace-nowrap text-lg flex items-center gap-1"
                 >
                   <ArrowDownCircleIcon height={18} />{" "}
@@ -185,14 +185,14 @@ export default function MatchInfo(props: MatchDecalProps) {
               <div className="w-full flex justify-end">
                 <a
                   download
-                  href={`${match.result?.participant2?.matchLog}`}
+                  href={`/${match.result?.participant2?.matchLog}`}
                   className="text-customGreen hover:underline whitespace-nowrap text-lg flex items-center gap-1"
                 >
                   <ArrowDownCircleIcon height={18} />{" "}
                   {match.result?.participant2.bot.name} Logs
                 </a>
               </div>
-            )} */}
+            )}
           </div>
         </div>
       </div>
