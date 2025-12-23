@@ -146,7 +146,7 @@ export default function MatchInfo(props: MatchDecalProps) {
               )}
             </span>
 
-            {match.result?.replayFile ? (
+            {match.result?.replayFile && (
               <div className="w-full flex justify-end">
                 <a
                   download
@@ -156,8 +156,8 @@ export default function MatchInfo(props: MatchDecalProps) {
                   <ArrowDownCircleIcon height={18} /> Replay
                 </a>
               </div>
-            ) : null}
-            {match.result?.arenaclientLog ? (
+            )}
+            {match.result?.arenaclientLog && (
               <div className="w-full flex justify-end">
                 <a
                   download
@@ -167,7 +167,7 @@ export default function MatchInfo(props: MatchDecalProps) {
                   <ArrowDownCircleIcon height={18} /> Logs
                 </a>
               </div>
-            ) : null}
+            )}
 
             {match.result?.participant1?.matchLog && (
               <div className="w-full flex justify-end">
