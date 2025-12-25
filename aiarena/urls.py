@@ -94,10 +94,6 @@ urlpatterns = [  # todo: replace usage of url with path for all these
         core_views.BotCompetitionStatsDetail.as_view(),
         name="bot_competition_stats",
     ),
-    path(
-        "competitions/stats/<int:pk>_elo_graph_update_plot.png",
-        core_views.BotCompetitionStatsEloGraphUpdatePlot.as_view(),
-    ),
     path("botupload/", core_views.BotUpload.as_view(), name="botupload"),
     path("requestmatch/", core_views.RequestMatch.as_view(), name="requestmatch"),
     path("avatar/", include("avatar.urls")),
@@ -122,3 +118,4 @@ urlpatterns = [  # todo: replace usage of url with path for all these
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
+
