@@ -255,3 +255,122 @@ class EloGraphsGenerator:
         plt.savefig(plot2, format="png", transparent=True)
         plt.close(fig)
         return plot1, plot2
+
+    def _get_race_outcome_breakdown_data(self, bot_id: int, competition_id: int):
+        with connection.cursor() as cursor:
+            query = """
+                SELECT
+                    br.label AS opp_race_label,
+                    COUNT(*) FILTER (WHERE me.result = 'win') AS wins,
+                    COUNT(*) FILTER (
+                        WHERE me.result = 'loss'
+                        AND COALESCE(me.result_cause,'') <> 'crash'
+                    ) AS losses,
+                    COUNT(*) FILTER (WHERE me.result = 'tie') AS ties,
+                    COUNT(*) FILTER (WHERE COALESCE(me.result_cause,'') = 'crash') AS crashes,
+                    COUNT(*) AS total
+                FROM core_matchparticipation me
+                JOIN core_match cm ON me.match_id = cm.id
+                JOIN core_round crnd ON cm.round_id = crnd.id
+
+                JOIN core_matchparticipation opp
+                ON opp.match_id = me.match_id
+                AND opp.id <> me.id
+
+                JOIN core_bot opp_bot ON opp.bot_id = opp_bot.id
+                JOIN core_botrace br ON opp_bot.plays_race_id = br.id
+
+                WHERE me.bot_id = %s
+                AND crnd.competition_id = %s
+                GROUP BY br.label
+            """
+            cursor.execute(query, [bot_id, competition_id])
+            return cursor.fetchall()
+
+    def _race_outcome_breakdown(self, rows):
+        def to_code(label: str):
+            s = (label or "").strip().lower()
+            if s.startswith("z"):
+                return "Z"
+            if s.startswith("p"):
+                return "P"
+            if s.startswith("t"):
+                return "T"
+            if s.startswith("r"):
+                return "R"
+            return None
+
+        out = {
+            "Z": {
+                "wins": 0,
+                "losses": 0,
+                "ties": 0,
+                "crashes": 0,
+                "played": 0,
+                "winRate": 0.0,
+                "lossRate": 0.0,
+                "tieRate": 0.0,
+                "crashRate": 0.0,
+            },
+            "P": {
+                "wins": 0,
+                "losses": 0,
+                "ties": 0,
+                "crashes": 0,
+                "played": 0,
+                "winRate": 0.0,
+                "lossRate": 0.0,
+                "tieRate": 0.0,
+                "crashRate": 0.0,
+            },
+            "T": {
+                "wins": 0,
+                "losses": 0,
+                "ties": 0,
+                "crashes": 0,
+                "played": 0,
+                "winRate": 0.0,
+                "lossRate": 0.0,
+                "tieRate": 0.0,
+                "crashRate": 0.0,
+            },
+            "R": {
+                "wins": 0,
+                "losses": 0,
+                "ties": 0,
+                "crashes": 0,
+                "played": 0,
+                "winRate": 0.0,
+                "lossRate": 0.0,
+                "tieRate": 0.0,
+                "crashRate": 0.0,
+            },
+        }
+
+        def rate(part: int, denom: int) -> float:
+            return round((part / denom) * 100.0, 2) if denom else 0.0
+
+        for label, wins, losses, ties, crashes, total in rows:
+            code = to_code(label)
+            if not code:
+                continue
+
+            wins = int(wins or 0)
+            losses = int(losses or 0)
+            ties = int(ties or 0)
+            crashes = int(crashes or 0)
+
+            played = wins + losses + ties + crashes
+
+            out[code]["wins"] = wins
+            out[code]["losses"] = losses
+            out[code]["ties"] = ties
+            out[code]["crashes"] = crashes
+            out[code]["played"] = played
+
+            out[code]["winRate"] = rate(wins, played)
+            out[code]["lossRate"] = rate(losses, played)
+            out[code]["tieRate"] = rate(ties, played)
+            out[code]["crashRate"] = rate(crashes, played)
+
+        return out

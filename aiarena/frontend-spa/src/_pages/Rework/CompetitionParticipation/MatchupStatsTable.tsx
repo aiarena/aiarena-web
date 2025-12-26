@@ -187,9 +187,6 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
 
   return (
     <div>
-      <div className="divider mb-6">
-        <h2 className="text-xl font-semibold">Matchups</h2>
-      </div>
       <TableContainer table={table} loading={false} />
     </div>
   );

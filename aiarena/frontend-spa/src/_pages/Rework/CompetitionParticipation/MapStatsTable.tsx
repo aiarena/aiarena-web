@@ -164,9 +164,6 @@ export default function MapStatsTable(props: MapStatsTableProps) {
 
   return (
     <div>
-      <div className="divider mb-6">
-        <h2 className="text-xl font-semibold">Maps</h2>
-      </div>
       <TableContainer table={table} loading={false} />
     </div>
   );

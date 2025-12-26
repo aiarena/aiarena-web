@@ -4,11 +4,33 @@ export const statsSideNavbarLinks = [
     state: "overview",
   },
   {
-    name: "Bots",
-    state: "bots",
-  },
-  {
     name: "Maps",
     state: "maps",
+  },
+  {
+    name: "Matchups",
+    state: "matchups",
+  },
+  {
+    name: "Results",
+    state: "results",
+  },
+] as const;
+
+export const statsTopNavbarLinks = [
+  {
+    parent: "overview",
+    name: "ELO Graph",
+    state: "elograph",
+  },
+  {
+    parent: "overview",
+    name: "Wins By Time",
+    state: "winsbytime",
+  },
+  {
+    parent: "overview",
+    name: "Wins By Race",
+    state: "winsbyrace",
   },
 ] as const;

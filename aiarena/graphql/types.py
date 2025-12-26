@@ -26,8 +26,10 @@ from aiarena.core import models
 from aiarena.core.models import BotRace, MatchParticipation, Result, User
 from aiarena.core.models.result import STEPS_PER_SECOND
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits, Users
+from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
 from aiarena.frontend.templatetags.url_utils import get_absolute_url
 from aiarena.frontend.views.bot_detail import RelativeResultFilter
+from aiarena.graphql.chart_types import EloChartType, RaceMatchupBreakdownType, WinrateChartType
 from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
 
 
@@ -275,6 +277,10 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
     competition_map_stats = DjangoConnectionField("aiarena.graphql.CompetitionBotMapStatsType")
     competition_matchup_stats = DjangoConnectionField("aiarena.graphql.CompetitionBotMatchupStatsType")
 
+    elo_chart_data = graphene.Field(EloChartType)
+    winrate_chart_data = graphene.Field(WinrateChartType)
+    race_matchup = graphene.Field(RaceMatchupBreakdownType)
+
     class Meta:
         model = models.CompetitionParticipation
         fields = [
@@ -291,7 +297,6 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             "division_num",
             "bot",
             "active",
-            "elo_graph",
         ]
         filterset_class = CompetitionParticipationFilterSet
         connection_class = CountingConnection
@@ -317,6 +322,117 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             .distinct()
             .select_related("opponent__bot", "opponent__bot__plays_race")
         )
+
+    @staticmethod
+    def resolve_elo_chart_data(root, info, **args):
+        competition = root.competition
+        if competition.statistics_finalized:
+            return None
+
+        gen = EloGraphsGenerator(root)
+        elo_data = gen._get_elo_data(root.bot, competition.id)
+
+        dt = gen._get_graph_update_line_datetime(root.bot, competition.id)
+        last_updated = dt.timestamp() * 1000 if dt else None
+
+        # request = info.context
+        # user = getattr(request, "user", None)
+
+        # if user and user.is_authenticated:
+        #     if (
+        #         user.is_superuser
+        #         or (
+        #             root.bot.user == user
+        #             and getattr(user, "patreon_level", "none") != "none"
+        #         )
+        #     ):
+        #         dt = gen._get_graph_update_line_datetime(root.bot, competition.id)
+        #         last_updated = dt.timestamp() * 1000 if dt else None
+
+        return {
+            "title": "ELO over time",
+            "lastUpdated": last_updated,
+            "data": {
+                "datasets": [
+                    {
+                        "label": "ELO",
+                        "backgroundColor": "#86c232",
+                        "borderColor": "#86c232",
+                        "data": [{"x": e[2].timestamp() * 1000, "y": e[1]} for e in elo_data],
+                    }
+                ]
+            },
+        }
+
+    @staticmethod
+    def resolve_winrate_chart_data(root, info, **args):
+        competition = root.competition
+        if competition.statistics_finalized:
+            return None
+
+        gen = EloGraphsGenerator(root)
+        data = gen._get_winrate_data(root.bot.id, competition.id)
+
+        with_total = [(d, w, l, c, t, (w + l + c + t)) for d, w, l, c, t in data]
+
+        labels = [f"{x[0]}-{x[0] + 5}" for x in with_total]
+        if labels and labels[-1] == "30-35":
+            labels[-1] = "30+"
+
+        def pct(p, total):
+            return f"{round((p / total if total else 0) * 100)}%"
+
+        def ds(label, idx, color):
+            return {
+                "label": label,
+                "data": [x[idx] for x in with_total],
+                "backgroundColor": color,
+                "extraLabels": [pct(x[idx], x[5]) for x in with_total],
+                "datalabels": {"align": "center", "anchor": "center"},
+            }
+
+        return {
+            "title": "Result vs Match Duration",
+            "data": {
+                "labels": labels,
+                "datasets": [
+                    ds("Wins", 1, "#86C232"),
+                    ds("Losses", 2, "#D20044"),
+                    ds("Crashes", 3, "#AAAAAA"),
+                    ds("Ties", 4, "#DFCE00"),
+                ],
+            },
+        }
+
+    @staticmethod
+    def resolve_race_matchup(root, info, **args):
+        competition = root.competition
+        if competition.statistics_finalized:
+            return None
+
+        gen = EloGraphsGenerator(root)
+        rows = gen._get_race_outcome_breakdown_data(root.bot.id, competition.id)
+        breakdown = gen._race_outcome_breakdown(rows)
+
+        def normalize(d):
+            return {
+                "wins": d.get("wins", 0),
+                "losses": d.get("losses", 0),
+                "ties": d.get("ties", 0),
+                "crashes": d.get("crashes", 0),
+                "played": d.get("played", 0),
+                "winRate": d.get("winRate", 0.0),
+                "lossRate": d.get("lossRate", 0.0),
+                "tieRate": d.get("tieRate", 0.0),
+                "crashRate": d.get("crashRate", 0.0),
+            }
+
+        return {
+            "zerg": normalize(breakdown.get("Z", {})),
+            "protoss": normalize(breakdown.get("P", {})),
+            "terran": normalize(breakdown.get("T", {})),
+            "random": normalize(breakdown.get("R", {})),
+        }
 
 
 class MatchParticipationFilterSet(FilterSet):

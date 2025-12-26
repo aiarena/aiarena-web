@@ -1,4 +1,7 @@
-import { statsSideNavbarLinks } from "@/_pages/Rework/CompetitionParticipation/StatsSideNavbarLinks";
+import {
+  statsSideNavbarLinks,
+  statsTopNavbarLinks,
+} from "@/_pages/Rework/CompetitionParticipation/StatsSideNavbarLinks";
 import clsx from "clsx";
 import {
   Dispatch,
@@ -13,11 +16,15 @@ export default function WithStatsSideButtons({
   children,
   activeTab,
   setActiveTab,
+  setActiveTopTab,
 }: {
   children: ReactNode;
   activeTab: (typeof statsSideNavbarLinks)[number]["state"];
   setActiveTab: Dispatch<
     SetStateAction<(typeof statsSideNavbarLinks)[number]["state"]>
+  >;
+  setActiveTopTab: Dispatch<
+    SetStateAction<(typeof statsTopNavbarLinks)[number]["state"]>
   >;
 }) {
   const [sideNavbar, setSideNavbar] = useState(false);
@@ -58,12 +65,18 @@ export default function WithStatsSideButtons({
       {" "}
       <div className={clsx(sideNavbar && "flex")}>
         {sideNavbar ? (
-          <aside className="w-1/12 min-w-[12em]  border-r border-neutral-700">
+          <aside className="ml-2 w-1/12 min-w-[12em]  ">
             <div className="sticky flex flex-col">
               {statsSideNavbarLinks.map((tab) => (
                 <button
                   key={tab.name}
-                  onClick={() => setActiveTab(tab.state)}
+                  onClick={() => {
+                    setActiveTab(tab.state);
+                    setActiveTopTab(
+                      statsTopNavbarLinks.find((it) => it.parent === tab.state)
+                        ?.state || "elograph"
+                    );
+                  }}
                   className={clsx(
                     "my-1  mr-2 pl-2 py-2 text-white border-1 bg-darken-2 shadow-black shadow-sm  duration-300 ease-in-out transform backdrop-blur-sm",
                     tab.state === activeTab
@@ -82,7 +95,9 @@ export default function WithStatsSideButtons({
               {statsSideNavbarLinks.map((tab) => (
                 <button
                   key={tab.name}
-                  onClick={() => setActiveTab(tab.state)}
+                  onClick={() => {
+                    setActiveTab(tab.state);
+                  }}
                   className={clsx(
                     "py-2 text-white font-gugi",
                     tab.state === activeTab
@@ -100,7 +115,7 @@ export default function WithStatsSideButtons({
         <main
           className={clsx(
             sideNavbar ? "flex-1" : "sticky top-0",
-            "overflow-y-auto p-8"
+            "overflow-y-auto"
           )}
           role="main"
         >

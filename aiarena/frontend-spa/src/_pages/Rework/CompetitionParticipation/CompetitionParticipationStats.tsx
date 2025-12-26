@@ -4,19 +4,30 @@ import MapStatsTable from "./MapStatsTable";
 import MatchupStatsTable from "./MatchupStatsTable";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import LoadingDots from "@/_components/_display/LoadingDots";
-import { Suspense, useState } from "react";
-import { statsSideNavbarLinks } from "./StatsSideNavbarLinks";
-import WithStatsSideButtons from "@/_components/_nav/WithStatsSideButtons";
+import { Dispatch, SetStateAction, Suspense } from "react";
+import {
+  statsSideNavbarLinks,
+  statsTopNavbarLinks,
+} from "./StatsSideNavbarLinks";
+import EloChart from "./EloChart";
+import BotResultsTable from "../Bot/BotResultsTable";
+import WinsByTime from "./WinsByTime";
+import RaceMatchup from "./RaceMatchup";
+import { CompetitionParticipationStatsResultsQuery } from "./__generated__/CompetitionParticipationStatsResultsQuery.graphql";
 
+type ActiveTab = (typeof statsSideNavbarLinks)[number]["state"];
+type ActiveTopTab = (typeof statsTopNavbarLinks)[number]["state"];
 interface CompetitionParticipationStatsProps {
   id: string;
+  activeTab: ActiveTab;
+  setActiveTab: Dispatch<SetStateAction<ActiveTab>>;
+  activeTopTab: ActiveTopTab;
+  setActiveTopTab: Dispatch<SetStateAction<ActiveTopTab>>;
 }
 
 export default function CompetitionParticipationStats(
   props: CompetitionParticipationStatsProps
 ) {
-  const [activeTab, setActiveTab] =
-    useState<(typeof statsSideNavbarLinks)[number]["state"]>("overview");
   const data = useLazyLoadQuery<CompetitionParticipationStatsQuery>(
     graphql`
       query CompetitionParticipationStatsQuery($id: ID!) {
@@ -32,23 +43,67 @@ export default function CompetitionParticipationStats(
               name
             }
             elo
+            ...EloChart_node
+            ...WinsByTime_node
             ...MapStatsTable_node
             ...MatchupStatsTable_node
+            ...RaceMatchup_node
           }
+        }
+        viewer {
+          id
         }
       }
     `,
     { id: getBase64FromID(props.id!, "CompetitionParticipationType") || "" }
   );
 
+  const resultsData =
+    useLazyLoadQuery<CompetitionParticipationStatsResultsQuery>(
+      graphql`
+        query CompetitionParticipationStatsResultsQuery($id: ID!) {
+          node(id: $id) {
+            ... on CompetitionParticipationType {
+              id
+              bot {
+                ...BotResultsTable_bot
+              }
+            }
+          }
+        }
+      `,
+      { id: getBase64FromID(props.id!, "CompetitionParticipationType") || "" }
+    );
+
   return (
     <Suspense fallback={<LoadingDots />}>
-      {data?.node ? (
-        <WithStatsSideButtons activeTab={activeTab} setActiveTab={setActiveTab}>
-          {activeTab === "overview" && <p>overview</p>}
-          {activeTab === "bots" && <MapStatsTable data={data.node} />}
-          {activeTab === "maps" && <MatchupStatsTable data={data.node} />}
-        </WithStatsSideButtons>
+      {data?.node && data?.node.bot ? (
+        <>
+          {props.activeTab === "overview" && (
+            <>
+              {props.activeTopTab === "elograph" && (
+                <EloChart data={data.node} />
+              )}
+              {props.activeTopTab === "winsbytime" && (
+                <WinsByTime data={data.node} />
+              )}
+              {props.activeTopTab === "winsbyrace" && (
+                <RaceMatchup data={data.node} />
+              )}
+            </>
+          )}
+          {props.activeTab === "maps" && <MapStatsTable data={data.node} />}
+          {props.activeTab === "matchups" && (
+            <MatchupStatsTable data={data.node} />
+          )}
+
+          {props.activeTab === "results" &&
+            (resultsData.node && resultsData.node.bot ? (
+              <BotResultsTable data={resultsData.node.bot} />
+            ) : (
+              <p>Results not found</p>
+            ))}
+        </>
       ) : (
         <div className="text-center py-12">
           <p className="text-gray-400">Competition participation not found</p>
