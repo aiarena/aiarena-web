@@ -14,6 +14,7 @@ import {
 import annotationPlugin from "chartjs-plugin-annotation";
 import { Line } from "react-chartjs-2";
 import "chartjs-adapter-date-fns";
+import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 
 ChartJS.register(
   LineElement,
@@ -74,7 +75,13 @@ export default function EloChart(props: EloChartProps) {
   useEffect(() => {
     console.log(chartData);
   }, [chartData]);
-  if (!chartData) return null;
+
+  if (!chartData)
+    return (
+      <NoItemsInListMessage>
+        <p>No match data available...</p>
+      </NoItemsInListMessage>
+    );
 
   const lastUpdated =
     eloChart?.lastUpdated != null ? Number(eloChart.lastUpdated) : null;

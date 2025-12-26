@@ -30,13 +30,11 @@ export default function CompetitionParticipationPage() {
       <h2 id="competition-participation-heading" className="sr-only">
         Competition Participation Stats
       </h2>
-      <h2 className="hidden lg:flex ml-4 mt-2"> Showing A for B on C</h2>
       <WithStatsSideButtons
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         setActiveTopTab={setActiveTopTab}
       >
-        <h2 className="lg:hidden"> Showing A for B on C</h2>
         <WithTopButtons
           activeTab={activeTab}
           setActiveTab={setActiveTab}

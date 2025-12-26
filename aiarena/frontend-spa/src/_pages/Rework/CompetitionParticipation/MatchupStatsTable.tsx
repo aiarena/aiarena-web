@@ -227,7 +227,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
         <TableContainer table={table} loading={false} />
       ) : (
         <NoItemsInListMessage>
-          <p>No matchup stats available yet...</p>
+          <p>No matchup stats available...</p>
         </NoItemsInListMessage>
       )}
       {hasNext ? (

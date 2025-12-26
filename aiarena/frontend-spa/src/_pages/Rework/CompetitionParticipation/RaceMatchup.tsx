@@ -11,6 +11,7 @@ import { Bar } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { graphql, useFragment } from "react-relay";
 import { RaceMatchup_node$key } from "./__generated__/RaceMatchup_node.graphql";
+import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 
 ChartJS.register(
   BarElement,
@@ -80,8 +81,14 @@ export default function RaceMatchup(props: RaceMatchupChartProps) {
     props.data
   );
 
+  const noItemsMessage = (
+    <NoItemsInListMessage>
+      <p>No match data available...</p>
+    </NoItemsInListMessage>
+  );
+
   const matchup = node?.raceMatchup;
-  if (!matchup) return null;
+  if (!matchup) return noItemsMessage;
 
   const labels = ["Zerg", "Protoss", "Terran", "Random"] as const;
 
@@ -93,7 +100,7 @@ export default function RaceMatchup(props: RaceMatchupChartProps) {
   ] as const;
 
   const totalPlayed = races.reduce((sum, r) => sum + r.played, 0);
-  if (totalPlayed === 0) return null;
+  if (totalPlayed === 0) return noItemsMessage;
 
   return (
     <div

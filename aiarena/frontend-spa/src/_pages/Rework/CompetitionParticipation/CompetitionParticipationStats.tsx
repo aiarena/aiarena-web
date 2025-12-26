@@ -61,18 +61,24 @@ export default function CompetitionParticipationStats(
   const resultsData =
     useLazyLoadQuery<CompetitionParticipationStatsResultsQuery>(
       graphql`
-        query CompetitionParticipationStatsResultsQuery($id: ID!) {
+        query CompetitionParticipationStatsResultsQuery(
+          $id: ID!
+          $competitionId: String
+        ) {
           node(id: $id) {
             ... on CompetitionParticipationType {
               id
               bot {
-                ...BotResultsTable_bot
+                ...BotResultsTable_bot @arguments(competitionId: $competitionId)
               }
             }
           }
         }
       `,
-      { id: getBase64FromID(props.id!, "CompetitionParticipationType") || "" }
+      {
+        id: getBase64FromID(props.id!, "CompetitionParticipationType") || "",
+        competitionId: data?.node?.competition?.id,
+      }
     );
 
   return (

@@ -11,6 +11,7 @@ import { Bar } from "react-chartjs-2";
 import { graphql, useFragment } from "react-relay";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { WinsByTime_node$key } from "./__generated__/WinsByTime_node.graphql";
+import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 
 ChartJS.register(
   BarElement,
@@ -43,14 +44,18 @@ export default function WinsByTime(props: WinsByTimeProps) {
     `,
     props.data
   );
-
+  const noItemsMessage = (
+    <NoItemsInListMessage>
+      <p>No match data available...</p>
+    </NoItemsInListMessage>
+  );
   const winrateChart = data?.winrateChartData;
-  if (!winrateChart) return null;
+  if (!winrateChart) return noItemsMessage;
 
   const labels = winrateChart.data?.labels;
   const datasets = winrateChart.data?.datasets;
 
-  if (!labels || !datasets) return null;
+  if (!labels || !datasets) return noItemsMessage;
 
   const labelsMutable = [...labels];
   return (

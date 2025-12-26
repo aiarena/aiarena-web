@@ -1,74 +1,78 @@
 import Modal from "@/_components/_actions/Modal";
-import MapStatsTable from "./MapStatsTable";
-import MatchupStatsTable from "./MatchupStatsTable";
-import { graphql, useLazyLoadQuery } from "react-relay";
-import { CompetitionParticipationModalQuery } from "./__generated__/CompetitionParticipationModalQuery.graphql";
-import LoadingDots from "@/_components/_display/LoadingDots";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
+import {
+  statsSideNavbarLinks,
+  statsTopNavbarLinks,
+} from "./StatsSideNavbarLinks";
+import WithStatsSideButtons from "@/_components/_nav/WithStatsSideButtons";
+import WithTopButtons from "@/_components/_nav/WithTopButtons";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
+import CompetitionParticipationStats from "./CompetitionParticipationStats";
+import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { StatsModalStatus } from "../Bot/Page";
+import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 
 interface CompetitionParticipationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  id: string;
+  modalStatus: StatsModalStatus;
 }
 
 export default function CompetitionParticipationModal({
   isOpen,
   onClose,
-  id,
+  modalStatus,
 }: CompetitionParticipationModalProps) {
-  // const [tab, setTab] = useState("");
-  const data = useLazyLoadQuery<CompetitionParticipationModalQuery>(
-    graphql`
-      query CompetitionParticipationModalQuery($id: ID!) {
-        node(id: $id) {
-          ... on CompetitionParticipationType {
-            id
-            bot {
-              id
-              name
-            }
-            competition {
-              id
-              name
-            }
-            elo
-            ...MapStatsTable_node
-            ...MatchupStatsTable_node
-          }
-        }
-      }
-    `,
-    { id: id }
-  );
+  const [activeTab, setActiveTab] =
+    useState<(typeof statsSideNavbarLinks)[number]["state"]>("overview");
 
+  const [activeTopTab, setActiveTopTab] =
+    useState<(typeof statsTopNavbarLinks)[number]["state"]>("elograph");
+  const id = getIDFromBase64(modalStatus.botId, "CompetitionParticipationType");
+  if (!id) {
+    return <NoItemsInListMessage>Unable to decode Id</NoItemsInListMessage>;
+  }
   return (
     <>
       <Modal
         onClose={onClose}
         isOpen={isOpen}
-        title={`${data?.node?.bot?.name} - ${data?.node?.competition?.name} stats`}
+        title={`${modalStatus.botName} - ${modalStatus.competitionName} stats`}
         size="l"
         padding={2}
         paddingX={2}
       >
-        <Suspense fallback={<LoadingDots />}>
-          {data?.node ? (
-            // <WithStatsSideButtons>
-            <>
-              {" "}
-              <MapStatsTable data={data.node} />
-              <MatchupStatsTable data={data.node} />
-              {/* </WithStatsSideButtons>  */}
-            </>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-400">
-                Competition participation not found
-              </p>
-            </div>
-          )}
-        </Suspense>
+        <section
+          aria-labelledby="competition-participation-heading"
+          className="min-h-[90vh]"
+        >
+          <h2 id="competition-participation-heading" className="sr-only">
+            Competition Participation Stats
+          </h2>
+
+          <WithStatsSideButtons
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            setActiveTopTab={setActiveTopTab}
+          >
+            <WithTopButtons
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              activeTopTab={activeTopTab}
+              setActiveTopTab={setActiveTopTab}
+            >
+              <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+                <CompetitionParticipationStats
+                  id={id}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  activeTopTab={activeTopTab}
+                  setActiveTopTab={setActiveTopTab}
+                />
+              </Suspense>
+            </WithTopButtons>
+          </WithStatsSideButtons>
+        </section>
       </Modal>
     </>
   );

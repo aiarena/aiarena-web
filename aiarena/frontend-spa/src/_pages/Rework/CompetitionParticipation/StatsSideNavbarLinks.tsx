@@ -8,7 +8,7 @@ export const statsSideNavbarLinks = [
     state: "maps",
   },
   {
-    name: "Matchups",
+    name: "Opponents",
     state: "matchups",
   },
   {

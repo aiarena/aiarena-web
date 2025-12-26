@@ -199,7 +199,7 @@ export default function MapStatsTable(props: MapStatsTableProps) {
         <TableContainer table={table} loading={false} />
       ) : (
         <NoItemsInListMessage>
-          <p>No map stats available yet...</p>
+          <p>No map stats available...</p>
         </NoItemsInListMessage>
       )}
       {hasNext ? (
