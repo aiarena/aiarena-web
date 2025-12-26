@@ -209,6 +209,27 @@ class CompetitionType(DjangoObjectTypeWithUID):
         return root.get_wiki_article().current_revision.content
 
 
+class CompetitionBotMapStatsFilterSet(FilterSet):
+    order_by = OrderingFilter(
+        fields=[
+            "map__name",
+            "match_count",
+            "win_count",
+            "win_perc",
+            "loss_count",
+            "loss_perc",
+            "tie_count",
+            "tie_perc",
+            "crash_count",
+            "crash_perc",
+        ],
+    )
+
+    class Meta:
+        model = models.CompetitionBotMapStats
+        fields = ["order_by"]
+
+
 class CompetitionBotMapStatsType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.CompetitionBotMapStats
@@ -225,8 +246,30 @@ class CompetitionBotMapStatsType(DjangoObjectTypeWithUID):
             "crash_perc",
             "updated",
         ]
-        filter_fields = []
+        filterset_class = CompetitionBotMapStatsFilterSet
         connection_class = CountingConnection
+
+
+class CompetitionBotMatchupStatsFilterSet(FilterSet):
+    order_by = OrderingFilter(
+        fields=[
+            "opponent__bot__name",
+            "opponent__bot__plays_race__label",
+            "match_count",
+            "win_count",
+            "win_perc",
+            "loss_count",
+            "loss_perc",
+            "tie_count",
+            "tie_perc",
+            "crash_count",
+            "crash_perc",
+        ],
+    )
+
+    class Meta:
+        model = models.CompetitionBotMatchupStats
+        fields = ["order_by"]
 
 
 class CompetitionBotMatchupStatsType(DjangoObjectTypeWithUID):
@@ -245,7 +288,7 @@ class CompetitionBotMatchupStatsType(DjangoObjectTypeWithUID):
             "crash_perc",
             "updated",
         ]
-        filter_fields = []
+        filterset_class = CompetitionBotMatchupStatsFilterSet
         connection_class = CountingConnection
 
 
@@ -274,8 +317,12 @@ class CompetitionParticipationFilterSet(FilterSet):
 
 class CompetitionParticipationType(DjangoObjectTypeWithUID):
     trend = graphene.Int()
-    competition_map_stats = DjangoConnectionField("aiarena.graphql.CompetitionBotMapStatsType")
-    competition_matchup_stats = DjangoConnectionField("aiarena.graphql.CompetitionBotMatchupStatsType")
+    competition_map_stats = DjangoFilterConnectionField(
+        "aiarena.graphql.CompetitionBotMapStatsType", filterset_class=CompetitionBotMapStatsFilterSet
+    )
+    competition_matchup_stats = DjangoFilterConnectionField(
+        "aiarena.graphql.CompetitionBotMatchupStatsType", filterset_class=CompetitionBotMatchupStatsFilterSet
+    )
 
     elo_chart_data = graphene.Field(EloChartType)
     winrate_chart_data = graphene.Field(WinrateChartType)

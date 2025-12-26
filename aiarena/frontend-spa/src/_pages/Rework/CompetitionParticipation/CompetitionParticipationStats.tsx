@@ -77,38 +77,40 @@ export default function CompetitionParticipationStats(
 
   return (
     <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-      {data?.node && data?.node.bot ? (
-        <>
-          {props.activeTab === "overview" && (
-            <>
-              {props.activeTopTab === "elograph" && (
-                <EloChart data={data.node} />
-              )}
-              {props.activeTopTab === "winsbytime" && (
-                <WinsByTime data={data.node} />
-              )}
-              {props.activeTopTab === "winsbyrace" && (
-                <RaceMatchup data={data.node} />
-              )}
-            </>
-          )}
-          {props.activeTab === "maps" && <MapStatsTable data={data.node} />}
-          {props.activeTab === "matchups" && (
-            <MatchupStatsTable data={data.node} />
-          )}
+      <div className="px-2 pb-8">
+        {data?.node && data?.node.bot ? (
+          <>
+            {props.activeTab === "overview" && (
+              <>
+                {props.activeTopTab === "elograph" && (
+                  <EloChart data={data.node} />
+                )}
+                {props.activeTopTab === "winsbytime" && (
+                  <WinsByTime data={data.node} />
+                )}
+                {props.activeTopTab === "winsbyrace" && (
+                  <RaceMatchup data={data.node} />
+                )}
+              </>
+            )}
+            {props.activeTab === "maps" && <MapStatsTable data={data.node} />}
+            {props.activeTab === "matchups" && (
+              <MatchupStatsTable data={data.node} />
+            )}
 
-          {props.activeTab === "results" &&
-            (resultsData.node && resultsData.node.bot ? (
-              <BotResultsTable data={resultsData.node.bot} />
-            ) : (
-              <p>Results not found</p>
-            ))}
-        </>
-      ) : (
-        <div className="text-center py-12">
-          <p className="text-gray-400">Competition participation not found</p>
-        </div>
-      )}
+            {props.activeTab === "results" &&
+              (resultsData.node && resultsData.node.bot ? (
+                <BotResultsTable data={resultsData.node.bot} />
+              ) : (
+                <p>Results not found</p>
+              ))}
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-400">Competition participation not found</p>
+          </div>
+        )}
+      </div>
     </Suspense>
   );
 }
