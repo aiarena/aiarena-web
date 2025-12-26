@@ -379,36 +379,51 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
         gen = EloGraphsGenerator(root)
         elo_data = gen._get_elo_data(root.bot, competition.id)
 
-        dt = gen._get_graph_update_line_datetime(root.bot, competition.id)
-        last_updated = dt.timestamp() * 1000 if dt else None
+        if not elo_data:
+            last_updated = None
+            datasets = []
 
-        # request = info.context
-        # user = getattr(request, "user", None)
+        else:  # only show the last updated if its within the date range
+            xs_ms = [e[2].timestamp() * 1000 for e in elo_data]
+            min_x, max_x = min(xs_ms), max(xs_ms)
 
-        # if user and user.is_authenticated:
-        #     if (
-        #         user.is_superuser
-        #         or (
-        #             root.bot.user == user
-        #             and getattr(user, "patreon_level", "none") != "none"
-        #         )
-        #     ):
-        #         dt = gen._get_graph_update_line_datetime(root.bot, competition.id)
-        #         last_updated = dt.timestamp() * 1000 if dt else None
+            ##
+            dt = gen._get_graph_update_line_datetime(root.bot, competition.id)
+            candidate_last_updated = dt.timestamp() * 1000 if dt else None
+
+            # request = info.context
+            # user = getattr(request, "user", None)
+
+            # if user and user.is_authenticated:
+            #     if (
+            #         user.is_superuser
+            #         or (
+            #             root.bot.user == user
+            #             and getattr(user, "patreon_level", "none") != "none"
+            #         )
+            #     ):
+            #         dt = gen._get_graph_update_line_datetime(root.bot, competition.id)
+            #         last_updated = dt.timestamp() * 1000 if dt else None
+
+            # Only keep it if it's within the data range
+            if candidate_last_updated is not None and min_x <= candidate_last_updated <= max_x:
+                last_updated = candidate_last_updated
+            else:
+                last_updated = None
+
+            datasets = [
+                {
+                    "label": "ELO",
+                    "backgroundColor": "#86c232",
+                    "borderColor": "#86c232",
+                    "data": [{"x": x, "y": e[1]} for x, e in zip(xs_ms, elo_data)],
+                }
+            ]
 
         return {
             "title": "ELO over time",
             "lastUpdated": last_updated,
-            "data": {
-                "datasets": [
-                    {
-                        "label": "ELO",
-                        "backgroundColor": "#86c232",
-                        "borderColor": "#86c232",
-                        "data": [{"x": e[2].timestamp() * 1000, "y": e[1]} for e in elo_data],
-                    }
-                ]
-            },
+            "data": {"datasets": datasets},
         }
 
     @staticmethod
