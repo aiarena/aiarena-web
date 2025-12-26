@@ -92,7 +92,6 @@ export default function RaceMatchup(props: RaceMatchupChartProps) {
     matchup.random,
   ] as const;
 
-  // If everything is 0 played, don’t render (prevents empty/ugly chart)
   const totalPlayed = races.reduce((sum, r) => sum + r.played, 0);
   if (totalPlayed === 0) return null;
 
@@ -161,11 +160,10 @@ export default function RaceMatchup(props: RaceMatchupChartProps) {
             },
             tooltip: {
               callbacks: {
-                // Header shows the race label
                 title: (items) => items[0]?.label ?? "",
                 label: (context: TooltipItem<"bar">) => {
                   const race = races[context.dataIndex];
-                  const v = context.parsed.y; // percent number
+                  const v = context.parsed.y;
 
                   let count = 0;
                   if (context.dataset.label === "Wins") count = race.wins;

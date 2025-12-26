@@ -3,7 +3,6 @@ import { CompetitionParticipationStatsQuery } from "./__generated__/CompetitionP
 import MapStatsTable from "./MapStatsTable";
 import MatchupStatsTable from "./MatchupStatsTable";
 import { getBase64FromID } from "@/_lib/relayHelpers";
-import LoadingDots from "@/_components/_display/LoadingDots";
 import { Dispatch, SetStateAction, Suspense } from "react";
 import {
   statsSideNavbarLinks,
@@ -14,6 +13,7 @@ import BotResultsTable from "../Bot/BotResultsTable";
 import WinsByTime from "./WinsByTime";
 import RaceMatchup from "./RaceMatchup";
 import { CompetitionParticipationStatsResultsQuery } from "./__generated__/CompetitionParticipationStatsResultsQuery.graphql";
+import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
 type ActiveTab = (typeof statsSideNavbarLinks)[number]["state"];
 type ActiveTopTab = (typeof statsTopNavbarLinks)[number]["state"];
@@ -76,7 +76,7 @@ export default function CompetitionParticipationStats(
     );
 
   return (
-    <Suspense fallback={<LoadingDots />}>
+    <Suspense fallback={<LoadingSpinner color="light-gray" />}>
       {data?.node && data?.node.bot ? (
         <>
           {props.activeTab === "overview" && (

@@ -225,7 +225,7 @@ export default function RoundsTable(props: RoundsTableProps) {
 
       {hasNext ? (
         <div className="flex justify-center mt-6" ref={loadMoreRef}>
-          <LoadingMoreItems loadingMessage="Loading more rounds..." />
+          <LoadingMoreItems loadingMessage="Loading more matches..." />
         </div>
       ) : !hasNext && hasItems ? (
         <div className="mt-8">

@@ -62,7 +62,6 @@ export default function EloChart(props: EloChartProps) {
     return {
       datasets: [
         {
-          // Chart.js supports {x, y} points for time series
           data: dataset0.data ?? [],
           borderColor: dataset0.borderColor ?? "#86c232",
           backgroundColor: dataset0.backgroundColor ?? "#86c232",
