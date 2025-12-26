@@ -1,18 +1,25 @@
 import { Suspense, useState } from "react";
 import CompetitionParticipationModal from "./CompetitionParticipationModal";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
+import { StatsModalStatus } from "../Bot/Page";
 
-export default function StatsButton({ id }: { id: string }) {
+export default function StatsButton({
+  StatsModalStatus,
+}: {
+  StatsModalStatus: StatsModalStatus;
+}) {
   const [isBiographyModalOpen, setBiographyModalOpen] = useState<{
     state: boolean;
-    id: string | null;
-  }>({ state: false, id: null });
+    id: string | undefined;
+  }>({ state: false, id: undefined });
   return (
     <>
       <div className="flex gap-2 items-center">
         <button
           className="text-customGreen"
-          onClick={() => setBiographyModalOpen({ state: true, id: id })}
+          onClick={() =>
+            setBiographyModalOpen({ state: true, id: StatsModalStatus.botId })
+          }
         >
           Stats
         </button>
@@ -20,8 +27,10 @@ export default function StatsButton({ id }: { id: string }) {
           {isBiographyModalOpen.state && isBiographyModalOpen.id != null && (
             <CompetitionParticipationModal
               isOpen={isBiographyModalOpen.state}
-              onClose={() => setBiographyModalOpen({ state: false, id: null })}
-              id={isBiographyModalOpen.id}
+              onClose={() =>
+                setBiographyModalOpen({ state: false, id: undefined })
+              }
+              modalStatus={StatsModalStatus}
             />
           )}
         </Suspense>
