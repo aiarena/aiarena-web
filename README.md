@@ -209,36 +209,6 @@ Here's how the deployment process works:
    3. Finally, it triggers a rolling update to all the Fargate containers, that will use the `latest` image
 4. As a final step, `uv run.py monitor-ecs` runs. It watches the rolling update, and makes sure all the services are replaced, and running. This step can fail if the containers are failing to start for some reason.
 
-
-## Module structure:
-### /aiarena/core
-Core project functionality
-
-### /aiarena/api
-Web API endpoints and functionality.  
-This root api folder contains views for public use.
-
-#### /aiarena/api/arenaclient
-API endpoints specifically for use by the arenaclients to obtain new matches and report results.
-
-#### /aiarena/api/stream
-API endpoints specifically for use by the livestream player to obtain a curated list of match replays to feature.
-
-### /aiarena/frontend
-Django template website frontend
-
-### /aiarena/frontend-spa
-React frontend for the profile dashboard
-
-### /aiarena/graphql
-GraphQL API used by the React frontend
-
-### /aiarena/patreon
-A module for linking website users to their patreon counterparts.
-
-
 ## License
-
-Copyright (c) 2019
 
 Licensed under the [GPLv3 license](LICENSE).
