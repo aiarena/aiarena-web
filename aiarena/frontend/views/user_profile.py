@@ -10,13 +10,13 @@ from django.utils.safestring import mark_safe
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from constance import config
-from discord_bind.models import DiscordUser
 from rest_framework.authtoken.models import Token
 
 from aiarena.core.models import Bot, Match, MatchParticipation, User
 from aiarena.core.services import SupporterBenefits
 from aiarena.core.services.internal.matches import CancelResult, cancel
 from aiarena.patreon.models import PatreonAccountBind
+from discord_bind.models import DiscordUser
 
 
 class UserProfile(LoginRequiredMixin, DetailView):

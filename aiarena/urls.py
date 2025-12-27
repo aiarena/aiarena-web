@@ -118,4 +118,3 @@ urlpatterns = [  # todo: replace usage of url with path for all these
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
-
