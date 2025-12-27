@@ -14,6 +14,7 @@ import WinsByTime from "./WinsByTime";
 import RaceMatchup from "./RaceMatchup";
 import { CompetitionParticipationStatsResultsQuery } from "./__generated__/CompetitionParticipationStatsResultsQuery.graphql";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
+import Summary from "./Summary";
 
 type ActiveTab = (typeof statsSideNavbarLinks)[number]["state"];
 type ActiveTopTab = (typeof statsTopNavbarLinks)[number]["state"];
@@ -48,6 +49,7 @@ export default function CompetitionParticipationStats(
             ...MapStatsTable_node
             ...MatchupStatsTable_node
             ...RaceMatchup_node
+            ...Summary_node
           }
         }
         viewer {
@@ -89,13 +91,25 @@ export default function CompetitionParticipationStats(
             {props.activeTab === "overview" && (
               <>
                 {props.activeTopTab === "elograph" && (
-                  <EloChart data={data.node} />
+                  <>
+                    {" "}
+                    <div className="flex flex-col gap-4">
+                      <EloChart data={data.node} />
+                      <Summary data={data.node} />
+                    </div>
+                  </>
                 )}
                 {props.activeTopTab === "winsbytime" && (
-                  <WinsByTime data={data.node} />
+                  <div className="flex flex-col gap-4">
+                    <WinsByTime data={data.node} />
+                    <Summary data={data.node} />
+                  </div>
                 )}
                 {props.activeTopTab === "winsbyrace" && (
-                  <RaceMatchup data={data.node} />
+                  <div className="flex flex-col gap-4">
+                    <RaceMatchup data={data.node} />
+                    <Summary data={data.node} />
+                  </div>
                 )}
               </>
             )}
@@ -106,7 +120,13 @@ export default function CompetitionParticipationStats(
 
             {props.activeTab === "results" &&
               (resultsData.node && resultsData.node.bot ? (
-                <BotResultsTable data={resultsData.node.bot} />
+                <BotResultsTable
+                  data={resultsData.node.bot}
+                  filterPreset={{
+                    competitionId: data.node.competition?.id,
+                    competitionName: data.node.competition?.name,
+                  }}
+                />
               ) : (
                 <p>Results not found</p>
               ))}
