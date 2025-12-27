@@ -1,6 +1,6 @@
 import { flexRender, Table } from "@tanstack/react-table";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
-import { ReactNode, Suspense } from "react";
+import { ReactNode, Suspense, useLayoutEffect, useRef } from "react";
 import clsx from "clsx";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
 import TableSettings from "./TableSettings";
@@ -42,6 +42,24 @@ export function TableContainer<T>({
   const visibleColumnCount = allColumns.filter((column) =>
     column.getIsVisible()
   ).length;
+
+  // We flip the scroll on the table 180 degrees to put the scrollbar at the top on mobile
+  // we have to init the component with max right scroll to put the scroll visually max left
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const snapToVisualLeft = () => {
+      // rotated 180 = scroll max right = visualy max left
+      el.scrollLeft = el.scrollWidth;
+    };
+
+    snapToVisualLeft();
+    requestAnimationFrame(snapToVisualLeft);
+    setTimeout(snapToVisualLeft, 50);
+  }, []);
+  //
 
   return (
     <div className={clsx(className)}>
@@ -87,7 +105,10 @@ export function TableContainer<T>({
           </div>
           <div className="flex items-center">{appendHeader}</div>
         </div>
-        <div className="overflow-x-auto rotate-180 scrollbar-black">
+        <div
+          ref={scrollerRef}
+          className="overflow-x-auto rotate-180 scrollbar-black"
+        >
           <div className="rotate-180 min-w-max">
             <table className="w-full border-collapse min-w-max">
               <thead className="bg-darken-2 text-white">
