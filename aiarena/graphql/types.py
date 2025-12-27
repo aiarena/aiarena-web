@@ -337,6 +337,8 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             "win_count",
             "loss_perc",
             "loss_count",
+            "tie_perc",
+            "tie_count",
             "crash_perc",
             "crash_count",
             "highest_elo",
@@ -460,8 +462,8 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
                 "datasets": [
                     ds("Wins", 1, "#86C232"),
                     ds("Losses", 2, "#D20044"),
-                    ds("Crashes", 3, "#AAAAAA"),
                     ds("Ties", 4, "#DFCE00"),
+                    ds("Crashes", 3, "#AAAAAA"),
                 ],
             },
         }
