@@ -65,7 +65,7 @@ export default function WithStatsSideButtons({
       {" "}
       <div className={clsx(sideNavbar && "flex")}>
         {sideNavbar ? (
-          <aside className="ml-2 w-1/12 min-w-[12em]  ">
+          <aside className="ml-2 w-1/12 min-w-[12em]  mt-4">
             <div className="sticky flex flex-col">
               {statsSideNavbarLinks.map((tab) => (
                 <button
@@ -115,7 +115,8 @@ export default function WithStatsSideButtons({
         <main
           className={clsx(
             sideNavbar ? "flex-1" : "sticky top-0",
-            "overflow-y-auto"
+            "overflow-y-auto",
+            "mt-4"
           )}
           role="main"
         >
