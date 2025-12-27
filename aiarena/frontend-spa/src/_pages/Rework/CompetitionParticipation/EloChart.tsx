@@ -89,7 +89,7 @@ export default function EloChart(props: EloChartProps) {
   return (
     <div
       style={{ height: 400 }}
-      className="bg-darken-2 rounded-2xl shadow-2xl p-4 pt-8 border border-neutral-700"
+      className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8"
     >
       <Line
         data={chartData}
