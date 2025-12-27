@@ -9,7 +9,7 @@ export default function DisplaySkeletonAuthorList() {
         [grid-template-columns:repeat(auto-fill,minmax(20rem,1fr))]
       "
     >
-      {Array.from({ length: 40 }).map((_, i) => (
+      {Array.from({ length: 70 }).map((_, i) => (
         <li key={i} role="listitem" className="w-full max-w-[42rem]">
           <DisplaySkeletonAuthor />
         </li>
