@@ -28,6 +28,7 @@ import {
 import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
 import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
+import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 
 interface ResultsTableProps {
   data: ResultsTable_node$key;
@@ -208,10 +209,12 @@ export default function ResultsTable(props: ResultsTableProps) {
           const replayFile = info.row.original.replayFile;
 
           return withAtag(
-            replayFile || "",
+            "Download",
             `/bots/${replayFile}`,
-            `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}, Opponent`,
-            "Download"
+            `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}`,
+            <span className="flex items-center gap-1">
+              <ArrowDownCircleIcon height={18} /> Replay
+            </span>
           );
         },
 
