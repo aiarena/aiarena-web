@@ -108,6 +108,7 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
             `View competition ${info.row.original.competition.name}`
           ),
         meta: { priority: 1 },
+        size: 350,
       }),
       columnHelper.accessor((row) => row.competition.dateOpened ?? "", {
         id: "dateOpened",
