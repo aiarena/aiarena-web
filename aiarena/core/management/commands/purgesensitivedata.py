@@ -1,10 +1,9 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from discord_bind.models import DiscordInvite, DiscordUser
-
 from aiarena.core.models import User
 from aiarena.patreon.models import PatreonAccountBind
+from discord_bind.models import DiscordInvite, DiscordUser
 
 
 def purge_user_data():

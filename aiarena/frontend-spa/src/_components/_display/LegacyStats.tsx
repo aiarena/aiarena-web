@@ -35,9 +35,13 @@ const LegacyStats: React.FC = () => {
       })
     : "-";
 
-  const rows: { label: string; value: React.ReactNode }[] = [
+  const rows: { label: string; value: React.ReactNode; link?: string }[] = [
     { label: "Build", value: buildNumber ?? "-" },
-    { label: "Arena clients", value: arenaclients ?? 0 },
+    {
+      label: "Arena clients",
+      value: arenaclients ?? 0,
+      link: "/arenaclients/",
+    },
     { label: "Matches last hour", value: matchCount1h ?? 0 },
     { label: "Matches last 24h", value: matchCount24h ?? 0 },
     { label: "Server Time", value: formattedDateTime },
@@ -62,7 +66,19 @@ const LegacyStats: React.FC = () => {
                 idx % 2 ? "bg-darken-4" : "bg-darken"
               }`}
             >
-              <td className="pl-3 font-semibold">{row.label}</td>
+              <td className="pl-3 font-semibold">
+                {row.link ? (
+                  <a
+                    title={`${row.label}`}
+                    aria-label={`Navigate to ${row.label}`}
+                    href={`${row.link}`}
+                  >
+                    {row.label}
+                  </a>
+                ) : (
+                  row.label
+                )}
+              </td>
               <td className="pr-3 text-right">{row.value}</td>
             </tr>
           ))}

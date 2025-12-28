@@ -66,6 +66,15 @@ const LegacyActivityList: React.FC = () => {
 
     if (parts.length === 0) return "0s";
 
+    if (parts[0][1] === "w") {
+      // Only return the week if the string starts with a week count
+      return parts
+        .slice(0, 1)
+        .map(([v, u]) => `${v}${u}`)
+        .join(" ");
+    }
+
+    // else return two largest units - i.e. day, hour /or/ hour, minute
     return parts
       .slice(0, 2)
       .map(([v, u]) => `${v}${u}`)

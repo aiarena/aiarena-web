@@ -3,6 +3,10 @@ import { CompetitionParticipationStatsQuery } from "./__generated__/CompetitionP
 import MapStatsTable from "./MapStatsTable";
 import MatchupStatsTable from "./MatchupStatsTable";
 import { getBase64FromID } from "@/_lib/relayHelpers";
+import LoadingDots from "@/_components/_display/LoadingDots";
+import { Suspense, useState } from "react";
+import { statsSideNavbarLinks } from "./StatsSideNavbarLinks";
+import WithStatsSideButtons from "@/_components/_nav/WithStatsSideButtons";
 
 interface CompetitionParticipationStatsProps {
   id: string;
@@ -11,6 +15,8 @@ interface CompetitionParticipationStatsProps {
 export default function CompetitionParticipationStats(
   props: CompetitionParticipationStatsProps
 ) {
+  const [activeTab, setActiveTab] =
+    useState<(typeof statsSideNavbarLinks)[number]["state"]>("overview");
   const data = useLazyLoadQuery<CompetitionParticipationStatsQuery>(
     graphql`
       query CompetitionParticipationStatsQuery($id: ID!) {
@@ -35,31 +41,19 @@ export default function CompetitionParticipationStats(
     { id: getBase64FromID(props.id!, "CompetitionParticipationType") || "" }
   );
 
-  if (!data.node) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-400">Competition participation not found</p>
-      </div>
-    );
-  }
-
-  const participation = data.node;
-
   return (
-    <div className="space-y-8">
-      <div className="divider">
-        <span></span>
-        <span>
-          <h2 className="text-2xl font-semibold">
-            {participation.bot?.name} - {participation.competition?.name} stats
-          </h2>
-        </span>
-        <span></span>
-      </div>
-
-      <MapStatsTable data={participation} />
-
-      <MatchupStatsTable data={participation} />
-    </div>
+    <Suspense fallback={<LoadingDots />}>
+      {data?.node ? (
+        <WithStatsSideButtons activeTab={activeTab} setActiveTab={setActiveTab}>
+          {activeTab === "overview" && <p>overview</p>}
+          {activeTab === "bots" && <MapStatsTable data={data.node} />}
+          {activeTab === "maps" && <MatchupStatsTable data={data.node} />}
+        </WithStatsSideButtons>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-gray-400">Competition participation not found</p>
+        </div>
+      )}
+    </Suspense>
   );
 }

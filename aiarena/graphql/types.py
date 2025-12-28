@@ -16,7 +16,6 @@ from django.utils import timezone
 import django_filters
 import graphene
 from avatar.models import Avatar
-from discord_bind.models import DiscordUser
 from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
@@ -292,6 +291,7 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             "division_num",
             "bot",
             "active",
+            "elo_graph",
         ]
         filterset_class = CompetitionParticipationFilterSet
         connection_class = CountingConnection
@@ -316,21 +316,6 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             .order_by("-win_perc")
             .distinct()
             .select_related("opponent__bot", "opponent__bot__plays_race")
-        )
-
-
-class DiscordUserType(DjangoObjectTypeWithUID):
-    class Meta:
-        model = DiscordUser
-        fields = (
-            "id",
-            "uid",
-            "username",
-            "discriminator",
-            "avatar",
-            "email",
-            "scope",
-            "expiry",
         )
 
 
