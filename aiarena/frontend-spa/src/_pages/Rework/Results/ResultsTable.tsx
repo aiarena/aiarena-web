@@ -50,11 +50,22 @@ export default function ResultsTable(props: ResultsTableProps) {
               created
               gameSteps
               id
+              participant1 {
+                bot {
+                  id
+                  name
+                }
+                match {
+                  id
+                }
+                eloChange
+              }
               participant2 {
                 bot {
                   id
                   name
                 }
+
                 eloChange
               }
               replayFile
@@ -62,13 +73,7 @@ export default function ResultsTable(props: ResultsTableProps) {
                 id
               }
               type
-              participant1 {
-                bot {
-                  id
-                  name
-                }
-                eloChange
-              }
+
               winner {
                 name
               }
@@ -96,14 +101,14 @@ export default function ResultsTable(props: ResultsTableProps) {
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor((row) => row.id, {
+      columnHelper.accessor((row) => row.participant1?.match.id, {
         id: "id",
         header: "ID",
         enableSorting: false,
         cell: (info) =>
           withAtag(
-            getIDFromBase64(info.getValue(), "ResultType") || "",
-            `/matches/${getIDFromBase64(info.getValue(), "ResultType")}`,
+            getIDFromBase64(info.getValue(), "MatchType") || "",
+            `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`,
             `View match details for Result ID ${info.getValue()}`
           ),
 
@@ -207,7 +212,9 @@ export default function ResultsTable(props: ResultsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const replayFile = info.row.original.replayFile;
-
+          if (!replayFile) {
+            return "";
+          }
           return withAtag(
             "Download",
             `${replayFile}`,
