@@ -81,7 +81,7 @@ export default function ResultsTable(props: ResultsTableProps) {
     `,
     props.data
   );
-
+  console.log(data);
   type ResultType = NonNullable<
     NonNullable<
       NonNullable<ResultsTable_node$data["results"]>["edges"][number]
@@ -210,7 +210,7 @@ export default function ResultsTable(props: ResultsTableProps) {
 
           return withAtag(
             "Download",
-            `/bots/${replayFile}`,
+            `${replayFile}`,
             `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}`,
             <span className="flex items-center gap-1">
               <ArrowDownCircleIcon height={18} /> Replay
