@@ -23,7 +23,7 @@ from graphql_relay import from_global_id
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
-from aiarena.core.models import BotRace, MatchParticipation, Result, User
+from aiarena.core.models import BotRace, Match, MatchParticipation, Result, User
 from aiarena.core.models.result import STEPS_PER_SECOND
 from aiarena.core.services import Ladders, MatchRequests, SupporterBenefits, Users
 from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
@@ -933,6 +933,8 @@ class StatsType(graphene.ObjectType):
     random_supporter = graphene.Field("aiarena.graphql.UserType")
     build_number = graphene.String()
     date_time = graphene.DateTime()
+    matches_queued = graphene.Int()
+    matches_started = graphene.Int()
 
     @staticmethod
     def resolve_match_count_1h(root, info, **args):
@@ -957,6 +959,20 @@ class StatsType(graphene.ObjectType):
     @staticmethod
     def resolve_date_time(root, info, **args):
         return timezone.now()
+
+    @staticmethod
+    def resolve_matches_queued(root, info, **args):
+        return Match.objects.filter(
+            result__isnull=True,
+            started__isnull=True,
+        ).count()
+
+    @staticmethod
+    def resolve_matches_started(root, info, **args):
+        return Match.objects.filter(
+            result__isnull=True,
+            started__isnull=False,
+        ).count()
 
 
 class TrophyType(DjangoObjectTypeWithUID):

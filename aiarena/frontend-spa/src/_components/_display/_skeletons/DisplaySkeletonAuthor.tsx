@@ -2,8 +2,8 @@ import DisplaySkeleton from "./DisplaySkeleton";
 
 export default function DisplaySkeletonAuthor() {
   return (
-    <div className="max-w-90">
-      <div className="relative w-full">
+    <div className="w-full max-w-[42rem]">
+      <div className="relative ">
         <DisplaySkeleton height={120} />
       </div>
     </div>
