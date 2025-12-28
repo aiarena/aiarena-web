@@ -48,8 +48,16 @@ const LegacyStats: React.FC = () => {
       link: "/match-queue/",
     },
     { label: "Matches Playing", value: data.stats.matchesStarted },
-    { label: "Matches last hour", value: data.stats.matchCount1h ?? 0 },
-    { label: "Matches last 24h", value: data.stats.matchCount24h ?? 0 },
+    {
+      label: "Matches last hour",
+      value: data.stats.matchCount1h ?? 0,
+      link: "/results/",
+    },
+    {
+      label: "Matches last 24h",
+      value: data.stats.matchCount24h ?? 0,
+      link: "/results/",
+    },
     { label: "Server Time", value: formattedDateTime },
   ];
 
