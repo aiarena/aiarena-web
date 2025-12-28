@@ -143,18 +143,20 @@ export default function InformationSection({ bot }: InformationSectionProps) {
               <div className="flex items-center mb-4">
                 <dt className="w-32 text-gray-400">Bot Zip</dt>
                 <dd className="flex-1 text-gray-100">
-                  {hasBotZip && (
+                  {data.botZipPubliclyDownloadable ? (
                     <>
-                      {data.botZipPubliclyDownloadable ? (
+                      {hasBotZip ? (
                         <a href={data.botZip} download="" className="text-sm">
                           <span className="flex gap-1">
                             <ArrowDownCircleIcon height={18} /> Download
                           </span>
                         </a>
                       ) : (
-                        <span className="text-gray-300">Private</span>
-                      )}
+                        <span className="text-gray-300">No Zip Available</span>
+                      )}{" "}
                     </>
+                  ) : (
+                    <span className="text-gray-300">Private</span>
                   )}
                 </dd>
               </div>
@@ -162,6 +164,22 @@ export default function InformationSection({ bot }: InformationSectionProps) {
               <div className="flex items-center mb-4">
                 <dt className="w-32 text-gray-400">Bot Data</dt>
                 <dd className="flex-1 text-gray-100">
+                  {data.botDataPubliclyDownloadable ? (
+                    <>
+                      {hasBotData ? (
+                        <a href={data.botData} download="" className="text-sm">
+                          <span className="flex gap-1">
+                            <ArrowDownCircleIcon height={18} /> Download
+                          </span>
+                        </a>
+                      ) : (
+                        <span className="text-gray-300">No Data Available</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-gray-300">Private</span>
+                  )}
+
                   {hasBotData && (
                     <>
                       {data.botDataPubliclyDownloadable ? (
