@@ -21,7 +21,7 @@ from sentry_sdk.integrations.celery import CeleryIntegration
 from aiarena.celery import app
 from aiarena.core.middleware import raw_time_spent_in_queue_key
 from aiarena.core.models import Competition
-from aiarena.core.services import Competitions
+from aiarena.core.services import competitions
 from aiarena.core.utils import ReprJSONEncoder, monitoring_minute_key, sql
 from aiarena.loggers import logger
 
@@ -252,8 +252,8 @@ def celery_queue_monitoring():
 
 @app.task(ignore_result=True)
 def competitions_monitoring():
-    competitions = Competition.objects.filter(status__in=["open", "closing"])
-    for competition in competitions:
+    competitions_list = Competition.objects.filter(status__in=["open", "closing"])
+    for competition in competitions_list:
         cloudwatch.put_metric_data(
             Namespace="Competitions",
             MetricData=[
@@ -267,7 +267,7 @@ def competitions_monitoring():
                     "Unit": "Count",
                     "Timestamp": datetime.datetime.now(),
                 }
-                for bot_type, total in Competitions.bot_type_stats(competition).items()
+                for bot_type, total in competitions.bot_type_stats(competition).items()
             ],
         )
 
