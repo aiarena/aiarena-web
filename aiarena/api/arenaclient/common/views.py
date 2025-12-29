@@ -124,24 +124,23 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
         match_id = serializer.validated_data["match"]
 
-        if config.DEBUG_LOGGING_ENABLED:
-            logger.info(
-                f"Result submission. "
-                f"match: {serializer.validated_data.get('match')} "
-                f"type: {serializer.validated_data.get('type')} "
-                f"replay_file: {serializer.validated_data.get('replay_file')} "
-                f"game_steps: {serializer.validated_data.get('game_steps')} "
-                f"submitted_by: {serializer.validated_data.get('submitted_by')} "
-                f"arenaclient_log: {serializer.validated_data.get('arenaclient_log')} "
-                f"bot1_avg_step_time: {serializer.validated_data.get('bot1_avg_step_time')} "
-                f"bot1_log: {serializer.validated_data.get('bot1_log')} "
-                f"bot1_data: {serializer.validated_data.get('bot1_data')} "
-                f"bot1_tags: {serializer.validated_data.get('bot1_tags')} "
-                f"bot2_avg_step_time: {serializer.validated_data.get('bot2_avg_step_time')} "
-                f"bot2_log: {serializer.validated_data.get('bot2_log')} "
-                f"bot2_data: {serializer.validated_data.get('bot2_data')} "
-                f"bot2_tags: {serializer.validated_data.get('bot2_tags')} "
-            )
+        logger.debug(
+            f"Result submission. "
+            f"match: {serializer.validated_data.get('match')} "
+            f"type: {serializer.validated_data.get('type')} "
+            f"replay_file: {serializer.validated_data.get('replay_file')} "
+            f"game_steps: {serializer.validated_data.get('game_steps')} "
+            f"submitted_by: {serializer.validated_data.get('submitted_by')} "
+            f"arenaclient_log: {serializer.validated_data.get('arenaclient_log')} "
+            f"bot1_avg_step_time: {serializer.validated_data.get('bot1_avg_step_time')} "
+            f"bot1_log: {serializer.validated_data.get('bot1_log')} "
+            f"bot1_data: {serializer.validated_data.get('bot1_data')} "
+            f"bot1_tags: {serializer.validated_data.get('bot1_tags')} "
+            f"bot2_avg_step_time: {serializer.validated_data.get('bot2_avg_step_time')} "
+            f"bot2_log: {serializer.validated_data.get('bot2_log')} "
+            f"bot2_data: {serializer.validated_data.get('bot2_data')} "
+            f"bot2_tags: {serializer.validated_data.get('bot2_tags')} "
+        )
 
         result = handle_result_submission(match_id, serializer.validated_data)
 
