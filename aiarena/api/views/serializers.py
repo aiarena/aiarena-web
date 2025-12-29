@@ -1,7 +1,6 @@
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError as DjangoValidationError
 
-from discord_bind.models import DiscordUser
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -49,6 +48,7 @@ from aiarena.core.models import (
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.services import Bots
 from aiarena.patreon.models import PatreonUnlinkedDiscordUID
+from discord_bind.models import DiscordUser
 
 
 # From: https://www.guguweb.com/2022/01/23/django-rest-framework-authentication-the-easy-way/

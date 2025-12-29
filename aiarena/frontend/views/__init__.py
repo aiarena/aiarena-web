@@ -4,7 +4,6 @@ from .arena_client_list import ArenaClients
 from .author_detail import AuthorDetail
 from .author_list import AuthorList
 from .bot_competition_stats_detail import BotCompetitionStatsDetail
-from .bot_competition_stats_elo_graph_update_plot import BotCompetitionStatsEloGraphUpdatePlot
 from .bot_data_download import BotDataDownloadView
 from .bot_detail import BotDetail
 from .bot_list import BotDownloadableList, BotList
