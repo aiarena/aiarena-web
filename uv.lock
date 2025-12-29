@@ -117,7 +117,7 @@ requires-dist = [
     { name = "six", specifier = "==1.16.0" },
     { name = "uwsgi", specifier = "==2.0.30" },
     { name = "wheel", specifier = "==0.45.1" },
-    { name = "wiki", specifier = "==0.11.1" },
+    { name = "wiki", specifier = "==0.12.2" },
 ]
 
 [package.metadata.requires-dev]
@@ -1790,7 +1790,7 @@ wheels = [
 
 [[package]]
 name = "wiki"
-version = "0.11.1"
+version = "0.12.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bleach", extra = ["css"] },
@@ -1803,7 +1803,7 @@ dependencies = [
     { name = "pymdown-extensions" },
     { name = "sorl-thumbnail" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/96/db/3c7381a5f701586ec17bda87158961a5a4df0dc042b11b3098876d90df26/wiki-0.11.1.tar.gz", hash = "sha256:42e389ee9d8c3fc3c83179adfc7d511c44a407879f30f5a73e2804f3c5a9d602", size = 2287985, upload-time = "2024-04-10T14:57:26.151Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/a7/3485956f175fef998af941fc2d080e8fefd52ade4f5385c66d91e8e3e722/wiki-0.12.2.tar.gz", hash = "sha256:c4c92be14443140890915415112adbca53cc8c7ede2950e7c18ab1fb8caa37ca", size = 2274267, upload-time = "2025-10-11T22:10:08.497Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3b/60/20064903ea2fd61dd2c9bcdd4401d8d023e089f0422eed954fdff56d1f23/wiki-0.11.1-py3-none-any.whl", hash = "sha256:73a3ae7c9cfb7848cd1f5df86abfe40097f8364d301defce742f29a31de0254c", size = 2451681, upload-time = "2024-04-10T14:57:22.324Z" },
+    { url = "https://files.pythonhosted.org/packages/11/dc/db63ff7b9af717c67534bca9442790add025b626177c3e7dff44ecd96abc/wiki-0.12.2-py3-none-any.whl", hash = "sha256:95569093d37bcd4d643109d92c218198e0ad934ee4a7fc9c23167c0734b3d31e", size = 2436352, upload-time = "2025-10-11T22:10:11.727Z" },
 ]
