@@ -236,14 +236,14 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                   </span>
                 </div>
 
-                <a
-                  href={`/competitions/stats/${getIDFromBase64(
+                <Link
+                  to={`/competitions/stats/${getIDFromBase64(
                     competitionParticipation.id,
                     "CompetitionParticipationType"
                   )}`}
                 >
                   Explore more stats
-                </a>
+                </Link>
               </div>
             </div>
           );

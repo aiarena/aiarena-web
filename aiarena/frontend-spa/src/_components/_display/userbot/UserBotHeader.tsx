@@ -8,6 +8,7 @@ import { TrophyIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { UserBotHeader_bot$key } from "./__generated__/UserBotHeader_bot.graphql";
 import RenderCodeLanguage from "../RenderCodeLanguage";
 import MutedButton from "@/_components/_actions/MutedButton";
+import { Link } from "react-router";
 
 export interface UserBotHeaderProps {
   bot: UserBotHeader_bot$key;
@@ -48,12 +49,12 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
         <div className="flex justify-between flsex-wrap">
           <div className="flex items-center flex-wrap">
             {/* Bot Name */}
-            <a
-              href={`/bots/${getIDFromBase64(bot.id, "BotType")}`}
+            <Link
+              to={`/bots/${getIDFromBase64(bot.id, "BotType")}`}
               className="text-lg text-customGreen font-medium"
             >
               {bot.name}
-            </a>
+            </Link>
 
             <div
               className="flex items-center cursor-pointer hover:bg-neutral-800 rounded p-1 ml-2 border border-transparent hover:border-neutral-700"

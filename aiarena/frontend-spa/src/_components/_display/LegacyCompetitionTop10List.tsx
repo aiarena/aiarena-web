@@ -8,6 +8,7 @@ import clsx from "clsx";
 
 import EloTrendIcon from "./EloTrendIcon";
 import FetchError from "./FetchError";
+import { Link } from "react-router";
 
 const LegacyCompetitonTop10List: React.FC = () => {
   const data = useLazyLoadQuery<LegacyCompetitionTop10ListQuery>(
@@ -59,13 +60,12 @@ const LegacyCompetitonTop10List: React.FC = () => {
     <div>
       <WrappedTitle title="Competitions" font="font-bold" />
       <div className="text-center mb-4">
-        <a
-          href={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
-          target="_blank"
+        <Link
+          to={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
           className="font-bold"
         >
           {competition.name}
-        </a>
+        </Link>
       </div>
 
       <table className="w-full">
@@ -93,12 +93,12 @@ const LegacyCompetitonTop10List: React.FC = () => {
                 <BotIcon user={participant.bot.user} />
               </td>
               <td>
-                <a
-                  href={`/bots/${getIDFromBase64(participant.bot.id, "BotType")}`}
+                <Link
+                  to={`/bots/${getIDFromBase64(participant.bot.id, "BotType")}`}
                   aria-label={`View bot profile for ${participant.bot.name}`}
                 >
                   {participant.bot.name}
-                </a>
+                </Link>
               </td>
               <td className="text-center">{participant.divisionNum}</td>
               <td className="text-center">{participant.elo}</td>

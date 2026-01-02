@@ -2,6 +2,8 @@ import { graphql, useFragment } from "react-relay";
 import { MatchInfo_match$key } from "./__generated__/MatchInfo_match.graphql";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
+import { Link } from "react-router";
+import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 
 interface MatchInfoProps {
   match: MatchInfo_match$key;
@@ -67,12 +69,12 @@ export default function MatchInfo(props: MatchInfoProps) {
           <dt className="w-32 text-gray-400">Assigned To</dt>
           <dd>
             {match.assignedTo?.username ? (
-              <a
-                href={`/users/${getIDFromBase64(match.assignedTo.id, "UserType")}`}
+              <Link
+                to={`/users/${getIDFromBase64(match.assignedTo.id, "UserType")}`}
                 className="text-customGreen hover:underline"
               >
                 {match.assignedTo.username}
-              </a>
+              </Link>
             ) : (
               "--"
             )}
@@ -88,15 +90,15 @@ export default function MatchInfo(props: MatchInfoProps) {
           <dt className="w-32 text-gray-400">Winner</dt>
           <dd>
             {match.result?.winner ? (
-              <a
-                href={`/bots/${getIDFromBase64(
+              <Link
+                to={`/bots/${getIDFromBase64(
                   match.result.winner.id,
                   "BotType"
                 )}`}
                 className="text-customGreen hover:underline"
               >
                 {match.result.winner.name}
-              </a>
+              </Link>
             ) : (
               "--"
             )}
@@ -111,7 +113,17 @@ export default function MatchInfo(props: MatchInfoProps) {
           <dt className="w-32 text-gray-400">Map</dt>
           <dd>
             {" "}
-            <a href={`${match.map.downloadLink}`}>{match.map.name || "--"} </a>
+            <a
+              download
+              className="text-customGreen hover:underline whitespace-nowrap  flex items-center gap-1"
+              href={`${match.map.downloadLink}`}
+            >
+              {(
+                <>
+                  <ArrowDownCircleIcon height={18} /> {match.map.name}
+                </>
+              ) || "--"}{" "}
+            </a>
           </dd>
         </div>
       </div>
@@ -132,24 +144,24 @@ export default function MatchInfo(props: MatchInfoProps) {
             <div className="flex gap-2">
               <dt className="w-32 text-gray-400">Competition</dt>
               <dd>
-                <a
-                  href={`/competitions/${getIDFromBase64(match.round?.competition.id, "CompetitionType")}`}
+                <Link
+                  to={`/competitions/${getIDFromBase64(match.round?.competition.id, "CompetitionType")}`}
                   className="text-customGreen hover:underline"
                 >
                   {match.round?.competition.name}
-                </a>
+                </Link>
               </dd>
             </div>
 
             <div className="flex gap-2">
               <dt className="w-32 text-gray-400">Round</dt>
               <dd>
-                <a
-                  href={`/rounds/${getIDFromBase64(match.round?.id, "RoundType")}`}
+                <Link
+                  to={`/rounds/${getIDFromBase64(match.round?.id, "RoundsType")}`}
                   className="text-customGreen hover:underline"
                 >
                   {match.round?.number}
-                </a>
+                </Link>
               </dd>
             </div>
           </>
@@ -159,11 +171,11 @@ export default function MatchInfo(props: MatchInfoProps) {
             <div className="flex gap-2">
               <dt className="w-32 text-gray-400">Requested By</dt>
               <dd>
-                <a
-                  href={`/authors/${getIDFromBase64(match.requestedBy.id, "UserType")}`}
+                <Link
+                  to={`/authors/${getIDFromBase64(match.requestedBy.id, "UserType")}`}
                 >
                   {match.requestedBy.username}
-                </a>
+                </Link>
               </dd>
             </div>
           </>
