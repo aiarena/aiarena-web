@@ -5,9 +5,7 @@ import {
   BotCompetitionsTable_bot$key,
 } from "./__generated__/BotCompetitionsTable_bot.graphql";
 import {
-  Dispatch,
   ReactNode,
-  SetStateAction,
   startTransition,
   Suspense,
   useEffect,
@@ -26,14 +24,11 @@ import LoadingDots from "@/_components/_display/LoadingDots";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
-import { StatsModalStatus } from "./Page";
 
 interface BotCompetitionsTableProps {
   bot: BotCompetitionsTable_bot$key;
   appendHeader?: ReactNode;
   onlyActive?: boolean | undefined;
-  isStatsModalOpen?: StatsModalStatus;
-  setIsStatsModalOpen?: Dispatch<SetStateAction<StatsModalStatus>>;
 }
 
 export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
@@ -164,32 +159,16 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
         header: "Stats",
         enableSorting: false,
         cell: (info) => {
-          return (
-            <button
-              className="text-customGreen hover:text-white"
-              onClick={() =>
-                props.setIsStatsModalOpen &&
-                props.setIsStatsModalOpen({
-                  status: true,
-                  botId: info.row.original.id,
-                  botName: info.row.original.bot.name,
-                  competitionName: info.row.original.competition.name,
-                })
-              }
-            >
-              Stats
-            </button>
+          return withAtag(
+            "View Stats",
+            `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,
+            `View stats ${info.getValue()}`
           );
-          // return withAtag(
-          //   "View Stats",
-          //   `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,
-          //   `View stats ${info.getValue()}`
-          // );
         },
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper, props]
+    [columnHelper]
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
@@ -243,15 +222,6 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
           <NoMoreItems />
         </div>
       ) : null}
-      {/* {isStatsModalOpen.status && (
-        <CompetitionParticipationModal
-          isOpen={isStatsModalOpen.status}
-          onClose={() =>
-            setIsStatsModalOpen({ status: false, botId: undefined })
-          }
-          id={isStatsModalOpen.botId || ""}
-        />
-      )} */}
     </div>
   );
 }

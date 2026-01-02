@@ -3,22 +3,15 @@ import InformationSection from "./InformationSection";
 import { BotQuery } from "./__generated__/BotQuery.graphql";
 import { useParams } from "react-router";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
-import { Dispatch, SetStateAction, Suspense, useState } from "react";
+import { Suspense, useState } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import BotCompetitionsTable from "./BotCompetitionsTable";
 import FetchError from "@/_components/_display/FetchError";
 // import BotResultsTable from "./BotResultsTable";
 import { BotResultQuery } from "./__generated__/BotResultQuery.graphql";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
-import { StatsModalStatus } from "./Page";
 
-export default function Bot({
-  isStatsModalOpen,
-  setIsStatsModalOpen,
-}: {
-  isStatsModalOpen: StatsModalStatus;
-  setIsStatsModalOpen: Dispatch<SetStateAction<StatsModalStatus>>;
-}) {
+export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
   const [onlyActive, setOnlyActive] = useState(false);
   const data = useLazyLoadQuery<BotQuery>(
@@ -62,8 +55,6 @@ export default function Bot({
         <h4 className="mb-4">Competition Participations</h4>
         <Suspense fallback={<LoadingSpinner color="light-gray" />}>
           <BotCompetitionsTable
-            isStatsModalOpen={isStatsModalOpen}
-            setIsStatsModalOpen={setIsStatsModalOpen}
             bot={data.node}
             onlyActive={onlyActive}
             appendHeader={
