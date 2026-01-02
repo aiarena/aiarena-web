@@ -27,6 +27,10 @@ export default function App() {
     <Routes>
       <Route element={<RootLayout />}>
         <Route index element={<LandingPage />} />
+        <Route
+          path="competitions/stats/:id/:slug?"
+          element={<CompetitionParticipationPage />}
+        />
       </Route>
       <Route element={<RootWithPaddingLayout />}>
         <Route path="authors" element={<AuthorsPage />} />
@@ -39,6 +43,8 @@ export default function App() {
         <Route path="rounds/:roundId" element={<RoundsPage />} />
         <Route path="bots" element={<BotsPage />} />
         <Route path="matches/:matchId" element={<MatchPage />} />
+        <Route path="results" element={<ResultsPage />} />
+        <Route path="bots/:botId" element={<BotPage />} />
       </Route>
 
       <Route element={<DashboardLayout />} path="dashboard">
@@ -50,19 +56,6 @@ export default function App() {
           <Route path="examples" element={<Examples />} />
         )}
         <Route path="*" element={<PageNotFound />} />
-      </Route>
-      <Route path="dashboard/rework">
-        <Route element={<RootLayout />}>
-          <Route
-            path="competitions/stats/:id/:slug?"
-            element={<CompetitionParticipationPage />}
-          />
-        </Route>
-
-        <Route element={<RootWithPaddingLayout />}>
-          <Route path="results" element={<ResultsPage />} />
-          <Route path="bots/:botId" element={<BotPage />} />
-        </Route>
       </Route>
     </Routes>
   );
