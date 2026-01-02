@@ -78,9 +78,11 @@ export default function EloChart(props: EloChartProps) {
 
   if (!chartData)
     return (
-      <NoItemsInListMessage>
-        <p>No match data available...</p>
-      </NoItemsInListMessage>
+      <div className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8">
+        <NoItemsInListMessage>
+          <p>No match data available...</p>
+        </NoItemsInListMessage>
+      </div>
     );
 
   const lastUpdated =
@@ -88,7 +90,7 @@ export default function EloChart(props: EloChartProps) {
 
   return (
     <div
-      style={{ height: 400 }}
+      style={{ height: 558 }}
       className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8"
     >
       <Line

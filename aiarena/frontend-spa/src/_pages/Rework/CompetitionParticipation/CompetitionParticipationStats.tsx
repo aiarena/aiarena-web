@@ -15,6 +15,8 @@ import RaceMatchup from "./RaceMatchup";
 import { CompetitionParticipationStatsResultsQuery } from "./__generated__/CompetitionParticipationStatsResultsQuery.graphql";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import Summary from "./Summary";
+import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
+import { socialLinks } from "@/_data/socialLinks";
 
 type ActiveTab = (typeof statsSideNavbarLinks)[number]["state"];
 type ActiveTopTab = (typeof statsTopNavbarLinks)[number]["state"];
@@ -53,7 +55,9 @@ export default function CompetitionParticipationStats(
           }
         }
         viewer {
-          id
+          user {
+            patreonLevel
+          }
         }
       }
     `,
@@ -91,13 +95,10 @@ export default function CompetitionParticipationStats(
             {props.activeTab === "overview" && (
               <>
                 {props.activeTopTab === "elograph" && (
-                  <>
-                    {" "}
-                    <div className="flex flex-col gap-4">
-                      <EloChart data={data.node} />
-                      <Summary data={data.node} />
-                    </div>
-                  </>
+                  <div className="flex flex-col gap-4">
+                    <EloChart data={data.node} />
+                    <Summary data={data.node} />
+                  </div>
                 )}
                 {props.activeTopTab === "winsbytime" && (
                   <div className="flex flex-col gap-4">
@@ -107,7 +108,25 @@ export default function CompetitionParticipationStats(
                 )}
                 {props.activeTopTab === "winsbyrace" && (
                   <div className="flex flex-col gap-4">
-                    <RaceMatchup data={data.node} />
+                    {data.viewer?.user?.patreonLevel == "NONE" ||
+                    data.viewer == null ? (
+                      <div className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8">
+                        <NoItemsInListMessage>
+                          <div className="block">
+                            <p>
+                              This feature is only available to Patreon
+                              Supporters
+                            </p>
+                            <a href={socialLinks["patreon"]} target="_blank">
+                              Patreon
+                            </a>
+                          </div>
+                        </NoItemsInListMessage>
+                      </div>
+                    ) : (
+                      <RaceMatchup data={data.node} />
+                    )}
+
                     <Summary data={data.node} />
                   </div>
                 )}

@@ -385,29 +385,13 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
             last_updated = None
             datasets = []
 
-        else:  # only show the last updated if its within the date range
+        else:
             xs_ms = [e[2].timestamp() * 1000 for e in elo_data]
             min_x, max_x = min(xs_ms), max(xs_ms)
 
-            ##
             dt = gen._get_graph_update_line_datetime(root.bot, competition.id)
             candidate_last_updated = dt.timestamp() * 1000 if dt else None
 
-            # request = info.context
-            # user = getattr(request, "user", None)
-
-            # if user and user.is_authenticated:
-            #     if (
-            #         user.is_superuser
-            #         or (
-            #             root.bot.user == user
-            #             and getattr(user, "patreon_level", "none") != "none"
-            #         )
-            #     ):
-            #         dt = gen._get_graph_update_line_datetime(root.bot, competition.id)
-            #         last_updated = dt.timestamp() * 1000 if dt else None
-
-            # Only keep it if it's within the data range
             if candidate_last_updated is not None and min_x <= candidate_last_updated <= max_x:
                 last_updated = candidate_last_updated
             else:
@@ -470,33 +454,38 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_race_matchup(root, info, **args):
-        competition = root.competition
-        if competition.statistics_finalized:
-            return None
+        request = info.context
+        user = getattr(request, "user", None)
+        # Wins by race is only  available for Patreon users
+        if user and user.is_authenticated:
+            if user.is_superuser or (root.bot.user == user and getattr(user, "patreon_level", "none") != "none"):
+                competition = root.competition
+                if competition.statistics_finalized:
+                    return None
 
-        gen = EloGraphsGenerator(root)
-        rows = gen._get_race_outcome_breakdown_data(root.bot.id, competition.id)
-        breakdown = gen._race_outcome_breakdown(rows)
+                gen = EloGraphsGenerator(root)
+                rows = gen._get_race_outcome_breakdown_data(root.bot.id, competition.id)
+                breakdown = gen._race_outcome_breakdown(rows)
 
-        def normalize(d):
-            return {
-                "wins": d.get("wins", 0),
-                "losses": d.get("losses", 0),
-                "ties": d.get("ties", 0),
-                "crashes": d.get("crashes", 0),
-                "played": d.get("played", 0),
-                "winRate": d.get("winRate", 0.0),
-                "lossRate": d.get("lossRate", 0.0),
-                "tieRate": d.get("tieRate", 0.0),
-                "crashRate": d.get("crashRate", 0.0),
-            }
+                def normalize(d):
+                    return {
+                        "wins": d.get("wins", 0),
+                        "losses": d.get("losses", 0),
+                        "ties": d.get("ties", 0),
+                        "crashes": d.get("crashes", 0),
+                        "played": d.get("played", 0),
+                        "winRate": d.get("winRate", 0.0),
+                        "lossRate": d.get("lossRate", 0.0),
+                        "tieRate": d.get("tieRate", 0.0),
+                        "crashRate": d.get("crashRate", 0.0),
+                    }
 
-        return {
-            "zerg": normalize(breakdown.get("Z", {})),
-            "protoss": normalize(breakdown.get("P", {})),
-            "terran": normalize(breakdown.get("T", {})),
-            "random": normalize(breakdown.get("R", {})),
-        }
+                return {
+                    "zerg": normalize(breakdown.get("Z", {})),
+                    "protoss": normalize(breakdown.get("P", {})),
+                    "terran": normalize(breakdown.get("T", {})),
+                    "random": normalize(breakdown.get("R", {})),
+                }
 
 
 class MatchParticipationFilterSet(FilterSet):
