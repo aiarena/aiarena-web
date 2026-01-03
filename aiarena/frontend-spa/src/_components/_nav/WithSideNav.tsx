@@ -8,7 +8,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
   const [navbarHeight, setNavbarHeight] = useState(0);
 
   const handleWindowResize = useCallback(() => {
-    if (window.innerWidth >= 920) {
+    if (window.innerWidth >= 1024) {
       setSideNavbar(true);
     } else {
       setSideNavbar(false);
@@ -68,7 +68,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
                     "m-2 pl-2 py-2 text-white border-1 shadow-black shadow-sm hover:shadow-customGreen-dark duration-300 ease-in-out transform backdrop-blur-sm",
                     isActive
                       ? "text-large border-neutral-700 border-b-customGreen border-b-2"
-                      : "border-neutral-700 hover:border-b-customGreen border-b-2",
+                      : "border-neutral-700 hover:border-b-customGreen border-b-2"
                   )
                 }
               >
@@ -92,7 +92,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
                     "py-2 text-white font-gugi",
                     isActive
                       ? "border-b-2 border-customGreen"
-                      : "border-b-2 border-transparent hover:border-customGreen",
+                      : "border-b-2 border-transparent hover:border-customGreen"
                   )
                 }
               >
@@ -106,7 +106,7 @@ export default function WithSideNav({ children }: { children: ReactNode }) {
       <main
         className={clsx(
           sideNavbar ? "flex-1" : "sticky top-0",
-          "overflow-y-auto p-8 min-h-[90vh]",
+          "overflow-y-auto p-8 min-h-[90vh]"
         )}
         role="main"
       >

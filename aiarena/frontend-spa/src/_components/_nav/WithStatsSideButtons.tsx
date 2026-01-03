@@ -29,7 +29,7 @@ export default function WithStatsSideButtons({
 }) {
   const [sideNavbar, setSideNavbar] = useState(false);
   const handleWindowResize = useCallback(() => {
-    if (window.innerWidth >= 920) {
+    if (window.innerWidth >= 1024) {
       setSideNavbar(true);
     } else {
       setSideNavbar(false);
