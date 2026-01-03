@@ -89,8 +89,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("matches/<int:pk>/", core_views.frontend, name="match"),
     path("competitions/", core_views.frontend, name="competitions"),
     path("competitions/<int:pk>/", core_views.frontend, name="competition"),
-    # path("competitions/stats/<int:pk>/", core_views.BotCompetitionStatsDetail.as_view()),
-    path("competitions/stats/<int:pk>/", core_views.frontend, name="bot_competition_participation"),
+    path("competitions/stats/<int:pk>/", core_views.BotCompetitionStatsDetail.as_view()),
     path(
         "competitions/stats/<int:pk>/<slug:slug>",
         core_views.BotCompetitionStatsDetail.as_view(),
