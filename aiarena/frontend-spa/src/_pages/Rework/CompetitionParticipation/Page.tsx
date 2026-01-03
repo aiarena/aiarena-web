@@ -8,8 +8,9 @@ import {
 } from "./StatsSideNavbarLinks";
 import WithStatsSideButtons from "@/_components/_nav/WithStatsSideButtons";
 import WithTopButtons from "@/_components/_nav/WithTopButtons";
+import NameCompDisplay from "./NameCompDisplay";
 
-export default function CompetitionParticipationPage() {
+export default function Page() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] =
     useState<(typeof statsSideNavbarLinks)[number]["state"]>("overview");
@@ -30,6 +31,10 @@ export default function CompetitionParticipationPage() {
       <h2 id="competition-participation-heading" className="sr-only">
         Competition Participation Stats
       </h2>
+
+      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+        <NameCompDisplay id={id} />
+      </Suspense>
       <WithStatsSideButtons
         activeTab={activeTab}
         setActiveTab={setActiveTab}
