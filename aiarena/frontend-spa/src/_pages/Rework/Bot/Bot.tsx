@@ -10,6 +10,7 @@ import FetchError from "@/_components/_display/FetchError";
 // import BotResultsTable from "./BotResultsTable";
 import { BotResultQuery } from "./__generated__/BotResultQuery.graphql";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
+import BotResultsTable from "./BotResultsTable";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
@@ -76,10 +77,10 @@ export default function Bot() {
             }
           />
         </Suspense>
-        {/* <h4 className="mb-4 mt-8">Results</h4>
+        <h4 className="mb-4 mt-8">Results</h4>
         <Suspense fallback={<LoadingSpinner color="light-gray" />}>
           <BotResultsTable data={resultData.node} />
-        </Suspense> */}
+        </Suspense>
       </div>
     </>
   );
