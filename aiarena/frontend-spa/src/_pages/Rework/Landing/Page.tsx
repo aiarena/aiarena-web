@@ -133,7 +133,9 @@ function InstructionsCard() {
         </h3>
         <ol className="list-decimal ml-10">
           <li>
-            <a href="/accounts/register/">Register</a>
+            <a href="/accounts/register/" target="_blank">
+              Register
+            </a>
           </li>
           <li>
             Read the{" "}

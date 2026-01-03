@@ -6,7 +6,6 @@ import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 import { ArrowDownCircleIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
-import { Link } from "react-router";
 interface MatchDecalProps {
   match: MatchDecal_match$key;
 }
@@ -114,12 +113,12 @@ export default function MatchInfo(props: MatchDecalProps) {
           </div>
           <span className="ml-2 flex gap-2 text-lg">
             on{" "}
-            <Link
-              to={`${match.map.downloadLink}`}
+            <a
+              href={`${match.map.downloadLink}`}
               className="flex gap-1 items-center"
             >
               <ArrowDownCircleIcon height={18} /> {match.map.name}
-            </Link>
+            </a>
           </span>
         </div>
 
@@ -130,12 +129,12 @@ export default function MatchInfo(props: MatchDecalProps) {
                 <>
                   {winner ? (
                     <span className="flex flex-wrap justify-end">
-                      <Link
-                        to={`/bots/${getIDFromBase64(winner.id, "BotType")}`}
+                      <a
+                        href={`/bots/${getIDFromBase64(winner.id, "BotType")}`}
                         className="block truncate max-w-80 mr-2 overflow-ellipsis"
                       >
                         {winner.name}
-                      </Link>
+                      </a>
                       won the match
                     </span>
                   ) : (
@@ -203,12 +202,12 @@ export default function MatchInfo(props: MatchDecalProps) {
           {mp1 && (
             <div className="font-medium flex flex-col items-center md:items-start gap-1 min-w-0">
               <>
-                <Link
-                  to={`/bots/${getIDFromBase64(mp1.id, "BotType")}`}
+                <a
+                  href={`/bots/${getIDFromBase64(mp1.id, "BotType")}`}
                   className="text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
                 >
                   {formatWinnerName(winner?.name, mp1.name)}
-                </Link>
+                </a>
                 {p1 && (
                   <div className="flex items-center gap-1 mb-4 text-lg">
                     <span className={getEloClass(p1.eloChange)}>
@@ -248,12 +247,12 @@ export default function MatchInfo(props: MatchDecalProps) {
           <div className="font-medium flex flex-col items-center md:items-end gap-1 min-w-0">
             {mp2 && (
               <>
-                <Link
-                  to={`/bots/${getIDFromBase64(mp2.id, "BotType")}`}
+                <a
+                  href={`/bots/${getIDFromBase64(mp2.id, "BotType")}`}
                   className="text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
                 >
                   {formatWinnerName(winner?.name, mp2.name)}
-                </Link>
+                </a>
                 {p2 && (
                   <div className="flex items-center gap-1 mb-4 text-lg">
                     <span className={getEloClass(p2.eloChange)}>

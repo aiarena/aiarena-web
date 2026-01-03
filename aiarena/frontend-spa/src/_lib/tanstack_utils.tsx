@@ -1,9 +1,8 @@
 import { SortingState } from "@tanstack/react-table";
-import { Link } from "react-router";
 
 export function parseSort(
   sortingMap: Record<string, string>,
-  sorting: SortingState
+  sorting: SortingState,
 ) {
   let sortField = "";
   let sortPrefix = "";
@@ -25,18 +24,19 @@ export const withAtag = (
   href: string,
   aria: string,
   children?: React.ReactNode,
-  appendOnEnd?: React.ReactNode
+  appendOnEnd?: React.ReactNode,
 ) => (
   <span className="flex justify-between">
-    <Link
+    <a
       className="font-semibold text-gray-200 truncate mr-2"
-      to={href}
+      href={href}
       role="cell"
+      target="_blank"
       aria-label={aria}
       title={`${label}`}
     >
       {children ? children : label}
-    </Link>
+    </a>
     {appendOnEnd && appendOnEnd}
   </span>
 );
