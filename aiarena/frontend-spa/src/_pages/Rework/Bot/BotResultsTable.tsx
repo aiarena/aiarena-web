@@ -111,6 +111,8 @@ export interface ResultsFilters {
   mapName: string | undefined;
   competitionId: string | undefined;
   competitionName: string | undefined;
+  matchStartedAfter: string | undefined; // ISO string
+  matchStartedBefore: string | undefined; // ISO string
 }
 
 export default function BotResultsTable(props: BotResultsTableProps) {
@@ -131,6 +133,8 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     mapName: undefined,
     competitionId: props.filterPreset?.competitionId || undefined,
     competitionName: props.filterPreset?.competitionName || undefined,
+    matchStartedAfter: undefined,
+    matchStartedBefore: undefined,
   });
 
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
@@ -152,6 +156,8 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         matchType: { type: "String" }
         mapName: { type: "String" }
         competitionId: { type: "String" }
+        matchStartedAfter: { type: "DateTime" }
+        matchStartedBefore: { type: "DateTime" }
       ) {
         matchParticipations(
           first: $first
@@ -168,6 +174,8 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           matchType: $matchType
           mapName: $mapName
           competitionId: $competitionId
+          matchStartedAfter: $matchStartedAfter
+          matchStartedBefore: $matchStartedBefore
         ) @connection(key: "ResultsTable_node_matchParticipations") {
           totalCount
           edges {
@@ -266,6 +274,8 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         matchType: filters.matchType?.toLowerCase(),
         mapName: filters.mapName,
         competitionId: filters.competitionId,
+        matchStartedAfter: filters.matchStartedAfter,
+        matchStartedBefore: filters.matchStartedBefore,
         orderBy: "-id",
         first: 50,
       });

@@ -446,3 +446,8 @@ nav .block {
   background: #666666;
 }
 /* EndOf Scrollbar Black Theme styles */
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.2) opacity(0.8);
+  cursor: pointer;
+}

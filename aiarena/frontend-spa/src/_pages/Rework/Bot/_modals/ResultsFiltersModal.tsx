@@ -92,6 +92,8 @@ export default function ResultsFiltersModal({
       mapName: undefined,
       competitionId: undefined,
       competitionName: undefined,
+      matchStartedAfter: undefined,
+      matchStartedBefore: undefined,
     });
   };
   return (
@@ -330,6 +332,63 @@ export default function ResultsFiltersModal({
               className="rounded-lg border px-3 py-2"
               placeholder="e.g. 250"
               min={0}
+            />
+          </div>
+        </div>
+        <SectionDivider color="gray" className="pb-1" />
+        {/* DateTime filter */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Match Started After */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="matchStartedAfter"
+              className="font-medium text-gray-200"
+            >
+              Match Started After
+            </label>
+            <input
+              id="matchStartedAfter"
+              type="datetime-local"
+              value={
+                filters.matchStartedAfter
+                  ? filters.matchStartedAfter.slice(0, 16)
+                  : ""
+              }
+              onChange={(e) => {
+                const val = e.target.value;
+                setFilters((prev) => ({
+                  ...prev,
+                  matchStartedAfter: val ? `${val}:00Z` : undefined,
+                }));
+              }}
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-customGreen"
+            />
+          </div>
+
+          {/* Match Started Before */}
+          <div className="flex flex-col gap-1">
+            <label
+              htmlFor="matchStartedBefore"
+              className="font-medium text-gray-200"
+            >
+              Match Started Before
+            </label>
+            <input
+              id="matchStartedBefore"
+              type="datetime-local"
+              value={
+                filters.matchStartedBefore
+                  ? filters.matchStartedBefore.slice(0, 16)
+                  : ""
+              }
+              onChange={(e) => {
+                const val = e.target.value;
+                setFilters((prev) => ({
+                  ...prev,
+                  matchStartedBefore: val ? `${val}:00Z` : undefined,
+                }));
+              }}
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-customGreen"
             />
           </div>
         </div>

@@ -518,6 +518,9 @@ class MatchParticipationFilterSet(FilterSet):
     map_name = django_filters.CharFilter(field_name="match__map__name", lookup_expr="icontains")
     competition_id = django_filters.CharFilter(method="filter_competition")
 
+    match_started_after = django_filters.DateTimeFilter(field_name="match__started", lookup_expr="gte")
+    match_started_before = django_filters.DateTimeFilter(field_name="match__started", lookup_expr="lte")
+
     class Meta:
         model = models.MatchParticipation
         fields = [
@@ -531,6 +534,8 @@ class MatchParticipationFilterSet(FilterSet):
             "map_name",
             "competition_id",
             "opponent_plays_race",
+            "match_started_after",
+            "match_started_before",
         ]
 
     def filter_order_by(self, queryset, name, value):
