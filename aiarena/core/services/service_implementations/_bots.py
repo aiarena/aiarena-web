@@ -11,6 +11,7 @@ from aiarena import settings
 from aiarena.core.models import Bot, Match
 from aiarena.core.services import Bots
 
+
 logger = logging.getLogger(__name__)
 
 

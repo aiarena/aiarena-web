@@ -7,3 +7,16 @@ from ._match_requests import MatchRequests
 from ._matches import Matches
 from ._supporters import SupportersImpl as Supporters
 from ._users import Users
+
+
+__all__ = [
+    "ArenaClients",
+    "BotStatistics",
+    "Bots",
+    "Competitions",
+    "Ladders",
+    "MatchRequests",
+    "Matches",
+    "Supporters",
+    "Users",
+]

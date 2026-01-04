@@ -1,14 +1,33 @@
 from ._bots import Bots
 from ._supporters import Supporters
-from .service_implementations import (ArenaClients as _ArenaClientsClass,
-                                      BotStatistics as _BotStatisticsClass,
-                                      Bots as _BotsClass,
-                                      Competitions as _CompetitionsClass,
-                                      Ladders as _LaddersClass,
-                                      MatchRequests as _MatchRequestsClass,
-                                      Matches as _MatchesClass,
-                                      Supporters as _SupportersImplClass,
-                                      Users as _UsersClass)
+from .service_implementations import (
+    ArenaClients as _ArenaClientsClass,
+)
+from .service_implementations import (
+    Bots as _BotsClass,
+)
+from .service_implementations import (
+    BotStatistics as _BotStatisticsClass,
+)
+from .service_implementations import (
+    Competitions as _CompetitionsClass,
+)
+from .service_implementations import (
+    Ladders as _LaddersClass,
+)
+from .service_implementations import (
+    Matches as _MatchesClass,
+)
+from .service_implementations import (
+    MatchRequests as _MatchRequestsClass,
+)
+from .service_implementations import (
+    Supporters as _SupportersImplClass,
+)
+from .service_implementations import (
+    Users as _UsersClass,
+)
+
 
 supporters: Supporters = _SupportersImplClass()
 arena_clients = _ArenaClientsClass()

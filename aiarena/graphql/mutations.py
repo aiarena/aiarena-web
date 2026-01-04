@@ -23,7 +23,7 @@ from aiarena.core.models.competition import Competition
 from aiarena.core.models.competition_participation import CompetitionParticipation
 from aiarena.core.models.map import Map
 from aiarena.core.models.map_pool import MapPool
-from aiarena.core.services import supporters, bots
+from aiarena.core.services import bots, supporters
 from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import (
     CleanedInputMutation,

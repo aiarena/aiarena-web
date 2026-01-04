@@ -3,6 +3,7 @@ from django.conf import settings
 from aiarena.core.models import User
 from aiarena.core.services import Supporters
 
+
 BENEFITS_MAP = {
     "none": {
         "active_bots_limit": settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER,
