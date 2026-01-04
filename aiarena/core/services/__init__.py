@@ -1,12 +1,12 @@
-from .arena_clients import ArenaClients as _ArenaClientsClass
-from .bot_statistics import BotStatistics as _BotStatisticsClass
-from .bots import Bots as _BotsClass
-from .competitions import Competitions as _CompetitionsClass
-from .ladders import Ladders as _LaddersClass
-from .match_requests import MatchRequests as _MatchRequestsClass
-from .matches import Matches as _MatchesClass
-from .supporter_benefits import SupporterBenefits as _SupporterBenefitsClass
-from .users import Users as _UsersClass
+from ._arena_clients import ArenaClients as _ArenaClientsClass
+from ._bot_statistics import BotStatistics as _BotStatisticsClass
+from ._bots import Bots as _BotsClass
+from ._competitions import Competitions as _CompetitionsClass
+from ._ladders import Ladders as _LaddersClass
+from ._match_requests import MatchRequests as _MatchRequestsClass
+from ._matches import Matches as _MatchesClass
+from ._supporter_benefits import SupporterBenefits as _SupporterBenefitsClass
+from ._users import Users as _UsersClass
 
 
 arena_clients = _ArenaClientsClass()

@@ -27,8 +27,8 @@ from aiarena.core.models import (
     Round,
 )
 
-from .bots import Bots
-from .competitions import Competitions
+from ._bots import Bots
+from ._competitions import Competitions
 from .internal.match_starter import MatchStarter
 from .internal.matches import CancelResult, cancel, create
 from .internal.rounds import update_round_if_completed
