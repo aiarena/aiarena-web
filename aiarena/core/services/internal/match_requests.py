@@ -5,8 +5,7 @@ from constance import config
 from aiarena.core.models import Map, Match, Result
 
 from ...exceptions import MatchRequestException
-from .. import bots
-from ..supporter_benefits import SupporterBenefits
+from .. import bots, supporter_benefits
 from .maps import Maps
 from .matches import create
 
@@ -20,7 +19,7 @@ def _get_map(map_selection_type, map_pool, chosen_map):
 
 def get_user_match_request_count_left(user):
     return (
-        SupporterBenefits.get_requested_matches_limit(user)
+        supporter_benefits.get_requested_matches_limit(user)
         - Match.objects.only("id")
         .filter(requested_by=user, created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD)
         .count()

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class MatchRequests:
     def request_matches(
+        self,
         requested_by_user: WebsiteUser,
         bot1,
         opponent,

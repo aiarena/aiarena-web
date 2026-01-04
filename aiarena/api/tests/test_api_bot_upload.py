@@ -135,7 +135,7 @@ class ApiBotUploadTestCase(FullDataSetMixin, TransactionTestCase):
         self.regularUser1Bot1.refresh_from_db()
         self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
 
-    @patch("aiarena.core.services.bots.Bots.bot_data_is_frozen", lambda x: True)
+    @patch("aiarena.core.services.bots.Bots.bot_data_is_frozen", lambda self, bot: True)
     def test_data_not_updated_while_frozen(self):
         self.assertEqual(self.regularUser1Bot1.bot_zip_publicly_downloadable, False)
         self.assertNotEqual(self.regularUser1Bot1.bot_data_md5hash, self.hashes["bot_data.zip"])

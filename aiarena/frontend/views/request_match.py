@@ -11,7 +11,7 @@ from django_select2.forms import Select2Widget
 
 from aiarena.core.exceptions import MatchRequestException
 from aiarena.core.models import Bot, Map, MapPool
-from aiarena.core.services import MatchRequests, SupporterBenefits
+from aiarena.core.services import match_requests, supporter_benefits
 
 
 class BotWidget(Select2Widget):
@@ -140,8 +140,8 @@ class RequestMatch(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["match_request_count_left"] = MatchRequests.get_user_match_request_count_left(self.request.user)
-        context["requested_matches_limit"] = SupporterBenefits.get_requested_matches_limit(self.request.user)
+        context["match_request_count_left"] = match_requests.get_user_match_request_count_left(self.request.user)
+        context["requested_matches_limit"] = supporter_benefits.get_requested_matches_limit(self.request.user)
         return context
 
     def form_valid(self, form):
@@ -155,7 +155,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
             map_pool = form.cleaned_data["map_pool"]
             chosen_map = form.cleaned_data["map"]
 
-            match_list = MatchRequests.request_matches(
+            match_list = match_requests.request_matches(
                 self.request.user.websiteuser,
                 bot1,
                 opponent,
