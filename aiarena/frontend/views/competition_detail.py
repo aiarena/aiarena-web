@@ -3,7 +3,7 @@ from django.db.models import Prefetch
 from django.views.generic import DetailView
 
 from aiarena.core.models import Bot, Competition, CompetitionParticipation, Round, User
-from aiarena.core.services import Ladders
+from aiarena.core.services import ladders
 from aiarena.frontend.utils import restrict_page_range
 
 
@@ -28,7 +28,7 @@ class CompetitionDetail(DetailView):
         context["round_list"] = rounds
         context["round_page_range"] = restrict_page_range(paginator.num_pages, rounds.number)
 
-        all_participants = Ladders.get_competition_display_full_rankings(self.object)
+        all_participants = ladders.get_competition_display_full_rankings(self.object)
         all_participants = all_participants.prefetch_related(
             Prefetch(
                 "bot",

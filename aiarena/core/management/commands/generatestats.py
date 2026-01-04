@@ -4,7 +4,7 @@ from django.db import transaction
 from django_pglocks import advisory_lock
 
 from aiarena.core.models import Competition, CompetitionParticipation
-from aiarena.core.services.bot_statistics import BotStatistics
+from aiarena.core.services import bot_statistics
 
 
 class Command(BaseCommand):
@@ -87,6 +87,6 @@ class Command(BaseCommand):
             for sp in CompetitionParticipation.objects.filter(competition_id=competition.id):
                 self.stdout.write(f"Generating current competition stats for bot {sp.bot_id}...")
                 if graphs_only:
-                    BotStatistics(sp).generate_graphs()
+                    bot_statistics.generate_graphs(sp)
                 else:
-                    BotStatistics(sp).recalculate_stats()
+                    bot_statistics.recalculate_stats(sp)

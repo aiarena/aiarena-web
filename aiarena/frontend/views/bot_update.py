@@ -7,7 +7,7 @@ from django.views.generic import UpdateView
 from wiki.editors import getEditor
 
 from aiarena.core.models import Bot
-from aiarena.core.services import Bots
+from aiarena.core.services import bots
 
 
 class BotUpdateForm(forms.ModelForm):
@@ -26,7 +26,7 @@ class BotUpdateForm(forms.ModelForm):
 
         # change the available fields based upon whether the bot_data is available for editing or not
         # and whether there's a current competition
-        if Bots.bot_data_is_frozen(self.instance):
+        if bots.bot_data_is_frozen(self.instance):
             self.fields["bot_data"].disabled = True
 
     def clean_bot_zip(self):

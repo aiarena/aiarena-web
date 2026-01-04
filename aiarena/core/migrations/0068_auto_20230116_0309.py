@@ -3,12 +3,12 @@
 from django.db import migrations
 
 from aiarena.core.models import Competition, CompetitionParticipation, Match
-from aiarena.core.services import Ladders
+from aiarena.core.services import ladders
 
 
 def mark_participated_in_most_recent_round(apps, schema_editor):
     for competition in Competition.objects.all().only("id"):
-        last_round = Ladders.get_most_recent_round(competition)
+        last_round = ladders.get_most_recent_round(competition)
         if last_round is not None:
             bot_ids = (
                 Match.objects.select_related("match_participation")
@@ -16,7 +16,7 @@ def mark_participated_in_most_recent_round(apps, schema_editor):
                 .values("matchparticipation__bot__id")
                 .distinct()
             )
-            participants = Ladders._get_competition_participants(competition).filter(
+            participants = ladders._get_competition_participants(competition).filter(
                 bot__id__in=bot_ids, division_num__gte=CompetitionParticipation.MIN_DIVISION
             )
 

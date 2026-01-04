@@ -19,7 +19,7 @@ from aiarena.core.models import (
     Result,
     User,
 )
-from aiarena.core.services import Ladders
+from aiarena.core.services import ladders
 from aiarena.core.tests.test_mixins import MatchReadyMixin
 
 
@@ -191,7 +191,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
             # The front end uses get_competition_last_round_participants for displaying a closed competition's rankings
             # so here we test that the displayed ranks don't change after finalization
             pre_finalization_ranks = serializers.serialize(
-                "json", Ladders.get_competition_last_round_participants(competition)
+                "json", ladders.get_competition_last_round_participants(competition)
             )
 
             # fake competition closure
@@ -203,7 +203,7 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
             self.assertIn(f"Competition {competition.id} has been finalized.", out.getvalue())
 
             post_finalization_ranks = serializers.serialize(
-                "json", Ladders.get_competition_last_round_participants(competition)
+                "json", ladders.get_competition_last_round_participants(competition)
             )
             self.assertEqual(pre_finalization_ranks, post_finalization_ranks)
 

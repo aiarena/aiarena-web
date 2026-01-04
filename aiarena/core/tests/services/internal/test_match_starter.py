@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from aiarena.core.models import ArenaClient, Bot, Competition, Game, GameMode, Map, Match, MatchParticipation, User
 from aiarena.core.models.bot_race import BotRace
-from aiarena.core.services.internal.match_starter import MatchStarter
+from aiarena.core.services.service_implementations.internal.match_starter import MatchStarter
 from aiarena.core.tests.testing_utils import create_bot_for_competition
 
 

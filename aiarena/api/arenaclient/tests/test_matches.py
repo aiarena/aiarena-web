@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 
 from aiarena.core.models import ArenaClient, GameMode, Map, Match, User
 from aiarena.core.models.bot_race import BotRace
-from aiarena.core.services import Bots, MatchRequests
+from aiarena.core.services import bots, match_requests
 from aiarena.core.tests.test_mixins import LoggedInMixin
 from aiarena.core.utils import calculate_md5
 
@@ -153,7 +153,7 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
         response = self._post_to_matches(expected_code=200)
         self.assertEqual("no_game_available", response.data["detail"].code)
 
-        MatchRequests.request_match(self.regularUser2, bot1, bot1.get_random_excluding_self(), game_mode=game_mode)
+        match_requests.request_match(self.regularUser2, bot1, bot1.get_random_excluding_self(), game_mode=game_mode)
 
         # now we should be able to get a match - the requested one
         self._post_to_matches()
@@ -229,8 +229,11 @@ class MatchesTestCase(LoggedInMixin, TransactionTestCase):
                 log.output,
             )
 
-        MatchRequests.request_match(
-            self.regularUser2, bot1, Bots.get_random_active_bot_excluding(bot1.id), game_mode=GameMode.objects.first()
+        match_requests.request_match(
+            self.regularUser2,
+            bot1,
+            bots.get_random_active_bot_excluding(bot1.id),
+            game_mode=GameMode.objects.first(),
         )
 
         # now we should be able to get a match - the requested one

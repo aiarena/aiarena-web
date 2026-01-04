@@ -9,14 +9,14 @@ from constance import config
 
 from aiarena import settings
 from aiarena.core.models import Bot, Match
+from aiarena.core.services import Bots
 
 
 logger = logging.getLogger(__name__)
 
 
-class Bots:
-    @staticmethod
-    def send_crash_alert(bot: Bot):
+class BotsImpl(Bots):
+    def send_crash_alert(self, bot: Bot):
         # Can uncomment this if the emails show it isn't wrongly flagging bots
         # bot.competition_participations.update(active=False)
         try:
@@ -45,39 +45,38 @@ class Bots:
         except Exception as e:
             logger.exception(e)
 
-    @staticmethod
-    def get_active() -> QuerySet:
+    def get_active(self) -> QuerySet:
         return Bot.objects.filter(competition_participations__active=True)
 
-    @staticmethod
-    def get_available(bots) -> list:
-        return [bot for bot in bots if not Bots.bot_data_is_frozen(bot)]
+    def get_active_excluding_bot(self, bot: Bot) -> QuerySet:
+        if self.get_active().count() <= 1:
+            raise RuntimeError(f"Bot {bot.id} is the only bot.")
+        return self.get_active().exclude(id=bot.id)
 
-    @staticmethod
-    def available_is_more_than(bots, amount: int) -> bool:
+    def get_available(self, bots) -> list:
+        return [bot for bot in bots if not self.bot_data_is_frozen(bot)]
+
+    def available_is_more_than(self, bots, amount: int) -> bool:
         available = 0
         for bot in bots:
-            if not Bots.bot_data_is_frozen(bot):
+            if not self.bot_data_is_frozen(bot):
                 available += 1
             if available >= amount:
                 return True
         return False
 
-    @staticmethod
-    def get_random_active():
+    def get_random_active(self):
         # todo: apparently this is really slow
         # https://stackoverflow.com/questions/962619/how-to-pull-a-random-record-using-djangos-orm#answer-962672
         return Bot.objects.filter(competition_participations__active=True).order_by("?").first()
 
-    @staticmethod
-    def get_random_active_bot_excluding(id):
-        if Bots.get_active().count() <= 1:
+    def get_random_active_bot_excluding(self, id):
+        if self.get_active().count() <= 1:
             raise RuntimeError("I am the only bot.")
-        bot = Bots.get_active().exclude(id=id).order_by("?").first()
+        bot = self.get_active().exclude(id=id).order_by("?").first()
         return bot
 
-    @staticmethod
-    def bot_data_is_frozen(bot) -> bool:
+    def bot_data_is_frozen(self, bot) -> bool:
         # Check if there's any match where the bot's data is being used and updated
         data_frozen = Match.objects.filter(
             matchparticipation__bot=bot,

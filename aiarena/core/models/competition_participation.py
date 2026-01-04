@@ -91,9 +91,9 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
 
     def validate_unique(self, exclude=None):
         if self.active:
-            from ..services import SupporterBenefits  # avoid circular import
+            from ..services import supporters  # avoid circular import
 
-            bot_limit = SupporterBenefits.get_active_bots_limit(self.bot.user)
+            bot_limit = supporters.get_active_bots_limit(self.bot.user)
             if (
                 CompetitionParticipation.objects.exclude(pk=self.pk)
                 .filter(bot__user=self.bot.user, active=True)

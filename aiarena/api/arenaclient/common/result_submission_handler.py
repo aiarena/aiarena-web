@@ -18,8 +18,7 @@ from aiarena.core.models import (
     Result,
     Tag,
 )
-from aiarena.core.services import Bots, BotStatistics
-from aiarena.core.services.internal.rounds import update_round_if_completed
+from aiarena.core.services import bot_statistics, bots, competitions
 from aiarena.core.utils import parse_tags
 
 from .serializers import (
@@ -214,7 +213,7 @@ def submit_result(result_submission: ResultSubmission):
     result_submission.match.save()
     # Only do these actions if the match is part of a round
     if result.match.round is not None:
-        update_round_if_completed(result.match.round)
+        competitions.update_competition_round_if_completed(result.match.round)
 
         # Update and record ELO figures
         participant1.starting_elo, participant2.starting_elo = result.get_initial_elos
@@ -269,8 +268,8 @@ def submit_result(result_submission: ResultSubmission):
         elif config.DEBUG_LOGGING_ENABLED:
             logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
-        BotStatistics(sp1).update_stats_based_on_result(result, sp2)
-        BotStatistics(sp2).update_stats_based_on_result(result, sp1)
+        bot_statistics.update_stats_based_on_result(sp1, result, sp2)
+        bot_statistics.update_stats_based_on_result(sp2, result, sp1)
 
         if result.is_crash_or_timeout:
             try:
@@ -313,4 +312,4 @@ def run_consecutive_crashes_check(triggering_participation: MatchParticipation):
     BotCrashLimitAlert.objects.create(triggering_match_participation=triggering_participation)
 
     # If we get to here, all the results were crashes, so take action
-    Bots.send_crash_alert(triggering_participation.bot)
+    bots.send_crash_alert(triggering_participation.bot)

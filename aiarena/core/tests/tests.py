@@ -18,7 +18,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
-from aiarena.core.services import MatchRequests
+from aiarena.core.services import match_requests
 from aiarena.core.tests.test_mixins import BaseTestMixin, FullDataSetMixin, LoggedInMixin, MatchReadyMixin
 from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5
@@ -133,19 +133,19 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         game_mode = GameMode.objects.first()
 
         # No tags
-        MatchRequests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_requests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(None, None)
         self.assertTrue(Match.objects.get(id=match_response.data["id"]).tags.all().count() == 0)
 
         # 1 side tags
-        MatchRequests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_requests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(["abc"], None)
         match_tags = Match.objects.get(id=match_response.data["id"]).tags.all()
         self.assertTrue(match_tags.count() == 1)
         for mt in match_tags:
             self.assertEqual(mt.user.websiteuser, self.staffUser1)
 
-        MatchRequests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_requests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(None, ["abc"])
         match_tags = Match.objects.get(id=match_response.data["id"]).tags.all()
         self.assertTrue(match_tags.count() == 1)
@@ -158,7 +158,7 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         bot1_tags_list = [_temp_tags, [_temp_tag1]]
         bot2_tags_list = [[_temp_tag1], _temp_tags]
         for i in range(2):
-            MatchRequests.request_match(
+            match_requests.request_match(
                 self.regularUser1, self.regularUser1Bot1, self.staffUser1Bot1, game_mode=game_mode
             )
             match_response, _ = self._send_tags(bot1_tags_list[i], bot2_tags_list[i])
@@ -196,7 +196,7 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         # Check that if both bots belong to the same user, tags unioned
         bot1_tags = _temp_tags
         bot2_tags = [_temp_tag1, "qwerty"]
-        MatchRequests.request_match(self.staffUser1, self.staffUser1Bot2, self.staffUser1Bot1, game_mode=game_mode)
+        match_requests.request_match(self.staffUser1, self.staffUser1Bot2, self.staffUser1Bot1, game_mode=game_mode)
         match_response, _ = self._send_tags(bot1_tags, bot2_tags)
         match = Match.objects.get(id=match_response.data["id"])
         match_tags = match.tags.all()
@@ -205,7 +205,7 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
 
         # Check that invalid tags get processed to be valid rather than causing validation errors
         # This is to prevent tags from causing a result to fail submission
-        MatchRequests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_requests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(
             bot1_tags=["!", "2", "A", "", az_symbols + num_symbols + extra_symbols], bot2_tags=["123"]
         )
@@ -213,7 +213,7 @@ class MatchTagsTestCase(MatchReadyMixin, TestCase):
         self.assertTrue(match_tags.count() == 4)
 
         # Too many tags
-        MatchRequests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
+        match_requests.request_match(self.staffUser1, self.staffUser1Bot2, self.regularUser1Bot1, game_mode=game_mode)
         match_response, result_response = self._send_tags(
             bot1_tags=[str(i) for i in range(50)], bot2_tags=[str(i) for i in range(50)]
         )

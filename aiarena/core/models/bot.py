@@ -171,14 +171,6 @@ class Bot(models.Model, LockableModelMixin):
     def __str__(self):
         return self.name
 
-    def get_active_excluding_self(self):
-        """Returns a queryset of active bots, excluding this one."""
-        from ..services import Bots  # avoid circular reference
-
-        if Bots.get_active().count() <= 1:
-            raise RuntimeError("I am the only bot.")
-        return Bots.get_active().exclude(id=self.id)
-
     def get_random_excluding_self(self):
         if Bot.objects.all().count() <= 1:
             raise RuntimeError("I am the only bot.")

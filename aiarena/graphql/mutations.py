@@ -23,7 +23,8 @@ from aiarena.core.models.competition import Competition
 from aiarena.core.models.competition_participation import CompetitionParticipation
 from aiarena.core.models.map import Map
 from aiarena.core.models.map_pool import MapPool
-from aiarena.core.services.internal.match_requests import handle_request_matches
+from aiarena.core.services import bots, supporters
+from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import (
     CleanedInputMutation,
     CleanedInputType,
@@ -119,6 +120,8 @@ class RequestMatch(CleanedInputMutation):
 
         try:
             matches = handle_request_matches(
+                supporters_service=supporters,
+                bots_service=bots,
                 requested_by_user=info.context.user,
                 bot1=input_object.bot1,
                 opponent=input_object.bot2,

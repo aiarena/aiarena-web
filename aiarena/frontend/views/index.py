@@ -5,7 +5,7 @@ from django.views.generic import ListView
 from constance import config
 
 from aiarena.core.models import Bot, Competition, CompetitionParticipation, News, Round, User
-from aiarena.core.services import Ladders
+from aiarena.core.services import ladders
 
 
 class Index(ListView):
@@ -44,7 +44,7 @@ class Index(ListView):
                 top10 = cache.get(cache_key)
                 if top10 is None:
                     top10 = (
-                        Ladders.get_competition_ranked_participants(comp, amount=10)
+                        ladders.get_competition_ranked_participants(comp, amount=10)
                         .prefetch_related(
                             Prefetch("bot", queryset=Bot.objects.all().only("user_id", "name")),
                             Prefetch("bot__user", queryset=User.objects.all().only("patreon_level")),

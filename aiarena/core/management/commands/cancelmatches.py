@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from aiarena.core.models import Match
-from aiarena.core.services import Matches
+from aiarena.core.services import matches
 
 
 class Command(BaseCommand):
@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
     def cancel(self, match_id):
         try:
-            Matches.cancel(match_id)
+            matches.cancel(match_id)
         except Exception as e:
             raise CommandError(e)
         self.stdout.write(self.style.SUCCESS(f'Successfully marked match "{match_id}" with MatchCancelled'))
