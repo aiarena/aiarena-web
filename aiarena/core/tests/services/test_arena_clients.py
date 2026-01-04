@@ -43,8 +43,8 @@ class ArenaClientsServiceTests(TestCase):
     def _create_match_with_participants(self, assigned=True, finished=False):
         match = Match.objects.create(map=self.map, assigned_to=self.ac if assigned else None)
         # Participants
-        p1 = MatchParticipation.objects.create(match=match, participant_number=1, bot=self.bot1)
-        p2 = MatchParticipation.objects.create(match=match, participant_number=2, bot=self.bot2)
+        MatchParticipation.objects.create(match=match, participant_number=1, bot=self.bot1)
+        MatchParticipation.objects.create(match=match, participant_number=2, bot=self.bot2)
         if finished:
             # Create a Result and hook it to the match
             res = Result.objects.create(type="Error", game_steps=1234)
