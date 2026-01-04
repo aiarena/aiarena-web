@@ -25,8 +25,8 @@ from rest_framework.authtoken.models import Token
 from aiarena.core import models
 from aiarena.core.models import BotRace, Match, MatchParticipation, Result, User
 from aiarena.core.models.result import STEPS_PER_SECOND
-from aiarena.core.services import ladders, match_requests, supporter_benefits, users
-from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
+from aiarena.core.services import ladders, match_requests, supporters, users
+from aiarena.core.services.service_implementations.internal.statistics.elo_graphs_generator import EloGraphsGenerator
 from aiarena.frontend.templatetags.url_utils import get_absolute_url
 from aiarena.frontend.views.bot_detail import RelativeResultFilter
 from aiarena.graphql.chart_types import EloChartType, RaceMatchupBreakdownType, WinrateChartType
@@ -1095,11 +1095,11 @@ class Viewer(graphene.ObjectType):
 
     @staticmethod
     def resolve_active_bot_participation_limit(root: models.User, info, **args):
-        return supporter_benefits.get_active_bots_limit(root)
+        return supporters.get_active_bots_limit(root)
 
     @staticmethod
     def resolve_request_matches_limit(root: models.User, info, **args):
-        return supporter_benefits.get_requested_matches_limit(root)
+        return supporters.get_requested_matches_limit(root)
 
     @staticmethod
     def resolve_request_matches_count_left(root: models.User, info, **args):

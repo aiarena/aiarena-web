@@ -2,10 +2,11 @@ from django.utils import timezone
 
 from constance import config
 
+from aiarena.core.exceptions import MatchRequestException
 from aiarena.core.models import Map, Match, Result
 
-from ...exceptions import MatchRequestException
-from .. import bots, supporter_benefits
+from .._supporters import Supporters
+from .._bots import Bots
 from .maps import Maps
 from .matches import create
 
@@ -17,13 +18,13 @@ def _get_map(map_selection_type, map_pool, chosen_map):
         return chosen_map
 
 
-def get_user_match_request_count_left(user):
+def get_user_match_request_count_left(user, supporters_service: Supporters):
     return (
-        supporter_benefits.get_requested_matches_limit(user)
-        - Match.objects.only("id")
+            supporters_service.get_requested_matches_limit(user)
+            - Match.objects.only("id")
         .filter(requested_by=user, created__gte=timezone.now() - config.REQUESTED_MATCHES_LIMIT_PERIOD)
         .count()
-        + Result.objects.only("id")
+            + Result.objects.only("id")
         .filter(
             submitted_by=user,
             type="MatchCancelled",
@@ -34,13 +35,13 @@ def get_user_match_request_count_left(user):
 
 
 def handle_request_matches(
-    requested_by_user, bot1, opponent, match_count, matchup_race, matchup_type, map_selection_type, map_pool, chosen_map
+    supporters_service: Supporters, bots_service: Bots, requested_by_user, bot1, opponent, match_count, matchup_race, matchup_type, map_selection_type, map_pool, chosen_map
 ):
     if not config.ALLOW_REQUESTED_MATCHES:
         raise MatchRequestException("Sorry. Requested matches are currently disabled.")
     if bot1 == opponent:
         raise MatchRequestException("Sorry - you cannot request matches between the same bot.")
-    if get_user_match_request_count_left(requested_by_user) < match_count:
+    if get_user_match_request_count_left(requested_by_user, supporters_service) < match_count:
         raise MatchRequestException("That number of matches exceeds your match request limit.")
 
     match_list = []
@@ -49,9 +50,9 @@ def handle_request_matches(
 
         for _ in range(0, match_count):
             opponent = (
-                bots.get_random_active_bot_excluding(bot1.id)
+                bots_service.get_random_active_bot_excluding(bot1.id)
                 if matchup_race == "any"
-                else bots.get_active_excluding_bot(bot1).filter(plays_race__label=matchup_race).order_by("?").first()
+                else bots_service.get_active_excluding_bot(bot1).filter(plays_race__label=matchup_race).order_by("?").first()
             )
 
             if opponent is None:

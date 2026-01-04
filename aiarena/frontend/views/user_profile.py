@@ -14,8 +14,8 @@ from discord_bind.models import DiscordUser
 from rest_framework.authtoken.models import Token
 
 from aiarena.core.models import Bot, Match, MatchParticipation, User
-from aiarena.core.services import supporter_benefits
-from aiarena.core.services.internal.matches import CancelResult, cancel
+from aiarena.core.services import supporters
+from aiarena.core.services.service_implementations.internal.matches import CancelResult, cancel
 from aiarena.patreon.models import PatreonAccountBind
 
 
@@ -39,7 +39,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
         context["bot_list"] = self.request.user.bots.all()
         context["max_user_bot_count"] = config.MAX_USER_BOT_COUNT
         context["max_active_active_competition_participations_count"] = (
-            supporter_benefits.get_active_competition_participations_limit_display(self.request.user)
+            self.get_active_competition_participations_limit_display()
         )
         requested_matches = (
             Match.objects.filter(requested_by=self.object)
@@ -60,6 +60,10 @@ class UserProfile(LoginRequiredMixin, DetailView):
             requested_matches.filter(result__isnull=False).order_by("-started")[:50]
         )
         return context
+
+    def get_active_competition_participations_limit_display(self) -> str | int:
+        limit = supporters.get_active_bots_limit(self.request.user)
+        return "unlimited" if limit is None else limit
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):

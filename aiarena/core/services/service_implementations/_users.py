@@ -1,8 +1,11 @@
 from aiarena.core.models import User
-from aiarena.core.services import supporter_benefits
+from .._supporters import Supporters
 
 
 class Users:
+    def __init__(self, supporters_service: Supporters):
+        self.supporters_service = supporters_service
+
     def get_total_active_competition_participations(self, user: User):
         active_count = 0
         for bot in user.bots.all():
@@ -10,7 +13,7 @@ class Users:
         return active_count
 
     def get_remaining_competition_participations(self, user: User):
-        available_count = supporter_benefits.get_active_bots_limit(
+        available_count = self.supporters_service.get_active_bots_limit(
             user
         ) - self.get_total_active_competition_participations(user)
         return available_count

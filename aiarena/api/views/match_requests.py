@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from aiarena.api.views.serializers import RequestMatchSerializer
-from aiarena.core.services import match_requests, supporter_benefits
+from aiarena.core.services import match_requests, supporters
 
 
 class MatchRequestsViewSet(viewsets.ViewSet):
@@ -38,7 +38,7 @@ class MatchRequestsViewSet(viewsets.ViewSet):
         Request a match between two bots.
         """
 
-        allowed, reject_message = supporter_benefits.can_request_match_via_api(request.user)
+        allowed, reject_message = supporters.can_request_match_via_api(request.user)
         if not allowed:
             return Response({"message": reject_message}, status=status.HTTP_403_FORBIDDEN)
 

@@ -11,7 +11,7 @@ from django_select2.forms import Select2Widget
 
 from aiarena.core.exceptions import MatchRequestException
 from aiarena.core.models import Bot, Map, MapPool
-from aiarena.core.services import match_requests, supporter_benefits
+from aiarena.core.services import match_requests, supporters
 
 
 class BotWidget(Select2Widget):
@@ -141,7 +141,7 @@ class RequestMatch(LoginRequiredMixin, FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["match_request_count_left"] = match_requests.get_user_match_request_count_left(self.request.user)
-        context["requested_matches_limit"] = supporter_benefits.get_requested_matches_limit(self.request.user)
+        context["requested_matches_limit"] = supporters.get_requested_matches_limit(self.request.user)
         return context
 
     def form_valid(self, form):

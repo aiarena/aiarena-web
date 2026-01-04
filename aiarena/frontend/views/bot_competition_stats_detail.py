@@ -3,7 +3,7 @@ import json
 from django.views.generic import DetailView
 
 from aiarena.core.models import CompetitionParticipation
-from aiarena.core.services.internal.statistics.elo_graphs_generator import EloGraphsGenerator
+from aiarena.core.services.service_implementations.internal.statistics.elo_graphs_generator import EloGraphsGenerator
 
 
 class BotCompetitionStatsDetail(DetailView):
