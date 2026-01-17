@@ -179,20 +179,6 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                   ) : (
                     <span className="text-gray-300">Private</span>
                   )}
-
-                  {hasBotData && (
-                    <>
-                      {data.botDataPubliclyDownloadable ? (
-                        <a href={data.botData} download="" className="text-sm">
-                          <span className="flex gap-1">
-                            <ArrowDownCircleIcon height={18} /> Download
-                          </span>
-                        </a>
-                      ) : (
-                        <span className="text-gray-300">Private</span>
-                      )}
-                    </>
-                  )}
                 </dd>
               </div>
             </dl>
