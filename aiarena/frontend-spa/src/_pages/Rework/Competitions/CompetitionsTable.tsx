@@ -2,14 +2,22 @@ import { graphql, usePaginationFragment } from "react-relay";
 import {
   createColumnHelper,
   getCoreRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
-import { Suspense, useMemo, useState, useTransition } from "react";
+import {
+  startTransition,
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 
-import { withAtag } from "@/_lib/tanstack_utils";
+import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
@@ -28,7 +36,7 @@ interface CompetitionsTableProps {
 }
 
 export default function CompetitionsTable(props: CompetitionsTableProps) {
-  const { data, loadNext, hasNext } = usePaginationFragment(
+  const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment CompetitionsTable on Query
       @refetchable(queryName: "CompetitionsTablePaginationQuery")
@@ -36,11 +44,13 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
         status: { type: "CoreCompetitionStatusChoices", defaultValue: CLOSED }
+        orderBy: { type: "String", defaultValue: "-date_closed" }
       ) {
         closedCompetitions: competitions(
           first: $first
           after: $cursor
           status: $status
+          orderBy: $orderBy
         ) @connection(key: "CompetitionsTable__closedCompetitions") {
           edges {
             node {
@@ -79,7 +89,6 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
       columnHelper.accessor((row) => row.id, {
         id: "id",
         header: "ID",
-        enableSorting: false,
         cell: (info) =>
           withAtag(
             getIDFromBase64(info.getValue(), "CompetitionType") || "",
@@ -92,7 +101,6 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
       columnHelper.accessor((row) => row.name || "", {
         id: "name",
         header: "Name",
-        enableSorting: false,
         cell: (info) => {
           const name = info.row.original.name;
 
@@ -121,14 +129,12 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
       columnHelper.accessor((row) => row.dateCreated ?? "", {
         id: "dateCreated",
         header: "Created",
-        enableSorting: false,
         cell: (info) => new Date(info.getValue()).toLocaleDateString(),
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.dateClosed ?? "", {
         id: "dateClosed",
         header: "Closed",
-        enableSorting: false,
         cell: (info) => new Date(info.getValue()).toLocaleDateString(),
         meta: { priority: 1 },
       }),
@@ -137,6 +143,28 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: "dateClosed",
+      desc: true,
+    },
+  ]);
+
+  useEffect(() => {
+    console.log(sorting);
+    const sortingMap: Record<string, string> = {
+      id: "id",
+      name: "name",
+      dateCreated: "date_created",
+      dateClosed: "date_closed",
+    };
+    startTransition(() => {
+      const sortString = parseSort(sortingMap, sorting);
+      refetch({
+        orderBy: sortString,
+      });
+    });
+  }, [sorting, refetch]);
 
   const table = useReactTable({
     data: matchData,
@@ -145,6 +173,12 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+
+    state: {
+      sorting,
+    },
+
+    onSortingChange: setSorting,
   });
 
   const hasItems = matchData.length > 0;

@@ -140,6 +140,7 @@ class BotType(DjangoObjectTypeWithUID):
 class CompetitionFilterSet(FilterSet):
     order_by = OrderingFilter(
         fields=[
+            "id",
             "name",
             "date_created",
             "date_opened",
