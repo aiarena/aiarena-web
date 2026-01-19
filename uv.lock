@@ -82,7 +82,7 @@ requires-dist = [
     { name = "django-appconf", specifier = "==1.2.0" },
     { name = "django-avatar", specifier = "==8.0.1" },
     { name = "django-bootstrap-form", specifier = "==3.4" },
-    { name = "django-constance", extras = ["redis"], specifier = "==3.1.0" },
+    { name = "django-constance", extras = ["redis"], specifier = "==4.3.4" },
     { name = "django-debug-toolbar", specifier = "==3.2.2" },
     { name = "django-dirtyfields", specifier = "==1.9.7" },
     { name = "django-discord-bind", git = "https://github.com/aiarena/django-discord-bind.git?rev=7f454d4d02593eb40762e95979d85c8cde733de0" },
@@ -487,14 +487,11 @@ wheels = [
 
 [[package]]
 name = "django-constance"
-version = "3.1.0"
+version = "4.3.4"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django-picklefield" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/93/67/f610b34cb8829aa2a2743ea1a25537305c11a544a71f330af178aad1a0b1/django-constance-3.1.0.tar.gz", hash = "sha256:2b96e51de63751ef63f8f92f74e0f6aea30fb6453f3a736c21e1f8b3f6cf0b4f", size = 36806, upload-time = "2023-08-21T21:36:35.453Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/88/c7/ce27c5aac4f3283e88e4d8a5d6f8743c4952bccc56c7c474e2b08ef1ad36/django_constance-4.3.4.tar.gz", hash = "sha256:30d1b325f636177c708cce63abbde7015593f5c60b2bc0b0e2eebe8c36e2ce59", size = 175428, upload-time = "2025-11-12T10:43:01.098Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/13/efb68bd759aab4f8f1de5863f9e63f93fdd532ca6743c41e14a396256f98/django_constance-3.1.0-py3-none-any.whl", hash = "sha256:6242486a346e396d765a9333d17f3101c8613cabc92e0b98dcb70c2a391bc53b", size = 63041, upload-time = "2023-08-21T21:35:43.59Z" },
+    { url = "https://files.pythonhosted.org/packages/82/f0/bd5d63ad23ca97ff3445c11c6cf2dbeb52336bbecb7c4692cc9d75a24c92/django_constance-4.3.4-py3-none-any.whl", hash = "sha256:598f8c967a675fe2c7fe3688510ac8302e1b6df2141d01b8d29577532a8241db", size = 64411, upload-time = "2025-11-12T10:42:59.198Z" },
 ]
 
 [package.optional-dependencies]
