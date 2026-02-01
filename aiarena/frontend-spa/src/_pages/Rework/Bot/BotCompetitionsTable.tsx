@@ -28,7 +28,7 @@ import NoMoreItems from "@/_components/_display/NoMoreItems";
 interface BotCompetitionsTableProps {
   bot: BotCompetitionsTable_bot$key;
   appendHeader?: ReactNode;
-  onlyActive?: boolean | undefined;
+  // onlyActive?: boolean | undefined;
 }
 
 export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
@@ -40,14 +40,14 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
         orderBy: { type: "String" }
-        active: { type: "Boolean" }
+        # active: { type: "Boolean" }
       ) {
         competitionParticipations(
           first: $first
           after: $cursor
           orderBy: $orderBy
-          active: $active
         )
+          # active: $active
           @connection(
             key: "BotCompetitionsTable_bot_competitionParticipations"
           ) {
@@ -72,7 +72,7 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
         }
       }
     `,
-    props.bot
+    props.bot,
   );
 
   type ParticipationType = NonNullable<
@@ -85,7 +85,7 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
 
   const competitionData = useMemo(
     () => getNodes<ParticipationType>(data?.competitionParticipations),
-    [data]
+    [data],
   );
 
   const columnHelper = createColumnHelper<ParticipationType>();
@@ -100,7 +100,7 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
           withAtag(
             info.getValue(),
             `/competitions/${getIDFromBase64(info.row.original.competition.id, "CompetitionType")}`,
-            `View competition ${info.row.original.competition.name}`
+            `View competition ${info.row.original.competition.name}`,
           ),
         meta: { priority: 1 },
         size: 350,
@@ -162,13 +162,13 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
           return withAtag(
             "View Stats",
             `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,
-            `View stats ${info.getValue()}`
+            `View stats ${info.getValue()}`,
           );
         },
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
@@ -181,10 +181,14 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
       const sortString = parseSort(sortingMap, sorting);
       refetch({
         orderBy: sortString,
-        active: props.onlyActive == true ? true : undefined,
+        // active: props.onlyActive == true ? true : undefined,
       });
     });
-  }, [sorting, props.onlyActive, refetch]);
+  }, [
+    sorting,
+    //  props.onlyActive,
+    refetch,
+  ]);
 
   const table = useReactTable({
     data: competitionData,

@@ -522,6 +522,10 @@ class MatchParticipationFilterSet(FilterSet):
     match_started_after = django_filters.DateTimeFilter(field_name="match__started", lookup_expr="gte")
     match_started_before = django_filters.DateTimeFilter(field_name="match__started", lookup_expr="lte")
 
+    include_finished = django_filters.BooleanFilter(method="filter_include_finished")
+    include_started = django_filters.BooleanFilter(method="filter_include_started")
+    include_queued = django_filters.BooleanFilter(method="filter_include_queued")
+
     class Meta:
         model = models.MatchParticipation
         fields = [
@@ -537,6 +541,9 @@ class MatchParticipationFilterSet(FilterSet):
             "opponent_plays_race",
             "match_started_after",
             "match_started_before",
+            "include_finished",
+            "include_started",
+            "include_queued",
         ]
 
     def filter_order_by(self, queryset, name, value):
@@ -659,6 +666,28 @@ class MatchParticipationFilterSet(FilterSet):
         if value == "competition":
             return queryset.filter(match__round__isnull=False)
 
+        return queryset
+
+    # Filter for result stats - Finished / Started / Queud
+    def filter_include_finished(self, queryset, name, value):
+        if value is False:
+            return queryset.exclude(match__result__isnull=False)
+        return queryset
+
+    def filter_include_started(self, queryset, name, value):
+        if value is False:
+            return queryset.exclude(
+                match__result__isnull=True,
+                match__started__isnull=False,
+            )
+        return queryset
+
+    def filter_include_queued(self, queryset, name, value):
+        if value is False:
+            return queryset.exclude(
+                match__result__isnull=True,
+                match__started__isnull=True,
+            )
         return queryset
 
 

@@ -10,6 +10,7 @@ import { ArrowDownCircleIcon } from "@heroicons/react/20/solid";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
+import BotActiveParticipations from "./BotActiveParticipations";
 
 interface InformationSectionProps {
   bot: InformationSection_bot$key;
@@ -46,6 +47,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
           }
         }
         ...BotTrophiesModal_bot
+        ...BotActiveParticipations_bot
 
         user {
           username
@@ -53,7 +55,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
         }
       }
     `,
-    bot
+    bot,
   );
 
   const hasBotZip = !!data.botZip;
@@ -66,7 +68,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
       <div
         className={clsx(
           "rounded-2xl border border-neutral-800 bg-darken-2",
-          "shadow-lg shadow-black p-6 sm:p-8"
+          "shadow-lg shadow-black p-6 sm:p-8",
         )}
       >
         <div className="items-baseline gap-2 mb-6">
@@ -182,6 +184,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                 </dd>
               </div>
             </dl>
+            <BotActiveParticipations bot={data} />
           </div>
 
           <div className="col-span-2">

@@ -36,6 +36,7 @@ import { RenderResult } from "@/_components/_display/RenderResult";
 import { RenderResultCause } from "@/_components/_display/RenderResultCause";
 import { HardcodedMatchTypeOptions } from "./CustomOptions/MatchTypeOptions";
 import { RenderRace } from "@/_components/_display/RenderRace";
+import ButtonToggle from "@/_components/_actions/_toggle/ButtonToggle";
 
 interface BotResultsTableProps {
   data: BotResultsTable_bot$key;
@@ -52,7 +53,7 @@ type MatchResult = NonNullable<NonNullable<Match>["result"]>;
 function getBotEloChange(
   participant1: NonNullable<MatchResult["participant1"]> | null | undefined,
   participant2: NonNullable<MatchResult["participant1"]> | null | undefined,
-  bot: NonNullable<NonNullable<MatchParticipation>["bot"]> | null | undefined
+  bot: NonNullable<NonNullable<MatchParticipation>["bot"]> | null | undefined,
 ) {
   if (!bot) return undefined;
 
@@ -74,7 +75,7 @@ function getBotEloChange(
 function getOpponent(
   participant1: NonNullable<Match["participant1"]> | null | undefined,
   participant2: NonNullable<Match["participant1"]> | null | undefined,
-  bot: NonNullable<NonNullable<MatchParticipation>["bot"]> | null | undefined
+  bot: NonNullable<NonNullable<MatchParticipation>["bot"]> | null | undefined,
 ) {
   if (!bot) return undefined;
 
@@ -113,6 +114,9 @@ export interface ResultsFilters {
   competitionName: string | undefined;
   matchStartedAfter: string | undefined; // ISO string
   matchStartedBefore: string | undefined; // ISO string
+  includeStarted: boolean | undefined;
+  includeQueued: boolean | undefined;
+  includeFinished: boolean | undefined;
 }
 
 export default function BotResultsTable(props: BotResultsTableProps) {
@@ -135,6 +139,9 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     competitionName: props.filterPreset?.competitionName || undefined,
     matchStartedAfter: undefined,
     matchStartedBefore: undefined,
+    includeStarted: false,
+    includeQueued: false,
+    includeFinished: true,
   });
 
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
@@ -158,6 +165,9 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         competitionId: { type: "String" }
         matchStartedAfter: { type: "DateTime" }
         matchStartedBefore: { type: "DateTime" }
+        includeStarted: { type: "Boolean" }
+        includeQueued: { type: "Boolean" }
+        includeFinished: { type: "Boolean" }
       ) {
         matchParticipations(
           first: $first
@@ -176,6 +186,9 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           competitionId: $competitionId
           matchStartedAfter: $matchStartedAfter
           matchStartedBefore: $matchStartedBefore
+          includeStarted: $includeStarted
+          includeQueued: $includeQueued
+          includeFinished: $includeFinished
         ) @connection(key: "ResultsTable_node_matchParticipations") {
           totalCount
           edges {
@@ -257,25 +270,30 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       }
     `,
 
-    props.data as BotResultsTable_bot$key
+    props.data as BotResultsTable_bot$key,
   );
 
-  function handleSort() {
+  function handleSort(refetchFilters?: typeof filters) {
+    const f = refetchFilters ?? filters;
+
     startTransition(() => {
       refetch({
-        opponentId: filters.opponentId,
-        opponentPlaysRace: filters.opponentPlaysRaceId,
-        result: filters.result?.toLowerCase(),
-        cause: filters.cause?.toLowerCase(),
-        avgStepTimeMin: filters.avgStepTimeMin,
-        avgStepTimeMax: filters.avgStepTimeMax,
-        gameTimeMin: filters.gameTimeMin,
-        gameTimeMax: filters.gameTimeMax,
-        matchType: filters.matchType?.toLowerCase(),
-        mapName: filters.mapName,
-        competitionId: filters.competitionId,
-        matchStartedAfter: filters.matchStartedAfter,
-        matchStartedBefore: filters.matchStartedBefore,
+        opponentId: f.opponentId,
+        opponentPlaysRace: f.opponentPlaysRaceId,
+        result: f.result?.toLowerCase(),
+        cause: f.cause?.toLowerCase(),
+        avgStepTimeMin: f.avgStepTimeMin,
+        avgStepTimeMax: f.avgStepTimeMax,
+        gameTimeMin: f.gameTimeMin,
+        gameTimeMax: f.gameTimeMax,
+        matchType: f.matchType?.toLowerCase(),
+        mapName: f.mapName,
+        competitionId: f.competitionId,
+        matchStartedAfter: f.matchStartedAfter,
+        matchStartedBefore: f.matchStartedBefore,
+        includeStarted: f.includeStarted,
+        includeQueued: f.includeQueued,
+        includeFinished: f.includeFinished,
         orderBy: "-id",
         first: 50,
       });
@@ -294,7 +312,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
   const [isPending, startTransition] = useTransition();
   const matchParticipationData = useMemo(
     () => getNodes<ResultType>(data?.matchParticipations),
-    [data]
+    [data],
   );
 
   const columnHelper = createColumnHelper<ResultType>();
@@ -309,7 +327,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           withAtag(
             getIDFromBase64(info.getValue(), "MatchType") || "",
             `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`,
-            `View match details for Match ID ${info.getValue()}`
+            `View match details for Match ID ${info.getValue()}`,
           ),
         meta: { priority: 1 },
         size: 100,
@@ -317,7 +335,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
 
       columnHelper.accessor(
         (row) =>
-          getOpponent(row.match?.participant1, row.match?.participant1, row.bot)
+          getOpponent(row.match?.participant1, row.match?.participant2, row.bot)
             ?.opponent?.name || "",
         {
           id: "opponent",
@@ -330,21 +348,21 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             const opponent = getOpponent(
               participant1,
               participant2,
-              bot
+              bot,
             )?.opponent;
 
             return withAtag(
               opponent?.name || "",
               `/bots/${getIDFromBase64(opponent?.id, "BotType")}`,
-              `View bot profile for ${opponent?.name}, Bot`
+              `View bot profile for ${opponent?.name}, Bot`,
             );
           },
           meta: { priority: 1 },
-        }
+        },
       ),
       columnHelper.accessor(
         (row) =>
-          getOpponent(row.match?.participant1, row.match?.participant1, row.bot)
+          getOpponent(row.match?.participant1, row.match?.participant2, row.bot)
             ?.opponent?.name || "",
         {
           id: "opponent_race",
@@ -357,14 +375,14 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             const opponent = getOpponent(
               participant1,
               participant2,
-              bot
+              bot,
             )?.opponent;
 
             return <RenderRace race={opponent?.playsRace} />;
           },
           meta: { priority: 1 },
           size: 5,
-        }
+        },
       ),
       columnHelper.accessor((row) => row.result ?? "", {
         id: "result",
@@ -382,7 +400,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           getBotEloChange(
             row.match.result?.participant1,
             row.match.result?.participant2,
-            row.bot
+            row.bot,
           )?.eloChange,
         {
           id: "elo_change",
@@ -393,7 +411,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           },
           meta: { priority: 1 },
           size: 85,
-        }
+        },
       ),
       columnHelper.accessor((row) => row.resultCause, {
         id: "cause",
@@ -432,7 +450,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           },
           meta: { priority: 1 },
           size: 5,
-        }
+        },
       ),
       columnHelper.accessor((row) => row.match.result?.created ?? "", {
         id: "date",
@@ -455,7 +473,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               `Download replay file for Match ${info.row.original.match.id}`,
               <span className="flex items-center gap-1">
                 <ArrowDownCircleIcon height={18} /> Replay
-              </span>
+              </span>,
             );
           }
         },
@@ -475,7 +493,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               `Download match log for Match ${info.row.original.match.id}`,
               <span className="flex items-center gap-1">
                 <ArrowDownCircleIcon height={18} /> Log
-              </span>
+              </span>,
             );
           }
         },
@@ -483,7 +501,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         size: 1,
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(100), hasNext);
@@ -506,7 +524,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           table={table}
           loading={isPending}
           appendLeftHeader={
-            <>
+            <div className="flex flexbox gap-2">
               <button
                 className="inline-flex w-full justify-center gap-x-1.5 rounded-md 
                 px-3 py-3 font-semibold bg-neutral-900 shadow-xs border border-neutral-700 
@@ -515,16 +533,60 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               >
                 <FunnelIcon className={clsx("size-5", "text-gray-400")} />
               </button>
-            </>
+              <ButtonToggle
+                active={filters.includeQueued}
+                onClick={() => {
+                  setFilters((prev) => {
+                    const next = {
+                      ...prev,
+                      includeQueued: prev.includeQueued === true ? false : true,
+                    };
+                    handleSort(next);
+                    return next;
+                  });
+                }}
+                text="Queued"
+              />
+              <ButtonToggle
+                active={filters.includeStarted}
+                onClick={() => {
+                  setFilters((prev) => {
+                    const next = {
+                      ...prev,
+                      includeStarted:
+                        prev.includeStarted === true ? false : true,
+                    };
+                    handleSort(next);
+                    return next;
+                  });
+                }}
+                text="Playing"
+              />
+              <ButtonToggle
+                active={filters.includeFinished}
+                onClick={() => {
+                  setFilters((prev) => {
+                    const next = {
+                      ...prev,
+                      includeFinished:
+                        prev.includeFinished === true ? false : true,
+                    };
+                    handleSort(next);
+                    return next;
+                  });
+                }}
+                text="Finnished"
+              />
+            </div>
           }
           appendHeader={
-            <>
+            <div>
               <WatchYourGamesButton
                 onClick={() => setIsWatchGamesModalOpen(true)}
               >
                 <span>Watch Replays on Twitch</span>
               </WatchYourGamesButton>
-            </>
+            </div>
           }
         />
       </Suspense>

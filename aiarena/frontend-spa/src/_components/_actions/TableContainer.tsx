@@ -40,7 +40,7 @@ export function TableContainer<T>({
   const allColumns = table.getAllLeafColumns();
 
   const visibleColumnCount = allColumns.filter((column) =>
-    column.getIsVisible()
+    column.getIsVisible(),
   ).length;
 
   // We flip the scroll on the table 180 degrees to put the scrollbar at the top on mobile
@@ -68,18 +68,18 @@ export function TableContainer<T>({
       <div
         className={clsx(
           "overflow-x-auto rounded-2xl border border-neutral-800 backdrop-blur-lg bg-darken-2 shadow-lg shadow-black",
-          `min-h-[${minHeight}vh]`
+          `min-h-[${minHeight}vh]`,
         )}
       >
         <div className="flex justify-between m-2">
           <div className="flex gap-2">
             <TableSettings>
-              <div className="text-white">
+              <div className="text-white ">
                 <Divider label="Visible Table Columns" labelPlacement="left" />
                 {allColumns.map((column) => (
                   <label
                     key={column.id}
-                    className="flex items-center space-x-4 ml-2"
+                    className="flex items-start space-x-4 ml-2"
                   >
                     <input
                       type="checkbox"
@@ -141,7 +141,7 @@ export function TableContainer<T>({
                               {
                                 "cursor-pointer   hover:text-white":
                                   header.column.getCanSort(),
-                              }
+                              },
                             )}
                             {...(header.column.getCanSort() && !loading
                               ? {
@@ -152,7 +152,7 @@ export function TableContainer<T>({
                           >
                             {flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )}
                             {header.column.getCanSort() && (
                               <>
@@ -191,7 +191,7 @@ export function TableContainer<T>({
                                     header.column.getIsResizing(),
                                   "border-r-neutral-700":
                                     !header.column.getIsResizing(),
-                                }
+                                },
                               )}
                             >
                               <div
@@ -200,7 +200,7 @@ export function TableContainer<T>({
                                   "h-full",
                                   header.column.getIsResizing()
                                     ? "bg-white"
-                                    : "bg-customGreen"
+                                    : "bg-customGreen",
                                 )}
                               ></div>
                             </div>
@@ -255,7 +255,7 @@ export function TableContainer<T>({
                               <div className="w-full md:overflow-hidden md:text-ellipsis md:whitespace-nowrap">
                                 {flexRender(
                                   cell.column.columnDef.cell,
-                                  cell.getContext()
+                                  cell.getContext(),
                                 )}
                               </div>
                             </td>

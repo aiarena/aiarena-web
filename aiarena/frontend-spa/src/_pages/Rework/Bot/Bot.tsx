@@ -3,18 +3,18 @@ import InformationSection from "./InformationSection";
 import { BotQuery } from "./__generated__/BotQuery.graphql";
 import { useParams } from "react-router";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import BotCompetitionsTable from "./BotCompetitionsTable";
 import FetchError from "@/_components/_display/FetchError";
 // import BotResultsTable from "./BotResultsTable";
 import { BotResultQuery } from "./__generated__/BotResultQuery.graphql";
-import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
+// import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import BotResultsTable from "./BotResultsTable";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
-  const [onlyActive, setOnlyActive] = useState(false);
+  // const [onlyActive, setOnlyActive] = useState(false);
   const data = useLazyLoadQuery<BotQuery>(
     graphql`
       query BotQuery($id: ID!) {
@@ -26,7 +26,7 @@ export default function Bot() {
         }
       }
     `,
-    { id: getBase64FromID(botId!, "BotType") || "" }
+    { id: getBase64FromID(botId!, "BotType") || "" },
   );
 
   const resultData = useLazyLoadQuery<BotResultQuery>(
@@ -39,7 +39,7 @@ export default function Bot() {
         }
       }
     `,
-    { id: getBase64FromID(botId!, "BotType") || "" }
+    { id: getBase64FromID(botId!, "BotType") || "" },
   );
 
   if (!data.node || !resultData.node) {
@@ -57,24 +57,24 @@ export default function Bot() {
         <Suspense fallback={<LoadingSpinner color="light-gray" />}>
           <BotCompetitionsTable
             bot={data.node}
-            onlyActive={onlyActive}
-            appendHeader={
-              <div
-                className="flex gap-4 items-center"
-                role="group"
-                aria-label="Bot filtering controls"
-              >
-                <div className="flex items-center gap-2">
-                  <label
-                    htmlFor="downloadable-toggle"
-                    className="text-sm font-medium text-gray-300"
-                  >
-                    Only active
-                  </label>
-                  <SimpleToggle enabled={onlyActive} onChange={setOnlyActive} />
-                </div>
-              </div>
-            }
+            // onlyActive={onlyActive}
+            // appendHeader={
+            //   <div
+            //     className="flex gap-4 items-center"
+            //     role="group"
+            //     aria-label="Bot filtering controls"
+            //   >
+            //     <div className="flex items-center gap-2">
+            //       <label
+            //         htmlFor="downloadable-toggle"
+            //         className="text-sm font-medium text-gray-300"
+            //       >
+            //         Only active
+            //       </label>
+            //       <SimpleToggle enabled={onlyActive} onChange={setOnlyActive} />
+            //     </div>
+            //   </div>
+            // }
           />
         </Suspense>
         <h4 className="mb-4 mt-8">Results</h4>

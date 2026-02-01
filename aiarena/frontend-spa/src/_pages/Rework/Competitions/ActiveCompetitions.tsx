@@ -31,7 +31,7 @@ export default function ActiveCompetitions(props: ActiveCompetitionsProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   const competitions = getNodes(data?.activeCompetitions);
