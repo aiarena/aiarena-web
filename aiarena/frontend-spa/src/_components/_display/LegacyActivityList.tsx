@@ -5,6 +5,7 @@ import WrappedTitle from "./WrappedTitle";
 import clsx from "clsx";
 import { LegacyActivityListQuery } from "./__generated__/LegacyActivityListQuery.graphql";
 import FetchError from "./FetchError";
+import { Link } from "react-router";
 
 const LegacyActivityList: React.FC = () => {
   const data = useLazyLoadQuery<LegacyActivityListQuery>(
@@ -26,14 +27,14 @@ const LegacyActivityList: React.FC = () => {
         }
       }
     `,
-    {}
+    {},
   );
   if (!data.bots) {
     return <FetchError type="bots" />;
   }
   function timeAgoShort(
     from: Date | number | string,
-    to: Date | number = Date.now()
+    to: Date | number = Date.now(),
   ): string {
     const start = new Date(from).getTime();
     const end = new Date(to).getTime();
@@ -115,12 +116,12 @@ const LegacyActivityList: React.FC = () => {
       </>
     ) : (
       <>
-        <a
-          href={`/users/${getIDFromBase64(botAuthorId, "UserType")}`}
+        <Link
+          to={`/authors/${getIDFromBase64(botAuthorId, "UserType")}`}
           aria-label={`View user profile for ${botAuthorName}`}
         >
           {botAuthorName}
-        </a>{" "}
+        </Link>{" "}
         uploaded a new bot:{" "}
         <a
           href={`/bots/${getIDFromBase64(botId, "BotType")}`}
