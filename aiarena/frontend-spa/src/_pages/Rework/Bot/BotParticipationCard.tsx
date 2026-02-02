@@ -1,15 +1,14 @@
-import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { graphql, useFragment } from "react-relay";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 import { BotParticipationCard_bot$key } from "./__generated__/BotParticipationCard_bot.graphql";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import AiArenaLoading from "@/_components/_display/AiArenaLoading";
 
 interface BotParticipationCardProps {
   data: BotParticipationCard_bot$key;
 }
 
 export default function BotParticipationCard(props: BotParticipationCardProps) {
-  const navigate = useNavigate();
   const data = useFragment(
     graphql`
       fragment BotParticipationCard_bot on CompetitionParticipationType {
@@ -33,16 +32,9 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
   const competitionLink = `/competitions/${getIDFromBase64(data.competition.id, "CompetitionType")}`;
 
   return (
-    <div className="grid grid-cols-5 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm p-1 mr-2">
-      <span className="w-full text-white flex flex-col items-center justify-center h-full text-center p-3 col-span-1">
-        <img
-          className="invert cursor-pointer"
-          src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
-          alt="AI-arena-logo"
-          width={128}
-          height={48}
-          onClick={() => navigate(competitionLink)}
-        />
+    <div className="grid grid-cols-5 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm p-1 mr-2 shadow-lg bg-blur-2xl">
+      <span className="p-3">
+        <AiArenaLoading text={""} size={50} speedMs={15000} />
       </span>
       <div className="col-span-4">
         <p className="truncate ">
@@ -69,7 +61,7 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
             <a
               href={`/competitions/stats/${getIDFromBase64(data.id, "CompetitionParticipationType")}`}
             >
-              View Results
+              View Stats
             </a>
           </div>
         </div>
