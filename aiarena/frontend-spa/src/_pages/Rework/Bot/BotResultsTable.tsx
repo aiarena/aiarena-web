@@ -390,6 +390,16 @@ export default function BotResultsTable(props: BotResultsTableProps) {
   const allColumns = headerTable.getAllLeafColumns();
   const visibleColumnCount = allColumns.filter((c) => c.getIsVisible()).length;
 
+  const excludedKeys = new Set([
+    "includeStarted",
+    "includeQueued",
+    "includeFinished",
+  ]);
+
+  const filterIsActive = Object.entries(filters).some(
+    ([key, value]) => !excludedKeys.has(key) && value !== undefined,
+  );
+
   return (
     <div>
       <TableContainerShell
@@ -397,9 +407,14 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         appendLeftHeader={
           <div className="flex flexbox gap-2">
             <button
-              className="inline-flex w-full justify-center gap-x-1.5 rounded-md 
-                px-3 py-3 font-semibold bg-neutral-900 shadow-xs border border-neutral-700 
-                ring-1 ring-inset ring-gray-700 focus:outline-none focus:ring-customGreen focus:ring-2"
+              className={clsx(
+                "inline-flex items-center w-full justify-center gap-x-1.5 rounded-md border-2 transition duration-100 ease-in-out transform",
+                "px-2 py-2 font-semibold bg-neutral-900 shadow-xs border",
+                filterIsActive
+                  ? "border-customGreen text-gray-200"
+                  : "border-neutral-700 text-gray-400",
+                "hover:border-customGreen",
+              )}
               onClick={() => setIsFiltersModalOpen(true)}
             >
               <FunnelIcon className={clsx("size-5", "text-gray-400")} />

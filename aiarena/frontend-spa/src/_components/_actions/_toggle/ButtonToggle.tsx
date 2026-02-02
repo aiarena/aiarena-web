@@ -34,7 +34,7 @@ export default function ButtonToggle({
         <button
           onClick={handleClick}
           className={clsx(
-            "flex justify-center items-center w-full shadow-sm shadow-black border-2 font-semibold px-6 py-2  rounded-sm transition duration-300 ease-in-out transform backdrop-blur-sm",
+            "flex justify-center items-center w-full shadow-sm shadow-black border-2 font-semibold px-6 py-2  rounded-sm transition duration-100 ease-in-out transform backdrop-blur-sm",
             {
               "hover:shadow-customGreen  bg-neutral-900 hover:border-customGreen hover:bg-transparent":
                 !disabled,
