@@ -9,10 +9,8 @@ import {
   statsTopNavbarLinks,
 } from "./StatsSideNavbarLinks";
 import EloChart from "./EloChart";
-import BotResultsTable from "../Bot/BotResultsTable";
 import WinsByTime from "./WinsByTime";
 import RaceMatchup from "./RaceMatchup";
-import { CompetitionParticipationStatsResultsQuery } from "./__generated__/CompetitionParticipationStatsResultsQuery.graphql";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import Summary from "./Summary";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
@@ -29,7 +27,7 @@ interface CompetitionParticipationStatsProps {
 }
 
 export default function CompetitionParticipationStats(
-  props: CompetitionParticipationStatsProps
+  props: CompetitionParticipationStatsProps,
 ) {
   const data = useLazyLoadQuery<CompetitionParticipationStatsQuery>(
     graphql`
@@ -61,31 +59,8 @@ export default function CompetitionParticipationStats(
         }
       }
     `,
-    { id: getBase64FromID(props.id!, "CompetitionParticipationType") || "" }
+    { id: getBase64FromID(props.id!, "CompetitionParticipationType") || "" },
   );
-
-  const resultsData =
-    useLazyLoadQuery<CompetitionParticipationStatsResultsQuery>(
-      graphql`
-        query CompetitionParticipationStatsResultsQuery(
-          $id: ID!
-          $competitionId: String
-        ) {
-          node(id: $id) {
-            ... on CompetitionParticipationType {
-              id
-              bot {
-                ...BotResultsTable_bot @arguments(competitionId: $competitionId)
-              }
-            }
-          }
-        }
-      `,
-      {
-        id: getBase64FromID(props.id!, "CompetitionParticipationType") || "",
-        competitionId: data?.node?.competition?.id,
-      }
-    );
 
   return (
     <Suspense fallback={<LoadingSpinner color="light-gray" />}>
@@ -136,19 +111,6 @@ export default function CompetitionParticipationStats(
             {props.activeTab === "matchups" && (
               <MatchupStatsTable data={data.node} />
             )}
-
-            {props.activeTab === "results" &&
-              (resultsData.node && resultsData.node.bot ? (
-                <BotResultsTable
-                  data={resultsData.node.bot}
-                  filterPreset={{
-                    competitionId: data.node.competition?.id,
-                    competitionName: data.node.competition?.name,
-                  }}
-                />
-              ) : (
-                <p>Results not found</p>
-              ))}
           </>
         ) : (
           <div className="text-center py-12">

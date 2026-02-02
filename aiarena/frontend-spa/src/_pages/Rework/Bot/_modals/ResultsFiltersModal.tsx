@@ -12,23 +12,24 @@ import MainButton from "@/_components/_actions/MainButton";
 import SearchList from "@/_components/_actions/SearchList";
 import { raceOptions } from "../CustomOptions/BotRaceOptions";
 import { resultOptions } from "../CustomOptions/ResultOptions";
-import {
-  CoreMatchParticipationResultCauseChoices,
-  CoreMatchParticipationResultChoices,
-} from "../__generated__/BotResultsTable_bot.graphql";
+
 import { CoreBotRaceLabelChoices } from "../__generated__/InformationSection_bot.graphql";
 import { resultCauseOptions } from "../CustomOptions/ResultCauseOptions";
 import {
   HardcodedMatchTypeOptions,
   matchTypeOptions,
 } from "../CustomOptions/MatchTypeOptions";
+import {
+  CoreMatchParticipationResultCauseChoices,
+  CoreMatchParticipationResultChoices,
+} from "../__generated__/BotResultsTbody_bot.graphql";
 
 interface ResultsFiltersModalProps {
   isOpen: boolean;
   onClose: () => void;
   filters: ResultsFilters;
   setFilters: Dispatch<SetStateAction<ResultsFilters>>;
-  onApply: () => void;
+  onApply: (next: ResultsFilters) => void;
 }
 
 export default function ResultsFiltersModal({
@@ -46,7 +47,7 @@ export default function ResultsFiltersModal({
         ...CompetitionSearchList
       }
     `,
-    {}
+    {},
   );
 
   const handleChange =
@@ -72,12 +73,14 @@ export default function ResultsFiltersModal({
     };
 
   const handleApply = () => {
-    onApply();
+    onApply(filters);
     onClose();
   };
 
   const handleClear = () => {
-    setFilters({
+    setFilters((oldF) => ({
+      ...oldF,
+
       opponentName: undefined,
       opponentId: undefined,
       opponentPlaysRaceId: undefined,
@@ -90,11 +93,10 @@ export default function ResultsFiltersModal({
       gameTimeMax: undefined,
       matchType: undefined,
       mapName: undefined,
-      competitionId: undefined,
-      competitionName: undefined,
+
       matchStartedAfter: undefined,
       matchStartedBefore: undefined,
-    });
+    }));
   };
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Filter results">
@@ -185,7 +187,7 @@ export default function ResultsFiltersModal({
               setQuery={() => {}}
               displayValue={(value) => {
                 const displayVal = resultOptions.find(
-                  (i) => i.id === value?.id
+                  (i) => i.id === value?.id,
                 );
 
                 if (displayVal) {
@@ -221,7 +223,7 @@ export default function ResultsFiltersModal({
               setQuery={() => {}}
               displayValue={(value) => {
                 const displayVal = resultCauseOptions.find(
-                  (i) => i.id === value?.id
+                  (i) => i.id === value?.id,
                 );
 
                 if (displayVal) {
@@ -414,7 +416,7 @@ export default function ResultsFiltersModal({
               setQuery={() => {}}
               displayValue={(value) => {
                 const displayVal = matchTypeOptions.find(
-                  (i) => i.id === value?.id
+                  (i) => i.id === value?.id,
                 );
 
                 if (displayVal) {
@@ -493,7 +495,7 @@ export default function ResultsFiltersModal({
             type="submit"
             className={clsx(
               "px-4 py-2 text-sm rounded-xl font-medium",
-              "bg-customGreen text-black hover:bg-customGreen/90 transition"
+              "bg-customGreen text-black hover:bg-customGreen/90 transition",
             )}
             text="Apply filters"
           />

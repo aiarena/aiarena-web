@@ -1,30 +1,20 @@
-import { graphql, usePaginationFragment } from "react-relay";
 import {
+  ColumnDef,
   createColumnHelper,
   getCoreRowModel,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 
-import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import clsx from "clsx";
 
-import { Suspense, useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState } from "react";
 
-import { withAtag } from "@/_lib/tanstack_utils";
-
-import NoMoreItems from "@/_components/_display/NoMoreItems";
-import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
-import { TableContainer } from "@/_components/_actions/TableContainer";
-import LoadingDots from "@/_components/_display/LoadingDots";
-import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
+import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
-import {
-  BotResultsTable_bot$data,
-  BotResultsTable_bot$key,
-  CoreMatchParticipationResultCauseChoices,
-  CoreMatchParticipationResultChoices,
-} from "./__generated__/BotResultsTable_bot.graphql";
+
 import ResultsFiltersModal from "./_modals/ResultsFiltersModal";
 import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
@@ -37,18 +27,19 @@ import { RenderResultCause } from "@/_components/_display/RenderResultCause";
 import { HardcodedMatchTypeOptions } from "./CustomOptions/MatchTypeOptions";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import ButtonToggle from "@/_components/_actions/_toggle/ButtonToggle";
+import { TableContainerShell } from "@/_components/_actions/TableContainerShell";
+import { BotResultsRefetchArgs, BotResultsTbody } from "./BotResultsTbody";
 
+import {
+  BotResultsTbody_bot$data,
+  BotResultsTbody_bot$key,
+  CoreMatchParticipationResultCauseChoices,
+  CoreMatchParticipationResultChoices,
+} from "./__generated__/BotResultsTbody_bot.graphql";
 interface BotResultsTableProps {
-  data: BotResultsTable_bot$key;
+  data: BotResultsTbody_bot$key;
   filterPreset?: { competitionId?: string; competitionName?: string };
 }
-
-type MatchParticipation = NonNullable<
-  NonNullable<BotResultsTable_bot$data["matchParticipations"]>["edges"][number]
->["node"];
-type Match = NonNullable<NonNullable<MatchParticipation>["match"]>;
-
-type MatchResult = NonNullable<NonNullable<Match>["result"]>;
 
 function getBotEloChange(
   participant1: NonNullable<MatchResult["participant1"]> | null | undefined,
@@ -119,8 +110,30 @@ export interface ResultsFilters {
   includeFinished: boolean | undefined;
 }
 
+export type BotResultsRow = NonNullable<
+  NonNullable<
+    NonNullable<
+      BotResultsTbody_bot$data["matchParticipations"]
+    >["edges"][number]
+  >["node"]
+>;
+
+type MatchParticipation = NonNullable<
+  NonNullable<BotResultsTbody_bot$data["matchParticipations"]>["edges"][number]
+>["node"];
+
+type Match = NonNullable<NonNullable<MatchParticipation>["match"]>;
+
+type MatchResult = NonNullable<NonNullable<Match>["result"]>;
+
 export default function BotResultsTable(props: BotResultsTableProps) {
-  const [isFiltersMoodalOpen, setIsFiltersModalOpen] = useState(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
+
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [columnSizing, setColumnSizing] = useState({});
+
+  const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
+  const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
 
   const [filters, setFilters] = useState<ResultsFilters>({
     opponentName: undefined,
@@ -144,179 +157,12 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     includeFinished: true,
   });
 
-  const { data, loadNext, hasNext, refetch } = usePaginationFragment(
-    graphql`
-      fragment BotResultsTable_bot on BotType
-      @refetchable(queryName: "BotResultsTablePaginationQuery")
-      @argumentDefinitions(
-        cursor: { type: "String" }
-        first: { type: "Int", defaultValue: 50 }
-        orderBy: { type: "String", defaultValue: "-id" }
-        opponentId: { type: "String" }
-        opponentPlaysRace: { type: "String" }
-        result: { type: "String" }
-        cause: { type: "String" }
-        avgStepTimeMin: { type: "Decimal" }
-        avgStepTimeMax: { type: "Decimal" }
-        gameTimeMin: { type: "Decimal" }
-        gameTimeMax: { type: "Decimal" }
-        matchType: { type: "String" }
-        mapName: { type: "String" }
-        competitionId: { type: "String" }
-        matchStartedAfter: { type: "DateTime" }
-        matchStartedBefore: { type: "DateTime" }
-        includeStarted: { type: "Boolean" }
-        includeQueued: { type: "Boolean" }
-        includeFinished: { type: "Boolean" }
-      ) {
-        matchParticipations(
-          first: $first
-          after: $cursor
-          orderBy: $orderBy
-          opponentId: $opponentId
-          opponentPlaysRace: $opponentPlaysRace
-          result: $result
-          cause: $cause
-          avgStepTimeMin: $avgStepTimeMin
-          avgStepTimeMax: $avgStepTimeMax
-          gameTimeMax: $gameTimeMax
-          gameTimeMin: $gameTimeMin
-          matchType: $matchType
-          mapName: $mapName
-          competitionId: $competitionId
-          matchStartedAfter: $matchStartedAfter
-          matchStartedBefore: $matchStartedBefore
-          includeStarted: $includeStarted
-          includeQueued: $includeQueued
-          includeFinished: $includeFinished
-        ) @connection(key: "ResultsTable_node_matchParticipations") {
-          totalCount
-          edges {
-            node {
-              id
-              result
-              resultCause
-              matchLog
-              avgStepTime
-              eloChange
-              bot {
-                id
-                name
-                playsRace {
-                  name
-                  label
-                  id
-                }
-              }
-              match {
-                id
-                started
-                status
-                participant1 {
-                  name
-                  id
-                  playsRace {
-                    name
-                    label
-                  }
-                }
-                participant2 {
-                  name
-                  id
-                  playsRace {
-                    name
-                    label
-                  }
-                }
-                map {
-                  id
-                  name
-                }
-                round {
-                  competition {
-                    id
-                    name
-                  }
-                }
-                result {
-                  created
-                  type
-                  gameTimeFormatted
-                  replayFile
+  const sortingMap: Record<string, string> = {
+    id: "id",
+    date: "match__result__created",
+  };
 
-                  participant1 {
-                    eloChange
-                    id
-                    bot {
-                      name
-                      id
-                    }
-                    result
-                  }
-                  participant2 {
-                    eloChange
-                    id
-                    bot {
-                      name
-                      id
-                    }
-                    result
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `,
-
-    props.data as BotResultsTable_bot$key,
-  );
-
-  function handleSort(refetchFilters?: typeof filters) {
-    const f = refetchFilters ?? filters;
-
-    startTransition(() => {
-      refetch({
-        opponentId: f.opponentId,
-        opponentPlaysRace: f.opponentPlaysRaceId,
-        result: f.result?.toLowerCase(),
-        cause: f.cause?.toLowerCase(),
-        avgStepTimeMin: f.avgStepTimeMin,
-        avgStepTimeMax: f.avgStepTimeMax,
-        gameTimeMin: f.gameTimeMin,
-        gameTimeMax: f.gameTimeMax,
-        matchType: f.matchType?.toLowerCase(),
-        mapName: f.mapName,
-        competitionId: f.competitionId,
-        matchStartedAfter: f.matchStartedAfter,
-        matchStartedBefore: f.matchStartedBefore,
-        includeStarted: f.includeStarted,
-        includeQueued: f.includeQueued,
-        includeFinished: f.includeFinished,
-        orderBy: "-id",
-        first: 50,
-      });
-    });
-  }
-
-  type ResultType = NonNullable<
-    NonNullable<
-      NonNullable<
-        BotResultsTable_bot$data["matchParticipations"]
-      >["edges"][number]
-    >["node"]
-  >;
-  const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
-
-  const [isPending, startTransition] = useTransition();
-  const matchParticipationData = useMemo(
-    () => getNodes<ResultType>(data?.matchParticipations),
-    [data],
-  );
-
-  const columnHelper = createColumnHelper<ResultType>();
-
+  const columnHelper = createColumnHelper<BotResultsRow>();
   const columns = useMemo(
     () => [
       columnHelper.accessor((row) => row.match.id, {
@@ -504,112 +350,138 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     [columnHelper],
   );
 
-  const { loadMoreRef } = useInfiniteScroll(() => loadNext(100), hasNext);
-
-  const table = useReactTable({
-    data: matchParticipationData,
+  const headerTable = useReactTable({
+    data: [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    enableSorting: true,
+    state: { columnVisibility, columnSizing, sorting },
+    onColumnVisibilityChange: setColumnVisibility,
+    onColumnSizingChange: setColumnSizing,
+    onSortingChange: (updater) => {
+      setSorting((prev) => {
+        const next = typeof updater === "function" ? updater(prev) : updater;
+        runRefetch(filters, next);
+        return next;
+      });
+    },
   });
 
-  const hasItems = matchParticipationData.length > 0;
+  const refetchFnRef = useRef<null | ((args: BotResultsRefetchArgs) => void)>(
+    null,
+  );
+
+  function handleSort(nextFilters?: ResultsFilters) {
+    const f = nextFilters ?? filters;
+    runRefetch(f, sorting);
+  }
+
+  function runRefetch(nextFilters: ResultsFilters, nextSorting: SortingState) {
+    const fn = refetchFnRef.current;
+    if (!fn) return;
+
+    const orderBy = parseSort(sortingMap, nextSorting) || "-id";
+
+    fn({ filters: nextFilters, orderBy });
+  }
+  const allColumns = headerTable.getAllLeafColumns();
+  const visibleColumnCount = allColumns.filter((c) => c.getIsVisible()).length;
 
   return (
     <div>
-      <Suspense fallback={<LoadingDots />}>
-        <TableContainer
-          table={table}
-          loading={isPending}
-          appendLeftHeader={
-            <div className="flex flexbox gap-2">
-              <button
-                className="inline-flex w-full justify-center gap-x-1.5 rounded-md 
+      <TableContainerShell
+        headerTable={headerTable}
+        appendLeftHeader={
+          <div className="flex flexbox gap-2">
+            <button
+              className="inline-flex w-full justify-center gap-x-1.5 rounded-md 
                 px-3 py-3 font-semibold bg-neutral-900 shadow-xs border border-neutral-700 
                 ring-1 ring-inset ring-gray-700 focus:outline-none focus:ring-customGreen focus:ring-2"
-                onClick={() => setIsFiltersModalOpen(true)}
-              >
-                <FunnelIcon className={clsx("size-5", "text-gray-400")} />
-              </button>
-              <ButtonToggle
-                active={filters.includeQueued}
-                onClick={() => {
-                  setFilters((prev) => {
-                    const next = {
-                      ...prev,
-                      includeQueued: prev.includeQueued === true ? false : true,
-                    };
-                    handleSort(next);
-                    return next;
-                  });
-                }}
-                text="Queued"
-              />
-              <ButtonToggle
-                active={filters.includeStarted}
-                onClick={() => {
-                  setFilters((prev) => {
-                    const next = {
-                      ...prev,
-                      includeStarted:
-                        prev.includeStarted === true ? false : true,
-                    };
-                    handleSort(next);
-                    return next;
-                  });
-                }}
-                text="Playing"
-              />
-              <ButtonToggle
-                active={filters.includeFinished}
-                onClick={() => {
-                  setFilters((prev) => {
-                    const next = {
-                      ...prev,
-                      includeFinished:
-                        prev.includeFinished === true ? false : true,
-                    };
-                    handleSort(next);
-                    return next;
-                  });
-                }}
-                text="Finnished"
-              />
-            </div>
-          }
-          appendHeader={
-            <div>
-              <WatchYourGamesButton
-                onClick={() => setIsWatchGamesModalOpen(true)}
-              >
-                <span>Watch Replays on Twitch</span>
-              </WatchYourGamesButton>
-            </div>
-          }
-        />
-      </Suspense>
+              onClick={() => setIsFiltersModalOpen(true)}
+            >
+              <FunnelIcon className={clsx("size-5", "text-gray-400")} />
+            </button>
+            <ButtonToggle
+              active={filters.includeQueued}
+              onClick={() => {
+                setFilters((prev) => {
+                  const next = { ...prev, includeQueued: !prev.includeQueued };
+                  handleSort(next);
+                  return next;
+                });
+              }}
+              text="Queued"
+            />
+            <ButtonToggle
+              active={filters.includeStarted}
+              onClick={() => {
+                setFilters((prev) => {
+                  const next = {
+                    ...prev,
+                    includeStarted: prev.includeStarted === true ? false : true,
+                  };
+                  handleSort(next);
+                  return next;
+                });
+              }}
+              text="Playing"
+            />
+            <ButtonToggle
+              active={filters.includeFinished}
+              onClick={() => {
+                setFilters((prev) => {
+                  const next = {
+                    ...prev,
+                    includeFinished:
+                      prev.includeFinished === true ? false : true,
+                  };
+                  handleSort(next);
+                  return next;
+                });
+              }}
+              text="Finished"
+            />
+          </div>
+        }
+        appendHeader={
+          <div>
+            <WatchYourGamesButton
+              onClick={() => setIsWatchGamesModalOpen(true)}
+            >
+              <span>Watch Replays on Twitch</span>
+            </WatchYourGamesButton>
+          </div>
+        }
+        tbody={
+          <BotResultsTbody
+            fragmentRef={props.data}
+            columnCount={visibleColumnCount}
+            columns={columns as unknown as ColumnDef<BotResultsRow, unknown>[]}
+            state={{ columnVisibility, columnSizing }}
+            onState={{
+              setColumnVisibility,
+              setColumnSizing,
+            }}
+            exposeRefetch={(fn) => {
+              refetchFnRef.current = fn;
+            }}
+          />
+        }
+      />
 
-      {hasNext ? (
-        <div className="flex justify-center mt-6" ref={loadMoreRef}>
-          <LoadingMoreItems loadingMessage="Loading more results..." />
-        </div>
-      ) : !hasNext && hasItems ? (
-        <div className="mt-8">
-          <NoMoreItems />
-        </div>
-      ) : null}
       <WatchGamesModal
         isOpen={isWatchGamesModalOpen}
         onClose={() => setIsWatchGamesModalOpen(false)}
       />
       <ResultsFiltersModal
-        isOpen={isFiltersMoodalOpen}
+        isOpen={isFiltersModalOpen}
         onClose={() => setIsFiltersModalOpen(false)}
         filters={filters}
         setFilters={setFilters}
-        onApply={handleSort}
+        onApply={(next) => handleSort(next)}
       />
     </div>
   );

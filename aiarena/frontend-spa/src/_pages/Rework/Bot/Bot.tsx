@@ -34,7 +34,7 @@ export default function Bot() {
       query BotResultQuery($id: ID!) {
         node(id: $id) {
           ... on BotType {
-            ...BotResultsTable_bot
+            ...BotResultsTbody_bot
           }
         }
       }
