@@ -66,6 +66,10 @@ export function BotResultsTbody({
         competitionId: { type: "String" }
         matchStartedAfter: { type: "DateTime" }
         matchStartedBefore: { type: "DateTime" }
+        tags: { type: "String" }
+        searchOnlyMyTags: { type: "Boolean", defaultValue: false }
+        showEveryonesTags: { type: "Boolean", defaultValue: false }
+
         includeStarted: { type: "Boolean", defaultValue: false }
         includeQueued: { type: "Boolean", defaultValue: false }
         includeFinished: { type: "Boolean", defaultValue: true }
@@ -87,6 +91,9 @@ export function BotResultsTbody({
           competitionId: $competitionId
           matchStartedAfter: $matchStartedAfter
           matchStartedBefore: $matchStartedBefore
+          tags: $tags
+          searchOnlyMyTags: $searchOnlyMyTags
+          showEveryonesTags: $showEveryonesTags
           includeStarted: $includeStarted
           includeQueued: $includeQueued
           includeFinished: $includeFinished
@@ -163,6 +170,18 @@ export function BotResultsTbody({
                     result
                   }
                 }
+                tags {
+                  edges {
+                    node {
+                      id
+                      tag
+                      user {
+                        id
+                        username
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -190,6 +209,9 @@ export function BotResultsTbody({
         competitionId: f.competitionId,
         matchStartedAfter: f.matchStartedAfter,
         matchStartedBefore: f.matchStartedBefore,
+        tags: f.tags,
+        searchOnlyMyTags: f.searchOnlyMyTags,
+        showEveryonesTags: f.showEveryonesTags,
         includeStarted: f.includeStarted,
         includeQueued: f.includeQueued,
         includeFinished: f.includeFinished,

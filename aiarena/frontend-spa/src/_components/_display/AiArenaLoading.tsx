@@ -119,18 +119,20 @@ export default function AiArenaLoading({
         }
       `}</style>
       </div>
-      <div
-        className="pt-2"
-        style={{
-          zIndex: 1,
-          fontSize: Math.max(12, Math.round(size * 0.14)),
-          fontWeight: 600,
-          lineHeight: 1,
-          userSelect: "none",
-        }}
-      >
-        <i>{text}</i>
-      </div>
+      {text != null && (
+        <div
+          className="pt-2"
+          style={{
+            zIndex: 1,
+            fontSize: Math.max(12, Math.round(size * 0.14)),
+            fontWeight: 600,
+            lineHeight: 1,
+            userSelect: "none",
+          }}
+        >
+          <i>{text}</i>
+        </div>
+      )}
     </div>
   );
 }

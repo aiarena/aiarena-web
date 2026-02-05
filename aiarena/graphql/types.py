@@ -526,6 +526,11 @@ class MatchParticipationFilterSet(FilterSet):
     include_started = django_filters.BooleanFilter(method="filter_include_started")
     include_queued = django_filters.BooleanFilter(method="filter_include_queued")
 
+    tags = django_filters.CharFilter(method="filter_tags")
+    search_only_my_tags = django_filters.BooleanFilter(method="noop_bool")
+
+    show_everyones_tags = django_filters.BooleanFilter(method="filter_show_everyones_tags")
+
     class Meta:
         model = models.MatchParticipation
         fields = [
@@ -544,11 +549,17 @@ class MatchParticipationFilterSet(FilterSet):
             "include_finished",
             "include_started",
             "include_queued",
+            "tags",
+            "search_only_my_tags",
+            "show_everyones_tags",
         ]
 
     def filter_order_by(self, queryset, name, value):
         order_fields = value if isinstance(value, list) else [value]
         return queryset.order_by(*order_fields)
+
+    def noop_bool(self, queryset, name, value):
+        return queryset
 
     @property
     def qs(self):
@@ -668,7 +679,6 @@ class MatchParticipationFilterSet(FilterSet):
 
         return queryset
 
-    # Filter for result stats - Finished / Started / Queud
     def filter_include_finished(self, queryset, name, value):
         if value is False:
             return queryset.exclude(match__result__isnull=False)
@@ -689,6 +699,52 @@ class MatchParticipationFilterSet(FilterSet):
                 match__started__isnull=True,
             )
         return queryset
+
+    def filter_tags(self, queryset, name, value):
+        if not value:
+            return queryset
+
+        tags = [t.strip() for t in value.split(",") if t.strip()]
+        if not tags:
+            return queryset
+
+        try:
+            search_only_my = bool(self.form.cleaned_data.get("search_only_my_tags"))
+        except Exception:
+            search_only_my = False
+
+        q = Q()
+        for t in tags:
+            cond = Q(match__tags__tag__name__icontains=t)
+            if search_only_my:
+                user = self.request.user
+                if not user or not user.is_authenticated:
+                    return queryset.none()
+                cond &= Q(match__tags__user=user)
+            q &= cond
+
+        return queryset.filter(q).distinct()
+
+    def filter_show_everyones_tags(self, queryset, name, value):
+        if value is True:
+            return queryset.prefetch_related("match__tags")
+
+        user = self.request.user
+
+        if not user or not user.is_authenticated:
+            return queryset.prefetch_related(
+                Prefetch(
+                    "match__tags",
+                    queryset=models.MatchTag.objects.none(),
+                )
+            )
+
+        return queryset.prefetch_related(
+            Prefetch(
+                "match__tags",
+                queryset=models.MatchTag.objects.filter(user=user),
+            )
+        )
 
 
 class MatchParticipationType(DjangoObjectTypeWithUID):

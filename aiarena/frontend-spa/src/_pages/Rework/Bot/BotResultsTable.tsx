@@ -6,7 +6,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import clsx from "clsx";
 
 import { useMemo, useRef, useState } from "react";
@@ -105,6 +105,9 @@ export interface ResultsFilters {
   competitionName: string | undefined;
   matchStartedAfter: string | undefined; // ISO string
   matchStartedBefore: string | undefined; // ISO string
+  tags: string | undefined;
+  searchOnlyMyTags: boolean | undefined;
+  showEveryonesTags: boolean | undefined;
   includeStarted: boolean | undefined;
   includeQueued: boolean | undefined;
   includeFinished: boolean | undefined;
@@ -152,6 +155,9 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     competitionName: props.filterPreset?.competitionName || undefined,
     matchStartedAfter: undefined,
     matchStartedBefore: undefined,
+    tags: undefined,
+    searchOnlyMyTags: undefined,
+    showEveryonesTags: undefined,
     includeStarted: false,
     includeQueued: false,
     includeFinished: true,
@@ -345,6 +351,19 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         },
         meta: { priority: 1 },
         size: 1,
+      }),
+      columnHelper.accessor((row) => row.match.tags ?? "", {
+        id: "tags",
+        header: "Tags",
+        enableSorting: false,
+        cell: (info) => {
+          const nodes = getNodes(info.row.original.match.tags);
+          const allTags = nodes.map((it) => it.tag);
+          const tagString = allTags.join(", ");
+          return <span title={tagString}>{tagString}</span>;
+        },
+        meta: { priority: 1 },
+        size: 5,
       }),
     ],
     [columnHelper],

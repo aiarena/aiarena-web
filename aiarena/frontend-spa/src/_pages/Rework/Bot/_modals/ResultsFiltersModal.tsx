@@ -94,6 +94,10 @@ export default function ResultsFiltersModal({
       matchType: undefined,
       mapName: undefined,
 
+      tags: undefined,
+      searchOnlyMyTags: undefined,
+      showEveryonesTags: undefined,
+
       matchStartedAfter: undefined,
       matchStartedBefore: undefined,
     }));
@@ -460,7 +464,7 @@ export default function ResultsFiltersModal({
             role="group"
             aria-labelledby="filter-competition-label"
           >
-            <label className="mb-16 flex flex-col gap-1">
+            <label className="flex flex-col gap-1">
               <span className="font-medium">Competition</span>
               <CompetitionSearchList
                 value={{
@@ -478,6 +482,58 @@ export default function ResultsFiltersModal({
               />
             </label>
           </div>
+        </div>
+        <SectionDivider color="gray" className="pb-1" />
+
+        {/* Tags */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1 md:col-span-2">
+            <label className="font-medium">Tags</label>
+            <input
+              type="text"
+              value={filters.tags ?? ""}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  tags: e.target.value === "" ? undefined : e.target.value,
+                }))
+              }
+              className="w-full rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 px-3 py-2"
+              placeholder="comma,separated,tags"
+            />
+          </div>
+
+          <label className="flex items-center gap-2 select-none">
+            <input
+              type="checkbox"
+              checked={filters.showEveryonesTags ?? false}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  showEveryonesTags: e.target.checked,
+                }))
+              }
+              className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
+            />
+            <span className="text-sm text-gray-200">
+              Show Everyone&apos;s Tags
+            </span>
+          </label>
+
+          <label className="flex items-center gap-2 select-none">
+            <input
+              type="checkbox"
+              checked={filters.searchOnlyMyTags ?? false}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  searchOnlyMyTags: e.target.checked,
+                }))
+              }
+              className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
+            />
+            <span className="text-sm text-gray-200">Search Only My Tags</span>
+          </label>
         </div>
 
         <SectionDivider color="gray" className="pb-1" />

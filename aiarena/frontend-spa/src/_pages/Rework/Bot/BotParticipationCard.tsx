@@ -32,9 +32,9 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
   const competitionLink = `/competitions/${getIDFromBase64(data.competition.id, "CompetitionType")}`;
 
   return (
-    <div className="grid grid-cols-5 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm p-1 mr-2 shadow-lg bg-blur-2xl">
-      <span className="p-3">
-        <AiArenaLoading text={""} size={50} speedMs={15000} />
+    <div className="grid grid-cols-5 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm  mr-2 shadow-lg bg-blur-2xl">
+      <span className="m-auto py-2 px-1">
+        <AiArenaLoading size={55} speedMs={15000} />
       </span>
       <div className="col-span-4">
         <p className="truncate ">
