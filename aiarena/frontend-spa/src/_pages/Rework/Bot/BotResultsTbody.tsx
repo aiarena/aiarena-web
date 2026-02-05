@@ -255,8 +255,8 @@ export function BotResultsTbody({
       ))}
       {hasNext ? (
         <>
-          <TbodyLoadingSkeleton colCount={columnCount} rowCount={24} />
           <div className="w-full" ref={loadMoreRef}></div>
+          <TbodyLoadingSkeleton colCount={columnCount} rowCount={24} />
         </>
       ) : !hasNext && hasItems ? (
         <div className="mt-8">
