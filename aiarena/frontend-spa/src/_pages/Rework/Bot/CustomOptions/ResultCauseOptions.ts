@@ -1,4 +1,4 @@
-import { CoreMatchParticipationResultCauseChoices } from "../__generated__/BotResultsTable_bot.graphql";
+import { CoreMatchParticipationResultCauseChoices } from "../__generated__/BotResultsTbody_bot.graphql";
 
 export const resultCauseOptions: { id: CoreMatchParticipationResultCauseChoices; name: string }[] = [
     { id: "CRASH", name: "Crash" },

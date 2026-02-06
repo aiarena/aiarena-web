@@ -1,4 +1,5 @@
-import { CoreMatchParticipationResultChoices } from "../__generated__/BotResultsTable_bot.graphql";
+import { CoreMatchParticipationResultChoices } from "../__generated__/BotResultsTbody_bot.graphql";
+
 export const resultOptions: {
   id: CoreMatchParticipationResultChoices;
   name: string;
