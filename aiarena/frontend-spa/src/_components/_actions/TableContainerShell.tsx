@@ -3,6 +3,8 @@ import { ReactNode, Suspense, useLayoutEffect, useRef } from "react";
 import clsx from "clsx";
 import TbodyLoadingSkeleton from "../_display/_skeletons/TableLoadingSkeleton";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
+import TableSettings from "./TableSettings";
+import Divider from "../_display/Divider";
 
 export function TableContainerShell<T>({
   headerTable,
@@ -41,8 +43,36 @@ export function TableContainerShell<T>({
           `min-h-[${minHeight}vh]`,
         )}
       >
-        <div className="flex justify-between m-2">
+        <div className="flex justify-between m-2 flex-wrap">
           <div className="flex gap-2">
+            <TableSettings>
+              <div className="text-white ">
+                <Divider label="Visible Table Columns" labelPlacement="left" />
+                {allColumns.map((column) => (
+                  <label
+                    key={column.id}
+                    className="flex items-center space-x-4 ml-2"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={column.getIsVisible()}
+                      onChange={
+                        visibleColumnCount == 1 && column.getIsVisible()
+                          ? undefined
+                          : column.getToggleVisibilityHandler()
+                      }
+                      disabled={!column.getCanHide()}
+                      className="accent-customGreen"
+                    />
+                    <span>
+                      {typeof column.columnDef.header === "string"
+                        ? column.columnDef.header
+                        : column.id}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </TableSettings>
             <div className="flex items-center">{appendLeftHeader}</div>
           </div>
           <div className="flex items-center">{appendHeader}</div>

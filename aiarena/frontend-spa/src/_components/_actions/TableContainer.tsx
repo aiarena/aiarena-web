@@ -72,14 +72,14 @@ export function TableContainer<T>({
         )}
       >
         <div className="flex justify-between m-2">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center flex-wrap">
             <TableSettings>
               <div className="text-white ">
                 <Divider label="Visible Table Columns" labelPlacement="left" />
                 {allColumns.map((column) => (
                   <label
                     key={column.id}
-                    className="flex items-start space-x-4 ml-2"
+                    className="flex items-center space-x-4 ml-2"
                   >
                     <input
                       type="checkbox"
@@ -101,7 +101,7 @@ export function TableContainer<T>({
                 ))}
               </div>
             </TableSettings>
-            <div className="flex items-center">{appendLeftHeader}</div>
+            <div className="flex items-center ">{appendLeftHeader}</div>
           </div>
           <div className="flex items-center">{appendHeader}</div>
         </div>

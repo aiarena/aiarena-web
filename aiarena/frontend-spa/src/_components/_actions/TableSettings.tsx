@@ -36,31 +36,30 @@ export default function TableSettings({ children }: TableSettingsProps) {
             "inline-flex",
             "w-full",
             "justify-center",
-            "gap-x-1.5",
             "rounded-md",
-            "px-3",
-            "py-3",
+            "px-[1em]",
+            "py-[0.7em]",
             "font-semibold",
             "bg-neutral-900",
             "shadow-xs",
-            "border",
+            "border-2",
+
             "border-neutral-700",
-            "ring-1",
-            "ring-inset",
-            "ring-gray-700",
-            "focus:outline-none",
+            "hover:border-customGreen",
             {
               "focus:ring-customGreen focus:ring-2": true,
-            }
+            },
           )}
         >
           <ChartBarIcon
+            height={5}
+            width={5}
             className={clsx(
               "-mr-1",
               "size-5",
               "text-gray-400",
               "rotate-90",
-              "scale-x-[-1]"
+              "scale-x-[-1]",
             )}
           />
         </button>
@@ -87,7 +86,7 @@ export default function TableSettings({ children }: TableSettingsProps) {
             "duration-100",
             "ease-out",
             "z-45",
-            "overflow-x-auto"
+            "overflow-x-auto",
           )}
         >
           <div className="py-1 flex flex-col my-1">{children}</div>
