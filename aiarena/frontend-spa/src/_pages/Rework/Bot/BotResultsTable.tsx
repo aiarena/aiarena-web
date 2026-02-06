@@ -174,7 +174,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       columnHelper.accessor((row) => row.match.id, {
         id: "id",
         header: "ID",
-        enableSorting: false,
+        enableSorting: true,
         cell: (info) =>
           withAtag(
             getIDFromBase64(info.getValue(), "MatchType") || "",
@@ -307,7 +307,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       columnHelper.accessor((row) => row.match.result?.created ?? "", {
         id: "date",
         header: "Date",
-        enableSorting: false,
+        enableSorting: true,
         cell: (info) => {
           return getDateTimeISOString(info.getValue()) || "";
         },

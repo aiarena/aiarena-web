@@ -491,9 +491,7 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
 
 class MatchParticipationFilterSet(FilterSet):
     order_by = OrderingFilter(
-        fields=[
-            "id",
-        ],
+        fields=["id", "match__result__created"],
         method="filter_order_by",
     )
     opponent_id = django_filters.CharFilter(method="filter_opponent_id")
