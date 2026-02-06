@@ -1,4 +1,4 @@
-import { CoreMatchParticipationResultCauseChoices } from "@/_pages/Rework/Bot/__generated__/BotResultsTable_bot.graphql";
+import { CoreMatchParticipationResultCauseChoices } from "@/_pages/Rework/Bot/__generated__/BotResultsTbody_bot.graphql";
 import { resultCauseOptions } from "@/_pages/Rework/Bot/CustomOptions/ResultCauseOptions";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
@@ -12,7 +12,7 @@ export function RenderResultCause({
   }
 
   const readableResult = resultCauseOptions.find(
-    (opt) => opt.id === cause.toUpperCase()
+    (opt) => opt.id === cause.toUpperCase(),
   );
 
   if (
