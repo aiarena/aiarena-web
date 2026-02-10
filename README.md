@@ -63,7 +63,7 @@ A website for running the aiarena.net infrastructure.
 7. Launching the Website
 
 
-    If the enviornment is not activated - activate it: 
+    If the environment is not activated - activate it: 
     ```shell
     source .venv/bin/activate
     ```
@@ -118,7 +118,7 @@ A website for running the aiarena.net infrastructure.
     uv run pre-commit install
     ```
 
-## Setting VS code enviornment variables:
+## Setting VS code environment variables:
 
     After creating the venv with UV. navigate to ./venv/bin/activate and add the env export just before "deactivate()":
     ```shell
