@@ -1,4 +1,3 @@
-from discord_bind.models import DiscordUser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -6,6 +5,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from aiarena.api.views.include import discord_user_include_fields
 from aiarena.api.views.serializers import DiscordUserSerializer
 from aiarena.core.permissions import IsServiceOrAdminUser
+from discord_bind.models import DiscordUser
 
 
 class DiscordUserViewSet(viewsets.ReadOnlyModelViewSet):

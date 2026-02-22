@@ -1,0 +1,25 @@
+﻿.\.venv\Scripts\python.exe : Traceback (most recent call last):
+At line:3 char:1
++ .\.venv\Scripts\python.exe manage.py check 2>&1 | Out-File -Encoding  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\code\aiarena-web\manage.py", line 16, in <module>
+    execute_from_command_line(sys.argv)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\code\aiarena-web\.venv\Lib\site-packages\django\core\management\__init__.py", line 442, in 
+execute_from_command_line
+    utility.execute()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\code\aiarena-web\.venv\Lib\site-packages\django\core\management\__init__.py", line 416, in execute
+    django.setup()
+    ~~~~~~~~~~~~^^
+  File "C:\code\aiarena-web\.venv\Lib\site-packages\django\__init__.py", line 24, in setup
+    apps.populate(settings.INSTALLED_APPS)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\code\aiarena-web\.venv\Lib\site-packages\django\apps\registry.py", line 91, in populate
+    app_config = AppConfig.create(entry)
+  File "C:\code\aiarena-web\.venv\Lib\site-packages\django\apps\config.py", line 190, in create
+    raise ImportError(msg)
+ImportError: Module 'django_nyt.apps' does not contain a 'DjangoNytConfig' class. Choices are: 'DjangoNYTConfig'.
