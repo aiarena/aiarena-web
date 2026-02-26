@@ -1,4 +1,4 @@
-import { CoreMatchParticipationResultCauseChoices } from "@/_pages/Rework/Bot/__generated__/BotResultsTbody_bot.graphql";
+import { CoreMatchParticipationResultCauseChoices } from "@/_pages/Rework/Bot/BotResultsTable/__generated__/BotResultsTbody_bot.graphql";
 import { resultCauseOptions } from "@/_pages/Rework/Bot/CustomOptions/ResultCauseOptions";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 

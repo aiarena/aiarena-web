@@ -1,4 +1,3 @@
-import React from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Suspense } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
@@ -9,8 +8,6 @@ import Summary from "../Summary";
 import FetchError from "@/_components/_display/FetchError";
 import { useParams } from "react-router";
 import { EloGraphQuery } from "./__generated__/EloGraphQuery.graphql";
-
-// type ActiveTopTab = "elograph" | "winsbytime" | "winsbyrace";
 
 export default function EloGraph() {
   const { id } = useParams<{ id: string }>();
