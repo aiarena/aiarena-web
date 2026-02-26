@@ -242,21 +242,19 @@ export function BotResultsTbody({
 
   if (bodyTable.getRowModel().rows.length === 0) {
     return (
-      <tbody>
-        <tr>
-          <td
-            colSpan={bodyTable.getVisibleLeafColumns().length}
-            className="p-6 text-center text-neutral-400"
-          >
-            No results
-          </td>
-        </tr>
-      </tbody>
+      <tr>
+        <td
+          colSpan={bodyTable.getVisibleLeafColumns().length}
+          className="p-6 text-center text-neutral-400"
+        >
+          No results
+        </td>
+      </tr>
     );
   }
 
   return (
-    <tbody>
+    <>
       {bodyTable.getRowModel().rows.map((row) => (
         <tr
           key={row.id}
@@ -275,16 +273,23 @@ export function BotResultsTbody({
           ))}
         </tr>
       ))}
+
       {hasNext ? (
         <>
-          <div className="w-full" ref={loadMoreRef}></div>
+          <tr ref={loadMoreRef}>
+            <td colSpan={columnCount} />
+          </tr>
           <TbodyLoadingSkeleton colCount={columnCount} rowCount={24} />
         </>
-      ) : !hasNext && hasItems ? (
-        <div className="mt-8">
-          <NoMoreItems />
-        </div>
       ) : null}
-    </tbody>
+
+      {!hasNext && hasItems ? (
+        <tr>
+          <td colSpan={columnCount} className="pt-8">
+            <NoMoreItems />
+          </td>
+        </tr>
+      ) : null}
+    </>
   );
 }

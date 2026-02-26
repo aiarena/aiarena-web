@@ -9,13 +9,13 @@ import {
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import clsx from "clsx";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { parseSort, withAtag } from "@/_lib/tanstack_utils";
 
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
 
-import ResultsFiltersModal from "./_modals/ResultsFiltersModal";
+import ResultsFiltersModal from "../_modals/ResultsFiltersModal";
 import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 import { ArrowDownCircleIcon, FunnelIcon } from "@heroicons/react/24/outline";
@@ -24,21 +24,26 @@ import EloChange from "@/_components/_display/EloChange";
 import StepTime from "@/_components/_display/RenderStepTime";
 import { RenderResult } from "@/_components/_display/RenderResult";
 import { RenderResultCause } from "@/_components/_display/RenderResultCause";
-import { HardcodedMatchTypeOptions } from "./CustomOptions/MatchTypeOptions";
+import { HardcodedMatchTypeOptions } from "../CustomOptions/MatchTypeOptions";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import ButtonToggle from "@/_components/_actions/_toggle/ButtonToggle";
 import { TableContainerShell } from "@/_components/_actions/TableContainerShell";
 import { BotResultsRefetchArgs, BotResultsTbody } from "./BotResultsTbody";
-
 import {
   BotResultsTbody_bot$data,
   BotResultsTbody_bot$key,
   CoreMatchParticipationResultCauseChoices,
   CoreMatchParticipationResultChoices,
 } from "./__generated__/BotResultsTbody_bot.graphql";
+import { BotResultsTableSortingMap } from "./botResultTableSearchParams";
+
 interface BotResultsTableProps {
   data: BotResultsTbody_bot$key;
   filterPreset?: { competitionId?: string; competitionName?: string };
+  onApplyFilters?: (next: ResultsFilters, replace?: boolean) => void;
+  initialFilters?: ResultsFilters;
+  onApplySort?: (next: SortingState, replace?: boolean) => void;
+  initialSorting?: SortingState;
 }
 
 function getBotEloChange(
@@ -130,7 +135,9 @@ type Match = NonNullable<NonNullable<MatchParticipation>["match"]>;
 type MatchResult = NonNullable<NonNullable<Match>["result"]>;
 
 export default function BotResultsTable(props: BotResultsTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>(
+    () => props.initialSorting ?? [],
+  );
 
   const [columnVisibility, setColumnVisibility] = useState({});
   const [columnSizing, setColumnSizing] = useState({});
@@ -138,7 +145,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
   const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
 
-  const [filters, setFilters] = useState<ResultsFilters>({
+  const defaultFilters: ResultsFilters = {
     opponentName: undefined,
     opponentId: undefined,
     opponentPlaysRaceId: undefined,
@@ -161,12 +168,17 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     includeStarted: false,
     includeQueued: false,
     includeFinished: true,
+  };
+
+  const [filters, setFilters] = useState<ResultsFilters>(() => {
+    return props.initialFilters
+      ? { ...defaultFilters, ...props.initialFilters }
+      : defaultFilters;
   });
 
-  const sortingMap: Record<string, string> = {
-    id: "id",
-    date: "match__result__created",
-  };
+  useEffect(() => {
+    if (props.initialSorting) setSorting(props.initialSorting);
+  }, [props.initialSorting]);
 
   const columnHelper = createColumnHelper<BotResultsRow>();
   const columns = useMemo(
@@ -323,8 +335,11 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               "Download",
               `/${info.getValue()}`,
               `Download replay file for Match ${info.row.original.match.id}`,
-              <span className="flex items-center gap-1">
-                <ArrowDownCircleIcon height={18} /> Replay
+              <span className="flex items-center align-middle gap-1">
+                <span className="flex h-[25px] w-[25px] items-center align-middle">
+                  <ArrowDownCircleIcon height={18} width={18} />
+                </span>
+                Replay
               </span>,
             );
           }
@@ -343,8 +358,11 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               "Download",
               `/${info.getValue()}`,
               `Download match log for Match ${info.row.original.match.id}`,
-              <span className="flex items-center gap-1">
-                <ArrowDownCircleIcon height={18} /> Log
+              <span className="flex items-center align-middle gap-1">
+                <span className="flex h-[25px] w-[25px] items-center align-middle">
+                  <ArrowDownCircleIcon height={18} width={18} />
+                </span>
+                Log
               </span>,
             );
           }
@@ -383,26 +401,29 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     onSortingChange: (updater) => {
       setSorting((prev) => {
         const next = typeof updater === "function" ? updater(prev) : updater;
+
+        props.onApplySort?.(next, true);
         runRefetch(filters, next);
+
         return next;
       });
     },
   });
+  function apply(next: ResultsFilters, replace = true) {
+    setFilters(next);
+    props.onApplyFilters?.(next, replace);
+    runRefetch(next, sorting);
+  }
 
   const refetchFnRef = useRef<null | ((args: BotResultsRefetchArgs) => void)>(
     null,
   );
 
-  function handleSort(nextFilters?: ResultsFilters) {
-    const f = nextFilters ?? filters;
-    runRefetch(f, sorting);
-  }
-
   function runRefetch(nextFilters: ResultsFilters, nextSorting: SortingState) {
     const fn = refetchFnRef.current;
     if (!fn) return;
 
-    const orderBy = parseSort(sortingMap, nextSorting) || "-id";
+    const orderBy = parseSort(BotResultsTableSortingMap, nextSorting) || "-id";
 
     fn({ filters: nextFilters, orderBy });
   }
@@ -440,42 +461,25 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             </button>
             <ButtonToggle
               active={filters.includeQueued}
-              onClick={() => {
-                setFilters((prev) => {
-                  const next = { ...prev, includeQueued: !prev.includeQueued };
-                  handleSort(next);
-                  return next;
-                });
-              }}
+              onClick={() =>
+                apply({ ...filters, includeQueued: !filters.includeQueued })
+              }
               text="Queued"
             />
+
             <ButtonToggle
               active={filters.includeStarted}
-              onClick={() => {
-                setFilters((prev) => {
-                  const next = {
-                    ...prev,
-                    includeStarted: prev.includeStarted === true ? false : true,
-                  };
-                  handleSort(next);
-                  return next;
-                });
-              }}
+              onClick={() =>
+                apply({ ...filters, includeStarted: !filters.includeStarted })
+              }
               text="Playing"
             />
+
             <ButtonToggle
               active={filters.includeFinished}
-              onClick={() => {
-                setFilters((prev) => {
-                  const next = {
-                    ...prev,
-                    includeFinished:
-                      prev.includeFinished === true ? false : true,
-                  };
-                  handleSort(next);
-                  return next;
-                });
-              }}
+              onClick={() =>
+                apply({ ...filters, includeFinished: !filters.includeFinished })
+              }
               text="Finished"
             />
           </div>
@@ -515,7 +519,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         onClose={() => setIsFiltersModalOpen(false)}
         filters={filters}
         setFilters={setFilters}
-        onApply={(next) => handleSort(next)}
+        onApply={(next) => apply(next, true)}
       />
     </div>
   );

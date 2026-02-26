@@ -11,10 +11,6 @@ export const statsSideNavbarLinks = [
     name: "Opponents",
     state: "matchups",
   },
-  {
-    name: "Results",
-    state: "results",
-  },
 ] as const;
 
 export const statsTopNavbarLinks = [

@@ -1,31 +1,12 @@
-import {
-  statsSideNavbarLinks,
-  statsTopNavbarLinks,
-} from "@/_pages/Rework/CompetitionParticipation/StatsSideNavbarLinks";
+import { statsSideNavbarLinks } from "@/_pages/Rework/CompetitionParticipation/StatsSideNavbarLinks";
 import clsx from "clsx";
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
+import { NavLink } from "react-router";
 
 export default function WithStatsSideButtons({
   children,
-  activeTab,
-  setActiveTab,
-  setActiveTopTab,
 }: {
   children: ReactNode;
-  activeTab: (typeof statsSideNavbarLinks)[number]["state"];
-  setActiveTab: Dispatch<
-    SetStateAction<(typeof statsSideNavbarLinks)[number]["state"]>
-  >;
-  setActiveTopTab: Dispatch<
-    SetStateAction<(typeof statsTopNavbarLinks)[number]["state"]>
-  >;
 }) {
   const [sideNavbar, setSideNavbar] = useState(false);
   const handleWindowResize = useCallback(() => {
@@ -68,24 +49,21 @@ export default function WithStatsSideButtons({
           <aside className="ml-2 w-1/12 min-w-[12em]  mt-4">
             <div className="sticky flex flex-col">
               {statsSideNavbarLinks.map((tab) => (
-                <button
+                <NavLink
                   key={tab.name}
-                  onClick={() => {
-                    setActiveTab(tab.state);
-                    setActiveTopTab(
-                      statsTopNavbarLinks.find((it) => it.parent === tab.state)
-                        ?.state || "elograph"
-                    );
-                  }}
-                  className={clsx(
-                    "my-1  mr-2 pl-2 py-2 text-white border-1 bg-darken-2 shadow-black shadow-sm  duration-300 ease-in-out transform backdrop-blur-sm",
-                    tab.state === activeTab
-                      ? "text-large border-neutral-700 border-b-customGreen border-b-2"
-                      : "border-neutral-700 hover:border-b-customGreen border-b-2"
-                  )}
+                  to={tab.state}
+                  relative="path"
+                  className={({ isActive }) =>
+                    clsx(
+                      "my-1  mr-2 pl-2 py-2 text-white border-1 bg-darken-2 shadow-black shadow-sm  duration-300 ease-in-out transform backdrop-blur-sm",
+                      isActive
+                        ? "text-large border-neutral-700 border-b-customGreen border-b-2"
+                        : "border-neutral-700 hover:border-b-customGreen border-b-2",
+                    )
+                  }
                 >
                   <p className="text-gray-100 text-l">{tab.name}</p>
-                </button>
+                </NavLink>
               ))}
             </div>
           </aside>
@@ -93,20 +71,21 @@ export default function WithStatsSideButtons({
           <div className="sticky z-49 border-b border-customGreen">
             <div className="flex flex-wrap justify-center space-x-4 py-4 bg-darken-2">
               {statsSideNavbarLinks.map((tab) => (
-                <button
+                <NavLink
                   key={tab.name}
-                  onClick={() => {
-                    setActiveTab(tab.state);
-                  }}
-                  className={clsx(
-                    "py-2 text-white font-gugi",
-                    tab.state === activeTab
-                      ? "border-b-2 border-customGreen"
-                      : "border-b-2 border-transparent hover:border-customGreen"
-                  )}
+                  to={tab.state}
+                  relative="path"
+                  className={({ isActive }) =>
+                    clsx(
+                      "py-2 text-white font-gugi",
+                      isActive
+                        ? "border-b-2 border-customGreen"
+                        : "border-b-2 border-transparent hover:border-customGreen",
+                    )
+                  }
                 >
                   {tab.name}
-                </button>
+                </NavLink>
               ))}
             </div>
           </div>
@@ -116,7 +95,7 @@ export default function WithStatsSideButtons({
           className={clsx(
             sideNavbar ? "flex-1" : "sticky top-0",
             "overflow-y-auto",
-            "mt-4"
+            "mt-4",
           )}
           role="main"
         >

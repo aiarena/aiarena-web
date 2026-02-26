@@ -10,8 +10,8 @@ import {
 import { Bar } from "react-chartjs-2";
 import { graphql, useFragment } from "react-relay";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { WinsByTime_node$key } from "./__generated__/WinsByTime_node.graphql";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
+import { WinsByTimeChart_node$key } from "./__generated__/WinsByTimeChart_node.graphql";
 
 ChartJS.register(
   BarElement,
@@ -19,15 +19,15 @@ ChartJS.register(
   LinearScale,
   Tooltip,
   Legend,
-  ChartDataLabels
+  ChartDataLabels,
 );
 interface WinsByTimeProps {
-  data: WinsByTime_node$key;
+  data: WinsByTimeChart_node$key;
 }
-export default function WinsByTime(props: WinsByTimeProps) {
+export default function WinsByTimeChart(props: WinsByTimeProps) {
   const data = useFragment(
     graphql`
-      fragment WinsByTime_node on CompetitionParticipationType {
+      fragment WinsByTimeChart_node on CompetitionParticipationType {
         winrateChartData {
           title
           data {
@@ -42,7 +42,7 @@ export default function WinsByTime(props: WinsByTimeProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
   const noItemsMessage = (
     <div className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8">

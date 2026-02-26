@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router";
+import { Navigate, Route, Routes } from "react-router";
 import DashboardLayout from "@/DashboardLayout";
 import UserRoot from "./_pages/UserRoot";
 import { getFeatureFlags } from "./_data/featureFlags";
@@ -20,7 +20,13 @@ import BotPage from "./_pages/Rework/Bot/Page";
 import RoundsPage from "./_pages/Rework/_Round/Page";
 import AuthorPage from "./_pages/Rework/_Author/Page";
 import MatchPage from "./_pages/Rework/_Match/Page";
-import CompetitionParticipationPage from "./_pages/Rework/CompetitionParticipation/Page";
+import Maps from "./_pages/Rework/CompetitionParticipation/Pages/Maps";
+import EloGraph from "./_pages/Rework/CompetitionParticipation/Pages/EloGraph";
+import WinsByRace from "./_pages/Rework/CompetitionParticipation/Pages/WinsByRace";
+import WinsByTime from "./_pages/Rework/CompetitionParticipation/Pages/WinsByTime";
+import CompetitionParticipationSideNav from "./_pages/Rework/CompetitionParticipation/CompetitionParticipationSideNav";
+import CompetitionParticipationTopNav from "./_components/_nav/CompetitionParticipationTopNav";
+import Matchups from "./_pages/Rework/CompetitionParticipation/Pages/Matchups";
 
 export default function App() {
   return (
@@ -54,9 +60,31 @@ export default function App() {
       <Route path="dashboard/rework">
         <Route element={<RootLayout />}>
           <Route
-            path="competitions/stats/:id/:slug?"
-            element={<CompetitionParticipationPage />}
-          />
+            path="competitions/stats/:id"
+            element={<CompetitionParticipationSideNav />}
+          >
+            <Route index element={<Navigate to="overview" replace />} />
+            <Route
+              path="overview"
+              element={
+                <CompetitionParticipationTopNav
+                  pages={[
+                    { name: "ELO Graph", to: "elograph" },
+                    { name: "Wins By Time", to: "winsbytime" },
+                    { name: "Wins By Race", to: "winsbyrace" },
+                  ]}
+                />
+              }
+            >
+              <Route index element={<Navigate to="elograph" replace />} />
+              <Route path="elograph" element={<EloGraph />} />
+              <Route path="winsbytime" element={<WinsByTime />} />
+              <Route path="winsbyrace" element={<WinsByRace />} />
+            </Route>
+
+            <Route path="maps" element={<Maps />} />
+            <Route path="matchups" element={<Matchups />} />
+          </Route>
         </Route>
 
         <Route element={<RootWithPaddingLayout />}>

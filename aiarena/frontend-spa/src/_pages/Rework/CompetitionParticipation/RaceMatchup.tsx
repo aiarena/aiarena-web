@@ -10,8 +10,8 @@ import {
 import { Bar } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { graphql, useFragment } from "react-relay";
-import { RaceMatchup_node$key } from "./__generated__/RaceMatchup_node.graphql";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
+import { RaceMatchupChart_node$key } from "./__generated__/RaceMatchupChart_node.graphql";
 
 ChartJS.register(
   BarElement,
@@ -19,17 +19,17 @@ ChartJS.register(
   LinearScale,
   Tooltip,
   Legend,
-  ChartDataLabels
+  ChartDataLabels,
 );
 
 interface RaceMatchupChartProps {
-  data: RaceMatchup_node$key;
+  data: RaceMatchupChart_node$key;
 }
 
-export default function RaceMatchup(props: RaceMatchupChartProps) {
+export default function RaceMatchupChart(props: RaceMatchupChartProps) {
   const node = useFragment(
     graphql`
-      fragment RaceMatchup_node on CompetitionParticipationType {
+      fragment RaceMatchupChart_node on CompetitionParticipationType {
         raceMatchup {
           zerg {
             wins
@@ -78,7 +78,7 @@ export default function RaceMatchup(props: RaceMatchupChartProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   const noItemsMessage = (
@@ -181,7 +181,7 @@ export default function RaceMatchup(props: RaceMatchupChartProps) {
                   if (context.dataset.label === "Crashes") count = race.crashes;
 
                   return `${context.dataset.label}: ${count}/${race.played} (${v?.toFixed(
-                    2
+                    2,
                   )}%)`;
                 },
               },

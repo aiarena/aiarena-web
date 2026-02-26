@@ -28,7 +28,7 @@ import NoMoreItems from "@/_components/_display/NoMoreItems";
 interface BotCompetitionsTableProps {
   bot: BotCompetitionsTable_bot$key;
   appendHeader?: ReactNode;
-  // onlyActive?: boolean | undefined;
+  onlyActive?: boolean | undefined;
 }
 
 export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
@@ -40,14 +40,14 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
         orderBy: { type: "String" }
-        # active: { type: "Boolean" }
+        active: { type: "Boolean" }
       ) {
         competitionParticipations(
           first: $first
           after: $cursor
           orderBy: $orderBy
+          active: $active
         )
-          # active: $active
           @connection(
             key: "BotCompetitionsTable_bot_competitionParticipations"
           ) {
@@ -181,14 +181,10 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
       const sortString = parseSort(sortingMap, sorting);
       refetch({
         orderBy: sortString,
-        // active: props.onlyActive == true ? true : undefined,
+        active: props.onlyActive == true ? true : undefined,
       });
     });
-  }, [
-    sorting,
-    //  props.onlyActive,
-    refetch,
-  ]);
+  }, [sorting, props.onlyActive, refetch]);
 
   const table = useReactTable({
     data: competitionData,

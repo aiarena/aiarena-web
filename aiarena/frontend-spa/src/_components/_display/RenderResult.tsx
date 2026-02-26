@@ -1,4 +1,4 @@
-import { CoreMatchParticipationResultChoices } from "@/_pages/Rework/Bot/__generated__/BotResultsTbody_bot.graphql";
+import { CoreMatchParticipationResultChoices } from "@/_pages/Rework/Bot/BotResultsTable/__generated__/BotResultsTbody_bot.graphql";
 
 export function RenderResult({
   result,

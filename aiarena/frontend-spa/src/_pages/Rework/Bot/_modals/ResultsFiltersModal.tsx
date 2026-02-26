@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 import Modal from "@/_components/_actions/Modal";
 import SectionDivider from "@/_components/_display/SectionDivider";
 import clsx from "clsx";
-import { ResultsFilters } from "../BotResultsTable";
+import { ResultsFilters } from "../BotResultsTable/BotResultsTable";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { ResultsFiltersModalQuery } from "./__generated__/ResultsFiltersModalQuery.graphql";
 import BotSearchList from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/BotSearchList";
@@ -22,7 +22,7 @@ import {
 import {
   CoreMatchParticipationResultCauseChoices,
   CoreMatchParticipationResultChoices,
-} from "../__generated__/BotResultsTbody_bot.graphql";
+} from "../BotResultsTable/__generated__/BotResultsTbody_bot.graphql";
 
 interface ResultsFiltersModalProps {
   isOpen: boolean;

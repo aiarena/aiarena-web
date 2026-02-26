@@ -181,17 +181,18 @@ export function TableContainerShell<T>({
                   </tr>
                 ))}
               </thead>
-
-              <Suspense
-                fallback={
-                  <TbodyLoadingSkeleton
-                    colCount={visibleColumnCount}
-                    rowCount={24}
-                  />
-                }
-              >
-                {tbody}
-              </Suspense>
+              <tbody>
+                <Suspense
+                  fallback={
+                    <TbodyLoadingSkeleton
+                      colCount={visibleColumnCount}
+                      rowCount={24}
+                    />
+                  }
+                >
+                  {tbody}
+                </Suspense>
+              </tbody>
             </table>
           </div>
         </div>
