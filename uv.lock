@@ -94,7 +94,7 @@ requires-dist = [
     { name = "django-private-storage", specifier = "==3.1" },
     { name = "django-random-queryset", specifier = "==0.1.3" },
     { name = "django-redis", specifier = "==5.4.0" },
-    { name = "django-registration-redux", specifier = "==2.10" },
+    { name = "django-registration-redux", specifier = "==2.13" },
     { name = "django-robots", specifier = "==6.1" },
     { name = "django-select2", specifier = "==8.4.1" },
     { name = "django-storages", specifier = "==1.13.2" },
@@ -674,11 +674,11 @@ wheels = [
 
 [[package]]
 name = "django-registration-redux"
-version = "2.10"
+version = "2.13"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/99/03/12bbb6262b26716c2df5b187bc321b6bd226d30b5ca60b080d641f079e9a/django-registration-redux-2.10.tar.gz", hash = "sha256:de25c3ae04ec466edc8a41e03d7ff817fdb996ffd00333550b9c4b960593fdff", size = 115983, upload-time = "2022-03-09T02:20:24.132Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/47/960fb3f88d0080a94fffb6fc98ff986012d3a968c030036cf79abdd40242/django-registration-redux-2.13.tar.gz", hash = "sha256:9793a05b32b1d7342c6ef3e0140b2951b7dbde058b3ba6e8a232b534928279f9", size = 125883, upload-time = "2023-10-27T02:41:46.863Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/74/f4/6aae205d40dfe3fe57e9ba6b288def0c360bcb803b046c992ab494bdb8b4/django_registration_redux-2.10-py2.py3-none-any.whl", hash = "sha256:ef6817b300f56f82658058d6e060eef819ae882074721e8e98870ed195a24118", size = 213227, upload-time = "2022-03-09T02:20:21.883Z" },
+    { url = "https://files.pythonhosted.org/packages/32/7f/715af6a1322a1bc8fc84befa469a048dd5983eeac49f464ffa01bff33f00/django_registration_redux-2.13-py2.py3-none-any.whl", hash = "sha256:547c86ad9b951cf743075b5486f304e51e450b45d04e5ef04392838a9cff3da8", size = 218441, upload-time = "2023-10-27T02:41:44.565Z" },
 ]
 
 [[package]]
