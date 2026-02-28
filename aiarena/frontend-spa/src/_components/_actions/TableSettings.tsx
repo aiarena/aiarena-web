@@ -38,7 +38,7 @@ export default function TableSettings({ children }: TableSettingsProps) {
             "justify-center",
             "rounded-md",
             "px-[1em]",
-            "py-[0.7em]",
+            "py-[0.6em]",
             "font-semibold",
             "bg-neutral-900",
             "shadow-xs",
