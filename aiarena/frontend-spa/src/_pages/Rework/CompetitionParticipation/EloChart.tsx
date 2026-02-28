@@ -23,7 +23,7 @@ ChartJS.register(
   TimeScale,
   Tooltip,
   Legend,
-  annotationPlugin
+  annotationPlugin,
 );
 
 interface EloChartProps {
@@ -51,7 +51,7 @@ export default function EloChart(props: EloChartProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   const eloChart = data?.eloChartData;
@@ -78,7 +78,10 @@ export default function EloChart(props: EloChartProps) {
 
   if (!chartData)
     return (
-      <div className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8">
+      <div
+        className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8 flex items-center justify-center"
+        style={{ height: 558 }}
+      >
         <NoItemsInListMessage>
           <p>No match data available...</p>
         </NoItemsInListMessage>

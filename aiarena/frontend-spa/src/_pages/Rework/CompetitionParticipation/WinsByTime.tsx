@@ -45,7 +45,10 @@ export default function WinsByTimeChart(props: WinsByTimeProps) {
     props.data,
   );
   const noItemsMessage = (
-    <div className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8">
+    <div
+      className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8 flex items-center justify-center"
+      style={{ height: 558 }}
+    >
       <NoItemsInListMessage>
         <p>No match data available...</p>
       </NoItemsInListMessage>
