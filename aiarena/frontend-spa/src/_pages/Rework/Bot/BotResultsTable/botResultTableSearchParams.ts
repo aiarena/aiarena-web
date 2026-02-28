@@ -3,6 +3,7 @@ import { CoreBotRaceLabelChoices } from "../__generated__/InformationSection_bot
 import { CoreMatchParticipationResultCauseChoices, CoreMatchParticipationResultChoices } from "./__generated__/BotResultsTbody_bot.graphql";
 import { HardcodedMatchTypeOptions } from "../CustomOptions/MatchTypeOptions";
 import { cleanStr, setOrDelete, setPair, toBool, toNum } from "@/_lib/searchParamsUtils";
+import { getBase64FromID, getIDFromBase64 } from "@/_lib/relayHelpers";
 
 
 export const BotResultsTableSortingMap: Record<string, string> = {
@@ -27,7 +28,7 @@ export function encodeFiltersToSearchParams(
     setPair(
         searchParam,
         "opponentId",
-        cleanStr(filters.opponentId),
+        cleanStr(getIDFromBase64(filters.opponentId, "BotType")),
         "opponentName",
         cleanStr(filters.opponentName),
     );
@@ -41,7 +42,7 @@ export function encodeFiltersToSearchParams(
     setPair(
         searchParam,
         "competitionId",
-        cleanStr(filters.competitionId),
+        cleanStr(getIDFromBase64(filters.competitionId, "CompetitionType")),
         "competitionName",
         cleanStr(filters.competitionName),
     );
@@ -104,12 +105,24 @@ export function decodeFiltersFromSearchParams(
     searchParam: URLSearchParams,
     preset?: { competitionId?: string; competitionName?: string },
 ): ResultsFilters {
-    const competitionId = cleanStr(searchParam.get("competitionId")) ?? preset?.competitionId;
+    const rawCompetitionId = searchParam.get("competitionId");
+
+    const competitionId = rawCompetitionId && rawCompetitionId.trim() !== ""
+        ? getBase64FromID(rawCompetitionId, "CompetitionType")
+        : preset?.competitionId
+
     const competitionName =
         cleanStr(searchParam.get("competitionName")) ?? preset?.competitionName;
 
+    const rawOpponentId = searchParam.get("opponentId");
+    const opponentId =
+        rawOpponentId && rawOpponentId.trim() !== ""
+            ? getBase64FromID(rawOpponentId, "BotType")
+            : null;
+
+
     return {
-        opponentId: cleanStr(searchParam.get("opponentId")),
+        opponentId: cleanStr(opponentId),
         opponentName: cleanStr(searchParam.get("opponentName")),
 
         opponentPlaysRaceId: cleanStr(searchParam.get("opponentRace")) as CoreBotRaceLabelChoices | undefined,
@@ -126,8 +139,8 @@ export function decodeFiltersFromSearchParams(
         matchType: (cleanStr(searchParam.get("matchType"))?.toUpperCase()) as HardcodedMatchTypeOptions | undefined ?? undefined,
         mapName: cleanStr(searchParam.get("mapName")),
 
-        competitionId: competitionId ?? undefined,
-        competitionName: competitionName ?? undefined,
+        competitionId: cleanStr(competitionId) ?? undefined,
+        competitionName: cleanStr(competitionName) ?? undefined,
 
         matchStartedAfter: cleanStr(searchParam.get("after")),
         matchStartedBefore: cleanStr(searchParam.get("before")),

@@ -85,6 +85,8 @@ export default function ResultsFiltersModal({
       opponentId: undefined,
       opponentPlaysRaceId: undefined,
       opponentPlaysRaceName: undefined,
+      competitionId: undefined,
+      competitionName: undefined,
       result: undefined,
       cause: undefined,
       avgStepTimeMin: undefined,

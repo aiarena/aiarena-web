@@ -23,7 +23,7 @@ export function getIDFromBase64(
   base64Id: string | undefined | null,
   expectedType: string,
 ) {
-  if (base64Id == null || base64Id == undefined) {
+  if (base64Id == null || base64Id == undefined || base64Id == "") {
     return null;
   }
   try {
