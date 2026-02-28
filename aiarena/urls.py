@@ -70,7 +70,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("stream/", TemplateView.as_view(template_name="stream.html"), name="stream"),
     path("bots/", core_views.frontend, name="bots"),
     path("bots/downloadable/", core_views.BotDownloadableList.as_view(), name="bots_downloadable"),
-    path("bots/<int:pk>/", core_views.BotDetail.as_view(), name="bot"),
+    path("bots/<int:pk>/", core_views.frontend, name="bot"),
     path("bots/<int:pk>/edit/", core_views.BotUpdate.as_view(), name="bot_edit"),
     path("bots/<int:pk>/bot_zip", core_views.BotZipDownloadView.as_view()),
     path("bots/<int:pk>/bot_data", core_views.BotDataDownloadView.as_view()),
@@ -88,12 +88,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("matches/<int:pk>/", core_views.frontend, name="match"),
     path("competitions/", core_views.frontend, name="competitions"),
     path("competitions/<int:pk>/", core_views.frontend, name="competition"),
-    path("competitions/stats/<int:pk>/", core_views.BotCompetitionStatsDetail.as_view()),
-    path(
-        "competitions/stats/<int:pk>/<slug:slug>",
-        core_views.BotCompetitionStatsDetail.as_view(),
-        name="bot_competition_stats",
-    ),
+    path("competitions/stats/<int:pk>/", core_views.frontend, name="bot_competition_stats"),
     path(
         "competitions/stats/<int:pk>_elo_graph_update_plot.png",
         core_views.BotCompetitionStatsEloGraphUpdatePlot.as_view(),

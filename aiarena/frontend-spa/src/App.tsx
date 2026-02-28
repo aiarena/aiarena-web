@@ -44,7 +44,34 @@ export default function App() {
         />
         <Route path="rounds/:roundId" element={<RoundsPage />} />
         <Route path="bots" element={<BotsPage />} />
+        <Route path="bots/:botId" element={<BotPage />} />
         <Route path="matches/:matchId" element={<MatchPage />} />
+        <Route
+          path="competitions/stats/:id"
+          element={<CompetitionParticipationSideNav />}
+        >
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route
+            path="overview"
+            element={
+              <CompetitionParticipationTopNav
+                pages={[
+                  { name: "ELO Graph", to: "elograph" },
+                  { name: "Wins By Time", to: "winsbytime" },
+                  { name: "Wins By Race", to: "winsbyrace" },
+                ]}
+              />
+            }
+          >
+            <Route index element={<Navigate to="elograph" replace />} />
+            <Route path="elograph" element={<EloGraph />} />
+            <Route path="winsbytime" element={<WinsByTime />} />
+            <Route path="winsbyrace" element={<WinsByRace />} />
+          </Route>
+
+          <Route path="maps" element={<Maps />} />
+          <Route path="matchups" element={<Matchups />} />
+        </Route>
       </Route>
 
       <Route element={<DashboardLayout />} path="dashboard">
@@ -57,39 +84,12 @@ export default function App() {
         )}
         <Route path="*" element={<PageNotFound />} />
       </Route>
-      <Route path="dashboard/rework">
-        <Route element={<RootLayout />}>
-          <Route
-            path="competitions/stats/:id"
-            element={<CompetitionParticipationSideNav />}
-          >
-            <Route index element={<Navigate to="overview" replace />} />
-            <Route
-              path="overview"
-              element={
-                <CompetitionParticipationTopNav
-                  pages={[
-                    { name: "ELO Graph", to: "elograph" },
-                    { name: "Wins By Time", to: "winsbytime" },
-                    { name: "Wins By Race", to: "winsbyrace" },
-                  ]}
-                />
-              }
-            >
-              <Route index element={<Navigate to="elograph" replace />} />
-              <Route path="elograph" element={<EloGraph />} />
-              <Route path="winsbytime" element={<WinsByTime />} />
-              <Route path="winsbyrace" element={<WinsByRace />} />
-            </Route>
 
-            <Route path="maps" element={<Maps />} />
-            <Route path="matchups" element={<Matchups />} />
-          </Route>
-        </Route>
+      <Route path="dashboard/rework">
+        <Route element={<RootLayout />}></Route>
 
         <Route element={<RootWithPaddingLayout />}>
           <Route path="results" element={<ResultsPage />} />
-          <Route path="bots/:botId" element={<BotPage />} />
         </Route>
       </Route>
     </Routes>
