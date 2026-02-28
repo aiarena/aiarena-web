@@ -8,7 +8,7 @@ export default function StepTime({
   const stepTime = Math.floor(Number(time) * 1000);
   const color = getRedGreenDynamicColor({
     value: stepTime,
-    rangeMin: 100,
+    rangeMin: 50,
     rangeMax: 0,
   });
 
