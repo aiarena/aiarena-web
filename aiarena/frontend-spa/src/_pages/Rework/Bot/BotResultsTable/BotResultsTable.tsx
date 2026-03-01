@@ -333,7 +333,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           if (info.getValue()) {
             return withAtag(
               "Download",
-              `/${info.getValue()}`,
+              `${info.getValue()}`,
               `Download replay file for Match ${info.row.original.match.id}`,
               <span className="flex items-center align-middle gap-1">
                 <span className="flex h-[25px] w-[25px] items-center align-middle">
