@@ -3,7 +3,11 @@ import { AuthNavbarQuery } from "./__generated__/AuthNavbarQuery.graphql";
 import { NavLink } from "react-router";
 import clsx from "clsx";
 
-export default function AuthNavbar() {
+interface AuthNavbarProps {
+  mobile?: boolean;
+}
+
+export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
   const data = useLazyLoadQuery<AuthNavbarQuery>(
     graphql`
       query AuthNavbarQuery {
@@ -14,35 +18,43 @@ export default function AuthNavbar() {
         }
       }
     `,
-    {}
+    {},
   );
 
+  const baseClasses = mobile
+    ? "block w-full bg-darken-3 hover:bg-darken-4 py-2 text-white hover:text-slate-300 border-b-2"
+    : "py-2 text-white border-b-2";
+
+  const activeBorder = "border-customGreen";
+  const inactiveBorder = mobile
+    ? "border-transparent"
+    : "border-transparent hover:border-customGreen";
+
   return (
-    <li key={"authentication"} className="pb-2 text-l p-2 text-center">
+    <li
+      className={clsx(
+        mobile
+          ? "text-l p-2 text-center w-full"
+          : "pb-2 text-l p-2 text-center",
+      )}
+    >
       {data.viewer?.user ? (
         <NavLink
-          key={"dashboard"}
           to={"/dashboard"}
           className={({ isActive }) =>
-            clsx(
-              "py-2 text-white border-b-2",
-              isActive
-                ? "border-customGreen"
-                : "border-transparent hover:border-customGreen"
-            )
+            clsx(baseClasses, isActive ? activeBorder : inactiveBorder)
           }
         >
           Dashboard
         </NavLink>
       ) : (
         <a
-          key={"login"}
           href={"/accounts/login/"}
           className={clsx(
-            "py-2 text-white border-b-2",
+            baseClasses,
             window.location.pathname === "/accounts/login/"
-              ? "border-customGreen"
-              : "border-transparent hover:border-customGreen"
+              ? activeBorder
+              : inactiveBorder,
           )}
         >
           Login

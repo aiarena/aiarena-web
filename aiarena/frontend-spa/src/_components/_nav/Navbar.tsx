@@ -104,7 +104,7 @@ function Navbar() {
                                 "py-2 text-white border-b-2",
                                 isActive
                                   ? "border-customGreen"
-                                  : "border-transparent hover:border-customGreen"
+                                  : "border-transparent hover:border-customGreen",
                               )
                             }
                           >
@@ -118,7 +118,7 @@ function Navbar() {
                               "py-2 text-white border-b-2",
                               window.location.pathname === link.path
                                 ? "border-customGreen"
-                                : "border-transparent hover:border-customGreen"
+                                : "border-transparent hover:border-customGreen",
                             )}
                           >
                             {link.title}
@@ -138,19 +138,35 @@ function Navbar() {
                   .filter((it) => it.featureFlag !== false)
                   .map((link, index) => (
                     <li key={index} className="text-l p-2 text-center w-full">
-                      <a
-                        key={index}
-                        href={link.path}
-                        onClick={handleMobileNavItemClick}
-                        className={clsx(
-                          "block w-full bg-darken-3 hover:darken-4 py-2 text-white hover:text-slate-300 border-b-2",
-                          window.location.pathname === link.path
-                            ? "border-customGreen"
-                            : "border-transparent"
-                        )}
-                      >
-                        {link.title}
-                      </a>
+                      {link.react === true ? (
+                        <NavLink
+                          to={link.path}
+                          onClick={handleMobileNavItemClick}
+                          className={({ isActive }) =>
+                            clsx(
+                              "block w-full bg-darken-3 hover:bg-darken-4 py-2 text-white hover:text-slate-300 border-b-2",
+                              isActive
+                                ? "border-customGreen"
+                                : "border-transparent",
+                            )
+                          }
+                        >
+                          {link.title}
+                        </NavLink>
+                      ) : (
+                        <a
+                          href={link.path}
+                          onClick={handleMobileNavItemClick}
+                          className={clsx(
+                            "block w-full bg-darken-3 hover:bg-darken-4 py-2 text-white hover:text-slate-300 border-b-2",
+                            window.location.pathname === link.path
+                              ? "border-customGreen"
+                              : "border-transparent",
+                          )}
+                        >
+                          {link.title}
+                        </a>
+                      )}
 
                       {/* Alternative NavLink block kept as-is (commented) */}
                       {/* 
@@ -172,6 +188,7 @@ function Navbar() {
                   */}
                     </li>
                   ))}
+                <AuthNavbar mobile />
               </ul>
             </div>
           ) : null}
