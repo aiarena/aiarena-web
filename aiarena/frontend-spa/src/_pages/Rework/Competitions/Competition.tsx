@@ -11,6 +11,7 @@ import CompetitionParticipantCount from "@/_components/_display/CompetitionParti
 import { Suspense } from "react";
 import LoadingDots from "@/_components/_display/LoadingDots";
 import { Link } from "react-router";
+import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 interface CompetitionCardProps {
   data: CompetitionCard_competition$key;
@@ -98,7 +99,7 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
               <p>
                 <span className="text-gray-400">Started:</span>{" "}
                 <span className="text-white">
-                  {new Date(competition.dateOpened).toLocaleDateString()}
+                  {getDateTimeISOString(competition.dateOpened) || "--"}
                 </span>
               </p>
             </div>
