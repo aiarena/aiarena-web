@@ -151,9 +151,14 @@ class CompetitionFilterSet(FilterSet):
     competition_id = graphene.ID()
     name = django_filters.CharFilter(method="filter_name")
 
+    status_in = django_filters.MultipleChoiceFilter(
+        field_name="status",
+        choices=models.Competition.COMPETITION_STATUSES,
+    )
+
     class Meta:
         model = models.Competition
-        fields = ["name", "id", "order_by", "status"]
+        fields = ["name", "id", "order_by", "status", "status_in"]
 
     def filter_name(self, queryset, name, value):
         return queryset.filter(Q(name__icontains=value))

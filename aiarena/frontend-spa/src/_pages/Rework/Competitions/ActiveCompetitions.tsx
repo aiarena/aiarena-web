@@ -14,12 +14,15 @@ export default function ActiveCompetitions(props: ActiveCompetitionsProps) {
       @argumentDefinitions(
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
-        status: { type: "CoreCompetitionStatusChoices", defaultValue: OPEN }
+        statusIn: {
+          type: "[String!]"
+          defaultValue: ["open", "created", "closing"]
+        }
       ) {
         activeCompetitions: competitions(
           first: $first
           after: $cursor
-          status: $status
+          statusIn: $statusIn
           orderBy: "-date_created"
         ) @connection(key: "ActiveCompetitionsProps__activeCompetitions") {
           edges {
