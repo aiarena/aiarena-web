@@ -194,7 +194,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             `View match details for Match ID ${info.getValue()}`,
           ),
         meta: { priority: 1 },
-        size: 100,
+        size: 50,
       }),
 
       columnHelper.accessor(
@@ -222,6 +222,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             );
           },
           meta: { priority: 1 },
+          size: 100,
         },
       ),
       columnHelper.accessor(
@@ -245,7 +246,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             return <RenderRace race={opponent?.playsRace} />;
           },
           meta: { priority: 1 },
-          size: 5,
+          size: 50,
         },
       ),
       columnHelper.accessor((row) => row.result ?? "", {
@@ -256,7 +257,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           return <RenderResult result={info.getValue()} />;
         },
         meta: { priority: 1 },
-        size: 5,
+        size: 50,
       }),
 
       columnHelper.accessor(
@@ -274,7 +275,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             return <EloChange delta={info.getValue()} />;
           },
           meta: { priority: 1 },
-          size: 85,
+          size: 50,
         },
       ),
       columnHelper.accessor((row) => row.resultCause, {
@@ -301,7 +302,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           }
         },
         meta: { priority: 1 },
-        size: 100,
+        size: 50,
       }),
       columnHelper.accessor(
         (row) => row.match.result?.gameTimeFormatted ?? "",
@@ -313,7 +314,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             return info.getValue();
           },
           meta: { priority: 1 },
-          size: 5,
+          size: 50,
         },
       ),
       columnHelper.accessor((row) => row.match.result?.created ?? "", {
@@ -324,6 +325,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           return getDateTimeISOString(info.getValue()) || "";
         },
         meta: { priority: 1 },
+        size: 50,
       }),
       columnHelper.accessor((row) => row.match.result?.replayFile ?? "", {
         id: "replay",
@@ -345,7 +347,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           }
         },
         meta: { priority: 1 },
-        size: 1,
+        size: 50,
       }),
       columnHelper.accessor((row) => row.matchLog ?? "", {
         id: "log",
@@ -368,7 +370,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           }
         },
         meta: { priority: 1 },
-        size: 1,
+        size: 50,
       }),
       columnHelper.accessor((row) => row.match.tags ?? "", {
         id: "tags",
@@ -381,7 +383,6 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           return <span title={tagString}>{tagString}</span>;
         },
         meta: { priority: 1 },
-        size: 5,
       }),
     ],
     [columnHelper],
