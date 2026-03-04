@@ -40,13 +40,6 @@ export const navLinks = [
     react: true,
   },
   {
-    title: "Match Queue",
-    path: "/match-queue",
-    showLoggedIn: true,
-    showLoggedOut: true,
-    featureFlag: null,
-  },
-  {
     title: "Results",
     path: "/results",
     showLoggedIn: true,
