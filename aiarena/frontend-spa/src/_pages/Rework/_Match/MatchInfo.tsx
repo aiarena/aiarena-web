@@ -46,7 +46,7 @@ export default function MatchInfo(props: MatchInfoProps) {
         }
       }
     `,
-    props.match
+    props.match,
   );
 
   return (
@@ -68,7 +68,7 @@ export default function MatchInfo(props: MatchInfoProps) {
           <dd>
             {match.assignedTo?.username ? (
               <a
-                href={`/users/${getIDFromBase64(match.assignedTo.id, "UserType")}`}
+                href={`/arenaclients/${getIDFromBase64(match.assignedTo.id, "UserType")}`}
                 className="text-customGreen hover:underline"
               >
                 {match.assignedTo.username}
@@ -91,7 +91,7 @@ export default function MatchInfo(props: MatchInfoProps) {
               <a
                 href={`/bots/${getIDFromBase64(
                   match.result.winner.id,
-                  "BotType"
+                  "BotType",
                 )}`}
                 className="text-customGreen hover:underline"
               >
@@ -145,7 +145,7 @@ export default function MatchInfo(props: MatchInfoProps) {
               <dt className="w-32 text-gray-400">Round</dt>
               <dd>
                 <a
-                  href={`/rounds/${getIDFromBase64(match.round?.id, "RoundType")}`}
+                  href={`/rounds/${getIDFromBase64(match.round?.id, "RoundsType")}`}
                   className="text-customGreen hover:underline"
                 >
                   {match.round?.number}
