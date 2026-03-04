@@ -52,7 +52,7 @@ export function BotResultsTbody({
       @argumentDefinitions(
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
-        orderBy: { type: "String", defaultValue: "-id" }
+        orderBy: { type: "String", defaultValue: "-match__result__created" }
         opponentId: { type: "String" }
         opponentPlaysRace: { type: "String" }
         result: { type: "String" }

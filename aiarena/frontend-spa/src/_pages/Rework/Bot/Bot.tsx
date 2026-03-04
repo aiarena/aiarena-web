@@ -63,7 +63,7 @@ export default function Bot() {
 
   const urlOrderBy = useMemo(() => {
     const s = urlSorting?.[0];
-    if (!s) return "-id";
+    if (!s) return "-match__result__created";
     const backendField = BotResultsTableSortingMap[s.id] ?? "id";
     return s.desc ? `-${backendField}` : backendField;
   }, [urlSorting]);
