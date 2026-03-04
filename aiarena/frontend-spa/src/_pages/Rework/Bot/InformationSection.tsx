@@ -63,6 +63,9 @@ export default function InformationSection({ bot }: InformationSectionProps) {
 
   const lastUpdated = data.botZipUpdated ?? data.created;
 
+  const handleDownload = (url: string) => {
+    window.location.href = `/${url}`;
+  };
   return (
     <section aria-labelledby="bot-information-heading" className="mb-8">
       <div
@@ -148,14 +151,17 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                   {data.botZipPubliclyDownloadable ? (
                     <>
                       {hasBotZip ? (
-                        <a href={data.botZip} download="" className="text-sm">
-                          <span className="flex gap-1">
+                        <button
+                          onClick={() => handleDownload(data.botZip)}
+                          className="text-customGreen"
+                        >
+                          <span className="flex gap-1 items-center ">
                             <ArrowDownCircleIcon height={18} /> Download
                           </span>
-                        </a>
+                        </button>
                       ) : (
                         <span className="text-gray-300">No Zip Available</span>
-                      )}{" "}
+                      )}
                     </>
                   ) : (
                     <span className="text-gray-300">Private</span>
