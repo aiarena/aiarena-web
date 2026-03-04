@@ -5,6 +5,7 @@ import { navbarTitle, navLinks } from "@/_data/navbarLinks";
 import clsx from "clsx";
 import BackgroundTexture from "../_display/BackgroundTexture";
 import AuthNavbar from "./AuthNavbar";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
@@ -114,6 +115,7 @@ function Navbar() {
                           <a
                             key={index}
                             href={link.path}
+                            target="_blank"
                             className={clsx(
                               "py-2 text-white border-b-2",
                               window.location.pathname === link.path
@@ -121,7 +123,10 @@ function Navbar() {
                                 : "border-transparent hover:border-customGreen",
                             )}
                           >
-                            {link.title}
+                            <span className="flex items-center justify-center gap-2">
+                              {link.title}
+                              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                            </span>
                           </a>
                         )}
                       </li>
@@ -164,7 +169,10 @@ function Navbar() {
                               : "border-transparent",
                           )}
                         >
-                          {link.title}
+                          <span className="flex items-center justify-center gap-2">
+                            {link.title}
+                            <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                          </span>
                         </a>
                       )}
 
