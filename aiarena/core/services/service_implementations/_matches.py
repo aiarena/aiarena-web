@@ -151,9 +151,7 @@ class Matches:
 
             # Map each match to its participant bot IDs
             match_bot_map = {}
-            for mp in MatchParticipation.objects.filter(match_id__in=available_match_ids).values(
-                "match_id", "bot_id"
-            ):
+            for mp in MatchParticipation.objects.filter(match_id__in=available_match_ids).values("match_id", "bot_id"):
                 match_bot_map.setdefault(mp["match_id"], []).append(mp["bot_id"])
 
             # Identify which available bots have data enabled
