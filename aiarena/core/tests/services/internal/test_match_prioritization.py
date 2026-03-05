@@ -223,16 +223,7 @@ class MatchPrioritizationTests(TestCase):
         started_match = self.matches_service._attempt_to_start_a_ladder_match(self.arenaclient, new_round)
 
         self.assertIsNotNone(started_match)
-        # match_with_old involves bot_data1 (data_enabled=True, 1 data bot) and bot_nodata_old
-        # match_with_recent involves bot_data1 (data_enabled=True, 1 data bot) and bot_nodata_recent
-        # Both have the same data_enabled_count (1).
-        # bot_data1's most recent match was 5 min ago, bot_nodata_old's was 60 min ago
-        # match_with_old: max(5 min ago, 60 min ago) = 5 min ago (timestamp)
-        # match_with_recent: max(5 min ago, 5 min ago) = 5 min ago
-        # Both have the same max timestamp. But since data1's last match is 5 min ago
-        # which is the same for both, the tiebreaker is nodata_old vs nodata_recent.
-        # Actually max(last_end(data1), last_end(nodata_old)) = last_end(data1) since 5 min ago is more recent
-        # And max(last_end(data1), last_end(nodata_recent)) = last_end(data1) for same reason
-        # So they'll be equal. The first match in the list that can start will be chosen.
-        # Both should be valid matches though.
+        # Both matches have one data-enabled bot (bot_data1) whose last match was 5 minutes ago.
+        # Since bot_data1 is shared between both matches, they have identical priority keys
+        # and either may be selected.
         self.assertIn(started_match.id, [match_with_old.id, match_with_recent.id])

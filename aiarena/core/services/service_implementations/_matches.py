@@ -177,8 +177,9 @@ class Matches:
             def match_sort_key(match):
                 bots_in_match = match_bot_map.get(match.id, [])
                 data_enabled_count = sum(1 for b in bots_in_match if b in data_enabled_bot_ids)
-                # Use the most recent last-match time among the two bots.
-                # Sorting ascending means pairs where both bots have been idle the longest come first.
+                # Find the most recent last-match time among the bots in this match.
+                # Ascending sort prioritizes matches where even the most-recently-played
+                # bot has been waiting longer.
                 most_recent_last_match = max(
                     (last_match_end_times.get(b, epoch) for b in bots_in_match),
                     default=epoch,
