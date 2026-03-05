@@ -123,7 +123,7 @@ function Navbar() {
                                 : "border-transparent hover:border-customGreen",
                             )}
                           >
-                            <span className="flex items-center justify-center gap-2">
+                            <span className="flex items-center justify-center gap-1">
                               {link.title}
                               <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                             </span>
@@ -169,7 +169,7 @@ function Navbar() {
                               : "border-transparent",
                           )}
                         >
-                          <span className="flex items-center justify-center gap-2">
+                          <span className="flex items-center justify-center gap-1">
                             {link.title}
                             <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                           </span>
