@@ -1,6 +1,7 @@
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
 import { MatchTagSection_match$key } from "./__generated__/MatchTagSection_match.graphql";
+import useParseUtils from "@/_components/_hooks/useParseUtils";
 
 interface MatchTagSectionProps {
   match: MatchTagSection_match$key;
@@ -24,29 +25,11 @@ export default function MatchTagSection(props: MatchTagSectionProps) {
         }
       }
     `,
-    props.match
+    props.match,
   );
   const tagNodes = getNodes(match.tags);
 
-  // Group tags by user.id
-  const grouped = tagNodes.reduce(
-    (acc, t) => {
-      const userId = t.user?.id ?? "unknown";
-
-      if (!acc[userId]) {
-        acc[userId] = {
-          user: t.user,
-          tags: [],
-        };
-      }
-      acc[userId].tags.push(t);
-      return acc;
-    },
-    {} as Record<
-      string,
-      { user: { id: string; username: string } | null; tags: typeof tagNodes }
-    >
-  );
+  const parseUtils = useParseUtils({ tagNodes });
 
   return (
     <section
@@ -62,7 +45,7 @@ export default function MatchTagSection(props: MatchTagSectionProps) {
       )}
 
       <div className="space-y-6">
-        {Object.values(grouped).map(({ user, tags }) => (
+        {Object.values(parseUtils.grouped).map(({ user, tags }) => (
           <div key={user?.id ?? "unknown"} className="space-y-2">
             <div className="flex items-center gap-2">
               <span className=" font-semibold text-customGreen">

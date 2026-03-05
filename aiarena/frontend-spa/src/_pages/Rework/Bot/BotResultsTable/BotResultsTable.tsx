@@ -36,6 +36,7 @@ import {
   CoreMatchParticipationResultChoices,
 } from "./__generated__/BotResultsTbody_bot.graphql";
 import { BotResultsTableSortingMap } from "./botResultTableSearchParams";
+import TagSummaryWithModal from "./TagSummaryModal";
 
 interface BotResultsTableProps {
   data: BotResultsTbody_bot$key;
@@ -133,6 +134,12 @@ type MatchParticipation = NonNullable<
 type Match = NonNullable<NonNullable<MatchParticipation>["match"]>;
 
 type MatchResult = NonNullable<NonNullable<Match>["result"]>;
+
+type TagNode = NonNullable<NonNullable<MatchParticipation>["match"]>["tags"];
+
+export type Tag = NonNullable<
+  NonNullable<NonNullable<TagNode>["edges"]>[number]
+>["node"];
 
 export default function BotResultsTable(props: BotResultsTableProps) {
   const [sorting, setSorting] = useState<SortingState>(
@@ -378,9 +385,14 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const nodes = getNodes(info.row.original.match.tags);
-          const allTags = nodes.map((it) => it.tag);
-          const tagString = allTags.join(", ");
-          return <span title={tagString}>{tagString}</span>;
+
+          return (
+            <TagSummaryWithModal
+              tagNodes={nodes}
+              previewCount={1}
+              title={`Tags - Match Id: ${getIDFromBase64(info.row.original.match.id, "MatchType")}`}
+            />
+          );
         },
         meta: { priority: 1 },
       }),
