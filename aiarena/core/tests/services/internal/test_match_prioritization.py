@@ -5,14 +5,12 @@ from django.utils import timezone
 
 from aiarena.core.models import (
     ArenaClient,
-    Bot,
     Competition,
     Game,
     GameMode,
     Map,
     Match,
     MatchParticipation,
-    Result,
     Round,
     User,
 )
@@ -102,7 +100,8 @@ class MatchPrioritizationTests(TestCase):
         round_obj = Round.objects.create(competition=self.competition)
         # Create matches: one with data-enabled bots, one without
         match_data = self._create_round_match(round_obj, bot_data1, bot_data2)
-        match_nodata = self._create_round_match(round_obj, bot_nodata1, bot_nodata2)
+        # match_nodata
+        self._create_round_match(round_obj, bot_nodata1, bot_nodata2)
 
         started_match = self.matches_service._attempt_to_start_a_ladder_match(self.arenaclient, round_obj)
 
@@ -131,7 +130,8 @@ class MatchPrioritizationTests(TestCase):
         # Create new round with available matches
         new_round = Round.objects.create(competition=self.competition)
         match_old_bots = self._create_round_match(new_round, bot1, bot2)
-        match_recent_bots = self._create_round_match(new_round, bot3, bot4)
+        # match_recent_bots
+        self._create_round_match(new_round, bot3, bot4)
 
         started_match = self.matches_service._attempt_to_start_a_ladder_match(self.arenaclient, new_round)
 
@@ -147,7 +147,8 @@ class MatchPrioritizationTests(TestCase):
 
         round_obj = Round.objects.create(competition=self.competition)
         match_data_new = self._create_round_match(round_obj, bot_data_new, bot_data_new2)
-        match_nodata = self._create_round_match(round_obj, bot_nodata1, bot_nodata2)
+        # match_nodata
+        self._create_round_match(round_obj, bot_nodata1, bot_nodata2)
 
         started_match = self.matches_service._attempt_to_start_a_ladder_match(self.arenaclient, round_obj)
 
@@ -163,7 +164,8 @@ class MatchPrioritizationTests(TestCase):
 
         round_obj = Round.objects.create(competition=self.competition)
         match_mixed = self._create_round_match(round_obj, bot_data1, bot_nodata1)
-        match_nodata = self._create_round_match(round_obj, bot_nodata2, bot_nodata3)
+        # match_nodata
+        self._create_round_match(round_obj, bot_nodata2, bot_nodata3)
 
         started_match = self.matches_service._attempt_to_start_a_ladder_match(self.arenaclient, round_obj)
 
@@ -191,7 +193,8 @@ class MatchPrioritizationTests(TestCase):
         # Create available matches for the new round
         new_round = Round.objects.create(competition=self.competition)
         match_old_bots = self._create_round_match(new_round, bot_data_old1, bot_data_old2)
-        match_new_bots = self._create_round_match(new_round, bot_data_new1, bot_data_new2)
+        # match_new_bots
+        self._create_round_match(new_round, bot_data_new1, bot_data_new2)
 
         started_match = self.matches_service._attempt_to_start_a_ladder_match(self.arenaclient, new_round)
 
