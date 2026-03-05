@@ -1,8 +1,7 @@
 import logging
-import random
 
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Max
 from django.utils import timezone
 
 from constance import config
@@ -145,7 +144,49 @@ class Matches:
                 else []
             )
 
-            random.shuffle(available_ladder_matches_to_play)  # ensure the match selection is random
+            # Prioritize matches involving bots with data enabled (they can't play concurrent matches)
+            # and bots that have waited the longest since their last match.
+            available_match_ids = [m.id for m in available_ladder_matches_to_play]
+
+            # Map each match to its participant bot IDs
+            match_bot_map = {}
+            for mp in MatchParticipation.objects.filter(match_id__in=available_match_ids).values(
+                "match_id", "bot_id"
+            ):
+                match_bot_map.setdefault(mp["match_id"], []).append(mp["bot_id"])
+
+            # Identify which available bots have data enabled
+            data_enabled_bot_ids = set(
+                Bot.objects.filter(id__in=bot_ids, bot_data_enabled=True).values_list("id", flat=True)
+            )
+
+            # Get the most recent match completion time for each bot
+            last_match_end_times = dict(
+                MatchParticipation.objects.filter(
+                    bot_id__in=bot_ids,
+                    match__result__isnull=False,
+                )
+                .values("bot_id")
+                .annotate(last_end=Max("match__result__created"))
+                .values_list("bot_id", "last_end")
+            )
+
+            # Bots with no previous match get the earliest possible time (highest priority)
+            epoch = timezone.datetime.min.replace(tzinfo=timezone.timezone.utc)
+
+            def match_sort_key(match):
+                bots_in_match = match_bot_map.get(match.id, [])
+                data_enabled_count = sum(1 for b in bots_in_match if b in data_enabled_bot_ids)
+                # Find the most recent last-match time among the bots in this match.
+                # Ascending sort prioritizes matches where even the most-recently-played
+                # bot has been waiting longer.
+                most_recent_last_match = max(
+                    (last_match_end_times.get(b, epoch) for b in bots_in_match),
+                    default=epoch,
+                )
+                return (-data_enabled_count, most_recent_last_match)
+
+            available_ladder_matches_to_play.sort(key=match_sort_key)
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
             if self.bots_service.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
