@@ -59,7 +59,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
   );
 
   const hasBotZip = !!data.botZip;
-  const hasBotData = !!data.botData && data.botDataEnabled;
+  const botData = data.botData;
 
   const lastUpdated = data.botZipUpdated ?? data.created;
 
@@ -153,7 +153,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                       {hasBotZip ? (
                         <button
                           onClick={() => handleDownload(data.botZip)}
-                          className="text-customGreen"
+                          className="text-customGreen hover:text-white"
                         >
                           <span className="flex gap-1 items-center ">
                             <ArrowDownCircleIcon height={18} /> Download
@@ -174,12 +174,15 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                 <dd className="flex-1 text-gray-100">
                   {data.botDataPubliclyDownloadable ? (
                     <>
-                      {hasBotData ? (
-                        <a href={data.botData} download="" className="text-sm">
-                          <span className="flex gap-1">
+                      {botData && data.botDataEnabled ? (
+                        <button
+                          onClick={() => handleDownload(botData)}
+                          className="text-customGreen hover:text-white"
+                        >
+                          <span className="flex gap-1 items-center ">
                             <ArrowDownCircleIcon height={18} /> Download
                           </span>
-                        </a>
+                        </button>
                       ) : (
                         <span className="text-gray-300">No Data Available</span>
                       )}
