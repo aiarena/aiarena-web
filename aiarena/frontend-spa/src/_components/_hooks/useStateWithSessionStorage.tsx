@@ -1,21 +1,20 @@
 import { useState } from "react";
 
-export default function useStateWithLocalStorage<T>(
+export default function useStateWithSessionStorage<T>(
   key: string,
   defaultValue: T | null = null,
 ): [T | null, (value: T | null) => void] {
   const [state, setState] = useState<T | null>(() => {
-    const stored = localStorage.getItem(key);
+    const stored = sessionStorage.getItem(key);
     return stored != null ? (JSON.parse(stored) as T) : defaultValue;
   });
 
   const setStateWithLocalStorage = (value: T | null) => {
     setState(value);
-
     if (value == null) {
-      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
     } else {
-      localStorage.setItem(key, JSON.stringify(value));
+      sessionStorage.setItem(key, JSON.stringify(value));
     }
   };
 
