@@ -36,7 +36,7 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
         ...BotTrophiesModal_bot
       }
     `,
-    props.bot
+    props.bot,
   );
 
   const [isTrophiesModalOpen, setTrophiesModalOpen] = useState(false);
@@ -96,10 +96,10 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
             </p>
 
             {bot.type && (
-              <p className="text-sm text-gray-400 flex gap-2">
+              <span className="text-sm text-gray-400 flex gap-2">
                 <span className="font-bold">Type:</span>
                 <RenderCodeLanguage type={`${bot.type}`} />
-              </p>
+              </span>
             )}
             {bot.botZipUpdated && (
               <p className="text-sm text-gray-400">
