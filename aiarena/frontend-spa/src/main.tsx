@@ -7,12 +7,14 @@ import environment from "@/_lib/RelayEnvironment";
 import { SnackbarProvider } from "notistack";
 import { RelayConnectionIDProvider } from "./_components/_contexts/RelayConnectionIDContext/RelayConnectionIDContext.tsx";
 import { SmartRouter } from "./SmartRouter.tsx";
+import AlwaysScrollToTop from "./_lib/AlwaysScrollToTop.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RelayEnvironmentProvider environment={environment}>
       <RelayConnectionIDProvider>
         <SmartRouter>
+          <AlwaysScrollToTop />
           <SnackbarProvider>
             <App />
           </SnackbarProvider>
