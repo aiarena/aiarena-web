@@ -570,17 +570,23 @@ class MatchParticipationFilterSet(FilterSet):
 
         qs = qs.select_related(
             "bot",
+            "bot__plays_race",
+            "bot__user",
             "match",
             "match__map",
             "match__round",
             "match__round__competition",
             "match__result",
-        )
-
-        qs = qs.prefetch_related(
+            "match__requested_by",
+        ).prefetch_related(
             Prefetch(
                 "match__matchparticipation_set",
-                queryset=models.MatchParticipation.objects.select_related("bot"),
+                queryset=models.MatchParticipation.objects.select_related(
+                    "bot",
+                    "bot__plays_race",
+                    "bot__user",
+                ).order_by("participant_number"),
+                to_attr="prefetched_participations",
             )
         )
 
@@ -822,10 +828,17 @@ class MatchFilterSet(FilterSet):
             "map",
             "round",
             "round__competition",
+            "requested_by",
+            "assigned_to",
         ).prefetch_related(
             Prefetch(
                 "matchparticipation_set",
-                queryset=MatchParticipation.objects.select_related("bot"),
+                queryset=MatchParticipation.objects.select_related(
+                    "bot",
+                    "bot__plays_race",
+                    "bot__user",
+                ).order_by("participant_number"),
+                to_attr="prefetched_participations",
             )
         )
 
@@ -846,12 +859,29 @@ class MatchType(DjangoObjectTypeWithUID):
         connection_class = CountingConnection
 
     @staticmethod
-    def resolve_participant1(root: models.Match, info, **args):
-        return root.participant1.bot
+    def _get_participation(root: models.Match, participant_number: int):
+        participations = getattr(root, "prefetched_participations", None)
+        if participations is not None:
+            for p in participations:
+                if p.participant_number == participant_number:
+                    return p
+            return None
 
-    @staticmethod
-    def resolve_participant2(root: models.Match, info, **args):
-        return root.participant2.bot
+        return (
+            root.matchparticipation_set.select_related("bot", "bot__plays_race", "bot__user")
+            .filter(participant_number=participant_number)
+            .first()
+        )
+
+    @classmethod
+    def resolve_participant1(cls, root: models.Match, info, **args):
+        participation = cls._get_participation(root, 1)
+        return participation.bot if participation else None
+
+    @classmethod
+    def resolve_participant2(cls, root: models.Match, info, **args):
+        participation = cls._get_participation(root, 2)
+        return participation.bot if participation else None
 
     @staticmethod
     def resolve_status(root: models.Match, info, **args):
