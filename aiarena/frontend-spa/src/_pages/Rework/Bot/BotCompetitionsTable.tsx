@@ -18,12 +18,13 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { parseSort, withAtag } from "@/_lib/tanstack_utils";
+import { parseSort } from "@/_lib/tanstack_utils";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import LoadingDots from "@/_components/_display/LoadingDots";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
+import { Link } from "react-router";
 
 interface BotCompetitionsTableProps {
   bot: BotCompetitionsTable_bot$key;
@@ -96,12 +97,26 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
         id: "name",
         header: "Competition",
         enableSorting: false,
-        cell: (info) =>
-          withAtag(
-            info.getValue(),
-            `/competitions/${getIDFromBase64(info.row.original.competition.id, "CompetitionType")}`,
-            `View competition ${info.row.original.competition.name}`,
-          ),
+        cell: (info) => {
+          const label = info.getValue();
+          const href = `/competitions/${getIDFromBase64(info.row.original.competition.id, "CompetitionType")}`;
+          const aria = `View competition ${info.row.original.competition.name}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
+          );
+        },
+
         meta: { priority: 1 },
         size: 350,
       }),
@@ -159,10 +174,22 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
         header: "Stats",
         enableSorting: false,
         cell: (info) => {
-          return withAtag(
-            "View Stats",
-            `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`,
-            `View stats ${info.getValue()}`,
+          const label = "View Stats";
+          const href = `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`;
+          const aria = `View stats ${info.getValue()}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
           );
         },
         meta: { priority: 1 },

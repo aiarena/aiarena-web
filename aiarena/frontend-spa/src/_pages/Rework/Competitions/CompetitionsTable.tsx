@@ -17,7 +17,7 @@ import {
   useTransition,
 } from "react";
 
-import { parseSort, withAtag } from "@/_lib/tanstack_utils";
+import { parseSort } from "@/_lib/tanstack_utils";
 
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
@@ -30,6 +30,7 @@ import {
   CompetitionsTable$data,
   CompetitionsTable$key,
 } from "./__generated__/CompetitionsTable.graphql";
+import { Link } from "react-router";
 
 interface CompetitionsTableProps {
   data: CompetitionsTable$key;
@@ -66,7 +67,7 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   type CompetitionType = NonNullable<
@@ -79,7 +80,7 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
   const [isPending] = useTransition();
   const matchData = useMemo(
     () => getNodes<CompetitionType>(data?.closedCompetitions),
-    [data]
+    [data],
   );
 
   const columnHelper = createColumnHelper<CompetitionType>();
@@ -89,12 +90,27 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
       columnHelper.accessor((row) => row.id, {
         id: "id",
         header: "ID",
-        cell: (info) =>
-          withAtag(
-            getIDFromBase64(info.getValue(), "CompetitionType") || "",
-            `/competitions/${getIDFromBase64(info.getValue(), "CompetitionType")}`,
-            `View competition details for Competition ID ${getIDFromBase64(info.getValue(), "CompetitionType")}}`
-          ),
+        cell: (info) => {
+          const label =
+            getIDFromBase64(info.getValue(), "CompetitionType") || "";
+          const href = `/competitions/${getIDFromBase64(info.getValue(), "CompetitionType")}`;
+          const aria = `View competition details for Competition ID ${getIDFromBase64(info.getValue(), "CompetitionType")}}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                target="_blank"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
+          );
+        },
 
         meta: { priority: 1 },
       }),
@@ -103,11 +119,22 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
         header: "Name",
         cell: (info) => {
           const name = info.row.original.name;
+          const label = name || "";
+          const href = `/competitions/${getIDFromBase64(info.row.original.id, "CompetitionType")}`;
+          const aria = `View competition details for Competition ${name}`;
 
-          return withAtag(
-            name || "",
-            `/competitions/${getIDFromBase64(info.row.original.id, "CompetitionType")}`,
-            `View competition details for Competition ${name}`
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
           );
         },
         meta: { priority: 1 },
@@ -139,7 +166,7 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);

@@ -11,13 +11,14 @@ import {
   MatchupStatsTable_node$data,
   MatchupStatsTable_node$key,
 } from "./__generated__/MatchupStatsTable_node.graphql";
-import { parseSort, withAtag } from "@/_lib/tanstack_utils";
+import { parseSort } from "@/_lib/tanstack_utils";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import { RenderRace } from "@/_components/_display/RenderRace";
+import { Link } from "react-router";
 
 interface MatchupStatsTableProps {
   data: MatchupStatsTable_node$key;
@@ -70,7 +71,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   type MatchupStatsType = NonNullable<
@@ -83,7 +84,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
 
   const matchupStatsData = useMemo(
     () => getNodes<MatchupStatsType>(data?.competitionMatchupStats),
-    [data]
+    [data],
   );
 
   const columnHelper = createColumnHelper<MatchupStatsType>();
@@ -93,12 +94,26 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
       columnHelper.accessor((row) => row.opponent.bot.name, {
         id: "opponent",
         header: "Opponent",
-        cell: (info) =>
-          withAtag(
-            info.getValue(),
-            `/bots/${getIDFromBase64(info.row.original.opponent.bot.id, "BotType")}`,
-            `View bot profile for ${info.getValue()}`
-          ),
+        cell: (info) => {
+          const label = info.getValue();
+          const href = `/bots/${getIDFromBase64(info.row.original.opponent.bot.id, "BotType")}`;
+          const aria = `View bot profile for ${info.getValue()}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
+          );
+        },
+
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.opponent.bot.playsRace.name ?? "", {
@@ -181,7 +196,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
         size: 95,
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);

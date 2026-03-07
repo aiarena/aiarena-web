@@ -13,8 +13,6 @@ import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
 
-import { withAtag } from "@/_lib/tanstack_utils";
-
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
@@ -29,6 +27,7 @@ import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
 import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
 import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router";
 
 interface ResultsTableProps {
   data: ResultsTable_node$key;
@@ -84,7 +83,7 @@ export default function ResultsTable(props: ResultsTableProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
   console.log(data);
   type ResultType = NonNullable<
@@ -105,12 +104,20 @@ export default function ResultsTable(props: ResultsTableProps) {
         id: "id",
         header: "ID",
         enableSorting: false,
-        cell: (info) =>
-          withAtag(
-            getIDFromBase64(info.getValue(), "MatchType") || "",
-            `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`,
-            `View match details for Result ID ${info.getValue()}`
-          ),
+        cell: (info) => {
+          const label = getIDFromBase64(info.getValue(), "MatchType") || "";
+          return (
+            <Link
+              className="font-semibold text-gray-200 truncate mr-2"
+              to={`/matches/${getIDFromBase64(info.getValue(), "MatchType")}`}
+              role="cell"
+              aria-label={`View match details for Result ID ${info.getValue()}`}
+              title={`${label}`}
+            >
+              {label}
+            </Link>
+          );
+        },
 
         meta: { priority: 1 },
       }),
@@ -122,14 +129,9 @@ export default function ResultsTable(props: ResultsTableProps) {
           const participant1 = info.row.original.participant1;
           const display_value = formatWinnerName(
             info.row.original.winner?.name,
-            participant1?.bot.name
+            participant1?.bot.name,
           );
-
-          return withAtag(
-            participant1?.bot.name || "",
-            `/bots/${getIDFromBase64(info.row.original.participant1?.bot.id, "BotType")}`,
-            `View bot profile for ${participant1?.bot.name}, Bot`,
-            display_value,
+          const appendOnEnd = (
             <span
               className={clsx({
                 "text-red-400":
@@ -137,6 +139,22 @@ export default function ResultsTable(props: ResultsTableProps) {
               })}
             >
               {participant1?.eloChange}
+            </span>
+          );
+          const children = display_value;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={`/bots/${getIDFromBase64(info.row.original.participant1?.bot.id, "BotType")}`}
+                role="cell"
+                aria-label={`View bot profile for ${participant1?.bot.name}, Bot`}
+                title={`${participant1?.bot.name || ""}`}
+              >
+                {children ? children : participant1?.bot.name || ""}
+              </Link>
+              {appendOnEnd}
             </span>
           );
         },
@@ -152,14 +170,10 @@ export default function ResultsTable(props: ResultsTableProps) {
 
           const display_value = formatWinnerName(
             info.row.original?.winner?.name,
-            info.row.original.participant2?.bot.name
+            info.row.original.participant2?.bot.name,
           );
 
-          return withAtag(
-            participant2?.bot.name || "",
-            `/bots/${getIDFromBase64(participant2?.bot.id, "BotType")}`,
-            `View bot profile for ${participant2?.bot.name}, Opponent`,
-            display_value,
+          const appendOnEnd = (
             <span
               className={clsx({
                 "text-red-400":
@@ -167,6 +181,22 @@ export default function ResultsTable(props: ResultsTableProps) {
               })}
             >
               {participant2?.eloChange}
+            </span>
+          );
+          const children = display_value;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={`/bots/${getIDFromBase64(info.row.original.participant1?.bot.id, "BotType")}`}
+                role="cell"
+                aria-label={`View bot profile for ${participant2?.bot.name}, Bot`}
+                title={`${participant2?.bot.name || ""}`}
+              >
+                {children ? children : participant2?.bot.name || ""}
+              </Link>
+              {appendOnEnd}
             </span>
           );
         },
@@ -181,7 +211,7 @@ export default function ResultsTable(props: ResultsTableProps) {
           const getResult = getMatchResultParsed(
             info.getValue(),
             info.row.original.participant1?.bot.name,
-            info.row.original.participant2?.bot.name
+            info.row.original.participant2?.bot.name,
           );
           return getResult != "" ? getResult : "In Queue";
         },
@@ -215,12 +245,27 @@ export default function ResultsTable(props: ResultsTableProps) {
           if (!replayFile) {
             return "";
           }
-          return withAtag(
-            "Download",
-            `${replayFile}`,
-            `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}`,
+
+          const label = "Download";
+          const href = `${replayFile}`;
+          const aria = `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}`;
+          const children = (
             <span className="flex items-center gap-1">
               <ArrowDownCircleIcon height={18} /> Replay
+            </span>
+          );
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {children ? children : label}
+              </Link>
             </span>
           );
         },
@@ -228,7 +273,7 @@ export default function ResultsTable(props: ResultsTableProps) {
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);

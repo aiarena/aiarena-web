@@ -16,8 +16,8 @@ import LoadingDots from "@/_components/_display/LoadingDots";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
-import { withAtag } from "@/_lib/tanstack_utils";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
+import { Link } from "react-router";
 
 interface CompetitionRoundsModalProps {
   competition: CompetitionRoundsModal_competition$key;
@@ -27,7 +27,7 @@ interface CompetitionRoundsModalProps {
 }
 
 export default function CompetitionRoundsModal(
-  props: CompetitionRoundsModalProps
+  props: CompetitionRoundsModalProps,
 ) {
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
@@ -51,7 +51,7 @@ export default function CompetitionRoundsModal(
         }
       }
     `,
-    props.competition
+    props.competition,
   );
 
   type ParticipationType = NonNullable<
@@ -64,7 +64,7 @@ export default function CompetitionRoundsModal(
 
   const competitionData = useMemo(
     () => getNodes<ParticipationType>(data?.rounds),
-    [data]
+    [data],
   );
 
   const columnHelper = createColumnHelper<ParticipationType>();
@@ -75,12 +75,26 @@ export default function CompetitionRoundsModal(
         id: "id",
         header: "Id",
         enableSorting: false,
-        cell: (info) =>
-          withAtag(
-            `Round ${info.getValue()}`,
-            `/rounds/${getIDFromBase64(info.row.original.id, "RoundsType")}`,
-            `View round ${info.row.original.number}`
-          ),
+        cell: (info) => {
+          const label = `Round ${info.getValue()}`;
+          const href = `/rounds/${getIDFromBase64(info.row.original.id, "RoundsType")}`;
+          const aria = `View round ${info.row.original.number}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
+          );
+        },
+
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.started ?? "--", {
@@ -98,7 +112,7 @@ export default function CompetitionRoundsModal(
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(10), hasNext);

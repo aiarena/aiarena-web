@@ -11,7 +11,7 @@ import clsx from "clsx";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { parseSort, withAtag } from "@/_lib/tanstack_utils";
+import { parseSort } from "@/_lib/tanstack_utils";
 
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
 
@@ -37,6 +37,7 @@ import {
 } from "./__generated__/BotResultsTbody_bot.graphql";
 import { BotResultsTableSortingMap } from "./botResultTableSearchParams";
 import TagSummaryWithModal from "./TagSummaryModal";
+import { Link } from "react-router";
 
 interface BotResultsTableProps {
   data: BotResultsTbody_bot$key;
@@ -194,12 +195,25 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         id: "id",
         header: "ID",
         enableSorting: true,
-        cell: (info) =>
-          withAtag(
-            getIDFromBase64(info.getValue(), "MatchType") || "",
-            `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`,
-            `View match details for Match ID ${info.getValue()}`,
-          ),
+        cell: (info) => {
+          const label = getIDFromBase64(info.getValue(), "MatchType") || "";
+          const href = `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`;
+          const aria = `View match details for Match ID ${getIDFromBase64(info.getValue(), "MatchType")}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
+          );
+        },
         meta: { priority: 1 },
         size: 50,
       }),
@@ -222,10 +236,22 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               bot,
             )?.opponent;
 
-            return withAtag(
-              opponent?.name || "",
-              `/bots/${getIDFromBase64(opponent?.id, "BotType")}`,
-              `View bot profile for ${opponent?.name}, Bot`,
+            const label = opponent?.name || "";
+            const href = `/bots/${getIDFromBase64(opponent?.id, "BotType")}`;
+            const aria = `View bot profile for ${opponent?.name}, Bot`;
+
+            return (
+              <span className="flex justify-between">
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={href}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  {label}
+                </Link>
+              </span>
             );
           },
           meta: { priority: 1 },
@@ -340,16 +366,30 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         enableSorting: false,
         cell: (info) => {
           if (info.getValue()) {
-            return withAtag(
-              "Download",
-              `${info.getValue()}`,
-              `Download replay file for Match ${info.row.original.match.id}`,
+            const label = "Download";
+            const href = `${info.getValue()}`;
+            const aria = `Download replay file for Match ${info.row.original.match.id}`;
+            const children = (
               <span className="flex items-center align-middle gap-1">
                 <span className="flex h-[25px] w-[25px] items-center align-middle">
                   <ArrowDownCircleIcon height={18} width={18} />
                 </span>
                 Replay
-              </span>,
+              </span>
+            );
+
+            return (
+              <span className="flex justify-between">
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={href}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  {children ? children : label}
+                </Link>
+              </span>
             );
           }
         },
@@ -363,16 +403,30 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         enableSorting: false,
         cell: (info) => {
           if (info.getValue() != "") {
-            return withAtag(
-              "Download",
-              `/${info.getValue()}`,
-              `Download match log for Match ${info.row.original.match.id}`,
+            const label = "Download";
+            const href = `/${info.getValue()}`;
+            const aria = `Download match log for Match ${info.row.original.match.id}`;
+            const children = (
               <span className="flex items-center align-middle gap-1">
                 <span className="flex h-[25px] w-[25px] items-center align-middle">
                   <ArrowDownCircleIcon height={18} width={18} />
                 </span>
                 Log
-              </span>,
+              </span>
+            );
+
+            return (
+              <span className="flex justify-between">
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={href}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  {children ? children : label}
+                </Link>
+              </span>
             );
           }
         },

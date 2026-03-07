@@ -9,8 +9,6 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
 import { Suspense, useMemo } from "react";
 
-import { withAtag } from "@/_lib/tanstack_utils";
-
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import { TableContainer } from "@/_components/_actions/TableContainer";
@@ -22,6 +20,7 @@ import {
 } from "./__generated__/AuthorBotsTable_user.graphql";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
+import { Link } from "react-router";
 
 interface AuthorBotsTableProps {
   data: AuthorBotsTable_user$key;
@@ -73,7 +72,7 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   type BotType = NonNullable<
@@ -92,12 +91,25 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
         id: "name",
         header: "Name",
         enableSorting: false,
-        cell: (info) =>
-          withAtag(
-            info.getValue(),
-            `/bots/${getIDFromBase64(info.row.original.id, "BotType")}`,
-            `View bot profile for ${info.getValue()}`
-          ),
+        cell: (info) => {
+          const label = info.getValue();
+          const href = `/bots/${getIDFromBase64(info.row.original.id, "BotType")}`;
+          const aria = `View bot profile for ${info.getValue()}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
+          );
+        },
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => getNodes(row.trophies).length ?? "", {
@@ -122,7 +134,7 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);

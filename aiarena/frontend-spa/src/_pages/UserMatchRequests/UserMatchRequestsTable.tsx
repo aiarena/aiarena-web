@@ -13,7 +13,7 @@ import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
 
-import { parseSort, withAtag } from "@/_lib/tanstack_utils";
+import { parseSort } from "@/_lib/tanstack_utils";
 
 import {
   UserMatchRequestsTable_viewer$data,
@@ -29,13 +29,14 @@ import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
+import { Link } from "react-router";
 
 interface UserMatchRequestsTableProps {
   viewer: UserMatchRequestsTable_viewer$key;
 }
 
 export default function UserMatchRequestsTable(
-  props: UserMatchRequestsTableProps
+  props: UserMatchRequestsTableProps,
 ) {
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
@@ -90,12 +91,12 @@ export default function UserMatchRequestsTable(
         }
       }
     `,
-    props.viewer
+    props.viewer,
   );
 
   useRegisterConnectionID(
     CONNECTION_KEYS.UserMatchRequestsConnection,
-    data?.requestedMatches?.__id
+    data?.requestedMatches?.__id,
   );
 
   type MatchType = NonNullable<
@@ -110,7 +111,7 @@ export default function UserMatchRequestsTable(
   const [isPending, startTransition] = useTransition();
   const matchData = useMemo(
     () => getNodes<MatchType>(data?.requestedMatches),
-    [data]
+    [data],
   );
 
   const columnHelper = createColumnHelper<MatchType>();
@@ -120,12 +121,25 @@ export default function UserMatchRequestsTable(
       columnHelper.accessor((row) => row.id, {
         id: "id",
         header: "ID",
-        cell: (info) =>
-          withAtag(
-            getIDFromBase64(info.getValue(), "MatchType") || "",
-            `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`,
-            `View match details for match ID ${info.getValue()}`
-          ),
+        cell: (info) => {
+          const label = getIDFromBase64(info.getValue(), "MatchType") || "";
+          const href = `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`;
+          const aria = `View match details for match ID ${info.getValue()}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
+          );
+        },
 
         meta: { priority: 1 },
       }),
@@ -136,14 +150,26 @@ export default function UserMatchRequestsTable(
           const participant1 = info.row.original.participant1;
           const display_value = formatWinnerName(
             info.row.original.result?.winner?.name,
-            participant1?.name
+            participant1?.name,
           );
 
-          return withAtag(
-            participant1?.name || "",
-            `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`,
-            `View bot profile for ${participant1?.name}, Bot`,
-            display_value
+          const label = participant1?.name || "";
+          const href = `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`;
+          const aria = `View bot profile for ${participant1?.name}, Bot`;
+          const children = display_value;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {children ? children : label}
+              </Link>
+            </span>
           );
         },
         meta: { priority: 1 },
@@ -156,14 +182,26 @@ export default function UserMatchRequestsTable(
 
           const display_value = formatWinnerName(
             info.row.original.result?.winner?.name,
-            info.row.original.participant2?.name
+            info.row.original.participant2?.name,
           );
 
-          return withAtag(
-            participant2?.name || "",
-            `/bots/${getIDFromBase64(participant2?.id, "BotType")}`,
-            `View bot profile for ${participant2?.name}, Opponent`,
-            display_value
+          const label = participant2?.name || "";
+          const href = `/bots/${getIDFromBase64(participant2?.id, "BotType")}`;
+          const aria = `View bot profile for ${participant2?.name}, Opponent`;
+          const children = display_value;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {children ? children : label}
+              </Link>
+            </span>
           );
         },
 
@@ -181,7 +219,7 @@ export default function UserMatchRequestsTable(
         cell: (info) => {
           const tags = info.getValue();
           const filtered = tags.filter((tag) =>
-            onlyMyTags ? tag.user.id === data?.user?.id : true
+            onlyMyTags ? tag.user.id === data?.user?.id : true,
           );
           return filtered.map((tag) => tag?.tag).join(", ");
         },
@@ -204,7 +242,7 @@ export default function UserMatchRequestsTable(
           const getResult = getMatchResultParsed(
             info.getValue(),
             info.row.original.participant1?.name,
-            info.row.original.participant2?.name
+            info.row.original.participant2?.name,
           );
           return getResult != "" ? getResult : "In Queue";
         },
@@ -212,7 +250,7 @@ export default function UserMatchRequestsTable(
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper, data?.user?.id, onlyMyTags]
+    [columnHelper, data?.user?.id, onlyMyTags],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);

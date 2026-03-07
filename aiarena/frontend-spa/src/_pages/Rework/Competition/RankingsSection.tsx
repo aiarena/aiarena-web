@@ -7,7 +7,6 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { withAtag } from "@/_lib/tanstack_utils";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import LoadingDots from "@/_components/_display/LoadingDots";
 import { TableContainer } from "@/_components/_actions/TableContainer";
@@ -21,6 +20,7 @@ import EloTrendIcon from "@/_components/_display/EloTrendIcon";
 import BotIcon from "@/_components/_display/BotIcon";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
+import { Link } from "react-router";
 
 interface RankingsSectionProps {
   competition: RankingsSection_competition$key;
@@ -85,12 +85,12 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         }
       }
     `,
-    competition
+    competition,
   );
 
   const rankingsData = useMemo(
     () => getNodes<ParticipationType>(data?.participants),
-    [data]
+    [data],
   );
 
   const tableData: RankingsRow[] = useMemo(() => {
@@ -148,10 +148,23 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           if (original.__kind !== "participant") return null;
 
           const bot = original.bot;
-          return withAtag(
-            bot.name ?? "",
-            `/bots/${getIDFromBase64(bot.id, "BotType")}`,
-            `View bot profile for ${bot.name}`
+
+          const label = bot.name ?? "";
+          const href = `/bots/${getIDFromBase64(bot.id, "BotType")}`;
+          const aria = `View bot profile for ${bot.name}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
           );
         },
         meta: { priority: 1 },
@@ -215,12 +228,27 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           if (original.__kind !== "participant") return null;
 
           const user = original.bot.user;
-          return withAtag(
-            "",
-            `/authors/${getIDFromBase64(user.id, "UserType")}`,
-            `View user profile for ${user.username}`,
+
+          const label = "";
+          const href = `/authors/${getIDFromBase64(user.id, "UserType")}`;
+          const aria = `View user profile for ${user.username}`;
+          const children = (
             <span className="flex gap-1 items-center">
               <BotIcon user={user} /> {user.username}
+            </span>
+          );
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {children ? children : label}
+              </Link>
             </span>
           );
         },
@@ -250,20 +278,33 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           const original = info.row.original;
           if (original.__kind !== "participant") return null;
 
-          // return <StatsButton id={original.id} />;
-          return withAtag(
-            "View Stats",
-            `/competitions/stats/${getIDFromBase64(
-              original.id,
-              "CompetitionParticipationType"
-            )}`,
-            `View stats ${original.id}`
+          const label = "View Stats";
+          const href = `/competitions/stats/${getIDFromBase64(
+            original.id,
+            "CompetitionParticipationType",
+          )}`;
+          const aria = `View stats ${original.id}`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
           );
+
+          // return <StatsButton id={original.id} />;
         },
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);

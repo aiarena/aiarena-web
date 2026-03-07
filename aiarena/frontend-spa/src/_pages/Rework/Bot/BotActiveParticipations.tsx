@@ -11,7 +11,7 @@ export default function BotActiveParticipations({ bot }: Props) {
   const data = useFragment(
     graphql`
       fragment BotActiveParticipations_bot on BotType {
-        activeCompetitions: competitionParticipations(first: 50, active: true) {
+        activeCompetitions: competitionParticipations(active: true) {
           edges {
             node {
               id
@@ -24,7 +24,7 @@ export default function BotActiveParticipations({ bot }: Props) {
     bot,
   );
   const competitions = getNodes(data.activeCompetitions);
-  console.log(data);
+
   return (
     <div className="grid gap-1">
       <h3 className="col-span-1 text-sm font-semibold tracking-wide text-gray-400 uppercase mb-3">

@@ -213,7 +213,7 @@ export default function Bot() {
         </Suspense>
       </div>
       <h4 className="mb-4 mt-8">Results</h4>
-      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+      <Suspense key={botId} fallback={<LoadingSpinner color="light-gray" />}>
         <BotResultsTable
           data={resultData.node}
           onApplyFilters={applyFiltersToUrl}

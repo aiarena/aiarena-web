@@ -10,8 +10,6 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import { Suspense, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
-import { withAtag } from "@/_lib/tanstack_utils";
-
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
@@ -25,6 +23,7 @@ import {
   RoundsTable_round$data,
   RoundsTable_round$key,
 } from "./__generated__/RoundsTable_round.graphql";
+import { Link } from "react-router";
 
 interface RoundsTableProps {
   data: RoundsTable_round$key;
@@ -70,7 +69,7 @@ export default function RoundsTable(props: RoundsTableProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   type MatchType = NonNullable<
@@ -90,13 +89,25 @@ export default function RoundsTable(props: RoundsTableProps) {
         id: "id",
         header: "Match ID",
         enableSorting: false,
-        cell: (info) =>
-          withAtag(
-            getIDFromBase64(info.getValue(), "MatchType") || "",
-            `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`,
-            `View match details for Match ID ${info.getValue()}`
-          ),
+        cell: (info) => {
+          const label = getIDFromBase64(info.getValue(), "MatchType") || "";
+          const href = `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`;
+          const aria = `View match details for Match ID ${info.getValue()}`;
 
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
+          );
+        },
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.participant1?.name || "", {
@@ -104,10 +115,22 @@ export default function RoundsTable(props: RoundsTableProps) {
         header: "Bot 1",
         enableSorting: false,
         cell: (info) => {
-          return withAtag(
-            info.getValue() || "",
-            `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`,
-            `View bot profile for ${info.getValue()}, Bot`
+          const label = info.getValue() || "";
+          const href = `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`;
+          const aria = `View bot profile for ${info.getValue()}, Bot`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
           );
         },
         meta: { priority: 1 },
@@ -118,10 +141,22 @@ export default function RoundsTable(props: RoundsTableProps) {
         header: "Bot 2",
         enableSorting: false,
         cell: (info) => {
-          return withAtag(
-            info.getValue() || "",
-            `/bots/${getIDFromBase64(info.row.original.participant2?.id, "BotType")}`,
-            `View bot profile for ${info.getValue()}, Bot`
+          const label = info.getValue() || "";
+          const href = `/bots/${getIDFromBase64(info.row.original.participant2?.id, "BotType")}`;
+          const aria = `View bot profile for ${info.getValue()}, Bot`;
+
+          return (
+            <span className="flex justify-between">
+              <Link
+                className="font-semibold text-gray-200 truncate mr-2"
+                to={href}
+                role="cell"
+                aria-label={aria}
+                title={`${label}`}
+              >
+                {label}
+              </Link>
+            </span>
           );
         },
         meta: { priority: 1 },
@@ -168,10 +203,22 @@ export default function RoundsTable(props: RoundsTableProps) {
         cell: (info) => {
           const status = info.row.original.status;
           if (status === "Finished") {
-            return withAtag(
-              info.row.original.assignedTo?.username || "",
-              `/bots/${getIDFromBase64(info.row.original.assignedTo?.id, "UserType")}`,
-              `Visit userprofile for ${info.row.original.assignedTo?.id}`
+            const label = info.row.original.assignedTo?.username || "";
+            const href = `/bots/${getIDFromBase64(info.row.original.assignedTo?.id, "UserType")}`;
+            const aria = `Visit userprofile for ${info.row.original.assignedTo?.id}`;
+
+            return (
+              <span className="flex justify-between">
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={href}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  {label}
+                </Link>
+              </span>
             );
           } else if (status === "Started") {
             return "In Progress...";
@@ -185,7 +232,7 @@ export default function RoundsTable(props: RoundsTableProps) {
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
