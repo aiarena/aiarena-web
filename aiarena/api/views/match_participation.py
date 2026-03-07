@@ -18,7 +18,7 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     Result data view
     """
 
-    queryset = MatchParticipation.objects.all().select_related("bot", "bot__user")
+    queryset = MatchParticipation.objects.all().select_related("match", "bot", "bot__user")
     serializer_class = MatchParticipationSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
