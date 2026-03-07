@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 import { startTransition, useEffect, useMemo, useState } from "react";
 import { TableContainer } from "@/_components/_actions/TableContainer";
@@ -19,12 +20,19 @@ import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface MatchupStatsTableProps {
   data: MatchupStatsTable_node$key;
 }
 
 export default function MatchupStatsTable(props: MatchupStatsTableProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "CompetitionParticipation_MatchupStatsTable_ColumnVisibility",
+      {},
+    );
+
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment MatchupStatsTable_node on CompetitionParticipationType
@@ -229,11 +237,22 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
     state: {
       sorting,
+      columnVisibility: columnVisibility ?? {},
     },
 
     onSortingChange: setSorting,
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
   const hasItems = matchupStatsData.length > 0;
   return (

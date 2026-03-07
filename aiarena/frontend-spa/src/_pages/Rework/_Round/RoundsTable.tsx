@@ -3,6 +3,7 @@ import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
@@ -24,12 +25,18 @@ import {
   RoundsTable_round$key,
 } from "./__generated__/RoundsTable_round.graphql";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface RoundsTableProps {
   data: RoundsTable_round$key;
 }
 
 export default function RoundsTable(props: RoundsTableProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Round_RoundsTable_ColumnVisibility",
+      {},
+    );
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
       fragment RoundsTable_round on RoundsType
@@ -244,6 +251,20 @@ export default function RoundsTable(props: RoundsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
+    state: {
+      columnVisibility: columnVisibility ?? {},
+    },
+
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = roundsData.length > 0;

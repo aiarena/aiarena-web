@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
@@ -31,12 +32,19 @@ import {
   CompetitionsTable$key,
 } from "./__generated__/CompetitionsTable.graphql";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface CompetitionsTableProps {
   data: CompetitionsTable$key;
 }
 
 export default function CompetitionsTable(props: CompetitionsTableProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Competitions_CompetitionsTable_ColumnVisibility",
+      {},
+    );
+
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment CompetitionsTable on Query
@@ -201,11 +209,22 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
     columnResizeMode: "onChange",
     manualSorting: true,
 
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
     state: {
       sorting,
+      columnVisibility: columnVisibility ?? {},
     },
 
     onSortingChange: setSorting,
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = matchData.length > 0;

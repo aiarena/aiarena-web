@@ -84,12 +84,11 @@ export function TableContainer<T>({
                     <input
                       type="checkbox"
                       checked={column.getIsVisible()}
-                      onChange={
-                        visibleColumnCount == 1 && column.getIsVisible()
-                          ? undefined
-                          : column.getToggleVisibilityHandler()
+                      onChange={column.getToggleVisibilityHandler()}
+                      disabled={
+                        !column.getCanHide() ||
+                        (visibleColumnCount === 1 && column.getIsVisible())
                       }
-                      disabled={!column.getCanHide()}
                       className="accent-customGreen"
                     />
                     <span>

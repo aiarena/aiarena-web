@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
@@ -30,6 +31,7 @@ import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface UserMatchRequestsTableProps {
   viewer: UserMatchRequestsTable_viewer$key;
@@ -38,6 +40,12 @@ interface UserMatchRequestsTableProps {
 export default function UserMatchRequestsTable(
   props: UserMatchRequestsTableProps,
 ) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "UserMatchRequests_UserMatchRequestsTable_ColumnVisibility",
+      {},
+    );
+
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment UserMatchRequestsTable_viewer on Viewer
@@ -279,12 +287,22 @@ export default function UserMatchRequestsTable(
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
-
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
     state: {
       sorting,
+      columnVisibility: columnVisibility ?? {},
     },
 
     onSortingChange: setSorting,
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = matchData.length > 0;

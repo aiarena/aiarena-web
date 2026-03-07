@@ -17,6 +17,7 @@ import {
   getCoreRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 import { parseSort } from "@/_lib/tanstack_utils";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
@@ -25,6 +26,7 @@ import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface BotCompetitionsTableProps {
   bot: BotCompetitionsTable_bot$key;
@@ -33,6 +35,12 @@ interface BotCompetitionsTableProps {
 }
 
 export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Bot_BotCompetitionTable_ColumnVisibility",
+      {},
+    );
+
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment BotCompetitionsTable_bot on BotType
@@ -220,11 +228,22 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
     state: {
       sorting,
+      columnVisibility: columnVisibility ?? {},
     },
 
     onSortingChange: setSorting,
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = competitionData.length > 0;

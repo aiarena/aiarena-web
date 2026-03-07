@@ -3,6 +3,7 @@ import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
@@ -21,12 +22,19 @@ import {
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface AuthorBotsTableProps {
   data: AuthorBotsTable_user$key;
 }
 
 export default function AuthorBotsTable(props: AuthorBotsTableProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Author_AuthorBotsTable_ColumnVisibility",
+      {},
+    );
+
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
       fragment AuthorBotsTable_user on UserType
@@ -146,6 +154,20 @@ export default function AuthorBotsTable(props: AuthorBotsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
+    state: {
+      columnVisibility: columnVisibility ?? {},
+    },
+
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = botData.length > 0;

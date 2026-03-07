@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
@@ -31,6 +32,7 @@ import {
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface BotsTableProps {
   data: BotsTable_node$key;
@@ -40,6 +42,12 @@ interface BotsTableProps {
 }
 
 export default function BotsTable(props: BotsTableProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Bots_BotsTable_ColumnVisibility",
+      {},
+    );
+
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment BotsTable_node on Query
@@ -192,12 +200,22 @@ export default function BotsTable(props: BotsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
-
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
     state: {
       sorting,
+      columnVisibility: columnVisibility ?? {},
     },
 
     onSortingChange: setSorting,
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = botData.length > 0;

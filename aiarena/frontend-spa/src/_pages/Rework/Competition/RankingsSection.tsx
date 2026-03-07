@@ -6,6 +6,7 @@ import {
   getCoreRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import LoadingDots from "@/_components/_display/LoadingDots";
@@ -21,6 +22,7 @@ import BotIcon from "@/_components/_display/BotIcon";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface RankingsSectionProps {
   competition: RankingsSection_competition$key;
@@ -48,6 +50,11 @@ type DivisionHeaderRow = {
 export type RankingsRow = ParticipantRow | DivisionHeaderRow;
 
 export default function RankingsSection({ competition }: RankingsSectionProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Competition_RankingsSection_ColumnVisibility",
+      {},
+    );
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
       fragment RankingsSection_competition on CompetitionType
@@ -317,12 +324,21 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
-
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
     state: {
       sorting,
+      columnVisibility: columnVisibility ?? {},
     },
-
     onSortingChange: setSorting,
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = rankingsData.length > 0;

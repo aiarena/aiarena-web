@@ -3,6 +3,7 @@ import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
@@ -28,12 +29,19 @@ import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
 import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
 import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface ResultsTableProps {
   data: ResultsTable_node$key;
 }
 
 export default function ResultsTable(props: ResultsTableProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Results_ResultsTable_ColumnVisibility",
+      {},
+    );
+
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
       fragment ResultsTable_node on Query
@@ -285,6 +293,20 @@ export default function ResultsTable(props: ResultsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
+    state: {
+      columnVisibility: columnVisibility ?? {},
+    },
+
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = matchData.length > 0;

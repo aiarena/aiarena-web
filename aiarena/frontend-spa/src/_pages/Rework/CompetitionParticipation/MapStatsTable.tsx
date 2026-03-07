@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 import { startTransition, useEffect, useMemo, useState } from "react";
 import { TableContainer } from "@/_components/_actions/TableContainer";
@@ -17,12 +18,19 @@ import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface MapStatsTableProps {
   data: MapStatsTable_node$key;
 }
 
 export default function MapStatsTable(props: MapStatsTableProps) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "CompetitionParticipation_MapStatsTable_ColumnVisibility",
+      {},
+    );
+
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment MapStatsTable_node on CompetitionParticipationType
@@ -54,7 +62,7 @@ export default function MapStatsTable(props: MapStatsTableProps) {
         }
       }
     `,
-    props.data
+    props.data,
   );
 
   type MapStatsType = NonNullable<
@@ -67,7 +75,7 @@ export default function MapStatsTable(props: MapStatsTableProps) {
 
   const mapStatsData = useMemo(
     () => getNodes<MapStatsType>(data?.competitionMapStats),
-    [data]
+    [data],
   );
 
   const columnHelper = createColumnHelper<MapStatsType>();
@@ -153,7 +161,7 @@ export default function MapStatsTable(props: MapStatsTableProps) {
         size: 95,
       }),
     ],
-    [columnHelper]
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
@@ -186,11 +194,22 @@ export default function MapStatsTable(props: MapStatsTableProps) {
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
     state: {
       sorting,
+      columnVisibility: columnVisibility ?? {},
     },
 
     onSortingChange: setSorting,
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
   const hasItems = mapStatsData.length > 0;
   return (

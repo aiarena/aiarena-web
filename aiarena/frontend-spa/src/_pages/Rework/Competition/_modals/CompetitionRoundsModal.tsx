@@ -10,6 +10,7 @@ import {
   createColumnHelper,
   getCoreRowModel,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import LoadingDots from "@/_components/_display/LoadingDots";
@@ -18,6 +19,7 @@ import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface CompetitionRoundsModalProps {
   competition: CompetitionRoundsModal_competition$key;
@@ -29,6 +31,11 @@ interface CompetitionRoundsModalProps {
 export default function CompetitionRoundsModal(
   props: CompetitionRoundsModalProps,
 ) {
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Competition_CompetitionRoundsModal_ColumnVisibility",
+      {},
+    );
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
       fragment CompetitionRoundsModal_competition on CompetitionType
@@ -124,6 +131,19 @@ export default function CompetitionRoundsModal(
     enableColumnResizing: true,
     columnResizeMode: "onChange",
     manualSorting: true,
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
+    state: {
+      columnVisibility: columnVisibility ?? {},
+    },
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
   });
 
   const hasItems = competitionData.length > 0;
