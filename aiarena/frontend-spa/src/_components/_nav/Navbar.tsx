@@ -55,13 +55,13 @@ function Navbar() {
                 width={48}
                 height={48}
               />
-              <h2 className="text-2xl md:pl-5 py-4 md:py-0 pb-5 font-gugi font-light text-customGreen hover:text-white text-center">
+              <h2 className="text-2xl md:pl-5 py-0 md:py-0 font-gugi font-light text-customGreen hover:text-white text-center">
                 {navbarTitle.title}
               </h2>
             </Link>
 
             {/* Phone */}
-            <div className="md:hidden py-4">
+            <div className="md:hidden py-1">
               <button
                 className="py-3 rounded-md px-3 cursor-pointer"
                 onClick={handleMenu}
