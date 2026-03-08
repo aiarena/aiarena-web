@@ -23,7 +23,7 @@ const LatestNews: React.FC = () => {
         }
       }
     `,
-    {}
+    {},
   );
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -44,7 +44,7 @@ const LatestNews: React.FC = () => {
       <WrappedTitle title="News" font="font-bold" />
       <div className="bg-darken">
         <div className="flex items-center justify-center relative mb-4 bg-customGreen-dark-2">
-          <p className="font-bold text-center px-4 py-2 truncate">
+          <p className="font-bold text-center py-2 min-w-0 break-words">
             {currentNewsItem.title}
           </p>
         </div>
@@ -58,7 +58,7 @@ const LatestNews: React.FC = () => {
         </div>
         <NewsBox key={currentNewsItem.id} videoUrl={currentNewsItem.ytLink} />
       </div>
-      <div className="flex items-center justify-center mt-4">
+      <div className="flex flex-wrap gap-1 items-center justify-center mt-4">
         {newsData.map((_, index) => (
           <button
             key={index}
