@@ -239,8 +239,8 @@ export default function ResultsTable(props: ResultsTableProps) {
         header: "Created",
         enableSorting: false,
         cell: (info) => {
-          const getTime = getDateTimeISOString(info.getValue());
-          return getTime !== "" ? `${timeAgoShort(getTime)} ago` : "In Queue";
+          const rawTime = info.getValue();
+          return rawTime ? `${timeAgoShort(rawTime)} ago` : "In Queue";
         },
         meta: { priority: 1 },
       }),
