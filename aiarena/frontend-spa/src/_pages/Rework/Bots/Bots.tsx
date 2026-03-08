@@ -15,7 +15,7 @@ export default function Bots() {
         ...BotsTable_node
       }
     `,
-    {}
+    {},
   );
   const [searchBarValue, setSearchBarValue] = useState("");
   const [onlyDownloadable, setOnlyDownloadable] = useState(false);
@@ -38,7 +38,7 @@ export default function Bots() {
             onlyDownloadable={onlyDownloadable}
             appendHeader={
               <div
-                className="flex gap-4 items-center"
+                className="flex flex-wrap gap-4 items-center"
                 role="group"
                 aria-label="Bot filtering controls"
               >

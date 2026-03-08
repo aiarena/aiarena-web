@@ -43,10 +43,10 @@ export function TableContainerShell<T>({
           `min-h-[${minHeight}vh]`,
         )}
       >
-        <div className="flex justify-between m-2 flex-wrap">
-          <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2 m-2">
+          <div className="flex gap-2 items-center flex-wrap">
             <TableSettings>
-              <div className="text-white ">
+              <div className="text-white">
                 <Divider label="Visible Table Columns" labelPlacement="left" />
                 {allColumns.map((column) => (
                   <label
@@ -56,12 +56,11 @@ export function TableContainerShell<T>({
                     <input
                       type="checkbox"
                       checked={column.getIsVisible()}
-                      onChange={
-                        visibleColumnCount == 1 && column.getIsVisible()
-                          ? undefined
-                          : column.getToggleVisibilityHandler()
+                      onChange={column.getToggleVisibilityHandler()}
+                      disabled={
+                        !column.getCanHide() ||
+                        (visibleColumnCount === 1 && column.getIsVisible())
                       }
-                      disabled={!column.getCanHide()}
                       className="accent-customGreen"
                     />
                     <span>
@@ -73,9 +72,11 @@ export function TableContainerShell<T>({
                 ))}
               </div>
             </TableSettings>
+
             <div className="flex items-center">{appendLeftHeader}</div>
           </div>
-          <div className="flex items-center">{appendHeader}</div>
+
+          <div className="flex items-center ml-auto">{appendHeader}</div>
         </div>
 
         <div

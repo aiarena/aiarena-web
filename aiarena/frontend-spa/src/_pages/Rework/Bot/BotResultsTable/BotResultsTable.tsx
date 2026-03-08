@@ -529,10 +529,10 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       <TableContainerShell
         headerTable={headerTable}
         appendLeftHeader={
-          <div className="flex flexbox gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               className={clsx(
-                "inline-flex items-center w-full justify-center gap-x-1.5 rounded-md border-2 transition duration-100 ease-in-out transform",
+                "inline-flex items-center  justify-center gap-x-1.5 rounded-md border-2 transition duration-100 ease-in-out transform",
                 "px-2 py-2 font-semibold bg-neutral-900 shadow-xs border",
                 filterIsActive
                   ? "border-customGreen text-gray-200"
