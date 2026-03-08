@@ -138,7 +138,7 @@ function Navbar() {
           </div>
           {navbar === true ? (
             <div className={clsx("md:block", navbar ? "block" : "hidden")}>
-              <ul className="md:h-auto md:flex bg-darken-3 pt-8 h-screen max-h-[calc(100vh-3rem)] overflow-y-auto">
+              <ul className="md:h-auto md:flex bg-darken-3 pt-8 h-screen max-h-[calc(100vh-3rem)] overflow-y-auto pb-32">
                 {navLinks
                   .filter((it) => it.featureFlag !== false)
                   .map((link, index) => (
