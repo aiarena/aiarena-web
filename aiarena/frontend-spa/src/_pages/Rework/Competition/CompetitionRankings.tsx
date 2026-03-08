@@ -1,16 +1,16 @@
 import RankingsSection from "./RankingsSection";
 import { useParams } from "react-router";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { CompetitionRankingQuery } from "./__generated__/CompetitionRankingQuery.graphql";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import FetchError from "@/_components/_display/FetchError";
+import { CompetitionRankingsQuery } from "./__generated__/CompetitionRankingsQuery.graphql";
 
 export default function CompetitionRankings() {
   const { competitionId } = useParams<{ competitionId: string }>();
 
-  const rankings = useLazyLoadQuery<CompetitionRankingQuery>(
+  const rankings = useLazyLoadQuery<CompetitionRankingsQuery>(
     graphql`
-      query CompetitionRankingQuery($id: ID!) {
+      query CompetitionRankingsQuery($id: ID!) {
         node(id: $id) {
           ... on CompetitionType {
             ...RankingsSection_competition

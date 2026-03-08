@@ -1,16 +1,16 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { CompetitionQuery } from "./__generated__/CompetitionQuery.graphql";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import CompetitionInformationSection from "./CompetitionInformationSection";
 import { useParams } from "react-router";
 import FetchError from "@/_components/_display/FetchError";
+import { CompetitionInformationQuery } from "./__generated__/CompetitionInformationQuery.graphql";
 
 export default function CompetitionInformation() {
   const { competitionId } = useParams<{ competitionId: string }>();
 
-  const data = useLazyLoadQuery<CompetitionQuery>(
+  const data = useLazyLoadQuery<CompetitionInformationQuery>(
     graphql`
-      query CompetitionQuery($id: ID!) {
+      query CompetitionInformationQuery($id: ID!) {
         node(id: $id) {
           ... on CompetitionType {
             ...CompetitionInformationSection_competition
