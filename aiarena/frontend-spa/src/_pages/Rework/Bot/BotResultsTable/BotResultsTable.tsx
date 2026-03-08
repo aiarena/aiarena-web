@@ -4,6 +4,7 @@ import {
   getCoreRowModel,
   SortingState,
   useReactTable,
+  VisibilityState,
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
@@ -38,6 +39,7 @@ import {
 import { BotResultsTableSortingMap } from "./botResultTableSearchParams";
 import TagSummaryWithModal from "./TagSummaryModal";
 import { Link } from "react-router";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface BotResultsTableProps {
   data: BotResultsTbody_bot$key;
@@ -147,7 +149,12 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     () => props.initialSorting ?? [],
   );
 
-  const [columnVisibility, setColumnVisibility] = useState({});
+  const [columnVisibility, setColumnVisibility] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Bot_BotResultsTable_ColumnVisibility",
+      {},
+    );
+
   const [columnSizing, setColumnSizing] = useState({});
 
   const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
@@ -462,8 +469,18 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     columnResizeMode: "onChange",
     manualSorting: true,
     enableSorting: true,
-    state: { columnVisibility, columnSizing, sorting },
-    onColumnVisibilityChange: setColumnVisibility,
+    initialState: {
+      columnVisibility: columnVisibility ?? undefined,
+    },
+
+    state: { columnVisibility: columnVisibility ?? {}, columnSizing, sorting },
+    onColumnVisibilityChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater(columnVisibility ?? {})
+          : updater;
+      setColumnVisibility(next);
+    },
     onColumnSizingChange: setColumnSizing,
     onSortingChange: (updater) => {
       setSorting((prev) => {
@@ -565,9 +582,15 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             fragmentRef={props.data}
             columnCount={visibleColumnCount}
             columns={columns as unknown as ColumnDef<BotResultsRow, unknown>[]}
-            state={{ columnVisibility, columnSizing }}
+            state={{ columnVisibility: columnVisibility ?? {}, columnSizing }}
             onState={{
-              setColumnVisibility,
+              setColumnVisibility: (updater) => {
+                const next =
+                  typeof updater === "function"
+                    ? updater(columnVisibility ?? {})
+                    : updater;
+                setColumnVisibility(next);
+              },
               setColumnSizing,
             }}
             exposeRefetch={(fn) => {
