@@ -83,117 +83,120 @@ export function TableContainerShell<T>({
           className="overflow-x-auto rotate-180 scrollbar-black"
         >
           <div className="rotate-180 min-w-max">
-            <table className="w-full border-collapse min-w-max">
-              <thead className="bg-darken-2 text-white">
-                {headerTable.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        colSpan={header.colSpan}
-                        style={{
-                          position: "relative",
-                          width: header.getSize(),
-                        }}
-                        className="text-left select-none border-b border-customGreen font-bold text-customGreen flex-nowrap"
-                      >
-                        <div className="inline-flex items-center gap-1 w-full justify-between h-full">
-                          <div
-                            className={clsx(
-                              "p-3",
-                              "inline-flex",
-                              "items-center",
-                              "gap-1",
-                              "w-full",
-                              "justify-between",
-                              header.column.getCanSort()
-                                ? ""
-                                : "text-white font-medium",
-                              "mr-5",
-                              "group",
-                              {
-                                "cursor-pointer   hover:text-white":
-                                  header.column.getCanSort(),
-                              },
-                            )}
-                            {...(header.column.getCanSort() && {
-                              onClick: header.column.getToggleSortingHandler(),
-                            })}
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                            {header.column.getCanSort() && (
-                              <>
-                                {header.column.getIsSorted() === "asc" ? (
-                                  <span>
-                                    <ArrowUpIcon className="size-5 group-hover:hidden" />
-                                    <ArrowDownIcon className="size-5 hidden group-hover:inline" />
-                                  </span>
-                                ) : header.column.getIsSorted() === "desc" ? (
-                                  <span>
-                                    <ArrowDownIcon className="size-5 opacity-100 group-hover:opacity-0" />
-                                  </span>
-                                ) : (
-                                  <ArrowUpIcon className="size-5 opacity-0 group-hover:opacity-100" />
-                                )}
-                              </>
-                            )}
-                          </div>
-                          {header.column.getCanResize() && (
+            <div className="[zoom:0.32] md:[zoom:1]">
+              <table className="w-full border-collapse min-w-max">
+                <thead className="bg-darken-2 text-white">
+                  {headerTable.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <th
+                          key={header.id}
+                          colSpan={header.colSpan}
+                          style={{
+                            position: "relative",
+                            width: header.getSize(),
+                          }}
+                          className="text-left select-none border-b border-customGreen font-bold text-customGreen flex-nowrap"
+                        >
+                          <div className="inline-flex items-center gap-1 w-full justify-between h-full">
                             <div
-                              onMouseDown={header.getResizeHandler()}
-                              onTouchStart={header.getResizeHandler()}
                               className={clsx(
-                                "absolute",
-                                "right-0",
-                                "top-0",
-                                "bottom-0",
-                                "w-1",
-                                "p-2",
-                                "border",
-                                "border-transparent",
-                                "hover:border-r-white",
-                                "cursor-col-resize",
+                                "p-3",
+                                "inline-flex",
+                                "items-center",
+                                "gap-1",
+                                "w-full",
+                                "justify-between",
+                                header.column.getCanSort()
+                                  ? ""
+                                  : "text-white font-medium",
+                                "mr-5",
+                                "group",
                                 {
-                                  "border-r-white":
-                                    header.column.getIsResizing(),
-                                  "border-r-neutral-700":
-                                    !header.column.getIsResizing(),
+                                  "cursor-pointer   hover:text-white":
+                                    header.column.getCanSort(),
                                 },
                               )}
+                              {...(header.column.getCanSort() && {
+                                onClick:
+                                  header.column.getToggleSortingHandler(),
+                              })}
                             >
-                              <div
-                                className={clsx(
-                                  "w-[1px]",
-                                  "h-full",
-                                  header.column.getIsResizing()
-                                    ? "bg-white"
-                                    : "bg-customGreen",
-                                )}
-                              ></div>
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                              {header.column.getCanSort() && (
+                                <>
+                                  {header.column.getIsSorted() === "asc" ? (
+                                    <span>
+                                      <ArrowUpIcon className="size-5 group-hover:hidden" />
+                                      <ArrowDownIcon className="size-5 hidden group-hover:inline" />
+                                    </span>
+                                  ) : header.column.getIsSorted() === "desc" ? (
+                                    <span>
+                                      <ArrowDownIcon className="size-5 opacity-100 group-hover:opacity-0" />
+                                    </span>
+                                  ) : (
+                                    <ArrowUpIcon className="size-5 opacity-0 group-hover:opacity-100" />
+                                  )}
+                                </>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                ))}
-              </thead>
-              <tbody>
-                <Suspense
-                  fallback={
-                    <TbodyLoadingSkeleton
-                      colCount={visibleColumnCount}
-                      rowCount={24}
-                    />
-                  }
-                >
-                  {tbody}
-                </Suspense>
-              </tbody>
-            </table>
+                            {header.column.getCanResize() && (
+                              <div
+                                onMouseDown={header.getResizeHandler()}
+                                onTouchStart={header.getResizeHandler()}
+                                className={clsx(
+                                  "absolute",
+                                  "right-0",
+                                  "top-0",
+                                  "bottom-0",
+                                  "w-1",
+                                  "p-2",
+                                  "border",
+                                  "border-transparent",
+                                  "hover:border-r-white",
+                                  "cursor-col-resize",
+                                  {
+                                    "border-r-white":
+                                      header.column.getIsResizing(),
+                                    "border-r-neutral-700":
+                                      !header.column.getIsResizing(),
+                                  },
+                                )}
+                              >
+                                <div
+                                  className={clsx(
+                                    "w-[1px]",
+                                    "h-full",
+                                    header.column.getIsResizing()
+                                      ? "bg-white"
+                                      : "bg-customGreen",
+                                  )}
+                                ></div>
+                              </div>
+                            )}
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
+                </thead>
+                <tbody>
+                  <Suspense
+                    fallback={
+                      <TbodyLoadingSkeleton
+                        colCount={visibleColumnCount}
+                        rowCount={24}
+                      />
+                    }
+                  >
+                    {tbody}
+                  </Suspense>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
