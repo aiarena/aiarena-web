@@ -71,7 +71,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           </div>
         </div>
         <div
-          className="flex gap-4 ml-auto"
+          className="flex flex-wrap gap-4 ml-auto mb-4 mb-0"
           role="group"
           aria-label="Bot filtering and sorting controls"
         >
@@ -117,20 +117,11 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
             </>
           ) : null}
           <div role="group" aria-label="Bot actions">
-            <div className="hidden md:block">
-              <MainButton
-                onClick={() => setUploadBotModalOpen(true)}
-                text="Upload Bot"
-                aria-label="Upload a new bot"
-              />
-            </div>
-            <div className="block md:hidden">
-              <MainButton
-                onClick={() => setUploadBotModalOpen(true)}
-                text="+"
-                aria-label="Upload a new bot"
-              />
-            </div>
+            <MainButton
+              onClick={() => setUploadBotModalOpen(true)}
+              text="Upload Bot"
+              aria-label="Upload a new bot"
+            />
           </div>
         </div>
       </div>
