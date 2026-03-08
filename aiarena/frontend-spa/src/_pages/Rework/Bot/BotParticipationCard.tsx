@@ -58,11 +58,13 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
                 {Math.trunc(data.winPerc)}%
               </dd>
             </div>
-            <a
-              href={`/competitions/stats/${getIDFromBase64(data.id, "CompetitionParticipationType")}`}
+            <Link
+              to={`/competitions/stats/${getIDFromBase64(data.id, "CompetitionParticipationType")}`}
+              aria-label={"View Stats"}
+              title={`View Stats`}
             >
               View Stats
-            </a>
+            </Link>
           </div>
         </div>
       </div>

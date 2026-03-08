@@ -39,7 +39,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
         }
       }
     `,
-    props.viewer
+    props.viewer,
   );
 
   const [logout, updating] = useMutation<UserSettingsSectionLogoutMutation>(
@@ -52,13 +52,13 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           }
         }
       }
-    `
+    `,
   );
 
   const { enqueueSnackbar } = useSnackbar();
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "signOut",
-    "Successfully logged out! Redirecting..."
+    "Successfully logged out! Redirecting...",
   );
   const [apiTokenVisible, setApiTokenVisible] = useState(false);
 

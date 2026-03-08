@@ -11,6 +11,7 @@ import { getDateTimeISOString } from "@/_lib/dateUtils";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import BotActiveParticipations from "./BotActiveParticipations";
+import { Link } from "react-router";
 
 interface InformationSectionProps {
   bot: InformationSection_bot$key;
@@ -102,11 +103,13 @@ export default function InformationSection({ bot }: InformationSectionProps) {
             <p className="text-sm text-gray-300 ml-4">
               by{" "}
               <span className="font-medium text-gray-100">
-                <a
-                  href={`/authors/${getIDFromBase64(data.user.id, "UserType")}`}
+                <Link
+                  to={`/authors/${getIDFromBase64(data.user.id, "UserType")}`}
+                  aria-label={"Navigate to author"}
+                  title={`${data.user.username}`}
                 >
                   {data.user.username}
-                </a>
+                </Link>
               </span>
             </p>
           )}
