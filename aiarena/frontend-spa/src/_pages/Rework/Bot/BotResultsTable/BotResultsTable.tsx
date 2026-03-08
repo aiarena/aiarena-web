@@ -411,7 +411,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         cell: (info) => {
           if (info.getValue() != "") {
             const label = "Download";
-            const href = `${info.getValue()}`;
+            const href = `/${info.getValue()}`;
             const aria = `Download match log for Match ${info.row.original.match.id}`;
             const children = (
               <span className="flex items-center align-middle gap-1">
@@ -424,15 +424,16 @@ export default function BotResultsTable(props: BotResultsTableProps) {
 
             return (
               <span className="flex justify-between">
-                <Link
+                <a
                   className="font-semibold text-gray-200 truncate mr-2"
-                  to={href}
+                  href={href}
                   role="cell"
                   aria-label={aria}
+                  download
                   title={`${label}`}
                 >
                   {children ? children : label}
-                </Link>
+                </a>
               </span>
             );
           }
