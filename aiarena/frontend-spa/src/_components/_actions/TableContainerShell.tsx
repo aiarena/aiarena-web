@@ -83,7 +83,7 @@ export function TableContainerShell<T>({
           className="overflow-x-auto rotate-180 scrollbar-black"
         >
           <div className="rotate-180 min-w-max">
-            <div className="[zoom:0.32] md:[zoom:1]">
+            <div className="[zoom:0.55] md:[zoom:1]">
               <table className="w-full border-collapse min-w-max">
                 <thead className="bg-darken-2 text-white">
                   {headerTable.getHeaderGroups().map((headerGroup) => (
