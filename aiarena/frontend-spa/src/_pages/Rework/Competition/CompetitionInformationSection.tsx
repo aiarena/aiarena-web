@@ -43,15 +43,15 @@ export default function CompetitionInformationSection({
         status
       }
     `,
-    competiton
+    competiton,
   );
 
   return (
-    <section aria-labelledby="bot-information-heading" className="mb-8">
+    <section aria-labelledby="bot-information-heading">
       <div
         className={clsx(
           "rounded-2xl border border-neutral-800 bg-darken-2",
-          "shadow-lg shadow-black p-6 sm:p-8"
+          "shadow-lg shadow-black p-6 sm:p-8",
         )}
       >
         <div className="items-baseline gap-2 mb-6">

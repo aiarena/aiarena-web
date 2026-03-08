@@ -1,62 +1,31 @@
-import { graphql, useLazyLoadQuery } from "react-relay";
-import { useParams } from "react-router";
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import { Suspense } from "react";
-import { getBase64FromID } from "@/_lib/relayHelpers";
-import CompetitionInformationSection from "./CompetitionInformationSection";
-import { CompetitionQuery } from "./__generated__/CompetitionQuery.graphql";
-import RankingsSection from "./RankingsSection";
-import { CompetitionRankingQuery } from "./__generated__/CompetitionRankingQuery.graphql";
-import FetchError from "@/_components/_display/FetchError";
+import CompetitionInformation from "./CompetitionInformation";
+import CompetitionRankings from "./CompetitionRankings";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 export default function Competition() {
-  const { competitionId } = useParams<{ competitionId: string }>();
-  const data = useLazyLoadQuery<CompetitionQuery>(
-    graphql`
-      query CompetitionQuery($id: ID!) {
-        node(id: $id) {
-          ... on CompetitionType {
-            ...CompetitionInformationSection_competition
-            ...CompetitionRoundsModal_competition
-          }
-        }
-      }
-    `,
-    { id: getBase64FromID(competitionId!, "CompetitionType") || "" }
-  );
-
-  const rankings = useLazyLoadQuery<CompetitionRankingQuery>(
-    graphql`
-      query CompetitionRankingQuery($id: ID!) {
-        node(id: $id) {
-          ... on CompetitionType {
-            ...RankingsSection_competition
-          }
-        }
-      }
-    `,
-    { id: getBase64FromID(competitionId!, "CompetitionType") || "" }
-  );
-  if (!data.node) {
-    return <FetchError type="competition" />;
-  }
-
-  if (!rankings.node) {
-    return <FetchError type="rankings" />;
-  }
   return (
     <div className="max-w-7xl mx-auto">
-      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-        <CompetitionInformationSection competiton={data.node} />
-      </Suspense>
-      <h4 className="mb-4">Rankings</h4>
-      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-        {rankings.node ? (
-          <RankingsSection competition={rankings.node} />
-        ) : (
-          <p>No rankings yet...</p>
-        )}
-      </Suspense>
+      <div className="mb-8">
+        <Suspense
+          fallback={
+            <DisplaySkeleton height={600} styles={SkeletonCardShadow} />
+          }
+        >
+          <CompetitionInformation />
+        </Suspense>
+      </div>
+      <div className="mb-8">
+        <h4 className="mb-4">Rankings</h4>
+        <Suspense
+          fallback={
+            <DisplaySkeleton height={1600} styles={SkeletonCardShadow} />
+          }
+        >
+          <CompetitionRankings />
+        </Suspense>
+      </div>
     </div>
   );
 }
