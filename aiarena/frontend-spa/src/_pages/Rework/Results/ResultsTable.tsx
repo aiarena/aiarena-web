@@ -234,9 +234,9 @@ export default function ResultsTable(props: ResultsTableProps) {
         meta: { priority: 1 },
       }),
 
-      columnHelper.accessor((row) => row.started ?? "", {
-        id: "started",
-        header: "Started",
+      columnHelper.accessor((row) => row.created ?? "", {
+        id: "created",
+        header: "Created",
         enableSorting: false,
         cell: (info) => {
           const getTime = getDateTimeISOString(info.getValue());
