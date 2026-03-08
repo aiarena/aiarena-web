@@ -49,15 +49,15 @@ const Modal = ({
   return createPortal(
     <div
       className={clsx(
-        "fixed inset-0 bg-darken-6 flex items-center justify-center z-50 focus:outline-none",
-        `p-${padding}`
+        "fixed inset-0 bg-darken-6 flex items-center justify-center z-50 focus:outline-none ",
+        `p-${padding}`,
       )}
     >
       <div
         className={clsx(
           "rounded-lg shadow-md w-full focus:outline-none",
           size === "m" && "max-w-sm sm:max-w-md md:max-w-lg lg:max-w-2xl",
-          size === "l" && "max-w-screen"
+          size === "l" && "max-w-screen",
         )}
         onClick={(e) => e.stopPropagation()}
         ref={modalRef}
@@ -96,9 +96,9 @@ const Modal = ({
             <SectionDivider color="gradient" className="mb-1" height={1} />
             <div
               className={clsx(
-                "pb-10 overflow-y-auto max-h-[90vh]",
+                "pb-10 overflow-y-auto max-h-[60vh]",
                 `pt-${padding}`,
-                `px-${paddingX}`
+                `px-${paddingX}`,
               )}
             >
               {children}
@@ -107,7 +107,7 @@ const Modal = ({
         </BackgroundTexture>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 
