@@ -30,6 +30,7 @@ import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modal
 import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
+import timeAgoShort from "@/_lib/timeAgoSort";
 
 interface ResultsTableProps {
   data: ResultsTable_node$key;
@@ -239,7 +240,7 @@ export default function ResultsTable(props: ResultsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const getTime = getDateTimeISOString(info.getValue());
-          return getTime !== "" ? getTime : "In Queue";
+          return getTime !== "" ? `${timeAgoShort(getTime)} ago` : "In Queue";
         },
         meta: { priority: 1 },
       }),
