@@ -411,7 +411,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         cell: (info) => {
           if (info.getValue() != "") {
             const label = "Download";
-            const href = `/${info.getValue()}`;
+            const href = `${info.getValue()}`;
             const aria = `Download match log for Match ${info.row.original.match.id}`;
             const children = (
               <span className="flex items-center align-middle gap-1">
