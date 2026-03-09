@@ -13,7 +13,7 @@ import Dropdown from "@/_components/_actions/Dropdown";
 import DropdownButton from "@/_components/_actions/DropdownButton";
 import Searchbar from "@/_components/_actions/Searchbar";
 import MainButton from "@/_components/_actions/MainButton";
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
+import DisplaySkeletonUserBots from "@/_components/_display/_skeletons/DisplaySkeletonUserBots";
 
 interface UserBotsSectionProps {
   viewer: UserBotsSection_viewer$key;
@@ -126,7 +126,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
         </div>
       </div>
 
-      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+      <Suspense fallback={<DisplaySkeletonUserBots />}>
         {viewer.user ? (
           <UserBotsList
             user={viewer.user}

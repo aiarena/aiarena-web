@@ -2,6 +2,8 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 
 import { UserMatchRequestsQuery } from "./__generated__/UserMatchRequestsQuery.graphql";
 import UserMatchRequestsSection from "@/_pages/UserMatchRequests/UserMatchRequestsSection";
+import { Suspense } from "react";
+import DisplaySkeletonRequestMatches from "@/_components/_display/_skeletons/DisplaySkeletonRequestMatches";
 
 export default function UserMatchRequests() {
   const data = useLazyLoadQuery<UserMatchRequestsQuery>(
@@ -24,7 +26,9 @@ export default function UserMatchRequests() {
 
   return (
     <>
-      <UserMatchRequestsSection viewer={data.viewer} />
+      <Suspense fallback={<DisplaySkeletonRequestMatches />}>
+        <UserMatchRequestsSection viewer={data.viewer} />
+      </Suspense>
     </>
   );
 }

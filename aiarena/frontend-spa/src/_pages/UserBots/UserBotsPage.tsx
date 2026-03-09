@@ -1,10 +1,10 @@
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import { Suspense } from "react";
 import UserBots from "./UserBots";
+import DisplaySkeletonUserBots from "@/_components/_display/_skeletons/DisplaySkeletonUserBots";
 
 export default function UserBotsPage() {
   return (
-    <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+    <Suspense fallback={<DisplaySkeletonUserBots />}>
       <UserBots />
     </Suspense>
   );
