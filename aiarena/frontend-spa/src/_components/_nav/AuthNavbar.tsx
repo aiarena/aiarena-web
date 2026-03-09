@@ -35,7 +35,7 @@ export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
       className={clsx(
         mobile
           ? "text-l p-2 text-center w-full"
-          : "pb-2 text-l p-2 text-center",
+          : "pb-2 text-l p-2 text-center w-26",
       )}
     >
       {data.viewer?.user ? (

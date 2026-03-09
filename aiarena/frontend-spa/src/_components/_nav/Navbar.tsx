@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { Link, NavLink } from "react-router";
 import { navbarTitle, navLinks } from "@/_data/navbarLinks";
@@ -6,6 +6,7 @@ import clsx from "clsx";
 import BackgroundTexture from "../_display/BackgroundTexture";
 import AuthNavbar from "./AuthNavbar";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import LoadingSpinner from "../_display/LoadingSpinnerGray";
 
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
@@ -131,7 +132,15 @@ function Navbar() {
                         )}
                       </li>
                     ))}
-                  <AuthNavbar />
+                  <Suspense
+                    fallback={
+                      <span className="w-26 justify-center flex items-center">
+                        <LoadingSpinner />
+                      </span>
+                    }
+                  >
+                    <AuthNavbar />
+                  </Suspense>
                 </ul>
               </div>
             </div>
@@ -196,7 +205,15 @@ function Navbar() {
                   */}
                     </li>
                   ))}
-                <AuthNavbar mobile />
+                <Suspense
+                  fallback={
+                    <span className="justify-center flex items-center">
+                      <LoadingSpinner />
+                    </span>
+                  }
+                >
+                  <AuthNavbar mobile />
+                </Suspense>
               </ul>
             </div>
           ) : null}
