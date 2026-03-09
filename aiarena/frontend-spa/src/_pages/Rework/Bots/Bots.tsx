@@ -1,12 +1,13 @@
 import { Suspense, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import { BotsQuery } from "./__generated__/BotsQuery.graphql";
 import Searchbar from "@/_components/_actions/Searchbar";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import BotsTable from "./BotsTable";
 import FetchError from "@/_components/_display/FetchError";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 export default function Bots() {
   const data = useLazyLoadQuery<BotsQuery>(
@@ -31,7 +32,11 @@ export default function Bots() {
           Bots
         </h2>
 
-        <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+        <Suspense
+          fallback={
+            <DisplaySkeleton height={1600} styles={SkeletonCardShadow} />
+          }
+        >
           <BotsTable
             data={data}
             searchBarValue={searchBarValue}
