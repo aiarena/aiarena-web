@@ -1,12 +1,11 @@
 import { Suspense } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
-
 import CompetitionsTable from "./CompetitionsTable";
 import ActiveCompetitions from "./ActiveCompetitions";
 import { CompetitionsQuery } from "./__generated__/CompetitionsQuery.graphql";
 import FetchError from "@/_components/_display/FetchError";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 export default function Competitions() {
   const data = useLazyLoadQuery<CompetitionsQuery>(
@@ -16,7 +15,7 @@ export default function Competitions() {
         ...CompetitionsTable
       }
     `,
-    {}
+    {},
   );
 
   if (!data) {
@@ -35,13 +34,23 @@ export default function Competitions() {
 
         <div className="grid mb-16">
           <h4 className="mb-4">Active Competitions</h4>
-          <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+          <Suspense
+            fallback={
+              <>
+                <DisplaySkeleton height={160} styles={SkeletonCardShadow} />
+              </>
+            }
+          >
             <ActiveCompetitions data={data} />
           </Suspense>
         </div>
         <div className="mb-16 ">
           <h4 className="mb-4">Legacy Competitions</h4>
-          <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+          <Suspense
+            fallback={
+              <DisplaySkeleton height={600} styles={SkeletonCardShadow} />
+            }
+          >
             <CompetitionsTable data={data} />
           </Suspense>
         </div>
