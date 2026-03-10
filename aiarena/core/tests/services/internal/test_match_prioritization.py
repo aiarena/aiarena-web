@@ -230,3 +230,33 @@ class MatchPrioritizationTests(TestCase):
         # Since bot_data1 is shared between both matches, they have identical priority keys
         # and either may be selected.
         self.assertIn(started_match.id, [match_with_old.id, match_with_recent.id])
+
+    def test_bot_with_no_previous_matches_uses_epoch(self):
+        """A bot with no match history should use datetime.min (epoch) as its last match time,
+        giving it highest priority among bots with the same data-enabled status."""
+        bot_new1 = self._create_bot_with_data("new_bot1", bot_data_enabled=False)
+        bot_new2 = self._create_bot_with_data("new_bot2", bot_data_enabled=False)
+        bot_old1 = self._create_bot_with_data("old_bot1", bot_data_enabled=False)
+        bot_old2 = self._create_bot_with_data("old_bot2", bot_data_enabled=False)
+
+        now = timezone.now()
+        setup_round = Round.objects.create(competition=self.competition)
+
+        # old bots completed a match 5 minutes ago
+        old_match = self._create_round_match(setup_round, bot_old1, bot_old2)
+        self._complete_match(old_match, now - timedelta(minutes=5))
+
+        # new bots have NO match history at all — their last_match_end_times
+        # entry is missing, so match_sort_key should fall back to epoch.
+
+        new_round = Round.objects.create(competition=self.competition)
+        match_new_bots = self._create_round_match(new_round, bot_new1, bot_new2)
+        # match_old_bots
+        self._create_round_match(new_round, bot_old1, bot_old2)
+
+        started_match = self.matches_service._attempt_to_start_a_ladder_match(self.arenaclient, new_round)
+
+        self.assertIsNotNone(started_match)
+        # Bots with no history get epoch (datetime.min) which sorts earliest,
+        # so their match should be prioritized.
+        self.assertEqual(started_match.id, match_new_bots.id)

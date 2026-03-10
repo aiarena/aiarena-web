@@ -95,12 +95,12 @@ class Matches:
         ladder_matches_to_play = list(
             Match.objects.raw(
                 """
-        SELECT core_match.id, core_match.started, assigned_to_id, round_id from core_match
-        inner join core_round cr on core_match.round_id = cr.id
-        where core_match.started is null and requested_by_id is null and round_id = %s
-        order by round_id
-        for update 
-        """,
+                    SELECT core_match.id, core_match.started, assigned_to_id, round_id from core_match
+                    inner join core_round cr on core_match.round_id = cr.id
+                    where core_match.started is null and requested_by_id is null and round_id = %s
+                    order by round_id
+                    for update 
+                """,
                 (for_round.id,),
             )
         )
@@ -132,12 +132,12 @@ class Matches:
                 list(
                     Match.objects.raw(
                         """
-                    SELECT cm.* from core_match cm
-                    inner join core_matchparticipation c1 on cm.id = c1.match_id and c1.participant_number = 1
-                    inner join core_matchparticipation c2 on cm.id = c2.match_id and c2.participant_number = 2
-                    where cm.id in %s
-                    and c1.bot_id in %s and c2.bot_id in %s
-            """,
+                            SELECT cm.* from core_match cm
+                            inner join core_matchparticipation c1 on cm.id = c1.match_id and c1.participant_number = 1
+                            inner join core_matchparticipation c2 on cm.id = c2.match_id and c2.participant_number = 2
+                            where cm.id in %s
+                            and c1.bot_id in %s and c2.bot_id in %s
+                        """,
                         (tuple(match_ids), tuple(bot_ids), tuple(bot_ids)),
                     )
                 )
@@ -174,7 +174,7 @@ class Matches:
                 )
 
                 # Bots with no previous match get the earliest possible time (highest priority)
-                epoch = timezone.datetime.min.replace(tzinfo=timezone.timezone.utc)
+                epoch = timezone.datetime.min.replace(tzinfo=timezone.utc)
 
                 def match_sort_key(match):
                     bots_in_match = match_bot_map.get(match.id, [])
