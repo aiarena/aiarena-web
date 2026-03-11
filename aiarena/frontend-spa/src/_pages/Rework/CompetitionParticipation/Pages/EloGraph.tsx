@@ -1,13 +1,13 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Suspense } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
 import EloChart from "../EloChart";
 import Summary from "../Summary";
 import FetchError from "@/_components/_display/FetchError";
 import { useParams } from "react-router";
 import { EloGraphQuery } from "./__generated__/EloGraphQuery.graphql";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 
 export default function EloGraph() {
   const { id } = useParams<{ id: string }>();
@@ -47,8 +47,15 @@ export default function EloGraph() {
   }
 
   return (
-    <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-      <div className="px-2 pb-8">
+    <div className="px-2 pb-8">
+      <Suspense
+        fallback={
+          <div className="flex flex-col gap-4">
+            <DisplaySkeleton height={500} />
+            <DisplaySkeleton height={300} />
+          </div>
+        }
+      >
         {data.node.bot ? (
           <div className="flex flex-col gap-4">
             <>
@@ -61,7 +68,7 @@ export default function EloGraph() {
             <p className="text-gray-400">Competition participation not found</p>
           </div>
         )}
-      </div>
-    </Suspense>
+      </Suspense>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Suspense } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import { socialLinks } from "@/_data/socialLinks";
@@ -11,6 +10,8 @@ import FetchError from "@/_components/_display/FetchError";
 import { useParams } from "react-router";
 import RaceMatchupChart from "../RaceMatchup";
 import { WinsByRaceQuery } from "./__generated__/WinsByRaceQuery.graphql";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 export default function WinsByRace() {
   const { id } = useParams<{ id: string }>();
@@ -48,8 +49,10 @@ export default function WinsByRace() {
   }
 
   return (
-    <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-      <div className="px-2 pb-8">
+    <div className="px-2 pb-8">
+      <Suspense
+        fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
+      >
         {data.node.bot ? (
           <div className="flex flex-col gap-4">
             <>
@@ -82,7 +85,7 @@ export default function WinsByRace() {
             <p className="text-gray-400">Competition participation not found</p>
           </div>
         )}
-      </div>
-    </Suspense>
+      </Suspense>
+    </div>
   );
 }

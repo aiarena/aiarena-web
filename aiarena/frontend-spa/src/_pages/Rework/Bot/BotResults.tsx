@@ -164,7 +164,7 @@ export default function BotResults() {
   return (
     <Suspense
       key={botId}
-      fallback={<DisplaySkeleton height={1200} styles={SkeletonCardShadow} />}
+      fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
     >
       <BotResultsTable
         data={resultData.node}

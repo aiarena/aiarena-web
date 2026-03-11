@@ -1,12 +1,12 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { Suspense } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
-
 import type { MapsQuery } from "./__generated__/MapsQuery.graphql";
 import MapStatsTable from "../MapStatsTable";
 import FetchError from "@/_components/_display/FetchError";
 import { useParams } from "react-router";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 export default function Maps() {
   const { id } = useParams<{ id: string }>();
@@ -35,8 +35,10 @@ export default function Maps() {
     return <FetchError type="competition participation" />;
   }
   return (
-    <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-      <div className="px-2 pb-8">
+    <div className="px-2 pb-8">
+      <Suspense
+        fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
+      >
         {data.node.bot ? (
           <MapStatsTable data={data.node} />
         ) : (
@@ -44,7 +46,7 @@ export default function Maps() {
             <p className="text-gray-400">Competition participation not found</p>
           </div>
         )}
-      </div>
-    </Suspense>
+      </Suspense>
+    </div>
   );
 }

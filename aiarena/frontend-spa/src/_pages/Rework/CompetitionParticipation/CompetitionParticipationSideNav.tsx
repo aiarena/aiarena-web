@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import { Outlet, useParams } from "react-router";
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 
 import WithStatsSideButtons from "@/_components/_nav/WithStatsSideButtons";
 import NameCompDisplay from "./NameCompDisplay";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 export default function CompetitionParticipationSideNav() {
   const { id } = useParams<{ id: string }>();
@@ -22,11 +23,17 @@ export default function CompetitionParticipationSideNav() {
         Competition Participation Stats
       </h2>
 
-      <Suspense fallback={<LoadingSpinner color="light-gray" />}>
+      <Suspense fallback={<DisplaySkeleton height={23} width={500} />}>
         <NameCompDisplay id={id} />
       </Suspense>
       <WithStatsSideButtons>
-        <Outlet />
+        <Suspense
+          fallback={
+            <DisplaySkeleton height={1200} styles={SkeletonCardShadow} />
+          }
+        >
+          <Outlet />
+        </Suspense>
       </WithStatsSideButtons>
     </section>
   );

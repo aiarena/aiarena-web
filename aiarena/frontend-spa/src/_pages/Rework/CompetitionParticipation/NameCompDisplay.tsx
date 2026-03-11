@@ -27,11 +27,11 @@ export default function NameCompDisplay({ id }: { id: string }) {
         }
       }
     `,
-    { id: getBase64FromID(id!, "CompetitionParticipationType") || "" }
+    { id: getBase64FromID(id!, "CompetitionParticipationType") || "" },
   );
 
   return (
-    <div className="flex items-center justify-between pt-6 pl-6 md:pb-0 pb-6 bg-darken-2 lg:bg-transparent">
+    <div className="flex items-center justify-between  bg-darken-2 lg:bg-transparent">
       <h3 className="text-lg font-semibold text-gray-100">
         <Link
           to={`/bots/${getIDFromBase64(data?.node?.bot?.id, "BotType")}`}
@@ -43,7 +43,7 @@ export default function NameCompDisplay({ id }: { id: string }) {
         <Link
           to={`/competitions/${getIDFromBase64(
             data?.node?.competition?.id,
-            "CompetitionType"
+            "CompetitionType",
           )}`}
           className="font-semibold"
         >
