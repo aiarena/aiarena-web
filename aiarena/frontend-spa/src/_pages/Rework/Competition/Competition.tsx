@@ -8,6 +8,7 @@ export default function Competition() {
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
+        <h4 className="mb-4">Competition</h4>
         <Suspense
           fallback={
             <DisplaySkeleton height={600} styles={SkeletonCardShadow} />
