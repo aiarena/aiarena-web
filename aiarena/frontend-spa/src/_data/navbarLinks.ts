@@ -8,14 +8,6 @@ export const navLinks = [
     react: true,
   },
   {
-    title: "Wiki",
-    path: "/wiki",
-    showLoggedIn: true,
-    showLoggedOut: true,
-    featureFlag: null,
-
-  },
-  {
     title: "Authors",
     path: "/authors",
     showLoggedIn: true,
@@ -45,6 +37,7 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+    react: true,
   },
   {
     title: "Live Stream",
@@ -66,6 +59,14 @@ export const navLinks = [
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
+  },
+  {
+    title: "Wiki",
+    path: "/wiki",
+    showLoggedIn: true,
+    showLoggedOut: true,
+    featureFlag: null,
+
   },
 ];
 

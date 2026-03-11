@@ -38,6 +38,7 @@ export default function App() {
         <Route path="authors" element={<AuthorsPage />} />
         <Route path="authors/:userId" element={<AuthorPage />} />
         <Route path="competitions" element={<CompetitionsPage />} />
+        <Route path="results" element={<ResultsPage />} />
         <Route
           path="competitions/:competitionId"
           element={<CompetitionPage />}
@@ -85,13 +86,9 @@ export default function App() {
         <Route path="*" element={<PageNotFound />} />
       </Route>
 
-      <Route path="dashboard/rework">
+      {/* <Route path="dashboard/rework">
         <Route element={<RootLayout />}></Route>
-
-        <Route element={<RootWithPaddingLayout />}>
-          <Route path="results" element={<ResultsPage />} />
-        </Route>
-      </Route>
+      </Route> */}
     </Routes>
   );
 }
