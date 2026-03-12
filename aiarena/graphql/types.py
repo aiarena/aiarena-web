@@ -134,7 +134,16 @@ class BotType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_match_participations(root: models.Bot, info, **args):
-        return root.matchparticipation_set.all()
+        return root.matchparticipation_set.select_related(
+            "bot",
+            "bot__plays_race",
+            "bot__user",
+            "match",
+            "match__map",
+            "match__round",
+            "match__round__competition",
+            "match__result",
+        )
 
 
 class CompetitionFilterSet(FilterSet):
