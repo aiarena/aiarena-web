@@ -262,6 +262,7 @@ class MatchPrioritizationTests(TestCase):
         # so their match should be prioritized.
         self.assertEqual(started_match.id, match_new_bots.id)
 
+
 class RoundOrderingTests(TestCase):
     """Tests that start_next_match_for_competition tries earlier rounds first.
 
