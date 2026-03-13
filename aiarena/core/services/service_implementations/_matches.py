@@ -162,15 +162,16 @@ class Matches:
                     Bot.objects.filter(id__in=bot_ids, bot_data_enabled=True).values_list("id", flat=True)
                 )
 
-                # Get the most recent match completion time for each bot
-                last_match_end_times = dict(
+                # Get the most recent match start time for each bot
+                last_match_start_times = dict(
                     MatchParticipation.objects.filter(
                         bot_id__in=bot_ids,
-                        match__result__isnull=False,
+                        match__round__isnull=False,
+                        match__started__isnull=False,
                     )
                     .values("bot_id")
-                    .annotate(last_end=Max("match__result__created"))
-                    .values_list("bot_id", "last_end")
+                    .annotate(last_start=Max("match__started"))
+                    .values_list("bot_id", "last_start")
                 )
 
                 # Bots with no previous match get the earliest possible time (highest priority)
@@ -179,11 +180,11 @@ class Matches:
                 def match_sort_key(match):
                     bots_in_match = match_bot_map.get(match.id, [])
                     data_enabled_count = sum(1 for b in bots_in_match if b in data_enabled_bot_ids)
-                    # Find the most recent last-match time among the bots in this match.
-                    # Ascending sort prioritizes matches where even the most-recently-played
+                    # Find the most recent last-match start time among the bots in this match.
+                    # Ascending sort prioritizes matches where even the most-recently-started
                     # bot has been waiting longer.
                     most_recent_last_match = max(
-                        (last_match_end_times.get(b, epoch) for b in bots_in_match),
+                        (last_match_start_times.get(b, epoch) for b in bots_in_match),
                         default=epoch,
                     )
                     return (-data_enabled_count, most_recent_last_match)
@@ -331,9 +332,9 @@ class Matches:
                     WHERE 
                         competition_id=%s 
                     AND finished IS NULL 
-                    AND cm.started IS NULL 
-                    ORDER BY NUMBER
-                ) for update""",
+                    AND cm.started IS NULL)
+            ORDER BY cr.number
+            FOR UPDATE""",
             (competition.id,),
         )
 
