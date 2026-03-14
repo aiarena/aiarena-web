@@ -11,8 +11,11 @@ logger = logging.getLogger(__name__)
 class Ladders:
     def _get_competition_participants(self, competition: Competition):
         return (
-            CompetitionParticipation.objects.only(
-                "id", "bot__id", "division_num", "elo", "win_perc", "slug", "in_placements"
+            CompetitionParticipation.objects.select_related(
+                "bot",
+                "bot__plays_race",
+                "bot__user",
+                "competition",
             )
             .filter(competition=competition)
             .annotate(
