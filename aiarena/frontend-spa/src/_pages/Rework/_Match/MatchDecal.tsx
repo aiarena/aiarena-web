@@ -6,6 +6,7 @@ import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 import { ArrowDownCircleIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
+import { Link } from "react-router";
 interface MatchDecalProps {
   match: MatchDecal_match$key;
 }
@@ -75,7 +76,7 @@ export default function MatchInfo(props: MatchDecalProps) {
         }
       }
     `,
-    props.match
+    props.match,
   );
 
   const p1 = match.result?.participant1;
@@ -92,7 +93,7 @@ export default function MatchInfo(props: MatchDecalProps) {
         ? "text-customGreen"
         : eloChange && eloChange < 0
           ? "text-red-500"
-          : "text-gray-300"
+          : "text-gray-300",
     );
 
   return (
@@ -129,12 +130,12 @@ export default function MatchInfo(props: MatchDecalProps) {
                 <>
                   {winner ? (
                     <span className="flex flex-wrap justify-end">
-                      <a
-                        href={`/bots/${getIDFromBase64(winner.id, "BotType")}`}
+                      <Link
+                        to={`/bots/${getIDFromBase64(winner.id, "BotType")}`}
                         className="block truncate max-w-80 mr-2 overflow-ellipsis"
                       >
                         {winner.name}
-                      </a>
+                      </Link>
                       won the match
                     </span>
                   ) : (
