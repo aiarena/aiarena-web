@@ -7,9 +7,9 @@ import type {
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import clsx from "clsx";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
-import CompetitionParticipantCount from "@/_components/_display/CompetitionParticipantCount";
-import { Suspense } from "react";
-import LoadingDots from "@/_components/_display/LoadingDots";
+// import CompetitionParticipantCount from "@/_components/_display/CompetitionParticipantCount";
+// import { Suspense } from "react";
+// import LoadingDots from "@/_components/_display/LoadingDots";
 import { Link } from "react-router";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
@@ -34,7 +34,7 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
         }
       }
     `,
-    data
+    data,
   );
 
   // function getGame(competition: CompetitionCard_competition$data) {
@@ -72,7 +72,7 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
       to={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
       className={clsx(
         "p-2  grid grid-cols-1 lg:grid-cols-4 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm",
-        "shadow-lg shadow-black transition hover:scale-102  duration-100  "
+        "shadow-lg shadow-black transition hover:scale-102  duration-100  ",
       )}
     >
       <div id="image" className="col-span-1 m-4 lg:p-0 md:p-8 p-2">
@@ -105,12 +105,12 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
             </div>
 
             <div id="populated_stats" className="text-gray-300 ml-2">
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <span className="text-gray-400">Bots:</span>
                 <Suspense fallback={<LoadingDots />}>
                   <CompetitionParticipantCount competitionId={competition.id} />
                 </Suspense>
-              </div>
+              </div> */}
               <p>
                 <span className="text-gray-400">Round:</span>{" "}
                 <span className="text-white">
