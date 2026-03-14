@@ -568,7 +568,18 @@ class MatchParticipationFilterSet(FilterSet):
 
     def filter_order_by(self, queryset, name, value):
         order_fields = value if isinstance(value, list) else [value]
-        return queryset.order_by(*order_fields)
+
+        normalized = []
+        for field in order_fields:
+            if field in {"id", "-id", "match__result__created", "-match__result__created"}:
+                normalized.append(field)
+
+        if not normalized:
+            normalized = ["-match__result__created", "-id"]
+        elif all(f not in {"id", "-id"} for f in normalized):
+            normalized.append("-id")
+
+        return queryset.order_by(*normalized)
 
     def noop_bool(self, queryset, name, value):
         return queryset
@@ -576,6 +587,7 @@ class MatchParticipationFilterSet(FilterSet):
     @property
     def qs(self):
         qs = super().qs
+        qs = self._apply_match_state_filters(qs)
 
         qs = qs.select_related(
             "bot",
@@ -601,6 +613,29 @@ class MatchParticipationFilterSet(FilterSet):
 
         return qs
 
+    def _apply_match_state_filters(self, queryset):
+        cleaned = getattr(self.form, "cleaned_data", {}) if hasattr(self, "form") else {}
+
+        include_finished = cleaned.get("include_finished", True)
+        include_started = cleaned.get("include_started", True)
+        include_queued = cleaned.get("include_queued", True)
+
+        state_q = Q()
+
+        if include_finished is not False:
+            state_q |= Q(match__result__isnull=False)
+
+        if include_started is not False:
+            state_q |= Q(match__result__isnull=True, match__started__isnull=False)
+
+        if include_queued is not False:
+            state_q |= Q(match__result__isnull=True, match__started__isnull=True)
+
+        if not state_q:
+            return queryset.none()
+
+        return queryset.filter(state_q)
+
     def _with_opponent_annotation(self, queryset):
         opponent_qs = models.MatchParticipation.objects.filter(match=OuterRef("match_id")).exclude(pk=OuterRef("pk"))
 
@@ -609,7 +644,10 @@ class MatchParticipationFilterSet(FilterSet):
                 opponent_qs.annotate(lower_name=Lower("bot__name")).values("lower_name")[:1],
                 output_field=CharField(),
             ),
-            opponent_plays_race=Subquery(opponent_qs.values("bot__plays_race")[:1]),
+            opponent_plays_race=Subquery(
+                opponent_qs.values("bot__plays_race_id")[:1],
+                output_field=IntegerField(),
+            ),
             opponent_id=Subquery(
                 opponent_qs.values("bot__id")[:1],
                 output_field=IntegerField(),
@@ -644,11 +682,14 @@ class MatchParticipationFilterSet(FilterSet):
             return queryset
 
         qs = self._with_opponent_annotation(queryset)
-        race_id = BotRace.objects.get(label=value)
+        race_id = BotRace.objects.only("id").get(label=value).id
         return qs.filter(opponent_plays_race=race_id)
 
     def filter_competition(self, queryset, name, value):
-        _type, db_id = from_global_id(value)
+        try:
+            _type, db_id = from_global_id(value)
+        except Exception:
+            return queryset.none()
         return queryset.filter(match__round__competition_id=db_id)
 
     def filter_avg_step_time_min(self, queryset, name, value):
@@ -698,24 +739,12 @@ class MatchParticipationFilterSet(FilterSet):
         return queryset
 
     def filter_include_finished(self, queryset, name, value):
-        if value is False:
-            return queryset.exclude(match__result__isnull=False)
         return queryset
 
     def filter_include_started(self, queryset, name, value):
-        if value is False:
-            return queryset.exclude(
-                match__result__isnull=True,
-                match__started__isnull=False,
-            )
         return queryset
 
     def filter_include_queued(self, queryset, name, value):
-        if value is False:
-            return queryset.exclude(
-                match__result__isnull=True,
-                match__started__isnull=True,
-            )
         return queryset
 
     def filter_tags(self, queryset, name, value):
@@ -745,7 +774,12 @@ class MatchParticipationFilterSet(FilterSet):
 
     def filter_show_everyones_tags(self, queryset, name, value):
         if value is True:
-            return queryset.prefetch_related("match__tags")
+            return queryset.prefetch_related(
+                Prefetch(
+                    "match__tags",
+                    queryset=models.MatchTag.objects.select_related("tag", "user"),
+                )
+            )
 
         user = self.request.user
 
