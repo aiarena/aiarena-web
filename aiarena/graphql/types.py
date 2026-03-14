@@ -1016,12 +1016,36 @@ class ResultType(DjangoObjectTypeWithUID):
         return root.started
 
     @staticmethod
-    def resolve_participant1(root: models.Result, info, **args):
-        return root.participant1
+    def _get_participant_map(root):
+        cached = getattr(root, "_participant_map", None)
+        if cached is not None:
+            return cached
 
-    @staticmethod
-    def resolve_participant2(root: models.Result, info, **args):
-        return root.participant2
+        match = getattr(root, "match", None)
+        if not match:
+            root._participant_map = {}
+            return root._participant_map
+
+        parts = getattr(match, "prefetched_participations", None)
+        if parts is None:
+            parts = list(
+                match.matchparticipation_set.select_related(
+                    "bot",
+                    "bot__plays_race",
+                    "bot__user",
+                ).order_by("participant_number")
+            )
+
+        root._participant_map = {p.participant_number: p for p in parts}
+        return root._participant_map
+
+    @classmethod
+    def resolve_participant1(cls, root, info, **args):
+        return cls._get_participant_map(root).get(1)
+
+    @classmethod
+    def resolve_participant2(cls, root, info, **args):
+        return cls._get_participant_map(root).get(2)
 
     @staticmethod
     def resolve_duration_seconds(root: models.Result, info, **args):
@@ -1161,7 +1185,7 @@ class UserType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_bots(root: models.User, info, **args):
-        return root.bots.order_by("-bot_zip_updated")
+        return root.bots.select_related("user", "plays_race").order_by("-bot_zip_updated")
 
     @staticmethod
     def resolve_avatar_url(root: models.User, info):
@@ -1288,7 +1312,7 @@ class Query(graphene.ObjectType):
 
     @staticmethod
     def resolve_bots(root, info, **args):
-        return models.Bot.objects.all()
+        return models.Bot.objects.select_related("user", "plays_race").all()
 
     @staticmethod
     def resolve_competitions(root, info, **args):
@@ -1312,7 +1336,26 @@ class Query(graphene.ObjectType):
 
     @staticmethod
     def resolve_results(root, info, **args):
-        return models.Result.objects.all().order_by("-created")
+        return (
+            models.Result.objects.all()
+            .order_by("-created")
+            .select_related(
+                "match",
+                "winner",
+                "submitted_by",
+            )
+            .prefetch_related(
+                Prefetch(
+                    "match__matchparticipation_set",
+                    queryset=models.MatchParticipation.objects.select_related(
+                        "bot",
+                        "bot__plays_race",
+                        "bot__user",
+                    ).order_by("participant_number"),
+                    to_attr="prefetched_participations",
+                )
+            )
+        )
 
     @staticmethod
     def resolve_rounds(root, info, **args):
