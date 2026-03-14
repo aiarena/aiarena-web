@@ -68,7 +68,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
     window.location.href = `/${url}`;
   };
   return (
-    <section aria-labelledby="bot-information-heading" className="mb-8">
+    <section aria-labelledby="bot-information-heading">
       <div
         className={clsx(
           "rounded-2xl border border-neutral-800 bg-darken-2",

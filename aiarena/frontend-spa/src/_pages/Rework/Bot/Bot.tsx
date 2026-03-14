@@ -3,14 +3,12 @@ import InformationSection from "./InformationSection";
 import { BotQuery } from "./__generated__/BotQuery.graphql";
 import { useParams } from "react-router";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import BotCompetitionsTable from "./BotCompetitionsTable";
 import FetchError from "@/_components/_display/FetchError";
 
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
-import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
@@ -36,16 +34,13 @@ export default function Bot() {
 
   return (
     <>
-      <h4 className="mb-4">Bot information</h4>
-      <Suspense
-        fallback={<DisplaySkeleton height={600} styles={SkeletonCardShadow} />}
-      >
+      <div className="mb-8">
+        <h4 className="mb-4">Bot information</h4>
         <InformationSection bot={data.node} />
-      </Suspense>
-      <h4 className="mb-4">Competition Participations</h4>
-      <Suspense
-        fallback={<DisplaySkeleton height={300} styles={SkeletonCardShadow} />}
-      >
+      </div>
+
+      <div>
+        <h4 className="mb-4">Competition Participations</h4>
         <BotCompetitionsTable
           bot={data.node}
           onlyActive={onlyActive}
@@ -70,7 +65,7 @@ export default function Bot() {
             </div>
           }
         />
-      </Suspense>
+      </div>
     </>
   );
 }

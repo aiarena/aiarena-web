@@ -250,14 +250,12 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
 
   return (
     <div>
-      <Suspense fallback={<LoadingDots />}>
-        <TableContainer
-          table={table}
-          loading={false}
-          appendHeader={props.appendHeader}
-          minHeight={20}
-        />
-      </Suspense>
+      <TableContainer
+        table={table}
+        loading={false}
+        appendHeader={props.appendHeader}
+        minHeight={20}
+      />
 
       {hasNext ? (
         <div className="flex justify-center mt-6" ref={loadMoreRef}>
