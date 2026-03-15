@@ -58,12 +58,12 @@ const LegacyActivityList: React.FC = () => {
     return isUpdate ? (
       <>
         Bot{" "}
-        <a
-          href={`/bots/${getIDFromBase64(botId, "BotType")}`}
+        <Link
+          to={`/bots/${getIDFromBase64(botId, "BotType")}`}
           aria-label={`View bot profile for ${botName}`}
         >
           {botName}
-        </a>{" "}
+        </Link>{" "}
         was updated.
       </>
     ) : (
@@ -75,12 +75,12 @@ const LegacyActivityList: React.FC = () => {
           {botAuthorName}
         </Link>{" "}
         uploaded a new bot:{" "}
-        <a
-          href={`/bots/${getIDFromBase64(botId, "BotType")}`}
+        <Link
+          to={`/bots/${getIDFromBase64(botId, "BotType")}`}
           aria-label={`View bot profile for ${botName}`}
         >
           {botName}
-        </a>
+        </Link>
       </>
     );
   }
