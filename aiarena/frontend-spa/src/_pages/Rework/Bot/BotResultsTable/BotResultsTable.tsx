@@ -7,7 +7,11 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import {
+  getBase64FromID,
+  getIDFromBase64,
+  getNodes,
+} from "@/_lib/relayHelpers";
 import clsx from "clsx";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -38,8 +42,10 @@ import {
 } from "./__generated__/BotResultsTbody_bot.graphql";
 import { BotResultsTableSortingMap } from "./botResultTableSearchParams";
 import TagSummaryWithModal from "./TagSummaryModal";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
+import { graphql, useLazyLoadQuery } from "react-relay";
+import { BotResultsTableQuery } from "./__generated__/BotResultsTableQuery.graphql";
 
 interface BotResultsTableProps {
   data: BotResultsTbody_bot$key;
@@ -139,6 +145,21 @@ type Match = NonNullable<NonNullable<MatchParticipation>["match"]>;
 type MatchResult = NonNullable<NonNullable<Match>["result"]>;
 
 export default function BotResultsTable(props: BotResultsTableProps) {
+  const { botId } = useParams<{ botId: string }>();
+
+  const data = useLazyLoadQuery<BotResultsTableQuery>(
+    graphql`
+      query BotResultsTableQuery($id: ID!) {
+        node(id: $id) {
+          ... on BotType {
+            botZipUpdated
+          }
+        }
+      }
+    `,
+    { id: getBase64FromID(botId!, "BotType") || "" },
+  );
+
   const [sorting, setSorting] = useState<SortingState>(
     () => props.initialSorting ?? [],
   );
@@ -559,6 +580,18 @@ export default function BotResultsTable(props: BotResultsTableProps) {
                 apply({ ...filters, includeFinished: !filters.includeFinished })
               }
               text="Finished"
+            />
+            <ButtonToggle
+              active={!!filters.matchStartedAfter}
+              onClick={() =>
+                apply({
+                  ...filters,
+                  matchStartedAfter: filters.matchStartedAfter
+                    ? undefined
+                    : data.node?.botZipUpdated,
+                })
+              }
+              text="Since Updated"
             />
           </div>
         }
