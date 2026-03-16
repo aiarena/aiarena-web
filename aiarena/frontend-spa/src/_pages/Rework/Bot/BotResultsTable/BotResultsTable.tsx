@@ -7,7 +7,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import clsx from "clsx";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -137,12 +137,6 @@ type MatchParticipation = NonNullable<
 type Match = NonNullable<NonNullable<MatchParticipation>["match"]>;
 
 type MatchResult = NonNullable<NonNullable<Match>["result"]>;
-
-type TagNode = NonNullable<NonNullable<MatchParticipation>["match"]>["tags"];
-
-export type Tag = NonNullable<
-  NonNullable<NonNullable<TagNode>["edges"]>[number]
->["node"];
 
 export default function BotResultsTable(props: BotResultsTableProps) {
   const [sorting, setSorting] = useState<SortingState>(
@@ -441,17 +435,16 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         meta: { priority: 1 },
         size: 50,
       }),
-      columnHelper.accessor((row) => row.match.tags ?? "", {
+      columnHelper.accessor((row) => row.tagCount ?? 0, {
         id: "tags",
         header: "Tags",
         enableSorting: false,
         cell: (info) => {
-          const nodes = getNodes(info.row.original.match.tags);
-
           return (
             <TagSummaryWithModal
-              tagNodes={nodes}
-              previewCount={1}
+              matchId={info.row.original.match.id}
+              tagCount={info.row.original.tagCount ?? 0}
+              firstTag={info.row.original.firstTag ?? undefined}
               title={`Tags - Match Id: ${getIDFromBase64(info.row.original.match.id, "MatchType")}`}
             />
           );

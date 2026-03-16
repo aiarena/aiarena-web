@@ -97,14 +97,10 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               name
             }
             tags {
-              edges {
-                node {
-                  id
-                  tag
-                  user {
-                    id
-                  }
-                }
+              id
+              tag
+              user {
+                id
               }
             }
             started

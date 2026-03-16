@@ -100,15 +100,17 @@ export function BotResultsTbody({
         ) @connection(key: "ResultsTable_node_matchParticipations") {
           edges {
             node {
+            id
+            result
+            resultCause
+            matchLog
+            avgStepTime
+            eloChange
+            tagCount
+            firstTag
+            bot {
               id
-              result
-              resultCause
-              matchLog
-              avgStepTime
-              eloChange
-              bot {
-                id
-                name
+              name
                 playsRace {
                   name
                   label
@@ -168,18 +170,6 @@ export function BotResultsTbody({
                       id
                     }
                     result
-                  }
-                }
-                tags {
-                  edges {
-                    node {
-                      id
-                      tag
-                      user {
-                        id
-                        username
-                      }
-                    }
                   }
                 }
               }

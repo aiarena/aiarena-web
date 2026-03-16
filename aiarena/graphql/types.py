@@ -9,8 +9,9 @@ from datetime import timedelta
 from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 from django.conf import settings
-from django.db.models import CharField, Count, IntegerField, OuterRef, Prefetch, Q, Subquery
+from django.db.models import CharField, Count, IntegerField, OuterRef, Prefetch, Q, Subquery, Value
 from django.db.models.functions import Lower
+from django.db.models.functions.comparison import Coalesce
 from django.utils import timezone
 
 import django_filters
@@ -591,6 +592,18 @@ class MatchParticipationFilterSet(FilterSet):
     def qs(self):
         qs = super().qs
         qs = self._apply_match_state_filters(qs)
+        match_tag_count_sq = (
+            models.Match.tags.through.objects.filter(match_id=OuterRef("match_id"))
+            .values("match_id")
+            .annotate(total=Count("*"))
+            .values("total")[:1]
+        )
+        first_tag_sq = models.MatchTag.objects.filter(match=OuterRef("match_id")).order_by("id").values("tag__name")[:1]
+
+        qs = qs.annotate(
+            match_tag_count=Coalesce(Subquery(match_tag_count_sq, output_field=IntegerField()), Value(0)),
+            match_first_tag=Subquery(first_tag_sq, output_field=CharField()),
+        )
 
         qs = qs.select_related(
             "bot",
@@ -611,7 +624,7 @@ class MatchParticipationFilterSet(FilterSet):
                     "bot__user",
                 ).order_by("participant_number"),
                 to_attr="prefetched_participations",
-            )
+            ),
         )
 
         return qs
@@ -797,13 +810,15 @@ class MatchParticipationFilterSet(FilterSet):
         return queryset.prefetch_related(
             Prefetch(
                 "match__tags",
-                queryset=models.MatchTag.objects.filter(user=user),
+                queryset=models.MatchTag.objects.filter(user=user).select_related("tag", "user"),
             )
         )
 
 
 class MatchParticipationType(DjangoObjectTypeWithUID):
     match_log = graphene.String()
+    tag_count = graphene.Int()
+    first_tag = graphene.String()
 
     class Meta:
         model = models.MatchParticipation
@@ -813,6 +828,12 @@ class MatchParticipationType(DjangoObjectTypeWithUID):
 
     def resolve_opponent_plays_race_enum(self, info):
         return self.opponent_plays_race
+
+    def resolve_tag_count(self, info):
+        return getattr(self, "match_tag_count", 0)
+
+    def resolve_first_tag(self, info):
+        return getattr(self, "match_first_tag", None)
 
     def resolve_match_log(self, info):
         if not self.match_log:
@@ -885,7 +906,11 @@ class MatchFilterSet(FilterSet):
                     "bot__user",
                 ).order_by("participant_number"),
                 to_attr="prefetched_participations",
-            )
+            ),
+            Prefetch(
+                "tags",
+                queryset=models.MatchTag.objects.select_related("tag", "user"),
+            ),
         )
 
         return qs
@@ -896,7 +921,7 @@ class MatchType(DjangoObjectTypeWithUID):
     participant2 = graphene.Field("aiarena.graphql.BotType")
     status = graphene.String()
     result = graphene.Field("aiarena.graphql.ResultType")
-    tags = DjangoConnectionField("aiarena.graphql.MatchTagType")
+    tags = graphene.List("aiarena.graphql.MatchTagType")
 
     class Meta:
         model = models.Match
@@ -936,6 +961,13 @@ class MatchType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_result(root: models.Match, info, **args):
         return root.result
+
+    @staticmethod
+    def resolve_tags(root: models.Match, info, **args):
+        prefetched = getattr(root, "_prefetched_objects_cache", {})
+        if "tags" in prefetched:
+            return root.tags.all()
+        return root.tags.select_related("tag", "user").all()
 
 
 class MatchTagType(DjangoObjectTypeWithUID):
