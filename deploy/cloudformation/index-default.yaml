@@ -482,6 +482,8 @@ Resources:
         - Key: access_logs.s3.bucket
           Value:
             Ref: ALBLogsBucket
+        - Key: idle_timeout.timeout_seconds
+          Value: "40"
 
   ALBWebServerTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
