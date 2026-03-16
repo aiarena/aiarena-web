@@ -28,8 +28,8 @@ export default function BotResults() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const id = getBase64FromID(botId!, "BotType") || "";
-  const allowedSortIds = useMemo(() => new Set(["id", "date"]), []);
-
+  // const allowedSortIds = useMemo(() => new Set(["id", "date"]), []);
+  const allowedSortIds = useMemo(() => new Set(["-id"]), []);
   const urlSorting = useMemo(
     () =>
       decodeSortingFromSearchParams(
@@ -47,8 +47,8 @@ export default function BotResults() {
 
   const urlOrderBy = useMemo(() => {
     const s = urlSorting?.[0];
-    if (!s) return "-match__result__created";
-    const backendField = BotResultsTableSortingMap[s.id] ?? "id";
+    if (!s) return "-id";
+    const backendField = BotResultsTableSortingMap[s.id] ?? "-id";
     return s.desc ? `-${backendField}` : backendField;
   }, [urlSorting]);
 

@@ -571,11 +571,14 @@ class MatchParticipationFilterSet(FilterSet):
 
         normalized = []
         for field in order_fields:
-            if field in {"id", "-id", "match__result__created", "-match__result__created"}:
+            # if field in {"id", "-id", "match__result__created", "-match__result__created"}:
+            if field in {"id", "-id"}:
                 normalized.append(field)
 
         if not normalized:
-            normalized = ["-match__result__created", "-id"]
+            # normalized = ["-match__result__created", "-id"]
+            normalized = ["-id"]
+
         elif all(f not in {"id", "-id"} for f in normalized):
             normalized.append("-id")
 

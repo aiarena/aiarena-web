@@ -360,7 +360,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       columnHelper.accessor((row) => row.match.result?.created ?? "", {
         id: "date",
         header: "Date",
-        enableSorting: true,
+        enableSorting: false,
         cell: (info) => {
           return getDateTimeISOString(info.getValue()) || "";
         },
