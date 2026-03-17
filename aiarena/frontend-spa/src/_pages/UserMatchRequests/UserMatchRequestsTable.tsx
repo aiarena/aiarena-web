@@ -7,7 +7,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 
 import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
@@ -216,13 +216,16 @@ export default function UserMatchRequestsTable(
         cell: (info) => info.getValue(),
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.tags ?? "", {
+      columnHelper.accessor((row) => row.tags ?? [], {
         id: "tags",
         header: "Tags",
         cell: (info) => {
           const tags = info.getValue();
-          const filtered = tags.filter((tag) =>
-            onlyMyTags ? tag.user.id === data?.user?.id : true,
+          const filtered = tags.filter(
+            (tag): tag is NonNullable<typeof tag> =>
+              tag !== null &&
+              tag !== undefined &&
+              (!onlyMyTags || tag.user.id === data?.user?.id),
           );
           return filtered.map((tag) => tag?.tag).join(", ");
         },

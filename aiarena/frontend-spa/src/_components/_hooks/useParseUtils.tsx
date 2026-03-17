@@ -1,12 +1,41 @@
-import { Tag } from "@/_pages/Rework/Bot/BotResultsTable/BotResultsTable";
 import { useMemo } from "react";
 
-export default function useParseUtils({ tagNodes }: { tagNodes: Tag[] }) {
+export type ParsedTagUser = {
+  id: string;
+  username?: string | null | undefined;
+} | null | undefined;
+
+export type ParsedTag = {
+  id: string;
+  tag: string | null | undefined;
+  user: ParsedTagUser;
+};
+
+type CleanTag = {
+  id: string;
+  tag: string;
+  user: ParsedTagUser;
+};
+
+type GroupedTags = Record<
+  string,
+  {
+    user: ParsedTagUser;
+    tags: CleanTag[];
+  }
+>;
+
+export default function useParseUtils({
+  tagNodes,
+}: {
+  tagNodes: ReadonlyArray<ParsedTag | null | undefined>;
+}) {
   const cleanNodes = useMemo(() => {
     return (tagNodes ?? [])
-      .map((n) => ({
+      .filter((n): n is ParsedTag => n !== null && n !== undefined)
+      .map((n): CleanTag => ({
         ...n,
-        tag: typeof n?.tag === "string" ? n.tag.trim() : "",
+        tag: typeof n.tag === "string" ? n.tag.trim() : "",
       }))
       .filter((n) => n.tag.length > 0);
   }, [tagNodes]);
@@ -21,18 +50,12 @@ export default function useParseUtils({ tagNodes }: { tagNodes: Tag[] }) {
       (acc, t) => {
         const userId = t.user?.id ?? "unknown";
         if (!acc[userId]) {
-          acc[userId] = { user: t.user ?? null, tags: [] as typeof cleanNodes };
+          acc[userId] = { user: t.user ?? null, tags: [] };
         }
         acc[userId].tags.push(t);
         return acc;
       },
-      {} as Record<
-        string,
-        {
-          user: { id: string; username: string } | null;
-          tags: typeof cleanNodes;
-        }
-      >,
+      {} as GroupedTags,
     );
   }, [cleanNodes]);
   return { grouped, cleanTags };

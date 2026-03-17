@@ -1,7 +1,7 @@
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { graphql, useFragment } from "react-relay";
 import { MatchTagSection_match$key } from "./__generated__/MatchTagSection_match.graphql";
-import useParseUtils from "@/_components/_hooks/useParseUtils";
+import useParseUtils, { ParsedTag } from "@/_components/_hooks/useParseUtils";
 
 interface MatchTagSectionProps {
   match: MatchTagSection_match$key;
@@ -23,7 +23,7 @@ export default function MatchTagSection(props: MatchTagSectionProps) {
     `,
     props.match,
   );
-  const tagNodes = match.tags ?? [];
+  const tagNodes: ReadonlyArray<ParsedTag | null | undefined> = match.tags ?? [];
 
   const parseUtils = useParseUtils({ tagNodes });
 

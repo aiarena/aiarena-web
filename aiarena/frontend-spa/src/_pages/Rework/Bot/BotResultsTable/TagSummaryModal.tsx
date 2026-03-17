@@ -2,7 +2,7 @@ import Modal from "@/_components/_actions/Modal";
 import useParseUtils from "@/_components/_hooks/useParseUtils";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { Link } from "react-router";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { TagSummaryModalQuery } from "./__generated__/TagSummaryModalQuery.graphql";
 
@@ -13,10 +13,6 @@ type TagSummaryWithModalProps = {
   title?: string;
   className?: string;
 };
-
-type MatchTag = NonNullable<
-  NonNullable<NonNullable<TagSummaryModalQuery["node"]>["tags"]>[number]
->;
 
 function TagModalBody({ matchId }: { matchId: string }) {
   const data = useLazyLoadQuery<TagSummaryModalQuery>(
@@ -39,7 +35,8 @@ function TagModalBody({ matchId }: { matchId: string }) {
     { id: matchId },
   );
 
-  const tagNodes = useMemo(() => data.node?.tags ?? [], [data.node]) as MatchTag[];
+  const queryData = data as TagSummaryModalQuery["response"];
+  const tagNodes = queryData.node?.tags ?? [];
   const parseUtils = useParseUtils({ tagNodes });
   const grouped = parseUtils.grouped;
 
