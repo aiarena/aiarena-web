@@ -23,7 +23,7 @@ export default function RoundsSection(props: RoundsSectionProps) {
         ...RoundsTable_round
       }
     `,
-    props.data
+    props.data,
   );
 
   return (
@@ -33,8 +33,8 @@ export default function RoundsSection(props: RoundsSectionProps) {
       </h2>
       <div
         className={clsx(
-          "rounded-2xl border border-neutral-800 bg-darken-2",
-          "shadow-lg shadow-black p-6 sm:p-8 mb-8"
+          "rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm",
+          "shadow-lg shadow-black p-6 sm:p-8 mb-8",
         )}
       >
         <div className="items-baseline gap-2 mb-6">
