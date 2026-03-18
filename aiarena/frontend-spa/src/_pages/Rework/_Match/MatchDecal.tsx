@@ -7,6 +7,7 @@ import { ArrowDownCircleIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { Link } from "react-router";
+import DownloadMap from "@/_components/_display/DownloadMap";
 interface MatchDecalProps {
   match: MatchDecal_match$key;
 }
@@ -114,12 +115,10 @@ export default function MatchInfo(props: MatchDecalProps) {
           </div>
           <span className="ml-2 flex gap-2 text-lg">
             on{" "}
-            <a
-              href={`${match.map.downloadLink}`}
-              className="flex gap-1 items-center"
-            >
-              <ArrowDownCircleIcon height={18} /> {match.map.name}
-            </a>
+            <DownloadMap
+              downloadLink={match.map.downloadLink}
+              name={match.map.name}
+            />
           </span>
         </div>
 
