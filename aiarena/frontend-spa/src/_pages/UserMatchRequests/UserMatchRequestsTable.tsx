@@ -32,6 +32,10 @@ import NoMoreItems from "@/_components/_display/NoMoreItems";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import { Link } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
+import { RenderRace } from "@/_components/_display/RenderRace";
+import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
+import TagSummaryWithModal from "../Rework/Bot/BotResultsTable/TagSummaryModal";
+import DownloadMap from "@/_components/_display/DownloadMap";
 
 interface UserMatchRequestsTableProps {
   viewer: UserMatchRequestsTable_viewer$key;
@@ -49,17 +53,22 @@ export default function UserMatchRequestsTable(
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment UserMatchRequestsTable_viewer on Viewer
+      @refetchable(queryName: "UserMatchRequestsTablePaginationQuery")
       @argumentDefinitions(
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
         orderBy: { type: "String" }
-      )
-      @refetchable(queryName: "UserMatchRequestsTablePaginationQuery") {
+        showEveryonesTags: { type: "Boolean", defaultValue: false }
+      ) {
         user {
           id
         }
-        requestedMatches(first: $first, after: $cursor, orderBy: $orderBy)
-          @connection(key: "UserMatchRequestsSection_viewer_requestedMatches") {
+        requestedMatches(
+          first: $first
+          after: $cursor
+          orderBy: $orderBy
+          showEveryonesTags: $showEveryonesTags
+        ) @connection(key: "UserMatchRequestsSection_viewer_requestedMatches") {
           __id
           edges {
             node {
@@ -68,30 +77,41 @@ export default function UserMatchRequestsTable(
               participant1 {
                 id
                 name
+                playsRace {
+                  name
+                  label
+                }
               }
               participant2 {
                 id
                 name
+                playsRace {
+                  name
+                  label
+                }
               }
               result {
                 type
+                gameTimeFormatted
+                replayFile
                 winner {
                   name
                 }
               }
               tags {
                 edges {
-                  cursor
                   node {
                     id
                     tag
                     user {
                       id
+                      username
                     }
                   }
                 }
               }
               map {
+                downloadLink
                 name
               }
             }
@@ -115,7 +135,7 @@ export default function UserMatchRequestsTable(
     >["node"]
   >;
 
-  const [onlyMyTags, setOnlyMyTags] = useState(true);
+  const [hideOtherAuthorsTags, setHideOtherAuthorsTags] = useState(true);
   const [isPending, startTransition] = useTransition();
   const matchData = useMemo(
     () => getNodes<MatchType>(data?.requestedMatches),
@@ -175,7 +195,10 @@ export default function UserMatchRequestsTable(
                 aria-label={aria}
                 title={`${label}`}
               >
-                {children ? children : label}
+                <span className="flex">
+                  <RenderRace withoutText race={participant1?.playsRace} />
+                  {children ? children : label}
+                </span>
               </Link>
             </span>
           );
@@ -207,7 +230,10 @@ export default function UserMatchRequestsTable(
                 aria-label={aria}
                 title={`${label}`}
               >
-                {children ? children : label}
+                <span className="flex">
+                  <RenderRace withoutText race={participant2?.playsRace} />
+                  {children ? children : label}
+                </span>
               </Link>
             </span>
           );
@@ -218,21 +244,14 @@ export default function UserMatchRequestsTable(
       columnHelper.accessor((row) => row.map?.name ?? "", {
         id: "map",
         header: "Map",
-        cell: (info) => info.getValue(),
-        meta: { priority: 1 },
-      }),
-      columnHelper.accessor((row) => getNodes(row.tags) ?? "", {
-        id: "tags",
-        header: "Tags",
         cell: (info) => {
-          const tags = info.getValue();
-          const filtered = tags.filter((tag) =>
-            onlyMyTags ? tag.user.id === data?.user?.id : true,
-          );
-          return filtered.map((tag) => tag?.tag).join(", ");
+          const downloadLink = info.row.original.map.downloadLink;
+          const name = info.getValue();
+          return <DownloadMap downloadLink={downloadLink} name={name} />;
         },
         meta: { priority: 1 },
       }),
+
       columnHelper.accessor((row) => row.started ?? "", {
         id: "started",
         header: "Started",
@@ -257,8 +276,62 @@ export default function UserMatchRequestsTable(
 
         meta: { priority: 1 },
       }),
+      columnHelper.accessor((row) => row.result?.replayFile ?? "", {
+        id: "replay",
+        header: "Replay",
+        enableSorting: false,
+        cell: (info) => {
+          if (info.getValue()) {
+            const label = "Download";
+            const href = `${info.getValue()}`;
+            const aria = `Download replay file for Match ${info.row.original.id}`;
+            const children = (
+              <span className="flex items-center align-middle gap-1">
+                <span className="flex h-[25px] w-[25px] items-center align-middle">
+                  <ArrowDownCircleIcon height={18} width={18} />
+                </span>
+                Replay
+              </span>
+            );
+
+            return (
+              <span className="flex justify-between">
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={href}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  {children ? children : label}
+                </Link>
+              </span>
+            );
+          }
+        },
+        meta: { priority: 1 },
+        size: 50,
+      }),
+
+      columnHelper.accessor((row) => row.tags ?? "", {
+        id: "tags",
+        header: "Tags",
+        enableSorting: false,
+        cell: (info) => {
+          const nodes = getNodes(info.row.original.tags);
+
+          return (
+            <TagSummaryWithModal
+              tagNodes={nodes}
+              previewCount={1}
+              title={`Tags - Match Id: ${getIDFromBase64(info.row.original.id, "MatchType")}`}
+            />
+          );
+        },
+        meta: { priority: 1 },
+      }),
     ],
-    [columnHelper, data?.user?.id, onlyMyTags],
+    [columnHelper],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
@@ -276,9 +349,18 @@ export default function UserMatchRequestsTable(
     };
     startTransition(() => {
       const sortString = parseSort(sortingMap, sorting);
-      refetch({ orderBy: sortString });
+      refetch(
+        {
+          orderBy: sortString,
+          showEveryonesTags: !hideOtherAuthorsTags,
+        },
+        {
+          fetchPolicy: "network-only",
+        },
+      );
+      console.log("executed rfts");
     });
-  }, [sorting, refetch]);
+  }, [sorting, hideOtherAuthorsTags, refetch]);
 
   const table = useReactTable({
     data: matchData,
@@ -328,8 +410,10 @@ export default function UserMatchRequestsTable(
                     Hide Tags by other authors
                   </label>
                   <SimpleToggle
-                    enabled={onlyMyTags}
-                    onChange={() => setOnlyMyTags(!onlyMyTags)}
+                    enabled={hideOtherAuthorsTags}
+                    onChange={() => {
+                      setHideOtherAuthorsTags((prev) => !prev);
+                    }}
                   />
                 </div>
               </div>
