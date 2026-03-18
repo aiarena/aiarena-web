@@ -270,6 +270,7 @@ export default function UserMatchRequestsTable(
       columnHelper.accessor((row) => row.result?.gameTimeFormatted ?? "", {
         id: "gameTime",
         header: "Duration",
+        enableSorting: false,
         cell: (info) => {
           return info.getValue();
         },
