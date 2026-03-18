@@ -2,6 +2,7 @@ import { graphql, useFragment } from "react-relay";
 import { MatchInfo_match$key } from "./__generated__/MatchInfo_match.graphql";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
+import { Link } from "react-router";
 
 interface MatchInfoProps {
   match: MatchInfo_match$key;
@@ -88,15 +89,15 @@ export default function MatchInfo(props: MatchInfoProps) {
           <dt className="w-32 text-gray-400">Winner</dt>
           <dd>
             {match.result?.winner ? (
-              <a
-                href={`/bots/${getIDFromBase64(
+              <Link
+                to={`/bots/${getIDFromBase64(
                   match.result.winner.id,
                   "BotType",
                 )}`}
                 className="text-customGreen hover:underline"
               >
                 {match.result.winner.name}
-              </a>
+              </Link>
             ) : (
               "--"
             )}
@@ -132,24 +133,24 @@ export default function MatchInfo(props: MatchInfoProps) {
             <div className="flex gap-2">
               <dt className="w-32 text-gray-400">Competition</dt>
               <dd>
-                <a
-                  href={`/competitions/${getIDFromBase64(match.round?.competition.id, "CompetitionType")}`}
+                <Link
+                  to={`/competitions/${getIDFromBase64(match.round?.competition.id, "CompetitionType")}`}
                   className="text-customGreen hover:underline"
                 >
                   {match.round?.competition.name}
-                </a>
+                </Link>
               </dd>
             </div>
 
             <div className="flex gap-2">
               <dt className="w-32 text-gray-400">Round</dt>
               <dd>
-                <a
-                  href={`/rounds/${getIDFromBase64(match.round?.id, "RoundsType")}`}
+                <Link
+                  to={`/rounds/${getIDFromBase64(match.round?.id, "RoundsType")}`}
                   className="text-customGreen hover:underline"
                 >
                   {match.round?.number}
-                </a>
+                </Link>
               </dd>
             </div>
           </>
@@ -159,11 +160,11 @@ export default function MatchInfo(props: MatchInfoProps) {
             <div className="flex gap-2">
               <dt className="w-32 text-gray-400">Requested By</dt>
               <dd>
-                <a
-                  href={`/authors/${getIDFromBase64(match.requestedBy.id, "UserType")}`}
+                <Link
+                  to={`/authors/${getIDFromBase64(match.requestedBy.id, "UserType")}`}
                 >
                   {match.requestedBy.username}
-                </a>
+                </Link>
               </dd>
             </div>
           </>
