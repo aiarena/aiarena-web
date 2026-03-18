@@ -197,7 +197,7 @@ export default function ResultsTable(props: ResultsTableProps) {
             <span className="flex justify-between">
               <Link
                 className="font-semibold text-gray-200 truncate mr-2"
-                to={`/bots/${getIDFromBase64(info.row.original.participant1?.bot.id, "BotType")}`}
+                to={`/bots/${getIDFromBase64(info.row.original.participant2?.bot.id, "BotType")}`}
                 role="cell"
                 aria-label={`View bot profile for ${participant2?.bot.name}, Bot`}
                 title={`${participant2?.bot.name || ""}`}
