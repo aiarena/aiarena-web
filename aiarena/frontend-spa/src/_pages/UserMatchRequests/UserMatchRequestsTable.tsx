@@ -171,6 +171,7 @@ export default function UserMatchRequestsTable(
 
         meta: { priority: 1 },
       }),
+
       columnHelper.accessor((row) => row.participant1?.name || "", {
         id: "participant1",
         header: "Bot",
@@ -252,16 +253,6 @@ export default function UserMatchRequestsTable(
         meta: { priority: 1 },
       }),
 
-      columnHelper.accessor((row) => row.started ?? "", {
-        id: "started",
-        header: "Started",
-        cell: (info) => {
-          const getTime = getDateTimeISOString(info.getValue());
-          return getTime !== "" ? getTime : "In Queue";
-        },
-        meta: { priority: 1 },
-      }),
-
       columnHelper.accessor((row) => row.result?.type, {
         id: "result",
         header: "Result",
@@ -274,6 +265,25 @@ export default function UserMatchRequestsTable(
           return getResult != "" ? getResult : "In Queue";
         },
 
+        meta: { priority: 1 },
+      }),
+      columnHelper.accessor((row) => row.result?.gameTimeFormatted ?? "", {
+        id: "gameTime",
+        header: "Duration",
+        cell: (info) => {
+          return info.getValue();
+        },
+        meta: { priority: 1 },
+        size: 50,
+      }),
+
+      columnHelper.accessor((row) => row.started ?? "", {
+        id: "started",
+        header: "Started",
+        cell: (info) => {
+          const getTime = getDateTimeISOString(info.getValue());
+          return getTime !== "" ? getTime : "In Queue";
+        },
         meta: { priority: 1 },
       }),
       columnHelper.accessor((row) => row.result?.replayFile ?? "", {
