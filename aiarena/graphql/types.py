@@ -781,6 +781,7 @@ class MatchParticipationFilterSet(FilterSet):
                 Prefetch(
                     "match__tags",
                     queryset=models.MatchTag.objects.select_related("tag", "user"),
+                    to_attr="prefetched_tags",
                 )
             )
 
@@ -791,13 +792,15 @@ class MatchParticipationFilterSet(FilterSet):
                 Prefetch(
                     "match__tags",
                     queryset=models.MatchTag.objects.none(),
+                    to_attr="prefetched_tags",
                 )
             )
 
         return queryset.prefetch_related(
             Prefetch(
                 "match__tags",
-                queryset=models.MatchTag.objects.filter(user=user),
+                queryset=models.MatchTag.objects.filter(user=user).select_related("tag", "user"),
+                to_attr="prefetched_tags",
             )
         )
 
@@ -839,9 +842,17 @@ class MatchFilterSet(FilterSet):
         method="filter_order_by",
     )
 
+    show_everyones_tags = django_filters.BooleanFilter(method="noop_bool")
+
     class Meta:
         model = models.Match
-        fields = ["order_by"]
+        fields = [
+            "order_by",
+            "show_everyones_tags",
+        ]
+
+    def noop_bool(self, queryset, name, value):
+        return queryset
 
     def filter_order_by(self, queryset, name, value):
         order_fields = value if isinstance(value, list) else [value]
@@ -887,6 +898,36 @@ class MatchFilterSet(FilterSet):
                 to_attr="prefetched_participations",
             )
         )
+
+        cleaned = getattr(self.form, "cleaned_data", {}) if hasattr(self, "form") else {}
+        show_everyones_tags = cleaned.get("show_everyones_tags")
+
+        if show_everyones_tags is True:
+            qs = qs.prefetch_related(
+                Prefetch(
+                    "tags",
+                    queryset=models.MatchTag.objects.select_related("tag", "user"),
+                    to_attr="prefetched_tags",
+                )
+            )
+        else:
+            user = getattr(self.request, "user", None)
+            if user and user.is_authenticated:
+                qs = qs.prefetch_related(
+                    Prefetch(
+                        "tags",
+                        queryset=models.MatchTag.objects.filter(user=user).select_related("tag", "user"),
+                        to_attr="prefetched_tags",
+                    )
+                )
+            else:
+                qs = qs.prefetch_related(
+                    Prefetch(
+                        "tags",
+                        queryset=models.MatchTag.objects.none(),
+                        to_attr="prefetched_tags",
+                    )
+                )
 
         return qs
 
@@ -936,6 +977,17 @@ class MatchType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_result(root: models.Match, info, **args):
         return root.result
+
+    @staticmethod
+    def resolve_tags(root: models.Match, info, **args):
+        prefetched_tags = getattr(root, "prefetched_tags", None)
+        if prefetched_tags is not None:
+            return prefetched_tags
+
+        user = getattr(info.context, "user", None)
+        if user and user.is_authenticated:
+            return root.tags.filter(user=user).select_related("tag", "user")
+        return root.tags.none()
 
 
 class MatchTagType(DjangoObjectTypeWithUID):
