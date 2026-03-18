@@ -5,8 +5,6 @@ import { MatchQuery } from "./__generated__/MatchQuery.graphql";
 import MatchDecal from "./MatchDecal";
 import MatchInfo from "./MatchInfo";
 import MatchTagSection from "./MatchTagSection";
-import { Suspense } from "react";
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import FetchError from "@/_components/_display/FetchError";
 export default function Match() {
   const { matchId } = useParams<{ matchId: string }>();
@@ -22,7 +20,7 @@ export default function Match() {
         }
       }
     `,
-    { id: getBase64FromID(matchId!, "MatchType") || "" }
+    { id: getBase64FromID(matchId!, "MatchType") || "" },
   );
   if (!data.node) {
     return <FetchError type="match" />;
@@ -30,16 +28,10 @@ export default function Match() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto">
-        <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-          <MatchDecal match={data.node} />
-        </Suspense>
-        <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-          <MatchInfo match={data.node} />
-        </Suspense>
-        <Suspense fallback={<LoadingSpinner color="light-gray" />}>
-          <MatchTagSection match={data.node} />
-        </Suspense>
+      <div className="max-w-7xl mx-auto grid gap-8">
+        <MatchDecal match={data.node} />
+        <MatchInfo match={data.node} />
+        <MatchTagSection match={data.node} />
       </div>
     </>
   );

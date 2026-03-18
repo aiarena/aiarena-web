@@ -51,7 +51,7 @@ export default function MatchInfo(props: MatchInfoProps) {
   );
 
   return (
-    <div className="mb-8 rounded-2xl border border-neutral-800 bg-darken-2 p-5 sm:p-6 shadow-lg shadow-black space-y-6 backdrop-blur-sm">
+    <div className=" rounded-2xl border border-neutral-800 bg-darken-2 p-5 sm:p-6 shadow-lg shadow-black space-y-6 backdrop-blur-sm">
       <div>
         <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">
           Match Information
