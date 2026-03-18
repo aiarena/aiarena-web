@@ -5,6 +5,7 @@ import clsx from "clsx";
 
 export function RenderRace({
   race,
+  withoutText,
 }: {
   race:
     | {
@@ -12,6 +13,7 @@ export function RenderRace({
         name: string | null | undefined;
       }
     | undefined;
+  withoutText?: boolean;
 }): ReactNode | string {
   const races = {
     P: {
@@ -41,10 +43,10 @@ export function RenderRace({
           title={race.name || ""}
           className={clsx(
             "mr-2 h-[25px] w-[25px]",
-            races[race.label].appendStyle
+            races[race.label].appendStyle,
           )}
         />
-        <p>{race.name}</p>
+        {withoutText ? null : <p>{race.name}</p>}
       </span>
     );
   } else {
