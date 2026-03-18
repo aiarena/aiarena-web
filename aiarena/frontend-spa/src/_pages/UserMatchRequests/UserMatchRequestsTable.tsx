@@ -135,7 +135,7 @@ export default function UserMatchRequestsTable(
     >["node"]
   >;
 
-  const [hideOtherAuthorsTags, setHideOtherAuthorsTags] = useState(true);
+  const [hideOtherAuthorsTags, setHideOtherAuthorsTags] = useState(false);
   const [isPending, startTransition] = useTransition();
   const matchData = useMemo(
     () => getNodes<MatchType>(data?.requestedMatches),
@@ -362,13 +362,12 @@ export default function UserMatchRequestsTable(
       refetch(
         {
           orderBy: sortString,
-          showEveryonesTags: !hideOtherAuthorsTags,
+          showEveryonesTags: hideOtherAuthorsTags,
         },
         {
           fetchPolicy: "network-only",
         },
       );
-      console.log("executed rfts");
     });
   }, [sorting, hideOtherAuthorsTags, refetch]);
 
@@ -417,7 +416,7 @@ export default function UserMatchRequestsTable(
                     htmlFor="downloadable-toggle"
                     className="text-sm font-medium text-gray-300"
                   >
-                    Hide Tags by other authors
+                    Show all tags
                   </label>
                   <SimpleToggle
                     enabled={hideOtherAuthorsTags}
