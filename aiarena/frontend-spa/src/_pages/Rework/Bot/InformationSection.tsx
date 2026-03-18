@@ -71,7 +71,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
     <section aria-labelledby="bot-information-heading">
       <div
         className={clsx(
-          "rounded-2xl border border-neutral-800 bg-darken-2",
+          "rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm",
           "shadow-lg shadow-black p-6 sm:p-8",
         )}
       >

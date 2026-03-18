@@ -97,7 +97,7 @@ export default function MatchInfo(props: MatchDecalProps) {
     );
 
   return (
-    <div className="mb-8 rounded-2xl border border-neutral-800 bg-darken-2 p-4 sm:p-5 shadow-lg shadow-black">
+    <div className="mb-8 rounded-2xl border border-neutral-800 bg-darken-2 p-4 sm:p-5 shadow-lg shadow-black backdrop-blur-sm">
       <div className="block sm:flex justify-between w-full  mb-6">
         <h2 id="match-heading" className="sr-only">
           Match {match.id}

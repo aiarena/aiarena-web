@@ -34,7 +34,7 @@ export default function MatchTagSection(props: MatchTagSectionProps) {
   return (
     <section
       aria-labelledby="match-tags-heading"
-      className="mb-8 rounded-2xl border border-neutral-800 bg-darken-2 p-5 shadow-lg shadow-black"
+      className="mb-8 rounded-2xl border border-neutral-800 bg-darken-2 p-5 shadow-lg shadow-black backdrop-blur-sm"
     >
       <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">Tags</h3>
 
