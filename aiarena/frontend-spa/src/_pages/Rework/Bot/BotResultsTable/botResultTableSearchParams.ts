@@ -103,6 +103,7 @@ export function encodeFiltersToSearchParams(
 
 export function decodeFiltersFromSearchParams(
     searchParam: URLSearchParams,
+    botZipUpdated: string,
     preset?: { competitionId?: string; competitionName?: string },
 ): ResultsFilters {
     const rawCompetitionId = searchParam.get("competitionId");
@@ -142,7 +143,7 @@ export function decodeFiltersFromSearchParams(
         competitionId: cleanStr(competitionId) ?? undefined,
         competitionName: cleanStr(competitionName) ?? undefined,
 
-        matchStartedAfter: cleanStr(searchParam.get("after")),
+        matchStartedAfter: (searchParam.get("after")) ? cleanStr(searchParam.get("after")) : botZipUpdated,
         matchStartedBefore: cleanStr(searchParam.get("before")),
 
         tags: cleanStr(searchParam.get("tags")),

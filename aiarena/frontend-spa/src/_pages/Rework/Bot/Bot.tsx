@@ -9,6 +9,7 @@ import BotCompetitionsTable from "./BotCompetitionsTable";
 import FetchError from "@/_components/_display/FetchError";
 
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
+import BotResults from "./BotResults";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
@@ -21,6 +22,7 @@ export default function Bot() {
           ... on BotType {
             ...InformationSection_bot
             ...BotCompetitionsTable_bot
+            botZipUpdated
           }
         }
       }
@@ -34,38 +36,42 @@ export default function Bot() {
 
   return (
     <>
-      <div className="mb-8">
-        <h4 className="mb-4">Bot information</h4>
-        <InformationSection bot={data.node} />
-      </div>
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h4 className="mb-4">Bot information</h4>
+          <InformationSection bot={data.node} />
+        </div>
 
-      <div>
-        <h4 className="mb-4">Competition Participations</h4>
-        <BotCompetitionsTable
-          bot={data.node}
-          onlyActive={onlyActive}
-          appendHeader={
-            <div
-              className="flex gap-4 items-center"
-              role="group"
-              aria-label="Bot filtering controls"
-            >
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="downloadable-toggle"
-                  className="text-sm font-medium text-gray-300"
-                >
-                  Only active
-                </label>
-                <SimpleToggle
-                  enabled={onlyActive}
-                  onChange={() => setOnlyActive(!onlyActive)}
-                />
+        <div>
+          <h4 className="mb-4">Competition Participations</h4>
+          <BotCompetitionsTable
+            bot={data.node}
+            onlyActive={onlyActive}
+            appendHeader={
+              <div
+                className="flex gap-4 items-center"
+                role="group"
+                aria-label="Bot filtering controls"
+              >
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="downloadable-toggle"
+                    className="text-sm font-medium text-gray-300"
+                  >
+                    Only active
+                  </label>
+                  <SimpleToggle
+                    enabled={onlyActive}
+                    onChange={() => setOnlyActive(!onlyActive)}
+                  />
+                </div>
               </div>
-            </div>
-          }
-        />
+            }
+          />
+        </div>
       </div>
+      <h4 className="mb-4 mt-8">Results</h4>
+      <BotResults botZipUpdated={data.node.botZipUpdated} />
     </>
   );
 }

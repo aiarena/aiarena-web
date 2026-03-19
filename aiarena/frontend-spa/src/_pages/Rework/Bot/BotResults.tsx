@@ -23,10 +23,13 @@ import { BotResultsQuery } from "./__generated__/BotResultsQuery.graphql";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
-export default function BotResults() {
+export default function BotResults({
+  botZipUpdated,
+}: {
+  botZipUpdated: string;
+}) {
   const { botId } = useParams<{ botId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-
   const id = getBase64FromID(botId!, "BotType") || "";
   // const allowedSortIds = useMemo(() => new Set(["id", "date"]), []);
   const allowedSortIds = useMemo(() => new Set(["-id"]), []);
@@ -41,8 +44,8 @@ export default function BotResults() {
   );
 
   const urlFilters = useMemo(
-    () => decodeFiltersFromSearchParams(searchParams),
-    [searchParams],
+    () => decodeFiltersFromSearchParams(searchParams, botZipUpdated),
+    [searchParams, botZipUpdated],
   );
 
   const urlOrderBy = useMemo(() => {
@@ -127,7 +130,9 @@ export default function BotResults() {
       matchType: urlFilters.matchType?.toLowerCase(),
       mapName: urlFilters.mapName,
       competitionId: urlFilters.competitionId,
-      matchStartedAfter: urlFilters.matchStartedAfter,
+      matchStartedAfter: urlFilters.matchStartedAfter
+        ? urlFilters.matchStartedAfter
+        : botZipUpdated,
       matchStartedBefore: urlFilters.matchStartedBefore,
       tags: urlFilters.tags,
       searchOnlyMyTags: urlFilters.searchOnlyMyTags ?? false,
@@ -172,6 +177,7 @@ export default function BotResults() {
         onApplySort={applySortingToUrl}
         initialFilters={urlFilters}
         initialSorting={urlSorting}
+        botZipUpdated={botZipUpdated}
       />
     </Suspense>
   );

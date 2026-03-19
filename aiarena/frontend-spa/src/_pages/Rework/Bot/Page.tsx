@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Bot from "./Bot";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-import BotResults from "./BotResults";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 export type StatsModalStatus = {
@@ -34,12 +33,7 @@ export default function BotPage() {
           </>
         }
       >
-        <div className="max-w-7xl mx-auto">
-          <Bot />
-        </div>
-        <h4 className="mb-4 mt-8">Results</h4>
-
-        <BotResults />
+        <Bot />
       </Suspense>
     </>
   );

@@ -7,11 +7,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 
-import {
-  getBase64FromID,
-  getIDFromBase64,
-  getNodes,
-} from "@/_lib/relayHelpers";
+import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import clsx from "clsx";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -42,10 +38,8 @@ import {
 } from "./__generated__/BotResultsTbody_bot.graphql";
 import { BotResultsTableSortingMap } from "./botResultTableSearchParams";
 import TagSummaryWithModal from "./TagSummaryModal";
-import { Link, useParams } from "react-router";
+import { Link } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
-import { graphql, useLazyLoadQuery } from "react-relay";
-import { BotResultsTableQuery } from "./__generated__/BotResultsTableQuery.graphql";
 
 interface BotResultsTableProps {
   data: BotResultsTbody_bot$key;
@@ -54,6 +48,7 @@ interface BotResultsTableProps {
   initialFilters?: ResultsFilters;
   onApplySort?: (next: SortingState, replace?: boolean) => void;
   initialSorting?: SortingState;
+  botZipUpdated: string;
 }
 
 function getBotEloChange(
@@ -151,21 +146,6 @@ export type Tag = NonNullable<
 >["node"];
 
 export default function BotResultsTable(props: BotResultsTableProps) {
-  const { botId } = useParams<{ botId: string }>();
-
-  const data = useLazyLoadQuery<BotResultsTableQuery>(
-    graphql`
-      query BotResultsTableQuery($id: ID!) {
-        node(id: $id) {
-          ... on BotType {
-            botZipUpdated
-          }
-        }
-      }
-    `,
-    { id: getBase64FromID(botId!, "BotType") || "" },
-  );
-
   const [sorting, setSorting] = useState<SortingState>(
     () => props.initialSorting ?? [],
   );
@@ -196,7 +176,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     mapName: undefined,
     competitionId: props.filterPreset?.competitionId || undefined,
     competitionName: props.filterPreset?.competitionName || undefined,
-    matchStartedAfter: undefined,
+    matchStartedAfter: props.botZipUpdated,
     matchStartedBefore: undefined,
     tags: undefined,
     searchOnlyMyTags: undefined,
@@ -595,7 +575,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
                   ...filters,
                   matchStartedAfter: filters.matchStartedAfter
                     ? undefined
-                    : data.node?.botZipUpdated,
+                    : props.botZipUpdated,
                 })
               }
               text="Since Updated"
@@ -644,6 +624,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         filters={filters}
         setFilters={setFilters}
         onApply={(next) => apply(next, true)}
+        botZipUpdated={props.botZipUpdated}
       />
     </div>
   );

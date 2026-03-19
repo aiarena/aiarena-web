@@ -30,6 +30,7 @@ interface ResultsFiltersModalProps {
   filters: ResultsFilters;
   setFilters: Dispatch<SetStateAction<ResultsFilters>>;
   onApply: (next: ResultsFilters) => void;
+  botZipUpdated: string;
 }
 
 export default function ResultsFiltersModal({
@@ -38,6 +39,7 @@ export default function ResultsFiltersModal({
   filters,
   setFilters,
   onApply,
+  botZipUpdated,
 }: ResultsFiltersModalProps) {
   const data = useLazyLoadQuery<ResultsFiltersModalQuery>(
     graphql`
@@ -100,7 +102,7 @@ export default function ResultsFiltersModal({
       searchOnlyMyTags: undefined,
       showEveryonesTags: undefined,
 
-      matchStartedAfter: undefined,
+      matchStartedAfter: botZipUpdated,
       matchStartedBefore: undefined,
     }));
   };
