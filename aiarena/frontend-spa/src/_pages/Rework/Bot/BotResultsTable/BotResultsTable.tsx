@@ -47,6 +47,9 @@ interface BotResultsTableProps {
   onApplyFilters?: (next: ResultsFilters, replace?: boolean) => void;
   initialFilters?: ResultsFilters;
   onApplySort?: (next: SortingState, replace?: boolean) => void;
+  sinceUpdated: VisibilityState | null;
+  setSinceUpdated: (value: VisibilityState | null) => void;
+
   initialSorting?: SortingState;
   botZipUpdated: string;
 }
@@ -176,7 +179,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     mapName: undefined,
     competitionId: props.filterPreset?.competitionId || undefined,
     competitionName: props.filterPreset?.competitionName || undefined,
-    matchStartedAfter: props.botZipUpdated,
+    matchStartedAfter: props.sinceUpdated ? props.botZipUpdated : undefined,
     matchStartedBefore: undefined,
     tags: undefined,
     searchOnlyMyTags: undefined,
@@ -569,15 +572,19 @@ export default function BotResultsTable(props: BotResultsTableProps) {
               text="Finished"
             />
             <ButtonToggle
-              active={!!filters.matchStartedAfter}
-              onClick={() =>
+              active={props.sinceUpdated?.sinceUpdated ?? false}
+              onClick={() => {
+                console.log(props.sinceUpdated);
+                props.setSinceUpdated({
+                  sinceUpdated: !props.sinceUpdated?.sinceUpdated,
+                });
                 apply({
                   ...filters,
                   matchStartedAfter: filters.matchStartedAfter
                     ? undefined
                     : props.botZipUpdated,
-                })
-              }
+                });
+              }}
               text="Since Updated"
             />
           </div>
@@ -625,6 +632,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         setFilters={setFilters}
         onApply={(next) => apply(next, true)}
         botZipUpdated={props.botZipUpdated}
+        sinceUpdated={props.sinceUpdated?.sinceUpdated}
       />
     </div>
   );

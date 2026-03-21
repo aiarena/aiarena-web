@@ -69,7 +69,6 @@ export function BotResultsTbody({
         tags: { type: "String" }
         searchOnlyMyTags: { type: "Boolean", defaultValue: false }
         showEveryonesTags: { type: "Boolean", defaultValue: false }
-
         includeStarted: { type: "Boolean", defaultValue: false }
         includeQueued: { type: "Boolean", defaultValue: false }
         includeFinished: { type: "Boolean", defaultValue: true }

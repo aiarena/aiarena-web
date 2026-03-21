@@ -11,7 +11,7 @@ import {
   decodeFiltersFromSearchParams,
   encodeFiltersToSearchParams,
 } from "./BotResultsTable/botResultTableSearchParams";
-import { SortingState } from "@tanstack/react-table";
+import { SortingState, VisibilityState } from "@tanstack/react-table";
 import {
   decodeSortingFromSearchParams,
   encodeSortingToSearchParams,
@@ -22,6 +22,7 @@ import FetchError from "@/_components/_display/FetchError";
 import { BotResultsQuery } from "./__generated__/BotResultsQuery.graphql";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 export default function BotResults({
   botZipUpdated,
@@ -30,6 +31,12 @@ export default function BotResults({
 }) {
   const { botId } = useParams<{ botId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [sinceUpdated, setSinceUpdated] =
+    useStateWithLocalStorage<VisibilityState>(
+      "Bot_BotResultsTable_SinceUpdated",
+      {},
+    );
+
   const id = getBase64FromID(botId!, "BotType") || "";
   // const allowedSortIds = useMemo(() => new Set(["id", "date"]), []);
   const allowedSortIds = useMemo(() => new Set(["-id"]), []);
@@ -44,8 +51,13 @@ export default function BotResults({
   );
 
   const urlFilters = useMemo(
-    () => decodeFiltersFromSearchParams(searchParams, botZipUpdated),
-    [searchParams, botZipUpdated],
+    () =>
+      decodeFiltersFromSearchParams(
+        searchParams,
+        botZipUpdated,
+        sinceUpdated?.sinceUpdated,
+      ),
+    [searchParams, botZipUpdated, sinceUpdated],
   );
 
   const urlOrderBy = useMemo(() => {
@@ -118,7 +130,6 @@ export default function BotResults({
       cursor: null,
       first: 50,
       orderBy: urlOrderBy,
-
       opponentId: urlFilters.opponentId,
       opponentPlaysRace: urlFilters.opponentPlaysRaceId,
       result: urlFilters.result?.toLowerCase(),
@@ -132,7 +143,9 @@ export default function BotResults({
       competitionId: urlFilters.competitionId,
       matchStartedAfter: urlFilters.matchStartedAfter
         ? urlFilters.matchStartedAfter
-        : botZipUpdated,
+        : sinceUpdated?.sinceUpdated
+          ? botZipUpdated
+          : null,
       matchStartedBefore: urlFilters.matchStartedBefore,
       tags: urlFilters.tags,
       searchOnlyMyTags: urlFilters.searchOnlyMyTags ?? false,
@@ -175,6 +188,8 @@ export default function BotResults({
         data={resultData.node}
         onApplyFilters={applyFiltersToUrl}
         onApplySort={applySortingToUrl}
+        sinceUpdated={sinceUpdated}
+        setSinceUpdated={setSinceUpdated}
         initialFilters={urlFilters}
         initialSorting={urlSorting}
         botZipUpdated={botZipUpdated}
