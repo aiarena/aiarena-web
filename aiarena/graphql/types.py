@@ -531,7 +531,7 @@ class MatchParticipationFilterSet(FilterSet):
     map_name = django_filters.CharFilter(field_name="match__map__name", lookup_expr="icontains")
     competition_id = django_filters.CharFilter(method="filter_competition")
 
-    match_started_after = django_filters.DateTimeFilter(field_name="match__started", lookup_expr="gte")
+    match_started_after = django_filters.DateTimeFilter(method="filter_started_after")
     match_started_before = django_filters.DateTimeFilter(field_name="match__started", lookup_expr="lte")
 
     include_finished = django_filters.BooleanFilter(method="filter_include_finished")
@@ -740,6 +740,9 @@ class MatchParticipationFilterSet(FilterSet):
             return queryset.filter(match__round__isnull=False)
 
         return queryset
+
+    def filter_started_after(self, queryset, name, value):
+        return queryset.filter(Q(match__started__gte=value) | Q(match__started__isnull=True))
 
     def filter_include_finished(self, queryset, name, value):
         return queryset
