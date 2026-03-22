@@ -10,6 +10,7 @@ import { ReactNode, Suspense } from "react";
 
 import "react-loading-skeleton/dist/skeleton.css";
 import DisplaySkeletonBlockWithTitle from "@/_components/_display/_skeletons/DisplaySkeletonBlockWithTitle";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function LandingPage() {
   return (
@@ -62,10 +63,14 @@ function CardsAndNewsSection() {
           </div>
         </div>
         <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={440} />}>
-          <LatestNews />
+          <ErrorBoundaryWrapper componentName={"latest news"}>
+            <LatestNews />
+          </ErrorBoundaryWrapper>
         </Suspense>
         <Suspense fallback={<DisplaySkeletonBlockWithTitle bodyHeight={200} />}>
-          <LegacyStats />
+          <ErrorBoundaryWrapper componentName="server stats">
+            <LegacyStats />
+          </ErrorBoundaryWrapper>
         </Suspense>
       </div>
     </>
@@ -83,7 +88,9 @@ function CompetitionsAndActivity() {
             </div>
           }
         >
-          <LegacyCompetitonTop10List />
+          <ErrorBoundaryWrapper componentName="top 10 rankings">
+            <LegacyCompetitonTop10List />
+          </ErrorBoundaryWrapper>
         </Suspense>
         <Suspense
           fallback={
@@ -92,7 +99,9 @@ function CompetitionsAndActivity() {
             </div>
           }
         >
-          <LegacyActivityList />
+          <ErrorBoundaryWrapper componentName="bot activity">
+            <LegacyActivityList />
+          </ErrorBoundaryWrapper>
         </Suspense>
       </div>
     </>

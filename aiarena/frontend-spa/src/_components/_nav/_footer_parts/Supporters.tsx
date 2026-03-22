@@ -5,6 +5,7 @@ import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import RandomSupporter from "@/_components/_display/RandomSupporter";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 const SupportersComponent: React.FC = () => {
   return (
@@ -12,7 +13,9 @@ const SupportersComponent: React.FC = () => {
       <WrappedTitle title="Funded by You" />
       <div className="justify-center flex">
         <Suspense fallback={<LoadingSpinner />}>
-          <RandomSupporter />
+          <ErrorBoundaryWrapper componentName="random supporter">
+            <RandomSupporter />
+          </ErrorBoundaryWrapper>
         </Suspense>
       </div>
 

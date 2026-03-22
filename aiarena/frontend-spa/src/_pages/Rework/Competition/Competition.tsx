@@ -3,6 +3,7 @@ import CompetitionInformation from "./CompetitionInformation";
 import CompetitionRankings from "./CompetitionRankings";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function Competition() {
   return (
@@ -14,7 +15,9 @@ export default function Competition() {
             <DisplaySkeleton height={600} styles={SkeletonCardShadow} />
           }
         >
-          <CompetitionInformation />
+          <ErrorBoundaryWrapper componentName="competition information">
+            <CompetitionInformation />
+          </ErrorBoundaryWrapper>
         </Suspense>
       </div>
       <div className="mb-8">
@@ -24,7 +27,9 @@ export default function Competition() {
             <DisplaySkeleton height={1600} styles={SkeletonCardShadow} />
           }
         >
-          <CompetitionRankings />
+          <ErrorBoundaryWrapper componentName="competition rankings">
+            <CompetitionRankings />
+          </ErrorBoundaryWrapper>
         </Suspense>
       </div>
     </div>

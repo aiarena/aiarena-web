@@ -12,6 +12,7 @@ import RaceMatchupChart from "../RaceMatchup";
 import { WinsByRaceQuery } from "./__generated__/WinsByRaceQuery.graphql";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function WinsByRace() {
   const { id } = useParams<{ id: string }>();
@@ -53,38 +54,42 @@ export default function WinsByRace() {
       <Suspense
         fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
       >
-        {data.node.bot ? (
-          <div className="flex flex-col gap-4">
-            <>
-              {data.viewer?.user?.patreonLevel === "NONE" ||
-              data.viewer == null ? (
-                <div
-                  className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8 flex items-center justify-center"
-                  style={{ height: 558 }}
-                >
-                  <NoItemsInListMessage className="m-auto">
-                    <div className="block">
-                      <p>
-                        This feature is only available to Patreon Supporters
-                      </p>
-                      <a href={socialLinks["patreon"]} target="_blank">
-                        Patreon
-                      </a>
-                    </div>
-                  </NoItemsInListMessage>
-                </div>
-              ) : (
-                <RaceMatchupChart data={data.node} />
-              )}
+        <ErrorBoundaryWrapper componentName="wins by time">
+          {data.node.bot ? (
+            <div className="flex flex-col gap-4">
+              <>
+                {data.viewer?.user?.patreonLevel === "NONE" ||
+                data.viewer == null ? (
+                  <div
+                    className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8 flex items-center justify-center"
+                    style={{ height: 558 }}
+                  >
+                    <NoItemsInListMessage className="m-auto">
+                      <div className="block">
+                        <p>
+                          This feature is only available to Patreon Supporters
+                        </p>
+                        <a href={socialLinks["patreon"]} target="_blank">
+                          Patreon
+                        </a>
+                      </div>
+                    </NoItemsInListMessage>
+                  </div>
+                ) : (
+                  <RaceMatchupChart data={data.node} />
+                )}
 
-              <Summary data={data.node} />
-            </>
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-400">Competition participation not found</p>
-          </div>
-        )}
+                <Summary data={data.node} />
+              </>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-400">
+                Competition participation not found
+              </p>
+            </div>
+          )}
+        </ErrorBoundaryWrapper>
       </Suspense>
     </div>
   );

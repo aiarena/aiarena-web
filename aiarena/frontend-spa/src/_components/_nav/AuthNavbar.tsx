@@ -31,13 +31,7 @@ export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
     : "border-transparent hover:border-customGreen";
 
   return (
-    <li
-      className={clsx(
-        mobile
-          ? "text-l p-2 text-center w-full"
-          : "pb-2 text-l p-2 text-center w-26",
-      )}
-    >
+    <li>
       {data.viewer?.user ? (
         <NavLink
           to={"/dashboard"}

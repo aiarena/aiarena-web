@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Rounds from "./Rounds";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function RoundsPage() {
   return (
@@ -13,7 +14,9 @@ export default function RoundsPage() {
         </div>
       }
     >
-      <Rounds />
+      <ErrorBoundaryWrapper componentName="rounds">
+        <Rounds />
+      </ErrorBoundaryWrapper>
     </Suspense>
   );
 }

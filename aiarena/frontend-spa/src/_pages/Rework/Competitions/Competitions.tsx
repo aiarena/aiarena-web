@@ -6,6 +6,7 @@ import { CompetitionsQuery } from "./__generated__/CompetitionsQuery.graphql";
 import FetchError from "@/_components/_display/FetchError";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function Competitions() {
   const data = useLazyLoadQuery<CompetitionsQuery>(
@@ -41,7 +42,9 @@ export default function Competitions() {
               </>
             }
           >
-            <ActiveCompetitions data={data} />
+            <ErrorBoundaryWrapper componentName="active competitions">
+              <ActiveCompetitions data={data} />
+            </ErrorBoundaryWrapper>
           </Suspense>
         </div>
         <div className="mb-16 ">
@@ -51,7 +54,9 @@ export default function Competitions() {
               <DisplaySkeleton height={600} styles={SkeletonCardShadow} />
             }
           >
-            <CompetitionsTable data={data} />
+            <ErrorBoundaryWrapper componentName="legacy competitions">
+              <CompetitionsTable data={data} />
+            </ErrorBoundaryWrapper>
           </Suspense>
         </div>
       </section>

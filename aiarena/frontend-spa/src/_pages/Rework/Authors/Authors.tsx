@@ -9,6 +9,7 @@ import AuthorsList from "./AuthorsList";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import FetchError from "@/_components/_display/FetchError";
 import DisplaySkeletonAuthorList from "@/_components/_display/_skeletons/DisplaySkeletonAuthorList";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function Authors() {
   const data = useLazyLoadQuery<AuthorsQuery>(
@@ -17,7 +18,7 @@ export default function Authors() {
         ...AuthorsList_node
       }
     `,
-    {}
+    {},
   );
   const [searchBarValue, setSearchBarValue] = useState("");
   const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
@@ -76,12 +77,14 @@ export default function Authors() {
         </div>
 
         <Suspense fallback={<DisplaySkeletonAuthorList />}>
-          <AuthorsList
-            authors={data}
-            searchBarValue={searchBarValue}
-            orderBy={orderBy.value}
-            onlyWithBots={onlyWithBots}
-          />
+          <ErrorBoundaryWrapper componentName="authors">
+            <AuthorsList
+              authors={data}
+              searchBarValue={searchBarValue}
+              orderBy={orderBy.value}
+              onlyWithBots={onlyWithBots}
+            />
+          </ErrorBoundaryWrapper>
         </Suspense>
       </section>
     </>

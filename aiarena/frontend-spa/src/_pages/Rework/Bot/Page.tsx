@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Bot from "./Bot";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export type StatsModalStatus = {
   status: boolean;
@@ -33,7 +34,9 @@ export default function BotPage() {
           </>
         }
       >
-        <Bot />
+        <ErrorBoundaryWrapper componentName="bot">
+          <Bot />
+        </ErrorBoundaryWrapper>
       </Suspense>
     </>
   );

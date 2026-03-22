@@ -7,6 +7,7 @@ import FetchError from "@/_components/_display/FetchError";
 import { useParams } from "react-router";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function Maps() {
   const { id } = useParams<{ id: string }>();
@@ -39,13 +40,17 @@ export default function Maps() {
       <Suspense
         fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
       >
-        {data.node.bot ? (
-          <MapStatsTable data={data.node} />
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-400">Competition participation not found</p>
-          </div>
-        )}
+        <ErrorBoundaryWrapper componentName="maps">
+          {data.node.bot ? (
+            <MapStatsTable data={data.node} />
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-400">
+                Competition participation not found
+              </p>
+            </div>
+          )}
+        </ErrorBoundaryWrapper>
       </Suspense>
     </div>
   );

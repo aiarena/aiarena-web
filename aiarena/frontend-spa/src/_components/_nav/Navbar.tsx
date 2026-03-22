@@ -7,6 +7,7 @@ import BackgroundTexture from "../_display/BackgroundTexture";
 import AuthNavbar from "./AuthNavbar";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import LoadingSpinner from "../_display/LoadingSpinnerGray";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 function Navbar() {
   const [navbar, setNavbar] = useState(false);
@@ -139,7 +140,11 @@ function Navbar() {
                       </span>
                     }
                   >
-                    <AuthNavbar />
+                    <div className={clsx("pb-2 text-l p-2 text-center w-26")}>
+                      <ErrorBoundaryWrapper override="Error">
+                        <AuthNavbar />
+                      </ErrorBoundaryWrapper>
+                    </div>
                   </Suspense>
                 </ul>
               </div>
@@ -212,7 +217,11 @@ function Navbar() {
                     </span>
                   }
                 >
-                  <AuthNavbar mobile />
+                  <div className="text-l p-2 text-center w-full">
+                    <ErrorBoundaryWrapper>
+                      <AuthNavbar mobile />
+                    </ErrorBoundaryWrapper>
+                  </div>
                 </Suspense>
               </ul>
             </div>

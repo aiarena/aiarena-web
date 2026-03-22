@@ -8,6 +8,7 @@ import FetchError from "@/_components/_display/FetchError";
 import { useParams } from "react-router";
 import { EloGraphQuery } from "./__generated__/EloGraphQuery.graphql";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function EloGraph() {
   const { id } = useParams<{ id: string }>();
@@ -56,18 +57,22 @@ export default function EloGraph() {
           </div>
         }
       >
-        {data.node.bot ? (
-          <div className="flex flex-col gap-4">
-            <>
-              <EloChart data={data.node} />
-              <Summary data={data.node} />
-            </>
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-400">Competition participation not found</p>
-          </div>
-        )}
+        <ErrorBoundaryWrapper componentName="elo graph">
+          {data.node.bot ? (
+            <div className="flex flex-col gap-4">
+              <>
+                <EloChart data={data.node} />
+                <Summary data={data.node} />
+              </>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-400">
+                Competition participation not found
+              </p>
+            </div>
+          )}
+        </ErrorBoundaryWrapper>
       </Suspense>
     </div>
   );

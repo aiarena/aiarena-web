@@ -11,15 +11,15 @@ import AlwaysScrollToTop from "./_lib/AlwaysScrollToTop.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RelayEnvironmentProvider environment={environment}>
-      <RelayConnectionIDProvider>
-        <SmartRouter>
-          <AlwaysScrollToTop />
-          <SnackbarProvider>
+    <SnackbarProvider>
+      <RelayEnvironmentProvider environment={environment}>
+        <RelayConnectionIDProvider>
+          <SmartRouter>
+            <AlwaysScrollToTop />
             <App />
-          </SnackbarProvider>
-        </SmartRouter>
-      </RelayConnectionIDProvider>
-    </RelayEnvironmentProvider>
+          </SmartRouter>
+        </RelayConnectionIDProvider>
+      </RelayEnvironmentProvider>
+    </SnackbarProvider>
   </StrictMode>,
 );

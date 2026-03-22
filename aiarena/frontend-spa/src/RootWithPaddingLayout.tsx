@@ -3,6 +3,7 @@ import Navbar from "./_components/_nav/Navbar";
 import Footer from "./_components/_nav/Footer";
 import BackgroundTexture from "./_components/_display/BackgroundTexture";
 import clsx from "clsx";
+import ErrorBoundaryWrapper from "./_lib/ErrorBoundary";
 export default function RootWithPaddingLayout() {
   return (
     <BackgroundTexture>
@@ -13,7 +14,9 @@ export default function RootWithPaddingLayout() {
           className={clsx("flex-1 overflow-y-auto p-1 md:p-8 min-h-[90vh]")}
           role="main"
         >
-          <Outlet />
+          <ErrorBoundaryWrapper componentName="page">
+            <Outlet />
+          </ErrorBoundaryWrapper>
         </main>
 
         <Footer />

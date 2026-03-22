@@ -5,6 +5,7 @@ import WithStatsSideButtons from "@/_components/_nav/WithStatsSideButtons";
 import NameCompDisplay from "./NameCompDisplay";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function CompetitionParticipationSideNav() {
   const { id } = useParams<{ id: string }>();
@@ -24,7 +25,9 @@ export default function CompetitionParticipationSideNav() {
       </h2>
 
       <Suspense fallback={<DisplaySkeleton height={23} width={500} />}>
-        <NameCompDisplay id={id} />
+        <ErrorBoundaryWrapper componentName="competition">
+          <NameCompDisplay id={id} />
+        </ErrorBoundaryWrapper>
       </Suspense>
       <WithStatsSideButtons>
         <Suspense
@@ -32,7 +35,9 @@ export default function CompetitionParticipationSideNav() {
             <DisplaySkeleton height={1200} styles={SkeletonCardShadow} />
           }
         >
-          <Outlet />
+          <ErrorBoundaryWrapper componentName="stats">
+            <Outlet />
+          </ErrorBoundaryWrapper>
         </Suspense>
       </WithStatsSideButtons>
     </section>

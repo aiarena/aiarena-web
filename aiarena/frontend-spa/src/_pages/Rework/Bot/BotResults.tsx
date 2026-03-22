@@ -23,6 +23,7 @@ import { BotResultsQuery } from "./__generated__/BotResultsQuery.graphql";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
+import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function BotResults({
   botZipUpdated,
@@ -184,16 +185,18 @@ export default function BotResults({
       key={botId}
       fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
     >
-      <BotResultsTable
-        data={resultData.node}
-        onApplyFilters={applyFiltersToUrl}
-        onApplySort={applySortingToUrl}
-        sinceUpdated={sinceUpdated}
-        setSinceUpdated={setSinceUpdated}
-        initialFilters={urlFilters}
-        initialSorting={urlSorting}
-        botZipUpdated={botZipUpdated}
-      />
+      <ErrorBoundaryWrapper>
+        <BotResultsTable
+          data={resultData.node}
+          onApplyFilters={applyFiltersToUrl}
+          onApplySort={applySortingToUrl}
+          sinceUpdated={sinceUpdated}
+          setSinceUpdated={setSinceUpdated}
+          initialFilters={urlFilters}
+          initialSorting={urlSorting}
+          botZipUpdated={botZipUpdated}
+        />
+      </ErrorBoundaryWrapper>
     </Suspense>
   );
 }

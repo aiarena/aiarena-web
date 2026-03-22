@@ -65,8 +65,25 @@ export default async function fetchGraphQL(
   }
 
   if (response.status >= 500) {
-    throw new Error(`Error code ${response.status} when fetching graphql`);
+    throwErrorMessage(response.status)
   }
 
-  return response.json();
+  const result = await response.json();
+  return result;
+}
+
+
+function throwErrorMessage(statusCode: number) {
+  switch (statusCode) {
+    case 500:
+      throw new Error(`${statusCode} - Internal Server Error`);
+    case 502:
+      throw new Error(`${statusCode} - Bad Gateway`);
+    case 503:
+      throw new Error(`${statusCode} - Service Unavailable`);
+    case 504:
+      throw new Error(`${statusCode} - Gateway timeout`);
+    default:
+      throw new Error(`${statusCode}`);
+  }
 }

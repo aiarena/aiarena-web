@@ -20,7 +20,7 @@ export default function AuthorSection() {
         }
       }
     `,
-    { id: getBase64FromID(authorId!, "UserType") || "" }
+    { id: getBase64FromID(authorId!, "UserType") || "" },
   );
   if (!data.node) {
     return <FetchError type="author" />;
@@ -28,10 +28,8 @@ export default function AuthorSection() {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto">
-        <AuthorProfile author={data.node} />
-        <AuthorBotsTable data={data.node} />
-      </div>
+      <AuthorProfile author={data.node} />
+      <AuthorBotsTable data={data.node} />
     </>
   );
 }
