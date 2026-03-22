@@ -25,6 +25,7 @@ from aiarena.core.models import (
     Round,
     ServiceUser,
     Tag,
+    TemporaryUpload,
     Trophy,
     TrophyIcon,
     User,
@@ -539,6 +540,19 @@ class TagAdmin(admin.ModelAdmin):
         "name",
     )
     search_fields = ("name",)
+
+
+@admin.register(TemporaryUpload)
+class TemporaryUploadAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "file",
+        "uploaded_by",
+        "created_at",
+    )
+    list_filter = ("created_at",)
+    list_select_related = ["uploaded_by"]
+    autocomplete_fields = ["uploaded_by"]
 
 
 @admin.register(Trophy)
