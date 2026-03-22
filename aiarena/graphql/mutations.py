@@ -236,7 +236,7 @@ class UploadBot(CleanedInputMutation):
 
 
 class UpdateBotInput(CleanedInputType):
-    id = BotID()
+    bot = BotID()
     bot_zip_publicly_downloadable = graphene.Boolean()
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
@@ -245,7 +245,7 @@ class UpdateBotInput(CleanedInputType):
     bot_data = Upload()
 
     class Meta:
-        required_fields = ["id"]
+        required_fields = ["bot"]
 
 
 class UpdateBot(CleanedInputMutation):
@@ -256,14 +256,14 @@ class UpdateBot(CleanedInputMutation):
 
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateBotInput):
-        bot = input_object.id
+        bot = input_object.bot
         raise_for_access(info, bot)
 
         if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):
             raise BotUploadsDisabled
 
         for attr, value in input_object.items():
-            if attr in ["id", "wiki_article"]:
+            if attr in ["bot", "wiki_article"]:
                 continue
             setattr(bot, attr, value)
 

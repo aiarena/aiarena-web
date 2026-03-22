@@ -101,7 +101,7 @@ export default function BotSettingsModal({
                   updateBot({
                     variables: {
                       input: {
-                        id: bot.id,
+                        bot: bot.id,
                         botDataEnabled: !bot.botDataEnabled,
                       },
                     },
@@ -132,7 +132,7 @@ export default function BotSettingsModal({
                     updateBot({
                       variables: {
                         input: {
-                          id: bot.id,
+                          bot: bot.id,
                           botZipPubliclyDownloadable:
                             !bot.botZipPubliclyDownloadable,
                         },
@@ -157,7 +157,7 @@ export default function BotSettingsModal({
                     updateBot({
                       variables: {
                         input: {
-                          id: bot.id,
+                          bot: bot.id,
                           botDataPubliclyDownloadable:
                             !bot.botDataPubliclyDownloadable,
                         },
@@ -216,7 +216,7 @@ export default function BotSettingsModal({
                   if (!botZipFile) return;
                   updateBot({
                     variables: {
-                      input: { id: bot.id, botZip: null },
+                      input: { bot: bot.id, botZip: null },
                     },
                     uploadables: {
                       "input.botZip": botZipFile,
@@ -278,7 +278,7 @@ export default function BotSettingsModal({
                   if (!botDataFile) return;
                   updateBot({
                     variables: {
-                      input: { id: bot.id, botData: null },
+                      input: { bot: bot.id, botData: null },
                     },
                     uploadables: {
                       "input.botData": botDataFile,

@@ -763,7 +763,7 @@ class TestUpdateBot(GraphQLTest):
             expected_status=200,
             variables={
                 "input": {
-                    "id": self.to_global_id(BotType, bot.id),
+                    "bot": self.to_global_id(BotType, bot.id),
                     "botZipPubliclyDownloadable": True,
                     "botDataEnabled": True,
                     "botDataPubliclyDownloadable": True,
@@ -797,7 +797,7 @@ class TestUpdateBot(GraphQLTest):
             expected_status=200,
             variables={
                 "input": {
-                    "id": self.to_global_id(BotType, bot.id),
+                    "bot": self.to_global_id(BotType, bot.id),
                     "botZip": None,
                 }
             },
@@ -822,7 +822,7 @@ class TestUpdateBot(GraphQLTest):
             login_user=other_user,
             variables={
                 "input": {
-                    "id": self.to_global_id(BotType, bot.id),
+                    "bot": self.to_global_id(BotType, bot.id),
                     "botZipPubliclyDownloadable": True,
                     "wikiArticle": "Some Content",
                 }
@@ -846,7 +846,7 @@ class TestUpdateBot(GraphQLTest):
         self.mutate(
             variables={
                 "input": {
-                    "id": self.to_global_id(BotType, bot.id),
+                    "bot": self.to_global_id(BotType, bot.id),
                     "botZipPubliclyDownloadable": True,
                     "wikiArticle": "Some Content",
                 }
@@ -866,7 +866,7 @@ class TestUpdateBot(GraphQLTest):
         self.mutate(
             login_user=user,
             variables={"input": {"botZipPubliclyDownloadable": True, "wikiArticle": "Some Content"}},
-            expected_validation_errors={"id": ["Required field"]},
+            expected_validation_errors={"bot": ["Required field"]},
         )
 
         # Verify bot was not updated
@@ -882,7 +882,7 @@ class TestUpdateBot(GraphQLTest):
             login_user=user,
             variables={
                 "input": {
-                    "id": self.to_global_id(BotType, bot.id),
+                    "bot": self.to_global_id(BotType, bot.id),
                     "name": "new name pls",
                 }
             },

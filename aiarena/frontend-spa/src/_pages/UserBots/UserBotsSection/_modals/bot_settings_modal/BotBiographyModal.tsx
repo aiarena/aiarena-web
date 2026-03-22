@@ -87,7 +87,7 @@ export default function BotBiographyModal({
               updateBot({
                 variables: {
                   input: {
-                    id: bot.id,
+                    bot: bot.id,
                     wikiArticle: biography,
                   },
                 },
