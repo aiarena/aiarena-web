@@ -164,10 +164,34 @@ def submit_result(result_submission: ResultSubmission):
     if bot2 is not None:
         bot2.save()
     # Save Tags
-    bot1_user = participant1.bot.user
-    bot2_user = participant2.bot.user
-    parsed_bot1_tags = parse_tags(result_submission.bot1_tags)
-    parsed_bot2_tags = parse_tags(result_submission.bot2_tags)
+    update_match_tags(
+        result_submission.match,
+        participant1.bot.user,
+        participant2.bot.user,
+        result_submission.bot1_tags,
+        result_submission.bot2_tags,
+    )
+
+    result_submission.match.result = result
+    result_submission.match.save()
+
+    # Process competition-related logic (ELO, stats, crash checks)
+    process_competition_result(result, participant1, participant2)
+
+    return result
+
+
+def update_match_tags(
+    match: Match,
+    bot1_user,
+    bot2_user,
+    bot1_tags: list | None,
+    bot2_tags: list | None,
+):
+    """Update match tags for both bots."""
+    parsed_bot1_tags = parse_tags(bot1_tags)
+    parsed_bot2_tags = parse_tags(bot2_tags)
+
     # Union tags if both bots belong to the same user
     if bot1_user == bot2_user:
         total_tags = list(
@@ -180,11 +204,9 @@ def submit_result(result_submission: ResultSubmission):
                 tag_obj = Tag.objects.get_or_create(name=tag)
                 total_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1_user)[0])
             # remove tags for this match that belong to this user and were not sent in the form
-            result_submission.match.tags.remove(
-                *result_submission.match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in total_match_tags])
-            )
+            match.tags.remove(*match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in total_match_tags]))
             # add everything, this shouldn't cause duplicates
-            result_submission.match.tags.add(*total_match_tags)
+            match.tags.add(*total_match_tags)
     else:
         if parsed_bot1_tags:
             p1_match_tags = []
@@ -192,11 +214,9 @@ def submit_result(result_submission: ResultSubmission):
                 tag_obj = Tag.objects.get_or_create(name=tag)
                 p1_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot1_user)[0])
             # remove tags for this match that belong to this user and were not sent in the form
-            result_submission.match.tags.remove(
-                *result_submission.match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in p1_match_tags])
-            )
+            match.tags.remove(*match.tags.filter(user=bot1_user).exclude(id__in=[mt.id for mt in p1_match_tags]))
             # add everything, this shouldn't cause duplicates
-            result_submission.match.tags.add(*p1_match_tags)
+            match.tags.add(*p1_match_tags)
 
         if parsed_bot2_tags:
             p2_match_tags = []
@@ -204,79 +224,76 @@ def submit_result(result_submission: ResultSubmission):
                 tag_obj = Tag.objects.get_or_create(name=tag)
                 p2_match_tags.append(MatchTag.objects.get_or_create(tag=tag_obj[0], user=bot2_user)[0])
             # remove tags for this match that belong to this user and were not sent in the form
-            result_submission.match.tags.remove(
-                *result_submission.match.tags.filter(user=bot2_user).exclude(id__in=[mt.id for mt in p2_match_tags])
-            )
+            match.tags.remove(*match.tags.filter(user=bot2_user).exclude(id__in=[mt.id for mt in p2_match_tags]))
             # add everything, this shouldn't cause duplicates
-            result_submission.match.tags.add(*p2_match_tags)
-    result_submission.match.result = result
-    result_submission.match.save()
-    # Only do these actions if the match is part of a round
-    if result.match.round is not None:
-        competitions.update_competition_round_if_completed(result.match.round)
+            match.tags.add(*p2_match_tags)
 
-        # Update and record ELO figures
-        participant1.starting_elo, participant2.starting_elo = result.get_initial_elos
-        result.adjust_elo()
 
-        initial_elo_sum = participant1.starting_elo + participant2.starting_elo
+def process_competition_result(result: Result, participant1: MatchParticipation, participant2: MatchParticipation):
+    """Process ELO, stats, and crash checks for a competition match result."""
+    if result.match.round is None:
+        return
 
-        # Calculate the change in ELO
-        # the bot elos have changed so refresh them
-        # todo: instead of having to refresh, return data from adjust_elo and apply it here
-        sp1, sp2 = result.get_competition_participants
-        participant1.resultant_elo = sp1.elo
-        participant2.resultant_elo = sp2.elo
-        participant1.elo_change = participant1.resultant_elo - participant1.starting_elo
-        participant2.elo_change = participant2.resultant_elo - participant2.starting_elo
-        participant1.save()
-        participant2.save()
+    competitions.update_competition_round_if_completed(result.match.round)
 
-        resultant_elo_sum = participant1.resultant_elo + participant2.resultant_elo
-        if initial_elo_sum != resultant_elo_sum:
+    # Update and record ELO figures
+    participant1.starting_elo, participant2.starting_elo = result.get_initial_elos
+    result.adjust_elo()
+
+    initial_elo_sum = participant1.starting_elo + participant2.starting_elo
+
+    # Calculate the change in ELO
+    # the bot elos have changed so refresh them
+    # todo: instead of having to refresh, return data from adjust_elo and apply it here
+    sp1, sp2 = result.get_competition_participants
+    participant1.resultant_elo = sp1.elo
+    participant2.resultant_elo = sp2.elo
+    participant1.elo_change = participant1.resultant_elo - participant1.starting_elo
+    participant2.elo_change = participant2.resultant_elo - participant2.starting_elo
+    participant1.save()
+    participant2.save()
+
+    resultant_elo_sum = participant1.resultant_elo + participant2.resultant_elo
+    if initial_elo_sum != resultant_elo_sum:
+        logger.critical(
+            f"Initial and resultant ELO sum mismatch: "
+            f"Result {result.id}. "
+            f"initial_elo_sum: {initial_elo_sum}. "
+            f"resultant_elo_sum: {resultant_elo_sum}. "
+            f"participant1.elo_change: {participant1.elo_change}. "
+            f"participant2.elo_change: {participant2.elo_change}"
+        )
+
+    if config.ENABLE_ELO_SANITY_CHECK:
+        if config.DEBUG_LOGGING_ENABLED:
+            logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
+
+        # test here to check ELO total and ensure no corruption
+        match_competition = result.match.round.competition
+        expected_elo_sum = (
+            settings.ELO_START_VALUE * CompetitionParticipation.objects.filter(competition=match_competition).count()
+        )
+        actual_elo_sum = CompetitionParticipation.objects.filter(competition=match_competition).aggregate(Sum("elo"))
+
+        if actual_elo_sum["elo__sum"] != expected_elo_sum:
             logger.critical(
-                f"Initial and resultant ELO sum mismatch: "
-                f"Result {result.id}. "
-                f"initial_elo_sum: {initial_elo_sum}. "
-                f"resultant_elo_sum: {resultant_elo_sum}. "
-                f"participant1.elo_change: {participant1.elo_change}. "
-                f"participant2.elo_change: {participant2.elo_change}"
+                f"ELO SANITY CHECK FAILURE: ELO sum of {actual_elo_sum['elo__sum']} did not match expected value "
+                f"of {expected_elo_sum} upon submission of result {result.id}"
             )
-
-        if config.ENABLE_ELO_SANITY_CHECK:
-            if config.DEBUG_LOGGING_ENABLED:
-                logger.info("ENABLE_ELO_SANITY_CHECK enabled. Performing check.")
-
-            # test here to check ELO total and ensure no corruption
-            match_competition = result.match.round.competition
-            expected_elo_sum = (
-                settings.ELO_START_VALUE
-                * CompetitionParticipation.objects.filter(competition=match_competition).count()
-            )
-            actual_elo_sum = CompetitionParticipation.objects.filter(competition=match_competition).aggregate(
-                Sum("elo")
-            )
-
-            if actual_elo_sum["elo__sum"] != expected_elo_sum:
-                logger.critical(
-                    f"ELO SANITY CHECK FAILURE: ELO sum of {actual_elo_sum['elo__sum']} did not match expected value "
-                    f"of {expected_elo_sum} upon submission of result {result.id}"
-                )
-            elif config.DEBUG_LOGGING_ENABLED:
-                logger.info("ENABLE_ELO_SANITY_CHECK passed!")
-
         elif config.DEBUG_LOGGING_ENABLED:
-            logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
+            logger.info("ENABLE_ELO_SANITY_CHECK passed!")
 
-        bot_statistics.update_stats_based_on_result(sp1, result, sp2)
-        bot_statistics.update_stats_based_on_result(sp2, result, sp1)
+    elif config.DEBUG_LOGGING_ENABLED:
+        logger.info("ENABLE_ELO_SANITY_CHECK disabled. Skipping check.")
 
-        if result.is_crash_or_timeout:
-            try:
-                run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
-            except Exception as e:
-                logger.exception(e)
-    return result
+    bot_statistics.update_stats_based_on_result(sp1, result, sp2)
+    bot_statistics.update_stats_based_on_result(sp2, result, sp1)
+
+    if result.is_crash_or_timeout:
+        try:
+            run_consecutive_crashes_check(result.get_causing_participant_of_crash_or_timeout_result)
+        except Exception as e:
+            logger.exception(e)
 
 
 def run_consecutive_crashes_check(triggering_participation: MatchParticipation):

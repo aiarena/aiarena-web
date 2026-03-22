@@ -21,6 +21,7 @@ from .result import Result
 from .round import Round
 from .service_user import ServiceUser
 from .tag import Tag
+from .temporary_upload import TemporaryUpload
 from .trophy import Trophy, TrophyIcon
 from .user import User
 from .website_user import WebsiteUser
@@ -49,6 +50,7 @@ __all__ = [
     "Round",
     "ServiceUser",
     "Tag",
+    "TemporaryUpload",
     "Trophy",
     "TrophyIcon",
     "User",

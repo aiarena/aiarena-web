@@ -9,6 +9,7 @@
 
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 import graphene
 from constance import config
@@ -16,7 +17,11 @@ from graphene_django.types import ErrorType
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
+from aiarena.api.arenaclient.common.ac_coordinator import ACCoordinator
+from aiarena.api.arenaclient.common.exceptions import LadderDisabled
+from aiarena.api.arenaclient.common.result_submission_handler import process_competition_result, update_match_tags
 from aiarena.core.exceptions import BotUploadsDisabled, CompetitionClosed, CompetitionClosing, MatchRequestException
+from aiarena.core.models import Match, Result, TemporaryUpload
 from aiarena.core.models.bot import Bot
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.competition import Competition
@@ -36,7 +41,11 @@ from aiarena.graphql.types import (
     CompetitionParticipationType,
     MapID,
     MapPoolID,
+    MatchID,
     MatchType,
+    ResultType,
+    TemporaryUploadID,
+    TemporaryUploadType,
 )
 
 
@@ -325,6 +334,223 @@ class SignOut(graphene.Mutation):
         return SignOut(errors=[])
 
 
+# =============================================================================
+# Arena Client Mutations
+# =============================================================================
+
+
+class GetNextMatch(graphene.Mutation):
+    """Get the next match for an arena client to play."""
+
+    match = graphene.Field(MatchType)
+
+    def mutate(self, info: graphene.ResolveInfo) -> "GetNextMatch":
+        user = info.context.user
+        if not user.is_authenticated:
+            raise GraphQLError("Authentication required.")
+
+        if not user.is_arenaclient:
+            raise GraphQLError("Only arena clients can get matches.")
+
+        try:
+            match = ACCoordinator.next_match(user.arenaclient, only_unfinished_matches=False)
+        except LadderDisabled:
+            raise GraphQLError("The ladder is currently disabled.")
+
+        return GetNextMatch(match=match)
+
+
+class RequestUploadUrlsInput(CleanedInputType):
+    count: int = graphene.Int(required=True, description="Number of upload URLs to generate (1-10)")
+
+    @staticmethod
+    def clean_count(value, info):
+        if value < 1 or value > 10:
+            raise ValidationError("Count must be between 1 and 10.")
+        return value
+
+
+class UploadUrlType(graphene.ObjectType):
+    """A presigned upload URL with its associated temporary upload record."""
+
+    upload = graphene.Field(TemporaryUploadType, required=True)
+    upload_url = graphene.String(required=True)
+
+
+class RequestUploadUrls(CleanedInputMutation):
+    """Request presigned URLs for uploading files to S3."""
+
+    class Meta:
+        input_class = RequestUploadUrlsInput
+
+    uploads = graphene.List(graphene.NonNull(UploadUrlType), required=True)
+
+    @classmethod
+    def perform_mutate(cls, info, input_object: RequestUploadUrlsInput):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise GraphQLError("Authentication required.")
+        if not user.is_arenaclient:
+            raise GraphQLError("Only arena clients can request upload URLs.")
+
+        uploads = []
+        for _ in range(input_object.count):
+            upload = TemporaryUpload.create_for_upload(user)
+            uploads.append(
+                UploadUrlType(
+                    upload=upload,
+                    upload_url=upload.generate_presigned_put_url(),
+                )
+            )
+
+        return cls(uploads=uploads, errors=[])
+
+
+class SubmitResultInput(CleanedInputType):
+    """Input for submitting match results."""
+
+    match: Match = MatchID()
+    type: str = graphene.String()
+    game_steps: int = graphene.Int()
+    bot1_avg_step_time: float = graphene.Float()
+    bot2_avg_step_time: float = graphene.Float()
+    bot1_tags: list[str] = graphene.List(graphene.String)
+    bot2_tags: list[str] = graphene.List(graphene.String)
+    # File references (TemporaryUpload IDs)
+    replay_file: TemporaryUpload | None = TemporaryUploadID()
+    arenaclient_log: TemporaryUpload | None = TemporaryUploadID()
+    bot1_data: TemporaryUpload | None = TemporaryUploadID()
+    bot2_data: TemporaryUpload | None = TemporaryUploadID()
+    bot1_log: TemporaryUpload | None = TemporaryUploadID()
+    bot2_log: TemporaryUpload | None = TemporaryUploadID()
+
+    class Meta:
+        required_fields = [
+            "match",
+            "type",
+            "game_steps",
+        ]
+
+    @staticmethod
+    def clean_type(value, info):
+        valid_types = [t[0] for t in Result.TYPES]
+        if value not in valid_types:
+            raise ValidationError(f"Invalid result type. Must be one of: {valid_types}")
+        return value
+
+    @staticmethod
+    def clean_match(match: Match, info):
+        user = info.context.user
+        if match.assigned_to is None or match.assigned_to != user:
+            raise ValidationError("Match is not assigned to this arena client.")
+        return match
+
+
+class SubmitResult(CleanedInputMutation):
+    """Submit the result of a match."""
+
+    class Meta:
+        input_class = SubmitResultInput
+
+    result = graphene.Field(ResultType)
+
+    @staticmethod
+    def _copy_upload(upload: TemporaryUpload | None, file_field) -> None:
+        """Copy a temporary upload to a file field if the upload exists."""
+        if upload is not None:
+            upload.copy_to_file_field(file_field, "")
+
+    @classmethod
+    def perform_mutate(cls, info, input_object: SubmitResultInput):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise GraphQLError("Authentication required.")
+        if not user.is_arenaclient:
+            raise GraphQLError("Only arena clients can submit results.")
+
+        # Lock match and participations to prevent concurrent result submissions
+        match = Match.objects.select_for_update().get(id=input_object.match.id)
+        p1 = match.matchparticipation_set.select_for_update().select_related("bot").get(participant_number=1)
+        p2 = match.matchparticipation_set.select_for_update().select_related("bot").get(participant_number=2)
+
+        # Check after locking (another request may have submitted while we waited)
+        if match.result is not None:
+            raise GraphQLError("Match already has a result.")
+
+        result = Result(
+            match=match,
+            type=input_object.type,
+            game_steps=input_object.game_steps,
+            submitted_by=user,
+        )
+        cls._copy_upload(input_object.replay_file, result.replay_file)
+        cls._copy_upload(input_object.arenaclient_log, result.arenaclient_log)
+        result.save()
+
+        result_cause = Result.calculate_result_cause(input_object.type)
+
+        p1.result = p1.calculate_relative_result(input_object.type)
+        p1.result_cause = result_cause
+        p1.avg_step_time = input_object.bot1_avg_step_time
+        cls._copy_upload(input_object.bot1_log, p1.match_log)
+        p1.save()
+
+        p2.result = p2.calculate_relative_result(input_object.type)
+        p2.result_cause = result_cause
+        p2.avg_step_time = input_object.bot2_avg_step_time
+        cls._copy_upload(input_object.bot2_log, p2.match_log)
+        p2.save()
+
+        match.result = result
+        match.save()
+
+        # Update bot data if applicable (capture old paths for cleanup after commit)
+        old_bot_data_keys = []
+        match_is_requested = match.is_requested
+        if p1.use_bot_data and p1.update_bot_data and not match_is_requested and input_object.bot1_data:
+            if p1.bot.bot_data:
+                old_bot_data_keys.append(p1.bot.bot_data.name)
+            cls._copy_upload(input_object.bot1_data, p1.bot.bot_data)
+            p1.bot.save()
+
+        if p2.use_bot_data and p2.update_bot_data and not match_is_requested and input_object.bot2_data:
+            if p2.bot.bot_data:
+                old_bot_data_keys.append(p2.bot.bot_data.name)
+            cls._copy_upload(input_object.bot2_data, p2.bot.bot_data)
+            p2.bot.save()
+
+        update_match_tags(match, p1.bot.user, p2.bot.user, input_object.bot1_tags, input_object.bot2_tags)
+        process_competition_result(result, p1, p2)
+
+        temp_uploads = [
+            input_object.replay_file,
+            input_object.arenaclient_log,
+            input_object.bot1_data,
+            input_object.bot2_data,
+            input_object.bot1_log,
+            input_object.bot2_log,
+        ]
+
+        def cleanup():
+            # Delete temporary upload S3 objects and DB records
+            for upload in temp_uploads:
+                if upload is not None:
+                    upload.delete_s3_object()
+                    upload.delete()
+            # Delete old bot_data files that were replaced
+            storage = Bot._meta.get_field("bot_data").storage
+            for key in old_bot_data_keys:
+                storage.delete(key)
+
+        # Clean up after transaction commits. If we started deleting old files, and it fails in the middle,
+        # we can no longer go back to the old state (ie we deleted bot data for bot1, but failed when trying to delete
+        # bot data for bot2). This will leave orphaned files in S3, but will result in a correct and consistent state
+        # in the database overall.
+        transaction.on_commit(cleanup)
+
+        return cls(result=result, errors=[])
+
+
 class Mutation(graphene.ObjectType):
     request_match = RequestMatch.Field()
     upload_bot = UploadBot.Field()
@@ -332,3 +558,8 @@ class Mutation(graphene.ObjectType):
     update_competition_participation = UpdateCompetitionParticipation.Field()
     password_sign_in = PasswordSignIn.Field()
     sign_out = SignOut.Field()
+
+    # Arena Client mutations
+    request_upload_urls = RequestUploadUrls.Field()
+    get_next_match = GetNextMatch.Field()
+    submit_result = SubmitResult.Field()
