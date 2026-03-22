@@ -104,6 +104,7 @@ class TestRequestMatch(GraphQLTest):
 
         self.mutate(
             login_user=user,
+            expected_status=400,
             variables={
                 "input": {
                     "bot1": self.to_global_id(BotType, bot.id),
@@ -113,11 +114,7 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_validation_errors={
-                "bot2": [
-                    "Bot2 with ID: '999' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-                ]
-            },
+            expected_errors_like=["Invalid ID format"],
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -143,6 +140,7 @@ class TestRequestMatch(GraphQLTest):
 
         self.mutate(
             login_user=user,
+            expected_status=400,
             variables={
                 "input": {
                     "bot1": 999,
@@ -152,11 +150,7 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_validation_errors={
-                "bot1": [
-                    "Bot1 with ID: '999' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-                ]
-            },
+            expected_errors_like=["Invalid ID format"],
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -255,6 +249,7 @@ class TestRequestMatch(GraphQLTest):
 
         self.mutate(
             login_user=user,
+            expected_status=400,
             variables={
                 "input": {
                     "bot1": self.to_global_id(BotType, bot.id),
@@ -264,11 +259,7 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": 999,
                 }
             },
-            expected_validation_errors={
-                "mapPool": [
-                    "Map pool with ID: '999' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-                ]
-            },
+            expected_errors_like=["Invalid ID format"],
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -444,7 +435,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
         # Create a competition participation
         self.mutate(
             login_user=bot.user,
-            expected_status=200,
+            expected_status=400,
             variables={
                 "input": {
                     "bot": "Abracadabra",
@@ -452,11 +443,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
                     "active": True,
                 }
             },
-            expected_validation_errors={
-                "bot": [
-                    "Bot with ID: 'Abracadabra' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-                ]
-            },
+            expected_errors_like=["Invalid ID format"],
         )
 
     def test_invalid_competition_id(self, competition, bot):
@@ -465,7 +452,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
         # Create a competition participation
         self.mutate(
             login_user=bot.user,
-            expected_status=200,
+            expected_status=400,
             variables={
                 "input": {
                     "bot": self.to_global_id(BotType, bot.id),
@@ -473,11 +460,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
                     "active": True,
                 }
             },
-            expected_validation_errors={
-                "competition": [
-                    "Competition with ID: 'Abracadabra' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-                ]
-            },
+            expected_errors_like=["Invalid ID format"],
         )
 
     def test_update_competition_participation_unauthorized(self, competition, bot, other_user):

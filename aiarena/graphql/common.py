@@ -4,13 +4,15 @@ from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 
 import graphene
-from graphene import InputObjectType
+from graphene import ID, InputObjectType
 from graphene.types.inputobjecttype import InputObjectTypeOptions
 from graphene.types.mutation import MutationOptions
 from graphene_django import DjangoObjectType
 from graphene_django.forms.mutation import _set_errors_flag_to_context
 from graphene_django.types import ErrorType
 from graphql import GraphQLError
+from graphql.language.ast import StringValueNode
+from graphql_relay import from_global_id
 
 from aiarena.core import permissions
 from aiarena.core.utils import camel_case
@@ -237,6 +239,62 @@ class CleanedInputType(InputObjectType):
             _meta = CleanedInputTypeOptions(cls)
         _meta.required_fields = required_fields
         super().__init_subclass_with_meta__(_meta=_meta, **options)
+
+
+class TypeModelChoice(ID):
+    """
+    A GraphQL ID scalar that automatically resolves to a Django model instance.
+
+    Subclass and set `graphql_type` to the GraphQL type:
+
+        class BotID(TypeModelChoice):
+            graphql_type = BotType
+
+    When used in a CleanedInputType, the clean_* method receives the resolved
+    model instance (not the raw ID string).
+    """
+
+    graphql_type = None  # Override in subclass with the GraphQL type
+
+    @classmethod
+    def parse_literal(cls, node, _variables=None):
+        if isinstance(node, StringValueNode):
+            return cls.parse_value(node.value)
+        return None
+
+    @classmethod
+    def parse_value(cls, value):
+        if value is None:
+            return None
+
+        try:
+            type_name, db_id = from_global_id(value)
+        except Exception:
+            raise ValidationError(f'Invalid ID format: "{value}"')
+
+        if not type_name:
+            raise ValidationError(f'Invalid ID format: "{value}"')
+
+        # Handle multiple allowed types
+        if isinstance(cls.graphql_type, (tuple, list)):
+            matching_types = [t for t in cls.graphql_type if t._meta.name == type_name]
+            if not matching_types:
+                allowed = ", ".join(t._meta.name for t in cls.graphql_type)
+                raise ValidationError(f'Wrong ID type "{type_name}" for {allowed}.')
+            graphql_type = matching_types[0]
+        else:
+            graphql_type = cls.graphql_type
+            if graphql_type._meta.name != type_name:
+                raise ValidationError(f'Wrong ID type "{type_name}" passed, expected {graphql_type._meta.name}.')
+
+        # Get the model and query for the instance
+        model = graphql_type._meta.model
+        try:
+            instance = model.objects.get(pk=db_id)
+        except model.DoesNotExist:
+            raise ValidationError(f'Cannot find {model.__name__} with ID "{value}".')
+
+        return instance
 
 
 class AccessDenied(GraphQLError):

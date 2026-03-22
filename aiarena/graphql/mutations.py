@@ -21,8 +21,6 @@ from aiarena.core.models.bot import Bot
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.competition import Competition
 from aiarena.core.models.competition_participation import CompetitionParticipation
-from aiarena.core.models.map import Map
-from aiarena.core.models.map_pool import MapPool
 from aiarena.core.services import bots, supporters
 from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import (
@@ -32,22 +30,23 @@ from aiarena.graphql.common import (
     raise_for_access,
 )
 from aiarena.graphql.types import (
+    BotID,
     BotType,
+    CompetitionID,
     CompetitionParticipationType,
-    CompetitionType,
-    MapPoolType,
-    MapType,
+    MapID,
+    MapPoolID,
     MatchType,
 )
 
 
 class RequestMatchInput(CleanedInputType):
-    bot1: Bot = graphene.ID()
-    bot2: Bot = graphene.ID()
+    bot1 = BotID()
+    bot2 = BotID()
     match_count = graphene.Int()
     map_selection_type = graphene.String()
-    map_pool: MapPool = graphene.ID(default=None)
-    chosen_map: Map = graphene.ID(default=None)
+    map_pool = MapPoolID(default=None)
+    chosen_map = MapID(default=None)
 
     class Meta:
         required_fields = [
@@ -69,42 +68,6 @@ class RequestMatchInput(CleanedInputType):
 
         if self.map_selection_type == "map_pool" and not self.map_pool:
             raise ValidationError("If 'mapSelectionType' is set to 'map_pool', a 'mapPool' must be provided.")
-
-    @staticmethod
-    def clean_bot1(bot, info):
-        try:
-            return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
-        except Exception:
-            raise ValidationError(
-                f"Bot1 with ID: '{bot}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-            )
-
-    @staticmethod
-    def clean_bot2(bot, info):
-        try:
-            return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
-        except Exception:
-            raise ValidationError(
-                f"Bot2 with ID: '{bot}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-            )
-
-    @staticmethod
-    def clean_map_pool(map_pool, info):
-        try:
-            return graphene.Node.get_node_from_global_id(info=info, global_id=map_pool, only_type=MapPoolType)
-        except Exception:
-            raise ValidationError(
-                f"Map pool with ID: '{map_pool}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-            )
-
-    @staticmethod
-    def clean_chosen_map(map, info):
-        try:
-            return graphene.Node.get_node_from_global_id(info=info, global_id=map, only_type=MapType)
-        except Exception:
-            raise ValidationError(
-                f"Map with ID: '{map}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-            )
 
 
 class RequestMatch(CleanedInputMutation):
@@ -140,33 +103,16 @@ class RequestMatch(CleanedInputMutation):
 
 
 class UpdateCompetitionParticipationInput(CleanedInputType):
-    bot: Bot = graphene.ID()
-    competition: Competition = graphene.ID()
+    bot = BotID()
+    competition = CompetitionID()
     active = graphene.Boolean(default=True)
 
     class Meta:
         required_fields = ["bot", "competition"]
 
     @staticmethod
-    def clean_bot(bot, info):
-        try:
-            return graphene.Node.get_node_from_global_id(info=info, global_id=bot, only_type=BotType)
-        except Exception:
-            raise ValidationError(
-                f"Bot with ID: '{bot}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-            )
-
-    @staticmethod
-    def clean_competition(competition, info):
-        try:
-            competition: Competition = graphene.Node.get_node_from_global_id(
-                info=info, global_id=competition, only_type=CompetitionType
-            )
-        except Exception:
-            raise ValidationError(
-                f"Competition with ID: '{competition}' does not exist. Make sure it is a base64 encoded string in the format: 'TypeName:id'. Exception message: Invalid Global ID"
-            )
-
+    def clean_competition(competition: Competition, info):
+        """Additional validation on the resolved Competition instance."""
         if competition.status in ["closing"]:
             raise CompetitionClosing
 
@@ -290,7 +236,7 @@ class UploadBot(CleanedInputMutation):
 
 
 class UpdateBotInput(CleanedInputType):
-    id = graphene.ID()
+    id = BotID()
     bot_zip_publicly_downloadable = graphene.Boolean()
     bot_data_enabled = graphene.Boolean()
     bot_data_publicly_downloadable = graphene.Boolean()
@@ -310,7 +256,7 @@ class UpdateBot(CleanedInputMutation):
 
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UpdateBotInput):
-        bot = graphene.Node.get_node_from_global_id(info=info, global_id=input_object.id, only_type=BotType)
+        bot = input_object.id
         raise_for_access(info, bot)
 
         if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):

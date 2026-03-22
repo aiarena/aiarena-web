@@ -30,7 +30,7 @@ from aiarena.core.services.service_implementations.internal.statistics.elo_graph
 from aiarena.frontend.templatetags.url_utils import get_absolute_url
 from aiarena.frontend.views.bot_detail import RelativeResultFilter
 from aiarena.graphql.chart_types import EloChartType, RaceMatchupBreakdownType, WinrateChartType
-from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID
+from aiarena.graphql.common import CountingConnection, DjangoObjectTypeWithUID, TypeModelChoice
 
 
 class BotRaceType(DjangoObjectTypeWithUID):
@@ -146,6 +146,10 @@ class BotType(DjangoObjectTypeWithUID):
         )
 
 
+class BotID(TypeModelChoice):
+    graphql_type = BotType
+
+
 class CompetitionFilterSet(FilterSet):
     order_by = OrderingFilter(
         fields=[
@@ -222,6 +226,10 @@ class CompetitionType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_wiki_article(root: models.Bot, info, **args):
         return root.get_wiki_article().current_revision.content
+
+
+class CompetitionID(TypeModelChoice):
+    graphql_type = CompetitionType
 
 
 class CompetitionBotMapStatsFilterSet(FilterSet):
@@ -1029,6 +1037,10 @@ class MapType(DjangoObjectTypeWithUID):
         return info.context.build_absolute_uri(root.file.url)
 
 
+class MapID(TypeModelChoice):
+    graphql_type = MapType
+
+
 class MapPoolFilterSet(FilterSet):
     order_by = OrderingFilter(fields=["enabled"])
     name = django_filters.CharFilter(lookup_expr="icontains")
@@ -1044,6 +1056,10 @@ class MapPoolType(DjangoObjectTypeWithUID):
         fields = ["name", "maps", "enabled"]
         filterset_class = MapPoolFilterSet
         connection_class = CountingConnection
+
+
+class MapPoolID(TypeModelChoice):
+    graphql_type = MapPoolType
 
 
 class NewsType(DjangoObjectTypeWithUID):
