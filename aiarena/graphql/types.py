@@ -1180,6 +1180,18 @@ class RoundsType(DjangoObjectTypeWithUID):
         return root.match_set.all()
 
 
+class TemporaryUploadType(DjangoObjectTypeWithUID):
+    """Temporary upload record for arena client file uploads."""
+
+    class Meta:
+        model = TemporaryUpload
+        fields = ["id", "created_at"]
+
+
+class TemporaryUploadID(TypeModelChoice):
+    graphql_type = TemporaryUploadType
+
+
 class StatsType(graphene.ObjectType):
     match_count_1h = graphene.Int()
     match_count_24h = graphene.Int()
