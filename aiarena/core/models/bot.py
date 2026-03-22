@@ -1,4 +1,5 @@
 import logging
+import time
 import uuid
 from zipfile import BadZipFile, ZipFile
 
@@ -31,7 +32,8 @@ def bot_zip_upload_to(instance, filename):
 
 
 def bot_data_upload_to(instance, filename):
-    return "/".join(["bots", str(instance.id), "bot_data"])
+    timestamp = int(time.time() * 1000)
+    return "/".join(["bots", str(instance.id), f"bot_data_{timestamp}"])
 
 
 class Bot(models.Model, LockableModelMixin):
