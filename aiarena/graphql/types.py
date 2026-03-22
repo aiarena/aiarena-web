@@ -25,6 +25,7 @@ from rest_framework.authtoken.models import Token
 from aiarena.core import models
 from aiarena.core.models import BotRace, Match, MatchParticipation, Result, TemporaryUpload, User
 from aiarena.core.models.result import STEPS_PER_SECOND
+from aiarena.core.s3_helpers import get_file_s3_url_with_content_disposition
 from aiarena.core.services import ladders, match_requests, supporters, users
 from aiarena.core.services.service_implementations.internal.statistics.elo_graphs_generator import EloGraphsGenerator
 from aiarena.frontend.templatetags.url_utils import get_absolute_url
@@ -101,6 +102,9 @@ class BotType(DjangoObjectTypeWithUID):
     wiki_article = graphene.String()
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
     trophies = DjangoConnectionField("aiarena.graphql.TrophyType")
+    bot_zip_url = graphene.String(description="Presigned URL to download the bot zip file")
+    bot_data_url = graphene.String(description="Presigned URL to download the bot data file")
+    game_display_id = graphene.String()
 
     class Meta:
         model = models.Bot
@@ -144,6 +148,26 @@ class BotType(DjangoObjectTypeWithUID):
             "match__round__competition",
             "match__result",
         )
+
+    @staticmethod
+    def resolve_bot_zip_url(root: models.Bot, info, **args):
+        if not root.bot_zip:
+            return None
+        if not root.can_download_bot_zip(info.context.user):
+            return None
+        return get_file_s3_url_with_content_disposition(root.bot_zip, f"{root.name}.zip")
+
+    @staticmethod
+    def resolve_bot_data_url(root: models.Bot, info, **args):
+        if not root.bot_data:
+            return None
+        if not root.can_download_bot_data(info.context.user):
+            return None
+        return get_file_s3_url_with_content_disposition(root.bot_data, f"{root.name}_data.zip")
+
+    @staticmethod
+    def resolve_game_display_id(root: models.Bot, info, **args):
+        return str(root.game_display_id)
 
 
 class BotID(TypeModelChoice):
@@ -821,7 +845,15 @@ class MatchParticipationType(DjangoObjectTypeWithUID):
 
     class Meta:
         model = models.MatchParticipation
-        fields = ["elo_change", "avg_step_time", "result", "bot", "match", "result_cause"]
+        fields = [
+            "elo_change",
+            "avg_step_time",
+            "result",
+            "bot",
+            "match",
+            "result_cause",
+            "use_bot_data",
+        ]
         filterset_class = MatchParticipationFilterSet
         connection_class = CountingConnection
 
@@ -999,6 +1031,10 @@ class MatchType(DjangoObjectTypeWithUID):
         if user and user.is_authenticated:
             return root.tags.filter(user=user).select_related("tag", "user")
         return root.tags.none()
+
+
+class MatchID(TypeModelChoice):
+    graphql_type = MatchType
 
 
 class MatchTagType(DjangoObjectTypeWithUID):
