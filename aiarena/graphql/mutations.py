@@ -17,6 +17,7 @@ from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 
 from aiarena.core.exceptions import BotUploadsDisabled, CompetitionClosed, CompetitionClosing, MatchRequestException
+from aiarena.core.models import TemporaryUpload
 from aiarena.core.models.bot import Bot
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.competition import Competition
@@ -37,6 +38,7 @@ from aiarena.graphql.types import (
     MapID,
     MapPoolID,
     MatchType,
+    TemporaryUploadType,
 )
 
 
@@ -325,6 +327,52 @@ class SignOut(graphene.Mutation):
         return SignOut(errors=[])
 
 
+class RequestUploadUrlsInput(CleanedInputType):
+    count: int = graphene.Int(required=True, description="Number of upload URLs to generate (1-10)")
+
+    @staticmethod
+    def clean_count(value, info):
+        if value < 1 or value > 10:
+            raise ValidationError("Count must be between 1 and 10.")
+        return value
+
+
+class UploadUrlType(graphene.ObjectType):
+    """A presigned upload URL with its associated temporary upload record."""
+
+    upload = graphene.Field(TemporaryUploadType, required=True)
+    upload_url = graphene.String(required=True)
+
+
+class RequestUploadUrls(CleanedInputMutation):
+    """Request presigned URLs for uploading files to S3."""
+
+    class Meta:
+        input_class = RequestUploadUrlsInput
+
+    uploads = graphene.List(graphene.NonNull(UploadUrlType), required=True)
+
+    @classmethod
+    def perform_mutate(cls, info, input_object: RequestUploadUrlsInput):
+        user = info.context.user
+        if not user.is_authenticated:
+            raise GraphQLError("Authentication required.")
+        if not user.is_arenaclient:
+            raise GraphQLError("Only arena clients can request upload URLs.")
+
+        uploads = []
+        for _ in range(input_object.count):
+            upload = TemporaryUpload.create_for_upload(user)
+            uploads.append(
+                UploadUrlType(
+                    upload=upload,
+                    upload_url=upload.generate_presigned_put_url(),
+                )
+            )
+
+        return cls(uploads=uploads, errors=[])
+
+
 class Mutation(graphene.ObjectType):
     request_match = RequestMatch.Field()
     upload_bot = UploadBot.Field()
@@ -332,3 +380,6 @@ class Mutation(graphene.ObjectType):
     update_competition_participation = UpdateCompetitionParticipation.Field()
     password_sign_in = PasswordSignIn.Field()
     sign_out = SignOut.Field()
+
+    # Arena Client mutations
+    request_upload_urls = RequestUploadUrls.Field()
