@@ -23,7 +23,7 @@ from graphql_relay import from_global_id
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
-from aiarena.core.models import BotRace, Match, MatchParticipation, Result, User
+from aiarena.core.models import BotRace, Match, MatchParticipation, Result, TemporaryUpload, User
 from aiarena.core.models.result import STEPS_PER_SECOND
 from aiarena.core.services import ladders, match_requests, supporters, users
 from aiarena.core.services.service_implementations.internal.statistics.elo_graphs_generator import EloGraphsGenerator
