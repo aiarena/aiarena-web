@@ -20,7 +20,9 @@ const SupportersComponent: React.FC = () => {
       </div>
 
       <p className="text-lg mb-6">
-        Thank you for your support! <br /> Your contributions help us keep
+        Thank you for your support! <br /> Your <a href="https://www.patreon.com/aiarena" target="_blank" rel="noopener noreferrer" className="text-customGreen hover:text-white transition">
+          Patreon
+        </a> contributions help us keep
         going.
       </p>
       <div className="flex justify-center">
