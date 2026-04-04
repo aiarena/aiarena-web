@@ -1,0 +1,90 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Docker",
+            "type": "shell",
+            "command": "docker compose up",
+            "isBackground": true,
+            "presentation": {
+                "panel": "dedicated",
+                "group": "dev"
+            }
+        },
+        {
+            "label": "Generate GraphQL Schema",
+            "type": "shell",
+            "command": "uv run manage.py graphql_schema",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_ENVIRONMENT": "DEVELOPMENT"
+                },
+            },
+            "presentation": {
+                "panel": "dedicated",
+                "group": "dev"
+            }
+        },
+        {
+            "label": "Backend (Django)",
+            "type": "shell",
+            "dependsOn": [
+                "Generate GraphQL Schema"
+            ],
+            "command": "uv run manage.py runserver",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    "DJANGO_ENVIRONMENT": "DEVELOPMENT"
+                },
+            },
+            "isBackground": true,
+            "presentation": {
+                "panel": "dedicated",
+                "group": "dev"
+            }
+        },
+        {
+            "label": "Frontend (Relay)",
+            "type": "shell",
+            "command": "npm run start_relay",
+            "options": {
+                "cwd": "${workspaceFolder}/aiarena/frontend-spa"
+            },
+            "isBackground": true,
+            "presentation": {
+                "panel": "dedicated",
+                "group": "dev"
+            }
+        },
+        {
+            "label": "Frontend (React)",
+            "type": "shell",
+            "command": "npm run dev",
+            "options": {
+                "cwd": "${workspaceFolder}/aiarena/frontend-spa"
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "custom",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "."
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".",
+                    "endsPattern": "Local:|localhost:|compiled successfully|ready in"
+                }
+            },
+            "presentation": {
+                "panel": "dedicated",
+                "group": "dev"
+            }
+        }
+    ]
+}
