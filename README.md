@@ -19,15 +19,15 @@ A website for running the aiarena.net infrastructure.
 
     ```shell
     uv venv
-    ```
-   
-    After this is done, you'll want to run
-
-    ```shell
     uv sync
     ```
+    to install python deps. 
+    
+    If you encounter build errors (e.g. related to Python.h), install the required system dependencies:
+    ```shell
+    sudo apt install python3-dev build-essential
+    ```
 
-    to install python deps, and
 
     ```shell
     cd aiarena/frontend-spa && npm install
@@ -60,16 +60,44 @@ A website for running the aiarena.net infrastructure.
     * Seed data - run `uv run manage.py migrate` to apply the database migrations, then `uv run manage.py seed` and optionally `uv run manage.py generatestats`
     * Restore backup - run `uv run run.py restore-backup --s3`. That will download the latest production backup, which will already have the migrations applied.
 
-7. Launching the Website
+    Ensure that the postgress client is installed: 
+    ```shell
+    sudo apt install postgresql-client
+    ```
 
+7. Relay pre-requisites
 
+    Note that our implementation of Relay uses Watchman. It is not maintained in apt, so we have to be build it manually. 
+    
+    ```shell
+    sudo apt install -y m4 autoconf automake libtool pkg-config build-essential
+
+    sudo apt install -y curl build-essential cmake ninja-build pkg-config
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    source "$HOME/.cargo/env"
+
+    git clone https://github.com/facebook/watchman.git
+    cd watchman
+
+    source "$HOME/.cargo/env"
+    ./autogen.sh
+   
+    sudo mkdir -p /usr/local/bin /usr/local/lib /usr/local/var/run/watchman
+    sudo cp built/bin/* /usr/local/bin/
+    sudo cp built/lib/* /usr/local/lib/
+    sudo chmod 755 /usr/local/bin/watchman
+    sudo chmod 2777 /usr/local/var/run/watchman
+    sudo ldconfig
+    ```
+
+8. Launching the Website
+    In VSCode, start using "Full Stack 🚀" in the run & debug tab, 
+
+    Otherwise: 
     If the enviornment is not activated - activate it: 
     ```shell
     source .venv/bin/activate
     ```
-
-
-
 
     In the terminal, run: 
     
@@ -89,6 +117,7 @@ A website for running the aiarena.net infrastructure.
     cd aiarena/frontend-spa
     npm run start_relay
     ```    
+
     In yet another terminal - navigate to aiarena-web/aiarena/frontend-spa
     ```shell 
     cd aiarena/frontend-spa
@@ -104,7 +133,7 @@ A website for running the aiarena.net infrastructure.
 
     Otherwise (if you restored the production backup), you can log in with the same username and password that you use in aiarena.net.
 
-8. Install pre-commit hooks
+9. Install pre-commit hooks
 
     Whenever you're pushing code to production, we'll run linters and make sure your code is well-formatted. To get faster feedback on this, you can install pre-commit hooks that will run the exact same checks when you're trying to commit.
 
