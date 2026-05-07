@@ -16,6 +16,8 @@ import { footerLinks } from "@/_data/footerLinks";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import { UserSettingsSectionLogoutMutation } from "./__generated__/UserSettingsSectionLogoutMutation.graphql";
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
+import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 interface UserSettingsSectionProps {
   viewer: UserSettingsSection_viewer$key;
 }
@@ -53,6 +55,10 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
         }
       }
     `,
+  );
+  const [hideSpoilers, setHideSpoilers] = useStateWithLocalStorage<boolean>(
+    "Profile_Hide_Spoilers",
+    false,
   );
 
   const { enqueueSnackbar } = useSnackbar();
@@ -266,6 +272,24 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
                 </div>
               </div>
             </div>
+
+            {/* Website settings */}
+            <div className="bg-darken-2 border border-neutral-600 shadow-lg shadow-black rounded-md backdrop-blur-sm">
+              <h3 className="mt-1 ml-2 text-base font-semibold">Website settings</h3>
+
+              <div className="p-4">
+                <div className="flex items-center justify-between gap-4 bg-black text-gray-300 px-2 py-2 rounded text-sm">
+                  <span>Hide spoilers</span>
+
+                  <SimpleToggle
+                    enabled={hideSpoilers ?? false}
+                    onChange={setHideSpoilers}
+                  />
+
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

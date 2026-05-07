@@ -49,7 +49,10 @@ export default function UserMatchRequestsTable(
       "UserMatchRequests_UserMatchRequestsTable_ColumnVisibility",
       {},
     );
-
+  const [hideSpoilers] = useStateWithLocalStorage<boolean>(
+    "Profile_Hide_Spoilers",
+    false,
+  );
   const { data, loadNext, hasNext, refetch } = usePaginationFragment(
     graphql`
       fragment UserMatchRequestsTable_viewer on Viewer
@@ -177,7 +180,7 @@ export default function UserMatchRequestsTable(
         header: "Bot",
         cell: (info) => {
           const participant1 = info.row.original.participant1;
-          const display_value = formatWinnerName(
+          const display_value = hideSpoilers ? participant1?.name : formatWinnerName(
             info.row.original.result?.winner?.name,
             participant1?.name,
           );
@@ -212,10 +215,10 @@ export default function UserMatchRequestsTable(
         cell: (info) => {
           const participant2 = info.row.original.participant2;
 
-          const display_value = formatWinnerName(
+          const display_value = hideSpoilers ? participant2?.name : formatWinnerName(
             info.row.original.result?.winner?.name,
             info.row.original.participant2?.name,
-          );
+          )
 
           const label = participant2?.name || "";
           const href = `/bots/${getIDFromBase64(participant2?.id, "BotType")}`;
