@@ -1,5 +1,6 @@
 import logging
 import random
+import time
 
 from django.db import transaction
 from django.db.models import Count, Max
@@ -35,6 +36,9 @@ from .internal.rounds import update_round_if_completed
 
 
 logger = logging.getLogger(__name__)
+loggerECS = logging.getLogger("aiarena")
+
+threshold_logger = 3
 
 
 class Matches:
@@ -70,6 +74,7 @@ class Matches:
     def attempt_to_start_a_requested_match(self, requesting_ac: ArenaClient):
         # Try get a requested match
         # Do we want trusted clients to run games not requiring trusted clients?
+        t = time.monotonic()
         matches = (
             Match.objects.select_related("round")
             .only("started", "assigned_to", "round")
@@ -77,8 +82,20 @@ class Matches:
             .select_for_update(of=("self",))
             .order_by("created")
         )
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - Matches attempt_to_start_a_requested_match took %.3fs ",
+                time.monotonic() - t,
+            )
         if matches.count() > 0:
-            return self._start_and_return_a_match(requesting_ac, matches)
+            t = time.monotonic()
+            match = self._start_and_return_a_match(requesting_ac, matches)
+            if time.monotonic() - t > threshold_logger:
+                loggerECS.warning(
+                    "Slow request - Matches _start_and_return_a_match took %.3fs ",
+                    time.monotonic() - t,
+                )
+            return match
         else:
             return None
 
@@ -316,6 +333,7 @@ class Matches:
         # LADDER MATCHES
         # Get rounds with un-started matches
         # The "IN" is a workaround due to postgresql not allowing "FOR UPDATE" with a DISTINCT clause
+        t = time.monotonic()
         rounds = Round.objects.raw(
             """
             SELECT 
@@ -337,28 +355,63 @@ class Matches:
             FOR UPDATE""",
             (competition.id,),
         )
-
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - Matches start_next_match_for_competition rounds query took %.3fs ",
+                time.monotonic() - t,
+            )
+        t = time.monotonic()
         for round in rounds:
             match = self._attempt_to_start_a_ladder_match(requesting_ac, round)
             if match is not None:
+                if time.monotonic() - t > threshold_logger:
+                    loggerECS.warning(
+                        "Slow request - Matches _attempt_to_start_a_ladder_match took %.3fs ",
+                        time.monotonic() - t,
+                    )
                 return match  # a match was found - we're done
 
         # If none of the previous matches were able to start, and we don't have 2 active bots available,
         # then we give up.
         # todo: does this need to be a select_for_update?
+        t = time.monotonic()
         active_bots = self.competitions_service.get_active_bots(competition).select_for_update()
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - Matches get_active_bots took %.3fs ",
+                time.monotonic() - t,
+            )
         if not self.bots_service.available_is_more_than(active_bots, 2):
             raise NotEnoughAvailableBots()
 
         # If we get to here, then we have
         # - no matches from any existing round we can start
         # - at least 2 active bots available for play
-
-        if self.competitions_service.has_reached_maximum_active_rounds(competition):
+        t = time.monotonic()
+        has_reached_max_active_rounds = self.competitions_service.has_reached_maximum_active_rounds(competition)
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - Matches has_reached_maximum_active_rounds took %.3fs ",
+                time.monotonic() - t,
+            )
+        if has_reached_max_active_rounds:
             raise MaxActiveRounds()
         else:  # generate new round
+            t = time.monotonic()
             round = self._attempt_to_generate_new_round(competition)
+            if time.monotonic() - t > threshold_logger:
+                loggerECS.warning(
+                    "Slow request - Matches _attempt_to_generate_new_round took %.3fs ",
+                    time.monotonic() - t,
+                )
+
+            t = time.monotonic()
             match = self._attempt_to_start_a_ladder_match(requesting_ac, round)
+            if time.monotonic() - t > threshold_logger:
+                loggerECS.warning(
+                    "Slow request - Matches _attempt_to_start_a_ladder_match took %.3fs ",
+                    time.monotonic() - t,
+                )
             if match is None:
                 raise APIException("Failed to start match. There might not be any available participants.")
             else:
