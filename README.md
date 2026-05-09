@@ -108,8 +108,8 @@ A website for running the aiarena.net infrastructure.
     In another terminal run:
 
     ```shell
-    uv run manage.py graphql_schema
-    uv run manage.py runserver
+    DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py graphql_schema
+    DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py runserver
     ```
 
     In another terminal - navigate to aiarena-web/aiarena/frontend-spa 
