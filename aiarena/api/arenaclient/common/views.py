@@ -183,6 +183,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     swagger_schema = None  # exclude this from swagger generation
 
     def create(self, request, *args, **kwargs):
+        t = time.monotonic()
         if not config.LADDER_ENABLED:
             raise LadderDisabled()
 
@@ -209,9 +210,17 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 f"bot2_data: {serializer.validated_data.get('bot2_data')} "
                 f"bot2_tags: {serializer.validated_data.get('bot2_tags')} "
             )
-
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - ResultViewSet get_serializer took %.3fs",
+                time.monotonic() - t,
+            )
         result = handle_result_submission(match_id, serializer.validated_data)
-
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - ResultViewSet handle_result_submission took %.3fs",
+                time.monotonic() - t,
+            )
         headers = self.get_success_headers(serializer.data)
         return Response({"result_id": result.id}, status=status.HTTP_201_CREATED, headers=headers)
 
