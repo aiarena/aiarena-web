@@ -1,4 +1,5 @@
 import logging
+from datetime import time
 from wsgiref.util import FileWrapper
 
 from django.core.cache import cache
@@ -55,20 +56,79 @@ class MatchViewSet(viewsets.GenericViewSet):
         )
 
     def create(self, request, *args, **kwargs):
-        no_game_available = cache.get("NoGameAvailable", False)
+        total_start = time.monotonic()
+        user_id = getattr(request.user, "id", "AnonymousUser")
 
-        if request.user.is_arenaclient:
-            match = ACCoordinator.next_match(request.user.arenaclient, no_game_available)
-            if match:
-                self.load_participants(match)
+        logger.warning("next-match create start | user=%s", user_id)
 
-                serializer = self.get_serializer(match)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                if not no_game_available:
-                    cache.set("NoGameAvailable", True, config.GAME_AVAILABLE_CACHE_TIME)
+        try:
+            t = time.monotonic()
+            no_game_available = cache.get("NoGameAvailable", False)
+            logger.warning(
+                "next-match cache.get took %.3fs | user=%s | no_game_available=%s",
+                time.monotonic() - t,
+                user_id,
+                no_game_available,
+            )
 
-        raise NoGameForClient()
+            if request.user.is_arenaclient:
+                t = time.monotonic()
+                match = ACCoordinator.next_match(request.user.arenaclient, no_game_available)
+                logger.warning(
+                    "next-match ACCoordinator.next_match took %.3fs | user=%s | match=%s",
+                    time.monotonic() - t,
+                    user_id,
+                    getattr(match, "id", None),
+                )
+
+                if match:
+                    t = time.monotonic()
+                    self.load_participants(match)
+                    logger.warning(
+                        "next-match load_participants took %.3fs | user=%s | match=%s",
+                        time.monotonic() - t,
+                        user_id,
+                        match.id,
+                    )
+
+                    t = time.monotonic()
+                    serializer = self.get_serializer(match)
+                    logger.warning(
+                        "next-match get_serializer took %.3fs | user=%s | match=%s",
+                        time.monotonic() - t,
+                        user_id,
+                        match.id,
+                    )
+
+                    t = time.monotonic()
+                    data = serializer.data
+                    logger.warning(
+                        "next-match serializer.data took %.3fs | user=%s | match=%s",
+                        time.monotonic() - t,
+                        user_id,
+                        match.id,
+                    )
+
+                    return Response(data, status=status.HTTP_201_CREATED)
+
+                else:
+                    if not no_game_available:
+                        t = time.monotonic()
+                        cache.set("NoGameAvailable", True, config.GAME_AVAILABLE_CACHE_TIME)
+                        logger.warning(
+                            "next-match cache.set took %.3fs | user=%s",
+                            time.monotonic() - t,
+                            user_id,
+                        )
+
+            raise NoGameForClient()
+
+        finally:
+            logger.warning(
+                "next-match create total %.3fs | user=%s",
+                time.monotonic() - total_start,
+                user_id,
+            )
 
     # todo: check match is in progress/bot is in this match
     @action(
