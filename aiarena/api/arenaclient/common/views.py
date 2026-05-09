@@ -62,8 +62,6 @@ class MatchViewSet(viewsets.GenericViewSet):
         total_start = time.monotonic()
         user_id = getattr(request.user, "id", "AnonymousUser")
 
-        loggerECS.warning("Slow request - next-match create start | user=%s", user_id)
-
         try:
             t = time.monotonic()
             no_game_available = cache.get("NoGameAvailable", False)
