@@ -114,6 +114,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "aiarena.core.middleware.track_harakiri_request",
+    "aiarena.core.middleware.slow_request_debug",
     "aiarena.core.middleware.build_number",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",

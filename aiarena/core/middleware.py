@@ -1,4 +1,6 @@
+import logging
 import socket
+import time
 from os import environ
 
 from django.conf import settings
@@ -12,6 +14,7 @@ from redis import Redis
 from aiarena.core.utils import monitoring_minute_key
 
 
+logger = logging.getLogger("aiarena")
 celery_redis = Redis.from_url(settings.CELERY_BROKER_URL)
 
 
@@ -137,5 +140,37 @@ def build_number(get_response):
         response = get_response(request)
         response["BUILD_NUMBER"] = str(settings.BUILD_NUMBER or "")
         return response
+
+    return middleware
+
+
+def slow_request_debug(get_response):
+    def middleware(request: HttpRequest):
+        start = time.monotonic()
+
+        try:
+            return get_response(request)
+        finally:
+            duration = time.monotonic() - start
+
+            if duration > 5:
+                graphql_payload = None
+
+                content_type = request.headers.get("Content-Type", "")
+
+                if "application/json" in content_type and "/graphql" in request.path:
+                    try:
+                        graphql_payload = request.body.decode("utf-8")[:5000]
+                    except Exception:
+                        graphql_payload = "<failed to decode body>"
+
+                logger.warning(
+                    ("Slow request %.2fs | view=%s | user=%s | uri=%s | graphql=%s"),
+                    duration,
+                    get_view_name(request),
+                    getattr(getattr(request, "user", None), "id", "AnonymousUser"),
+                    request.build_absolute_uri(),
+                    graphql_payload,
+                )
 
     return middleware
