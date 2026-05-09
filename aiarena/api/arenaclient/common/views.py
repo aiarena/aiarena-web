@@ -1,5 +1,5 @@
 import logging
-from datetime import time
+import time
 from wsgiref.util import FileWrapper
 
 from django.core.cache import cache
