@@ -30,6 +30,8 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 loggerECS = logging.getLogger("aiarena")
 
+threshold_logger = 3
+
 
 class MatchViewSet(viewsets.GenericViewSet):
     """
@@ -65,50 +67,55 @@ class MatchViewSet(viewsets.GenericViewSet):
         try:
             t = time.monotonic()
             no_game_available = cache.get("NoGameAvailable", False)
-            loggerECS.warning(
-                "Slow request - next-match cache.get took %.3fs | user=%s | no_game_available=%s",
-                time.monotonic() - t,
-                user_id,
-                no_game_available,
-            )
+            if time.monotonic() - t > threshold_logger:
+                loggerECS.warning(
+                    "Slow request - next-match cache.get took %.3fs | user=%s | no_game_available=%s",
+                    time.monotonic() - t,
+                    user_id,
+                    no_game_available,
+                )
 
             if request.user.is_arenaclient:
                 t = time.monotonic()
                 match = ACCoordinator.next_match(request.user.arenaclient, no_game_available)
-                loggerECS.warning(
-                    "Slow request - next-match ACCoordinator.next_match took %.3fs | user=%s | match=%s",
-                    time.monotonic() - t,
-                    user_id,
-                    getattr(match, "id", None),
-                )
+                if time.monotonic() - t > threshold_logger:
+                    loggerECS.warning(
+                        "Slow request - next-match ACCoordinator.next_match took %.3fs | user=%s | match=%s",
+                        time.monotonic() - t,
+                        user_id,
+                        getattr(match, "id", None),
+                    )
 
                 if match:
                     t = time.monotonic()
                     self.load_participants(match)
-                    loggerECS.warning(
-                        "Slow request - next-match load_participants took %.3fs | user=%s | match=%s",
-                        time.monotonic() - t,
-                        user_id,
-                        match.id,
-                    )
+                    if time.monotonic() - t > threshold_logger:
+                        loggerECS.warning(
+                            "Slow request - next-match load_participants took %.3fs | user=%s | match=%s",
+                            time.monotonic() - t,
+                            user_id,
+                            match.id,
+                        )
 
                     t = time.monotonic()
                     serializer = self.get_serializer(match)
-                    loggerECS.warning(
-                        "Slow request - next-match get_serializer took %.3fs | user=%s | match=%s",
-                        time.monotonic() - t,
-                        user_id,
-                        match.id,
-                    )
+                    if time.monotonic() - t > threshold_logger:
+                        loggerECS.warning(
+                            "Slow request - next-match get_serializer took %.3fs | user=%s | match=%s",
+                            time.monotonic() - t,
+                            user_id,
+                            match.id,
+                        )
 
                     t = time.monotonic()
                     data = serializer.data
-                    loggerECS.warning(
-                        "Slow request - next-match serializer.data took %.3fs | user=%s | match=%s",
-                        time.monotonic() - t,
-                        user_id,
-                        match.id,
-                    )
+                    if time.monotonic() - t > threshold_logger:
+                        loggerECS.warning(
+                            "Slow request - next-match serializer.data took %.3fs | user=%s | match=%s",
+                            time.monotonic() - t,
+                            user_id,
+                            match.id,
+                        )
 
                     return Response(data, status=status.HTTP_201_CREATED)
 
@@ -116,11 +123,12 @@ class MatchViewSet(viewsets.GenericViewSet):
                     if not no_game_available:
                         t = time.monotonic()
                         cache.set("NoGameAvailable", True, config.GAME_AVAILABLE_CACHE_TIME)
-                        loggerECS.warning(
-                            "Slow request - next-match cache.set took %.3fs | user=%s",
-                            time.monotonic() - t,
-                            user_id,
-                        )
+                        if time.monotonic() - t > threshold_logger:
+                            loggerECS.warning(
+                                "Slow request - next-match cache.set took %.3fs | user=%s",
+                                time.monotonic() - t,
+                                user_id,
+                            )
 
             raise NoGameForClient()
 
