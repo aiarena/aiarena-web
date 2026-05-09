@@ -74,9 +74,24 @@ class ACCoordinator:
                 # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
                 with transaction.atomic():
                     # this call will apply a select for update, so we do it inside an atomic block
-                    if competitions.check_has_matches_to_play_and_apply_locks(competition):
+                    has_matches = competitions.check_has_matches_to_play_and_apply_locks(competition)
+                    if time.monotonic() - t > 3:
+                        loggerECS.warning(
+                            "Slow request - ACCoordinator check_has_matches_to_play_and_apply_locks took %.3fs | competition=%s",
+                            time.monotonic() - t,
+                            competition.id,
+                        )
+                    if has_matches:
                         try:
-                            return matches.start_next_match_for_competition(arenaclient, competition)
+                            match = matches.start_next_match_for_competition(arenaclient, competition)
+                            if time.monotonic() - t > 3:
+                                loggerECS.warning(
+                                    "Slow request - ACCoordinator start_next_match_for_competition took %.3fs | competition=%s | match=%s",
+                                    time.monotonic() - t,
+                                    competition.id,
+                                    getattr(match, "id", None),
+                                )
+                            return match
                         except (
                             NoMaps,
                             NotEnoughAvailableBots,
