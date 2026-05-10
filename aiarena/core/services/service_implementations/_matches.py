@@ -183,19 +183,29 @@ class Matches:
             t = time.monotonic()
             if available_ladder_matches_to_play:
                 available_match_ids = [m.id for m in available_ladder_matches_to_play]
-
+                t_a = time.monotonic()
                 # Map each match to its participant bot IDs
                 match_bot_map = {}
                 for mp in MatchParticipation.objects.filter(match_id__in=available_match_ids).values(
                     "match_id", "bot_id"
                 ):
                     match_bot_map.setdefault(mp["match_id"], []).append(mp["bot_id"])
-
+                if time.monotonic() - t_a > threshold_logger:
+                    loggerECS.warning(
+                        "Slow request - Matches available_ladder_matches_to_play MatchParticipation.objects.filter took %.3fs ",
+                        time.monotonic() - t_a,
+                    )
+                t_a = time.monotonic()
                 # Identify which available bots have data enabled
                 data_enabled_bot_ids = set(
                     Bot.objects.filter(id__in=bot_ids, bot_data_enabled=True).values_list("id", flat=True)
                 )
-
+                if time.monotonic() - t_a > threshold_logger:
+                    loggerECS.warning(
+                        "Slow request - Matches available_ladder_matches_to_play data_enabled_bot_ids took %.3fs ",
+                        time.monotonic() - t_a,
+                    )
+                t_a = time.monotonic()
                 # Get the most recent match start time for each bot
                 last_match_start_times = dict(
                     MatchParticipation.objects.filter(
@@ -207,6 +217,11 @@ class Matches:
                     .annotate(last_start=Max("match__started"))
                     .values_list("bot_id", "last_start")
                 )
+                if time.monotonic() - t_a > threshold_logger:
+                    loggerECS.warning(
+                        "Slow request - Matches available_ladder_matches_to_play last_match_start_times took %.3fs ",
+                        time.monotonic() - t_a,
+                    )
                 if time.monotonic() - t > threshold_logger:
                     loggerECS.warning(
                         "Slow request - Matches available_ladder_matches_to_play queries took %.3fs ",
