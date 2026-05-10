@@ -108,7 +108,7 @@ class Matches:
     def _attempt_to_start_a_ladder_match(self, requesting_ac: ArenaClient, for_round):
         assert requesting_ac is not None
         assert for_round is not None
-
+        t = time.monotonic()
         ladder_matches_to_play = list(
             Match.objects.raw(
                 """
@@ -121,8 +121,15 @@ class Matches:
                 (for_round.id,),
             )
         )
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - Matches _attempt_to_start_a_ladder_match Match.objects.raw took %.3fs ",
+                time.monotonic() - t,
+            )
 
         if len(ladder_matches_to_play) > 0:
+            t_0 = time.monotonic()
+            t = time.monotonic()
             bots_with_a_ladder_match_to_play = (
                 Bot.objects.exclude(
                     matchparticipation__in=MatchParticipation.objects.filter(
@@ -141,10 +148,14 @@ class Matches:
                 .distinct()
                 .only("id")
             )
-
+            if time.monotonic() - t > threshold_logger:
+                loggerECS.warning(
+                    "Slow request - Matches _attempt_to_start_a_ladder_match bots_with_a_ladder_match_to_play took %.3fs ",
+                    time.monotonic() - t,
+                )
             match_ids = [match.id for match in ladder_matches_to_play]
             bot_ids = [bot.id for bot in bots_with_a_ladder_match_to_play]
-
+            t = time.monotonic()
             available_ladder_matches_to_play = (
                 list(
                     Match.objects.raw(
@@ -161,9 +172,15 @@ class Matches:
                 if bot_ids
                 else []
             )
+            if time.monotonic() - t > threshold_logger:
+                loggerECS.warning(
+                    "Slow request - Matches _attempt_to_start_a_ladder_match Match.objects.raw_2 took %.3fs ",
+                    time.monotonic() - t,
+                )
 
             # Prioritize matches involving bots with data enabled (they can't play concurrent matches)
             # and bots that have waited the longest since their last match.
+            t = time.monotonic()
             if available_ladder_matches_to_play:
                 available_match_ids = [m.id for m in available_ladder_matches_to_play]
 
@@ -190,6 +207,11 @@ class Matches:
                     .annotate(last_start=Max("match__started"))
                     .values_list("bot_id", "last_start")
                 )
+                if time.monotonic() - t > threshold_logger:
+                    loggerECS.warning(
+                        "Slow request - Matches available_ladder_matches_to_play queries took %.3fs ",
+                        time.monotonic() - t,
+                    )
 
                 # Bots with no previous match get the earliest possible time (highest priority)
                 epoch = timezone.datetime.min.replace(tzinfo=timezone.utc)
@@ -210,7 +232,13 @@ class Matches:
 
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
             if self.bots_service.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
-                return self._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
+                match = self._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
+                if time.monotonic() - t_0 > threshold_logger:
+                    loggerECS.warning(
+                        "Slow request - Matches _attempt_to_start_a_ladder_match total took %.3fs ",
+                        time.monotonic() - t_0,
+                    )
+                return match
         return None
 
     def _attempt_to_generate_new_round(self, competition: Competition):
