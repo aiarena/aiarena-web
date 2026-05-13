@@ -113,6 +113,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "aiarena.core.middleware.graphql_token_auth",
     "aiarena.core.middleware.track_harakiri_request",
     "aiarena.core.middleware.slow_request_debug",
     "aiarena.core.middleware.build_number",
