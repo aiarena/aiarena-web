@@ -10,6 +10,8 @@ from django.urls import Resolver404, resolve
 from django.utils.timezone import now
 
 from redis import Redis
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 
 from aiarena.core.utils import monitoring_minute_key
 
@@ -140,6 +142,35 @@ def build_number(get_response):
         response = get_response(request)
         response["BUILD_NUMBER"] = str(settings.BUILD_NUMBER or "")
         return response
+
+    return middleware
+
+
+def graphql_token_auth(get_response):
+    """
+    Authenticate GraphQL requests via DRF tokens (`Authorization: Token <key>`).
+
+    Django's AuthenticationMiddleware only handles session auth, so without this
+    the GraphQL endpoint is session-only — REST tokens issued to arena clients
+    wouldn't work for the GraphQL arena client API.
+    """
+    token_auth = TokenAuthentication()
+
+    def middleware(request: HttpRequest):
+        if not request.path.startswith("/graphql"):
+            return get_response(request)
+        if getattr(request.user, "is_authenticated", False):
+            return get_response(request)
+
+        try:
+            result = token_auth.authenticate(request)
+        except AuthenticationFailed:
+            pass
+        else:
+            if result is not None:
+                request.user, request._auth = result
+
+        return get_response(request)
 
     return middleware
 
