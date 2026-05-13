@@ -383,7 +383,7 @@ class RequestUploadUrls(CleanedInputMutation):
     class Meta:
         input_class = RequestUploadUrlsInput
 
-    uploads = graphene.List(graphene.NonNull(UploadUrlType), required=True)
+    uploads = graphene.List(graphene.NonNull(UploadUrlType))
 
     @classmethod
     def perform_mutate(cls, info, input_object: RequestUploadUrlsInput):
