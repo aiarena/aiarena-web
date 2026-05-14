@@ -17,6 +17,7 @@ import WideButton from "@/_components/_actions/WideButton";
 import { UploadFile } from "@/_components/_actions/UploadFile";
 import SectionDivider from "@/_components/_display/SectionDivider";
 import SquareButton from "@/_components/_actions/SquareButton";
+import { getIDFromBase64 } from "@/_lib/relayHelpers";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -72,8 +73,9 @@ export default function BotSettingsModal({
 
   const [isBiographyModalOpen, setBiographyModalOpen] = useState(false);
 
-  const handleDownload = (url: string) => {
-    window.location.href = `/${url}`;
+  const handleDownload = (kind: "bot_zip" | "bot_data") => {
+    const botId = getIDFromBase64(bot.id, "BotType");
+    window.location.href = `/bots/${botId}/${kind}`;
   };
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
@@ -193,7 +195,7 @@ export default function BotSettingsModal({
 
               <SquareButton
                 disabled={bot.botZip == "{}"}
-                onClick={() => handleDownload(bot.botZip)}
+                onClick={() => handleDownload("bot_zip")}
                 outerClassName="w-full mb-8"
               >
                 <ArrowDownOnSquareIcon
@@ -254,9 +256,7 @@ export default function BotSettingsModal({
 
               <SquareButton
                 disabled={!bot.botData}
-                onClick={() =>
-                  bot.botData ? handleDownload(bot.botData) : null
-                }
+                onClick={() => (bot.botData ? handleDownload("bot_data") : null)}
                 outerClassName="w-full mb-8"
               >
                 <ArrowDownOnSquareStackIcon

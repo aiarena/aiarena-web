@@ -64,8 +64,9 @@ export default function InformationSection({ bot }: InformationSectionProps) {
 
   const lastUpdated = data.botZipUpdated ?? data.created;
 
-  const handleDownload = (url: string) => {
-    window.location.href = `/${url}`;
+  const handleDownload = (kind: "bot_zip" | "bot_data") => {
+    const botId = getIDFromBase64(data.id, "BotType");
+    window.location.href = `/bots/${botId}/${kind}`;
   };
   return (
     <section aria-labelledby="bot-information-heading">
@@ -155,7 +156,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                     <>
                       {hasBotZip ? (
                         <button
-                          onClick={() => handleDownload(data.botZip)}
+                          onClick={() => handleDownload("bot_zip")}
                           className="text-customGreen hover:text-white"
                         >
                           <span className="flex gap-1 items-center ">
@@ -179,7 +180,7 @@ export default function InformationSection({ bot }: InformationSectionProps) {
                     <>
                       {botData && data.botDataEnabled ? (
                         <button
-                          onClick={() => handleDownload(botData)}
+                          onClick={() => handleDownload("bot_data")}
                           className="text-customGreen hover:text-white"
                         >
                           <span className="flex gap-1 items-center ">
