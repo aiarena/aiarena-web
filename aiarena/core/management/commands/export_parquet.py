@@ -3,8 +3,6 @@ from pathlib import Path
 from uuid import UUID
 
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
-from django.db.models.signals import post_delete
 
 import pandas as pd
 
@@ -22,8 +20,19 @@ from aiarena.core.models import (
     Round,
     Tag,
 )
-from aiarena.core.models.match_tag import delete_orphan_tags
 
+
+# Exports competition or a users requested matches to parquet.
+# Data is sanitized to remove sensitive information.
+
+# Exporting 'by year' counts from the end date of a competition.
+# If a competition is started in 2025 but ends in 2026, it will be included in exports for 2026 but not 2025.
+
+# Usage:
+# - Export a specific competition: `python manage.py export_parquet competition <competition_id>`
+# - Export all competitions closed in a specific year: `python manage.py export_parquet all_competitions <year>`
+# - Export matches requested by a specific user in a specific year: `python manage.py export_parquet requested <user_id> <year>`
+# - Export all requested matches in a specific year: `python manage.py export_parquet all_requests <year>`
 
 GAME_FIELDS = ["id", "name", "map_file_extension"]
 GAME_MODE_FIELDS = ["id", "name", "game_id", "game__name"]
@@ -227,10 +236,6 @@ class Command(BaseCommand):
             competition_qs=Competition.objects.filter(id=competition_id),
             success_message=f"Finished sanitized Parquet export for competition {competition_id}",
         )
-
-        # self.cleanup_exported_competition_data(
-        #         competition.id
-        # )
         return ds
 
     def export_all_competitions(self, year, base_output_dir):
@@ -350,63 +355,6 @@ class Command(BaseCommand):
             self.stdout.write(f"- user_{user_id}")
 
         self.stdout.write(self.style.SUCCESS(f"Total exported rows across all requested exports: {total_rows:,}"))
-
-    def cleanup_exported_competition_data(self, competition_id):
-        self.stdout.write(self.style.WARNING(f"Cleaning up exported DB data for competition {competition_id}"))
-
-        with transaction.atomic():
-            rounds = Round.objects.filter(competition_id=competition_id)
-
-            matches = Match.objects.filter(round__competition_id=competition_id)
-
-            match_ids = list(matches.values_list("id", flat=True))
-            result_ids = list(matches.exclude(result_id__isnull=True).values_list("result_id", flat=True))
-
-            # delete m2m rows first
-            Match.tags.through.objects.filter(match_id__in=match_ids).delete()
-
-            # delete participations
-            MatchParticipation.objects.filter(match_id__in=match_ids).delete()
-
-            # delete matches
-            matches.delete()
-
-            # delete results
-            Result.objects.filter(id__in=result_ids).delete()
-
-            # delete rounds
-            rounds.delete()
-
-            # delete orphaned match tags
-            orphaned_match_tags = MatchTag.objects.filter(match__isnull=True)
-
-            orphaned_tag_ids = list(orphaned_match_tags.values_list("tag_id", flat=True))
-
-            post_delete.disconnect(
-                delete_orphan_tags,
-                sender=MatchTag,
-            )
-
-            try:
-                orphaned_match_tags.delete()
-            finally:
-                post_delete.connect(
-                    delete_orphan_tags,
-                    sender=MatchTag,
-                )
-
-            # delete orphaned tags
-            used_tag_ids = MatchTag.objects.values_list(
-                "tag_id",
-                flat=True,
-            ).distinct()
-
-            Tag.objects.filter(id__in=orphaned_tag_ids).exclude(id__in=used_tag_ids).delete()
-
-            # finally delete competition
-            Competition.objects.filter(id=competition_id).delete()
-
-        self.stdout.write(self.style.SUCCESS(f"Finished cleanup for competition {competition_id}"))
 
     def export_match_dataset(
         self,
