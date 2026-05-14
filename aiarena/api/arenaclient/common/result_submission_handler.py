@@ -1,4 +1,5 @@
 import logging
+import time
 from dataclasses import dataclass
 from typing import Any
 
@@ -29,13 +30,23 @@ from .serializers import (
 
 
 logger = logging.getLogger(__name__)
+loggerECS = logging.getLogger("aiarena")
+
+threshold_logger = 3
 
 
 def handle_result_submission(match_id, result_data):
+    t = time.monotonic()
     with transaction.atomic():
         match = Match.objects.prefetch_related(
             Prefetch("matchparticipation_set", MatchParticipation.objects.all().select_related("bot"))
         ).get(id=match_id)
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - handle_result_submission get Match took %.3fs | match_id=%s",
+                time.monotonic() - t,
+                match_id=match_id,
+            )
 
         # validate result
         result = SubmitResultResultSerializer(
@@ -49,6 +60,12 @@ def handle_result_submission(match_id, result_data):
             }
         )
         result.is_valid(raise_exception=True)
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - handle_result_submission validate result took %.3fs | match_id=%s",
+                time.monotonic() - t,
+                match_id=match_id,
+            )
 
         # validate participants
         p1_instance = match.matchparticipation_set.get(participant_number=1)
@@ -76,6 +93,12 @@ def handle_result_submission(match_id, result_data):
             partial=True,
         )
         participant2.is_valid(raise_exception=True)
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - handle_result_submission validate participants took %.3fs | match_id=%s",
+                time.monotonic() - t,
+                match_id=match_id,
+            )
 
         result_submission = ResultSubmission(
             match=match,

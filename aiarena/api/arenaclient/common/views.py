@@ -1,4 +1,5 @@
 import logging
+import time
 from wsgiref.util import FileWrapper
 
 from django.core.cache import cache
@@ -27,6 +28,9 @@ from .serializers import (
 
 
 logger = logging.getLogger(__name__)
+loggerECS = logging.getLogger("aiarena")
+
+threshold_logger = 3
 
 
 class MatchViewSet(viewsets.GenericViewSet):
@@ -55,23 +59,83 @@ class MatchViewSet(viewsets.GenericViewSet):
         )
 
     def create(self, request, *args, **kwargs):
-        no_game_available = cache.get("NoGameAvailable", False)
+        total_start = time.monotonic()
+        user_id = getattr(request.user, "id", "AnonymousUser")
 
-        if request.user.is_arenaclient:
-            match = ACCoordinator.next_match(request.user.arenaclient, no_game_available)
+        try:
+            t = time.monotonic()
+            no_game_available = cache.get("NoGameAvailable", False)
+            if time.monotonic() - t > threshold_logger:
+                loggerECS.warning(
+                    "Slow request - next-match cache.get took %.3fs | user=%s | no_game_available=%s",
+                    time.monotonic() - t,
+                    user_id,
+                    no_game_available,
+                )
 
-            if match:
-                self.load_participants(match)
+            if request.user.is_arenaclient:
+                t = time.monotonic()
+                match = ACCoordinator.next_match(request.user.arenaclient, no_game_available)
+                if time.monotonic() - t > threshold_logger:
+                    loggerECS.warning(
+                        "Slow request - next-match ACCoordinator.next_match took %.3fs | user=%s | match=%s",
+                        time.monotonic() - t,
+                        user_id,
+                        getattr(match, "id", None),
+                    )
 
-                serializer = self.get_serializer(match)
+                if match:
+                    t = time.monotonic()
+                    self.load_participants(match)
+                    if time.monotonic() - t > threshold_logger:
+                        loggerECS.warning(
+                            "Slow request - next-match load_participants took %.3fs | user=%s | match=%s",
+                            time.monotonic() - t,
+                            user_id,
+                            match.id,
+                        )
 
-                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+                    t = time.monotonic()
+                    serializer = self.get_serializer(match)
+                    if time.monotonic() - t > threshold_logger:
+                        loggerECS.warning(
+                            "Slow request - next-match get_serializer took %.3fs | user=%s | match=%s",
+                            time.monotonic() - t,
+                            user_id,
+                            match.id,
+                        )
 
-            else:
-                if not no_game_available:
-                    cache.set("NoGameAvailable", True, config.GAME_AVAILABLE_CACHE_TIME)
+                    t = time.monotonic()
+                    data = serializer.data
+                    if time.monotonic() - t > threshold_logger:
+                        loggerECS.warning(
+                            "Slow request - next-match serializer.data took %.3fs | user=%s | match=%s",
+                            time.monotonic() - t,
+                            user_id,
+                            match.id,
+                        )
+
+                    return Response(data, status=status.HTTP_201_CREATED)
+
+                else:
+                    if not no_game_available:
+                        t = time.monotonic()
+                        cache.set("NoGameAvailable", True, config.GAME_AVAILABLE_CACHE_TIME)
+                        if time.monotonic() - t > threshold_logger:
+                            loggerECS.warning(
+                                "Slow request - next-match cache.set took %.3fs | user=%s",
+                                time.monotonic() - t,
+                                user_id,
+                            )
 
             raise NoGameForClient()
+
+        finally:
+            loggerECS.warning(
+                "Slow request - next-match create total %.3fs | user=%s",
+                time.monotonic() - total_start,
+                user_id,
+            )
 
     # todo: check match is in progress/bot is in this match
     @action(
@@ -119,6 +183,7 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     swagger_schema = None  # exclude this from swagger generation
 
     def create(self, request, *args, **kwargs):
+        t = time.monotonic()
         if not config.LADDER_ENABLED:
             raise LadderDisabled()
 
@@ -145,7 +210,19 @@ class ResultViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
                 f"bot2_data: {serializer.validated_data.get('bot2_data')} "
                 f"bot2_tags: {serializer.validated_data.get('bot2_tags')} "
             )
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - ResultViewSet get_serializer took %.3fs",
+                time.monotonic() - t,
+            )
+        t = time.monotonic()
         result = handle_result_submission(match_id, serializer.validated_data)
+        if time.monotonic() - t > threshold_logger:
+            loggerECS.warning(
+                "Slow request - ResultViewSet handle_result_submission took %.3fs",
+                time.monotonic() - t,
+            )
+        t = time.monotonic()
         headers = self.get_success_headers(serializer.data)
         return Response({"result_id": result.id}, status=status.HTTP_201_CREATED, headers=headers)
 
