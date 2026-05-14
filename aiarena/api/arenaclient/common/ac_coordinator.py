@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from aiarena.core.models import ArenaClient
 
 import logging
-import time
 
 from django.db import connection, transaction
 from django.db.models.signals import pre_save
@@ -33,9 +32,6 @@ from .exceptions import LadderDisabled
 
 
 logger = logging.getLogger(__name__)
-loggerECS = logging.getLogger("aiarena")
-
-threshold_logger = 3
 
 
 class ACCoordinator:
@@ -43,30 +39,17 @@ class ACCoordinator:
 
     @staticmethod
     def next_requested_match(arenaclient: ArenaClient):
-        t = time.monotonic()
         # REQUESTED MATCHES
         with transaction.atomic():
             match = matches.attempt_to_start_a_requested_match(arenaclient)
 
             if match is not None:
-                if time.monotonic() - t > threshold_logger:
-                    loggerECS.warning(
-                        "Slow request - ACCoordinator next_requested_match took %.3fs | match=%s",
-                        time.monotonic() - t,
-                        getattr(match, "id", None),
-                    )
                 return match  # a match was found - we're done
         return None
 
     @staticmethod
     def next_competition_match(arenaclient: ArenaClient):
-        t = time.monotonic()
         competition_ids = ACCoordinator._get_competition_priority_order()
-        if time.monotonic() - t > threshold_logger:
-            loggerECS.warning(
-                "Slow request - ACCoordinator _get_competition_priority_order took %.3fs",
-                time.monotonic() - t,
-            )
         for id in competition_ids:
             competition = Competition.objects.get(id=id)
             # This excludes non-trusted clients from competitions requiring trusted infrastructure
@@ -75,22 +58,11 @@ class ACCoordinator:
                 with transaction.atomic():
                     # this call will apply a select for update, so we do it inside an atomic block
                     has_matches = competitions.check_has_matches_to_play_and_apply_locks(competition)
-                    if time.monotonic() - t > 3:
-                        loggerECS.warning(
-                            "Slow request - ACCoordinator check_has_matches_to_play_and_apply_locks took %.3fs | competition=%s",
-                            time.monotonic() - t,
-                            competition.id,
-                        )
+
                     if has_matches:
                         try:
                             match = matches.start_next_match_for_competition(arenaclient, competition)
-                            if time.monotonic() - t > 3:
-                                loggerECS.warning(
-                                    "Slow request - ACCoordinator start_next_match_for_competition took %.3fs | competition=%s | match=%s",
-                                    time.monotonic() - t,
-                                    competition.id,
-                                    getattr(match, "id", None),
-                                )
+
                             return match
                         except (
                             NoMaps,
@@ -106,20 +78,14 @@ class ACCoordinator:
 
     @staticmethod
     def next_new_match(arenaclient: ArenaClient):
-        t = time.monotonic()
         requested_match = ACCoordinator.next_requested_match(arenaclient)
-        if time.monotonic() - t > threshold_logger:
-            loggerECS.warning(
-                "Slow request - ACCoordinator next_new_match next_requested_match took %.3fs",
-                time.monotonic() - t,
-            )
+
         if requested_match is not None:
             return requested_match
         return ACCoordinator.next_competition_match(arenaclient)
 
     @staticmethod
     def next_match(arenaclient: ArenaClient, only_unfinished_matches: bool) -> Match | None:
-        t = time.monotonic()
         if not config.LADDER_ENABLED:
             raise LadderDisabled()
 
@@ -134,20 +100,11 @@ class ACCoordinator:
                 )
                 .order_by("round_id")
             )
-            if time.monotonic() - t > threshold_logger:
-                loggerECS.warning(
-                    "Slow request - ACCoordinator next_match Match.objects.only took %.3fs",
-                    time.monotonic() - t,
-                )
+
             if len(unfinished_matches) > 0:
                 return unfinished_matches[0]  # todo: re-set started time?
             if only_unfinished_matches:
                 return None  # Return None so we don't try to start a new match
-        if time.monotonic() - t > threshold_logger:
-            loggerECS.warning(
-                "Slow request - ACCoordinator next_match total took %.3fs",
-                time.monotonic() - t,
-            )
         # Trying a new match
         return ACCoordinator.next_new_match(arenaclient)
 
