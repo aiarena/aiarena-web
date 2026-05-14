@@ -1,6 +1,5 @@
 import logging
 import random
-import time
 
 from django.db import transaction
 from django.db.models import Count, Max
@@ -36,9 +35,6 @@ from .internal.rounds import update_round_if_completed
 
 
 logger = logging.getLogger(__name__)
-loggerECS = logging.getLogger("aiarena")
-
-threshold_logger = 3
 
 
 class Matches:
@@ -74,7 +70,6 @@ class Matches:
     def attempt_to_start_a_requested_match(self, requesting_ac: ArenaClient):
         # Try get a requested match
         # Do we want trusted clients to run games not requiring trusted clients?
-        t = time.monotonic()
         matches = (
             Match.objects.select_related("round")
             .only("started", "assigned_to", "round")
@@ -82,19 +77,9 @@ class Matches:
             .select_for_update(of=("self",))
             .order_by("created")
         )
-        if time.monotonic() - t > threshold_logger:
-            loggerECS.warning(
-                "Slow request - Matches attempt_to_start_a_requested_match took %.3fs ",
-                time.monotonic() - t,
-            )
+
         if matches.count() > 0:
-            t = time.monotonic()
             match = self._start_and_return_a_match(requesting_ac, matches)
-            if time.monotonic() - t > threshold_logger:
-                loggerECS.warning(
-                    "Slow request - Matches _start_and_return_a_match took %.3fs ",
-                    time.monotonic() - t,
-                )
             return match
         else:
             return None
@@ -108,7 +93,6 @@ class Matches:
     def _attempt_to_start_a_ladder_match(self, requesting_ac: ArenaClient, for_round):
         assert requesting_ac is not None
         assert for_round is not None
-        t = time.monotonic()
         ladder_matches_to_play = list(
             Match.objects.raw(
                 """
@@ -121,15 +105,8 @@ class Matches:
                 (for_round.id,),
             )
         )
-        if time.monotonic() - t > threshold_logger:
-            loggerECS.warning(
-                "Slow request - Matches _attempt_to_start_a_ladder_match Match.objects.raw took %.3fs ",
-                time.monotonic() - t,
-            )
 
         if len(ladder_matches_to_play) > 0:
-            t_0 = time.monotonic()
-            t = time.monotonic()
             bots_with_a_ladder_match_to_play = (
                 Bot.objects.exclude(
                     matchparticipation__in=MatchParticipation.objects.filter(
@@ -148,14 +125,8 @@ class Matches:
                 .distinct()
                 .only("id")
             )
-            if time.monotonic() - t > threshold_logger:
-                loggerECS.warning(
-                    "Slow request - Matches _attempt_to_start_a_ladder_match bots_with_a_ladder_match_to_play took %.3fs ",
-                    time.monotonic() - t,
-                )
             match_ids = [match.id for match in ladder_matches_to_play]
             bot_ids = [bot.id for bot in bots_with_a_ladder_match_to_play]
-            t = time.monotonic()
             available_ladder_matches_to_play = (
                 list(
                     Match.objects.raw(
@@ -172,40 +143,22 @@ class Matches:
                 if bot_ids
                 else []
             )
-            if time.monotonic() - t > threshold_logger:
-                loggerECS.warning(
-                    "Slow request - Matches _attempt_to_start_a_ladder_match Match.objects.raw_2 took %.3fs ",
-                    time.monotonic() - t,
-                )
 
             # Prioritize matches involving bots with data enabled (they can't play concurrent matches)
             # and bots that have waited the longest since their last match.
-            t = time.monotonic()
             if available_ladder_matches_to_play:
                 available_match_ids = [m.id for m in available_ladder_matches_to_play]
-                t_a = time.monotonic()
                 # Map each match to its participant bot IDs
                 match_bot_map = {}
                 for mp in MatchParticipation.objects.filter(match_id__in=available_match_ids).values(
                     "match_id", "bot_id"
                 ):
                     match_bot_map.setdefault(mp["match_id"], []).append(mp["bot_id"])
-                if time.monotonic() - t_a > threshold_logger:
-                    loggerECS.warning(
-                        "Slow request - Matches available_ladder_matches_to_play MatchParticipation.objects.filter took %.3fs ",
-                        time.monotonic() - t_a,
-                    )
-                t_a = time.monotonic()
+
                 # Identify which available bots have data enabled
                 data_enabled_bot_ids = set(
                     Bot.objects.filter(id__in=bot_ids, bot_data_enabled=True).values_list("id", flat=True)
                 )
-                if time.monotonic() - t_a > threshold_logger:
-                    loggerECS.warning(
-                        "Slow request - Matches available_ladder_matches_to_play data_enabled_bot_ids took %.3fs ",
-                        time.monotonic() - t_a,
-                    )
-                t_a = time.monotonic()
                 # Get the most recent match start time for each bot
                 last_match_start_times = dict(
                     MatchParticipation.objects.filter(
@@ -217,17 +170,6 @@ class Matches:
                     .annotate(last_start=Max("match__started"))
                     .values_list("bot_id", "last_start")
                 )
-                if time.monotonic() - t_a > threshold_logger:
-                    loggerECS.warning(
-                        "Slow request - Matches available_ladder_matches_to_play last_match_start_times took %.3fs ",
-                        time.monotonic() - t_a,
-                    )
-                if time.monotonic() - t > threshold_logger:
-                    loggerECS.warning(
-                        "Slow request - Matches available_ladder_matches_to_play queries took %.3fs ",
-                        time.monotonic() - t,
-                    )
-
                 # Bots with no previous match get the earliest possible time (highest priority)
                 epoch = timezone.datetime.min.replace(tzinfo=timezone.utc)
 
@@ -248,11 +190,6 @@ class Matches:
             # if, out of the bots that have a ladder match to play, at least 2 are active, then try starting matches.
             if self.bots_service.available_is_more_than(bots_with_a_ladder_match_to_play, 2):
                 match = self._start_and_return_a_match(requesting_ac, available_ladder_matches_to_play)
-                if time.monotonic() - t_0 > threshold_logger:
-                    loggerECS.warning(
-                        "Slow request - Matches _attempt_to_start_a_ladder_match total took %.3fs ",
-                        time.monotonic() - t_0,
-                    )
                 return match
         return None
 
@@ -376,7 +313,6 @@ class Matches:
         # LADDER MATCHES
         # Get rounds with un-started matches
         # The "IN" is a workaround due to postgresql not allowing "FOR UPDATE" with a DISTINCT clause
-        t = time.monotonic()
         rounds = Round.objects.raw(
             """
             SELECT 
@@ -398,63 +334,27 @@ class Matches:
             FOR UPDATE""",
             (competition.id,),
         )
-        if time.monotonic() - t > threshold_logger:
-            loggerECS.warning(
-                "Slow request - Matches start_next_match_for_competition rounds query took %.3fs ",
-                time.monotonic() - t,
-            )
-        t = time.monotonic()
         for round in rounds:
             match = self._attempt_to_start_a_ladder_match(requesting_ac, round)
             if match is not None:
-                if time.monotonic() - t > threshold_logger:
-                    loggerECS.warning(
-                        "Slow request - Matches _attempt_to_start_a_ladder_match took %.3fs ",
-                        time.monotonic() - t,
-                    )
                 return match  # a match was found - we're done
 
         # If none of the previous matches were able to start, and we don't have 2 active bots available,
         # then we give up.
         # todo: does this need to be a select_for_update?
-        t = time.monotonic()
         active_bots = self.competitions_service.get_active_bots(competition).select_for_update()
-        if time.monotonic() - t > threshold_logger:
-            loggerECS.warning(
-                "Slow request - Matches get_active_bots took %.3fs ",
-                time.monotonic() - t,
-            )
         if not self.bots_service.available_is_more_than(active_bots, 2):
             raise NotEnoughAvailableBots()
 
         # If we get to here, then we have
         # - no matches from any existing round we can start
         # - at least 2 active bots available for play
-        t = time.monotonic()
         has_reached_max_active_rounds = self.competitions_service.has_reached_maximum_active_rounds(competition)
-        if time.monotonic() - t > threshold_logger:
-            loggerECS.warning(
-                "Slow request - Matches has_reached_maximum_active_rounds took %.3fs ",
-                time.monotonic() - t,
-            )
         if has_reached_max_active_rounds:
             raise MaxActiveRounds()
         else:  # generate new round
-            t = time.monotonic()
             round = self._attempt_to_generate_new_round(competition)
-            if time.monotonic() - t > threshold_logger:
-                loggerECS.warning(
-                    "Slow request - Matches _attempt_to_generate_new_round took %.3fs ",
-                    time.monotonic() - t,
-                )
-
-            t = time.monotonic()
             match = self._attempt_to_start_a_ladder_match(requesting_ac, round)
-            if time.monotonic() - t > threshold_logger:
-                loggerECS.warning(
-                    "Slow request - Matches _attempt_to_start_a_ladder_match took %.3fs ",
-                    time.monotonic() - t,
-                )
             if match is None:
                 raise APIException("Failed to start match. There might not be any available participants.")
             else:
