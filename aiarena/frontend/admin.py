@@ -42,6 +42,10 @@ from aiarena.core.services import competitions, matches
 from aiarena.patreon.models import PatreonAccountBind, PatreonUnlinkedDiscordUID
 
 
+admin.site.site_header = "AiArena Admin"
+admin.site.site_title = "AiArena Admin"
+
+
 class ApiUsageAdminMixin:
     """Adds sortable 30-day API call/duration columns to a user admin changelist."""
 
@@ -64,18 +68,6 @@ class ApiUsageAdminMixin:
     @admin.display(description="API seconds (30d)", ordering="_api_seconds_30d")
     def api_seconds_30d(self, obj):
         return obj._api_seconds_30d or 0
-
-
-class StackedItemInline(admin.StackedInline):
-    classes = ("grp-collapse grp-open",)
-
-
-class TabularItemInline(admin.TabularInline):
-    classes = ("grp-collapse grp-open",)
-
-
-class BotInline(StackedItemInline):
-    model = Bot
 
 
 ##################################################################

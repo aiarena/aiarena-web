@@ -34,9 +34,6 @@ os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(__file__).parent.parent.parent
 APP_DIR = BASE_DIR / "aiarena"
-GRAPPELLI_ADMIN_TITLE = "AiArena Admin"
-GRAPPELLI_SWITCH_USER_ORIGINAL = True
-GRAPPELLI_INDEX_DASHBOARD = "aiarena.frontend.dashboard.CustomIndexDashboard"
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -63,8 +60,6 @@ SQL_TIME_LIMIT = 120  # seconds. Enforced by Slow Query Killer (tm)
 
 INSTALLED_APPS = [
     "registration",
-    "grappelli.dashboard",
-    "grappelli",
     "django_extensions",
     "django.contrib.admin",
     "django.contrib.auth",
