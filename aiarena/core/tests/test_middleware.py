@@ -54,6 +54,32 @@ class TestGraphQLTokenAuthMiddleware:
         assert seen["user"].pk == arenaclient_user.pk
         assert seen["user"].is_authenticated
 
+    def test_valid_token_disables_csrf(self, arenaclient_user, arenaclient_token):
+        """Token-authenticated requests must bypass CSRF — REST clients have no CSRF cookie."""
+        middleware, seen = _make_middleware()
+        request = RequestFactory().post(
+            "/graphql/",
+            HTTP_AUTHORIZATION=f"Token {arenaclient_token}",
+        )
+        request.user = AnonymousUser()
+
+        middleware(request)
+
+        assert getattr(seen["request"], "_dont_enforce_csrf_checks", False) is True
+
+    def test_bad_token_does_not_disable_csrf(self, db):
+        """A bad token must NOT disable CSRF — otherwise the header alone would bypass it."""
+        middleware, seen = _make_middleware()
+        request = RequestFactory().post(
+            "/graphql/",
+            HTTP_AUTHORIZATION="Token not-a-real-token",
+        )
+        request.user = AnonymousUser()
+
+        middleware(request)
+
+        assert getattr(seen["request"], "_dont_enforce_csrf_checks", False) is False
+
     def test_bad_token_leaves_anonymous(self, db):
         middleware, seen = _make_middleware()
         request = RequestFactory().post(
