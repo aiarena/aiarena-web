@@ -168,7 +168,7 @@ def graphql_token_auth(get_response):
             pass
         else:
             if result is not None:
-                request.user, request._auth = result
+                request.user, request.auth = result
                 request._dont_enforce_csrf_checks = True
 
         return get_response(request)
