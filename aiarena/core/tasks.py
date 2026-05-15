@@ -19,8 +19,8 @@ from redis import Redis
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from aiarena.celery import app
-from aiarena.core.middleware import raw_time_spent_in_queue_key
-from aiarena.core.models import Competition
+from aiarena.core.middleware import API_USAGE_KEY_PREFIX, raw_time_spent_in_queue_key
+from aiarena.core.models import ApiUsage, Competition
 from aiarena.core.services import competitions
 from aiarena.core.utils import ReprJSONEncoder, monitoring_minute_key, sql
 from aiarena.loggers import logger
@@ -326,6 +326,44 @@ def request_queue_monitoring():
         ],
     )
     celery_redis.delete(key)
+
+
+API_USAGE_FLUSH_GRACE_SECONDS = 60  # Absorbs clock skew across web hosts so no late RPUSH lands in a key we're reading.
+
+
+@app.task(ignore_result=True)
+def flush_api_usage():
+    now_ts = int(time.time())
+    pattern = f"{API_USAGE_KEY_PREFIX}:*"
+    for raw_key in celery_redis.scan_iter(match=pattern, count=500):
+        key = raw_key.decode()
+        try:
+            _, _, start_ts, end_ts, user_id = key.split(":")
+            start_ts, end_ts, user_id = int(start_ts), int(end_ts), int(user_id)
+        except ValueError:
+            continue
+
+        if end_ts > now_ts - API_USAGE_FLUSH_GRACE_SECONDS:
+            continue
+
+        durations = [int(v) for v in celery_redis.lrange(key, 0, -1)]
+        celery_redis.delete(key)
+        if not durations:
+            continue
+
+        ApiUsage.objects.update_or_create(
+            user_id=user_id,
+            period_start=datetime.datetime.fromtimestamp(start_ts, tz=datetime.UTC),
+            period_end=datetime.datetime.fromtimestamp(end_ts, tz=datetime.UTC),
+            defaults={
+                "call_count": len(durations),
+                "total_duration_ms": sum(durations),
+                "p50_duration_ms": _calc_percentile(durations, 50),
+                "p75_duration_ms": _calc_percentile(durations, 75),
+                "p95_duration_ms": _calc_percentile(durations, 95),
+                "p99_duration_ms": _calc_percentile(durations, 99),
+            },
+        )
 
 
 @app.task(ignore_result=True)

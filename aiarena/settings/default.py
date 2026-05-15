@@ -114,6 +114,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "aiarena.core.middleware.graphql_token_auth",
+    "aiarena.core.middleware.api_usage_tracking",
     "aiarena.core.middleware.track_harakiri_request",
     "aiarena.core.middleware.slow_request_debug",
     "aiarena.core.middleware.build_number",
@@ -580,6 +581,10 @@ if crontab:
         "timeout_overtime_matches": {
             "task": "aiarena.core.tasks.timeout_overtime_matches",
             "schedule": crontab(minute="*/30"),  # At every 30th minute.
+        },
+        "flush_api_usage": {
+            "task": "aiarena.core.tasks.flush_api_usage",
+            "schedule": crontab(minute="1-59/5"),  # :01, :06, :11... — one minute after each 5-min bucket closes.
         },
     }
 

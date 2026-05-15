@@ -2,11 +2,13 @@ from unittest import mock
 
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
+from django.urls import reverse
 
 import pytest
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
-from aiarena.core.middleware import graphql_token_auth
+from aiarena.core.middleware import API_USAGE_KEY_PREFIX, graphql_token_auth
 from aiarena.core.models import ArenaClient
 
 
@@ -145,3 +147,69 @@ class TestGraphQLTokenAuthMiddleware:
 
         authenticate.assert_not_called()
         assert seen["user"].is_anonymous
+
+
+class TestApiUsageTrackingMiddleware:
+    """End-to-end checks that the middleware records token-authenticated API calls.
+
+    We patch celery_redis.rpush so we don't need a live Redis — the assertion is
+    that rpush was called, with a key matching our scheme.
+    """
+
+    @staticmethod
+    def _key_user_ids(rpush_mock):
+        ids = []
+        for call in rpush_mock.call_args_list:
+            key = call.args[0]
+            assert key.startswith(f"{API_USAGE_KEY_PREFIX}:"), key
+            ids.append(int(key.rsplit(":", 1)[1]))
+        return ids
+
+    def test_rest_api_call_records_usage(self, arenaclient_user, arenaclient_token):
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=f"Token {arenaclient_token}")
+
+        with mock.patch("aiarena.core.middleware.celery_redis.rpush") as rpush:
+            response = client.get(reverse("api_bot-list"))
+
+        assert response.status_code == 200, response.content
+        assert rpush.called
+        assert self._key_user_ids(rpush) == [arenaclient_user.pk]
+
+    def test_graphql_call_records_usage(self, arenaclient_user, arenaclient_token):
+        client = APIClient()
+
+        with mock.patch("aiarena.core.middleware.celery_redis.rpush") as rpush:
+            response = client.post(
+                reverse("graphql"),
+                data={"query": "{ viewer { user { id } } }"},
+                format="json",
+                HTTP_AUTHORIZATION=f"Token {arenaclient_token}",
+            )
+
+        assert response.status_code == 200, response.content
+        # Sanity check that the token actually authenticated us — the viewer field
+        # is null/errored when anonymous, so non-null user.id is a reliable signal.
+        body = response.json()
+        assert body.get("data", {}).get("viewer", {}).get("user", {}).get("id"), body
+        assert rpush.called
+        assert self._key_user_ids(rpush) == [arenaclient_user.pk]
+
+    def test_unauthenticated_request_does_not_record(self, db):
+        """Hitting the homepage with no token must not write to Redis."""
+        client = APIClient()
+
+        with mock.patch("aiarena.core.middleware.celery_redis.rpush") as rpush:
+            client.get("/")
+
+        rpush.assert_not_called()
+
+    def test_session_authenticated_request_does_not_record(self, user):
+        """We only count token-auth API usage. A logged-in browser session is not API traffic."""
+        client = APIClient()
+        client.force_login(user)
+
+        with mock.patch("aiarena.core.middleware.celery_redis.rpush") as rpush:
+            client.get("/")
+
+        rpush.assert_not_called()

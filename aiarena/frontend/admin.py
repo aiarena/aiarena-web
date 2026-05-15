@@ -1,5 +1,8 @@
+import datetime
+
 from django import forms
 from django.contrib import admin, messages
+from django.db.models import Q, Sum
 from django.http import HttpResponseRedirect
 from django.utils.safestring import mark_safe
 
@@ -7,6 +10,7 @@ from wiki.editors import getEditor
 from wiki.models import ArticleRevision
 
 from aiarena.core.models import (
+    ApiUsage,
     ArenaClient,
     ArenaClientStatus,
     Bot,
@@ -38,6 +42,30 @@ from aiarena.core.services import competitions, matches
 from aiarena.patreon.models import PatreonAccountBind, PatreonUnlinkedDiscordUID
 
 
+class ApiUsageAdminMixin:
+    """Adds sortable 30-day API call/duration columns to a user admin changelist."""
+
+    def get_queryset(self, request):
+        cutoff = datetime.datetime.now(tz=datetime.UTC) - datetime.timedelta(days=30)
+        recent = Q(api_usage__period_end__gte=cutoff)
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(
+                _api_calls_30d=Sum("api_usage__call_count", filter=recent),
+                _api_seconds_30d=Sum("api_usage__total_duration_ms", filter=recent) / 1000,
+            )
+        )
+
+    @admin.display(description="API calls (30d)", ordering="_api_calls_30d")
+    def api_calls_30d(self, obj):
+        return obj._api_calls_30d or 0
+
+    @admin.display(description="API seconds (30d)", ordering="_api_seconds_30d")
+    def api_seconds_30d(self, obj):
+        return obj._api_seconds_30d or 0
+
+
 class StackedItemInline(admin.StackedInline):
     classes = ("grp-collapse grp-open",)
 
@@ -55,8 +83,42 @@ class BotInline(StackedItemInline):
 ##################################################################
 
 
+@admin.register(ApiUsage)
+class ApiUsageAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "period_start",
+        "period_end",
+        "call_count",
+        "total_duration_ms",
+        "p50_duration_ms",
+        "p75_duration_ms",
+        "p95_duration_ms",
+        "p99_duration_ms",
+    )
+    list_filter = ("period_start",)
+    search_fields = ("user__username",)
+    ordering = ("-period_start",)
+    list_select_related = ("user",)
+    autocomplete_fields = ("user",)
+    readonly_fields = (
+        "user",
+        "period_start",
+        "period_end",
+        "call_count",
+        "total_duration_ms",
+        "p50_duration_ms",
+        "p75_duration_ms",
+        "p95_duration_ms",
+        "p99_duration_ms",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+
 @admin.register(ArenaClient)
-class ArenaClientAdmin(admin.ModelAdmin):
+class ArenaClientAdmin(ApiUsageAdminMixin, admin.ModelAdmin):
     search_fields = ("username",)
     ordering = ["username"]
     list_display = (
@@ -67,6 +129,8 @@ class ArenaClientAdmin(admin.ModelAdmin):
         "type",
         "owner",
         "trusted",
+        "api_calls_30d",
+        "api_seconds_30d",
     )
     list_filter = (
         "date_joined",
@@ -502,7 +566,7 @@ class RoundAdmin(admin.ModelAdmin):
 
 
 @admin.register(ServiceUser)
-class ServiceUserAdmin(admin.ModelAdmin):
+class ServiceUserAdmin(ApiUsageAdminMixin, admin.ModelAdmin):
     search_fields = ("username",)
     list_display = (
         "id",
@@ -521,6 +585,8 @@ class ServiceUserAdmin(admin.ModelAdmin):
         "extra_active_competition_participations",
         "extra_periodic_match_requests",
         "receive_email_comms",
+        "api_calls_30d",
+        "api_seconds_30d",
     )
     list_filter = (
         "last_login",
@@ -610,7 +676,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 @admin.register(WebsiteUser)
-class WebsiteUserAdmin(admin.ModelAdmin):
+class WebsiteUserAdmin(ApiUsageAdminMixin, admin.ModelAdmin):
     search_fields = ("username",)
     list_display = (
         "id",
@@ -630,6 +696,8 @@ class WebsiteUserAdmin(admin.ModelAdmin):
         "extra_periodic_match_requests",
         "receive_email_comms",
         "single_use_match_requests",
+        "api_calls_30d",
+        "api_seconds_30d",
     )
     list_filter = (
         "last_login",

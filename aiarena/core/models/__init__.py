@@ -1,4 +1,5 @@
 # ruff: noqa: F401
+from .api_usage import ApiUsage
 from .arena_client import ArenaClient
 from .arena_client_status import ArenaClientStatus
 from .bot import Bot
@@ -28,6 +29,7 @@ from .website_user import WebsiteUser
 
 
 __all__ = [
+    "ApiUsage",
     "ArenaClient",
     "ArenaClientStatus",
     "Bot",

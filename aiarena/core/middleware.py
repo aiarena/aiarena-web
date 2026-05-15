@@ -9,11 +9,18 @@ from django.shortcuts import render
 from django.urls import Resolver404, resolve
 from django.utils.timezone import now
 
+import sentry_sdk
 from redis import Redis
+from redis.exceptions import RedisError
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed
 
 from aiarena.core.utils import monitoring_minute_key
+
+
+API_USAGE_INTERVAL_SECONDS = 5 * 60
+API_USAGE_KEY_PREFIX = "api_usage:durations"
 
 
 logger = logging.getLogger("aiarena")
@@ -172,6 +179,43 @@ def graphql_token_auth(get_response):
                 request._dont_enforce_csrf_checks = True
 
         return get_response(request)
+
+    return middleware
+
+
+def api_usage_key(period_start_ts: int, period_end_ts: int, user_id: int) -> str:
+    return f"{API_USAGE_KEY_PREFIX}:{period_start_ts}:{period_end_ts}:{user_id}"
+
+
+def current_api_usage_bucket(now_ts: int) -> tuple[int, int]:
+    start = now_ts - (now_ts % API_USAGE_INTERVAL_SECONDS)
+    return start, start + API_USAGE_INTERVAL_SECONDS
+
+
+def api_usage_tracking(get_response):
+    """
+    Record duration of token-authenticated API requests into Redis.
+
+    Buckets are calendar-aligned (Unix-epoch floored) so the bucket a request
+    belongs to is determined by its timestamp, not by when the flush task runs.
+    Silent users produce no keys — only active ones consume Redis memory.
+    """
+
+    def middleware(request: HttpRequest):
+        start = time.monotonic()
+        try:
+            return get_response(request)
+        finally:
+            auth = getattr(request, "auth", None)
+            user = getattr(request, "user", None)
+            if isinstance(auth, Token) and user is not None and user.is_authenticated:
+                duration_ms = int((time.monotonic() - start) * 1000)
+                period_start, period_end = current_api_usage_bucket(int(time.time()))
+                key = api_usage_key(period_start, period_end, user.id)
+                try:
+                    celery_redis.rpush(key, duration_ms)
+                except RedisError as exc:
+                    sentry_sdk.capture_exception(exc)
 
     return middleware
 
