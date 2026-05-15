@@ -39,3 +39,4 @@ class CompetitionBotMapStats(DirtyFieldsMixin, models.Model):
 
     class Meta:
         unique_together = (("bot", "map"),)
+        verbose_name_plural = "Competition bot map stats"

@@ -21,3 +21,6 @@ class ArenaClientStatus(models.Model):
     """The running status of the ArenaClient."""
     logged_at = models.DateTimeField(auto_now_add=True, db_index=True)
     """The datetime this status was logged at."""
+
+    class Meta:
+        verbose_name_plural = "Arena client statuses"
