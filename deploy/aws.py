@@ -379,6 +379,7 @@ def connect_to_ecs_task(cluster_id, task_id, container_name=None):
 
 def create_one_off_task(
     stack_outputs,
+    cluster_id=None,
     task_definition_id=None,
     container_name=None,
     custom_command: list[str] | None = None,
@@ -388,7 +389,8 @@ def create_one_off_task(
     memory,
 ):
     """Create a new ECS task and wait for it to be ready for commands."""
-    cluster_id = stack_outputs.ecs_cluster
+    if not cluster_id:
+        cluster_id = stack_outputs.ecs_cluster
 
     if not task_definition_id:
         task_definitions_list = task_definitions()

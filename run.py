@@ -79,6 +79,15 @@ def _manage_py(env_container, comment, args):
     docker.cli(f"exec -i {env_container} bash -c 'cd /code/ && python manage.py {args}'")
 
 
+def _pick_cluster():
+    clusters = aws.all_clusters()
+    if not clusters:
+        raise RuntimeError("No ECS clusters found")
+    if len(clusters) == 1:
+        return clusters[0]
+    return questionary.select("Choose an ECS cluster", clusters).unsafe_ask()
+
+
 @cli.command(help="Generate cloudformation template")
 def cloudformation():
     region = "default"
@@ -257,8 +266,11 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
     else:
         container_name = container_names[0]
 
+    cluster_id = _pick_cluster()
+
     cluster_id, task_id, container_name = aws.create_one_off_task(
         stack_outputs=stack_outputs,
+        cluster_id=cluster_id,
         task_definition_id=task_definition_id,
         container_name=container_name,
         lifetime_hours=lifetime_hours,
@@ -281,8 +293,7 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
 @click.option("--task-id")
 @click.option("--container-name")
 def production_attach_to_task(task_id, container_name):
-    clusters = aws.all_clusters()
-    cluster_id = questionary.select("Choose an ECS cluster", clusters).unsafe_ask()
+    cluster_id = _pick_cluster()
 
     if task_id:
         task = aws.describe_tasks(cluster_id, [task_id])[task_id]
