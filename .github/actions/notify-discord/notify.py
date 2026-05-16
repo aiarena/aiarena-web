@@ -166,9 +166,13 @@ DISCORD_HEADERS = {
     "User-Agent": "aiarena-notify-discord (+https://github.com/aiarena/aiarena-web)",
 }
 
+# Match GitHub's `/github` integration username so messages group tightly with
+# its commit notifications. Avatar inherits from the webhook's stored config.
+IDENTITY = {"username": "GitHub"}
+
 
 def discord_post(webhook: str, embed: dict) -> str:
-    body = json.dumps({"embeds": [embed]}).encode()
+    body = json.dumps({**IDENTITY, "embeds": [embed]}).encode()
     req = urllib.request.Request(
         f"{webhook}?wait=true",
         data=body,
