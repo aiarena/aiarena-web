@@ -84,6 +84,7 @@ dev = [
     "click==8.3.0",
     "coverage==7.10.6",
     "django-fakeredis==0.1.2",
+    "ecs-deployer-boto3==0.3.0",
     "jinja2==3.1.6",
     "jsonschema==4.25.1",
     "pre-commit==4.3.0",
