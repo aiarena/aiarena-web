@@ -579,33 +579,20 @@ class ApplicationUpdater:
         if self.dry_run:
             echo("Running in dry run mode")
 
-        # Find target group ARNs
-        self.target_group_arns = {}
-        resources = cloudformation_load(skip_secrets=True).get("Resources", {})
-        for name, resource in resources.items():
-            if resource["Type"] != "AWS::ElasticLoadBalancingV2::TargetGroup":
-                continue
-            arn = resource_details(PROJECT_NAME, name)["PhysicalResourceId"]
-            self.target_group_arns[name] = arn
-
-        # Detect clusters and roles in use (logical -> physical name mapping)
-        self.clusters = {}
-        self.roles = {}
-        for service in SERVICES:
-            c = service.cluster_name
-            assert c in resources, f"{c} not found in CloudFormation template"
-            self.clusters[c] = self.clusters.get(c) or physical_name(PROJECT_NAME, c)
-
-            r = service.role_name
-            if not r:
-                continue
-
-            aws_roles = {"AWSServiceRoleForECS"}  # They exist by default, not part of our stack
-            if r in aws_roles:
-                self.roles[r] = r
-            else:
-                assert r in resources, f"{r} not found in CloudFormation template"
-                self.roles[r] = self.roles.get(r) or physical_name(PROJECT_NAME, r)
+        # Logical-id -> physical-id maps. Kept as dicts since callers index by
+        # the logical id declared on each Service. The dicts collapse to one
+        # entry each for the current set of services.
+        self.target_group_arns = {
+            "ALBWebServerTargetGroup": stack_outputs.alb_webserver_target_group_arn,
+        }
+        self.clusters = {
+            "ECSCluster": stack_outputs.ecs_cluster,
+        }
+        # AWSServiceRoleForECS is the AWS-managed service-linked role; it
+        # exists by default outside our stack and maps to itself.
+        self.roles = {
+            "AWSServiceRoleForECS": "AWSServiceRoleForECS",
+        }
 
     @property
     def desired_services(self):
@@ -880,9 +867,9 @@ def get_all_ecs_tasks(cluster):
     return tasks
 
 
-def get_ecs_status(stack_name, services, threads=8):
+def get_ecs_status(stack_outputs, services, threads=8):
     desired_services = {s.name: s for s in services}
-    clusters = {}
+    clusters = {"ECSCluster": stack_outputs.ecs_cluster}
 
     def split_task_def(task_def):
         return task_def.rsplit(":", 1)
@@ -891,7 +878,6 @@ def get_ecs_status(stack_name, services, threads=8):
         """
         Returns task definition with last revision number and its service
         """
-        c = service.cluster_name
         result = cli(
             "ecs list-task-definitions",
             {
@@ -903,9 +889,6 @@ def get_ecs_status(stack_name, services, threads=8):
         task_def, actual_version = split_task_def(
             result["taskDefinitionArns"][0],
         )
-        if c not in clusters:
-            # physical_name take some time, do not use setdefault
-            clusters[c] = physical_name(stack_name, c)
         return task_def, (actual_version, service)
 
     # use threadpool to fetch results in parallel, much faster
@@ -957,7 +940,7 @@ def get_ecs_status(stack_name, services, threads=8):
     }
 
 
-def monitor_ecs_cluster(stack_name, services, limit_minutes):
+def monitor_ecs_cluster(stack_outputs, services, limit_minutes):
     tries = 300
     services = [s for s in services if s.count]
 
@@ -973,7 +956,7 @@ def monitor_ecs_cluster(stack_name, services, limit_minutes):
         if (datetime.now() - start).seconds > 60 * limit_minutes:
             raise TimeoutError(f"Not steady for {limit_minutes} minutes")
         echo(f"[{datetime.now().isoformat()}] Try {i}...")
-        status = get_ecs_status(stack_name=stack_name, services=services)
+        status = get_ecs_status(stack_outputs=stack_outputs, services=services)
         stopped_tasks = [t for t in status["stopped_tasks"] if datetime.fromtimestamp(t["stoppingAt"]) > start]
 
         if stopped_tasks:

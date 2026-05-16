@@ -231,7 +231,7 @@ def deploy_dry_run():
 @timing
 def monitor_ecs():
     aws.monitor_ecs_cluster(
-        stack_name=PROJECT_NAME,
+        stack_outputs=fetch_stack_outputs(),
         services=SERVICES,
         limit_minutes=10,
     )
