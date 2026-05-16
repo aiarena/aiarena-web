@@ -713,7 +713,7 @@ class ApplicationUpdater:
             return
 
         echo(f"Creating service: {service_name}")
-        register_task(match.task.as_dict(environment))
+        register_task(match.task.as_dict(environment, self.stack_outputs))
 
         conf = {
             "service-name": service_name,
@@ -747,10 +747,10 @@ class ApplicationUpdater:
     def update_service(self, cluster_id, service_name, match, environment):
         echo(f"Updating service: {service_name}")
         if self.dry_run:
-            conf_json = json.dumps(match.task.as_dict(environment), indent=2)
+            conf_json = json.dumps(match.task.as_dict(environment, self.stack_outputs), indent=2)
             echo(f"Would have updated {service_name} task with conf:\n{conf_json}\n\n")
         else:
-            register_task(match.task.as_dict(environment))
+            register_task(match.task.as_dict(environment, self.stack_outputs))
         conf = {
             "service": service_name,
             "cluster": cluster_id,

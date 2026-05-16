@@ -62,14 +62,9 @@ class Task:
     def convert_port_to_mapping(port_list):
         return [{"hostPort": host_port, "containerPort": container_port} for (host_port, container_port) in port_list]
 
-    def as_dict(self, environment):
-        from deploy.aws import physical_name
-        from deploy.settings import AWS_ACCOUNT_ID, PROJECT_NAME
-
-        role_arn = f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/{physical_name(PROJECT_NAME, self.role_name)}"
-        execution_role_arn = (
-            f"arn:aws:iam::{AWS_ACCOUNT_ID}:role/{physical_name(PROJECT_NAME, self.execution_role_name)}"
-        )
+    def as_dict(self, environment, stack_outputs):
+        role_arn = stack_outputs.ecs_task_role_arn
+        execution_role_arn = stack_outputs.ecs_task_execution_role_arn
 
         env = [{"name": k, "value": v} for k, v in environment.items()]
         return {
