@@ -206,7 +206,6 @@ def main() -> int:
     jobs_by_name = {j["name"]: j for j in jobs}
     embed = render_embed(config, jobs_by_name, run, repo)
     message_id = discord_post(webhook, embed)
-    print(f"Posted Discord message {message_id}", flush=True)
 
     last_payload = json.dumps(embed, sort_keys=True)
 
@@ -220,16 +219,13 @@ def main() -> int:
         if payload != last_payload:
             discord_patch(webhook, message_id, embed)
             last_payload = payload
-            print("Card updated", flush=True)
 
         watched_terminal = all(
             (j := jobs_by_name.get(entry["name"])) is not None and is_terminal(j) for entry in config
         )
         if watched_terminal:
-            print("All watched jobs terminal; exiting", flush=True)
             return 0
 
-    print("Hit MAX_POLL_DURATION_SECONDS; giving up", file=sys.stderr)
     return 1
 
 
