@@ -214,7 +214,7 @@ def ecs():
         f"{PROJECT_NAME}/cloud "
         f'bash -c "{manage_py_cmd} migrate -v 0 --noinput"',
     )
-    application_updater = aws.ApplicationUpdater()
+    application_updater = aws.ApplicationUpdater(stack_outputs)
     application_updater.update_application(environment)
 
 
@@ -223,7 +223,7 @@ def ecs():
 def deploy_dry_run():
     stack_outputs = fetch_stack_outputs()
     environment, build_number = deploy_environment(stack_outputs)
-    updater = aws.ApplicationUpdater(dry_run=True)
+    updater = aws.ApplicationUpdater(stack_outputs, dry_run=True)
     updater.update_application(environment)
 
 
@@ -243,6 +243,8 @@ def monitor_ecs():
 @click.option("--cpu")
 @click.option("--memory")
 def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory):
+    stack_outputs = fetch_stack_outputs()
+
     task_definitions = aws.task_definitions()
     task_definition_id = questionary.select("Select the base task definition & revision", task_definitions).unsafe_ask()
 
@@ -255,11 +257,8 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
     else:
         container_name = container_names[0]
 
-    clusters = aws.all_clusters()
-    cluster_id = questionary.select("Choose the ECS cluster", clusters).unsafe_ask()
-
     cluster_id, task_id, container_name = aws.create_one_off_task(
-        cluster_id=cluster_id,
+        stack_outputs=stack_outputs,
         task_definition_id=task_definition_id,
         container_name=container_name,
         lifetime_hours=lifetime_hours,
@@ -330,6 +329,7 @@ def production_backup():
 
     echo("Spinning up a temporary task for the backup...")
     cluster_id, task_id, container_name = aws.create_one_off_task(
+        stack_outputs=stack_outputs,
         custom_command=["bash", "-c", f"{pg_dump_cmd} && {s3_mv_cmd}"],
         cpu="256",
         memory="1024",

@@ -390,7 +390,7 @@ def connect_to_ecs_task(cluster_id, task_id, container_name=None):
 
 
 def create_one_off_task(
-    cluster_id=None,
+    stack_outputs,
     task_definition_id=None,
     container_name=None,
     custom_command: list[str] | None = None,
@@ -400,9 +400,7 @@ def create_one_off_task(
     memory,
 ):
     """Create a new ECS task and wait for it to be ready for commands."""
-    if not cluster_id:
-        clusters = all_clusters()
-        cluster_id = clusters[0]
+    cluster_id = stack_outputs.ecs_cluster
 
     if not task_definition_id:
         task_definitions_list = task_definitions()
@@ -440,7 +438,7 @@ def create_one_off_task(
                 "cpu": cpu,
                 "memory": memory,
             },
-            "network-configuration": get_network_configuration(),
+            "network-configuration": get_network_configuration(stack_outputs),
         },
     )
     task_id = result["tasks"][0]["taskArn"].split("/")[-1]
@@ -489,14 +487,14 @@ def clean_fargate_memory(cpu_value, value=None):
     return questionary.select("Pick the memory value", valid).unsafe_ask()
 
 
-def get_network_configuration():
+def get_network_configuration(stack_outputs):
     return {
         "awsvpcConfiguration": {
             "subnets": [
-                physical_name(PROJECT_NAME, "PublicSubnetZoneA"),
-                physical_name(PROJECT_NAME, "PublicSubnetZoneB"),
+                stack_outputs.public_subnet_zone_a,
+                stack_outputs.public_subnet_zone_b,
             ],
-            "securityGroups": [physical_name(PROJECT_NAME, "ECSTaskSecurityGroup")],
+            "securityGroups": [stack_outputs.ecs_task_security_group],
             "assignPublicIp": "ENABLED",
         }
     }
@@ -574,7 +572,8 @@ def register_task(task_definition):
 
 
 class ApplicationUpdater:
-    def __init__(self, dry_run=False):
+    def __init__(self, stack_outputs, dry_run=False):
+        self.stack_outputs = stack_outputs
         self.dry_run = dry_run
 
         if self.dry_run:
@@ -730,7 +729,7 @@ class ApplicationUpdater:
         }
 
         if match.add_network_configuration:
-            conf["network-configuration"] = get_network_configuration()
+            conf["network-configuration"] = get_network_configuration(self.stack_outputs)
 
         if match.container_port is not None:
             target_group = self.target_group_arns[match.target_group]
@@ -767,7 +766,7 @@ class ApplicationUpdater:
         }
 
         if match.add_network_configuration:
-            conf["network-configuration"] = get_network_configuration()
+            conf["network-configuration"] = get_network_configuration(self.stack_outputs)
 
         if match.container_port is not None:
             target_group = self.target_group_arns[match.target_group]
