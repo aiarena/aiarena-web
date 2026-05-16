@@ -32,11 +32,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       actions: read
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/notify-discord
+      - uses: ipeterov/discord-notify-action@v1
         with:
           webhook: ${{ secrets.CI_UPDATES_DISCORD_WEBHOOK }}
+          jobs: |
+            - linters
+            - tests
+            - tests-playwright
+            - prepare-images
+            - deploy
 
   linters:
     name: Linters
