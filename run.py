@@ -321,9 +321,10 @@ def production_backup():
         now.isoformat("_").replace(":", "-"),
     )
     backup_file = f"/tmp/{filename}"  # nosec
+    stack_outputs = fetch_stack_outputs()
     password = aws.get_secrets()["POSTGRES_ROOT_PASSWORD"]
-    host = aws.db_endpoint(PROJECT_NAME, "MainDB")
-    bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
+    host = stack_outputs.main_db_endpoint
+    bucket = stack_outputs.backups_bucket
     pg_dump_cmd = f"PGPASSWORD={password} pg_dump -U {PRODUCTION_DB_ROOT_USER} -h {host} {DB_NAME} -Fc -f {backup_file}"
     s3_mv_cmd = f"aws s3 mv {backup_file} s3://{bucket}/"
 
@@ -382,7 +383,8 @@ def restore_backup(
     """
 
     if s3:
-        bucket = aws.physical_name(PROJECT_NAME, "backupsBucket")
+        stack_outputs = fetch_stack_outputs()
+        bucket = stack_outputs.backups_bucket
         backups = aws.cli(
             "s3api list-objects-v2",
             {
