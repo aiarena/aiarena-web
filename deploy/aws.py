@@ -4,7 +4,6 @@ import os
 import subprocess
 import time
 from functools import wraps
-from shlex import quote
 
 import questionary
 
@@ -12,7 +11,6 @@ from . import docker
 from .session import get_boto3_session
 from .settings import (
     AWS_ELB_HEALTH_CHECK_ENDPOINT,
-    AWS_REGION,
     CONTAINER_INSIGHTS,
     DB_NAME,
     PRIVATE_REGISTRY_URL,
@@ -22,48 +20,8 @@ from .settings import (
     UWSGI_CONTAINER_NAME,
     WEB_PORT,
 )
-from .utils import echo, run
+from .utils import echo
 from .yaml_template import load_yaml_template
-
-
-def cli(
-    command: str,
-    conf=None,
-    region=None,
-    parse_output=True,
-    capture_stderr=False,
-    **kwargs,
-):
-    def format_value(value):
-        if isinstance(value, str):
-            return value
-        json_str = json.dumps(value, separators=(",", ":"))
-        return quote(json_str)
-
-    if conf is None:
-        conf = {}
-    arguments = " ".join(f"--{k} {format_value(v)}" for k, v in conf.items())
-    cmd = f"{command} {arguments}"
-
-    if parse_output:
-        kwargs["capture_stdout"] = True
-    if capture_stderr:
-        kwargs["capture_stderr"] = True
-
-    region = region or AWS_REGION
-    if os.environ.get("AWS_ACCESS_KEY_ID"):
-        prefix = f"aws --region {region}"
-    else:
-        profile = os.environ.get("AWS_PROFILE") or PROJECT_NAME
-        prefix = f"aws --profile {profile} --region {region}"
-    cmd = f"{prefix} {cmd}"
-
-    result = run(cmd, **kwargs)
-
-    if parse_output:
-        result = json.loads("".join(result.stdout_lines))
-
-    return result
 
 
 def get_secrets(secret_id="production-env"):
@@ -188,73 +146,84 @@ def push_manifest(
 
 
 def task_definitions():
-    arn_list = cli("ecs list-task-definitions")["taskDefinitionArns"]
-    return [task_definition_arn.split("/")[-1] for task_definition_arn in arn_list]
+    ecs = get_boto3_session().client("ecs")
+    arn_list = ecs.list_task_definitions()["taskDefinitionArns"]
+    return [arn.split("/")[-1] for arn in arn_list]
 
 
 def task_definition_container_names(task_definition):
-    result = cli(
-        "ecs describe-task-definition",
-        {"task-definition": task_definition},
-    )
-    container_definitions = result["taskDefinition"]["containerDefinitions"]
-    return [container["name"] for container in container_definitions]
+    ecs = get_boto3_session().client("ecs")
+    result = ecs.describe_task_definition(taskDefinition=task_definition)
+    return [c["name"] for c in result["taskDefinition"]["containerDefinitions"]]
 
 
 def all_clusters():
-    arn_list = cli("ecs list-clusters")["clusterArns"]
-    return [cluster_arn.split("/")[-1] for cluster_arn in arn_list]
+    ecs = get_boto3_session().client("ecs")
+    arn_list = ecs.list_clusters()["clusterArns"]
+    return [arn.split("/")[-1] for arn in arn_list]
 
 
 def cluster_services(cluster):
-    arn_list = cli("ecs list-services", {"cluster": cluster})["serviceArns"]
-    return [service_arn.split("/")[-1] for service_arn in arn_list]
+    ecs = get_boto3_session().client("ecs")
+    arn_list = ecs.list_services(cluster=cluster)["serviceArns"]
+    return [arn.split("/")[-1] for arn in arn_list]
 
 
 def describe_tasks(cluster, task_list):
-    tasks = cli(
-        "ecs describe-tasks",
-        {
-            "cluster": cluster,
-            "tasks": task_list,
-        },
-    )["tasks"]
+    if not task_list:
+        return {}
+    ecs = get_boto3_session().client("ecs")
+    tasks = ecs.describe_tasks(cluster=cluster, tasks=task_list)["tasks"]
     for task in tasks:
         task["id"] = task["taskArn"].split("/")[-1]
     return {task["id"]: task for task in tasks}
 
 
 def service_tasks(cluster, service):
-    arn_list = cli("ecs list-tasks", {"cluster": cluster, "service-name": service})["taskArns"]
+    ecs = get_boto3_session().client("ecs")
+    arn_list = ecs.list_tasks(cluster=cluster, serviceName=service)["taskArns"]
     return describe_tasks(cluster, arn_list)
 
 
 def execute_command(cluster_id, task_id, command: str, container_name=None):
-    conf = {
-        "cluster": cluster_id,
-        "task": task_id,
-        "command": f'"{command}"',
-        "interactive": "",  # non-interactive mode isn't actually supported
-    }
+    """Run an interactive command inside a task via ECS Exec.
 
+    Shells out to the AWS CLI because the underlying SSM session manager plugin
+    needs a real TTY — boto3 alone can't drive an interactive session.
+    """
+    session = get_boto3_session()
+    cmd = [
+        "aws",
+        "ecs",
+        "execute-command",
+        "--cluster",
+        cluster_id,
+        "--task",
+        task_id,
+        "--command",
+        command,
+        "--interactive",
+        "--region",
+        session.region_name,
+    ]
+    # boto3 reports profile_name == "default" when no profile was passed (e.g.
+    # under OIDC in CI where credentials come from environment variables). The
+    # AWS CLI errors out on `--profile default` when there's no ~/.aws/config,
+    # so only forward --profile when we attached a real one in get_boto3_session.
+    if session.profile_name and session.profile_name != "default":
+        cmd.extend(["--profile", session.profile_name])
     if container_name:
-        conf["container"] = container_name
+        cmd.extend(["--container", container_name])
 
     # Retry logic for when execute agent is not ready yet
     max_attempts = 10
     attempts = 0
     while attempts <= max_attempts:
         try:
-            cli(
-                "ecs execute-command",
-                conf,
-                parse_output=False,
-                capture_stderr=True,
-            )
-            break  # Success, exit retry loop
-        except RuntimeError as e:
+            subprocess.run(cmd, check=True)
+            break
+        except subprocess.CalledProcessError as e:
             if attempts == max_attempts:
-                # Last attempt failed, re-raise the error
                 raise RuntimeError("Execute agent wasn't available after 10 attempts, giving up :(") from e
             echo("Execute agent not running yet, re-trying in 10s")
             attempts += 1
@@ -269,15 +238,11 @@ def wait_for_task_status(
     give_up_after_seconds=None,
 ):
     """Wait for an ECS task to reach a status."""
-
+    ecs = get_boto3_session().client("ecs")
     t_start = time.time()
 
     while True:
-        tasks = cli(
-            "ecs describe-tasks",
-            {"cluster": cluster_id, "tasks": task_id},
-        )["tasks"]
-
+        tasks = ecs.describe_tasks(cluster=cluster_id, tasks=[task_id])["tasks"]
         task = tasks[0]
         task_last_status = task["lastStatus"]
         if task_last_status == status:
@@ -295,13 +260,9 @@ def wait_for_task_status(
 
 
 def get_task_exit_code(cluster_id, task_id, container_name):
-    # Check if the task succeeded
-    tasks = cli(
-        "ecs describe-tasks",
-        {"cluster": cluster_id, "tasks": task_id},
-    )["tasks"]
-    task = tasks[0]
-    container = next(c for c in task["containers"] if c["name"] == container_name)
+    ecs = get_boto3_session().client("ecs")
+    tasks = ecs.describe_tasks(cluster=cluster_id, tasks=[task_id])["tasks"]
+    container = next(c for c in tasks[0]["containers"] if c["name"] == container_name)
     return container.get("exitCode")
 
 
@@ -353,11 +314,8 @@ def connect_to_ecs_task(cluster_id, task_id, container_name=None):
     wait_for_task_status(cluster_id, task_id, "RUNNING")
 
     # Get task details after it's running
-    tasks = cli(
-        "ecs describe-tasks",
-        {"cluster": cluster_id, "tasks": task_id},
-    )["tasks"]
-    task = tasks[0]
+    ecs = get_boto3_session().client("ecs")
+    task = ecs.describe_tasks(cluster=cluster_id, tasks=[task_id])["tasks"][0]
 
     if len(task["containers"]) > 1 and not container_name:
         raise ValueError(
@@ -407,27 +365,23 @@ def create_one_off_task(
         command = ["sleep", str(lifetime_hours * 60 * 60)]
 
     echo(f"Creating ECS task using {task_definition_id}...")
-    result = cli(
-        "ecs run-task",
-        {
-            "cluster": cluster_id,
-            "capacity-provider-strategy": [
-                {"capacityProvider": "FARGATE_SPOT", "weight": 1},
+    ecs = get_boto3_session().client("ecs")
+    result = ecs.run_task(
+        cluster=cluster_id,
+        capacityProviderStrategy=[{"capacityProvider": "FARGATE_SPOT", "weight": 1}],
+        enableExecuteCommand=True,
+        taskDefinition=task_definition_id,
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": container_name,
+                    "command": command,
+                },
             ],
-            "enable-execute-command": "",
-            "task-definition": task_definition_id,
-            "overrides": {
-                "containerOverrides": [
-                    {
-                        "name": container_name,
-                        "command": command,
-                    },
-                ],
-                "cpu": cpu,
-                "memory": memory,
-            },
-            "network-configuration": get_network_configuration(stack_outputs),
+            "cpu": cpu,
+            "memory": memory,
         },
+        networkConfiguration=get_network_configuration(stack_outputs),
     )
     task_id = result["tasks"][0]["taskArn"].split("/")[-1]
 

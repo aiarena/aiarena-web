@@ -283,11 +283,7 @@ def production_one_off_task(lifetime_hours, dont_kill_on_disconnect, cpu, memory
     aws.connect_to_ecs_task(cluster_id, task_id, container_name)
 
     if not dont_kill_on_disconnect:
-        aws.cli(
-            "ecs stop-task",
-            {"cluster": cluster_id, "task": task_id},
-            parse_output=True,
-        )
+        get_boto3_session().client("ecs").stop_task(cluster=cluster_id, task=task_id)
         echo(f"Task {task_id} stopped")
 
 
