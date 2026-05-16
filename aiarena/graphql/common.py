@@ -159,7 +159,7 @@ class CleanedInputMutation(graphene.Mutation):
         for field in required_fields:
             field_path = f"{path}.{field}" if path else field
 
-            if field not in input_object.keys() or not input_object[field]:
+            if field not in input_object.keys() or input_object[field] is None:
                 errors.append(
                     ErrorType(
                         field=camel_case(field_path),
