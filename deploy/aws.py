@@ -312,20 +312,13 @@ def get_task_exit_code(cluster_id, task_id, container_name):
 
 def print_task_logs(cluster_id, task_id, container_name):
     """Print CloudWatch logs for an ECS task."""
-    # Get task details to find the log configuration
-    tasks = cli(
-        "ecs describe-tasks",
-        {"cluster": cluster_id, "tasks": task_id},
-    )["tasks"]
-    task = tasks[0]
+    session = get_boto3_session()
+    ecs = session.client("ecs")
+    logs = session.client("logs")
 
-    # Get task definition to find log group
-    task_def = cli(
-        "ecs describe-task-definition",
-        {"task-definition": task["taskDefinitionArn"]},
-    )["taskDefinition"]
+    task = ecs.describe_tasks(cluster=cluster_id, tasks=[task_id])["tasks"][0]
+    task_def = ecs.describe_task_definition(taskDefinition=task["taskDefinitionArn"])["taskDefinition"]
 
-    # Find log configuration for the container
     container_def = next(c for c in task_def["containerDefinitions"] if c["name"] == container_name)
     log_config = container_def.get("logConfiguration", {})
 
@@ -341,20 +334,16 @@ def print_task_logs(cluster_id, task_id, container_name):
         echo("No log group configured for this task")
         return
 
-    # Construct log stream name: {prefix}/{container_name}/{task_id}
     if log_stream_prefix:
         log_stream = f"{log_stream_prefix}/{container_name}/{task_id}"
     else:
         log_stream = f"{container_name}/{task_id}"
 
-    # Fetch logs using filter-log-events (works with AWS CLI v1 and v2)
-    result = cli(
-        "logs filter-log-events",
-        {
-            "log-group-name": log_group,
-            "log-stream-names": log_stream,
-        },
-    )
+    try:
+        result = logs.filter_log_events(logGroupName=log_group, logStreamNames=[log_stream])
+    except logs.exceptions.ResourceNotFoundException:
+        echo(f"Log stream not found: {log_stream}")
+        return
 
     events = result.get("events", [])
     if not events:
