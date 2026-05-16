@@ -11,6 +11,7 @@ from shlex import quote
 import questionary
 
 from . import docker
+from .session import get_boto3_session
 from .settings import (
     AWS_ELB_HEALTH_CHECK_ENDPOINT,
     AWS_REGION,
@@ -69,8 +70,9 @@ def cli(
 
 
 def get_secrets(secret_id="production-env"):
-    secret_string = cli("secretsmanager get-secret-value", {"secret-id": secret_id})["SecretString"]
-    secrets: dict = json.loads(secret_string)
+    client = get_boto3_session().client("secretsmanager")
+    response = client.get_secret_value(SecretId=secret_id)
+    secrets: dict = json.loads(response["SecretString"])
 
     # Printing out the special add-mask instruction doesn't show up in
     # GitHub Actions, and instead makes it so that any occurrences of those
@@ -90,8 +92,8 @@ def store_secret(key, value, secret_id="production-env"):
         raise RuntimeError("Aborting...")
 
     current_values[key] = value
-    secret_string = quote(json.dumps(current_values))
-    cli("secretsmanager put-secret-value", {"secret-id": secret_id, "secret-string": secret_string})
+    client = get_boto3_session().client("secretsmanager")
+    client.put_secret_value(SecretId=secret_id, SecretString=json.dumps(current_values))
 
 
 def remove_secret(key, secret_id="production-env"):
@@ -101,8 +103,8 @@ def remove_secret(key, secret_id="production-env"):
         return
 
     del current_values[key]
-    secret_string = quote(json.dumps(current_values))
-    cli("secretsmanager put-secret-value", {"secret-id": secret_id, "secret-string": secret_string})
+    client = get_boto3_session().client("secretsmanager")
+    client.put_secret_value(SecretId=secret_id, SecretString=json.dumps(current_values))
 
 
 def ensure_docker_login(func):
