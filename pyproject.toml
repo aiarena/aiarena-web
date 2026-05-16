@@ -74,6 +74,21 @@ addopts = "--tb=short --showlocals --browser=chromium"
 markers = ["playwright"]
 python_files = ["test_*.py", "tests.py"]
 
+[project.scripts]
+backups = "deploy.cli.backups:backups"
+connect = "deploy.cli.connect:connect"
+deploy = "deploy.cli.deploy:deploy"
+dev = "deploy.cli.dev:dev"
+infra = "deploy.cli.infra:infra"
+secrets = "deploy.cli.secrets:secrets"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["deploy"]
+
 [tool.uv.sources]
 django-discord-bind = { git = "https://github.com/aiarena/django-discord-bind.git", rev = "7f454d4d02593eb40762e95979d85c8cde733de0" }
 drf-yasg = { git = "https://github.com/max-muoto/drf-yasg.git", rev = "68cc6fa76848d1d0194d847569009eb603e516b2" }

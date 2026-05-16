@@ -255,7 +255,7 @@ jobs:
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           MAINTENANCE_MODE: ${{ vars.MAINTENANCE_MODE }}
-        run: uv run run.py prepare-images
+        run: uv run deploy prepare-images
 
   deploy:
     if: github.event_name != 'pull_request'
@@ -289,7 +289,7 @@ jobs:
           BUILD_NUMBER: ${{ github.run_number }}
           PREPARED_IMAGES: ${{ needs.prepare-images.outputs.images }}
           MAINTENANCE_MODE: ${{ vars.MAINTENANCE_MODE }}
-        run: uv run run.py ecs
+        run: uv run deploy migrate-and-update
 
       - name: Monitor deployment
-        run: uv run run.py monitor-ecs
+        run: uv run deploy monitor
