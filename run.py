@@ -8,8 +8,10 @@ from pathlib import Path
 import click
 import questionary
 import yaml
+from ecs_deployer_boto3 import ApplicationUpdater, DeploymentMonitor
 
 from deploy import aws, docker
+from deploy.services.config import get_services
 from deploy.session import get_boto3_session
 from deploy.settings import (
     AWS_REGION,
@@ -19,7 +21,6 @@ from deploy.settings import (
     PRODUCTION_DB_USER,
     PROJECT_NAME,
     PROJECT_PATH,
-    SERVICES,
 )
 from deploy.stack_outputs import StackOutputs, fetch_stack_outputs
 from deploy.utils import echo, env_as_cli_args, run, timing
@@ -224,7 +225,8 @@ def ecs():
         f"{PROJECT_NAME}/cloud "
         f'bash -c "{manage_py_cmd} migrate -v 0 --noinput"',
     )
-    application_updater = aws.ApplicationUpdater(stack_outputs)
+    services = get_services(stack_outputs)
+    application_updater = ApplicationUpdater(services, get_boto3_session())
     application_updater.update_application(environment)
 
 
@@ -233,18 +235,17 @@ def ecs():
 def deploy_dry_run():
     stack_outputs = fetch_stack_outputs()
     environment, build_number = deploy_environment(stack_outputs)
-    updater = aws.ApplicationUpdater(stack_outputs, dry_run=True)
+    services = get_services(stack_outputs)
+    updater = ApplicationUpdater(services, get_boto3_session(), dry_run=True)
     updater.update_application(environment)
 
 
 @cli.command(help="Monitor ECS deployment")
 @timing
 def monitor_ecs():
-    aws.monitor_ecs_cluster(
-        stack_outputs=fetch_stack_outputs(),
-        services=SERVICES,
-        limit_minutes=10,
-    )
+    services = get_services(fetch_stack_outputs())
+    monitor = DeploymentMonitor(services, get_boto3_session())
+    monitor.monitor(limit_minutes=10)
 
 
 @cli.command(help="Spin up a new ECS task, and connect to it")
