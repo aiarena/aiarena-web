@@ -63,8 +63,11 @@ jobs:
       - name: Install the project
         run: uv sync --locked --all-extras --dev
 
-      - name: Run linters
-        uses: pre-commit/action@v3.0.0
+      - name: Ruff check
+        run: uv run ruff check --output-format=github .
+
+      - name: Ruff format
+        run: uv run ruff format --check --diff
 
   tests:
     name: Regular tests
