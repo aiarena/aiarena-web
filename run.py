@@ -10,6 +10,7 @@ import questionary
 import yaml
 
 from deploy import aws, docker
+from deploy.session import get_boto3_session
 from deploy.settings import (
     AWS_REGION,
     DB_NAME,
@@ -396,13 +397,9 @@ def restore_backup(
     if s3:
         stack_outputs = fetch_stack_outputs()
         bucket = stack_outputs.backups_bucket
-        backups = aws.cli(
-            "s3api list-objects-v2",
-            {
-                "bucket": bucket,
-                "max-items": 1000,
-            },
-        )["Contents"]
+        s3_client = get_boto3_session().client("s3")
+        response = s3_client.list_objects_v2(Bucket=bucket, MaxKeys=1000)
+        backups = response.get("Contents", [])
         filenames = sorted(obj["Key"] for obj in backups)
         if not filenames:
             echo("The backups S3 bucket is empty")
@@ -420,7 +417,7 @@ def restore_backup(
             return
         local_file = PROJECT_PATH / "backup" / filename
         echo(f"Downloading: S3 -> ./backup/{filename}")
-        aws.cli(f"s3 cp s3://{bucket}/{filename} {local_file}", parse_output=False)
+        s3_client.download_file(Bucket=bucket, Key=filename, Filename=str(local_file))
     else:
         if filename:
             # Allow providing absolute and relative path, not just filename,
