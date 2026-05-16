@@ -149,7 +149,7 @@ def render_embed(
     title = f"[{repo_short}:{branch}] CI · run #{run.get('run_number', '?')}"
     footer_bits = [sha, author]
     if msg_line:
-        footer_bits.append(msg_line[:80])
+        footer_bits.append(msg_line)
     footer = " · ".join(b for b in footer_bits if b)
 
     return {
