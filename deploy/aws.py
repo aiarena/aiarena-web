@@ -41,25 +41,24 @@ def get_secrets(secret_id="production-env"):
     return secrets
 
 
-def store_secret(key, value, secret_id="production-env"):
+def store_secrets(updates: dict, secret_id="production-env"):
+    """Merge `updates` into the secret and put it back. Single atomic write."""
     current_values = get_secrets(secret_id)
-    if key in current_values and not questionary.confirm(f"{key} already in secrets. Override?").unsafe_ask():
-        raise RuntimeError("Aborting...")
-
-    current_values[key] = value
+    current_values.update(updates)
     client = get_boto3_session().client("secretsmanager")
     client.put_secret_value(SecretId=secret_id, SecretString=json.dumps(current_values))
 
 
-def remove_secret(key, secret_id="production-env"):
+def remove_secrets(keys, secret_id="production-env") -> list[str]:
+    """Remove `keys` from the secret. Returns the keys that were actually removed."""
     current_values = get_secrets(secret_id)
-    if key not in current_values:
-        echo(f"{key} not found in secrets, nothing to do")
-        return
-
-    del current_values[key]
-    client = get_boto3_session().client("secretsmanager")
-    client.put_secret_value(SecretId=secret_id, SecretString=json.dumps(current_values))
+    removed = [k for k in keys if k in current_values]
+    for k in removed:
+        del current_values[k]
+    if removed:
+        client = get_boto3_session().client("secretsmanager")
+        client.put_secret_value(SecretId=secret_id, SecretString=json.dumps(current_values))
+    return removed
 
 
 def ecr_login():
