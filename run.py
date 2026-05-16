@@ -20,6 +20,7 @@ from deploy.settings import (
     PROJECT_PATH,
     SERVICES,
 )
+from deploy.stack_outputs import StackOutputs, fetch_stack_outputs
 from deploy.utils import echo, env_as_cli_args, run, timing
 
 
@@ -111,23 +112,23 @@ def build_frontend():
     )
 
 
-def deploy_environment():
+def deploy_environment(stack_outputs: StackOutputs):
     try:
         REDIS_CACHE_DB = int(os.environ.get("BUILD_NUMBER", "")) % 5 + 5
     except ValueError:
         REDIS_CACHE_DB = 5
 
     build_number = os.environ.get("BUILD_NUMBER", "")
-    media_bucket = aws.physical_name(PROJECT_NAME, "mediaProductionBucket")
+    media_bucket = stack_outputs.media_production_bucket
     media_domain = aws.s3_domain(media_bucket)
     environment = {
         "AWS_REGION": AWS_REGION,
         "BUILD_NUMBER": build_number,
-        "POSTGRES_HOST": aws.db_endpoint(PROJECT_NAME, "MainDB"),
+        "POSTGRES_HOST": stack_outputs.main_db_endpoint,
         "POSTGRES_PORT": "5432",
         "POSTGRES_DATABASE": DB_NAME,
         "POSTGRES_USER": PRODUCTION_DB_USER,
-        "REDIS_HOST": aws.cache_cluster_nodes(PROJECT_NAME)[0],
+        "REDIS_HOST": stack_outputs.redis_endpoint,
         "REDIS_PORT": "6379",
         "REDIS_CACHE_DB": str(REDIS_CACHE_DB),
         "C_FORCE_ROOT": "1",  # force Celery to run as root
@@ -149,7 +150,8 @@ def set_github_actions_output(key, value):
 @cli.command(help="Prepare and push production images to ECR")
 @timing
 def prepare_images():
-    environment, build_number = deploy_environment()
+    stack_outputs = fetch_stack_outputs()
+    environment, build_number = deploy_environment(stack_outputs)
     echo(f"Build number: {build_number}")
 
     docker.build_image("env", arch=docker.ARCH_AMD64)
@@ -190,7 +192,8 @@ def prepare_images():
 @cli.command(help="Deploy to Amazon ECS")
 @timing
 def ecs():
-    environment, build_number = deploy_environment()
+    stack_outputs = fetch_stack_outputs()
+    environment, build_number = deploy_environment(stack_outputs)
     images = json.loads(os.environ.get("PREPARED_IMAGES"))
 
     aws.push_manifest("cloud", "latest", images["cloud_images"])
@@ -218,7 +221,8 @@ def ecs():
 @cli.command(help="Deploy dry run")
 @timing
 def deploy_dry_run():
-    environment, build_number = deploy_environment()
+    stack_outputs = fetch_stack_outputs()
+    environment, build_number = deploy_environment(stack_outputs)
     updater = aws.ApplicationUpdater(dry_run=True)
     updater.update_application(environment)
 
