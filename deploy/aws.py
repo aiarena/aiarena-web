@@ -178,18 +178,6 @@ def push_manifest(
     docker.cli(f"manifest push --purge {manifest_name}", print_cmd=True)
 
 
-def resource_details(stack_name, logical_id):
-    return cli(
-        "cloudformation describe-stack-resource",
-        {"stack-name": stack_name, "logical-resource-id": logical_id},
-    )["StackResourceDetail"]
-
-
-def physical_name(stack_name, logical_id):
-    res_id = resource_details(stack_name, logical_id)["PhysicalResourceId"]
-    return res_id.split("/")[-1]
-
-
 def task_definitions():
     arn_list = cli("ecs list-task-definitions")["taskDefinitionArns"]
     return [task_definition_arn.split("/")[-1] for task_definition_arn in arn_list]
@@ -498,35 +486,6 @@ def get_network_configuration(stack_outputs):
             "assignPublicIp": "ENABLED",
         }
     }
-
-
-def db_endpoint(stack_name, logical_id):
-    def tags_match(instance_description):
-        tags = {tag["Key"]: tag["Value"] for tag in instance_description["TagList"]}
-
-        if tags["aws:cloudformation:stack-name"] != stack_name:
-            return False
-
-        if tags["aws:cloudformation:logical-id"] != logical_id:
-            return False
-
-        return True
-
-    db_instances = cli("rds describe-db-instances")["DBInstances"]
-    instance = next(i for i in db_instances if tags_match(i))
-    return instance["Endpoint"]["Address"]
-
-
-def cache_cluster_nodes(cluster_id):
-    result = cli(
-        "elasticache describe-cache-clusters",
-        {
-            "show-cache-node-info": "",
-            "cache-cluster-id": cluster_id,
-        },
-    )
-    cluster = result["CacheClusters"][0]
-    return [n["Endpoint"]["Address"] for n in cluster["CacheNodes"]]
 
 
 def s3_domain(cf_id) -> str:

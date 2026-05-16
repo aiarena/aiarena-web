@@ -1,10 +1,3 @@
-"""Typed access to CloudFormation stack outputs.
-
-Replaces ad-hoc `physical_name(stack, logical_id)` lookups against
-`describe-stack-resource`. Call sites migrate to `stack_outputs.X` one at a
-time; both styles work in parallel until the migration is done.
-"""
-
 from pydantic import BaseModel, Field
 
 from .session import get_boto3_session
