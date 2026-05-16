@@ -958,3 +958,69 @@ Mappings:
   AWSRegionToAMI:
     eu-central-1:
       AMIID: ami-0e8851af9b98bb0f5
+
+Outputs:
+
+  EcsCluster:
+    Value:
+      Ref: ECSCluster
+
+  EcsTaskRoleArn:
+    Value:
+      Fn::GetAtt:
+        - ECSTaskRole
+        - Arn
+
+  EcsTaskExecutionRoleArn:
+    Value:
+      Fn::GetAtt:
+        - ECSTaskExecutionRole
+        - Arn
+
+  EcsServiceRoleArn:
+    Value:
+      Fn::GetAtt:
+        - ECSServiceRole
+        - Arn
+
+  PublicSubnetZoneA:
+    Value:
+      Ref: PublicSubnetZoneA
+
+  PublicSubnetZoneB:
+    Value:
+      Ref: PublicSubnetZoneB
+
+  EcsTaskSecurityGroup:
+    Value:
+      Ref: ECSTaskSecurityGroup
+
+  AlbWebServerTargetGroupArn:
+    Value:
+      Ref: ALBWebServerTargetGroup
+
+  MainDbEndpoint:
+    Value:
+      Fn::GetAtt:
+        - MainDB
+        - Endpoint.Address
+
+  RedisEndpoint:
+    Value:
+      Fn::GetAtt:
+        - RedisCluster
+        - RedisEndpoint.Address
+
+  EcrRepositoryCloudUri:
+    Value:
+      Fn::GetAtt:
+        - ECRRepositoryCloud
+        - RepositoryUri
+
+  MediaProductionBucket:
+    Value:
+      Ref: mediaProductionBucket
+
+  BackupsBucket:
+    Value:
+      Ref: backupsBucket
