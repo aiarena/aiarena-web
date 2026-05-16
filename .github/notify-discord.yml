@@ -1,0 +1,14 @@
+# Jobs to display on the Discord status card, in display order.
+# `name` must match the workflow job's `name:` field exactly (that is what the
+# GitHub Actions API returns). `label` is what we show on the card.
+jobs:
+  - name: Linters
+    label: Linters
+  - name: Regular tests
+    label: Regular tests
+  - name: Playwright tests
+    label: Playwright tests
+  - name: Build & push image to ECR
+    label: Build & push image to ECR
+  - name: Deploy to ECS
+    label: Deploy to ECS

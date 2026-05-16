@@ -26,6 +26,18 @@ env:
   MASK_SECRETS: 1
 
 jobs:
+  notify-discord:
+    name: Notify Discord
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/notify-discord
+        with:
+          webhook: ${{ secrets.CI_UPDATES_DISCORD_WEBHOOK }}
+
   linters:
     name: Linters
     runs-on: ubuntu-latest
@@ -223,7 +235,6 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     outputs:
-      status_message_id: ${{ steps.slack.outputs.message_id }}
       images: ${{ steps.prepare_images.outputs.images }}
     steps:
       - uses: actions/checkout@v4
