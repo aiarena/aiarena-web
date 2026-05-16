@@ -1,6 +1,8 @@
+import base64
 import itertools
 import json
 import os
+import subprocess
 import time
 from collections import defaultdict
 from datetime import datetime
@@ -107,6 +109,22 @@ def remove_secret(key, secret_id="production-env"):
     client.put_secret_value(SecretId=secret_id, SecretString=json.dumps(current_values))
 
 
+def ecr_login():
+    """Authenticate the local Docker daemon against ECR."""
+    client = get_boto3_session().client("ecr")
+    response = client.get_authorization_token()
+    auth = response["authorizationData"][0]
+    username, password = base64.b64decode(auth["authorizationToken"]).decode().split(":")
+    endpoint = auth["proxyEndpoint"]
+
+    subprocess.run(
+        ["docker", "login", "--username", username, "--password-stdin", endpoint],
+        input=password.encode(),
+        check=True,
+        capture_output=True,
+    )
+
+
 def ensure_docker_login(func):
     """
     Re-tries the docker operation with login, if needed
@@ -122,13 +140,7 @@ def ensure_docker_login(func):
             return func(*args, **kwargs)
         except RuntimeError:
             echo("Try adding ECR authorization...")
-            docker_login = cli(
-                "ecr get-login",
-                {"no-include-email": ""},
-                capture_stdout=True,
-                parse_output=False,
-            ).stdout_lines[0]
-            run(docker_login)
+            ecr_login()
             return func(*args, **kwargs)
 
     return inner
