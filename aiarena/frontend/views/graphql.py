@@ -33,12 +33,17 @@ class CustomGraphQLView(FileUploadGraphQLView):
                 raise exc
             sentry_sdk.capture_exception(exc)
 
+    # def format_error(self, error):
+    #     formatted_error = super().format_error(error)
+
+    #     original_error = getattr(error, "original_error", None) or error
+    #     if any(isinstance(original_error, whitelisted_error) for whitelisted_error in self.whitelisted_errors):
+    #         return formatted_error
+
+    #     formatted_error["message"] = self.masked_error_message
+    #     return formatted_error
+
+
     def format_error(self, error):
-        formatted_error = super().format_error(error)
-
-        original_error = getattr(error, "original_error", None) or error
-        if any(isinstance(original_error, whitelisted_error) for whitelisted_error in self.whitelisted_errors):
-            return formatted_error
-
-        formatted_error["message"] = self.masked_error_message
-        return formatted_error
+        return super().format_error(error)
+        
