@@ -43,7 +43,5 @@ class CustomGraphQLView(FileUploadGraphQLView):
     #     formatted_error["message"] = self.masked_error_message
     #     return formatted_error
 
-
     def format_error(self, error):
         return super().format_error(error)
-        
