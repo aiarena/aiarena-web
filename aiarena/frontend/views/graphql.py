@@ -45,3 +45,4 @@ class CustomGraphQLView(FileUploadGraphQLView):
 
     def format_error(self, error):
         return super().format_error(error)
+    
