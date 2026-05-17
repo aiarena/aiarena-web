@@ -535,7 +535,7 @@ class SubmitResult(CleanedInputMutation):
             # Delete temporary upload S3 objects and DB records
             for upload in temp_uploads:
                 if upload is not None:
-                    upload.delete_s3_object()
+                    upload.delete_from_storage()
                     upload.delete()
             # Delete old bot_data files that were replaced
             storage = Bot._meta.get_field("bot_data").storage
