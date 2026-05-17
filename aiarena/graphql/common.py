@@ -48,6 +48,8 @@ class CountingConnection(graphene.relay.Connection):
 
 
 class DjangoObjectTypeWithUID(DjangoObjectType):
+    database_id = graphene.Int(required=True, description="The underlying database primary key, for display purposes")
+
     @classmethod
     def __init_subclass_with_meta__(
         cls,
@@ -61,6 +63,10 @@ class DjangoObjectTypeWithUID(DjangoObjectType):
             interfaces=interfaces,
             **options,
         )
+
+    @staticmethod
+    def resolve_database_id(root, info, **args):
+        return root.id
 
     class Meta:
         abstract = True
