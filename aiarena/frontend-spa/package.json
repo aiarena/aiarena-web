@@ -40,6 +40,7 @@
     "rehype-sanitize": "^6.0.0",
     "relay-compiler": "^18.2.0",
     "relay-runtime": "^18.2.0",
+    "shiki": "^4.1.0",
     "tailwindcss": "^4.1.4",
     "vite-plugin-relay": "^2.1.0"
   },

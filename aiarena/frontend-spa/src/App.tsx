@@ -20,6 +20,7 @@ import BotPage from "./_pages/Rework/Bot/Page";
 import RoundsPage from "./_pages/Rework/_Round/Page";
 import AuthorPage from "./_pages/Rework/_Author/Page";
 import MatchPage from "./_pages/Rework/_Match/Page";
+import DevelopersPage from "./_pages/Developers/Page";
 import Maps from "./_pages/Rework/CompetitionParticipation/Pages/Maps";
 import EloGraph from "./_pages/Rework/CompetitionParticipation/Pages/EloGraph";
 import WinsByRace from "./_pages/Rework/CompetitionParticipation/Pages/WinsByRace";
@@ -47,6 +48,7 @@ export default function App() {
         <Route path="bots" element={<BotsPage />} />
         <Route path="bots/:botId" element={<BotPage />} />
         <Route path="matches/:matchId" element={<MatchPage />} />
+        <Route path="developers" element={<DevelopersPage />} />
         <Route
           path="competitions/stats/:id"
           element={<CompetitionParticipationSideNav />}

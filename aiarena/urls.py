@@ -62,6 +62,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("", core_views.frontend, name="home"),
     path("api/", include("aiarena.api.urls")),
     path("graphql/", core_views.CustomGraphQLView.as_view(graphiql=True), name="graphql"),
+    path("developers/", core_views.frontend, name="developers"),
     path("results/", core_views.frontend, name="results"),
     path("arenaclients/", core_views.ArenaClients.as_view(), name="arenaclients"),
     path("arenaclients/<int:pk>/", core_views.ArenaClientView.as_view(), name="arenaclient"),

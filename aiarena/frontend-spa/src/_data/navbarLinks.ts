@@ -54,19 +54,20 @@ export const navLinks = [
     featureFlag: null,
   },
   {
-    title: "API",
-    path: `/api`,
-    showLoggedIn: true,
-    showLoggedOut: true,
-    featureFlag: null,
-  },
-  {
     title: "Wiki",
     path: "/wiki",
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
 
+  },
+  {
+    title: "Developers",
+    path: `/developers/`,
+    showLoggedIn: true,
+    showLoggedOut: true,
+    featureFlag: null,
+    react: true,
   },
 ];
 

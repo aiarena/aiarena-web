@@ -1,13 +1,6 @@
-import { useState } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
 
 import { getDateToLocale } from "@/_lib/dateUtils";
-import {
-  ClipboardDocumentIcon,
-  EyeIcon,
-  EyeSlashIcon,
-} from "@heroicons/react/20/solid";
-import { useSnackbar } from "notistack";
 import { UserSettingsSection_viewer$key } from "./__generated__/UserSettingsSection_viewer.graphql";
 import AvatarWithBorder from "@/_components/_display/AvatarWithBorder";
 import SectionDivider from "@/_components/_display/SectionDivider";
@@ -18,6 +11,8 @@ import { UserSettingsSectionLogoutMutation } from "./__generated__/UserSettingsS
 import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
+import TokenReveal from "@/_components/_actions/TokenReveal";
+import SquareButton from "@/_components/_actions/SquareButton";
 interface UserSettingsSectionProps {
   viewer: UserSettingsSection_viewer$key;
 }
@@ -61,12 +56,10 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
     false,
   );
 
-  const { enqueueSnackbar } = useSnackbar();
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "signOut",
     "Successfully logged out! Redirecting...",
   );
-  const [apiTokenVisible, setApiTokenVisible] = useState(false);
 
   const handleLogout = () => {
     logout({
@@ -94,11 +87,6 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
 
   const handleUnlinkPatreon = () => {
     window.open("/profile/unlink/patreon/", "_blank", "noopener,noreferrer");
-  };
-
-  const handleCopyToken = () => {
-    navigator.clipboard.writeText(viewer.apiToken ?? "");
-    enqueueSnackbar("API token copied to clipboard!");
   };
 
   const StatusInfo = () => {
@@ -234,42 +222,18 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
             <div className="bg-darken-2 border border-neutral-600 shadow-lg shadow-black rounded-md backdrop-blur-sm">
               <h3 className="mt-1 ml-2 text-base font-semibold ">API Token</h3>
               <div className=" p-4">
-                <div className="flex items-center gap-2 bg-black text-gray-300 px-2 py-1 rounded font-mono text-xs break-words ">
-                  <span className="flex-1 truncate">
-                    {apiTokenVisible
-                      ? viewer.apiToken
-                      : "•••••••••••••••••••••••••••••••••••••••"}
-                  </span>
+                <TokenReveal token={viewer.apiToken} />
 
-                  <button
-                    onClick={() => setApiTokenVisible(!apiTokenVisible)}
-                    className="text-white  hover:text-gray-400 p-1"
-                    title={apiTokenVisible ? "Hide token" : "Show token"}
-                  >
-                    {apiTokenVisible ? (
-                      <EyeSlashIcon className="h-4 w-4" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4" />
-                    )}
-                  </button>
+                <p className="text-sm text-gray-300 mt-3">
+                  For deeper queries, fewer requests, and an interactive
+                  playground, check out our new GraphQL API.
+                </p>
 
-                  <button
-                    onClick={handleCopyToken}
-                    className="text-white hover:text-gray-400 p-1"
-                    title="Copy token"
-                  >
-                    <ClipboardDocumentIcon className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <div className="flex gap-4 mt-2 text-sm">
-                  <a href="/wiki/data-api/" target="_blank">
-                    Wiki
-                  </a>
-                  <a href="/api/" target="_blank">
-                    API Endpoints
-                  </a>
-                </div>
+                <SquareButton
+                  href="/developers/"
+                  text="API docs →"
+                  outerClassName="mt-2"
+                />
               </div>
             </div>
 
