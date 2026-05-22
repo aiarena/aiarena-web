@@ -5,6 +5,7 @@ import CodeBlock from "@/_components/_display/CodeBlock";
 import TokenReveal from "@/_components/_actions/TokenReveal";
 import TabNav from "@/_components/_nav/TabNav";
 import SquareButton from "@/_components/_actions/SquareButton";
+import LanguagePicker from "@/_components/_actions/LanguagePicker";
 import Pitch from "./Pitch";
 
 const TOKEN_PLACEHOLDER = "<your token>";
@@ -72,7 +73,34 @@ documents:
   - "**/*.{ts,tsx,graphql}"
   - "**/*.py"`;
 
-// Note: no `language=` annotation — PyCharm would lint the __SLOT__ placeholders as undefined identifiers.
+// language=Python
+const PYTHON_NODES_HELPER = `def nodes(connection):
+    """Unwrap edges/node connection into a flat list."""
+    if not connection:
+        return []
+    return [edge["node"] for edge in connection["edges"]]
+
+
+# Usage:
+# competitions = nodes(payload["data"]["competitions"])
+# # -> [{"id": "...", "name": "..."}, ...]`;
+
+// language=TypeScript
+const TS_NODES_HELPER = `export function nodes<T>(
+  connection: { edges?: ReadonlyArray<{ node: T | null } | null> } | null,
+): T[] {
+  return (
+    connection?.edges
+      ?.map((edge) => edge?.node)
+      .filter((node): node is T => node != null) ?? []
+  );
+}
+
+// Usage:
+// const competitions = nodes(data.competitions);
+// // -> [{ id: "...", name: "..." }, ...]`;
+
+// Note: no \`language=\` annotation — PyCharm would lint the __SLOT__ placeholders as undefined identifiers.
 const PYTHON_TEMPLATE = `import requests
 
 query = """
@@ -124,6 +152,7 @@ interface Example {
   blurb: string;
   query: string;
   variables?: Record<string, string>;
+  showConnectionsNote?: boolean;
 }
 
 function buildExamples(sampleRoundId: string | null): Example[] {
@@ -139,6 +168,7 @@ function buildExamples(sampleRoundId: string | null): Example[] {
       blurb:
         "First taste of Relay connections and filters. Grab any round id from the result for example 3.",
       query: EXAMPLE_2_QUERY,
+      showConnectionsNote: true,
     },
     {
       name: "3. Matches in a round",
@@ -233,11 +263,6 @@ export default function DevelopersContent({
 }: DevelopersContentProps) {
   const examples = useMemo(() => buildExamples(sampleRoundId), [sampleRoundId]);
   const [activeExample, setActiveExample] = useState(examples[0].name);
-  const [activeLanguage, setActiveLanguage] = useState<string>(
-    LANGUAGES[0].display,
-  );
-  const language =
-    LANGUAGES.find((l) => l.display === activeLanguage) ?? LANGUAGES[0];
 
   const example = examples.find((e) => e.name === activeExample) ?? examples[0];
   const tokenForSnippet = apiToken ?? TOKEN_PLACEHOLDER;
@@ -324,6 +349,66 @@ export default function DevelopersContent({
           </div>
         ) : null}
 
+        {example.showConnectionsNote ? (
+          <details className="mt-3 text-sm text-gray-300 bg-darken-3 border border-neutral-700 rounded-md">
+            <summary className="cursor-pointer select-none px-3 py-2 hover:text-white">
+              What's with the edges / node nesting?
+            </summary>
+            <div className="px-3 pb-3 pt-1 border-t border-neutral-700 space-y-2">
+              <p>
+                Lists of related objects come back as{" "}
+                <strong>connections</strong>, not plain arrays. A connection
+                holds <span className="font-mono">edges</span>,{" "}
+                <span className="font-mono">node</span>, and{" "}
+                <span className="font-mono">pageInfo</span> — that's where
+                cursor-based pagination, the cursor itself,{" "}
+                <span className="font-mono">totalCount</span>, and other
+                per-connection metadata go. A plain list has nowhere to put
+                that.
+              </p>
+              <p>
+                Single root entities skip the wrapper — that's why{" "}
+                <span className="font-mono">viewer</span> in example 1 and{" "}
+                <span className="font-mono">node(id: $id)</span> in example 3
+                return fields directly. Only one-to-many fields get the
+                connection shape.
+              </p>
+              <p>
+                Worth writing a one-line unwrap helper once and using it
+                everywhere:
+              </p>
+              <div className="!mt-3">
+                <LanguagePicker
+                  options={[
+                    {
+                      display: "Python",
+                      code: PYTHON_NODES_HELPER,
+                      lang: "python",
+                    },
+                    {
+                      display: "TypeScript",
+                      code: TS_NODES_HELPER,
+                      lang: "typescript",
+                    },
+                  ]}
+                />
+              </div>
+              <p>
+                Full spec:{" "}
+                <a
+                  href="https://relay.dev/graphql/connections.htm"
+                  className="underline"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Relay Cursor Connections
+                </a>
+                .
+              </p>
+            </div>
+          </details>
+        ) : null}
+
         <div className="mt-4">
           <SquareButton
             onClick={() =>
@@ -350,16 +435,13 @@ export default function DevelopersContent({
         <span className="font-mono">Authorization</span> header.
       </p>
 
-      <TabNav
-        tabs={LANGUAGES.map((l) => ({ name: l.display, href: "#" }))}
-        activeTab={activeLanguage}
-        setActiveTab={setActiveLanguage}
-      />
-
-      <div className="bg-darken-2 border border-neutral-600 border-t-0 rounded-b-md p-4 mb-10">
-        <CodeBlock
-          code={language.render(example, tokenForSnippet)}
-          lang={language.shikiLang}
+      <div className="bg-darken-2 border border-neutral-600 rounded-md p-4 mb-10">
+        <LanguagePicker
+          options={LANGUAGES.map((l) => ({
+            display: l.display,
+            code: l.render(example, tokenForSnippet),
+            lang: l.shikiLang,
+          }))}
         />
         {isLoggedIn ? (
           <p className="text-xs text-gray-400 mt-2">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import {
   createHighlighter,
   type Highlighter,
@@ -15,6 +15,7 @@ const THEME: BundledTheme = "github-dark-default";
 const LANGS: BundledLanguage[] = [
   "graphql",
   "javascript",
+  "typescript",
   "python",
   "bash",
   "json",
@@ -37,9 +38,19 @@ interface CodeBlockProps {
   code: string;
   lang: BundledLanguage;
   className?: string;
+  /**
+   * Additional controls rendered in the top-right chrome row, to the left
+   * of the copy button. Used for things like a language picker.
+   */
+  topRight?: ReactNode;
 }
 
-export default function CodeBlock({ code, lang, className }: CodeBlockProps) {
+export default function CodeBlock({
+  code,
+  lang,
+  className,
+  topRight,
+}: CodeBlockProps) {
   const [html, setHtml] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const mountedRef = useRef(true);
@@ -74,24 +85,27 @@ export default function CodeBlock({ code, lang, className }: CodeBlockProps) {
     });
   };
 
-  const copyButton = (
-    <button
-      onClick={handleCopy}
-      title="Copy"
-      className="absolute top-2 right-2 z-10 p-1.5 rounded bg-black/40 hover:bg-black/70 text-gray-200 hover:text-white opacity-70 hover:opacity-100 transition"
-    >
-      {copied ? (
-        <CheckIcon className="h-4 w-4" />
-      ) : (
-        <ClipboardDocumentIcon className="h-4 w-4" />
-      )}
-    </button>
+  const chrome = (
+    <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
+      {topRight}
+      <button
+        onClick={handleCopy}
+        title="Copy"
+        className="p-1.5 rounded bg-black/40 hover:bg-black/70 text-gray-200 hover:text-white opacity-70 hover:opacity-100 transition"
+      >
+        {copied ? (
+          <CheckIcon className="h-4 w-4" />
+        ) : (
+          <ClipboardDocumentIcon className="h-4 w-4" />
+        )}
+      </button>
+    </div>
   );
 
   if (html == null) {
     return (
       <div className={"relative " + (className ?? "")}>
-        {copyButton}
+        {chrome}
         <pre className="bg-black text-gray-200 font-mono text-xs rounded p-3 overflow-auto">
           <code>{code}</code>
         </pre>
@@ -101,7 +115,7 @@ export default function CodeBlock({ code, lang, className }: CodeBlockProps) {
 
   return (
     <div className={"relative " + (className ?? "")}>
-      {copyButton}
+      {chrome}
       <div
         className="shiki-block text-xs rounded overflow-auto [&_pre]:p-3 [&_pre]:m-0"
         // shiki output is trusted: it comes from our own static strings
