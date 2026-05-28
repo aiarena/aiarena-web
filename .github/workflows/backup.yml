@@ -43,5 +43,5 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Perform production DB backup
-        run: uv run backups create
+        run: uv run backups create-production
 
