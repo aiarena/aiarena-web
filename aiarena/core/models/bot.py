@@ -210,7 +210,7 @@ class Bot(models.Model, LockableModelMixin):
             self.user.id == user.id
             or self.bot_zip_publicly_downloadable
             or user.is_staff
-            or (user.is_arenaclient and user.arenaclient.trusted)
+            or (user.is_authenticated and user.is_arenaclient and user.arenaclient.trusted)
         )
 
     def can_download_bot_data(self, user):
@@ -225,7 +225,7 @@ class Bot(models.Model, LockableModelMixin):
             self.user.id == user.id
             or self.bot_data_publicly_downloadable
             or user.is_staff
-            or (user.is_arenaclient and user.arenaclient.trusted)
+            or (user.is_authenticated and user.is_arenaclient and user.arenaclient.trusted)
         )
 
     # for purpose of distinquish news in activity feed
