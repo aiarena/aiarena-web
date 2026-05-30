@@ -63,11 +63,20 @@ jobs:
       - name: Install the project
         run: uv sync --locked --all-extras --dev
 
-      - name: Ruff check
-        run: uv run ruff check --output-format=github .
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: aiarena/frontend-spa/package-lock.json
 
-      - name: Ruff format
-        run: uv run ruff format --check --diff
+      - name: Install frontend deps
+        run: npm ci
+        working-directory: aiarena/frontend-spa
+
+      # Single source of truth: the exact same checks developers run locally.
+      - name: Run all checks
+        run: uv run dev pre-commit
 
   tests:
     name: Regular tests
@@ -194,10 +203,6 @@ jobs:
 
       - name: Install frontend deps
         run: npm ci
-        working-directory: aiarena/frontend-spa
-
-      - name: Lint React code
-        run: npm run lint
         working-directory: aiarena/frontend-spa
 
       - name: Generate Relay artifacts

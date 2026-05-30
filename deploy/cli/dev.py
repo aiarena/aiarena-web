@@ -51,7 +51,7 @@ def run_check(name: str, command: list[str], cwd: Path, env: dict | None = None)
 
 @dev.command("pre-commit", help="Run all pre-commit checks (matches CI)")
 def pre_commit():
-    """Run all checks that gate a commit.
+    """Run all checks that gate a commit. This is also what CI runs.
 
     Runs every check even if one fails, so you see all issues in one pass.
     Exits 2 on any failure.
