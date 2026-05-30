@@ -484,6 +484,7 @@ class MatchParticipationAdmin(admin.ModelAdmin):
     )
     list_filter = ("use_bot_data", "update_bot_data")
     list_select_related = ["match", "bot"]
+    raw_id_fields = ("match", "bot")
 
 
 @admin.register(MatchTag)
