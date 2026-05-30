@@ -61,10 +61,10 @@ def pre_commit():
     django_env = {**os.environ, "DJANGO_ENVIRONMENT": "DEVELOPMENT"}
 
     checks = [
-        ("Ruff check...", ["uv", "run", "ruff", "check", "--fix"], git_root, None),
-        ("Ruff format...", ["uv", "run", "ruff", "format"], git_root, None),
+        ("Ruff check...", ["uv", "run", "ruff", "check"], git_root, None),
+        ("Ruff format check...", ["uv", "run", "ruff", "format", "--check"], git_root, None),
         (
-            "Regenerating GraphQL schema...",
+            "Generating GraphQL schema...",
             ["uv", "run", "python", "manage.py", "graphql_schema"],
             git_root,
             django_env,
