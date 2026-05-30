@@ -5,7 +5,19 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 import pytest
 
-from aiarena.core.models import Bot, Competition, CompetitionParticipation, Game, GameMode, Map, MapPool, WebsiteUser
+from aiarena.core.models import (
+    ArenaClient,
+    Bot,
+    Competition,
+    CompetitionParticipation,
+    Game,
+    GameMode,
+    Map,
+    MapPool,
+    Match,
+    MatchParticipation,
+    WebsiteUser,
+)
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.base import BrowserHelper
 
@@ -265,6 +277,26 @@ def map(db, game_mode):
         file="/maps/AiArenaArena513LE.map",
         game_mode=game_mode,
     )
+
+
+@pytest.fixture
+def arenaclient_user(db, admin_user):
+    return ArenaClient.objects.create(
+        username="ac1",
+        email="ac1@dev.aiarena.net",
+        type="ARENA_CLIENT",
+        trusted=True,
+        owner=admin_user,
+    )
+
+
+@pytest.fixture
+def queued_match(db, bot, other_bot, map):
+    """A scheduled match that hasn't been played yet: no result, no match_log on either participation."""
+    match = Match.objects.create(map=map)
+    MatchParticipation.objects.create(match=match, participant_number=1, bot=bot)
+    MatchParticipation.objects.create(match=match, participant_number=2, bot=other_bot)
+    return match
 
 
 @pytest.fixture

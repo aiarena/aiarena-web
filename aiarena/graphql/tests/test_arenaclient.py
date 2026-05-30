@@ -1,20 +1,7 @@
 from unittest import mock
 
-import pytest
-
-from aiarena.core.models import ArenaClient, TemporaryUpload
+from aiarena.core.models import TemporaryUpload
 from aiarena.core.tests.base import GraphQLTest
-
-
-@pytest.fixture
-def arenaclient_user(db, admin_user):
-    return ArenaClient.objects.create(
-        username="ac1",
-        email="ac1@dev.aiarena.net",
-        type="ARENA_CLIENT",
-        trusted=True,
-        owner=admin_user,
-    )
 
 
 class TestRequestUploadUrls(GraphQLTest):

@@ -29,7 +29,7 @@ class MatchParticipationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["GET"], name="Download a bot's zip file", url_path="match-log")
     def download_match_log(self, request, *args, **kwargs):
         mp = MatchParticipation.objects.get(id=kwargs["pk"])
-        if mp.can_download_match_log(request.user):
+        if mp.match_log and mp.can_download_match_log(request.user):
             response = HttpResponse(FileWrapper(mp.match_log), content_type="application/zip")
             response["Content-Disposition"] = f'inline; filename="{mp.match_id}_{mp.bot.name}.zip"'
             return response
