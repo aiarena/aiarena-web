@@ -345,7 +345,7 @@ export default function UserMatchRequestsTable(
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper],
+    [columnHelper, hideSpoilers],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
