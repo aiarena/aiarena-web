@@ -117,6 +117,9 @@ jobs:
       - name: Generate GraphQL Schema
         run: uv run python manage.py graphql_schema
 
+      - name: Generate URL definitions
+        run: uv run python manage.py generate_url_definitions
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -193,6 +196,9 @@ jobs:
 
       - name: Generate GraphQL Schema
         run: uv run python manage.py graphql_schema
+
+      - name: Generate URL definitions
+        run: uv run python manage.py generate_url_definitions
 
       - name: Set up Node
         uses: actions/setup-node@v4

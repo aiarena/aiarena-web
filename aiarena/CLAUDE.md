@@ -27,3 +27,12 @@ each path from `reverse()` itself rather than reconstructing it, so the generate
 URLs can't drift from Django's routing. When you change a route, rerun
 `uv run dev pre-commit` to regenerate, and keep that guarantee intact if you
 touch the generator.
+
+The generated `urlDefinitions.ts` is **not committed** (it's under a gitignored
+`__generated__/` dir), exactly like the GraphQL `schema.graphql`. So it must be
+regenerated wherever the frontend is built or type-checked. Treat the two as a
+pair: **anywhere `manage.py graphql_schema` runs, `manage.py
+generate_url_definitions` must run right after it** — the local pre-commit, every
+CI job that builds/checks the SPA, and the deploy image build. Adding a new build
+path without the URL step compiles locally (where the file lingers) but fails in
+CI's clean checkout with "Cannot find module '@/__generated__/urlDefinitions'".
