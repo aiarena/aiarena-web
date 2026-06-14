@@ -3,6 +3,7 @@ import { graphql, useFragment } from "react-relay";
 import { getDateToLocale } from "@/_lib/dateUtils";
 import BotSettingsModal from "../../../_pages/UserBots/UserBotsSection/_modals/bot_settings_modal/BotSettingsModal";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import BotTrophiesModal from "../../../_pages/UserBots/UserBotsSection/_modals/BotTrophiesModal";
 import { TrophyIcon, PencilIcon } from "@heroicons/react/20/solid";
 import { UserBotHeader_bot$key } from "./__generated__/UserBotHeader_bot.graphql";
@@ -49,7 +50,9 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
           <div className="flex items-center flex-wrap">
             {/* Bot Name */}
             <a
-              href={`/bots/${getIDFromBase64(bot.id, "BotType")}`}
+              href={reverseUrl("bot", {
+                pk: getIDFromBase64(bot.id, "BotType"),
+              })}
               className="text-lg text-customGreen font-medium"
             >
               {bot.name}

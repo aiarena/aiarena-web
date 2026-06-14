@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 import { Suspense, useEffect, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
@@ -154,7 +155,7 @@ export default function UserMatchRequestsTable(
         header: "ID",
         cell: (info) => {
           const label = getIDFromBase64(info.getValue(), "MatchType") || "";
-          const href = `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`;
+          const href = reverseUrl("match", { pk: getIDFromBase64(info.getValue(), "MatchType") });
           const aria = `View match details for match ID ${info.getValue()}`;
 
           return (
@@ -186,24 +187,36 @@ export default function UserMatchRequestsTable(
           );
 
           const label = participant1?.name || "";
-          const href = `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`;
+          const botId = getIDFromBase64(
+            info.row.original.participant1?.id,
+            "BotType",
+          );
           const aria = `View bot profile for ${participant1?.name}, Bot`;
           const children = display_value;
 
           return (
             <span className="flex justify-between">
-              <Link
-                className="font-semibold text-gray-200 truncate mr-2"
-                to={href}
-                role="cell"
-                aria-label={aria}
-                title={`${label}`}
-              >
-                <span className="flex">
-                  <RenderRace withoutText race={participant1?.playsRace} />
-                  {children ? children : label}
+              {botId ? (
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={reverseUrl("bot", { pk: botId })}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  <span className="flex">
+                    <RenderRace withoutText race={participant1?.playsRace} />
+                    {children ? children : label}
+                  </span>
+                </Link>
+              ) : (
+                <span className="font-semibold text-gray-200 truncate mr-2">
+                  <span className="flex">
+                    <RenderRace withoutText race={participant1?.playsRace} />
+                    {children ? children : label}
+                  </span>
                 </span>
-              </Link>
+              )}
             </span>
           );
         },
@@ -221,24 +234,33 @@ export default function UserMatchRequestsTable(
           )
 
           const label = participant2?.name || "";
-          const href = `/bots/${getIDFromBase64(participant2?.id, "BotType")}`;
+          const botId = getIDFromBase64(participant2?.id, "BotType");
           const aria = `View bot profile for ${participant2?.name}, Opponent`;
           const children = display_value;
 
           return (
             <span className="flex justify-between">
-              <Link
-                className="font-semibold text-gray-200 truncate mr-2"
-                to={href}
-                role="cell"
-                aria-label={aria}
-                title={`${label}`}
-              >
-                <span className="flex">
-                  <RenderRace withoutText race={participant2?.playsRace} />
-                  {children ? children : label}
+              {botId ? (
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={reverseUrl("bot", { pk: botId })}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  <span className="flex">
+                    <RenderRace withoutText race={participant2?.playsRace} />
+                    {children ? children : label}
+                  </span>
+                </Link>
+              ) : (
+                <span className="font-semibold text-gray-200 truncate mr-2">
+                  <span className="flex">
+                    <RenderRace withoutText race={participant2?.playsRace} />
+                    {children ? children : label}
+                  </span>
                 </span>
-              </Link>
+              )}
             </span>
           );
         },

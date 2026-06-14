@@ -1,5 +1,6 @@
 import { Suspense, useState } from "react";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { graphql, useFragment } from "react-relay";
 import ActiveDot from "../ActiveDot";
 import SquareButton from "@/_components/_actions/SquareButton";
@@ -129,10 +130,12 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                     <ActiveDot color={dotColor} />
                   </div>
                   <Link
-                    to={`/competitions/${getIDFromBase64(
-                      competitionParticipation.competition.id,
-                      "CompetitionType"
-                    )}`}
+                    to={reverseUrl("competition", {
+                      pk: getIDFromBase64(
+                        competitionParticipation.competition.id,
+                        "CompetitionType"
+                      ),
+                    })}
                     className="text-sm font-semibold"
                   >
                     {competitionParticipation.competition.name}
@@ -237,10 +240,12 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                 </div>
 
                 <a
-                  href={`/competitions/stats/${getIDFromBase64(
-                    competitionParticipation.id,
-                    "CompetitionParticipationType"
-                  )}`}
+                  href={reverseUrl("competition_stats_root", {
+                    pk: getIDFromBase64(
+                      competitionParticipation.id,
+                      "CompetitionParticipationType"
+                    ),
+                  })}
                 >
                   Explore more stats
                 </a>

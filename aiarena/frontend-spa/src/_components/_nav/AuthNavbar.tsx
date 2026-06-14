@@ -2,6 +2,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import { AuthNavbarQuery } from "./__generated__/AuthNavbarQuery.graphql";
 import { NavLink } from "react-router";
 import clsx from "clsx";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 interface AuthNavbarProps {
   mobile?: boolean;
@@ -34,7 +35,7 @@ export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
     <li>
       {data.viewer?.user ? (
         <NavLink
-          to={"/dashboard"}
+          to={reverseUrl("dashboard_root")}
           className={({ isActive }) =>
             clsx(baseClasses, isActive ? activeBorder : inactiveBorder)
           }
@@ -43,10 +44,10 @@ export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
         </NavLink>
       ) : (
         <a
-          href={"/accounts/login/"}
+          href={reverseUrl("login")}
           className={clsx(
             baseClasses,
-            window.location.pathname === "/accounts/login/"
+            window.location.pathname === reverseUrl("login")
               ? activeBorder
               : inactiveBorder,
           )}

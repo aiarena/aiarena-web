@@ -14,6 +14,7 @@ import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import TokenReveal from "@/_components/_actions/TokenReveal";
 import RegenerateTokenButton from "@/_components/_actions/RegenerateTokenButton";
 import SquareButton from "@/_components/_actions/SquareButton";
+import { reverseUrl } from "@/_lib/reverseUrl";
 interface UserSettingsSectionProps {
   viewer: UserSettingsSection_viewer$key;
 }
@@ -69,7 +70,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
       onCompleted: (...args) => {
         const success = onCompleted(...args);
         if (success) {
-          window.location.href = "/";
+          window.location.href = reverseUrl("home");
         }
       },
       onError,
@@ -77,18 +78,18 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
   };
 
   const handleLinkDiscord = () => {
-    window.open("/discord/", "_blank", "noopener,noreferrer");
+    window.open(reverseUrl("discord_bind_index"), "_blank", "noopener,noreferrer");
   };
   const handleUnlinkDiscord = () => {
-    window.open("/profile/unlink/discord/", "_blank", "noopener,noreferrer");
+    window.open(reverseUrl("unlink_discord"), "_blank", "noopener,noreferrer");
   };
 
   const handleLinkPatreon = () => {
-    window.open("/patreon/", "_blank", "noopener,noreferrer");
+    window.open(reverseUrl("patreon_bind_index"), "_blank", "noopener,noreferrer");
   };
 
   const handleUnlinkPatreon = () => {
-    window.open("/profile/unlink/patreon/", "_blank", "noopener,noreferrer");
+    window.open(reverseUrl("unlink_patreon"), "_blank", "noopener,noreferrer");
   };
 
   const StatusInfo = () => {
@@ -111,7 +112,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           <dd>{viewer.receiveEmailComms ? "Yes" : "No"}</dd>
         </div>
         <div className="grid gap-4">
-          <a id="change_password" href="/accounts/password_change/">
+          <a id="change_password" href={reverseUrl("password_change")}>
             Change password
           </a>
           <button
@@ -234,7 +235,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
                 </p>
 
                 <SquareButton
-                  href="/developers/"
+                  href={reverseUrl("developers")}
                   text="API docs →"
                   outerClassName="mt-2"
                 />

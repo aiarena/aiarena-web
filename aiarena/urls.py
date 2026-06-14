@@ -72,15 +72,15 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("bots/downloadable/", core_views.BotDownloadableList.as_view(), name="bots_downloadable"),
     path("bots/<int:pk>/", core_views.frontend, name="bot"),
     path("bots/<int:pk>/edit/", core_views.BotUpdate.as_view(), name="bot_edit"),
-    path("bots/<int:pk>/bot_zip", core_views.BotZipDownloadView.as_view()),
-    path("bots/<int:pk>/bot_data", core_views.BotDataDownloadView.as_view()),
+    path("bots/<int:pk>/bot_zip", core_views.BotZipDownloadView.as_view(), name="bot_zip_download"),
+    path("bots/<int:pk>/bot_data", core_views.BotDataDownloadView.as_view(), name="bot_data_download"),
     path("bots/<int:pk>/competitions/", core_views.CompetitionParticipationList.as_view(), name="bot_competitions"),
     path(
         "bots/<int:bot_id>/competitions/<int:pk>",
         core_views.CompetitionParticipationUpdate.as_view(),
         name="bot_competition_edit",
     ),
-    path("match-logs/<int:pk>/", core_views.MatchLogDownloadView.as_view()),
+    path("match-logs/<int:pk>/", core_views.MatchLogDownloadView.as_view(), name="match_log_download"),
     path("authors/", core_views.frontend, name="authors"),
     path("authors/<int:pk>/", core_views.frontend, name="author"),
     # path('rounds/', core_views.RoundList.as_view(), name='rounds'), # todo
@@ -89,6 +89,15 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("competitions/", core_views.frontend, name="competitions"),
     path("competitions/<int:pk>/", core_views.frontend, name="competition"),
     path("competitions/stats/<int:pk>/", core_views.frontend, name="competition_stats_root"),
+    # Named entries for each stats tab so they're reversible by name (e.g. from an email).
+    # The SPA renders these via nested react-router; the <path:rest> catch-all below still
+    # serves any stats sub-path on a cold load / refresh, including ones not named here.
+    path("competitions/stats/<int:pk>/overview", core_views.frontend, name="competition_stats_overview"),
+    path("competitions/stats/<int:pk>/overview/elograph", core_views.frontend, name="competition_stats_elograph"),
+    path("competitions/stats/<int:pk>/overview/winsbytime", core_views.frontend, name="competition_stats_winsbytime"),
+    path("competitions/stats/<int:pk>/overview/winsbyrace", core_views.frontend, name="competition_stats_winsbyrace"),
+    path("competitions/stats/<int:pk>/maps", core_views.frontend, name="competition_stats_maps"),
+    path("competitions/stats/<int:pk>/matchups", core_views.frontend, name="competition_stats_matchups"),
     path("competitions/stats/<int:pk>/<path:rest>", core_views.frontend, name="bot_competition_stats"),
     path("botupload/", core_views.BotUpload.as_view(), name="botupload"),
     path("requestmatch/", core_views.RequestMatch.as_view(), name="requestmatch"),
@@ -107,9 +116,12 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("sitemap.xml/", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("robots.txt", include("robots.urls")),
     path("private-media/", include(private_storage.urls)),
+    path("dashboard/", core_views.frontend, name="dashboard_root"),
     path("dashboard/bots/", core_views.frontend, name="dashboard_bots"),
     path("dashboard/match-requests/", core_views.frontend, name="dashboard_match_requests"),
     path("dashboard/profile/", core_views.frontend, name="dashboard_profile"),
+    # Serves any other dashboard sub-path on a cold load (incl. React's own 404). Not
+    # reversible to a specific path — the named entries above are the reverse targets.
     re_path("^dashboard/.*", core_views.frontend, name="dashboard"),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT

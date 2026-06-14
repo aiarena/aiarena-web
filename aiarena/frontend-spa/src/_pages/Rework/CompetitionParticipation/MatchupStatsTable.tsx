@@ -14,6 +14,7 @@ import {
 } from "./__generated__/MatchupStatsTable_node.graphql";
 import { parseSort } from "@/_lib/tanstack_utils";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
@@ -104,7 +105,7 @@ export default function MatchupStatsTable(props: MatchupStatsTableProps) {
         header: "Opponent",
         cell: (info) => {
           const label = info.getValue();
-          const href = `/bots/${getIDFromBase64(info.row.original.opponent.bot.id, "BotType")}`;
+          const href = reverseUrl("bot", { pk: getIDFromBase64(info.row.original.opponent.bot.id, "BotType") });
           const aria = `View bot profile for ${info.getValue()}`;
 
           return (

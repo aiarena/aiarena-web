@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 import { Suspense, useMemo, useState, useTransition } from "react";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
@@ -98,7 +99,7 @@ export default function RoundsTable(props: RoundsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const label = getIDFromBase64(info.getValue(), "MatchType") || "";
-          const href = `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`;
+          const href = reverseUrl("match", { pk: getIDFromBase64(info.getValue(), "MatchType") });
           const aria = `View match details for Match ID ${info.getValue()}`;
 
           return (
@@ -123,20 +124,26 @@ export default function RoundsTable(props: RoundsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const label = info.getValue() || "";
-          const href = `/bots/${getIDFromBase64(info.row.original.participant1?.id, "BotType")}`;
+          const botId = getIDFromBase64(info.row.original.participant1?.id, "BotType");
           const aria = `View bot profile for ${info.getValue()}, Bot`;
 
           return (
             <span className="flex justify-between">
-              <Link
-                className="font-semibold text-gray-200 truncate mr-2"
-                to={href}
-                role="cell"
-                aria-label={aria}
-                title={`${label}`}
-              >
-                {label}
-              </Link>
+              {botId ? (
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={reverseUrl("bot", { pk: botId })}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  {label}
+                </Link>
+              ) : (
+                <span className="font-semibold text-gray-200 truncate mr-2">
+                  {label}
+                </span>
+              )}
             </span>
           );
         },
@@ -149,20 +156,26 @@ export default function RoundsTable(props: RoundsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const label = info.getValue() || "";
-          const href = `/bots/${getIDFromBase64(info.row.original.participant2?.id, "BotType")}`;
+          const botId = getIDFromBase64(info.row.original.participant2?.id, "BotType");
           const aria = `View bot profile for ${info.getValue()}, Bot`;
 
           return (
             <span className="flex justify-between">
-              <Link
-                className="font-semibold text-gray-200 truncate mr-2"
-                to={href}
-                role="cell"
-                aria-label={aria}
-                title={`${label}`}
-              >
-                {label}
-              </Link>
+              {botId ? (
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={reverseUrl("bot", { pk: botId })}
+                  role="cell"
+                  aria-label={aria}
+                  title={`${label}`}
+                >
+                  {label}
+                </Link>
+              ) : (
+                <span className="font-semibold text-gray-200 truncate mr-2">
+                  {label}
+                </span>
+              )}
             </span>
           );
         },

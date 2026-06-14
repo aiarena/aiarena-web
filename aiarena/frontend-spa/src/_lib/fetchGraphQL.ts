@@ -1,5 +1,7 @@
 import { Variables, UploadableMap } from "relay-runtime";
 
+import { reverseUrl } from "@/_lib/reverseUrl";
+
 const frontendBuildNumber = window.BUILD_NUMBER;
 
 export default async function fetchGraphQL(
@@ -53,7 +55,7 @@ export default async function fetchGraphQL(
 
   headers["X-CSRFToken"] = window.Settings.csrfToken;
 
-  const response = await fetch("/graphql/", {
+  const response = await fetch(reverseUrl("graphql"), {
     method: "POST",
     headers: headers,
     body: body,

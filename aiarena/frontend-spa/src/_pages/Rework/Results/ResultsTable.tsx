@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import clsx from "clsx";
 
 import { Suspense, useMemo, useState, useTransition } from "react";
@@ -113,16 +114,19 @@ export default function ResultsTable(props: ResultsTableProps) {
         header: "ID",
         enableSorting: false,
         cell: (info) => {
-          const label = getIDFromBase64(info.getValue(), "MatchType") || "";
+          const matchId = getIDFromBase64(info.getValue(), "MatchType");
+          if (!matchId) {
+            return null;
+          }
           return (
             <Link
               className="font-semibold text-gray-200 truncate mr-2"
-              to={`/matches/${getIDFromBase64(info.getValue(), "MatchType")}`}
+              to={reverseUrl("match", { pk: matchId })}
               role="cell"
               aria-label={`View match details for Result ID ${info.getValue()}`}
-              title={`${label}`}
+              title={matchId}
             >
-              {label}
+              {matchId}
             </Link>
           );
         },
@@ -150,18 +154,26 @@ export default function ResultsTable(props: ResultsTableProps) {
             </span>
           );
           const children = display_value;
+          const label = children ? children : participant1?.bot.name || "";
+          const botId = getIDFromBase64(participant1?.bot.id, "BotType");
 
           return (
             <span className="flex justify-between">
-              <Link
-                className="font-semibold text-gray-200 truncate mr-2"
-                to={`/bots/${getIDFromBase64(info.row.original.participant1?.bot.id, "BotType")}`}
-                role="cell"
-                aria-label={`View bot profile for ${participant1?.bot.name}, Bot`}
-                title={`${participant1?.bot.name || ""}`}
-              >
-                {children ? children : participant1?.bot.name || ""}
-              </Link>
+              {botId ? (
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={reverseUrl("bot", { pk: botId })}
+                  role="cell"
+                  aria-label={`View bot profile for ${participant1?.bot.name}, Bot`}
+                  title={`${participant1?.bot.name || ""}`}
+                >
+                  {label}
+                </Link>
+              ) : (
+                <span className="font-semibold text-gray-200 truncate mr-2">
+                  {label}
+                </span>
+              )}
               {appendOnEnd}
             </span>
           );
@@ -192,18 +204,26 @@ export default function ResultsTable(props: ResultsTableProps) {
             </span>
           );
           const children = display_value;
+          const label = children ? children : participant2?.bot.name || "";
+          const botId = getIDFromBase64(participant2?.bot.id, "BotType");
 
           return (
             <span className="flex justify-between">
-              <Link
-                className="font-semibold text-gray-200 truncate mr-2"
-                to={`/bots/${getIDFromBase64(info.row.original.participant2?.bot.id, "BotType")}`}
-                role="cell"
-                aria-label={`View bot profile for ${participant2?.bot.name}, Bot`}
-                title={`${participant2?.bot.name || ""}`}
-              >
-                {children ? children : participant2?.bot.name || ""}
-              </Link>
+              {botId ? (
+                <Link
+                  className="font-semibold text-gray-200 truncate mr-2"
+                  to={reverseUrl("bot", { pk: botId })}
+                  role="cell"
+                  aria-label={`View bot profile for ${participant2?.bot.name}, Bot`}
+                  title={`${participant2?.bot.name || ""}`}
+                >
+                  {label}
+                </Link>
+              ) : (
+                <span className="font-semibold text-gray-200 truncate mr-2">
+                  {label}
+                </span>
+              )}
               {appendOnEnd}
             </span>
           );

@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { useState } from "react";
 import { TrophyIcon } from "@heroicons/react/24/outline";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import BotTrophiesModal from "@/_pages/UserBots/UserBotsSection/_modals/BotTrophiesModal";
 import { MarkdownDisplay } from "@/_components/_actions/MarkdownDisplay";
 import { ArrowDownCircleIcon } from "@heroicons/react/20/solid";
@@ -66,7 +67,8 @@ export default function InformationSection({ bot }: InformationSectionProps) {
 
   const handleDownload = (kind: "bot_zip" | "bot_data") => {
     const botId = getIDFromBase64(data.id, "BotType");
-    window.location.href = `/bots/${botId}/${kind}`;
+    const route = kind === "bot_zip" ? "bot_zip_download" : "bot_data_download";
+    window.location.href = reverseUrl(route, { pk: botId });
   };
   return (
     <section aria-labelledby="bot-information-heading">
@@ -105,7 +107,9 @@ export default function InformationSection({ bot }: InformationSectionProps) {
               by{" "}
               <span className="font-medium text-gray-100">
                 <Link
-                  to={`/authors/${getIDFromBase64(data.user.id, "UserType")}`}
+                  to={reverseUrl("author", {
+                    pk: getIDFromBase64(data.user.id, "UserType"),
+                  })}
                   aria-label={"Navigate to author"}
                   title={`${data.user.username}`}
                 >

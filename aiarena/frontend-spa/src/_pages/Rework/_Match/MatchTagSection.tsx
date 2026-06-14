@@ -1,4 +1,5 @@
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { graphql, useFragment } from "react-relay";
 import { MatchTagSection_match$key } from "./__generated__/MatchTagSection_match.graphql";
 import useParseUtils from "@/_components/_hooks/useParseUtils";
@@ -51,7 +52,9 @@ export default function MatchTagSection(props: MatchTagSectionProps) {
               <span className=" font-semibold text-customGreen">
                 {user ? (
                   <a
-                    href={`/authors/${getIDFromBase64(user.id, "UserType")}`}
+                    href={reverseUrl("author", {
+                      pk: getIDFromBase64(user.id, "UserType"),
+                    })}
                     className="hover:underline"
                   >
                     {user.username}

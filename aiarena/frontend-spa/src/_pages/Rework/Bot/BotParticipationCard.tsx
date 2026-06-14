@@ -2,6 +2,7 @@ import { graphql, useFragment } from "react-relay";
 import { Link } from "react-router";
 import { BotParticipationCard_bot$key } from "./__generated__/BotParticipationCard_bot.graphql";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import AiArenaLoading from "@/_components/_display/AiArenaLoading";
 
 interface BotParticipationCardProps {
@@ -29,7 +30,9 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
     props.data,
   );
 
-  const competitionLink = `/competitions/${getIDFromBase64(data.competition.id, "CompetitionType")}`;
+  const competitionLink = reverseUrl("competition", {
+    pk: getIDFromBase64(data.competition.id, "CompetitionType"),
+  });
 
   return (
     <div className="grid grid-cols-5 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm  mr-2 shadow-lg bg-blur-2xl py-2">
@@ -59,7 +62,9 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
               </dd>
             </div>
             <Link
-              to={`/competitions/stats/${getIDFromBase64(data.id, "CompetitionParticipationType")}`}
+              to={reverseUrl("competition_stats_root", {
+                pk: getIDFromBase64(data.id, "CompetitionParticipationType"),
+              })}
               aria-label={"View Stats"}
               title={`View Stats`}
             >

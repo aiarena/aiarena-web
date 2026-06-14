@@ -1,7 +1,9 @@
+import { reverseUrl } from "@/_lib/reverseUrl";
+
 export const navLinks = [
   {
     title: "Home",
-    path: "/",
+    path: reverseUrl("home"),
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
@@ -9,7 +11,7 @@ export const navLinks = [
   },
   {
     title: "Authors",
-    path: "/authors",
+    path: reverseUrl("authors"),
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
@@ -17,7 +19,7 @@ export const navLinks = [
   },
   {
     title: "Bots",
-    path: "/bots",
+    path: reverseUrl("bots"),
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
@@ -25,7 +27,7 @@ export const navLinks = [
   },
   {
     title: "Competitions",
-    path: "/competitions",
+    path: reverseUrl("competitions"),
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
@@ -33,7 +35,7 @@ export const navLinks = [
   },
   {
     title: "Results",
-    path: "/results",
+    path: reverseUrl("results"),
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
@@ -55,7 +57,7 @@ export const navLinks = [
   },
   {
     title: "Wiki",
-    path: "/wiki",
+    path: reverseUrl("wiki:root"),
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,
@@ -63,7 +65,7 @@ export const navLinks = [
   },
   {
     title: "Developers",
-    path: `/developers/`,
+    path: reverseUrl("developers"),
     showLoggedIn: true,
     showLoggedOut: true,
     featureFlag: null,

@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import clsx from "clsx";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -208,7 +209,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         enableSorting: true,
         cell: (info) => {
           const label = getIDFromBase64(info.getValue(), "MatchType") || "";
-          const href = `/matches/${getIDFromBase64(info.getValue(), "MatchType")}`;
+          const href = reverseUrl("match", { pk: getIDFromBase64(info.getValue(), "MatchType") });
           const aria = `View match details for Match ID ${getIDFromBase64(info.getValue(), "MatchType")}`;
 
           return (
@@ -248,20 +249,26 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             )?.opponent;
 
             const label = opponent?.name || "";
-            const href = `/bots/${getIDFromBase64(opponent?.id, "BotType")}`;
+            const botId = getIDFromBase64(opponent?.id, "BotType");
             const aria = `View bot profile for ${opponent?.name}, Bot`;
 
             return (
               <span className="flex justify-between">
-                <Link
-                  className="font-semibold text-gray-200 truncate mr-2"
-                  to={href}
-                  role="cell"
-                  aria-label={aria}
-                  title={`${label}`}
-                >
-                  {label}
-                </Link>
+                {botId ? (
+                  <Link
+                    className="font-semibold text-gray-200 truncate mr-2"
+                    to={reverseUrl("bot", { pk: botId })}
+                    role="cell"
+                    aria-label={aria}
+                    title={`${label}`}
+                  >
+                    {label}
+                  </Link>
+                ) : (
+                  <span className="font-semibold text-gray-200 truncate mr-2">
+                    {label}
+                  </span>
+                )}
               </span>
             );
           },

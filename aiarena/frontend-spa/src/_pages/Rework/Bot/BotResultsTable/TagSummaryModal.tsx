@@ -1,5 +1,6 @@
 import Modal from "@/_components/_actions/Modal";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { useState } from "react";
 import { Tag } from "./BotResultsTable";
 import { Link } from "react-router";
@@ -61,7 +62,9 @@ export default function TagSummaryWithModal({
                 <span className="font-semibold text-customGreen">
                   {user ? (
                     <Link
-                      to={`/authors/${getIDFromBase64(user.id, "UserType")}`}
+                      to={reverseUrl("author", {
+                        pk: getIDFromBase64(user.id, "UserType"),
+                      })}
                       className="hover:underline"
                     >
                       {user.username}

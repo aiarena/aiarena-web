@@ -3,6 +3,7 @@ import RoundsTable from "./RoundsTable";
 import { RoundsSection_round$key } from "./__generated__/RoundsSection_round.graphql";
 import clsx from "clsx";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
 interface RoundsSectionProps {
@@ -45,7 +46,9 @@ export default function RoundsSection(props: RoundsSectionProps) {
             >
               Round {data.number} on{" "}
               <a
-                href={`/competitions/${getIDFromBase64(data.competition.id, "CompetitionType")}`}
+                href={reverseUrl("competition", {
+                  pk: getIDFromBase64(data.competition.id, "CompetitionType"),
+                })}
               >
                 {" "}
                 {data.competition.name}

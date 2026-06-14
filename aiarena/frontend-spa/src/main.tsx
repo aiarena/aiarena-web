@@ -8,6 +8,10 @@ import { SnackbarProvider } from "notistack";
 import { RelayConnectionIDProvider } from "./_components/_contexts/RelayConnectionIDContext/RelayConnectionIDContext.tsx";
 import { SmartRouter } from "./SmartRouter.tsx";
 import AlwaysScrollToTop from "./_lib/AlwaysScrollToTop.tsx";
+import { reverseUrl } from "@/_lib/reverseUrl";
+
+// Exposed for the Playwright reverse-parity test and console debugging; see vite-env.d.ts.
+window.reverseUrl = reverseUrl;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

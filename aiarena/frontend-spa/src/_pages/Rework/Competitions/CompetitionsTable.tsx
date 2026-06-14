@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 import {
   startTransition,
@@ -101,7 +102,7 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
         cell: (info) => {
           const label =
             getIDFromBase64(info.getValue(), "CompetitionType") || "";
-          const href = `/competitions/${getIDFromBase64(info.getValue(), "CompetitionType")}`;
+          const href = reverseUrl("competition", { pk: getIDFromBase64(info.getValue(), "CompetitionType") });
           const aria = `View competition details for Competition ID ${getIDFromBase64(info.getValue(), "CompetitionType")}}`;
 
           return (
@@ -128,7 +129,7 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
         cell: (info) => {
           const name = info.row.original.name;
           const label = name || "";
-          const href = `/competitions/${getIDFromBase64(info.row.original.id, "CompetitionType")}`;
+          const href = reverseUrl("competition", { pk: getIDFromBase64(info.row.original.id, "CompetitionType") });
           const aria = `View competition details for Competition ${name}`;
 
           return (

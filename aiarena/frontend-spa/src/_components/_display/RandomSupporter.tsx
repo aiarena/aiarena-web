@@ -1,6 +1,7 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { RandomSupporterQuery } from "./__generated__/RandomSupporterQuery.graphql";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { Link } from "react-router";
 
 export default function RandomSupporter() {
@@ -18,12 +19,19 @@ export default function RandomSupporter() {
     {},
   );
 
+  const supporter = data.stats?.randomSupporter;
+  if (!supporter) {
+    return null;
+  }
+
   return (
     <Link
       className="mb-6 text-2xl font-bold"
-      to={`/authors/${getIDFromBase64(data.stats?.randomSupporter?.id, "UserType")}`}
+      to={reverseUrl("author", {
+        pk: getIDFromBase64(supporter.id, "UserType"),
+      })}
     >
-      {data.stats?.randomSupporter?.username}
+      {supporter.username}
     </Link>
   );
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import WrappedTitle from "./WrappedTitle";
 import clsx from "clsx";
 import { LegacyActivityListQuery } from "./__generated__/LegacyActivityListQuery.graphql";
@@ -59,7 +60,7 @@ const LegacyActivityList: React.FC = () => {
       <>
         Bot{" "}
         <Link
-          to={`/bots/${getIDFromBase64(botId, "BotType")}`}
+          to={reverseUrl("bot", { pk: getIDFromBase64(botId, "BotType") })}
           aria-label={`View bot profile for ${botName}`}
         >
           {botName}
@@ -69,14 +70,16 @@ const LegacyActivityList: React.FC = () => {
     ) : (
       <>
         <Link
-          to={`/authors/${getIDFromBase64(botAuthorId, "UserType")}`}
+          to={reverseUrl("author", {
+            pk: getIDFromBase64(botAuthorId, "UserType"),
+          })}
           aria-label={`View user profile for ${botAuthorName}`}
         >
           {botAuthorName}
         </Link>{" "}
         uploaded a new bot:{" "}
         <Link
-          to={`/bots/${getIDFromBase64(botId, "BotType")}`}
+          to={reverseUrl("bot", { pk: getIDFromBase64(botId, "BotType") })}
           aria-label={`View bot profile for ${botName}`}
         >
           {botName}

@@ -1,4 +1,5 @@
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import {
   graphql,
   useFragment,
@@ -144,7 +145,9 @@ export default function JoinCompetitionModal({
               <div className="block">
                 <div>
                   <a
-                    href={`/competitions/${getIDFromBase64(comp.id, "CompetitionType")}`}
+                    href={reverseUrl("competition", {
+                      pk: getIDFromBase64(comp.id, "CompetitionType"),
+                    })}
                     target="_blank"
                     className="font-bold"
                   >

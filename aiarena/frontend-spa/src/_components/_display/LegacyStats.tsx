@@ -2,6 +2,7 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import WrappedTitle from "./WrappedTitle";
 import { LegacyStatsQuery } from "./__generated__/LegacyStatsQuery.graphql";
 import FetchError from "./FetchError";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 const LegacyStats: React.FC = () => {
   const data = useLazyLoadQuery<LegacyStatsQuery>(
@@ -40,23 +41,23 @@ const LegacyStats: React.FC = () => {
     {
       label: "Arena Clients",
       value: data.stats.arenaclients ?? 0,
-      link: "/arenaclients/",
+      link: reverseUrl("arenaclients"),
     },
     {
       label: "Match Queue",
       value: data.stats.matchesQueued,
-      link: "/match-queue/",
+      link: reverseUrl("match_queue"),
     },
     { label: "Matches Playing", value: data.stats.matchesStarted },
     {
       label: "Matches last hour",
       value: data.stats.matchCount1h ?? 0,
-      link: "/results/",
+      link: reverseUrl("results"),
     },
     {
       label: "Matches last 24h",
       value: data.stats.matchCount24h ?? 0,
-      link: "/results/",
+      link: reverseUrl("results"),
     },
     { label: "Server Time", value: formattedDateTime },
   ];

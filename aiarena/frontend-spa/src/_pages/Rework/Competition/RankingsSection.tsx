@@ -1,5 +1,6 @@
 import { graphql, usePaginationFragment } from "react-relay";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { Suspense, useMemo, useState } from "react";
 import {
   createColumnHelper,
@@ -157,7 +158,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           const bot = original.bot;
 
           const label = bot.name ?? "";
-          const href = `/bots/${getIDFromBase64(bot.id, "BotType")}`;
+          const href = reverseUrl("bot", { pk: getIDFromBase64(bot.id, "BotType") });
           const aria = `View bot profile for ${bot.name}`;
 
           return (
@@ -237,7 +238,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           const user = original.bot.user;
 
           const label = "";
-          const href = `/authors/${getIDFromBase64(user.id, "UserType")}`;
+          const href = reverseUrl("author", { pk: getIDFromBase64(user.id, "UserType") });
           const aria = `View user profile for ${user.username}`;
           const children = (
             <span className="flex gap-1 items-center">
@@ -286,10 +287,9 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           if (original.__kind !== "participant") return null;
 
           const label = "View Stats";
-          const href = `/competitions/stats/${getIDFromBase64(
-            original.id,
-            "CompetitionParticipationType",
-          )}`;
+          const href = reverseUrl("competition_stats_root", {
+            pk: getIDFromBase64(original.id, "CompetitionParticipationType"),
+          });
           const aria = `View stats ${original.id}`;
 
           return (

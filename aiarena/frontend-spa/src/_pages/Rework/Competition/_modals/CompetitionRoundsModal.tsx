@@ -6,6 +6,7 @@ import {
 } from "./__generated__/CompetitionRoundsModal_competition.graphql";
 import { Suspense, useMemo } from "react";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -84,7 +85,7 @@ export default function CompetitionRoundsModal(
         enableSorting: false,
         cell: (info) => {
           const label = `Round ${info.getValue()}`;
-          const href = `/rounds/${getIDFromBase64(info.row.original.id, "RoundsType")}`;
+          const href = reverseUrl("round", { pk: getIDFromBase64(info.row.original.id, "RoundsType") });
           const aria = `View round ${info.row.original.number}`;
 
           return (

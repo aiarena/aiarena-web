@@ -4,6 +4,7 @@ import { UserMatchRequestsQuery } from "./__generated__/UserMatchRequestsQuery.g
 import UserMatchRequestsSection from "@/_pages/UserMatchRequests/UserMatchRequestsSection";
 import { Suspense } from "react";
 import DisplaySkeletonRequestMatches from "@/_components/_display/_skeletons/DisplaySkeletonRequestMatches";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 export default function UserMatchRequests() {
   const data = useLazyLoadQuery<UserMatchRequestsQuery>(
@@ -20,7 +21,7 @@ export default function UserMatchRequests() {
   );
 
   if (!data.viewer) {
-    window.location.replace("/accounts/login");
+    window.location.replace(reverseUrl("login"));
     return null;
   }
 

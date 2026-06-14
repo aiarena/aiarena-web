@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import WrappedTitle from "./WrappedTitle";
 import { LegacyCompetitionTop10ListQuery } from "./__generated__/LegacyCompetitionTop10ListQuery.graphql";
 import BotIcon from "./BotIcon";
@@ -61,7 +62,9 @@ const LegacyCompetitonTop10List: React.FC = () => {
       <WrappedTitle title="Competitions" font="font-bold" />
       <div className="text-center mb-4">
         <Link
-          to={`/competitions/${getIDFromBase64(competition.id, "CompetitionType")}`}
+          to={reverseUrl("competition", {
+            pk: getIDFromBase64(competition.id, "CompetitionType"),
+          })}
           className="font-bold"
         >
           {competition.name}
@@ -94,7 +97,9 @@ const LegacyCompetitonTop10List: React.FC = () => {
               </td>
               <td>
                 <Link
-                  to={`/bots/${getIDFromBase64(participant.bot.id, "BotType")}`}
+                  to={reverseUrl("bot", {
+                    pk: getIDFromBase64(participant.bot.id, "BotType"),
+                  })}
                   aria-label={`View bot profile for ${participant.bot.name}`}
                 >
                   {participant.bot.name}

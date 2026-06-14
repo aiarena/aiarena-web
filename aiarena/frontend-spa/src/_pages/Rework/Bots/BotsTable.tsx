@@ -8,6 +8,7 @@ import {
 } from "@tanstack/react-table";
 
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 import {
   Suspense,
@@ -110,7 +111,7 @@ export default function BotsTable(props: BotsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const label = info.getValue();
-          const href = `/bots/${getIDFromBase64(info.row.original.id, "BotType")}`;
+          const href = reverseUrl("bot", { pk: getIDFromBase64(info.row.original.id, "BotType") });
           const aria = `View bot profile for ${info.getValue()}`;
 
           return (
@@ -137,7 +138,7 @@ export default function BotsTable(props: BotsTableProps) {
 
         cell: (info) => {
           const label = info.getValue();
-          const href = `/authors/${getIDFromBase64(info.row.original.user.id, "UserType")}`;
+          const href = reverseUrl("author", { pk: getIDFromBase64(info.row.original.user.id, "UserType") });
           const aria = `View author profile for ${info.getValue()}`;
 
           return (

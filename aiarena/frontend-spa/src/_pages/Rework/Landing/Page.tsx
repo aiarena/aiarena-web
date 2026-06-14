@@ -11,6 +11,7 @@ import { ReactNode, Suspense } from "react";
 import "react-loading-skeleton/dist/skeleton.css";
 import DisplaySkeletonBlockWithTitle from "@/_components/_display/_skeletons/DisplaySkeletonBlockWithTitle";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 export default function LandingPage() {
   return (
@@ -43,7 +44,7 @@ function CardsAndNewsSection() {
             Learning AIs fight in Starcraft 2.
             <br />
             <br />
-            Matches are run 24/7 and <a href="/stream/">streamed</a> to various
+            Matches are run 24/7 and <a href={reverseUrl("stream")}>streamed</a> to various
             live-stream platforms.
           </div>
         </div>
@@ -142,7 +143,7 @@ function InstructionsCard() {
         </h3>
         <ol className="list-decimal ml-10">
           <li>
-            <a href="/accounts/register/" target="_blank">
+            <a href={reverseUrl("registration_register")} target="_blank">
               Register
             </a>
           </li>

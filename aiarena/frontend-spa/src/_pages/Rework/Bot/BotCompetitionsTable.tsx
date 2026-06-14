@@ -1,5 +1,6 @@
 import { graphql, usePaginationFragment } from "react-relay";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import {
   BotCompetitionsTable_bot$data,
   BotCompetitionsTable_bot$key,
@@ -105,7 +106,7 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const label = info.getValue();
-          const href = `/competitions/${getIDFromBase64(info.row.original.competition.id, "CompetitionType")}`;
+          const href = reverseUrl("competition", { pk: getIDFromBase64(info.row.original.competition.id, "CompetitionType") });
           const aria = `View competition ${info.row.original.competition.name}`;
 
           return (
@@ -181,7 +182,7 @@ export default function BotCompetitionsTable(props: BotCompetitionsTableProps) {
         enableSorting: false,
         cell: (info) => {
           const label = "View Stats";
-          const href = `/competitions/stats/${getIDFromBase64(info.getValue(), "CompetitionParticipationType")}`;
+          const href = reverseUrl("competition_stats_root", { pk: getIDFromBase64(info.getValue(), "CompetitionParticipationType") });
           const aria = `View stats ${info.getValue()}`;
 
           return (

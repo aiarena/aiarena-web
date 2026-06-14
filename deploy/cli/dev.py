@@ -69,6 +69,12 @@ def pre_commit():
             git_root,
             django_env,
         ),
+        (
+            "Generating URL definitions...",
+            ["uv", "run", "python", "manage.py", "generate_url_definitions"],
+            git_root,
+            django_env,
+        ),
         ("Relay compiler...", ["npm", "run", "relay"], frontend, None),
         ("ESLint...", ["npm", "run", "lint"], frontend, None),
         ("TypeScript check...", ["npm", "run", "typescript"], frontend, None),

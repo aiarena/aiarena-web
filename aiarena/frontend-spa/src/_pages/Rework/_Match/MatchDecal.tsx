@@ -2,6 +2,7 @@ import { graphql, useFragment } from "react-relay";
 import { MatchDecal_match$key } from "./__generated__/MatchDecal_match.graphql";
 import EloTrendIcon from "@/_components/_display/EloTrendIcon";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { formatWinnerName } from "@/_components/_display/formatWinnerName";
 import { ArrowDownCircleIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
@@ -130,7 +131,9 @@ export default function MatchInfo(props: MatchDecalProps) {
                   {winner ? (
                     <span className="flex flex-wrap justify-end">
                       <Link
-                        to={`/bots/${getIDFromBase64(winner.id, "BotType")}`}
+                        to={reverseUrl("bot", {
+                          pk: getIDFromBase64(winner.id, "BotType"),
+                        })}
                         className="block truncate max-w-80 mr-2 overflow-ellipsis"
                       >
                         {winner.name}
@@ -203,7 +206,9 @@ export default function MatchInfo(props: MatchDecalProps) {
             <div className="font-medium flex flex-col items-center md:items-start gap-1 min-w-0">
               <>
                 <a
-                  href={`/bots/${getIDFromBase64(mp1.id, "BotType")}`}
+                  href={reverseUrl("bot", {
+                    pk: getIDFromBase64(mp1.id, "BotType"),
+                  })}
                   className="text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
                 >
                   {formatWinnerName(winner?.name, mp1.name)}
@@ -248,7 +253,9 @@ export default function MatchInfo(props: MatchDecalProps) {
             {mp2 && (
               <>
                 <a
-                  href={`/bots/${getIDFromBase64(mp2.id, "BotType")}`}
+                  href={reverseUrl("bot", {
+                    pk: getIDFromBase64(mp2.id, "BotType"),
+                  })}
                   className="text-white hover:text-customGreen truncate max-w-[180px] sm:max-w-xs text-xl"
                 >
                   {formatWinnerName(winner?.name, mp2.name)}

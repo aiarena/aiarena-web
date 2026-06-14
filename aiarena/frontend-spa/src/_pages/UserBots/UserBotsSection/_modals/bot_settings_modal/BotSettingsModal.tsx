@@ -18,6 +18,7 @@ import { UploadFile } from "@/_components/_actions/UploadFile";
 import SectionDivider from "@/_components/_display/SectionDivider";
 import SquareButton from "@/_components/_actions/SquareButton";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -77,7 +78,8 @@ export default function BotSettingsModal({
 
   const handleDownload = (kind: "bot_zip" | "bot_data") => {
     const botId = getIDFromBase64(bot.id, "BotType");
-    window.location.href = `/bots/${botId}/${kind}`;
+    const route = kind === "bot_zip" ? "bot_zip_download" : "bot_data_download";
+    window.location.href = reverseUrl(route, { pk: botId });
   };
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(

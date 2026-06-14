@@ -1,6 +1,7 @@
 import { graphql, useFragment } from "react-relay";
 import { MatchInfo_match$key } from "./__generated__/MatchInfo_match.graphql";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 import { Link } from "react-router";
 
@@ -69,7 +70,9 @@ export default function MatchInfo(props: MatchInfoProps) {
           <dd>
             {match.assignedTo?.username ? (
               <a
-                href={`/arenaclients/${getIDFromBase64(match.assignedTo.id, "UserType")}`}
+                href={reverseUrl("arenaclient", {
+                  pk: getIDFromBase64(match.assignedTo.id, "UserType"),
+                })}
                 className="text-customGreen hover:underline"
               >
                 {match.assignedTo.username}
@@ -90,10 +93,9 @@ export default function MatchInfo(props: MatchInfoProps) {
           <dd>
             {match.result?.winner ? (
               <Link
-                to={`/bots/${getIDFromBase64(
-                  match.result.winner.id,
-                  "BotType",
-                )}`}
+                to={reverseUrl("bot", {
+                  pk: getIDFromBase64(match.result.winner.id, "BotType"),
+                })}
                 className="text-customGreen hover:underline"
               >
                 {match.result.winner.name}
@@ -134,7 +136,12 @@ export default function MatchInfo(props: MatchInfoProps) {
               <dt className="w-32 text-gray-400">Competition</dt>
               <dd>
                 <Link
-                  to={`/competitions/${getIDFromBase64(match.round?.competition.id, "CompetitionType")}`}
+                  to={reverseUrl("competition", {
+                    pk: getIDFromBase64(
+                      match.round?.competition.id,
+                      "CompetitionType",
+                    ),
+                  })}
                   className="text-customGreen hover:underline"
                 >
                   {match.round?.competition.name}
@@ -146,7 +153,9 @@ export default function MatchInfo(props: MatchInfoProps) {
               <dt className="w-32 text-gray-400">Round</dt>
               <dd>
                 <Link
-                  to={`/rounds/${getIDFromBase64(match.round?.id, "RoundsType")}`}
+                  to={reverseUrl("round", {
+                    pk: getIDFromBase64(match.round?.id, "RoundsType"),
+                  })}
                   className="text-customGreen hover:underline"
                 >
                   {match.round?.number}
@@ -161,7 +170,9 @@ export default function MatchInfo(props: MatchInfoProps) {
               <dt className="w-32 text-gray-400">Requested By</dt>
               <dd>
                 <Link
-                  to={`/authors/${getIDFromBase64(match.requestedBy.id, "UserType")}`}
+                  to={reverseUrl("author", {
+                    pk: getIDFromBase64(match.requestedBy.id, "UserType"),
+                  })}
                 >
                   {match.requestedBy.username}
                 </Link>

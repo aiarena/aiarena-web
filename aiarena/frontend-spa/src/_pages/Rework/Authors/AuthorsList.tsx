@@ -4,6 +4,7 @@ import { AuthorsList_node$key } from "./__generated__/AuthorsList_node.graphql";
 import { startTransition, useEffect } from "react";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 import Author from "./Author";
@@ -92,7 +93,11 @@ export default function AuthorsList(props: AuthorsListProps) {
               role="listitem"
               className="w-full max-w-[42rem]"
             >
-              <Link to={`/authors/${getIDFromBase64(author.id, "UserType")}`}>
+              <Link
+                to={reverseUrl("author", {
+                  pk: getIDFromBase64(author.id, "UserType"),
+                })}
+              >
                 <Author author={author} />
               </Link>
             </li>

@@ -28,7 +28,9 @@ Before renaming or replacing anything, **grep for usages of the old name** — i
 
 Run `uv run dev pre-commit` to run all checks. This is what CI runs, so if it passes here it should pass there.
 
-It runs Ruff (check + format), regenerates the GraphQL schema (`aiarena/schema.graphql`) from the Python types, runs the Relay compiler, and runs ESLint + `tsc`. Because it regenerates the schema from the Python source, it's relevant to **backend** changes too, not just frontend. Don't run `ruff`, `eslint`, `tsc`, or `relay-compiler` directly — this command sequences them correctly.
+It runs Ruff (check + format), regenerates the GraphQL schema (`aiarena/schema.graphql`) from the Python types and the SPA's URL definitions from `urls.py`, runs the Relay compiler, and runs ESLint + `tsc`. Because it regenerates from the Python source, it's relevant to **backend** changes too, not just frontend. Don't run `ruff`, `eslint`, `tsc`, or `relay-compiler` directly — this command sequences them correctly.
+
+**Read its output in full; never grep it.** The output is short and the whole point is to see every issue in one pass — a failure in one check (and the regeneration steps' diffs) is exactly the context you need. Piping it through `grep`/`tail` hides failures and the regenerated changes you're responsible for reviewing.
 
 ## Scratch files — never use `/tmp`
 

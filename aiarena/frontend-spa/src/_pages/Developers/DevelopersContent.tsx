@@ -10,6 +10,7 @@ import TabNav from "@/_components/_nav/TabNav";
 import SquareButton from "@/_components/_actions/SquareButton";
 import LanguagePicker from "@/_components/_actions/LanguagePicker";
 import Pitch from "./Pitch";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 const TOKEN_PLACEHOLDER = "<your token>";
 const ROUND_ID_PLACEHOLDER = "<paste a round id from example 2>";
@@ -250,7 +251,7 @@ function playgroundUrl(example: Example): string {
       )}`,
     );
   }
-  return `/graphql/#${parts.join("&")}`;
+  return `${reverseUrl("graphql")}#${parts.join("&")}`;
 }
 
 interface DevelopersContentProps {
@@ -298,7 +299,7 @@ export default function DevelopersContent({
         <Pitch
           title="Interactive playground"
           body="The /graphql/ endpoint ships an in-browser playground with autocomplete and live docs. Try queries with your own credentials."
-          href="/graphql/"
+          href={reverseUrl("graphql")}
           linkText="Open playground →"
         />
         <Pitch
@@ -325,7 +326,7 @@ export default function DevelopersContent({
           </>
         ) : (
           <p className="text-sm text-gray-300">
-            <a href="/accounts/login/" className="underline">
+            <a href={reverseUrl("login")} className="underline">
               Log in
             </a>{" "}
             to see your personal API token. The examples below use{" "}
@@ -538,7 +539,7 @@ export default function DevelopersContent({
       <h3 className="text-lg font-semibold mb-2">Learn more</h3>
       <ul className="list-disc list-inside text-sm text-gray-300 mb-10 space-y-1">
         <li>
-          <a href="/graphql/" className="underline" target="_blank">
+          <a href={reverseUrl("graphql")} className="underline" target="_blank">
             Interactive playground
           </a>{" "}
           — autocomplete, schema browser, run real queries
@@ -607,12 +608,12 @@ export default function DevelopersContent({
         <p>It uses the same API token as GraphQL.</p>
         <ul className="list-disc list-inside space-y-1">
           <li>
-            <a href="/api/" className="underline" target="_blank">
+            <a href={reverseUrl("api-root")} className="underline" target="_blank">
               Browsable API root
             </a>
           </li>
           <li>
-            <a href="/swagger/" className="underline" target="_blank">
+            <a href={reverseUrl("schema-swagger-ui")} className="underline" target="_blank">
               Swagger reference
             </a>
           </li>

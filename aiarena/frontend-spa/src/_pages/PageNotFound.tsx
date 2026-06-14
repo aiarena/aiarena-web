@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 export default function PageNotFound() {
   return (
@@ -18,7 +19,7 @@ export default function PageNotFound() {
       <p className="text-lg mt-12 mb-10">
         Sorry, we couldn&apos;t find the page you&apos;re looking for.
       </p>
-      <Link to="/dashboard/">
+      <Link to={reverseUrl("dashboard_root")}>
         <span
           className="hover:border-4 border-4 border-customGreen bg-neutral-900 hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform"
           aria-label="Navigate back to the main dashboard with your bots"

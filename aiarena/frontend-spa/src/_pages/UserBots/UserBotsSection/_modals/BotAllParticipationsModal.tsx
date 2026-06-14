@@ -1,4 +1,5 @@
 import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import { graphql, useFragment } from "react-relay";
 import Modal from "@/_components/_actions/Modal";
 
@@ -64,7 +65,12 @@ export default function BotAllParticipationsModal({
                 <div className="flex justify-between flex-wrap">
                   <div>
                     <a
-                      href={`/competitions/${getIDFromBase64(participation.competition.id, "CompetitionType")}`}
+                      href={reverseUrl("competition", {
+                        pk: getIDFromBase64(
+                          participation.competition.id,
+                          "CompetitionType",
+                        ),
+                      })}
                       className="font-bold"
                     >
                       {participation.competition.name}
@@ -119,7 +125,12 @@ export default function BotAllParticipationsModal({
                     </dl>
 
                     <a
-                      href={`/competitions/stats/${getIDFromBase64(participation.id, "CompetitionParticipationType")}`}
+                      href={reverseUrl("competition_stats_root", {
+                        pk: getIDFromBase64(
+                          participation.id,
+                          "CompetitionParticipationType",
+                        ),
+                      })}
                     >
                       Explore more stats
                     </a>
