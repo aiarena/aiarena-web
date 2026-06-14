@@ -1,3 +1,4 @@
+import functools
 from collections import OrderedDict
 
 from django.core.exceptions import ValidationError
@@ -7,6 +8,7 @@ import graphene
 from graphene import ID, InputObjectType
 from graphene.types.inputobjecttype import InputObjectTypeOptions
 from graphene.types.mutation import MutationOptions
+from graphene.utils.get_unbound_function import get_unbound_function
 from graphene_django import DjangoObjectType
 from graphene_django.forms.mutation import _set_errors_flag_to_context
 from graphene_django.types import ErrorType
@@ -72,7 +74,47 @@ class DjangoObjectTypeWithUID(DjangoObjectType):
         abstract = True
 
 
-class CleanedInputMutation(graphene.Mutation):
+class BaseMutation(graphene.Mutation):
+    """Base class for every mutation in the schema.
+
+    Login is required **by default**: the caller must be authenticated unless the
+    mutation explicitly opts out with ``allow_anonymous = True`` in its ``Meta``.
+    This is secure-by-default — anonymous access is a visible, greppable opt-in
+    (used by auth-entry mutations like sign-in) rather than something each
+    mutation has to remember to guard against.
+
+    The check is injected by wrapping the subclass's ``mutate`` resolver, so it
+    applies uniformly whether the subclass defines ``mutate(self, info)`` (a
+    plain mutation) or inherits the input pipeline from ``CleanedInputMutation``.
+    """
+
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def __init_subclass_with_meta__(cls, allow_anonymous=False, resolver=None, **options):
+        # Wrap the subclass's `mutate` with the login check BEFORE delegating to
+        # graphene, which reads `mutate` to build the (then-frozen) resolver. We
+        # can't reassign `_meta.resolver` afterwards — graphene freezes _meta.
+        if not allow_anonymous:
+            mutate = resolver or getattr(cls, "mutate", None)
+            assert mutate, "All mutations must define a mutate method"
+            resolver = cls._wrap_resolver_with_login(get_unbound_function(mutate))
+
+        super().__init_subclass_with_meta__(resolver=resolver, **options)
+
+    @staticmethod
+    def _wrap_resolver_with_login(resolver):
+        @functools.wraps(resolver)
+        def wrapper(root, info, **kwargs):
+            if not info.context.user.is_authenticated:
+                raise AccessDenied(NOT_LOGGED_IN_MESSAGE)
+            return resolver(root, info, **kwargs)
+
+        return wrapper
+
+
+class CleanedInputMutation(BaseMutation):
     class Meta:
         abstract = True
 
@@ -87,6 +129,7 @@ class CleanedInputMutation(graphene.Mutation):
         input_class=None,
         input_name="input",
         arguments=None,
+        allow_anonymous=False,
         **options,
     ):
         if not _meta:
@@ -98,6 +141,7 @@ class CleanedInputMutation(graphene.Mutation):
         arguments = OrderedDict({input_name: input_class(required=True)})
 
         super().__init_subclass_with_meta__(
+            allow_anonymous=allow_anonymous,
             output=None,
             arguments=arguments,
             _meta=_meta,
@@ -307,6 +351,30 @@ class AccessDenied(GraphQLError):
     pass
 
 
+# Every access denial — the read floor and explicit write/delete checks alike —
+# shares this prefix. It's verb-neutral on purpose: "read" is the floor's
+# mechanism, not the user's intent, so someone updating a Bot they can't see is
+# told they lack access to it (with an optional "(tried to write)" hint) rather
+# than the misleading "you can't read this". Assert against this constant in
+# tests so a wording change is one edit, not a suite-wide rewrite.
+NO_ACCESS_MESSAGE_PREFIX = "You don't have access to that"
+
+# The login denial is intentionally separate: it's not about a specific object.
+NOT_LOGGED_IN_MESSAGE = "You have to be logged in to do this"
+
+
+def no_access_message(instance, scope=None):
+    """User-facing access-denied message for `instance`.
+
+    Pass `scope` (the attempted action) to append a "(tried to …)" debugging
+    hint; omit it for the bare read floor.
+    """
+    base = f"{NO_ACCESS_MESSAGE_PREFIX} {instance._meta.verbose_name}"
+    if scope:
+        return f"{base} (tried to {scope})"
+    return base
+
+
 def raise_for_access(info, instance, scopes=None):
     if scopes is None:
         scopes = [permissions.SCOPE_WRITE]
@@ -316,7 +384,7 @@ def raise_for_access(info, instance, scopes=None):
 
     for scope in scopes:
         if not checker.can(scope):
-            raise AccessDenied(f'{user} cannot perform "{scope}" on "{instance}"')
+            raise AccessDenied(no_access_message(instance, scope))
 
 
 def parse_deep_errors(e):

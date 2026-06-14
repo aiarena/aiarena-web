@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth import get_user
 
 import pytest
 from rest_framework.authtoken.models import Token
@@ -6,6 +7,7 @@ from rest_framework.authtoken.models import Token
 from aiarena.core.models import Bot, CompetitionParticipation, Match, MatchParticipation
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.graphql import BotType, CompetitionType, MapPoolType, MapType
+from aiarena.graphql.common import NO_ACCESS_MESSAGE_PREFIX, NOT_LOGGED_IN_MESSAGE
 
 
 class TestRequestMatch(GraphQLTest):
@@ -97,7 +99,7 @@ class TestRequestMatch(GraphQLTest):
                     "mapPool": self.to_global_id(MapPoolType, map_pool.id),
                 }
             },
-            expected_errors_like=["You need to be logged in in to perform this action."],
+            expected_errors_like=[NOT_LOGGED_IN_MESSAGE],
         )
         assert not Match.objects.filter(requested_by=user).exists()
 
@@ -480,7 +482,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
                     "active": True,
                 }
             },
-            expected_errors_like=['bobby cannot perform "write" on "My_Bot"'],
+            expected_errors_like=[NO_ACCESS_MESSAGE_PREFIX],
         )
         # Verify the competition participation was not created.
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
@@ -668,7 +670,7 @@ class TestUploadBot(GraphQLTest):
                 }
             },
             files={"input.botZip": python_zip_file()},
-            expected_errors_like=["You need to be logged in in to perform this action."],
+            expected_errors_like=[NOT_LOGGED_IN_MESSAGE],
         )
         assert Bot.objects.count() == 0
 
@@ -832,7 +834,7 @@ class TestUpdateBot(GraphQLTest):
                     "wikiArticle": "Some Content",
                 }
             },
-            expected_errors_like=['bobby cannot perform "write" on "My_Bot"'],
+            expected_errors_like=[NO_ACCESS_MESSAGE_PREFIX],
         )
 
         # Verify bot was not updated
@@ -856,7 +858,7 @@ class TestUpdateBot(GraphQLTest):
                     "wikiArticle": "Some Content",
                 }
             },
-            expected_errors_like=['AnonymousUser cannot perform "write" on "My_Bot"'],
+            expected_errors_like=[NOT_LOGGED_IN_MESSAGE],
         )
 
         # Verify bot was not updated
@@ -943,12 +945,12 @@ class TestRegenerateApiToken(GraphQLTest):
         assert response["regenerateApiToken"]["viewer"]["apiToken"] == new_token.key
 
     def test_not_logged_in_does_not_create_token(self, user):
-        """An unauthenticated caller cannot mint a token."""
+        """An unauthenticated caller is denied by login-by-default and mints nothing."""
         assert not Token.objects.filter(user=user).exists()
 
         self.mutate(
             expected_status=200,
-            expected_validation_errors={"__all__": ["You are not signed in"]},
+            expected_errors_like=[NOT_LOGGED_IN_MESSAGE],
         )
 
         assert not Token.objects.exists()
@@ -966,3 +968,74 @@ class TestRegenerateApiToken(GraphQLTest):
         other_token.refresh_from_db()
         assert other_token.key == other_key
         assert Token.objects.filter(user=other_user).count() == 1
+
+
+class TestPasswordSignIn(GraphQLTest):
+    """The sign-in mutation is anonymous-allowed (allow_anonymous=True): the
+    login-by-default gate must NOT block an unauthenticated caller, or nobody
+    could ever sign in."""
+
+    mutation_name = "passwordSignIn"
+    # language=graphql
+    mutation = """
+        mutation ($input: PasswordSignInInput!) {
+            passwordSignIn(input: $input) {
+                errors {
+                    messages
+                    field
+                }
+            }
+        }
+    """
+
+    def test_anonymous_can_sign_in_with_valid_credentials(self, user):
+        """An anonymous caller reaches the auth logic (not blocked by the login
+        floor) and ends up authenticated in the session."""
+        self.mutate(
+            expected_status=200,
+            variables={"input": {"username": "billy", "password": "guest"}},
+        )
+
+        assert get_user(self.last_query_client).is_authenticated
+
+    def test_wrong_password_returns_error_payload(self, user):
+        """Bad credentials return a graceful error payload, not auth."""
+        self.mutate(
+            expected_status=200,
+            expected_validation_errors={"__all__": ["Incorrect email or password"]},
+            variables={"input": {"username": "billy", "password": "wrong"}},
+        )
+
+        assert not get_user(self.last_query_client).is_authenticated
+
+
+class TestSignOut(GraphQLTest):
+    """Sign-out is anonymous-allowed: an already-anonymous caller gets a graceful
+    error payload rather than being blocked by the login floor."""
+
+    mutation_name = "signOut"
+    # language=graphql
+    mutation = """
+        mutation {
+            signOut {
+                errors {
+                    messages
+                    field
+                }
+            }
+        }
+    """
+
+    def test_signed_in_user_is_signed_out(self, user):
+        self.mutate(login_user=user, expected_status=200)
+
+        assert not get_user(self.last_query_client).is_authenticated
+
+    def test_anonymous_is_denied(self, db):
+        """Sign-out requires auth like any other mutation. Denying a logged-out
+        caller is the honest signal (e.g. a frontend with stale auth state learns
+        the session is already gone) — better than a no-op that reports success."""
+        self.mutate(
+            expected_status=200,
+            expected_errors_like=[NOT_LOGGED_IN_MESSAGE],
+        )

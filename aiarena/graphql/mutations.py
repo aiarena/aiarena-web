@@ -30,6 +30,7 @@ from aiarena.core.models.competition_participation import CompetitionParticipati
 from aiarena.core.services import bots, supporters
 from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import (
+    BaseMutation,
     CleanedInputMutation,
     CleanedInputType,
     join_deep_errors_to_string,
@@ -89,9 +90,6 @@ class RequestMatch(CleanedInputMutation):
 
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: RequestMatchInput):
-        if not info.context.user.is_authenticated:
-            raise GraphQLError("You need to be logged in in to perform this action.")
-
         try:
             matches = handle_request_matches(
                 supporters_service=supporters,
@@ -223,9 +221,6 @@ class UploadBot(CleanedInputMutation):
 
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object: UploadBotInput):
-        if not info.context.user.is_authenticated:
-            raise GraphQLError("You need to be logged in in to perform this action.")
-
         if not config.BOT_UPLOADS_ENABLED and getattr(input_object, "bot_zip", None):
             raise GraphQLError("Bot uploads are currently disabled.")
 
@@ -298,6 +293,9 @@ class PasswordSignInInput(CleanedInputType):
 class PasswordSignIn(CleanedInputMutation):
     class Meta:
         input_class = PasswordSignInInput
+        # Anonymous by necessity: the caller is signing in, so they aren't
+        # authenticated yet at entry.
+        allow_anonymous = True
 
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object):
@@ -319,38 +317,19 @@ class PasswordSignIn(CleanedInputMutation):
         return cls(errors=[])
 
 
-class SignOut(graphene.Mutation):
+class SignOut(BaseMutation):
     errors = graphene.List(ErrorType)
 
     def mutate(self, info: graphene.ResolveInfo) -> "SignOut":
-        if not info.context.user.is_authenticated:
-            return SignOut(
-                errors=[
-                    ErrorType(
-                        field="__all__",
-                        messages=["You are not signed in"],
-                    )
-                ]
-            )
         logout(request=info.context)
         return SignOut(errors=[])
 
 
-class RegenerateApiToken(graphene.Mutation):
+class RegenerateApiToken(BaseMutation):
     errors = graphene.List(ErrorType)
     viewer = graphene.Field(Viewer)
 
     def mutate(self, info: graphene.ResolveInfo) -> "RegenerateApiToken":
-        if not info.context.user.is_authenticated:
-            return RegenerateApiToken(
-                errors=[
-                    ErrorType(
-                        field="__all__",
-                        messages=["You are not signed in"],
-                    )
-                ]
-            )
-
         with transaction.atomic():
             Token.objects.filter(user=info.context.user).delete()
             Token.objects.create(user=info.context.user)
@@ -363,15 +342,13 @@ class RegenerateApiToken(graphene.Mutation):
 # =============================================================================
 
 
-class GetNextMatch(graphene.Mutation):
+class GetNextMatch(BaseMutation):
     """Get the next match for an arena client to play."""
 
     match = graphene.Field(MatchType)
 
     def mutate(self, info: graphene.ResolveInfo) -> "GetNextMatch":
         user = info.context.user
-        if not user.is_authenticated:
-            raise GraphQLError("Authentication required.")
 
         if not user.is_arenaclient:
             raise GraphQLError("Only arena clients can get matches.")
@@ -412,8 +389,6 @@ class RequestUploadUrls(CleanedInputMutation):
     @classmethod
     def perform_mutate(cls, info, input_object: RequestUploadUrlsInput):
         user = info.context.user
-        if not user.is_authenticated:
-            raise GraphQLError("Authentication required.")
         if not user.is_arenaclient:
             raise GraphQLError("Only arena clients can request upload URLs.")
 
@@ -469,6 +444,25 @@ class SubmitResultInput(CleanedInputType):
             raise ValidationError("Match is not assigned to this arena client.")
         return match
 
+    @staticmethod
+    def _clean_own_upload(upload: TemporaryUpload | None, info):
+        """Reject a TemporaryUpload referenced by ID that the caller didn't upload.
+
+        The upload IDs are resolved to instances with no ownership check, so
+        without this a client could reference another client's upload by ID and
+        have its contents copied into their result.
+        """
+        if upload is not None and upload.uploaded_by != info.context.user:
+            raise ValidationError("Upload was not created by this arena client.")
+        return upload
+
+    clean_replay_file = _clean_own_upload
+    clean_arenaclient_log = _clean_own_upload
+    clean_bot1_data = _clean_own_upload
+    clean_bot2_data = _clean_own_upload
+    clean_bot1_log = _clean_own_upload
+    clean_bot2_log = _clean_own_upload
+
 
 class SubmitResult(CleanedInputMutation):
     """Submit the result of a match."""
@@ -487,8 +481,6 @@ class SubmitResult(CleanedInputMutation):
     @classmethod
     def perform_mutate(cls, info, input_object: SubmitResultInput):
         user = info.context.user
-        if not user.is_authenticated:
-            raise GraphQLError("Authentication required.")
         if not user.is_arenaclient:
             raise GraphQLError("Only arena clients can submit results.")
 
