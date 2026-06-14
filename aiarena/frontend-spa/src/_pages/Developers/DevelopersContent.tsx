@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
+import { graphql, useFragment } from "react-relay";
 
+import { DevelopersContent_viewer$key } from "./__generated__/DevelopersContent_viewer.graphql";
 import WrappedTitle from "@/_components/_display/WrappedTitle";
 import CodeBlock from "@/_components/_display/CodeBlock";
 import TokenReveal from "@/_components/_actions/TokenReveal";
+import RegenerateTokenButton from "@/_components/_actions/RegenerateTokenButton";
 import TabNav from "@/_components/_nav/TabNav";
 import SquareButton from "@/_components/_actions/SquareButton";
 import LanguagePicker from "@/_components/_actions/LanguagePicker";
@@ -251,21 +254,32 @@ function playgroundUrl(example: Example): string {
 }
 
 interface DevelopersContentProps {
-  apiToken: string | null;
+  viewer: DevelopersContent_viewer$key | null;
   isLoggedIn: boolean;
   sampleRoundId: string | null;
 }
 
 export default function DevelopersContent({
-  apiToken,
+  viewer,
   isLoggedIn,
   sampleRoundId,
 }: DevelopersContentProps) {
+  const data = useFragment(
+    graphql`
+      fragment DevelopersContent_viewer on Viewer {
+        apiToken
+        ...TokenReveal_viewer
+        ...RegenerateTokenButton_viewer
+      }
+    `,
+    viewer,
+  );
+
   const examples = useMemo(() => buildExamples(sampleRoundId), [sampleRoundId]);
   const [activeExample, setActiveExample] = useState(examples[0].name);
 
   const example = examples.find((e) => e.name === activeExample) ?? examples[0];
-  const tokenForSnippet = apiToken ?? TOKEN_PLACEHOLDER;
+  const tokenForSnippet = data?.apiToken ?? TOKEN_PLACEHOLDER;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -299,9 +313,10 @@ export default function DevelopersContent({
 
       <div className="bg-darken-2 border border-neutral-600 rounded-md p-4 mb-8">
         <h3 className="text-base font-semibold mb-2">Your API token</h3>
-        {isLoggedIn ? (
+        {isLoggedIn && data ? (
           <>
-            <TokenReveal token={apiToken} />
+            <TokenReveal viewer={data} />
+            <RegenerateTokenButton viewer={data} outerClassName="mt-2" />
             <p className="text-xs text-gray-400 mt-2">
               For non-browser clients (scripts, servers, bots), send it as the{" "}
               <span className="font-mono">Authorization: Token &lt;key&gt;</span>{" "}

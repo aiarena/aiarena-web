@@ -12,6 +12,7 @@ import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import TokenReveal from "@/_components/_actions/TokenReveal";
+import RegenerateTokenButton from "@/_components/_actions/RegenerateTokenButton";
 import SquareButton from "@/_components/_actions/SquareButton";
 interface UserSettingsSectionProps {
   viewer: UserSettingsSection_viewer$key;
@@ -21,7 +22,8 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
   const viewer = useFragment(
     graphql`
       fragment UserSettingsSection_viewer on Viewer {
-        apiToken
+        ...TokenReveal_viewer
+        ...RegenerateTokenButton_viewer
         receiveEmailComms
         lastLogin
         dateJoined
@@ -222,7 +224,9 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
             <div className="bg-darken-2 border border-neutral-600 shadow-lg shadow-black rounded-md backdrop-blur-sm">
               <h3 className="mt-1 ml-2 text-base font-semibold ">API Token</h3>
               <div className=" p-4">
-                <TokenReveal token={viewer.apiToken} />
+                <TokenReveal viewer={viewer} />
+
+                <RegenerateTokenButton viewer={viewer} outerClassName="mt-3" />
 
                 <p className="text-sm text-gray-300 mt-3">
                   For deeper queries, fewer requests, and an interactive

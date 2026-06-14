@@ -8,7 +8,7 @@ export default function Developers() {
     graphql`
       query DevelopersQuery {
         viewer {
-          apiToken
+          ...DevelopersContent_viewer
           user {
             username
           }
@@ -29,7 +29,7 @@ export default function Developers() {
 
   return (
     <DevelopersContent
-      apiToken={data.viewer?.apiToken ?? null}
+      viewer={data.viewer ?? null}
       isLoggedIn={Boolean(data.viewer?.user)}
       sampleRoundId={sampleRoundId}
     />

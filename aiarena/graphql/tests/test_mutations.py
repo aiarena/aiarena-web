@@ -1,6 +1,7 @@
 from django.conf import settings
 
 import pytest
+from rest_framework.authtoken.models import Token
 
 from aiarena.core.models import Bot, CompetitionParticipation, Match, MatchParticipation
 from aiarena.core.tests.base import GraphQLTest
@@ -895,3 +896,68 @@ class TestUpdateBot(GraphQLTest):
         # Verify bot was not updated
         bot.refresh_from_db()
         assert bot.bot_zip_publicly_downloadable != "new name pls"
+
+
+class TestRegenerateApiToken(GraphQLTest):
+    mutation_name = "regenerateApiToken"
+    mutation = """
+        mutation {
+            regenerateApiToken {
+                viewer {
+                    apiToken
+                }
+                errors {
+                    messages
+                    field
+                }
+            }
+        }
+    """
+
+    def test_generates_token_when_missing(self, user):
+        """A user with no token gets one created, and it's returned to them."""
+        assert not Token.objects.filter(user=user).exists()
+
+        response = self.mutate(login_user=user, expected_status=200)
+
+        token = Token.objects.get(user=user)
+        returned_token = response["regenerateApiToken"]["viewer"]["apiToken"]
+        assert returned_token == token.key
+
+    def test_regenerates_existing_token(self, user):
+        """Regenerating replaces the existing token: old key gone, new key differs, still exactly one."""
+        old_token = Token.objects.create(user=user)
+        old_key = old_token.key
+
+        response = self.mutate(login_user=user, expected_status=200)
+
+        assert Token.objects.filter(user=user).count() == 1
+        new_token = Token.objects.get(user=user)
+        assert new_token.key != old_key
+        assert not Token.objects.filter(key=old_key).exists()
+        assert response["regenerateApiToken"]["viewer"]["apiToken"] == new_token.key
+
+    def test_not_logged_in_does_not_create_token(self, user):
+        """An unauthenticated caller cannot mint a token."""
+        assert not Token.objects.filter(user=user).exists()
+
+        self.mutate(
+            expected_status=200,
+            expected_validation_errors={"__all__": ["You are not signed in"]},
+        )
+
+        assert not Token.objects.exists()
+
+    def test_only_affects_own_token(self, user, other_user):
+        """Regenerating one user's token must not touch another user's token."""
+        other_token = Token.objects.create(user=other_user)
+        other_key = other_token.key
+
+        self.mutate(login_user=user, expected_status=200)
+
+        # The caller got a fresh token...
+        assert Token.objects.filter(user=user).exists()
+        # ...and the other user's token is completely untouched.
+        other_token.refresh_from_db()
+        assert other_token.key == other_key
+        assert Token.objects.filter(user=other_user).count() == 1

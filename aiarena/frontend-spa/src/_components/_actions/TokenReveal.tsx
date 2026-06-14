@@ -5,22 +5,48 @@ import {
   EyeSlashIcon,
 } from "@heroicons/react/20/solid";
 import { useSnackbar } from "notistack";
+import { graphql, useFragment } from "react-relay";
+
+import { TokenReveal_viewer$key } from "./__generated__/TokenReveal_viewer.graphql";
 
 interface TokenRevealProps {
-  token: string | null | undefined;
+  viewer: TokenReveal_viewer$key;
   className?: string;
 }
 
 const MASK = "•••••••••••••••••••••••••••••••••••••••";
 
-export default function TokenReveal({ token, className }: TokenRevealProps) {
+export default function TokenReveal({ viewer, className }: TokenRevealProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [visible, setVisible] = useState(false);
+
+  const data = useFragment(
+    graphql`
+      fragment TokenReveal_viewer on Viewer {
+        apiToken
+      }
+    `,
+    viewer,
+  );
+  const token = data.apiToken;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(token ?? "");
     enqueueSnackbar("API token copied to clipboard!");
   };
+
+  if (!token) {
+    return (
+      <div
+        className={
+          "flex items-center bg-black text-gray-400 px-2 py-1 rounded font-mono text-xs italic " +
+          (className ?? "")
+        }
+      >
+        No API token yet.
+      </div>
+    );
+  }
 
   return (
     <div

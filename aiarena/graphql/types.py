@@ -1389,9 +1389,9 @@ class Viewer(graphene.ObjectType):
         try:
             token = Token.objects.get(user=info.context.user)
         except Token.DoesNotExist:
-            token = "no token - contact us"
+            return None
 
-        return token
+        return token.key
 
     @staticmethod
     def resolve_email(root: models.User, info):

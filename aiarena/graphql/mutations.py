@@ -16,6 +16,7 @@ from constance import config
 from graphene_django.types import ErrorType
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
+from rest_framework.authtoken.models import Token
 
 from aiarena.api.arenaclient.common.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.common.exceptions import LadderDisabled
@@ -46,6 +47,7 @@ from aiarena.graphql.types import (
     ResultType,
     TemporaryUploadID,
     TemporaryUploadType,
+    Viewer,
 )
 
 
@@ -334,6 +336,28 @@ class SignOut(graphene.Mutation):
         return SignOut(errors=[])
 
 
+class RegenerateApiToken(graphene.Mutation):
+    errors = graphene.List(ErrorType)
+    viewer = graphene.Field(Viewer)
+
+    def mutate(self, info: graphene.ResolveInfo) -> "RegenerateApiToken":
+        if not info.context.user.is_authenticated:
+            return RegenerateApiToken(
+                errors=[
+                    ErrorType(
+                        field="__all__",
+                        messages=["You are not signed in"],
+                    )
+                ]
+            )
+
+        with transaction.atomic():
+            Token.objects.filter(user=info.context.user).delete()
+            Token.objects.create(user=info.context.user)
+
+        return RegenerateApiToken(errors=[], viewer=info.context.user)
+
+
 # =============================================================================
 # Arena Client Mutations
 # =============================================================================
@@ -558,6 +582,7 @@ class Mutation(graphene.ObjectType):
     update_competition_participation = UpdateCompetitionParticipation.Field()
     password_sign_in = PasswordSignIn.Field()
     sign_out = SignOut.Field()
+    regenerate_api_token = RegenerateApiToken.Field()
 
     # Arena Client mutations
     request_upload_urls = RequestUploadUrls.Field()
