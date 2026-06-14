@@ -50,15 +50,17 @@ export default function BotSettingsModal({
   );
 
   const [updateBot, updating] = useMutation<BotSettingsModalMutation>(graphql`
-    mutation BotSettingsModalMutation($input: UpdateBotInput!) {
+    mutation BotSettingsModalMutation($input: UpdateBotInput!, $botId: ID!) {
       updateBot(input: $input) {
-        bot {
-          id
-          botDataEnabled
-          botDataPubliclyDownloadable
-          botZipPubliclyDownloadable
-          wikiArticle
-          botZip
+        node(id: $botId) {
+          ... on BotType {
+            id
+            botDataEnabled
+            botDataPubliclyDownloadable
+            botZipPubliclyDownloadable
+            wikiArticle
+            botZip
+          }
         }
         errors {
           field
@@ -102,6 +104,7 @@ export default function BotSettingsModal({
                 onChange={() =>
                   updateBot({
                     variables: {
+                      botId: bot.id,
                       input: {
                         bot: bot.id,
                         botDataEnabled: !bot.botDataEnabled,
@@ -133,6 +136,7 @@ export default function BotSettingsModal({
                   onChange={() =>
                     updateBot({
                       variables: {
+                        botId: bot.id,
                         input: {
                           bot: bot.id,
                           botZipPubliclyDownloadable:
@@ -158,6 +162,7 @@ export default function BotSettingsModal({
                   onChange={() =>
                     updateBot({
                       variables: {
+                        botId: bot.id,
                         input: {
                           bot: bot.id,
                           botDataPubliclyDownloadable:
@@ -218,6 +223,7 @@ export default function BotSettingsModal({
                   if (!botZipFile) return;
                   updateBot({
                     variables: {
+                      botId: bot.id,
                       input: { bot: bot.id, botZip: null },
                     },
                     uploadables: {
@@ -278,6 +284,7 @@ export default function BotSettingsModal({
                   if (!botDataFile) return;
                   updateBot({
                     variables: {
+                      botId: bot.id,
                       input: { bot: bot.id, botData: null },
                     },
                     uploadables: {

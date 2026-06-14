@@ -739,9 +739,6 @@ class TestUpdateBot(GraphQLTest):
     mutation = """
         mutation($input: UpdateBotInput!) {
             updateBot(input: $input) {
-                bot {
-                    id
-                }
                 errors {
                     field
                     messages

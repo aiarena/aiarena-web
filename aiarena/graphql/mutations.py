@@ -40,7 +40,6 @@ from aiarena.graphql.types import (
     BotID,
     BotType,
     CompetitionID,
-    CompetitionParticipationType,
     MapID,
     MapPoolID,
     MatchID,
@@ -48,7 +47,6 @@ from aiarena.graphql.types import (
     ResultType,
     TemporaryUploadID,
     TemporaryUploadType,
-    Viewer,
 )
 
 
@@ -132,8 +130,6 @@ class UpdateCompetitionParticipationInput(CleanedInputType):
 
 
 class UpdateCompetitionParticipation(CleanedInputMutation):
-    competition_participation = graphene.Field(CompetitionParticipationType)
-
     class Meta:
         input_class = UpdateCompetitionParticipationInput
 
@@ -170,9 +166,9 @@ class UpdateCompetitionParticipation(CleanedInputMutation):
 
         competition_participation = cls.get_competition_participation_if_exists(input_object)
 
-        # Return the object if not change to active.
+        # No change to active — nothing to do.
         if competition_participation and competition_participation.active == input_object.active:
-            return cls(errors=[], competition_participation=competition_participation)
+            return cls(errors=[])
 
         # Reset division for existing participant when setting false,
         # or raise error for attempting to set a new competition_participation to false.
@@ -182,9 +178,9 @@ class UpdateCompetitionParticipation(CleanedInputMutation):
         if not competition_participation:
             competition_participation = cls.create_new_competition_participation(input_object)
 
-        competition_participation = cls.update_competition_participation(input_object, competition_participation)
+        cls.update_competition_participation(input_object, competition_participation)
 
-        return cls(errors=[], competition_participation=competition_participation)
+        return cls(errors=[])
 
 
 class UploadBotInput(CleanedInputType):
@@ -255,8 +251,6 @@ class UpdateBotInput(CleanedInputType):
 
 
 class UpdateBot(CleanedInputMutation):
-    bot = graphene.Field(BotType)
-
     class Meta:
         input_class = UpdateBotInput
 
@@ -282,7 +276,7 @@ class UpdateBot(CleanedInputMutation):
         except ValidationError as e:
             raise ValidationError(join_deep_errors_to_string(e))
 
-        return cls(errors=[], bot=bot)
+        return cls(errors=[])
 
 
 class PasswordSignInInput(CleanedInputType):
@@ -318,17 +312,12 @@ class PasswordSignIn(CleanedInputMutation):
 
 
 class SignOut(BaseMutation):
-    errors = graphene.List(ErrorType)
-
     def mutate(self, info: graphene.ResolveInfo) -> "SignOut":
         logout(request=info.context)
         return SignOut(errors=[])
 
 
 class RegenerateApiToken(BaseMutation):
-    errors = graphene.List(ErrorType)
-    viewer = graphene.Field(Viewer)
-
     def mutate(self, info: graphene.ResolveInfo) -> "RegenerateApiToken":
         with transaction.atomic():
             Token.objects.filter(user=info.context.user).delete()

@@ -22,6 +22,33 @@ learns its session is gone, instead of getting a no-op that reports success.
 `PasswordSignIn` should be the only `allow_anonymous` mutation in the schema. If
 you're adding a second, that's a strong signal to stop and reconsider.
 
+## What a mutation returns
+
+Every mutation inherits three response fields from `BaseMutation`:
+
+- `errors` — the structured validation-error channel (the frontend reads it on
+  every mutation; see `frontend-spa/CLAUDE.md`).
+- `node(id:)` — fetch any object by global ID.
+- `viewer` — the current user.
+
+Because `node` and `viewer` are always there, **don't add a bespoke output field
+for data the client can already reach through them.** A field declared on the
+mutation is only warranted when the result is otherwise unfetchable:
+
+- **Object the client already identified** (the typical *update* — the client
+  passed its ID in): don't return it. The client reads it back via
+  `node(id: theIdItAlreadyHas)`. `UpdateBot` / `UpdateCompetitionParticipation`
+  follow this — they declare no object field.
+- **Current-user state** (counts, flags that changed): don't return it. The
+  client reads `viewer`.
+- **A newly-created object** whose ID the client can't know in advance: *this* is
+  what a bespoke field is for. `RequestMatch.match`, `UploadBot.bot`,
+  `RequestUploadUrls.uploads`, `SubmitResult.result` return freshly-made objects
+  that `node` couldn't address — keep those.
+
+The test: "could the client fetch this with an ID it already has, or from
+`viewer`?" If yes, don't add the field.
+
 ## Authorizing the objects a mutation touches
 
 ### The mechanism, and why it needs care

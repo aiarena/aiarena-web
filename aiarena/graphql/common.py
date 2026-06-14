@@ -91,6 +91,21 @@ class BaseMutation(graphene.Mutation):
     class Meta:
         abstract = True
 
+    # On every mutation's response by convention. `errors` is the structured
+    # validation-error channel the frontend reads on every mutation (see
+    # useBackendErrors). `node` fetches any object by global ID and `viewer`
+    # exposes the current user, so a client can read back whatever it needs after
+    # a mutation without the mutation declaring a bespoke field for it.
+    errors = graphene.List(graphene.NonNull(ErrorType), required=True)
+    node = graphene.relay.Node.Field()
+    viewer = graphene.Field("aiarena.graphql.Viewer")
+
+    @staticmethod
+    def resolve_viewer(root, info, **args):
+        if info.context.user.is_authenticated:
+            return info.context.user
+        return None
+
     @classmethod
     def __init_subclass_with_meta__(cls, allow_anonymous=False, resolver=None, **options):
         # Wrap the subclass's `mutate` with the login check BEFORE delegating to
@@ -117,10 +132,6 @@ class BaseMutation(graphene.Mutation):
 class CleanedInputMutation(BaseMutation):
     class Meta:
         abstract = True
-
-    errors = graphene.List(graphene.NonNull(ErrorType), required=True)
-    node = graphene.relay.Node.Field()
-    viewer = graphene.Field("aiarena.graphql.Viewer")
 
     @classmethod
     def __init_subclass_with_meta__(
@@ -270,12 +281,6 @@ class CleanedInputMutation(BaseMutation):
     @classmethod
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object):
         raise NotImplementedError()
-
-    @staticmethod
-    def resolve_viewer(root, info, **args):
-        if info.context.user.is_authenticated:
-            return info.context.user
-        return None
 
 
 class CleanedInputTypeOptions(InputObjectTypeOptions):

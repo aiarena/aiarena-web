@@ -31,10 +31,12 @@ export default function BotBiographyModal({
     props.bot
   );
   const [updateBot, updating] = useMutation<BotBiographyModalMutation>(graphql`
-    mutation BotBiographyModalMutation($input: UpdateBotInput!) {
+    mutation BotBiographyModalMutation($input: UpdateBotInput!, $botId: ID!) {
       updateBot(input: $input) {
-        bot {
-          ...BotBiographyModal_bot
+        node(id: $botId) {
+          ... on BotType {
+            ...BotBiographyModal_bot
+          }
         }
         errors {
           field
@@ -86,6 +88,7 @@ export default function BotBiographyModal({
             onClick={() => {
               updateBot({
                 variables: {
+                  botId: bot.id,
                   input: {
                     bot: bot.id,
                     wikiArticle: biography,

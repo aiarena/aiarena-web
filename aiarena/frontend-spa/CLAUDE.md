@@ -97,6 +97,39 @@ section fetch its own data under `Suspense`, with a skeleton fallback. The
 renders immediately, each section suspends on its own data, and Relay's store
 caches it so revisiting a section doesn't refetch.
 
+### Mutations
+
+Every mutation exposes three fields on its result, regardless of what it does:
+`errors`, `node(id:)`, and `viewer`. Lean on them instead of expecting a bespoke
+return field.
+
+**Always select `errors` and handle them.** Drive the mutation through
+`useBackendErrors` (or `useSnackbarErrorHandlers`, which wraps it) — these read
+`response[mutationName].errors` and surface form/validation messages. Selecting
+`errors` is the convention; omitting it means errors pass silently.
+
+**Read results back through `node`/`viewer`, not bespoke fields.** To see the
+effect of a mutation:
+
+- For an object you already have the ID of (the usual *update* case — you passed
+  the ID in), select it back via `node`. Pass the id as a variable and spread the
+  fragment you need:
+  ```tsx
+  mutation BotSettingsModalMutation($input: UpdateBotInput!, $botId: ID!) {
+    updateBot(input: $input) {
+      node(id: $botId) {
+        ... on BotType { ...BotSettings_bot }
+      }
+      errors { field messages }
+    }
+  }
+  ```
+  Relay merges the returned object into its store by ID, so the UI updates.
+- For changed current-user state (counts, flags), select `viewer { ... }`.
+- Only a **newly-created** object whose ID you couldn't know in advance comes
+  back on a dedicated field (e.g. `requestMatch { match { ... } }`,
+  `uploadBot { bot { ... } }`).
+
 ### Helpers (`@/_lib/relayHelpers`)
 
 - **`getNodes(connection)`** — flatten a Relay connection's edges to a plain
