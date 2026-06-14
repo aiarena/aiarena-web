@@ -9,7 +9,7 @@ from ecs_deployer_boto3 import ApplicationUpdater, DeploymentMonitor
 from deploy import aws, docker
 from deploy.build_commands import (
     build_frontend,
-    build_generated_frontend_sources,
+    build_graphql_schema,
     deploy_environment,
     set_github_actions_output,
 )
@@ -37,7 +37,7 @@ def prepare_images():
 
     docker.build_image("env", arch=docker.ARCH_AMD64)
     docker.build_image("dev", arch=docker.ARCH_AMD64)
-    build_generated_frontend_sources(environment, img="dev")
+    build_graphql_schema(environment, img="dev")
     build_frontend()
 
     cloud_tag = f"cloud-{build_number}-{docker.ARCH_AMD64}"

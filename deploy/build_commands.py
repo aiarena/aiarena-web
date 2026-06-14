@@ -44,14 +44,8 @@ def deploy_environment(stack_outputs: StackOutputs):
     return environment, build_number
 
 
-def build_generated_frontend_sources(env: dict | None = None, img: str = "dev") -> None:
-    """Regenerate the frontend's gitignored, Django-derived sources before the build.
-
-    Both the GraphQL schema and the SPA URL definitions are generated from the Python
-    source and are not committed, so they must be (re)generated wherever the frontend is
-    built. Keep these two in lockstep — anywhere one runs, the other must too.
-    """
-    # Run generation without build number, since, if it is present,
+def build_graphql_schema(env: dict | None = None, img: str = "dev") -> None:
+    # Run schema generation without build number, since, if it is present,
     # local.py is checked, which we do not have in the env image.
     env_without_build_number = (env or {}).copy()
     env_without_build_number.pop("BUILD_NUMBER", None)
@@ -59,13 +53,17 @@ def build_generated_frontend_sources(env: dict | None = None, img: str = "dev") 
     app_dir = Path.cwd()
     manage_py_cmd = "python -B /app/manage.py"
     docker.cli(
-        f"run --rm {args} -v {app_dir}:/app {PROJECT_NAME}/{img} bash -c "
-        f'"{manage_py_cmd} graphql_schema && {manage_py_cmd} generate_url_definitions"',
+        f'run --rm {args} -v {app_dir}:/app {PROJECT_NAME}/{img} bash -c "{manage_py_cmd} graphql_schema"',
     )
 
 
 def build_frontend() -> None:
     echo("Build frontend")
+    # Regenerate the SPA's URL definitions from urls.py first — like the GraphQL schema
+    # it's gitignored and generated, but unlike the schema it's written *into* the Relay
+    # `__generated__/` dir, so it must run on the host (not the root build container, which
+    # would leave the dir root-owned and break the host-side `npm run relay` that follows).
+    run("uv run python manage.py generate_url_definitions")
     run(
         "npm install && npm run relay && npm run build",
         cwd="aiarena/frontend-spa",
