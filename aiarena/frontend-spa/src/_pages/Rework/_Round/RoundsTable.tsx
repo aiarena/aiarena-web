@@ -224,20 +224,26 @@ export default function RoundsTable(props: RoundsTableProps) {
           const status = info.row.original.status;
           if (status === "Finished") {
             const label = info.row.original.assignedTo?.username || "";
-            const href = `/bots/${getIDFromBase64(info.row.original.assignedTo?.id, "UserType")}`;
-            const aria = `Visit userprofile for ${info.row.original.assignedTo?.id}`;
+            const arenaClientId = getIDFromBase64(info.row.original.assignedTo?.id, "UserType");
+            const aria = `Visit arena client profile for ${label}`;
 
             return (
               <span className="flex justify-between">
-                <Link
-                  className="font-semibold text-gray-200 truncate mr-2"
-                  to={href}
-                  role="cell"
-                  aria-label={aria}
-                  title={`${label}`}
-                >
-                  {label}
-                </Link>
+                {arenaClientId ? (
+                  <Link
+                    className="font-semibold text-gray-200 truncate mr-2"
+                    to={reverseUrl("arenaclient", { pk: arenaClientId })}
+                    role="cell"
+                    aria-label={aria}
+                    title={`${label}`}
+                  >
+                    {label}
+                  </Link>
+                ) : (
+                  <span className="font-semibold text-gray-200 truncate mr-2">
+                    {label}
+                  </span>
+                )}
               </span>
             );
           } else if (status === "Started") {
