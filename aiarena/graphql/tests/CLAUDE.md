@@ -17,6 +17,7 @@ call `self.mutate(...)`:
 ```python
 class TestRequestMatch(GraphQLTest):
     mutation_name = "requestMatch"
+    # language=graphql
     mutation = """
         mutation ($input: RequestMatchInput!) {
             requestMatch(input: $input) {
@@ -31,6 +32,15 @@ class TestRequestMatch(GraphQLTest):
             variables={"input": {"bot1": self.to_global_id(BotType, bot.id), ...}},
         )
 ```
+
+## Tag GraphQL strings with `# language=graphql`
+
+Put the `# language=graphql` comment directly above the `mutation`/`query`
+string (as shown above). It's not decoration: it switches PyCharm into GraphQL
+mode for that string — syntax highlighting, schema-aware autocomplete, and
+validation against the real schema (resolved via the repo-root
+`graphql.config.yml`). Skipping it silently loses all of that, so include it on
+every GraphQL string.
 
 Useful helpers on the base class:
 

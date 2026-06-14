@@ -10,6 +10,7 @@ from aiarena.graphql import BotType, CompetitionType, MapPoolType, MapType
 
 class TestRequestMatch(GraphQLTest):
     mutation_name = "requestMatch"
+    # language=graphql
     mutation = """
         mutation ($input: RequestMatchInput!) {
             requestMatch(input: $input) {
@@ -284,6 +285,7 @@ class TestRequestMatch(GraphQLTest):
 
 class TestUpdateCompetitionParticipation(GraphQLTest):
     mutation_name = "updateCompetitionParticipation"
+    # language=graphql
     mutation = """
         mutation ($input: UpdateCompetitionParticipationInput!) {
             updateCompetitionParticipation(input: $input) {
@@ -525,6 +527,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
 
 class TestUploadBot(GraphQLTest):
     mutation_name = "uploadBot"
+    # language=graphql
     mutation = """
     mutation ($input: UploadBotInput!) {
         uploadBot(input: $input) {
@@ -730,6 +733,7 @@ class TestUploadBot(GraphQLTest):
 
 class TestUpdateBot(GraphQLTest):
     mutation_name = "updateBot"
+    # language=graphql
     mutation = """
         mutation($input: UpdateBotInput!) {
             updateBot(input: $input) {
@@ -900,6 +904,7 @@ class TestUpdateBot(GraphQLTest):
 
 class TestRegenerateApiToken(GraphQLTest):
     mutation_name = "regenerateApiToken"
+    # language=graphql
     mutation = """
         mutation {
             regenerateApiToken {

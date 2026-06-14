@@ -6,6 +6,7 @@ from aiarena.core.tests.base import GraphQLTest
 
 class TestRequestUploadUrls(GraphQLTest):
     mutation_name = "requestUploadUrls"
+    # language=graphql
     mutation = """
         mutation ($input: RequestUploadUrlsInput!) {
             requestUploadUrls(input: $input) {
