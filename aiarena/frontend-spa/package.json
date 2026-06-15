@@ -36,7 +36,7 @@
     "react-dom": "^18.3.1",
     "react-loading-skeleton": "^3.5.0",
     "react-relay": "^18.2.0",
-    "react-router": "^7.5.2",
+    "react-router": "^7.15.0",
     "rehype-sanitize": "^6.0.0",
     "relay-compiler": "^18.2.0",
     "relay-runtime": "^18.2.0",
