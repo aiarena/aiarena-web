@@ -124,7 +124,7 @@ dev = [
     { name = "click", specifier = "==8.3.0" },
     { name = "coverage", specifier = "==7.10.6" },
     { name = "django-fakeredis", specifier = "==0.1.2" },
-    { name = "ecs-deployer-boto3", specifier = "==0.3.0" },
+    { name = "ecs-deployer-boto3", specifier = "==0.4.0" },
     { name = "jinja2", specifier = "==3.1.6" },
     { name = "jsonschema", specifier = "==4.25.1" },
     { name = "pydantic", specifier = "==2.13.4" },
@@ -781,15 +781,15 @@ dependencies = [
 
 [[package]]
 name = "ecs-deployer-boto3"
-version = "0.3.0"
+version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
     { name = "pydantic" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9a/38/6c4dc8c2567eeac5a03f5548b225331b02a1196d5323e42dd19258ce3ec2/ecs_deployer_boto3-0.3.0.tar.gz", hash = "sha256:57c38f6f79a31b8d565cd89f959a82208d7e3e02a6a198cf391f65e753d4b7d0", size = 13335, upload-time = "2026-05-16T14:25:12.368Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/24/21/80f113a7da20431ab79f3525b12f714df1d59931be5e80565bb19801477d/ecs_deployer_boto3-0.4.0.tar.gz", hash = "sha256:706a42aabba1ad92ed52041a97a2b8abf18006914a43ba3f0a80892ca29b7199", size = 13480, upload-time = "2026-06-15T19:05:57.482Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b1/7f/e336a9128d1a592b8ca404c70584e0f6695afbb1111df8a69b6846cef3d7/ecs_deployer_boto3-0.3.0-py3-none-any.whl", hash = "sha256:74528c74478e1e96e7b07bac0559b2a7b701ea00af3640f0c2cb1328ec24b107", size = 15585, upload-time = "2026-05-16T14:25:11.108Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/b0/bd6c00ee20567b89f4e31faa144f31b06c7d6a966edbd075b0266bccc142/ecs_deployer_boto3-0.4.0-py3-none-any.whl", hash = "sha256:067502d0ce96fcbab073201a3c095ecbc6ff57a9ccf16c1b48d6b5a05dd64243", size = 15742, upload-time = "2026-06-15T19:05:56.418Z" },
 ]
 
 [[package]]
