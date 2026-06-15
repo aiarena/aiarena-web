@@ -12,7 +12,7 @@ dependencies = [
     "django-avatar==8.0.1",
     "django-bootstrap-form==3.4",
     "django-constance[redis]==3.1.0",
-    "django-debug-toolbar==3.2.2",
+    "django-debug-toolbar==6.1.0",
     "django-dirtyfields==1.9.7",
     "django-discord-bind",
     "django-extensions==4.1",
