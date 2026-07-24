@@ -1,0 +1,40 @@
+
+2
+Bump wheel from 0.45.1 to 0.46.2
+dependencies python:uv
+#1081 opened on Jan 23 by dependabot Bot
+2
+Bump django-debug-toolbar from 3.2.2 to 6.1.0
+dependencies python:uv
+#1076 opened on Dec 22, 2025 by dependabot Bot
+2
+Bump django-constance[redis] from 3.1.0 to 4.3.4
+dependencies python:uv
+#1075 opened on Dec 22, 2025 by dependabot Bot
+2
+Bump django-tables2 from 2.7.0 to 2.8.0
+dependencies python:uv
+#1074 opened on Dec 22, 2025 by dependabot Bot
+2
+Bump django-picklefield from 3.1 to 3.4.0
+dependencies python:uv
+#1073 opened on Dec 22, 2025 by dependabot Bot
+2
+Bump wiki from 0.11.1 to 0.12.2
+dependencies python:uv
+#1058 opened on Oct 13, 2025 by dependabot Bot
+2
+Bump pandas from 2.2.2 to 2.3.3
+dependencies python:uv
+#1055 opened on Sep 30, 2025 by dependabot Bot
+2
+Bump six from 1.16.0 to 1.17.0
+dependencies python:uv
+#1050 opened on Sep 22, 2025 by dependabot Bot
+2
+Bump django-registration-redux from 2.10 to 2.13
+dependencies python:uv
+#1048 opened on Sep 22, 2025 by dependabot Bot
+2
+Bump confusable-homoglyphs from 3.2.0 to 3.3.1
+dependencies python:uv
