@@ -22,7 +22,6 @@ from django.contrib.sitemaps.views import sitemap
 from django.urls import path, re_path
 from django.views.generic.base import TemplateView
 
-import debug_toolbar
 import private_storage.urls
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
@@ -50,7 +49,6 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [  # todo: replace usage of url with path for all these
-    path("__debug__/", include(debug_toolbar.urls)),
     path("health-check/", core_views.health_check, name="health_check"),
     path("health-check-with-db/", core_views.health_check_with_db, name="health_check_with_db"),
     path("500/", core_views.http_500),
@@ -126,3 +124,10 @@ urlpatterns = [  # todo: replace usage of url with path for all these
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
+
+if settings.DJDT:
+    # debug_toolbar isn't in INSTALLED_APPS outside of DJDT (see aiarena/settings/__init__.py),
+    # so importing its urls (which pulls in a real Model) must stay gated the same way.
+    import debug_toolbar
+
+    urlpatterns = [path("__debug__/", include(debug_toolbar.urls))] + urlpatterns
