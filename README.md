@@ -55,10 +55,9 @@ A website for running the aiarena.net infrastructure.
 
 6. Populate the DB
 
-    You can go two routes here - either populate it with seed data (if you don't want to worry about protecting production data on a local machine, or don't have access to AWS), or just restore the production backup locally (better for reproducing performance issues, simpler, but requires AWS access).
-
-    * Seed data - run `uv run manage.py migrate` to apply the database migrations, then `uv run manage.py seed` and optionally `uv run manage.py generatestats`
-    * Restore backup - run `uv run run.py restore-backup --s3`. That will download the latest production backup, which will already have the migrations applied.
+   You can go two routes here - either populate it with seed data (if you don't want to worry about protecting production data on a local machine, or don't have access to AWS), or just restore the production backup locally (better for reproducing performance issues, simpler, but requires AWS access).
+   - Seed data - run `uv run manage.py migrate` to apply the database migrations, then `uv run manage.py seed` and optionally `uv run manage.py generatestats`
+   - Restore backup - run `uv run backups restore-local`. That will open the backup restore wizard and guide you through downloading the latest production backup, which will already have the migrations applied, or restoring from a local backup.
 
     Ensure that the postgress client is installed: 
     ```shell
@@ -107,10 +106,13 @@ A website for running the aiarena.net infrastructure.
 
     In another terminal run:
 
-    ```shell
-    DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py graphql_schema
-    DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py runserver
-    ```
+   ```shell
+
+   DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py collectstatic
+   DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py graphql_schema
+   DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py some collect static
+   DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py runserver
+   ```
 
     In another terminal - navigate to aiarena-web/aiarena/frontend-spa 
     ```shell 
