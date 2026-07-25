@@ -622,7 +622,10 @@ export default function AdminStatsChart(props: AdminStatsChartProps) {
         <h2 className="mb-3 text-lg font-semibold text-neutral-100">
           Total Patreon pledge
         </h2>
-
+        <p>
+          Large discrepancy between these stats and ground truth. Housebots,
+          etc, are included.{" "}
+        </p>
         <div
           className="rounded-xl border border-neutral-800 bg-darken-2 p-4 pt-6 shadow-lg backdrop-blur-lg"
           style={{ height: 558 }}
