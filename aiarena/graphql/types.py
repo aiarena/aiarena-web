@@ -10,7 +10,7 @@ from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 from django.conf import settings
 from django.db.models import CharField, Count, IntegerField, OuterRef, Prefetch, Q, Subquery
-from django.db.models.functions import Lower
+from django.db.models.functions import Lower, TruncDate
 from django.utils import timezone
 
 import django_filters
@@ -1275,8 +1275,94 @@ class StatsType(graphene.ObjectType):
             result__isnull=True,
             started__isnull=False,
         ).count()
+    
+class AdminStatsPoint(graphene.ObjectType):
+    date_time = graphene.DateTime(required=True)
+    count = graphene.Int(required=True)
 
 
+class StatsForAdmins(graphene.ObjectType):
+    new_users = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
+    new_users_with_at_least_one_bot = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
+    new_patreon_users = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
+    new_bots = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
+    @staticmethod
+    def _points(queryset, datetime_field):
+        rows = (
+            queryset
+            .annotate(day=TruncDate(datetime_field))
+            .values("day")
+            .annotate(count=Count("id", distinct=True))
+            .order_by("day")
+        )
+
+        return [
+            {
+                "date_time": row["day"],
+                "count": row["count"],
+            }
+            for row in rows
+            if row["day"] is not None
+        ]
+
+    @classmethod
+    def resolve_new_users(cls, root, info, **args):
+        return cls._points(
+            User.objects.all(),
+            "date_joined",
+        )
+
+    @classmethod
+    def resolve_new_users_with_at_least_one_bot(
+        cls,
+        root,
+        info,
+        **args,
+    ):
+        return cls._points(
+            User.objects.filter(
+                bots__isnull=False,
+            ),
+            "date_joined",
+        )
+
+    @classmethod
+    def resolve_new_patreon_users(
+        cls,
+        root,
+        info,
+        **args,
+    ):
+        return cls._points(
+            User.objects.exclude(
+                patreon_level="none",
+            ),
+            "date_joined",
+        )
+
+    @classmethod
+    def resolve_new_bots(cls, root, info, **args):
+        return cls._points(
+            models.Bot.objects.all(),
+            "created",
+        )
+    
 class TrophyType(DjangoObjectTypeWithUID):
     trophy_icon_name = graphene.String()
     trophy_icon_image = graphene.String()
@@ -1458,6 +1544,7 @@ class Query(graphene.ObjectType):
     results = DjangoFilterConnectionField("aiarena.graphql.ResultType")
     rounds = DjangoFilterConnectionField("aiarena.graphql.RoundsType")
     stats = graphene.Field(StatsType)
+    stats_for_admins = graphene.Field("aiarena.graphql.StatsForAdmins")
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
     viewer = graphene.Field("aiarena.graphql.Viewer")
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
@@ -1521,6 +1608,23 @@ class Query(graphene.ObjectType):
     def resolve_stats(root, info, **args):
         return StatsType()
 
+    @staticmethod
+    def resolve_stats_for_admins(
+        root,
+        info,
+        **args,
+    ):
+        user = getattr(info.context, "user", None)
+
+        if (
+            not user
+            or not user.is_authenticated
+            or not user.is_superuser
+        ):
+            return None
+
+        return StatsForAdmins()
+    
     @staticmethod
     def resolve_users(root, info, **args):
         return models.User.objects.all()
