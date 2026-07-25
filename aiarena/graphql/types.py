@@ -1275,7 +1275,8 @@ class StatsType(graphene.ObjectType):
             result__isnull=True,
             started__isnull=False,
         ).count()
-    
+
+
 class AdminStatsPoint(graphene.ObjectType):
     date_time = graphene.DateTime(required=True)
     count = graphene.Int(required=True)
@@ -1305,8 +1306,7 @@ class StatsForAdmins(graphene.ObjectType):
     @staticmethod
     def _points(queryset, datetime_field):
         rows = (
-            queryset
-            .annotate(day=TruncDate(datetime_field))
+            queryset.annotate(day=TruncDate(datetime_field))
             .values("day")
             .annotate(count=Count("id", distinct=True))
             .order_by("day")
@@ -1362,7 +1362,8 @@ class StatsForAdmins(graphene.ObjectType):
             models.Bot.objects.all(),
             "created",
         )
-    
+
+
 class TrophyType(DjangoObjectTypeWithUID):
     trophy_icon_name = graphene.String()
     trophy_icon_image = graphene.String()
@@ -1616,15 +1617,11 @@ class Query(graphene.ObjectType):
     ):
         user = getattr(info.context, "user", None)
 
-        if (
-            not user
-            or not user.is_authenticated
-            or not user.is_superuser
-        ):
+        if not user or not user.is_authenticated or not user.is_superuser:
             return None
 
         return StatsForAdmins()
-    
+
     @staticmethod
     def resolve_users(root, info, **args):
         return models.User.objects.all()
