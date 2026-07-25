@@ -19,6 +19,7 @@ import SectionDivider from "@/_components/_display/SectionDivider";
 import SquareButton from "@/_components/_actions/SquareButton";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface BotSettingsModalProps {
   bot: BotSettingsModal_bot$key;
@@ -47,7 +48,7 @@ export default function BotSettingsModal({
         ...BotBiographyModal_bot
       }
     `,
-    props.bot
+    props.bot,
   );
 
   const [updateBot, updating] = useMutation<BotSettingsModalMutation>(graphql`
@@ -70,7 +71,7 @@ export default function BotSettingsModal({
       }
     }
   `);
-
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [botZipFile, setBotZipFile] = useState<File | null>(null);
   const [botDataFile, setBotDataFile] = useState<File | null>(null);
 
@@ -84,7 +85,7 @@ export default function BotSettingsModal({
 
   const { onCompleted, onError } = useSnackbarErrorHandlers(
     "updateBot",
-    "Bot Settings Updated!"
+    "Bot Settings Updated!",
   );
 
   return (
@@ -264,7 +265,9 @@ export default function BotSettingsModal({
 
               <SquareButton
                 disabled={!bot.botData}
-                onClick={() => (bot.botData ? handleDownload("bot_data") : null)}
+                onClick={() =>
+                  bot.botData ? handleDownload("bot_data") : null
+                }
                 outerClassName="w-full mb-8"
               >
                 <ArrowDownOnSquareStackIcon
@@ -304,6 +307,37 @@ export default function BotSettingsModal({
               >
                 <ArrowUpOnSquareStackIcon className="size-5 mr-1" />
                 Upload Bot Data
+              </SquareButton>
+              <SquareButton
+                color={confirmDelete ? "red" : "orange"}
+                onClick={() => {
+                  if (!confirmDelete) {
+                    setConfirmDelete(true);
+                    return;
+                  }
+
+                  updateBot({
+                    variables: {
+                      botId: bot.id,
+                      input: { bot: bot.id, botData: null },
+                    },
+                    onCompleted: (...args) => {
+                      const success = onCompleted(...args);
+                      if (success) {
+                        setBotDataFile(null);
+                        setConfirmDelete(false);
+                      }
+                    },
+                    onError: (...args) => {
+                      setConfirmDelete(false);
+                      onError(...args);
+                    },
+                  });
+                }}
+                outerClassName="w-full mt-4"
+              >
+                <TrashIcon className="size-5 mr-1" />
+                {confirmDelete ? "Click Again to Delete" : "Delete Bot Data"}
               </SquareButton>
             </div>
           </div>

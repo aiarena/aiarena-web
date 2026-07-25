@@ -12,6 +12,7 @@ interface SquareButtonProps {
   disabled?: boolean;
   children?: React.ReactNode;
   textColor?: "bright" | "dim";
+  color?: "green" | "orange" | "red";
 }
 
 export default function SquareButton({
@@ -24,6 +25,7 @@ export default function SquareButton({
   disabled,
   children,
   textColor = "bright",
+  color = "green",
 }: SquareButtonProps) {
   const navigate = useNavigate();
 
@@ -41,22 +43,23 @@ export default function SquareButton({
         @keyframes highlight {
           0% {
             border-color: transparent;
-            border-bottom-color: var(--color-customGreen);
+            border-bottom-color: var(--highlight-color);
           }
           25% {
-            border-left-color: var(--color-customGreen);
+            border-left-color: var(--highlight-color);
           }
           50% {
-            border-top-color: var(--color-customGreen);
+            border-top-color: var(--highlight-color);
           }
           75% {
-            border-right-color: var(--color-customGreen);
+            border-right-color: var(--highlight-color);
           }
           100% {
             border-color: transparent;
-            border-bottom-color: var(--color-customGreen);
+            border-bottom-color: var(--highlight-color);
           }
         }
+
         .animate-highlight {
           position: absolute;
           top: -4px;
@@ -68,7 +71,20 @@ export default function SquareButton({
           animation: highlight 1s linear infinite;
           animation-delay: 0.15s;
         }
+
+        .highlight-green {
+          --highlight-color: var(--color-customGreen);
+        }
+
+        .highlight-orange {
+          --highlight-color: #f97316; /* Tailwind orange-500 */
+        }
+
+        .highlight-red {
+          --highlight-color: #ef4444; /* Tailwind red-500 */
+        }
       `}</style>
+
       <div className={clsx("relative inline-block", outerClassName)}>
         <button
           onClick={handleClick}
@@ -77,8 +93,20 @@ export default function SquareButton({
             {
               "text-white": textColor === "bright",
               "text-gray-200": textColor === "dim",
+
+              // Green
               "hover:shadow-customGreen border-customGreen bg-darken-2 hover:border-customGreen hover:bg-transparent":
-                !disabled,
+                !disabled && color === "green",
+
+              // Orange
+              "hover:shadow-orange-500 border-orange-500 bg-darken-2 hover:border-orange-500 hover:bg-transparent":
+                !disabled && color === "orange",
+
+              // Red
+              "hover:shadow-red-500 border-red-500 bg-darken-2 hover:border-red-500 hover:bg-transparent":
+                !disabled && color === "red",
+
+              // Disabled
               "bg-darken border-gray-700 hover:bg-darken hover:border-gray-700 cursor-not-allowed":
                 disabled,
             },
@@ -89,7 +117,16 @@ export default function SquareButton({
           {children}
           {text}
         </button>
-        {isLoading && <div className="animate-highlight"></div>}
+
+        {isLoading && (
+          <div
+            className={clsx("animate-highlight", {
+              "highlight-green": color === "green",
+              "highlight-orange": color === "orange",
+              "highlight-red": color === "red",
+            })}
+          />
+        )}
       </div>
     </>
   );
