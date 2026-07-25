@@ -9,7 +9,7 @@ from datetime import timedelta
 from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 from django.conf import settings
-from django.db.models import CharField, Count, IntegerField, OuterRef, Prefetch, Q, Subquery
+from django.db.models import CharField, Count, F, IntegerField, OuterRef, Prefetch, Q, Subquery, Value
 from django.db.models.functions import Lower, TruncDate
 from django.utils import timezone
 
@@ -1298,10 +1298,43 @@ class StatsForAdmins(graphene.ObjectType):
         required=True,
     )
 
+    bronze_patreon_pledge = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
+    silver_patreon_pledge = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
+    gold_patreon_pledge = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
+    platinum_patreon_pledge = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
+    diamond_patreon_pledge = graphene.List(
+        AdminStatsPoint,
+        required=True,
+    )
+
     new_bots = graphene.List(
         AdminStatsPoint,
         required=True,
     )
+
+    PATREON_PLEDGE_AMOUNTS = {
+        "bronze": 5,
+        "silver": 10,
+        "gold": 25,
+        "platinum": 50,
+        "diamond": 100,
+    }
 
     @staticmethod
     def _points(queryset, datetime_field):
@@ -1322,9 +1355,46 @@ class StatsForAdmins(graphene.ObjectType):
         ]
 
     @classmethod
+    def _patreon_pledge_points(cls, level):
+        pledge_amount = cls.PATREON_PLEDGE_AMOUNTS[level]
+
+        rows = (
+            User.objects.filter(
+                type="WEBSITE_USER",
+                patreon_level=level,
+            )
+            .annotate(
+                day=TruncDate("date_joined"),
+            )
+            .values("day")
+            .annotate(
+                users=Count("id", distinct=True),
+            )
+            .annotate(
+                count=Value(
+                    pledge_amount,
+                    output_field=IntegerField(),
+                )
+                * F("users"),
+            )
+            .order_by("day")
+        )
+
+        return [
+            {
+                "date_time": row["day"],
+                "count": row["count"],
+            }
+            for row in rows
+            if row["day"] is not None
+        ]
+
+    @classmethod
     def resolve_new_users(cls, root, info, **args):
         return cls._points(
-            User.objects.all(),
+            User.objects.filter(
+                type="WEBSITE_USER",
+            ),
             "date_joined",
         )
 
@@ -1337,6 +1407,7 @@ class StatsForAdmins(graphene.ObjectType):
     ):
         return cls._points(
             User.objects.filter(
+                type="WEBSITE_USER",
                 bots__isnull=False,
             ),
             "date_joined",
@@ -1350,16 +1421,65 @@ class StatsForAdmins(graphene.ObjectType):
         **args,
     ):
         return cls._points(
-            User.objects.exclude(
+            User.objects.filter(
+                type="WEBSITE_USER",
+            ).exclude(
                 patreon_level="none",
             ),
             "date_joined",
         )
 
     @classmethod
+    def resolve_bronze_patreon_pledge(
+        cls,
+        root,
+        info,
+        **args,
+    ):
+        return cls._patreon_pledge_points("bronze")
+
+    @classmethod
+    def resolve_silver_patreon_pledge(
+        cls,
+        root,
+        info,
+        **args,
+    ):
+        return cls._patreon_pledge_points("silver")
+
+    @classmethod
+    def resolve_gold_patreon_pledge(
+        cls,
+        root,
+        info,
+        **args,
+    ):
+        return cls._patreon_pledge_points("gold")
+
+    @classmethod
+    def resolve_platinum_patreon_pledge(
+        cls,
+        root,
+        info,
+        **args,
+    ):
+        return cls._patreon_pledge_points("platinum")
+
+    @classmethod
+    def resolve_diamond_patreon_pledge(
+        cls,
+        root,
+        info,
+        **args,
+    ):
+        return cls._patreon_pledge_points("diamond")
+
+    @classmethod
     def resolve_new_bots(cls, root, info, **args):
         return cls._points(
-            models.Bot.objects.all(),
+            models.Bot.objects.filter(
+                user__type="WEBSITE_USER",
+            ),
             "created",
         )
 
