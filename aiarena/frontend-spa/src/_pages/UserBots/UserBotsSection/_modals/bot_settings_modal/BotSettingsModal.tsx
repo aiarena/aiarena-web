@@ -61,6 +61,7 @@ export default function BotSettingsModal({
             botDataPubliclyDownloadable
             botZipPubliclyDownloadable
             wikiArticle
+            botData
             botZip
           }
         }
