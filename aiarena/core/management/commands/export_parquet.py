@@ -22,6 +22,7 @@ from aiarena.core.models import (
     Round,
     Tag,
 )
+
 # from aiarena.core.models.match_tag import delete_orphan_tags
 
 # Usage:
