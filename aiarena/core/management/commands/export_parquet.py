@@ -3,9 +3,9 @@ from pathlib import Path
 from uuid import UUID
 
 from django.core.management.base import BaseCommand, CommandError
+
 # from django.db import transaction
 # from django.db.models.signals import post_delete
-
 import pandas as pd
 
 from aiarena.core.models import (
@@ -22,6 +22,7 @@ from aiarena.core.models import (
     Round,
     Tag,
 )
+
 
 # from aiarena.core.models.match_tag import delete_orphan_tags
 
