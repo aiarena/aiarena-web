@@ -531,7 +531,6 @@ class ResultAdmin(admin.ModelAdmin):
         "replay_file_has_been_cleaned",
     )
     list_filter = (
-        "match",
         "winner",
         "created",
         "submitted_by",
