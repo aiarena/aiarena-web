@@ -22,7 +22,7 @@ from aiarena.core.models import (
     Round,
     Tag,
 )
-from aiarena.core.models.match_tag import delete_orphan_tags
+# from aiarena.core.models.match_tag import delete_orphan_tags
 
 # Usage:
 
@@ -423,7 +423,7 @@ class Command(BaseCommand):
     #         # finally delete competition
     #         Competition.objects.filter(id=competition_id).delete()
 
-        self.stdout.write(self.style.SUCCESS(f"Finished cleanup for competition {competition_id}"))
+    # self.stdout.write(self.style.SUCCESS(f"Finished cleanup for competition {competition_id}"))
 
     def export_match_dataset(
         self,
