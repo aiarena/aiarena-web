@@ -154,7 +154,7 @@ def get_services(stack_outputs: StackOutputs) -> list[Service]:
             name=f"{PROJECT_NAME}-webService",
             cluster=stack_outputs.ecs_cluster,
             task_definition=web_task,
-            desired_count=4,
+            desired_count=12,
             capacity_provider_strategy=CAPACITY_PROVIDER_STRATEGY,
             deployment_configuration=DeploymentConfiguration(
                 strategy="ROLLING",
