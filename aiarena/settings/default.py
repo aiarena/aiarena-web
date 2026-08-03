@@ -103,6 +103,10 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "aiarena.core.middleware.response_timing_metrics",
+    # Outermost of the app's own middleware, because it classifies on the way
+    # out: it has to run after auth has resolved the user, and timing from here
+    # captures the whole stack rather than just the view.
+    "aiarena.core.middleware.traffic_classification",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -565,6 +569,12 @@ if crontab:
             "task": "aiarena.core.tasks.celery_queue_monitoring",
             "schedule": timedelta(seconds=13),
         },
+        # Faster than the minute it aggregates, so a bucket is never missed; the
+        # task deletes the buckets it drained, so the extra runs are no-ops.
+        "traffic_monitoring": {
+            "task": "aiarena.core.tasks.traffic_monitoring",
+            "schedule": timedelta(seconds=30),
+        },
         "competitions_monitoring": {
             "task": "aiarena.core.tasks.competitions_monitoring",
             "schedule": timedelta(minutes=1),
@@ -588,6 +598,9 @@ CELERY_TASK_ROUTES = {
         "queue": "monitoring",
     },
     "aiarena.core.tasks.celery_queue_monitoring": {
+        "queue": "monitoring",
+    },
+    "aiarena.core.tasks.traffic_monitoring": {
         "queue": "monitoring",
     },
 }

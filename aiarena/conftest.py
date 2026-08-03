@@ -140,6 +140,25 @@ def all_bot_races(db):
     BotRace.create_all_races()
 
 
+# A browser test stands in for a person using the site, so it should look like
+# one all the way down -- including to the traffic classifier. Left alone,
+# headless Chromium announces itself as "HeadlessChrome/...", and we classify
+# that as a bot on purpose: someone pointing default-config Playwright at
+# production is not user traffic. Rather than weaken that rule, the tests
+# present a plain desktop Chrome user agent, so they exercise the same code path
+# a real visitor does.
+BROWSER_TEST_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+)
+
+
+@pytest.fixture(scope="session")
+def browser_context_args(browser_context_args):
+    """Give browser tests a real-user user agent — see BROWSER_TEST_USER_AGENT."""
+    return {**browser_context_args, "user_agent": BROWSER_TEST_USER_AGENT}
+
+
 @pytest.fixture
 def bh(live_server, transactional_db):
     browser_helper = BrowserHelper(live_server=live_server)

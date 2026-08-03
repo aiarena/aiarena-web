@@ -19,6 +19,7 @@ from redis import Redis
 from sentry_sdk.integrations.celery import CeleryIntegration
 
 from aiarena.celery import app
+from aiarena.core import traffic
 from aiarena.core.middleware import API_USAGE_KEY_PREFIX, raw_time_spent_in_queue_key
 from aiarena.core.models import ApiUsage, Competition
 from aiarena.core.services import competitions
@@ -282,6 +283,47 @@ def _calc_percentile(data: list, percentile: int):
     assert 100 % top_percent == 0, f"Cannot calculate exact {percentile} percentile, please select a divisible number"
     n = 100 // top_percent
     return round(quantiles(data, n=n, method="inclusive")[n - 2], 3)
+
+
+# One PutMetricData call takes at most 1000 datapoints. A backfilled sweep is
+# minutes x classes x metrics, which comfortably exceeds that after a long
+# outage, so the payload is chunked rather than assumed to fit.
+_CLOUDWATCH_MAX_DATAPOINTS = 1000
+
+
+@app.task(ignore_result=True)
+def traffic_monitoring():
+    """Ship per-minute traffic buckets to CloudWatch.
+
+    Just the CloudWatch adapter: draining, backfilling and the bucket lifecycle
+    all belong to core/traffic, which knows nothing about where the numbers end
+    up. This decides the wire format and nothing else.
+
+    Buckets are discarded only after the whole batch is accepted. If a send
+    raises, they stay in Redis and the next run picks them up again -- which is
+    the same backfill path a missed run takes.
+    """
+    buckets = traffic.drain()
+
+    metric_data = [
+        {
+            "MetricName": bucket.metric.cloudwatch_name,
+            "Dimensions": [{"Name": "TrafficClass", "Value": traffic_class.value}],
+            "Value": count,
+            "Unit": bucket.metric.unit,
+            "Timestamp": bucket.timestamp,
+        }
+        for bucket in buckets
+        for traffic_class, count in bucket.counts.items()
+    ]
+
+    for start in range(0, len(metric_data), _CLOUDWATCH_MAX_DATAPOINTS):
+        cloudwatch.put_metric_data(
+            Namespace="Traffic",
+            MetricData=metric_data[start : start + _CLOUDWATCH_MAX_DATAPOINTS],
+        )
+
+    traffic.discard(buckets)
 
 
 @app.task(ignore_result=True)

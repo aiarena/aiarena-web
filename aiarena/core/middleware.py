@@ -16,6 +16,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed
 
+from aiarena.core import traffic
 from aiarena.core.utils import monitoring_minute_key
 
 
@@ -133,6 +134,31 @@ def response_timing_metrics(get_response):
         response.headers["Server-Timing"] = ",".join(server_timings)
 
         return response
+
+    return middleware
+
+
+def traffic_classification(get_response):
+    """Time each request and hand it to the traffic recorder.
+
+    Deliberately thin: everything about *what* a client is and *where* the
+    numbers go lives in core/traffic/, so this is only the part that has to be
+    middleware — measuring the request and recording it on the way out.
+
+    MUST BE THE OUTERMOST of the app's own middleware, and the recording must
+    happen after `get_response`. Arena clients and scripted users are the
+    traffic that matters most here and they look like browsers on the wire;
+    only the resolved user tells them apart, and that isn't known until the auth
+    stack has run. Timing from out here also covers the whole inner stack rather
+    than just view execution. See the CLAUDE.md in core/traffic/.
+    """
+
+    def middleware(request: HttpRequest):
+        start = time.monotonic()
+        try:
+            return get_response(request)
+        finally:
+            traffic.record(request, duration_ms=int((time.monotonic() - start) * 1000))
 
     return middleware
 
