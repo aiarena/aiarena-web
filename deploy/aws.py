@@ -445,7 +445,12 @@ def run_ecs_task_and_wait(
     # Poll faster than the 10s default: this blocks the deploy, and the task
     # itself is short, so a coarse interval adds meaningful dead time (up to
     # 10s of the deploy spent waiting on an already-finished task).
-    wait_for_task_status(stack_outputs.ecs_cluster, task_id, {"STOPPED"}, check_period_seconds=3)
+    wait_for_task_status(
+        stack_outputs.ecs_cluster,
+        task_id,
+        {"DEPROVISIONING", "STOPPED"},
+        check_period_seconds=3,
+    )
 
     exit_code = get_task_exit_code(stack_outputs.ecs_cluster, task_id, container_name)
     echo(f"Remote command finished with exit code {exit_code}, here's its output:")
