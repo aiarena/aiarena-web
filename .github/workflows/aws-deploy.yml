@@ -80,7 +80,7 @@ jobs:
 
   tests:
     name: Regular tests
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-16vcpu-ubuntu-2404
     env:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
     steps:
@@ -160,7 +160,7 @@ jobs:
 
   tests-playwright:
     name: Playwright tests
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     env:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
     steps:
@@ -253,7 +253,7 @@ jobs:
   prepare-images:
     name: Build & push image to ECR
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     outputs:
       images: ${{ steps.prepare_images.outputs.images }}
     steps:
