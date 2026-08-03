@@ -1,4 +1,18 @@
-FROM python:3.12.7-slim-bullseye
+# Single multi-stage build for all three images. Build a specific one with
+# `--target env|dev|cloud`.
+#
+# These used to be three separate Dockerfiles, with dev/cloud doing
+# `FROM aiarena/env` and relying on the local Docker daemon's image store to
+# supply that base. That only works with the legacy builder: buildx runs the
+# build in an isolated BuildKit container, which has no access to the daemon's
+# images and so tries to resolve `aiarena/env` from Docker Hub. Expressing the
+# relationship as stages keeps it inside a single build, where BuildKit resolves
+# it directly from source.
+
+# ==============================================================================
+# Env - base image with system deps, prod python deps, and the code
+# ==============================================================================
+FROM python:3.12.7-slim-bullseye AS env
 
 ENV UV_PROJECT_ENVIRONMENT=/usr/local
 
@@ -32,3 +46,28 @@ RUN uv sync --locked --no-dev
 COPY . /app
 
 ENV PYTHONDONTWRITEBYTECODE=1
+
+
+# ==============================================================================
+# Dev - env plus the dev dependency group
+# ==============================================================================
+FROM env AS dev
+
+ENV DJANGO_ENVIRONMENT=DEVELOPMENT
+
+RUN uv sync --locked --dev
+
+
+# ==============================================================================
+# Cloud - production image with collected static files
+# ==============================================================================
+FROM env AS cloud
+
+ENV DJANGO_ENVIRONMENT=PRODUCTION
+ARG SECRET_KEY
+
+COPY . /app/
+
+RUN python /app/manage.py collectstatic --noinput --clear
+
+VOLUME /app

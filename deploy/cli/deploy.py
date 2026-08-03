@@ -35,9 +35,9 @@ def prepare_images():
     environment, build_number = deploy_environment(stack_outputs)
     echo(f"Build number: {build_number}")
 
-    # env/dev are consumed locally (dev runs graphql_schema below), so they're
-    # --load'ed into the local daemon rather than pushed.
-    docker.build_image("env", arch=docker.ARCH_AMD64)
+    # dev is consumed locally (it runs graphql_schema below), so it's --load'ed
+    # into the local daemon rather than pushed. No need to build env first: it's
+    # a stage of the same Dockerfile, so this build produces it along the way.
     docker.build_image("dev", arch=docker.ARCH_AMD64)
     build_graphql_schema(environment, img="dev")
     build_frontend()

@@ -13,11 +13,9 @@ PROJECT_ID = 83
 WEB_PORT = PROJECT_ID * 100 + 1
 DJANGO_PORT = PROJECT_ID * 100 + 11
 
-IMAGES: dict[str, Path] = {
-    "env": PROJECT_PATH / "docker/Dockerfile",
-    "cloud": PROJECT_PATH / "docker/Dockerfile_cloud",
-    "dev": PROJECT_PATH / "docker/Dockerfile_dev",
-}
+# All images are stages of one multi-stage Dockerfile; the image name is the
+# build target.
+DOCKERFILE: Path = PROJECT_PATH / "docker/Dockerfile"
 
 UWSGI_CONTAINER_NAME = "aiarena-uwsgi"
 NGINX_CONTAINER_NAME = "nginx"

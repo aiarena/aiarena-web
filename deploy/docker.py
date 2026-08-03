@@ -1,6 +1,6 @@
 import os
 
-from .settings import IMAGES, PROJECT_NAME, PROJECT_PATH
+from .settings import DOCKERFILE, PROJECT_NAME, PROJECT_PATH
 from .utils import echo, run, str_to_bool
 
 
@@ -93,7 +93,6 @@ def build_image(
     echo(f"Build environment image: {', '.join(refs)}")
     image_tags: str = " ".join(f"-t {ref}" for ref in refs)
 
-    path = IMAGES[image]
     if build_args:
         args = " ".join([f'--build-arg {k}="{v}"' for k, v in build_args.items()])
     else:
@@ -114,7 +113,8 @@ def build_image(
     if cache_to:
         args += f" --cache-to {cache_to}"
 
-    cli(f"buildx build {args} {extra_args} {image_tags} -f {path} .")
+    # The image name is the stage to build in the shared multi-stage Dockerfile.
+    cli(f"buildx build --target {image} {args} {extra_args} {image_tags} -f {DOCKERFILE} .")
 
 
 def remove_unused_local_images():

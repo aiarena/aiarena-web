@@ -28,9 +28,8 @@ def manage_py(command):
 @dev.command("build-image", help="Build dev image")
 @timing
 def build_image():
-    tag = {"latest"}
-    docker.build_image("env", tag)
-    docker.build_image("dev", tag)
+    # env is a stage of the same Dockerfile, so this builds it along the way.
+    docker.build_image("dev", "latest")
 
 
 def get_git_root() -> Path:

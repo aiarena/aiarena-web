@@ -1,5 +1,0 @@
-FROM aiarena/env
-
-ENV DJANGO_ENVIRONMENT=DEVELOPMENT
-
-RUN uv sync --locked --dev
