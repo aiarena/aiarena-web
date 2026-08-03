@@ -238,19 +238,20 @@ def execute_command(cluster_id, task_id, command: str, container_name=None):
 def wait_for_task_status(
     cluster_id,
     task_id,
-    status,
+    statuses: set[str],
     check_period_seconds=10,
     give_up_after_seconds=None,
 ):
-    """Wait for an ECS task to reach a status."""
+    """Wait for an ECS task to reach one of the given statuses."""
     ecs = get_boto3_session().client("ecs")
     t_start = time.time()
+    wanted = ", ".join(sorted(statuses))
 
     while True:
         tasks = ecs.describe_tasks(cluster=cluster_id, tasks=[task_id])["tasks"]
         task = tasks[0]
         task_last_status = task["lastStatus"]
-        if task_last_status == status:
+        if task_last_status in statuses:
             break
 
         # If we're actually waiting for it to stop, we'll break above ^
@@ -258,9 +259,9 @@ def wait_for_task_status(
             raise RuntimeError(f"Task {task_id} in unexpected STOPPED status")
 
         if give_up_after_seconds and time.time() > t_start + give_up_after_seconds:
-            raise RuntimeError(f"Task {task_id} didn't reach {status} status after {give_up_after_seconds} seconds")
+            raise RuntimeError(f"Task {task_id} didn't reach {wanted} status after {give_up_after_seconds} seconds")
 
-        echo(f"Task {task_id} has status {task_last_status}, waiting {check_period_seconds}s for {status} status ")
+        echo(f"Task {task_id} has status {task_last_status}, waiting {check_period_seconds}s for {wanted} status ")
         time.sleep(check_period_seconds)
 
 
@@ -316,7 +317,7 @@ def print_task_logs(cluster_id, task_id, container_name):
 
 
 def connect_to_ecs_task(cluster_id, task_id, container_name=None):
-    wait_for_task_status(cluster_id, task_id, "RUNNING")
+    wait_for_task_status(cluster_id, task_id, {"RUNNING"})
 
     # Get task details after it's running
     ecs = get_boto3_session().client("ecs")
@@ -392,7 +393,7 @@ def create_one_off_task(
 
     # Wait for task to be ready
     echo(f"Waiting for task {task_id} to be ready...")
-    wait_for_task_status(cluster_id, task_id, "RUNNING")
+    wait_for_task_status(cluster_id, task_id, {"RUNNING"})
 
     return cluster_id, task_id, container_name
 
@@ -444,7 +445,7 @@ def run_ecs_task_and_wait(
     # Poll faster than the 10s default: this blocks the deploy, and the task
     # itself is short, so a coarse interval adds meaningful dead time (up to
     # 10s of the deploy spent waiting on an already-finished task).
-    wait_for_task_status(stack_outputs.ecs_cluster, task_id, "STOPPED", check_period_seconds=3)
+    wait_for_task_status(stack_outputs.ecs_cluster, task_id, {"STOPPED"}, check_period_seconds=3)
 
     exit_code = get_task_exit_code(stack_outputs.ecs_cluster, task_id, container_name)
     echo(f"Remote command finished with exit code {exit_code}, here's its output:")

@@ -156,7 +156,7 @@ def create_production():
     )
 
     echo(f"Waiting for backup task {task_id} to finish...")
-    aws.wait_for_task_status(cluster_id, task_id, "STOPPED")
+    aws.wait_for_task_status(cluster_id, task_id, {"STOPPED"})
     exit_code = aws.get_task_exit_code(cluster_id, task_id, container_name)
 
     echo(f"Logs for task {task_id}:")
