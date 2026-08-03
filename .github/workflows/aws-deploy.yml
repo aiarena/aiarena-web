@@ -34,9 +34,10 @@ jobs:
       actions: read
       contents: read
     steps:
-      - uses: ipeterov/discord-notify-action@v1
+      - uses: ipeterov/discord-notify-action@93b6e13ce5cdb5ffd5b425224b514f81447d44dc
         with:
           webhook: ${{ secrets.CI_UPDATES_DISCORD_WEBHOOK }}
+          poll_interval: 1
           jobs: |
             - linters
             - tests
@@ -48,15 +49,15 @@ jobs:
     name: Linters
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version-file: "pyproject.toml"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           enable-cache: true
 
@@ -64,7 +65,7 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -85,7 +86,7 @@ jobs:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Start database services
         run: docker compose up -d builtin_db redis
@@ -102,12 +103,12 @@ jobs:
           done
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version-file: "pyproject.toml"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           enable-cache: true
 
@@ -121,7 +122,7 @@ jobs:
         run: uv run python manage.py generate_url_definitions
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -165,7 +166,7 @@ jobs:
       DJANGO_ALLOW_ASYNC_UNSAFE: true
     steps:
       - name: Checkout repository and submodules
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Start database services
         run: docker compose up -d builtin_db redis
@@ -182,12 +183,12 @@ jobs:
           done
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version-file: "pyproject.toml"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           enable-cache: true
 
@@ -201,7 +202,7 @@ jobs:
         run: uv run python manage.py generate_url_definitions
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -243,7 +244,7 @@ jobs:
             test-results/pytest-playwright.xml
 
       - name: Upload failure traces
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-failures
@@ -257,10 +258,10 @@ jobs:
     outputs:
       images: ${{ steps.prepare_images.outputs.images }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::315513665747:role/aiarena-DeployRole-NUZWXPWHC0MZ
           aws-region: eu-central-1
@@ -269,12 +270,12 @@ jobs:
         run: aws sts get-caller-identity
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version-file: "pyproject.toml"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           enable-cache: true
 
@@ -294,15 +295,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ linters, tests, tests-playwright, prepare-images ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version-file: "pyproject.toml"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v8.2.0
         with:
           enable-cache: true
 
@@ -310,7 +311,7 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: arn:aws:iam::315513665747:role/aiarena-DeployRole-NUZWXPWHC0MZ
           aws-region: eu-central-1
