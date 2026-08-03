@@ -26,6 +26,7 @@ cloudformation-default.yaml
 test-results/
 
 testtest11.py
+.scratch/
 
 schema.graphql
 **/__generated__
