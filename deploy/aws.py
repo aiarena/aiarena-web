@@ -108,14 +108,33 @@ def image_uri(image: str, tag: str) -> str:
     return f"{PRIVATE_REGISTRY_URL}/{PROJECT_NAME}/{image}:{tag}"
 
 
+# All targets are stages of one Dockerfile and share the base/deps stages, so
+# they share ONE cache ref rather than one per image. A per-image cache would
+# make each build re-do the ~55s of apt in base/deps that the other just did.
+BUILDCACHE_REF = f"{PRIVATE_REGISTRY_URL}/{PROJECT_NAME}/cloud:buildcache"
+
+# mode=max exports the layers of INTERMEDIATE stages too, not just those that
+# survive into the final image. That matters here because the expensive stages
+# (deps, which compiles uwsgi; static, which runs collectstatic) are discarded
+# by the multi-stage build. `type=inline` — the obvious cheaper choice — can
+# only record layers present in the pushed image, so it silently caches nothing
+# for exactly the stages worth caching.
+CACHE_FROM = f"type=registry,ref={BUILDCACHE_REF}"
+CACHE_TO = f"type=registry,ref={BUILDCACHE_REF},mode=max,image-manifest=true"
+
+
+def build_cached_image(image: str, **build_kwargs) -> None:
+    """Build an image locally (--load), reading and writing the shared ECR cache."""
+    ecr_login()
+    docker.build_image(image, cache_from=CACHE_FROM, cache_to=CACHE_TO, **build_kwargs)
+
+
 def build_and_push_image(image: str, tag: str, **build_kwargs) -> str:
     """Build an image and push it straight to ECR from buildx (`--push`).
 
-    Uses ECR itself as the layer cache: `--cache-from` reads the `:buildcache`
-    tag pushed by previous builds and `--cache-to type=inline` embeds the cache
-    metadata in the image being pushed, so no separate cache export step (and no
-    paid runner-side cache) is needed. The `:buildcache` tag is only a cache
-    pointer — deploys always pin the immutable build-N tag.
+    Uses ECR itself as the layer cache — no separate cache export step, and no
+    paid runner-side cache. The `:buildcache` tag is only a cache pointer;
+    deploys always pin the immutable build-N tag.
 
     We log in to ECR up front rather than relying on ensure_docker_login's
     retry: the push is fused into the build, so a failed-then-retried push would
@@ -123,13 +142,12 @@ def build_and_push_image(image: str, tag: str, **build_kwargs) -> str:
     """
     ecr_login()
     registry_image = image_uri(image, tag)
-    cache_ref = image_uri(image, "buildcache")
     docker.build_image(
         image,
-        refs=[registry_image, cache_ref],
+        refs=[registry_image],
         push=True,
-        cache_from=f"type=registry,ref={cache_ref}",
-        cache_to="type=inline",
+        cache_from=CACHE_FROM,
+        cache_to=CACHE_TO,
         **build_kwargs,
     )
     return registry_image

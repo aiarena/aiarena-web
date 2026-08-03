@@ -38,7 +38,11 @@ def prepare_images():
     # dev is consumed locally (it runs graphql_schema below), so it's --load'ed
     # into the local daemon rather than pushed. No need to build env first: it's
     # a stage of the same Dockerfile, so this build produces it along the way.
-    docker.build_image("dev", arch=docker.ARCH_AMD64)
+    #
+    # It reads/writes the same build cache as the cloud build below: they share
+    # the base and deps stages, so an uncached dev build means paying for those
+    # twice (~55s of apt) on every run.
+    aws.build_cached_image("dev", arch=docker.ARCH_AMD64)
     build_graphql_schema(environment, img="dev")
     build_frontend()
 
