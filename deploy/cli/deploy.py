@@ -79,7 +79,10 @@ def migrate_and_update():
         stack_outputs=stack_outputs,
         task_definition_id=migration_base.task_definition.family,
         container_name=migration_base.task_definition.containers[0].name,
-        command=["python", "-B", "/app/manage.py", "migrate", "-v", "0", "--noinput"],
+        # Default verbosity, not -v 0: the task's logs are the only record of
+        # what the migration did, and run_ecs_task_and_wait prints them into
+        # the deploy output. Silencing it left nothing to debug a failure with.
+        command=["python", "-B", "/app/manage.py", "migrate", "--noinput"],
         description="Migrating production DB",
         environment_override={
             "POSTGRES_USER": PRODUCTION_DB_ROOT_USER,

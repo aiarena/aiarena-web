@@ -1,7 +1,20 @@
-private-media
-media
-logs
-backup
-venv
-frontend/node_modules
-.git
+# The Dockerfile whitelists what it copies (see the COPY block in the env
+# stage), so this file is no longer the primary defense against junk in the
+# image — it only has to exclude things living INSIDE the whitelisted
+# directories. Adding a new top-level directory to the image is a Dockerfile
+# change, not a change here.
+
+# Frontend deps, inside aiarena/frontend-spa/. The build output Django actually
+# serves is aiarena/frontend-spa/static/dist, which is produced before the image
+# build and deliberately NOT excluded.
+#
+# Must be `**/node_modules`: a bare `node_modules` only matches at the context
+# root, which is why the old entry never excluded the SPA's copy.
+**/node_modules
+
+# Python bytecode and caches
+**/__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.mypy_cache
