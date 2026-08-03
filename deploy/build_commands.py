@@ -68,11 +68,3 @@ def build_frontend() -> None:
         "npm install && npm run relay && npm run build",
         cwd="aiarena/frontend-spa",
     )
-
-
-def set_github_actions_output(key: str, value: str) -> None:
-    output_file = os.environ.get("GITHUB_OUTPUT")
-    if not output_file:
-        return
-    with open(output_file, "a") as f:
-        f.write(f"{key}={value}\n")

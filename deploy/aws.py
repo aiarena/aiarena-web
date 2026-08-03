@@ -98,36 +98,41 @@ def ensure_docker_login(func):
     return inner
 
 
-@ensure_docker_login
-def push_image(image, public=False, registry_url=None) -> str:
-    echo(f"Pushing image: {image}")
-    local_image = f"{PROJECT_NAME}/{image}"
-    registry_image = f"{registry_url}/{local_image}"
-    docker.cli(f"tag {local_image} {registry_image}")
-    docker.cli(f"push {registry_image}", input="\n")
+def image_uri(image: str, tag: str) -> str:
+    """Single source of truth for the registry URI of an image:tag.
+
+    Both the build/push path and the deploy path (which reconstructs the
+    per-arch URIs to assemble the manifest) go through this, so the tag pushed
+    and the tag referenced in the manifest cannot diverge.
+    """
+    return f"{PRIVATE_REGISTRY_URL}/{PROJECT_NAME}/{image}:{tag}"
+
+
+def build_and_push_image(image: str, tag: str, **build_kwargs) -> str:
+    """Build an image and push it straight to ECR from buildx (`--push`).
+
+    Uses ECR itself as the layer cache: `--cache-from` reads the `:buildcache`
+    tag pushed by previous builds and `--cache-to type=inline` embeds the cache
+    metadata in the image being pushed, so no separate cache export step (and no
+    paid runner-side cache) is needed. The `:buildcache` tag is only a cache
+    pointer — deploys always pin the immutable build-N tag.
+
+    We log in to ECR up front rather than relying on ensure_docker_login's
+    retry: the push is fused into the build, so a failed-then-retried push would
+    re-run the whole buildx build.
+    """
+    ecr_login()
+    registry_image = image_uri(image, tag)
+    cache_ref = image_uri(image, "buildcache")
+    docker.build_image(
+        image,
+        refs=[registry_image, cache_ref],
+        push=True,
+        cache_from=f"type=registry,ref={cache_ref}",
+        cache_to="type=inline",
+        **build_kwargs,
+    )
     return registry_image
-
-
-@ensure_docker_login
-def pull_image(image, public=False, registry_url=None):
-    echo(f"Pulling image: {image}")
-    local_image = f"{PROJECT_NAME}/{image}"
-    registry_image = f"{registry_url}/{local_image}"
-    docker.cli(f"pull {registry_image}", input="\n")
-    docker.cli(f"tag {registry_image} {local_image}")
-
-
-@ensure_docker_login
-def push_images(
-    image,
-    tags: list[str],
-    public=False,
-    registry_url=None,
-):
-    ecr_images: list[str] = []
-    for tag in tags:
-        ecr_images.append(push_image(f"{image}:{tag}", public=public))
-    return ecr_images
 
 
 @ensure_docker_login
@@ -135,11 +140,12 @@ def push_manifest(
     image,
     manifest_tag: str,
     ecr_images: list[str],
-    public=False,
     registry_url=None,
 ):
     echo(f"Creating manifest: {image}:{manifest_tag} from {ecr_images}")
-    manifest_name = f"{registry_url}/{PROJECT_NAME}/{image}:{manifest_tag}"
+    manifest_name = image_uri(image, manifest_tag)
+    # A stale local manifest from a previous run would make `create` fail.
+    docker.cli(f"manifest rm {manifest_name}", raise_on_error=False, print_cmd=True)
     docker.cli(f"manifest create {manifest_name} {' '.join(ecr_images)}", print_cmd=True)
     docker.cli(f"manifest push --purge {manifest_name}", print_cmd=True)
 
@@ -389,6 +395,62 @@ def create_one_off_task(
     wait_for_task_status(cluster_id, task_id, "RUNNING")
 
     return cluster_id, task_id, container_name
+
+
+def run_ecs_task_and_wait(
+    stack_outputs,
+    task_definition_id: str,
+    command: list[str],
+    description: str,
+    container_name: str,
+    environment_override: dict[str, str] | None = None,
+    cpu: str = "1024",
+    memory: str = "2048",
+) -> None:
+    """Run a one-off ECS task to completion, printing its logs.
+
+    Runs inside the VPC on the given task definition, which already references
+    the app image and whose security group already reaches RDS — so nothing has
+    to be pulled onto (or reachable from) the CI runner. Raises if the
+    container exits non-zero.
+
+    `environment_override` merges per-variable on top of the baked task
+    definition's environment; it must stay small, as ECS caps
+    containerOverrides at 8192 bytes (so don't pass the full environment here).
+    """
+    echo(f"{description}...")
+
+    container_override: dict = {"name": container_name, "command": command}
+    if environment_override:
+        container_override["environment"] = [{"name": k, "value": str(v)} for k, v in environment_override.items()]
+
+    ecs = get_boto3_session().client("ecs")
+    result = ecs.run_task(
+        cluster=stack_outputs.ecs_cluster,
+        capacityProviderStrategy=[{"capacityProvider": "FARGATE_SPOT", "weight": 1}],
+        taskDefinition=task_definition_id,
+        overrides={
+            "containerOverrides": [container_override],
+            "cpu": cpu,
+            "memory": memory,
+        },
+        networkConfiguration=get_network_configuration(stack_outputs),
+    )
+    if not result["tasks"] and (failures := result.get("failures")):
+        raise RuntimeError(f"Could not start one-off task, got failures:\n{failures}")
+
+    task_id = result["tasks"][0]["taskArn"].split("/")[-1]
+    echo(f"Waiting for task {task_id} to finish...")
+    wait_for_task_status(stack_outputs.ecs_cluster, task_id, "STOPPED")
+
+    exit_code = get_task_exit_code(stack_outputs.ecs_cluster, task_id, container_name)
+    echo(f"Remote command finished with exit code {exit_code}, here's its output:")
+    print_task_logs(stack_outputs.ecs_cluster, task_id, container_name)
+
+    if exit_code != 0:
+        raise RuntimeError(f"{description} failed with exit code {exit_code}")
+
+    echo(f"{description} complete")
 
 
 def clean_fargate_cpu(value=None):

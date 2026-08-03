@@ -66,11 +66,32 @@ def build_image(
     build_args: dict = None,
     extra_args: str = "",
     arch: str = None,
+    refs: list[str] = None,
+    push: bool = False,
+    cache_from: str = None,
+    cache_to: str = None,
 ):
-    echo(f"Build environment image: {image}:{tag}")
+    """Build an image with buildx.
 
-    tags = {tag} if isinstance(tag, str) else tag
-    image_tags: str = " ".join([f"-t {PROJECT_NAME}/{image}:{t}" for t in tags])
+    By default the image is tagged locally as `PROJECT_NAME/image:tag` and
+    loaded into the local Docker daemon. Pass `refs` (fully-qualified registry
+    URIs) together with `push=True` to upload it straight from the builder to
+    the registry instead, skipping the tarball export into the local daemon and
+    the subsequent re-push.
+    """
+    if refs is None:
+        tags = {tag} if isinstance(tag, str) else tag
+        refs = [f"{PROJECT_NAME}/{image}:{t}" for t in tags]
+
+    # --push uploads every -t reference straight to the registry, so they must
+    # be fully-qualified registry URIs — a bare local name would be pushed to
+    # Docker Hub and fail. A registry URI has a host (with a dot) before its
+    # first slash; a bare local name does not.
+    if push and not all("." in ref.partition("/")[0] for ref in refs):
+        raise ValueError(f"push=True requires absolute registry URIs, got: {refs}")
+
+    echo(f"Build environment image: {', '.join(refs)}")
+    image_tags: str = " ".join(f"-t {ref}" for ref in refs)
 
     path = IMAGES[image]
     if build_args:
@@ -78,10 +99,22 @@ def build_image(
     else:
         args = ""
     if arch:
-        platform = f"--platform=linux/{arch}"
-    else:
-        platform = ""
-    cli(f"build --force-rm {args} {platform} {extra_args} {image_tags} -f {path} .")
+        args += f" --platform=linux/{arch}"
+
+    # --provenance=false: by default buildx pushes each tag as a manifest LIST
+    # (image + provenance/SBOM attestation), even for a single platform. The
+    # deploy step assembles the multi-arch image with `docker manifest create`
+    # from the per-arch tags, which refuses to nest a manifest list inside
+    # another one. Disabling attestations makes each per-arch tag a plain
+    # single-platform image manifest, so manifest create works.
+    args += " --push --provenance=false" if push else " --load"
+
+    if cache_from:
+        args += f" --cache-from {cache_from}"
+    if cache_to:
+        args += f" --cache-to {cache_to}"
+
+    cli(f"buildx build {args} {extra_args} {image_tags} -f {path} .")
 
 
 def remove_unused_local_images():

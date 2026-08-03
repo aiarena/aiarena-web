@@ -255,10 +255,14 @@ jobs:
     name: Build & push image to ECR
     if: github.event_name != 'pull_request'
     runs-on: blacksmith-2vcpu-ubuntu-2404
-    outputs:
-      images: ${{ steps.prepare_images.outputs.images }}
     steps:
       - uses: actions/checkout@v7
+
+      # Plain buildx, deliberately NOT Blacksmith's sticky-disk builder: the
+      # layer cache lives in ECR itself (see build_and_push_image), which costs
+      # only the storage of one extra tag.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -283,7 +287,6 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Prepare image
-        id: prepare_images
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           MAINTENANCE_MODE: ${{ vars.MAINTENANCE_MODE }}
@@ -319,7 +322,6 @@ jobs:
       - name: Deploy
         env:
           BUILD_NUMBER: ${{ github.run_number }}
-          PREPARED_IMAGES: ${{ needs.prepare-images.outputs.images }}
           MAINTENANCE_MODE: ${{ vars.MAINTENANCE_MODE }}
         run: uv run deploy migrate-and-update
 

@@ -1,8 +1,5 @@
 """Production deploy commands."""
 
-import json
-import os
-
 import click
 from ecs_deployer_boto3 import ApplicationUpdater, DeploymentMonitor
 
@@ -11,7 +8,6 @@ from deploy.build_commands import (
     build_frontend,
     build_graphql_schema,
     deploy_environment,
-    set_github_actions_output,
 )
 from deploy.services.config import get_services
 from deploy.session import get_boto3_session
@@ -20,12 +16,16 @@ from deploy.settings import (
     PROJECT_NAME,
 )
 from deploy.stack_outputs import fetch_stack_outputs
-from deploy.utils import echo, env_as_cli_args, timing
+from deploy.utils import echo, timing
 
 
 @click.group()
 def deploy():
     """Production deployment commands."""
+
+
+def cloud_tag(build_number: str) -> str:
+    return f"cloud-{build_number}-{docker.ARCH_AMD64}"
 
 
 @deploy.command("prepare-images", help="Prepare and push production images to ECR")
@@ -35,22 +35,19 @@ def prepare_images():
     environment, build_number = deploy_environment(stack_outputs)
     echo(f"Build number: {build_number}")
 
+    # env/dev are consumed locally (dev runs graphql_schema below), so they're
+    # --load'ed into the local daemon rather than pushed.
     docker.build_image("env", arch=docker.ARCH_AMD64)
     docker.build_image("dev", arch=docker.ARCH_AMD64)
     build_graphql_schema(environment, img="dev")
     build_frontend()
 
-    cloud_tag = f"cloud-{build_number}-{docker.ARCH_AMD64}"
-    docker.build_image(
+    aws.build_and_push_image(
         "cloud",
-        tag=cloud_tag,
+        cloud_tag(build_number),
         arch=docker.ARCH_AMD64,
         build_args={"SECRET_KEY": "temporary-secret-key"},  # Does not stay in the image, just for build
     )
-
-    cloud_images = aws.push_images("cloud", [cloud_tag])
-    echo(f"Saving images to github output: {json.dumps({'cloud_images': cloud_images})}")
-    set_github_actions_output("images", json.dumps({"cloud_images": cloud_images}))
 
     docker.remove_unused_local_images()
 
@@ -60,27 +57,36 @@ def prepare_images():
 def migrate_and_update():
     stack_outputs = fetch_stack_outputs()
     environment, build_number = deploy_environment(stack_outputs)
-    images = json.loads(os.environ.get("PREPARED_IMAGES"))
-
-    aws.push_manifest("cloud", "latest", images["cloud_images"])
-
-    # Prepare different environment with root db user for migrations. This is
-    # required in order to prevent long-running migrations from being killed by
-    # Slow Query Killer (tm) which kills queries only for regular user
-    root_environment = environment.copy()
-    root_environment["POSTGRES_USER"] = PRODUCTION_DB_ROOT_USER
-    root_environment["POSTGRES_PASSWORD"] = root_environment["POSTGRES_ROOT_PASSWORD"]
-
-    aws.pull_image("cloud:latest")
-
-    # Migrate production DB and load initial data
-    manage_py_cmd = "python -B /app/manage.py"
-    docker.cli(
-        f"run --rm {env_as_cli_args(root_environment)} "
-        f"{PROJECT_NAME}/cloud "
-        f'bash -c "{manage_py_cmd} migrate -v 0 --noinput"',
-    )
     services = get_services(stack_outputs)
+
+    # Reconstruct the URI that prepare-images pushed, via the same tag +
+    # image_uri helpers, so the manifest references exactly what was built.
+    aws.push_manifest("cloud", "latest", [aws.image_uri("cloud", cloud_tag(build_number))])
+
+    # Migrate the production DB as a one-off ECS task inside the VPC, rather
+    # than pulling the image onto the CI runner and connecting to RDS from
+    # there. We piggyback on a celery service's task definition: single
+    # container, same app image, and its security group already reaches RDS.
+    # It references cloud:latest — the tag just repointed by push_manifest
+    # above — so the migration runs the NEW code while the live services still
+    # run the old one (zero-downtime ordering: migrate first, then update).
+    migration_base = next(s for s in services if s.name == f"{PROJECT_NAME}-celeryWorker-Default")
+
+    # Run migrations as the root db user, to prevent long-running migrations
+    # from being killed by Slow Query Killer (tm), which kills queries only for
+    # the regular user.
+    aws.run_ecs_task_and_wait(
+        stack_outputs=stack_outputs,
+        task_definition_id=migration_base.task_definition.family,
+        container_name=migration_base.task_definition.containers[0].name,
+        command=["python", "-B", "/app/manage.py", "migrate", "-v", "0", "--noinput"],
+        description="Migrating production DB",
+        environment_override={
+            "POSTGRES_USER": PRODUCTION_DB_ROOT_USER,
+            "POSTGRES_PASSWORD": environment["POSTGRES_ROOT_PASSWORD"],
+        },
+    )
+
     application_updater = ApplicationUpdater(services, get_boto3_session())
     application_updater.update_application(environment)
 
