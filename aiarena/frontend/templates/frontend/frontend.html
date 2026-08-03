@@ -10,10 +10,16 @@
   <meta name="robots" content="noindex">
   <title>AI Arena</title>
   <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+  {# The SPA @imports these too, but that CSS lands too late for the loading screen. #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&family=Gugi&display=swap">
 </head>
 <body>
   <div id="root">
-    <!-- JS app root container -->
+    {# Shown until React mounts and replaces the root's contents. #}
+    {% include 'frontend/loading_screen.html' %}
   </div>
   <script>
     window.Settings = JSON.parse('{{ frontend_settings|escapejs }}');
@@ -23,8 +29,8 @@
       window.global = window;
     }
   </script>
-  {% vite_hmr_client %}
-  {% vite_react_refresh %}
-  {% vite_asset 'src/main.tsx' %}
+{#  {% vite_hmr_client %}#}
+{#  {% vite_react_refresh %}#}
+{#  {% vite_asset 'src/main.tsx' %}#}
 </body>
 </html>

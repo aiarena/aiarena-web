@@ -1,0 +1,88 @@
+{% load static %}
+<style>
+  /* Mirrors the SPA's chrome (body gradient + tiled BackgroundTexture) so the
+     handoff to React isn't a visible change of scenery. */
+  #loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgb(12, 12, 12);
+    background-image: url("{% static 'img/background.gif' %}"),
+      linear-gradient(rgb(12, 12, 12), rgb(20, 20, 20));
+    background-repeat: repeat, no-repeat;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    font-family: "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  #loading-screen .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(134, 194, 50, 0.2);
+    border-top-color: rgba(134, 194, 50, 1);
+    border-radius: 50%;
+    animation: loading-screen-spin 1s linear infinite;
+  }
+
+  #loading-screen .wordmark {
+    font-family: "Gugi", cursive;
+    font-size: 34px;
+    color: rgba(134, 194, 50, 1);
+    letter-spacing: 0.03em;
+  }
+
+  #loading-screen .joke {
+    color: rgba(225, 225, 225, 0.6);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    text-align: center;
+    max-width: min(90vw, 420px);
+    padding: 0 16px;
+    animation: loading-screen-fade-in 0.4s ease-out both;
+  }
+
+  @keyframes loading-screen-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes loading-screen-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #loading-screen .spinner { animation-duration: 3s; }
+    #loading-screen .joke { animation: none; }
+  }
+</style>
+
+<div id="loading-screen">
+  <div class="wordmark">AI Arena</div>
+  <div class="spinner"></div>
+  <div class="joke" id="loading-joke"></div>
+</div>
+
+<script>
+  (function () {
+    var jokes = [
+      "Loading a $#*!-ton of JavaScript…",
+      "Launching a swarm of AI agents…",
+      "Mining minerals, building pylons…",
+      "Asking the bots to please stop crashing…",
+      "Recalculating ELO for the eleventh time…",
+      "Spawning overlords, awaiting supply…",
+      "Convincing a neural net that cannon rushes are rude…",
+      "Replaying the game where your bot definitely won…",
+      "Teaching a Zerg AI the value of patience…"
+    ];
+    var el = document.getElementById("loading-joke");
+    if (el) {
+      el.textContent = jokes[Math.floor(Math.random() * jokes.length)];
+    }
+  })();
+</script>
