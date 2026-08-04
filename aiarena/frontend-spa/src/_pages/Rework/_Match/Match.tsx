@@ -8,20 +8,31 @@ import MatchTagSection from "./MatchTagSection";
 import FetchError from "@/_components/_display/FetchError";
 export default function Match() {
   const { matchId } = useParams<{ matchId: string }>();
+
+  const showEveryonesTags = true;
+
   const data = useLazyLoadQuery<MatchQuery>(
     graphql`
-      query MatchQuery($id: ID!) {
+      query MatchQuery($id: ID!, $showEveryonesTags: Boolean!) {
         node(id: $id) {
           ... on MatchType {
             ...MatchInfo_match
             ...MatchDecal_match
             ...MatchTagSection_match
+              @arguments(showEveryonesTags: $showEveryonesTags)
           }
         }
       }
     `,
-    { id: getBase64FromID(matchId!, "MatchType") || "" },
+    {
+      id: getBase64FromID(matchId!, "MatchType") || "",
+      showEveryonesTags,
+    },
   );
+
+  if (!data.node) {
+    return <FetchError type="match" />;
+  }
   if (!data.node) {
     return <FetchError type="match" />;
   }

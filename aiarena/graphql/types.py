@@ -980,7 +980,12 @@ class MatchType(DjangoObjectTypeWithUID):
     participant2 = graphene.Field("aiarena.graphql.BotType")
     status = graphene.String()
     result = graphene.Field("aiarena.graphql.ResultType")
-    tags = DjangoConnectionField("aiarena.graphql.MatchTagType")
+    tags = DjangoConnectionField(
+        "aiarena.graphql.MatchTagType",
+        show_everyones_tags=graphene.Boolean(
+            default_value=False,
+        ),
+    )
 
     class Meta:
         model = models.Match
@@ -1022,15 +1027,40 @@ class MatchType(DjangoObjectTypeWithUID):
         return root.result
 
     @staticmethod
-    def resolve_tags(root: models.Match, info, **args):
-        prefetched_tags = getattr(root, "prefetched_tags", None)
+    def resolve_tags(
+        root: models.Match,
+        info,
+        show_everyones_tags=False,
+        **kwargs,
+    ):
+        user = getattr(info.context, "user", None)
+        is_authenticated = bool(user and user.is_authenticated)
+
+        prefetched_tags = getattr(
+            root,
+            "prefetched_tags",
+            None,
+        )
+
         if prefetched_tags is not None:
             return prefetched_tags
 
-        user = getattr(info.context, "user", None)
-        if user and user.is_authenticated:
-            return root.tags.filter(user=user).select_related("tag", "user")
-        return root.tags.none()
+        if not is_authenticated:
+            return root.tags.select_related(
+                "tag",
+                "user",
+            )
+
+        if show_everyones_tags:
+            return root.tags.select_related(
+                "tag",
+                "user",
+            )
+
+        return root.tags.filter(user=user).select_related(
+            "tag",
+            "user",
+        )
 
 
 class MatchID(TypeModelChoice):
