@@ -13,6 +13,8 @@ from aiarena.core.models import (
     ApiUsage,
     ArenaClient,
     ArenaClientStatus,
+    AwardSet,
+    AwardSetItem,
     Bot,
     BotCrashLimitAlert,
     Competition,
@@ -181,6 +183,48 @@ class ArenaClientStatusAdmin(admin.ModelAdmin):
     )
 
 
+class AwardSetItemInline(admin.TabularInline):
+    model = AwardSetItem
+    extra = 1
+    autocomplete_fields = ("trophy_icon",)
+
+
+@admin.register(AwardSet)
+class AwardSetAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "name",
+    )
+    search_fields = ("name",)
+    inlines = (AwardSetItemInline,)
+
+
+@admin.register(AwardSetItem)
+class AwardSetItemAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "award_set",
+        "condition",
+        "trophy_icon",
+    )
+    list_filter = (
+        "award_set",
+        "condition",
+    )
+    search_fields = (
+        "award_set__name",
+        "trophy_icon__name",
+    )
+    list_select_related = (
+        "award_set",
+        "trophy_icon",
+    )
+    autocomplete_fields = (
+        "award_set",
+        "trophy_icon",
+    )
+
+
 @admin.register(Bot)
 class BotAdmin(admin.ModelAdmin):
     search_fields = ("name", "user__username")
@@ -279,10 +323,14 @@ class CompetitionAdminForm(forms.ModelForm):
 
 @admin.register(Competition)
 class CompetitionAdmin(admin.ModelAdmin):
+    search_fields = ("name",)
+
     list_display = (
         "id",
         "name",
         "game_mode",
+        "award_set",
+        "awards_given",
         "date_created",
         "date_opened",
         "date_closed",
@@ -290,14 +338,23 @@ class CompetitionAdmin(admin.ModelAdmin):
         "max_active_rounds",
         "interest",
     )
+
     list_filter = (
+        "award_set",
+        "awards_given",
         "date_created",
         "date_opened",
         "date_closed",
         "playable_races",
     )
-    list_select_related = ["game_mode"]
-    # Add the close competition button
+
+    list_select_related = [
+        "game_mode",
+        "award_set",
+    ]
+
+    autocomplete_fields = ("award_set",)
+
     change_form_template = "admin/change_form_competition.html"
     form = CompetitionAdminForm
 
@@ -613,11 +670,50 @@ class TemporaryUploadAdmin(admin.ModelAdmin):
     autocomplete_fields = ["uploaded_by"]
 
 
+class TrophyAdminForm(forms.ModelForm):
+    class Meta:
+        model = Trophy
+        fields = "__all__"
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "style": "width: 800px;",
+                }
+            ),
+        }
+
+
 @admin.register(Trophy)
 class TrophyAdmin(admin.ModelAdmin):
-    list_display = ("id", "bot", "name", "icon")
-    list_filter = ("bot",)
-    search_fields = ("name",)
+    form = TrophyAdminForm
+    list_display = (
+        "id",
+        "bot",
+        "name",
+        "condition",
+        "icon",
+        "competition",
+    )
+    list_filter = (
+        "competition",
+        "condition",
+        "icon",
+    )
+    search_fields = (
+        "name",
+        "bot__name",
+        "competition__name",
+    )
+    list_select_related = (
+        "bot",
+        "icon",
+        "competition",
+    )
+    autocomplete_fields = (
+        "bot",
+        "icon",
+        "competition",
+    )
 
 
 @admin.register(TrophyIcon)

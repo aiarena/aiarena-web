@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from wiki.models import Article, ArticleRevision
 
+from .award_set import AwardSet
 from .bot_race import BotRace
 from .game_mode import GameMode
 from .mixins import LockableModelMixin
@@ -38,6 +39,15 @@ class Competition(models.Model, LockableModelMixin):
     date_opened = models.DateTimeField(blank=True, null=True)
     date_closed = models.DateTimeField(blank=True, null=True)
     status = models.CharField(max_length=16, choices=COMPETITION_STATUSES, default="created", blank=True)
+    award_set = models.ForeignKey(
+        AwardSet,
+        on_delete=models.PROTECT,
+        related_name="competitions",
+        blank=True,
+        null=True,
+    )
+    awards_given = models.BooleanField(default=False)
+
     max_active_rounds = models.IntegerField(default=2, blank=True)
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)
     interest = models.IntegerField(default=0, blank=True)
