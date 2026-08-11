@@ -62,11 +62,7 @@ export default function CompetitionTrophyModal({
   const checkDisabled = !competition.awardSet || checkInFlight || awardInFlight;
 
   const awardDisabled =
-    !competition.awardSet ||
-    competition.awardsGiven ||
-    !canAward ||
-    checkInFlight ||
-    awardInFlight;
+    !competition.awardSet || !canAward || checkInFlight || awardInFlight;
 
   return (
     <Modal
