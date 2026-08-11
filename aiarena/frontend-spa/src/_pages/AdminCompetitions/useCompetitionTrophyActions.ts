@@ -17,7 +17,6 @@ export default function useCompetitionTrophyActions({
   onAwardsGiven,
 }: UseCompetitionTrophyActionsProps) {
   const [awardMessage, setAwardMessage] = useState<string | null>(null);
-
   const [awardError, setAwardError] = useState<string | null>(null);
 
   const [commitCheck, checkInFlight] =
@@ -28,6 +27,7 @@ export default function useCompetitionTrophyActions({
         checkCompetitionTrophies(input: $input) {
           status
           message
+          awardsGiven
 
           expectedTrophyCount
           existingTrophyCount
@@ -84,6 +84,8 @@ export default function useCompetitionTrophyActions({
           success
           message
 
+          awardsGiven
+
           createdTrophyCount
           deletedTrophyCount
 
@@ -98,9 +100,13 @@ export default function useCompetitionTrophyActions({
       }
     `);
 
-  const runTrophyCheck = (competition: AdminCompetition) => {
+  const resetTrophyActions = () => {
     setAwardMessage(null);
     setAwardError(null);
+  };
+
+  const runTrophyCheck = (competition: AdminCompetition) => {
+    resetTrophyActions();
 
     onCheckResult({
       status: "loading",
@@ -151,8 +157,7 @@ export default function useCompetitionTrophyActions({
     competition: AdminCompetition,
     checkResult: TrophyCheckResult,
   ) => {
-    setAwardMessage(null);
-    setAwardError(null);
+    resetTrophyActions();
 
     commitAward({
       variables: {
@@ -187,7 +192,6 @@ export default function useCompetitionTrophyActions({
         }
 
         const createdCount = payload.createdTrophyCount ?? 0;
-
         const deletedCount = payload.deletedTrophyCount ?? 0;
 
         setAwardMessage(
@@ -199,7 +203,6 @@ export default function useCompetitionTrophyActions({
           message: "Trophies have been awarded.",
 
           expectedTrophyCount: checkResult.expectedTrophyCount ?? 0,
-
           existingTrophyCount: checkResult.expectedTrophyCount ?? 0,
 
           missingTrophyCount: 0,
@@ -223,6 +226,7 @@ export default function useCompetitionTrophyActions({
   return {
     runTrophyCheck,
     runAwardTrophies,
+    resetTrophyActions,
 
     checkInFlight,
     awardInFlight,

@@ -602,13 +602,14 @@ class CheckCompetitionTrophiesInput(CleanedInputType):
     class Meta:
         required_fields = ["competition"]
 
-
 class CheckCompetitionTrophies(CleanedInputMutation):
     status = graphene.Field(
         CompetitionTrophyCheckStatus,
         required=True,
     )
     message = graphene.String(required=True)
+
+    awards_given = graphene.Boolean(required=True)
 
     expected_trophy_count = graphene.Int(required=True)
     existing_trophy_count = graphene.Int(required=True)
@@ -653,16 +654,21 @@ class CheckCompetitionTrophies(CleanedInputMutation):
         if not user or not user.is_authenticated or not user.is_superuser:
             raise GraphQLError("Administrator access is required.")
 
-        report = check_competition_trophies(input_object.competition)
+        competition = input_object.competition
+
+        report = check_competition_trophies(competition)
+
+        competition.refresh_from_db(fields=["awards_given"])
 
         return cls(
             errors=[],
             status=report.status,
             message=report.message,
-            expected_trophy_count=(report.expected_trophy_count),
-            existing_trophy_count=(report.existing_trophy_count),
-            missing_trophy_count=(report.missing_trophy_count),
-            incorrect_trophy_count=(report.incorrect_trophy_count),
+            awards_given=competition.awards_given,
+            expected_trophy_count=report.expected_trophy_count,
+            existing_trophy_count=report.existing_trophy_count,
+            missing_trophy_count=report.missing_trophy_count,
+            incorrect_trophy_count=report.incorrect_trophy_count,
             missing_trophies=[
                 ExpectedCompetitionTrophyType(
                     bot_id=expected.bot_id,
@@ -674,7 +680,9 @@ class CheckCompetitionTrophies(CleanedInputMutation):
                 )
                 for expected in report.missing_trophies
             ],
-            incorrect_trophy_ids=[str(trophy.id) for trophy in report.incorrect_trophies],
+            incorrect_trophy_ids=[
+                str(trophy.id) for trophy in report.incorrect_trophies
+            ],
             incorrect_trophies=[
                 IncorrectCompetitionTrophyType(
                     id=trophy.id,
@@ -682,13 +690,13 @@ class CheckCompetitionTrophies(CleanedInputMutation):
                     bot_id=trophy.bot_id,
                     bot_name=trophy.bot_name,
                     condition=trophy.condition,
-                    condition_display=(trophy.condition_display),
+                    condition_display=trophy.condition_display,
                     icon_id=trophy.icon_id,
                     icon_name=trophy.icon_name,
                     icon_image=trophy.icon_image,
-                    competition_id=(trophy.competition_id),
-                    competition_name=(trophy.competition_name),
-                    participated=(trophy.participated),
+                    competition_id=trophy.competition_id,
+                    competition_name=trophy.competition_name,
+                    participated=trophy.participated,
                     placement=trophy.placement,
                 )
                 for trophy in report.incorrect_trophies
@@ -707,6 +715,8 @@ class AwardCompetitionTrophiesInput(CleanedInputType):
 class AwardCompetitionTrophies(CleanedInputMutation):
     success = graphene.Boolean(required=True)
     message = graphene.String(required=True)
+
+    awards_given = graphene.Boolean(required=True)
 
     created_trophy_count = graphene.Int(required=True)
     deleted_trophy_count = graphene.Int(required=True)
@@ -738,16 +748,25 @@ class AwardCompetitionTrophies(CleanedInputMutation):
         if not user or not user.is_authenticated or not user.is_superuser:
             raise GraphQLError("Administrator access is required.")
 
-        report = award_competition_trophies(input_object.competition)
+        competition = input_object.competition
+
+        report = award_competition_trophies(competition)
+
+        competition.refresh_from_db(fields=["awards_given"])
 
         return cls(
             errors=[],
             success=report.success,
             message=report.message,
-            created_trophy_count=(report.created_trophy_count),
-            deleted_trophy_count=(report.deleted_trophy_count),
-            created_trophy_ids=[str(trophy_id) for trophy_id in report.created_trophy_ids],
-            deleted_trophy_ids=[str(trophy_id) for trophy_id in report.deleted_trophy_ids],
+            awards_given=competition.awards_given,
+            created_trophy_count=report.created_trophy_count,
+            deleted_trophy_count=report.deleted_trophy_count,
+            created_trophy_ids=[
+                str(trophy_id) for trophy_id in report.created_trophy_ids
+            ],
+            deleted_trophy_ids=[
+                str(trophy_id) for trophy_id in report.deleted_trophy_ids
+            ],
         )
 
 

@@ -33,6 +33,7 @@ export default function CompetitionTrophyModal({
   const {
     runTrophyCheck,
     runAwardTrophies,
+    resetTrophyActions,
     checkInFlight,
     awardInFlight,
     awardMessage,
@@ -64,10 +65,15 @@ export default function CompetitionTrophyModal({
   const awardDisabled =
     !competition.awardSet || !canAward || checkInFlight || awardInFlight;
 
+  const handleClose = () => {
+    resetTrophyActions();
+    onClose();
+  };
+
   return (
     <Modal
       isOpen
-      onClose={onClose}
+      onClose={handleClose}
       title={`Manage trophies: ${competition.name}`}
       size="l"
       padding={4}
