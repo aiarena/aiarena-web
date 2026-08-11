@@ -11,6 +11,7 @@ from aiarena.core.models import (
     Trophy,
     TrophyIcon,
 )
+from aiarena.core.models.trophy import TrophyCondition
 
 
 # Usage:
@@ -32,20 +33,54 @@ from aiarena.core.models import (
 #     derive_competition_award_sets \
 #     --competition-id 3 \
 #     --competition-id 8
-#
-# Replace an existing competition award set:
-# DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py \
-#     derive_competition_award_sets --apply --overwrite
-#
-# Also mark competitions as having already received their awards:
-# DJANGO_ENVIRONMENT=DEVELOPMENT uv run manage.py \
-#     derive_competition_award_sets \
-#     --apply \
-#     --mark-awards-given
 
 
 class Command(BaseCommand):
-    help = "Derive competition AwardSets from existing competition trophies and their condition-to-icon mappings."
+    help = (
+        "Conservatively derive competition AwardSets from existing "
+        "competition trophies and their condition-to-icon mappings."
+    )
+
+    # Historical Trophy.condition values that are equivalent to current
+    # canonical conditions.
+    #
+    # We only normalize aliases where the meaning is unambiguous.
+    CONDITION_ALIASES = {
+        # Historical podium aliases.
+        "top_1": TrophyCondition.FIRST_PLACE,
+        "top_2": TrophyCondition.SECOND_PLACE,
+        "top_3": TrophyCondition.THIRD_PLACE,
+        # Previous race-condition naming.
+        "top_zerg": TrophyCondition.BEST_ZERG,
+        "top_protoss": TrophyCondition.BEST_PROTOSS,
+        "top_terran": TrophyCondition.BEST_TERRAN,
+        "top_random": TrophyCondition.BEST_RANDOM,
+        # Current canonical values map to themselves for clarity.
+        "best_zerg": TrophyCondition.BEST_ZERG,
+        "best_protoss": TrophyCondition.BEST_PROTOSS,
+        "best_terran": TrophyCondition.BEST_TERRAN,
+        "best_random": TrophyCondition.BEST_RANDOM,
+    }
+
+    # Conditions from which it is safe to derive an automatically managed
+    # AwardSet.
+    #
+    # CUSTOM is deliberately excluded. A custom trophy's semantics cannot
+    # be inferred from historical Trophy rows alone.
+    DERIVABLE_CONDITIONS = {
+        TrophyCondition.FIRST_PLACE,
+        TrophyCondition.SECOND_PLACE,
+        TrophyCondition.THIRD_PLACE,
+        TrophyCondition.TOP_5,
+        TrophyCondition.TOP_10,
+        TrophyCondition.TOP_15,
+        TrophyCondition.TOP_20,
+        TrophyCondition.BEST_ZERG,
+        TrophyCondition.BEST_PROTOSS,
+        TrophyCondition.BEST_TERRAN,
+        TrophyCondition.BEST_RANDOM,
+        TrophyCondition.PARTICIPANT,
+    }
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -53,16 +88,7 @@ class Command(BaseCommand):
             action="store_true",
             help=("Save changes. Without this option, the command performs a dry run."),
         )
-        parser.add_argument(
-            "--overwrite",
-            action="store_true",
-            help=("Replace Competition award_set values that are already populated."),
-        )
-        parser.add_argument(
-            "--mark-awards-given",
-            action="store_true",
-            help=("Set awards_given=True for competitions assigned an award set."),
-        )
+
         parser.add_argument(
             "--competition-id",
             type=int,
@@ -73,18 +99,20 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         apply_changes = options["apply"]
-        overwrite = options["overwrite"]
-        mark_awards_given = options["mark_awards_given"]
         competition_ids = options["competition_ids"]
 
-        competitions = Competition.objects.select_related(
-            "award_set",
-        ).order_by("id")
+        competitions = Competition.objects.select_related("award_set").order_by("id")
 
         if competition_ids:
             competitions = competitions.filter(id__in=competition_ids)
 
-            found_ids = set(competitions.values_list("id", flat=True))
+            found_ids = set(
+                competitions.values_list(
+                    "id",
+                    flat=True,
+                )
+            )
+
             missing_ids = set(competition_ids) - found_ids
 
             if missing_ids:
@@ -114,21 +142,23 @@ class Command(BaseCommand):
 
         existing_sets_by_signature = self.get_existing_award_sets_by_signature()
 
-        # Tracks sets planned or created during this command, allowing
-        # identical mappings to reuse the same set.
+        # Sets planned/created during this command. This allows identical
+        # mappings to reuse one AwardSet.
         derived_sets_by_signature = {}
 
         counters = Counter()
+
         clear_mappings = []
         conflicts = []
-        competitions_without_usable_trophies = []
-        incomplete_trophies = []
+        unsafe_competitions = []
+        competitions_without_trophies = []
 
         with transaction.atomic():
             for competition in competitions:
                 counters["competitions_scanned"] += 1
 
-                if competition.award_set_id and not overwrite:
+                # Never replace an award set that has already been assigned.
+                if competition.award_set_id:
                     counters["existing_award_set_skipped"] += 1
 
                     self.stdout.write(
@@ -136,6 +166,7 @@ class Command(BaseCommand):
                         f'"{competition.name}" already uses '
                         f'award set "{competition.award_set}".'
                     )
+
                     continue
 
                 competition_trophies = trophies_by_competition.get(
@@ -143,23 +174,31 @@ class Command(BaseCommand):
                     [],
                 )
 
-                condition_icons = defaultdict(set)
-                condition_trophies = defaultdict(lambda: defaultdict(list))
+                if not competition_trophies:
+                    counters["without_trophies"] += 1
 
-                for trophy in competition_trophies:
-                    if not trophy.condition or trophy.icon_id is None:
-                        incomplete_trophies.append(trophy)
-                        counters["incomplete_trophies"] += 1
-                        continue
+                    competitions_without_trophies.append(competition)
 
-                    condition_icons[trophy.condition].add(trophy.icon_id)
+                    continue
 
-                    condition_trophies[trophy.condition][trophy.icon_id].append(trophy)
+                (
+                    condition_icons,
+                    condition_trophies,
+                    problems,
+                ) = self.analyze_trophies(competition_trophies)
 
-                if not condition_icons:
-                    counters["without_usable_trophies"] += 1
+                # Be conservative: any uncertainty prevents deriving an
+                # AwardSet for the entire competition.
+                if problems:
+                    counters["unsafe_competitions"] += 1
 
-                    competitions_without_usable_trophies.append(competition)
+                    unsafe_competitions.append(
+                        (
+                            competition,
+                            problems,
+                        )
+                    )
+
                     continue
 
                 conflicting_conditions = {
@@ -176,6 +215,7 @@ class Command(BaseCommand):
                             condition_trophies,
                         )
                     )
+
                     continue
 
                 signature = tuple(
@@ -188,12 +228,17 @@ class Command(BaseCommand):
                     )
                 )
 
+                if not signature:
+                    counters["without_usable_trophies"] += 1
+                    continue
+
                 award_set = existing_sets_by_signature.get(signature)
 
                 source = "existing"
 
                 if award_set is None:
                     award_set = derived_sets_by_signature.get(signature)
+
                     source = "derived"
 
                 if award_set is None:
@@ -207,6 +252,7 @@ class Command(BaseCommand):
                     source = "created"
 
                     counters["award_sets_created"] += 1
+
                     counters["award_set_items_created"] += len(signature)
 
                 elif source == "existing":
@@ -225,134 +271,94 @@ class Command(BaseCommand):
                     )
                 )
 
-                update_fields = []
-
                 if apply_changes:
-                    if competition.award_set_id != award_set.id:
-                        competition.award_set = award_set
-                        update_fields.append("award_set")
+                    competition.award_set = award_set
+                    competition.save(update_fields=["award_set"])
 
-                    if mark_awards_given and not competition.awards_given:
-                        competition.awards_given = True
-                        update_fields.append("awards_given")
-
-                    if update_fields:
-                        competition.save(update_fields=update_fields)
-
-                else:
-                    # During a dry run, planned award sets are
-                    # strings rather than saved model instances.
-                    if competition.award_set_id is None or overwrite:
-                        update_fields.append("award_set")
-
-                    if mark_awards_given and not competition.awards_given:
-                        update_fields.append("awards_given")
-
-                if update_fields:
-                    counters["competitions_would_update"] += 1
-                else:
-                    counters["competitions_unchanged"] += 1
+                counters["competitions_would_update"] += 1
 
             if not apply_changes:
                 transaction.set_rollback(True)
 
-        if clear_mappings:
-            self.stdout.write("")
-            self.stdout.write(self.style.SUCCESS("Competitions with clear trophies to map (add with --apply):"))
+        self.render_results(
+            apply_changes=apply_changes,
+            counters=counters,
+            clear_mappings=clear_mappings,
+            conflicts=conflicts,
+            unsafe_competitions=unsafe_competitions,
+            competitions_without_trophies=(competitions_without_trophies),
+        )
 
-            for (
-                competition,
-                award_set,
-                rendered_mapping,
-            ) in clear_mappings:
-                self.stdout.write(
-                    f"  Competition {competition.id}: "
-                    f'"{competition.name}" -> '
-                    f"{self.get_award_set_name(award_set)} "
-                    f"[{rendered_mapping}]"
+    def analyze_trophies(
+        self,
+        trophies,
+    ):
+        """
+        Analyze all trophies for one competition.
+
+        This function deliberately rejects the entire competition if any
+        linked trophy cannot be interpreted safely.
+        """
+        condition_icons = defaultdict(set)
+
+        condition_trophies = defaultdict(lambda: defaultdict(list))
+
+        problems = []
+
+        for trophy in trophies:
+            if not trophy.condition:
+                problems.append(f'Trophy {trophy.id} "{trophy.name}" has no condition.')
+                continue
+
+            if trophy.icon_id is None:
+                problems.append(f'Trophy {trophy.id} "{trophy.name}" has no icon.')
+                continue
+
+            condition = self.normalize_condition(trophy.condition)
+
+            if condition not in self.DERIVABLE_CONDITIONS:
+                problems.append(
+                    f"Trophy {trophy.id} \"{trophy.name}\" uses unsupported condition '{trophy.condition}'."
                 )
+                continue
 
-        mode = "APPLIED" if apply_changes else "DRY RUN"
+            condition_icons[condition].add(trophy.icon_id)
 
-        self.stdout.write("")
-        self.stdout.write(self.style.SUCCESS(f"{mode} complete"))
-        self.stdout.write(f"Competitions scanned: {counters['competitions_scanned']}")
+            condition_trophies[condition][trophy.icon_id].append(trophy)
 
-        if apply_changes:
-            self.stdout.write(f"Competitions updated: {counters['competitions_would_update']}")
-        else:
-            self.stdout.write(f"Competitions that would update: {counters['competitions_would_update']}")
+        return (
+            condition_icons,
+            condition_trophies,
+            problems,
+        )
 
-        self.stdout.write(f"Competitions unchanged: {counters['competitions_unchanged']}")
-        self.stdout.write(f"Existing award sets skipped: {counters['existing_award_set_skipped']}")
+    @classmethod
+    def normalize_condition(
+        cls,
+        condition,
+    ):
+        """
+        Normalize known historical condition aliases.
 
-        if apply_changes:
-            self.stdout.write(f"Award sets created: {counters['award_sets_created']}")
-            self.stdout.write(f"Award set items created: {counters['award_set_items_created']}")
-        else:
-            self.stdout.write(f"Award sets that would be created: {counters['award_sets_created']}")
-            self.stdout.write(f"Award set items that would be created: {counters['award_set_items_created']}")
+        Examples:
 
-        self.stdout.write(f"Existing award sets reused: {counters['existing_award_sets_reused']}")
-        self.stdout.write(f"Newly derived award sets reused: {counters['derived_award_sets_reused']}")
-        self.stdout.write(f"Competitions without usable trophies: {counters['without_usable_trophies']}")
-        self.stdout.write(f"Competitions with conflicting mappings: {counters['conflicting_competitions']}")
-        self.stdout.write(f"Incomplete trophies ignored: {counters['incomplete_trophies']}")
+            top_1       -> first_place
+            top_2       -> second_place
+            top_3       -> third_place
 
-        if conflicts:
-            self.stdout.write("")
-            self.stdout.write(self.style.ERROR("Conflicting condition-to-icon mappings (would not apply):"))
+            top_zerg    -> best_zerg
+            top_protoss -> best_protoss
+            top_terran  -> best_terran
+            top_random  -> best_random
+        """
+        return cls.CONDITION_ALIASES.get(
+            condition,
+            condition,
+        )
 
-            for (
-                competition,
-                conditions,
-                condition_trophies,
-            ) in conflicts:
-                self.stdout.write(f'  Competition {competition.id}: "{competition.name}"')
-
-                for condition, icon_ids in sorted(conditions.items()):
-                    self.stdout.write(f"    {condition}:")
-
-                    for icon_id in sorted(icon_ids):
-                        trophies_for_icon = condition_trophies[condition][icon_id]
-
-                        icon_name = (
-                            trophies_for_icon[0].icon.name if trophies_for_icon[0].icon else f"icon_id={icon_id}"
-                        )
-
-                        trophy_ids = ", ".join(str(trophy.id) for trophy in trophies_for_icon)
-
-                        self.stdout.write(f"      {icon_name}: trophy IDs {trophy_ids}")
-
-        if competitions_without_usable_trophies:
-            self.stdout.write("")
-            self.stdout.write(self.style.WARNING("Competitions without usable trophies:"))
-
-            for competition in competitions_without_usable_trophies:
-                self.stdout.write(f'  {competition.id}: "{competition.name}"')
-
-        if incomplete_trophies:
-            self.stdout.write("")
-            self.stdout.write(self.style.WARNING("Ignored trophies missing a condition or icon:"))
-
-            for trophy in incomplete_trophies:
-                missing = []
-
-                if not trophy.condition:
-                    missing.append("condition")
-
-                if trophy.icon_id is None:
-                    missing.append("icon")
-
-                self.stdout.write(f'  Trophy {trophy.id}: "{trophy.name}" missing {", ".join(missing)}')
-
-        if not apply_changes:
-            self.stdout.write("")
-            self.stdout.write(
-                self.style.WARNING("No records were changed. Run again with --apply to save the displayed updates.")
-            )
-
-    def get_existing_award_sets_by_signature(self):
+    def get_existing_award_sets_by_signature(
+        self,
+    ):
         award_sets = AwardSet.objects.prefetch_related(
             "items",
             "items__trophy_icon",
@@ -361,18 +367,34 @@ class Command(BaseCommand):
         result = {}
 
         for award_set in award_sets:
-            signature = tuple(
-                sorted(
+            conditions = []
+
+            unsafe = False
+
+            for item in award_set.items.all():
+                condition = self.normalize_condition(item.condition)
+
+                if condition not in self.DERIVABLE_CONDITIONS:
+                    unsafe = True
+                    break
+
+                conditions.append(
                     (
-                        item.condition,
+                        condition,
                         item.trophy_icon_id,
                     )
-                    for item in award_set.items.all()
                 )
-            )
+
+            if unsafe:
+                continue
+
+            signature = tuple(sorted(set(conditions)))
 
             if signature:
-                result.setdefault(signature, award_set)
+                result.setdefault(
+                    signature,
+                    award_set,
+                )
 
         return result
 
@@ -382,6 +404,7 @@ class Command(BaseCommand):
         apply_changes,
     ):
         digest = self.signature_digest(signature)
+
         base_name = f"Derived Competition Awards {digest}"
 
         if not apply_changes:
@@ -392,16 +415,19 @@ class Command(BaseCommand):
             signature=signature,
         )
 
-        AwardSetItem.objects.bulk_create(
-            [
-                AwardSetItem(
-                    award_set=award_set,
-                    condition=condition,
-                    trophy_icon_id=icon_id,
-                )
-                for condition, icon_id in signature
-            ]
-        )
+        # create_unique_award_set() can return an existing set.
+        # Only create items when this AwardSet currently has none.
+        if not award_set.items.exists():
+            AwardSetItem.objects.bulk_create(
+                [
+                    AwardSetItem(
+                        award_set=award_set,
+                        condition=condition,
+                        trophy_icon_id=icon_id,
+                    )
+                    for condition, icon_id in signature
+                ]
+            )
 
         return award_set
 
@@ -425,17 +451,17 @@ class Command(BaseCommand):
             )
 
             if existing is None:
-                return AwardSet.objects.create(
-                    name=name,
-                )
+                return AwardSet.objects.create(name=name)
 
             existing_signature = tuple(
                 sorted(
-                    (
-                        item.condition,
-                        item.trophy_icon_id,
+                    set(
+                        (
+                            self.normalize_condition(item.condition),
+                            item.trophy_icon_id,
+                        )
+                        for item in existing.items.all()
                     )
-                    for item in existing.items.all()
                 )
             )
 
@@ -443,27 +469,183 @@ class Command(BaseCommand):
                 return existing
 
             suffix += 1
+
             suffix_text = f" {suffix}"
+
             name = f"{base_name[: 64 - len(suffix_text)]}{suffix_text}"
 
     @staticmethod
-    def signature_digest(signature):
+    def signature_digest(
+        signature,
+    ):
         serialized = "|".join(f"{condition}:{icon_id}" for condition, icon_id in signature)
 
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:8]
 
     @staticmethod
-    def get_award_set_name(award_set):
-        if isinstance(award_set, str):
+    def get_award_set_name(
+        award_set,
+    ):
+        if isinstance(
+            award_set,
+            str,
+        ):
             return f'"{award_set}"'
 
         return f'"{award_set.name}"'
 
     @staticmethod
-    def render_signature(signature):
+    def render_signature(
+        signature,
+    ):
         icon_names = {
             icon.id: icon.name
-            for icon in TrophyIcon.objects.filter(id__in=[icon_id for _condition, icon_id in signature])
+            for icon in TrophyIcon.objects.filter(
+                id__in=[
+                    icon_id
+                    for (
+                        _condition,
+                        icon_id,
+                    ) in signature
+                ]
+            )
         }
 
-        return ", ".join(f"{condition}={icon_names.get(icon_id, icon_id)}" for condition, icon_id in signature)
+        return ", ".join(
+            (
+                f"{condition}="
+                f"{
+                    icon_names.get(
+                        icon_id,
+                        icon_id,
+                    )
+                }"
+            )
+            for (
+                condition,
+                icon_id,
+            ) in signature
+        )
+
+    def render_results(
+        self,
+        *,
+        apply_changes,
+        counters,
+        clear_mappings,
+        conflicts,
+        unsafe_competitions,
+        competitions_without_trophies,
+    ):
+        if clear_mappings:
+            self.stdout.write("")
+
+            self.stdout.write(self.style.SUCCESS("Competitions with clear trophies to map (add with --apply):"))
+
+            for (
+                competition,
+                award_set,
+                rendered_mapping,
+            ) in clear_mappings:
+                self.stdout.write(
+                    f"  Competition {competition.id}: "
+                    f'"{competition.name}" -> '
+                    f"{self.get_award_set_name(award_set)} "
+                    f"[{rendered_mapping}]"
+                )
+
+        mode = "APPLIED" if apply_changes else "DRY RUN"
+
+        self.stdout.write("")
+        self.stdout.write(self.style.SUCCESS(f"{mode} complete"))
+
+        self.stdout.write(f"Competitions scanned: {counters['competitions_scanned']}")
+
+        if apply_changes:
+            self.stdout.write(f"Competitions updated: {counters['competitions_would_update']}")
+        else:
+            self.stdout.write(f"Competitions that would update: {counters['competitions_would_update']}")
+
+        self.stdout.write(f"Competitions unchanged: {counters['competitions_unchanged']}")
+
+        self.stdout.write(f"Existing award sets skipped: {counters['existing_award_set_skipped']}")
+
+        self.stdout.write(
+            "Award sets "
+            + ("created: " if apply_changes else "that would be created: ")
+            + f"{counters['award_sets_created']}"
+        )
+
+        self.stdout.write(
+            "Award set items "
+            + ("created: " if apply_changes else "that would be created: ")
+            + f"{counters['award_set_items_created']}"
+        )
+
+        self.stdout.write(f"Existing award sets reused: {counters['existing_award_sets_reused']}")
+
+        self.stdout.write(f"Newly derived award sets reused: {counters['derived_award_sets_reused']}")
+
+        self.stdout.write(f"Competitions without trophies: {counters['without_trophies']}")
+
+        self.stdout.write(f"Unsafe competitions skipped: {counters['unsafe_competitions']}")
+
+        self.stdout.write(f"Competitions with conflicting mappings: {counters['conflicting_competitions']}")
+
+        if conflicts:
+            self.stdout.write("")
+
+            self.stdout.write(self.style.ERROR("Conflicting condition-to-icon mappings (would not apply):"))
+
+            for (
+                competition,
+                conditions,
+                condition_trophies,
+            ) in conflicts:
+                self.stdout.write(f'  Competition {competition.id}: "{competition.name}"')
+
+                for (
+                    condition,
+                    icon_ids,
+                ) in sorted(conditions.items()):
+                    self.stdout.write(f"    {condition}:")
+
+                    for icon_id in sorted(icon_ids):
+                        trophies_for_icon = condition_trophies[condition][icon_id]
+
+                        icon_name = (
+                            trophies_for_icon[0].icon.name if trophies_for_icon[0].icon else f"icon_id={icon_id}"
+                        )
+
+                        trophy_ids = ", ".join(str(trophy.id) for trophy in trophies_for_icon)
+
+                        self.stdout.write(f"      {icon_name}: trophy IDs {trophy_ids}")
+
+        if unsafe_competitions:
+            self.stdout.write("")
+
+            self.stdout.write(self.style.WARNING("Unsafe competitions skipped (would not apply):"))
+
+            for (
+                competition,
+                problems,
+            ) in unsafe_competitions:
+                self.stdout.write(f'  Competition {competition.id}: "{competition.name}"')
+
+                for problem in problems:
+                    self.stdout.write(f"    - {problem}")
+
+        if competitions_without_trophies:
+            self.stdout.write("")
+
+            self.stdout.write(self.style.WARNING("Competitions without trophies:"))
+
+            for competition in competitions_without_trophies:
+                self.stdout.write(f'  {competition.id}: "{competition.name}"')
+
+        if not apply_changes:
+            self.stdout.write("")
+
+            self.stdout.write(
+                self.style.WARNING("No records were changed. Run again with --apply to save the displayed updates.")
+            )
