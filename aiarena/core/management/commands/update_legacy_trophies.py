@@ -45,7 +45,7 @@ class Command(BaseCommand):
         "ai arena season 2": "AI Arena - Season 2",
         # Legacy trophy name -> current competition name.
         "sc2 ai arena micro ladder season 1": ("Sc2 AI Arena Micro Ladder"),
-        "sc2 ai arena season 1": "Sc2 AI Arena Season 1"
+        "sc2 ai arena season 1": "Sc2 AI Arena Season 1",
     }
 
     # Legacy trophy names -> canonical Trophy.condition.
