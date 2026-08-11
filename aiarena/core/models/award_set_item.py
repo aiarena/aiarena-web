@@ -6,12 +6,16 @@ from django.db import models
 
 from .award_set import AwardSet
 from .trophy_icon import TrophyIcon
-from .trophy import TROPHY_CONDITIONS
+from .trophy import TrophyCondition
 
 logger = logging.getLogger(__name__)
 
 
 class AwardSetItem(models.Model):
+    """An item in an award_set. It corresponds of a reward (trophy icon) mapped to a condition - such as first place, top 10, coolest hat, best zerg, etc.
+    It is not in itself a reward - but rather an item that can be used to check if an award should be administered.
+    """
+
     award_set = models.ForeignKey(
         AwardSet,
         on_delete=models.CASCADE,
@@ -19,7 +23,7 @@ class AwardSetItem(models.Model):
     )
     condition = models.CharField(
         max_length=32,
-        choices=TROPHY_CONDITIONS,
+        choices=TrophyCondition.choices,
     )
     trophy_icon = models.ForeignKey(
         TrophyIcon,
