@@ -7,9 +7,11 @@ import { reverseUrl } from "@/_lib/reverseUrl";
 
 import CompetitionTrophyModal from "./CompetitionTrophyModal";
 import { AdminCompetition, TrophyCheckResult } from "./adminCompetitionTypes";
-import { BooleanBadge, DateValue, StatusBadge } from "./adminCompetitionUtils";
 
 import { AdminCompetitionsQuery } from "./__generated__/AdminCompetitionsQuery.graphql";
+import { StatusBadge } from "./utils/StatusBadge.";
+import { DateValue } from "./utils/DateValue";
+import { BooleanBadge } from "./utils/BooleanBadge";
 
 const EMPTY_CHECK_RESULT: TrophyCheckResult = {
   status: "idle",

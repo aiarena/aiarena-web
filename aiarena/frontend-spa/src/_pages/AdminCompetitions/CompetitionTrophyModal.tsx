@@ -6,14 +6,13 @@ import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
 
 import { AdminCompetition, TrophyCheckResult } from "./adminCompetitionTypes";
-import {
-  BooleanBadge,
-  CompetitionDetail,
-  formatDateTime,
-  StatusBadge,
-} from "./adminCompetitionUtils";
+
 import TrophyStatusMessage from "./TrophyStatusMessage";
 import useCompetitionTrophyActions from "./useCompetitionTrophyActions";
+import { CompetitionDetail } from "./utils/CompetitionDetail";
+import { StatusBadge } from "./utils/StatusBadge.";
+import { BooleanBadge } from "./utils/BooleanBadge";
+import { formatDateTime } from "./utils/formatDateTime";
 
 interface CompetitionTrophyModalProps {
   competition: AdminCompetition | null;
