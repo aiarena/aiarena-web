@@ -8,6 +8,7 @@
 from types import SimpleNamespace
 
 import pytest
+
 from aiarena.core.models import (
     AwardSet,
     AwardSetItem,

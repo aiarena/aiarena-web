@@ -28,11 +28,11 @@ from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.competition import Competition
 from aiarena.core.models.competition_participation import CompetitionParticipation
 from aiarena.core.services import bots, supporters
-from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
 from aiarena.core.services.service_implementations._competition_trophies import (
     award_competition_trophies,
     check_competition_trophies,
 )
+from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import (
     BaseMutation,
     CleanedInputMutation,

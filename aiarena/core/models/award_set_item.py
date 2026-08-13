@@ -5,8 +5,9 @@ import logging
 from django.db import models
 
 from .award_set import AwardSet
-from .trophy_icon import TrophyIcon
 from .trophy import TrophyCondition
+from .trophy_icon import TrophyIcon
+
 
 logger = logging.getLogger(__name__)
 
