@@ -31,6 +31,7 @@ from aiarena.core.services import bots, supporters
 from aiarena.core.services.service_implementations._competition_trophies import (
     award_competition_trophies,
     check_competition_trophies,
+    CompetitionTrophyAwardError,
 )
 from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
 from aiarena.graphql.common import (
@@ -646,20 +647,35 @@ class CheckCompetitionTrophies(CleanedInputMutation):
         info: graphene.ResolveInfo,
         input_object: CheckCompetitionTrophiesInput,
     ):
-        user = getattr(
-            info.context,
-            "user",
-            None,
-        )
+        user = info.context.user
 
         if not user or not user.is_authenticated or not user.is_superuser:
             raise GraphQLError("Administrator access is required.")
 
         competition = input_object.competition
 
-        report = check_competition_trophies(competition)
-
-        competition.refresh_from_db(fields=["awards_given"])
+        try:
+            report = check_competition_trophies(competition)
+        except CompetitionTrophyAwardError as exc:
+            return cls(
+                errors=[
+                    {
+                        "field": "competition",
+                        "messages": [str(exc)],
+                    }
+                ],
+                status=CompetitionTrophyCheckStatus.INCOMPLETE_OR_INCORRECT,
+                message=str(exc),
+                awards_given=competition.awards_given,
+                expected_trophy_count=0,
+                existing_trophy_count=0,
+                missing_trophy_count=0,
+                incorrect_trophy_count=0,
+                missing_trophies=[],
+                incorrect_trophy_ids=[],
+                incorrect_trophies=[],
+                issues=[str(exc)],
+            )
 
         return cls(
             errors=[],
@@ -681,7 +697,10 @@ class CheckCompetitionTrophies(CleanedInputMutation):
                 )
                 for expected in report.missing_trophies
             ],
-            incorrect_trophy_ids=[str(trophy.id) for trophy in report.incorrect_trophies],
+            incorrect_trophy_ids=[
+                str(trophy.id)
+                for trophy in report.incorrect_trophies
+            ],
             incorrect_trophies=[
                 IncorrectCompetitionTrophyType(
                     id=trophy.id,
@@ -738,20 +757,33 @@ class AwardCompetitionTrophies(CleanedInputMutation):
         info: graphene.ResolveInfo,
         input_object: AwardCompetitionTrophiesInput,
     ):
-        user = getattr(
-            info.context,
-            "user",
-            None,
-        )
+        user = info.context.user
 
         if not user or not user.is_authenticated or not user.is_superuser:
             raise GraphQLError("Administrator access is required.")
 
         competition = input_object.competition
 
-        report = award_competition_trophies(competition)
+        try:
+            report = award_competition_trophies(competition)
+        except CompetitionTrophyAwardError as exc:
+            return cls(
+                errors=[
+                    {
+                        "field": "competition",
+                        "messages": [str(exc)],
+                    }
+                ],
+                success=False,
+                message=str(exc),
+                awards_given=competition.awards_given,
+                created_trophy_count=0,
+                deleted_trophy_count=0,
+                created_trophy_ids=[],
+                deleted_trophy_ids=[],
+            )
 
-        competition.refresh_from_db(fields=["awards_given"])
+        competition.refresh_from_db()
 
         return cls(
             errors=[],
@@ -760,11 +792,15 @@ class AwardCompetitionTrophies(CleanedInputMutation):
             awards_given=competition.awards_given,
             created_trophy_count=report.created_trophy_count,
             deleted_trophy_count=report.deleted_trophy_count,
-            created_trophy_ids=[str(trophy_id) for trophy_id in report.created_trophy_ids],
-            deleted_trophy_ids=[str(trophy_id) for trophy_id in report.deleted_trophy_ids],
+            created_trophy_ids=[
+                str(trophy_id)
+                for trophy_id in report.created_trophy_ids
+            ],
+            deleted_trophy_ids=[
+                str(trophy_id)
+                for trophy_id in report.deleted_trophy_ids
+            ],
         )
-
-
 class Mutation(graphene.ObjectType):
     request_match = RequestMatch.Field()
     upload_bot = UploadBot.Field()

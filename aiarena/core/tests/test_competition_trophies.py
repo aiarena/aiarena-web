@@ -519,7 +519,7 @@ def test_build_expected_trophies_includes_placement_and_race_awards(
     first_protoss = make_participation(1002, "BestProtoss", "P")
     second_zerg = make_participation(1003, "SecondZerg", "Z")
 
-    expected, issues = _competition_trophies.build_expected_trophies(
+    expected = _competition_trophies.build_expected_trophies(
         competition,
         ranked_participations=[
             first_zerg,
@@ -528,12 +528,93 @@ def test_build_expected_trophies_includes_placement_and_race_awards(
         ],
     )
 
-    assert issues == []
     assert [(trophy.bot_name, trophy.condition) for trophy in expected] == [
         ("BestZerg", TrophyCondition.FIRST_PLACE),
         ("BestZerg", TrophyCondition.BEST_ZERG),
         ("BestProtoss", TrophyCondition.BEST_PROTOSS),
     ]
+
+
+def test_build_expected_trophies_raises_without_award_set(
+    competition,
+):
+    competition.award_set = None
+    competition.save(update_fields=["award_set"])
+
+    with pytest.raises(
+        _competition_trophies.CompetitionTrophyAwardError,
+        match="The competition does not have an award set.",
+    ):
+        _competition_trophies.build_expected_trophies(
+            competition,
+            ranked_participations=[],
+        )
+
+
+def test_build_expected_trophies_raises_when_award_set_is_empty(
+    competition,
+):
+    award_set = AwardSet.objects.create(name="Empty Awards")
+
+    competition.award_set = award_set
+    competition.save(update_fields=["award_set"])
+
+    with pytest.raises(
+        _competition_trophies.CompetitionTrophyAwardError,
+        match="The competition award set does not contain any items.",
+    ):
+        _competition_trophies.build_expected_trophies(
+            competition,
+            ranked_participations=[],
+        )
+
+
+def test_build_expected_trophies_raises_for_unsupported_condition(
+    competition,
+):
+    icon = TrophyIcon.objects.create(
+        name="custom-icon",
+        image="trophy_images/custom-icon.png",
+    )
+    award_set = AwardSet.objects.create(name="Unsupported Awards")
+
+    AwardSetItem.objects.create(
+        award_set=award_set,
+        condition=TrophyCondition.CUSTOM,
+        trophy_icon=icon,
+    )
+
+    competition.award_set = award_set
+    competition.save(update_fields=["award_set"])
+
+    participation = make_participation(1, "CustomBot", "Z")
+
+    with pytest.raises(
+        _competition_trophies.CompetitionTrophyAwardError,
+        match="cannot be checked automatically",
+    ):
+        _competition_trophies.build_expected_trophies(
+            competition,
+            ranked_participations=[participation],
+        )
+
+
+def test_build_expected_trophies_raises_without_ranked_participants(
+    competition,
+):
+    configure_competition(
+        competition,
+        status="closed",
+    )
+
+    with pytest.raises(
+        _competition_trophies.CompetitionTrophyAwardError,
+        match="The competition has no ranked participants.",
+    ):
+        _competition_trophies.build_expected_trophies(
+            competition,
+            ranked_participations=[],
+        )
 
 
 class TestCheckCompetitionTrophies(GraphQLTest):
@@ -705,6 +786,40 @@ class TestCheckCompetitionTrophies(GraphQLTest):
 
         assert incorrect["participated"] is False
         assert incorrect["placement"] is None
+
+    def test_check_propagates_trophy_configuration_error(
+        self,
+        user,
+        competition,
+        monkeypatch,
+    ):
+        admin = make_admin(user)
+
+        competition.award_set = None
+        competition.save(update_fields=["award_set"])
+
+        mock_rankings(
+            monkeypatch,
+            [],
+        )
+
+        self.mutate(
+            login_user=admin,
+            expected_status=200,
+            variables={
+                "input": {
+                    "competition": self.to_global_id(
+                        CompetitionType,
+                        competition.id,
+                    ),
+                }
+            },
+            expected_validation_errors={
+                "competition": [
+                    "The competition does not have an award set.",
+                ],
+            },
+        )
 
     def test_non_admin_cannot_check(
         self,
@@ -1226,6 +1341,61 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         assert Trophy.objects.count() == trophy_count
 
+    def test_missing_award_set_cannot_be_awarded(
+        self,
+        user,
+        competition,
+        bot,
+        monkeypatch,
+    ):
+        admin = make_admin(user)
+
+        competition.status = "closed"
+        competition.award_set = None
+        competition.awards_given = False
+        competition.save(
+            update_fields=[
+                "status",
+                "award_set",
+                "awards_given",
+            ]
+        )
+
+        mock_rankings(
+            monkeypatch,
+            [bot],
+        )
+
+        response = self.mutate(
+            login_user=admin,
+            expected_status=200,
+            variables={
+                "input": {
+                    "competition": self.to_global_id(
+                        CompetitionType,
+                        competition.id,
+                    ),
+                }
+            },
+            expected_validation_errors={
+                "competition": [
+                    "The competition does not have an award set.",
+                ],
+            },
+        )
+
+        result = response["awardCompetitionTrophies"]
+
+        assert result["success"] is False
+        assert result["message"] == "The competition does not have an award set."
+
+        assert not Trophy.objects.filter(
+            competition=competition
+        ).exists()
+
+        competition.refresh_from_db()
+        assert competition.awards_given is False
+
     def test_open_competition_cannot_be_awarded(
         self,
         user,
@@ -1261,12 +1431,17 @@ class TestAwardCompetitionTrophies(GraphQLTest):
                     ),
                 }
             },
+            expected_validation_errors={
+                "competition": [
+                    COMPETITION_CLOSED_MESSAGE,
+                ],
+            },
         )
 
         result = response["awardCompetitionTrophies"]
 
         assert result["success"] is False
-        assert result["message"] == ("Competition must be closed before trophies can be awarded.")
+        assert result["message"] == COMPETITION_CLOSED_MESSAGE
 
         assert not Trophy.objects.filter(competition=competition).exists()
 

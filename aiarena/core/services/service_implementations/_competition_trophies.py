@@ -5,7 +5,7 @@ from typing import Any
 
 from django.db import transaction
 
-from aiarena.core.models import Competition, Trophy
+from aiarena.core.models import Competition, Trophy, CompetitionParticipation
 from aiarena.core.models.trophy import TrophyCondition
 from aiarena.core.services import ladders
 
@@ -27,8 +27,8 @@ class ConditionContext:
     """
 
     rank: int
-    participation: Any
-    ranked_participations: list[Any]
+    participation: CompetitionParticipation
+    ranked_participations: list[CompetitionParticipation]
 
 
 ConditionCheck = Callable[[ConditionContext], bool]
@@ -366,22 +366,27 @@ def build_rank_map(
     }
 
 
+class CompetitionTrophyAwardError(Exception):
+    """Raised when competition trophies cannot be safely awarded."""
+
+
 def build_expected_trophies(
     competition: Competition,
     ranked_participations=None,
-) -> tuple[
-    list[ExpectedTrophy],
-    list[str],
-]:
+) -> list[ExpectedTrophy]:
     issues = []
 
     if competition.award_set_id is None:
-        return [], ["The competition does not have an award set."]
+        raise CompetitionTrophyAwardError(
+            "The competition does not have an award set."
+        )
 
     award_items = list(competition.award_set.items.select_related("trophy_icon").order_by("condition"))
 
     if not award_items:
-        return [], ["The competition award set does not contain any items."]
+        raise CompetitionTrophyAwardError(
+            "The competition award set does not contain any items."
+        )
 
     configured_conditions = {item.condition for item in award_items}
 
@@ -396,7 +401,7 @@ def build_expected_trophies(
         )
 
     if issues:
-        return [], issues
+        raise CompetitionTrophyAwardError("; ".join(issues))
 
     items_by_condition = {item.condition: item for item in award_items}
 
@@ -404,7 +409,9 @@ def build_expected_trophies(
         ranked_participations = get_ranked_participations(competition)
 
     if not ranked_participations:
-        return [], ["The competition has no ranked participants."]
+        raise CompetitionTrophyAwardError(
+            "The competition has no ranked participants."
+        )
 
     expected_trophies = []
 
@@ -438,15 +445,15 @@ def build_expected_trophies(
             )
 
     if issues:
-        return [], issues
+        raise CompetitionTrophyAwardError("; ".join(issues))
 
     if not expected_trophies:
-        return [], ["The award set does not produce any trophies for the current competition rankings."]
+        raise CompetitionTrophyAwardError(
+            "The award set does not produce any trophies "
+            "for the current competition rankings."
+        )
 
-    return (
-        expected_trophies,
-        [],
-    )
+    return expected_trophies
 
 
 def serialize_incorrect_trophy(
@@ -487,20 +494,10 @@ def check_competition_trophies(
 
     rank_by_bot_id = build_rank_map(ranked_participations)
 
-    (
-        expected_trophies,
-        configuration_issues,
-    ) = build_expected_trophies(
+    expected_trophies = build_expected_trophies(
         competition,
         ranked_participations=(ranked_participations),
     )
-
-    if configuration_issues:
-        return CompetitionTrophyCheckReport(
-            status=("INCOMPLETE_OR_INCORRECT"),
-            message=("Trophies are incomplete or incorrect."),
-            issues=configuration_issues,
-        )
 
     existing_trophies = list(
         Trophy.objects.filter(
@@ -633,14 +630,8 @@ def check_competition_trophies(
     # All expected trophies exist and are correct.
     # Keep awards_given synchronized with actual trophy state.
     if not competition.awards_given:
-        Competition.objects.filter(
-            pk=competition.pk,
-            awards_given=False,
-        ).update(
-            awards_given=True,
-        )
-
         competition.awards_given = True
+        competition.save()
 
     return CompetitionTrophyCheckReport(
         status="AWARDED",
@@ -697,15 +688,13 @@ def award_competition_trophies(
     locked_competition = Competition.objects.select_for_update().get(pk=competition.pk)
 
     if locked_competition.status != "closed":
-        return CompetitionTrophyAwardReport(
-            success=False,
-            message=("Competition must be closed before trophies can be awarded."),
+        raise CompetitionTrophyAwardError(
+            "Competition must be closed before trophies can be awarded."
         )
 
     if locked_competition.award_set_id is None:
-        return CompetitionTrophyAwardReport(
-            success=False,
-            message=("The competition does not have an award set."),
+        raise CompetitionTrophyAwardError(
+            "The competition does not have an award set."
         )
 
     # Lock the existing trophies for this competition.
@@ -721,13 +710,6 @@ def award_competition_trophies(
     )
 
     report = check_competition_trophies(locked_competition)
-
-    # Configuration errors cannot safely be repaired.
-    if report.status == "INCOMPLETE_OR_INCORRECT" and not report.incorrect_trophies:
-        return CompetitionTrophyAwardReport(
-            success=False,
-            message=report.message,
-        )
 
     incorrect_trophy_ids = [trophy.id for trophy in report.incorrect_trophies]
 
@@ -757,7 +739,9 @@ def award_competition_trophies(
     final_report = check_competition_trophies(locked_competition)
 
     if final_report.status != "AWARDED":
-        raise RuntimeError("Trophy reconciliation did not produce a valid awarded state.")
+        raise CompetitionTrophyAwardError(
+            "Trophy reconciliation did not produce a valid awarded state."
+        )
 
     # check_competition_trophies() normally updates this,
     # but retain the explicit guarantee here too.
