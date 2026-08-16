@@ -254,7 +254,7 @@ function IncorrectTrophyCard({
 
         <MetadataValue
           label="Competition ID"
-          value={trophy.competitionId}
+          value={trophy.competitionId || ""}
           code
         />
       </footer>
