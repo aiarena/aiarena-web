@@ -56,6 +56,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("admin/doc/", include("django.contrib.admindocs.urls")),
     path("admin/", admin.site.urls),
     path("adminstats/", core_views.frontend, name="adminstats"),
+    path("admincompetitions/", core_views.frontend, name="adminstats"),
     path("accounts/", include("registration.backends.default.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("", core_views.frontend, name="home"),

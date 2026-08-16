@@ -174,6 +174,31 @@ class BotID(TypeModelChoice):
     graphql_type = BotType
 
 
+class AwardSetItemType(DjangoObjectTypeWithUID):
+    class Meta:
+        model = models.AwardSetItem
+        fields = [
+            "condition",
+            "trophy_icon",
+        ]
+        connection_class = CountingConnection
+
+
+class AwardSetType(DjangoObjectTypeWithUID):
+    items = DjangoConnectionField("aiarena.graphql.AwardSetItemType")
+
+    class Meta:
+        model = models.AwardSet
+        fields = [
+            "name",
+        ]
+        connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_items(root: models.AwardSet, info, **args):
+        return root.items.select_related("trophy_icon").order_by("condition")
+
+
 class CompetitionFilterSet(FilterSet):
     order_by = OrderingFilter(
         fields=[
@@ -215,6 +240,9 @@ class CompetitionType(DjangoObjectTypeWithUID):
     game_mode = graphene.String()
     wiki_article = graphene.String()
 
+    award_set = graphene.Field("aiarena.graphql.AwardSetType")
+    awards_given = graphene.DateTime()
+
     class Meta:
         model = models.Competition
         fields = [
@@ -223,32 +251,74 @@ class CompetitionType(DjangoObjectTypeWithUID):
             "date_opened",
             "date_closed",
             "status",
+            "award_set",
+            "awards_given",
         ]
         filterset_class = CompetitionFilterSet
         connection_class = CountingConnection
 
     @staticmethod
-    def resolve_rounds(root: models.Competition, info, **args):
+    def resolve_award_set(
+        root: models.Competition,
+        info,
+        **args,
+    ):
+        return root.award_set
+
+    @staticmethod
+    def resolve_awards_given(
+        root: models.Competition,
+        info,
+        **args,
+    ):
+        return root.awards_given
+
+    @staticmethod
+    def resolve_rounds(
+        root: models.Competition,
+        info,
+        **args,
+    ):
         return root.round_set.all().order_by("-started")
 
     @staticmethod
-    def resolve_game(root: models.Competition, info, **args):
+    def resolve_game(
+        root: models.Competition,
+        info,
+        **args,
+    ):
         return root.game_mode.game
 
     @staticmethod
-    def resolve_game_mode(root: models.Competition, info, **args):
+    def resolve_game_mode(
+        root: models.Competition,
+        info,
+        **args,
+    ):
         return root.game_mode
 
     @staticmethod
-    def resolve_url(root: models.Competition, info, **args):
+    def resolve_url(
+        root: models.Competition,
+        info,
+        **args,
+    ):
         return get_absolute_url("competition", root)
 
     @staticmethod
-    def resolve_participants(root: models.Competition, info, **args):
+    def resolve_participants(
+        root: models.Competition,
+        info,
+        **args,
+    ):
         return ladders.get_competition_display_full_rankings(root).calculate_trend(root)
 
     @staticmethod
-    def resolve_wiki_article(root: models.Bot, info, **args):
+    def resolve_wiki_article(
+        root: models.Competition,
+        info,
+        **args,
+    ):
         return root.get_wiki_article().current_revision.content
 
 
@@ -1710,7 +1780,9 @@ class Query(graphene.ObjectType):
 
     @staticmethod
     def resolve_competitions(root, info, **args):
-        return models.Competition.objects.all()
+        return models.Competition.objects.select_related(
+            "award_set",
+        ).all()
 
     @staticmethod
     def resolve_map_pools(root, info, **args):
