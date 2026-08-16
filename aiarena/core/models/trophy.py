@@ -57,7 +57,6 @@ class Trophy(models.Model):
         null=True,
     )
 
-
     condition = models.CharField(
         max_length=64,
         choices=TrophyCondition.choices,

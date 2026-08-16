@@ -248,28 +248,19 @@ class Command(BaseCommand):
                 competition_participation = None
 
                 if competition:
-                    competition_participation = (
-                        CompetitionParticipation.objects.filter(
-                            competition=competition,
-                            bot_id=trophy.bot_id,
-                        ).first()
-                    )
+                    competition_participation = CompetitionParticipation.objects.filter(
+                        competition=competition,
+                        bot_id=trophy.bot_id,
+                    ).first()
 
                     if competition_participation:
                         counters["competition_participation_matched"] += 1
                     else:
                         counters["competition_participation_unmatched"] += 1
 
-                if competition_participation and (
-                    overwrite or trophy.competition_participation_id is None
-                ):
-                    if (
-                        trophy.competition_participation_id
-                        != competition_participation.id
-                    ):
-                        changes["competition_participation"] = (
-                            competition_participation
-                        )
+                if competition_participation and (overwrite or trophy.competition_participation_id is None):
+                    if trophy.competition_participation_id != competition_participation.id:
+                        changes["competition_participation"] = competition_participation
 
                 if not changes:
                     counters["unchanged"] += 1
@@ -316,15 +307,9 @@ class Command(BaseCommand):
 
         self.stdout.write(f"Competition unmatched: {counters['competition_unmatched']}")
 
-        self.stdout.write(
-            "Competition participation matched: "
-            f"{counters['competition_participation_matched']}"
-        )
+        self.stdout.write(f"Competition participation matched: {counters['competition_participation_matched']}")
 
-        self.stdout.write(
-            "Competition participation unmatched: "
-            f"{counters['competition_participation_unmatched']}"
-        )
+        self.stdout.write(f"Competition participation unmatched: {counters['competition_participation_unmatched']}")
 
         if condition_unmatched:
             self.stdout.write("")

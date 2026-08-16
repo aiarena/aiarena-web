@@ -1601,9 +1601,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert result["success"] is False
         assert result["message"] == "The competition does not have an award set."
 
-        assert not Trophy.objects.filter(
-            competition_participation__competition=competition
-        ).exists()
+        assert not Trophy.objects.filter(competition_participation__competition=competition).exists()
 
         competition.refresh_from_db()
         assert competition.awards_given is False

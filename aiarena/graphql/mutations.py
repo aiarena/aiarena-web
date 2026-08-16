@@ -697,10 +697,7 @@ class CheckCompetitionTrophies(CleanedInputMutation):
                 )
                 for expected in report.missing_trophies
             ],
-            incorrect_trophy_ids=[
-                str(trophy.id)
-                for trophy in report.incorrect_trophies
-            ],
+            incorrect_trophy_ids=[str(trophy.id) for trophy in report.incorrect_trophies],
             incorrect_trophies=[
                 IncorrectCompetitionTrophyType(
                     id=trophy.id,
@@ -792,15 +789,11 @@ class AwardCompetitionTrophies(CleanedInputMutation):
             awards_given=competition.awards_given,
             created_trophy_count=report.created_trophy_count,
             deleted_trophy_count=report.deleted_trophy_count,
-            created_trophy_ids=[
-                str(trophy_id)
-                for trophy_id in report.created_trophy_ids
-            ],
-            deleted_trophy_ids=[
-                str(trophy_id)
-                for trophy_id in report.deleted_trophy_ids
-            ],
+            created_trophy_ids=[str(trophy_id) for trophy_id in report.created_trophy_ids],
+            deleted_trophy_ids=[str(trophy_id) for trophy_id in report.deleted_trophy_ids],
         )
+
+
 class Mutation(graphene.ObjectType):
     request_match = RequestMatch.Field()
     upload_bot = UploadBot.Field()

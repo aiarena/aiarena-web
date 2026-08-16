@@ -140,9 +140,7 @@ class Command(BaseCommand):
         trophies_by_competition = defaultdict(list)
 
         for trophy in trophies:
-            trophies_by_competition[
-                trophy.competition_participation.competition_id
-            ].append(trophy)
+            trophies_by_competition[trophy.competition_participation.competition_id].append(trophy)
 
         existing_sets_by_signature = self.get_existing_award_sets_by_signature()
 

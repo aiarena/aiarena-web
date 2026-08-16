@@ -721,6 +721,7 @@ class TrophyAdmin(admin.ModelAdmin):
         "competition_participation",
     )
 
+
 @admin.register(TrophyIcon)
 class TrophyIconAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "image", "image_preview")
