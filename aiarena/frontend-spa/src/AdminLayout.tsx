@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
-import { NavLink, Navigate, Outlet } from "react-router";
+import { NavLink, Outlet } from "react-router";
 import clsx from "clsx";
 
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
