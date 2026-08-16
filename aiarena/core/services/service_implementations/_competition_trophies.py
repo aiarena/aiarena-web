@@ -1,11 +1,10 @@
 from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
 
 from django.db import transaction
 
-from aiarena.core.models import Competition, Trophy, CompetitionParticipation
+from aiarena.core.models import Competition, CompetitionParticipation, Trophy
 from aiarena.core.models.trophy import TrophyCondition
 from aiarena.core.services import ladders
 
@@ -185,6 +184,7 @@ SPECIAL_CONDITIONS = (
 
 @dataclass(frozen=True)
 class ExpectedTrophy:
+    competition_participation_id: int | None
     bot_id: int
     bot_name: str
     rank: int
@@ -198,6 +198,7 @@ class IncorrectTrophy:
     id: int
     name: str
 
+    competition_participation_id: int
     bot_id: int
     bot_name: str
 
@@ -208,8 +209,8 @@ class IncorrectTrophy:
     icon_name: str | None
     icon_image: str | None
 
-    competition_id: int
-    competition_name: str
+    competition_id: int | None
+    competition_name: str | None
 
     participated: bool
     placement: int | None
@@ -355,10 +356,10 @@ def build_rank_map(
     ranked_participations,
 ) -> dict[int, int]:
     """
-    Map bot IDs to their one-based competition placement.
+    Map competition participation IDs to their one-based placement.
     """
     return {
-        participation.bot_id: rank
+        participation.id: rank
         for rank, participation in enumerate(
             ranked_participations,
             start=1,
@@ -435,12 +436,13 @@ def build_expected_trophies(
 
             expected_trophies.append(
                 ExpectedTrophy(
-                    bot_id=(participation.bot_id),
-                    bot_name=(participation.bot.name),
+                    competition_participation_id=participation.id,
+                    bot_id=participation.bot_id,
+                    bot_name=participation.bot.name,
                     rank=rank,
                     condition=condition,
-                    icon_id=(award_item.trophy_icon_id),
-                    icon_name=(award_item.trophy_icon.name),
+                    icon_id=award_item.trophy_icon_id,
+                    icon_name=award_item.trophy_icon.name,
                 )
             )
 
@@ -458,9 +460,18 @@ def build_expected_trophies(
 
 def serialize_incorrect_trophy(
     trophy: Trophy,
-    rank_by_bot_id: dict[int, int],
+    rank_by_participation_id: dict[int, int],
 ) -> IncorrectTrophy:
-    placement = rank_by_bot_id.get(trophy.bot_id)
+    participation = trophy.competition_participation
+
+    placement = None
+    competition_id = None
+    competition_name = None
+
+    if participation is not None:
+        placement = rank_by_participation_id.get(participation.id)
+        competition_id = participation.competition_id
+        competition_name = participation.competition.name
 
     icon_image = None
 
@@ -473,16 +484,25 @@ def serialize_incorrect_trophy(
     return IncorrectTrophy(
         id=trophy.id,
         name=trophy.name,
+        competition_participation_id=(
+            participation.id
+            if participation is not None
+            else None
+        ),
         bot_id=trophy.bot_id,
         bot_name=trophy.bot.name,
         condition=trophy.condition or "",
-        condition_display=(trophy.get_condition_display() if trophy.condition else ""),
+        condition_display=(
+            trophy.get_condition_display()
+            if trophy.condition
+            else ""
+        ),
         icon_id=trophy.icon_id,
-        icon_name=(trophy.icon.name if trophy.icon else None),
+        icon_name=trophy.icon.name if trophy.icon else None,
         icon_image=icon_image,
-        competition_id=(trophy.competition_id),
-        competition_name=(trophy.competition.name),
-        participated=(placement is not None),
+        competition_id=competition_id,
+        competition_name=competition_name,
+        participated=participation is not None,
         placement=placement,
     )
 
@@ -492,28 +512,29 @@ def check_competition_trophies(
 ) -> CompetitionTrophyCheckReport:
     ranked_participations = get_ranked_participations(competition)
 
-    rank_by_bot_id = build_rank_map(ranked_participations)
+    rank_by_participation_id = build_rank_map(ranked_participations)
 
     expected_trophies = build_expected_trophies(
         competition,
-        ranked_participations=(ranked_participations),
+        ranked_participations=ranked_participations,
     )
 
     existing_trophies = list(
         Trophy.objects.filter(
-            competition=competition,
+            competition_participation__competition=competition,
         )
         .select_related(
             "bot",
+            "competition_participation",
+            "competition_participation__competition",
             "icon",
-            "competition",
         )
         .order_by("id")
     )
 
     expected_by_key = {
         (
-            expected.bot_id,
+            expected.competition_participation_id,
             expected.condition,
         ): expected
         for expected in expected_trophies
@@ -524,7 +545,7 @@ def check_competition_trophies(
     for trophy in existing_trophies:
         existing_by_key[
             (
-                trophy.bot_id,
+                trophy.competition_participation_id,
                 trophy.condition,
             )
         ].append(trophy)
@@ -533,10 +554,7 @@ def check_competition_trophies(
     incorrect_trophy_records = []
     issues = []
 
-    for (
-        key,
-        expected,
-    ) in expected_by_key.items():
+    for key, expected in expected_by_key.items():
         matching_trophies = existing_by_key.get(
             key,
             [],
@@ -551,11 +569,24 @@ def check_competition_trophies(
 
             incorrect_trophy_records.extend(matching_trophies)
 
-            issues.append(f"{expected.bot_name} has duplicate '{expected.condition}' trophies: {duplicate_ids}.")
+            issues.append(
+                f"{expected.bot_name} has duplicate "
+                f"'{expected.condition}' trophies: {duplicate_ids}."
+            )
 
             continue
 
         trophy = matching_trophies[0]
+
+        if trophy.bot_id != expected.bot_id:
+            incorrect_trophy_records.append(trophy)
+
+            issues.append(
+                f"Trophy {trophy.id} is linked to bot "
+                f"{trophy.bot_id}, but competition participation "
+                f"{expected.competition_participation_id} belongs to "
+                f"bot {expected.bot_id}."
+            )
 
         if trophy.icon_id != expected.icon_id:
             incorrect_trophy_records.append(trophy)
@@ -569,51 +600,61 @@ def check_competition_trophies(
                 f"'{expected.icon_name}' is expected."
             )
 
-    for (
-        key,
-        trophies,
-    ) in existing_by_key.items():
+    for key, trophies in existing_by_key.items():
         if key in expected_by_key:
             continue
 
         for trophy in trophies:
             incorrect_trophy_records.append(trophy)
 
-            placement = rank_by_bot_id.get(trophy.bot_id)
+            participation = trophy.competition_participation
 
-            if placement is None:
-                participation_description = "did not participate in this competition"
+            if participation is None:
+                participation_description = (
+                    "is not linked to a competition participation"
+                )
             else:
-                participation_description = f"placed {placement}"
+                placement = rank_by_participation_id.get(participation.id)
+
+                if placement is None:
+                    participation_description = (
+                        "is not present in the current competition rankings"
+                    )
+                else:
+                    participation_description = f"placed {placement}"
 
             issues.append(
                 f"Trophy {trophy.id} for "
                 f"{trophy.bot.name} with condition "
                 f"'{trophy.condition or 'unset'}' "
                 f"is not expected for this competition; "
-                f"the bot "
-                f"{participation_description}."
+                f"the participation {participation_description}."
             )
 
-    incorrect_trophy_records = list({trophy.id: trophy for trophy in incorrect_trophy_records}.values())
+    incorrect_trophy_records = list(
+        {
+            trophy.id: trophy
+            for trophy in incorrect_trophy_records
+        }.values()
+    )
 
     incorrect_trophy_records.sort(key=lambda trophy: trophy.id)
 
     incorrect_trophies = [
         serialize_incorrect_trophy(
             trophy,
-            rank_by_bot_id,
+            rank_by_participation_id,
         )
         for trophy in incorrect_trophy_records
     ]
 
     if incorrect_trophies:
         return CompetitionTrophyCheckReport(
-            status=("INCOMPLETE_OR_INCORRECT"),
-            message=("Trophies are incomplete or incorrect."),
-            expected_trophies=(expected_trophies),
-            missing_trophies=(missing_trophies),
-            incorrect_trophies=(incorrect_trophies),
+            status="INCOMPLETE_OR_INCORRECT",
+            message="Trophies are incomplete or incorrect.",
+            expected_trophies=expected_trophies,
+            missing_trophies=missing_trophies,
+            incorrect_trophies=incorrect_trophies,
             issues=issues,
             existing_trophy_count=len(existing_trophies),
         )
@@ -621,9 +662,9 @@ def check_competition_trophies(
     if missing_trophies:
         return CompetitionTrophyCheckReport(
             status="NOT_AWARDED",
-            message=("Trophies have not been awarded."),
-            expected_trophies=(expected_trophies),
-            missing_trophies=(missing_trophies),
+            message="Trophies have not been awarded.",
+            expected_trophies=expected_trophies,
+            missing_trophies=missing_trophies,
             existing_trophy_count=len(existing_trophies),
         )
 
@@ -631,12 +672,12 @@ def check_competition_trophies(
     # Keep awards_given synchronized with actual trophy state.
     if not competition.awards_given:
         competition.awards_given = True
-        competition.save()
+        competition.save(update_fields=["awards_given"])
 
     return CompetitionTrophyCheckReport(
         status="AWARDED",
-        message=("Trophies have been awarded."),
-        expected_trophies=(expected_trophies),
+        message="Trophies have been awarded.",
+        expected_trophies=expected_trophies,
         existing_trophy_count=len(existing_trophies),
     )
 
@@ -678,14 +719,19 @@ def award_competition_trophies(
     """
     Reconcile trophies for one competition.
 
+    Trophies are linked to both Bot and CompetitionParticipation.
+    Competition is derived through CompetitionParticipation.
+
     - Only allows awarding for closed competitions.
-    - Locks the competition and its existing trophies.
+    - Locks the competition and its existing participation trophies.
     - Deletes trophies identified as incorrect.
     - Creates trophies identified as missing.
     - Leaves correct trophies unchanged.
     - Marks awards_given=True after reconciliation.
     """
-    locked_competition = Competition.objects.select_for_update().get(pk=competition.pk)
+    locked_competition = Competition.objects.select_for_update().get(
+        pk=competition.pk
+    )
 
     if locked_competition.status != "closed":
         raise CompetitionTrophyAwardError(
@@ -697,11 +743,11 @@ def award_competition_trophies(
             "The competition does not have an award set."
         )
 
-    # Lock the existing trophies for this competition.
+    # Lock existing trophies belonging to participations in this competition.
     list(
         Trophy.objects.select_for_update()
         .filter(
-            competition=(locked_competition),
+            competition_participation__competition=locked_competition,
         )
         .values_list(
             "id",
@@ -711,12 +757,15 @@ def award_competition_trophies(
 
     report = check_competition_trophies(locked_competition)
 
-    incorrect_trophy_ids = [trophy.id for trophy in report.incorrect_trophies]
+    incorrect_trophy_ids = [
+        trophy.id
+        for trophy in report.incorrect_trophies
+    ]
 
     if incorrect_trophy_ids:
         Trophy.objects.filter(
-            competition=(locked_competition),
-            id__in=(incorrect_trophy_ids),
+            competition_participation__competition=locked_competition,
+            id__in=incorrect_trophy_ids,
         ).delete()
 
     created_trophies = []
@@ -724,8 +773,8 @@ def award_competition_trophies(
     for expected in report.missing_trophies:
         trophy = Trophy.objects.create(
             bot_id=expected.bot_id,
-            competition=(locked_competition),
-            condition=(expected.condition),
+            competition_participation_id=expected.competition_participation_id,
+            condition=expected.condition,
             icon_id=expected.icon_id,
             name=get_trophy_name(
                 locked_competition,
@@ -736,7 +785,9 @@ def award_competition_trophies(
         created_trophies.append(trophy)
 
     # Recheck everything before reporting success.
-    final_report = check_competition_trophies(locked_competition)
+    final_report = check_competition_trophies(
+        locked_competition
+    )
 
     if final_report.status != "AWARDED":
         raise CompetitionTrophyAwardError(
@@ -747,12 +798,16 @@ def award_competition_trophies(
     # but retain the explicit guarantee here too.
     if not locked_competition.awards_given:
         locked_competition.awards_given = True
-
-        locked_competition.save(update_fields=["awards_given"])
+        locked_competition.save(
+            update_fields=["awards_given"]
+        )
 
     return CompetitionTrophyAwardReport(
         success=True,
-        message=("Trophies have been awarded successfully."),
-        deleted_trophy_ids=(incorrect_trophy_ids),
-        created_trophy_ids=[trophy.id for trophy in created_trophies],
+        message="Trophies have been awarded successfully.",
+        deleted_trophy_ids=incorrect_trophy_ids,
+        created_trophy_ids=[
+            trophy.id
+            for trophy in created_trophies
+        ],
     )

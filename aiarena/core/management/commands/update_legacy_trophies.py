@@ -4,7 +4,7 @@ from collections import Counter
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from aiarena.core.models import Competition, Trophy
+from aiarena.core.models import Competition, CompetitionParticipation, Trophy
 
 
 # Usage:
@@ -30,7 +30,10 @@ from aiarena.core.models import Competition, Trophy
 
 
 class Command(BaseCommand):
-    help = "Parse legacy trophy names, assign trophy conditions, and link trophies to confidently matched competitions."
+    help = (
+        "Parse legacy trophy names, assign trophy conditions, and link trophies "
+        "to confidently matched competition participations."
+    )
 
     # Historical trophy names that differ from Competition.name.
     #
@@ -174,9 +177,11 @@ class Command(BaseCommand):
         trophy_ids = options["trophy_ids"]
 
         queryset = Trophy.objects.select_related(
-            "competition",
-            "icon",
+            "competition_participation",
+            "competition_participation__competition",
+            "competition_participation__bot",
             "bot",
+            "icon",
         ).order_by("id")
 
         if trophy_ids:
@@ -238,12 +243,33 @@ class Command(BaseCommand):
                     counters["competition_matched"] += 1
                 else:
                     counters["competition_unmatched"] += 1
-
                     competition_unmatched.append(trophy)
 
-                if competition and (overwrite or trophy.competition_id is None):
-                    if trophy.competition_id != competition.id:
-                        changes["competition"] = competition
+                competition_participation = None
+
+                if competition:
+                    competition_participation = (
+                        CompetitionParticipation.objects.filter(
+                            competition=competition,
+                            bot_id=trophy.bot_id,
+                        ).first()
+                    )
+
+                    if competition_participation:
+                        counters["competition_participation_matched"] += 1
+                    else:
+                        counters["competition_participation_unmatched"] += 1
+
+                if competition_participation and (
+                    overwrite or trophy.competition_participation_id is None
+                ):
+                    if (
+                        trophy.competition_participation_id
+                        != competition_participation.id
+                    ):
+                        changes["competition_participation"] = (
+                            competition_participation
+                        )
 
                 if not changes:
                     counters["unchanged"] += 1
@@ -289,6 +315,16 @@ class Command(BaseCommand):
         self.stdout.write(f"Competition matched: {counters['competition_matched']}")
 
         self.stdout.write(f"Competition unmatched: {counters['competition_unmatched']}")
+
+        self.stdout.write(
+            "Competition participation matched: "
+            f"{counters['competition_participation_matched']}"
+        )
+
+        self.stdout.write(
+            "Competition participation unmatched: "
+            f"{counters['competition_participation_unmatched']}"
+        )
 
         if condition_unmatched:
             self.stdout.write("")

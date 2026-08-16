@@ -686,35 +686,40 @@ class TrophyAdminForm(forms.ModelForm):
 @admin.register(Trophy)
 class TrophyAdmin(admin.ModelAdmin):
     form = TrophyAdminForm
+
     list_display = (
         "id",
         "bot",
         "name",
         "condition",
         "icon",
-        "competition",
+        "competition_participation",
     )
+
     list_filter = (
-        "competition",
+        "competition_participation__competition",
         "condition",
         "icon",
     )
+
     search_fields = (
         "name",
         "bot__name",
-        "competition__name",
+        "competition_participation__competition__name",
     )
+
     list_select_related = (
         "bot",
         "icon",
-        "competition",
+        "competition_participation",
+        "competition_participation__competition",
     )
+
     autocomplete_fields = (
         "bot",
         "icon",
-        "competition",
+        "competition_participation",
     )
-
 
 @admin.register(TrophyIcon)
 class TrophyIconAdmin(admin.ModelAdmin):

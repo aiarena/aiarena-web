@@ -12,6 +12,7 @@ import pytest
 from aiarena.core.models import (
     AwardSet,
     AwardSetItem,
+    CompetitionParticipation,
     Trophy,
     TrophyIcon,
 )
@@ -111,25 +112,25 @@ def configure_competition(
 
 def mock_rankings(
     monkeypatch,
+    competition,
     bots,
 ):
     """
-    Trophy calculation only needs bot_id and bot from each ranked
-    participation, so tests do not need to construct an entire
-    historical ladder dataset.
+    Create real CompetitionParticipation rows and make the trophy service
+    use them as the ranked competition results.
     """
     participations = [
-        SimpleNamespace(
-            bot_id=bot.id,
+        CompetitionParticipation.objects.get_or_create(
+            competition=competition,
             bot=bot,
-        )
+        )[0]
         for bot in bots
     ]
 
     monkeypatch.setattr(
         _competition_trophies,
         "get_ranked_participations",
-        lambda competition: participations,
+        lambda requested_competition: participations,
     )
 
     return participations
@@ -150,6 +151,7 @@ def make_participation(
     )
 
     return SimpleNamespace(
+        id=bot_id,
         bot_id=bot_id,
         bot=bot,
     )
@@ -528,10 +530,17 @@ def test_build_expected_trophies_includes_placement_and_race_awards(
         ],
     )
 
-    assert [(trophy.bot_name, trophy.condition) for trophy in expected] == [
-        ("BestZerg", TrophyCondition.FIRST_PLACE),
-        ("BestZerg", TrophyCondition.BEST_ZERG),
-        ("BestProtoss", TrophyCondition.BEST_PROTOSS),
+    assert [
+        (
+            trophy.competition_participation_id,
+            trophy.bot_name,
+            trophy.condition,
+        )
+        for trophy in expected
+    ] == [
+        (1001, "BestZerg", TrophyCondition.FIRST_PLACE),
+        (1001, "BestZerg", TrophyCondition.BEST_ZERG),
+        (1002, "BestProtoss", TrophyCondition.BEST_PROTOSS),
     ]
 
 
@@ -690,6 +699,7 @@ class TestCheckCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [
                 bot,
                 other_bot,
@@ -741,12 +751,18 @@ class TestCheckCompetitionTrophies(GraphQLTest):
         # Only bot participates.
         mock_rankings(
             monkeypatch,
+            competition,
             [bot],
+        )
+
+        other_participation = CompetitionParticipation.objects.get(
+            competition=competition,
+            bot=other_bot,
         )
 
         wrong_trophy = Trophy.objects.create(
             bot=other_bot,
-            competition=competition,
+            competition_participation=other_participation,
             condition=TrophyCondition.TOP_10,
             icon=awards.top_10_icon,
             name=f"Top 10 - {competition.name}",
@@ -784,7 +800,7 @@ class TestCheckCompetitionTrophies(GraphQLTest):
         assert incorrect["competitionId"] == str(competition.id)
         assert incorrect["competitionName"] == competition.name
 
-        assert incorrect["participated"] is False
+        assert incorrect["participated"] is True
         assert incorrect["placement"] is None
 
     def test_check_propagates_trophy_configuration_error(
@@ -800,6 +816,7 @@ class TestCheckCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [],
         )
 
@@ -927,6 +944,56 @@ class TestCheckCompetitionTrophies(GraphQLTest):
             ],
         )
 
+    def test_check_ignores_bot_trophy_without_competition_participation(
+        self,
+        user,
+        competition,
+        bot,
+        monkeypatch,
+    ):
+        admin = make_admin(user)
+
+        configure_competition(
+            competition,
+            status="closed",
+        )
+
+        mock_rankings(
+            monkeypatch,
+            competition,
+            [bot],
+        )
+
+        legacy_trophy = Trophy.objects.create(
+            bot=bot,
+            competition_participation=None,
+            condition=TrophyCondition.CUSTOM,
+            name="Legacy bot trophy",
+        )
+
+        response = self.mutate(
+            login_user=admin,
+            variables={
+                "input": {
+                    "competition": self.to_global_id(
+                        CompetitionType,
+                        competition.id,
+                    ),
+                }
+            },
+        )
+
+        result = response["checkCompetitionTrophies"]
+
+        assert result["status"] == "NOT_AWARDED"
+        assert result["existingTrophyCount"] == 0
+        assert result["missingTrophyCount"] == 1
+        assert result["incorrectTrophyCount"] == 0
+
+        legacy_trophy.refresh_from_db()
+        assert legacy_trophy.bot == bot
+        assert legacy_trophy.competition_participation is None
+
     def test_check_marks_awards_given_when_all_trophies_are_correct(
         self,
         user,
@@ -943,12 +1010,18 @@ class TestCheckCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [bot],
+        )
+
+        participation = CompetitionParticipation.objects.get(
+            competition=competition,
+            bot=bot,
         )
 
         Trophy.objects.create(
             bot=bot,
-            competition=competition,
+            competition_participation=participation,
             condition=TrophyCondition.FIRST_PLACE,
             icon=awards.first_icon,
             name=f"1st Place - {competition.name}",
@@ -1017,13 +1090,14 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [
                 bot,
                 other_bot,
             ],
         )
 
-        assert not Trophy.objects.filter(competition=competition).exists()
+        assert not Trophy.objects.filter(competition_participation__competition=competition).exists()
 
         response = self.mutate(
             login_user=admin,
@@ -1044,22 +1118,26 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert result["createdTrophyCount"] == 2
         assert result["deletedTrophyCount"] == 0
 
-        trophies = Trophy.objects.filter(competition=competition).order_by("condition")
+        trophies = Trophy.objects.filter(competition_participation__competition=competition).order_by("condition")
 
         assert trophies.count() == 2
 
         first = Trophy.objects.get(
-            competition=competition,
-            bot=bot,
+            competition_participation__competition=competition,
+            competition_participation__bot=bot,
         )
+        assert first.bot == bot
+        assert first.competition_participation.bot == bot
         assert first.condition == TrophyCondition.FIRST_PLACE
         assert first.icon == awards.first_icon
         assert first.name == (f"1st Place - {competition.name}")
 
         second = Trophy.objects.get(
-            competition=competition,
-            bot=other_bot,
+            competition_participation__competition=competition,
+            competition_participation__bot=other_bot,
         )
+        assert second.bot == other_bot
+        assert second.competition_participation.bot == other_bot
         assert second.condition == TrophyCondition.SECOND_PLACE
         assert second.icon == awards.second_icon
 
@@ -1083,6 +1161,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [
                 bot,
                 other_bot,
@@ -1090,9 +1169,14 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         )
 
         # Bot is rank 1 but has the wrong trophy.
+        bot_participation = CompetitionParticipation.objects.get(
+            competition=competition,
+            bot=bot,
+        )
+
         incorrect = Trophy.objects.create(
             bot=bot,
-            competition=competition,
+            competition_participation=bot_participation,
             condition=TrophyCondition.TOP_10,
             icon=awards.top_10_icon,
             name=f"Top 10 - {competition.name}",
@@ -1100,8 +1184,8 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         # Rank 2 has no trophy at all.
         assert not Trophy.objects.filter(
-            bot=other_bot,
-            competition=competition,
+            competition_participation__bot=other_bot,
+            competition_participation__competition=competition,
         ).exists()
 
         response = self.mutate(
@@ -1132,8 +1216,8 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         assert (
             Trophy.objects.filter(
-                competition=competition,
-                bot=bot,
+                competition_participation__competition=competition,
+                competition_participation__bot=bot,
                 condition=TrophyCondition.FIRST_PLACE,
                 icon=awards.first_icon,
             ).count()
@@ -1142,8 +1226,8 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         assert (
             Trophy.objects.filter(
-                competition=competition,
-                bot=other_bot,
+                competition_participation__competition=competition,
+                competition_participation__bot=other_bot,
                 condition=TrophyCondition.SECOND_PLACE,
                 icon=awards.second_icon,
             ).count()
@@ -1152,6 +1236,61 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         competition.refresh_from_db()
         assert competition.awards_given is True
+
+    def test_does_not_touch_bot_trophy_without_competition_participation(
+        self,
+        user,
+        competition,
+        bot,
+        monkeypatch,
+    ):
+        admin = make_admin(user)
+
+        configure_competition(
+            competition,
+            status="closed",
+        )
+
+        mock_rankings(
+            monkeypatch,
+            competition,
+            [bot],
+        )
+
+        legacy_trophy = Trophy.objects.create(
+            bot=bot,
+            competition_participation=None,
+            condition=TrophyCondition.CUSTOM,
+            name="Legacy bot trophy",
+        )
+
+        response = self.mutate(
+            login_user=admin,
+            variables={
+                "input": {
+                    "competition": self.to_global_id(
+                        CompetitionType,
+                        competition.id,
+                    ),
+                }
+            },
+        )
+
+        result = response["awardCompetitionTrophies"]
+
+        assert result["success"] is True
+
+        legacy_trophy.refresh_from_db()
+        assert legacy_trophy.bot == bot
+        assert legacy_trophy.competition_participation is None
+        assert legacy_trophy.condition == TrophyCondition.CUSTOM
+
+        competition_trophies = Trophy.objects.filter(
+            competition_participation__competition=competition,
+        )
+
+        assert competition_trophies.count() == 1
+        assert competition_trophies.get().bot == bot
 
     def test_does_not_touch_trophies_from_other_competitions(
         self,
@@ -1171,6 +1310,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [bot],
         )
 
@@ -1185,9 +1325,14 @@ class TestAwardCompetitionTrophies(GraphQLTest):
             image="trophy_images/unrelated.png",
         )
 
+        unrelated_participation = CompetitionParticipation.objects.create(
+            competition=other_competition,
+            bot=bot,
+        )
+
         unrelated_trophy = Trophy.objects.create(
             bot=bot,
-            competition=other_competition,
+            competition_participation=unrelated_participation,
             condition=TrophyCondition.CUSTOM,
             icon=unrelated_icon,
             name="Some completely unrelated trophy",
@@ -1209,9 +1354,73 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         # belonging to a different competition.
         unrelated_trophy.refresh_from_db()
 
-        assert unrelated_trophy.competition == other_competition
+        assert unrelated_trophy.bot == bot
+        assert unrelated_trophy.competition_participation == unrelated_participation
+        assert unrelated_trophy.competition_participation.bot == bot
+        assert unrelated_trophy.competition_participation.competition == other_competition
         assert unrelated_trophy.condition == TrophyCondition.CUSTOM
         assert unrelated_trophy.icon == unrelated_icon
+
+    def test_award_replaces_trophy_when_bot_does_not_match_participation(
+        self,
+        user,
+        competition,
+        bot,
+        other_bot,
+        monkeypatch,
+    ):
+        admin = make_admin(user)
+
+        awards = configure_competition(
+            competition,
+            status="closed",
+        )
+
+        mock_rankings(
+            monkeypatch,
+            competition,
+            [bot],
+        )
+
+        participation = CompetitionParticipation.objects.get(
+            competition=competition,
+            bot=bot,
+        )
+
+        mismatched_trophy = Trophy.objects.create(
+            bot=other_bot,
+            competition_participation=participation,
+            condition=TrophyCondition.FIRST_PLACE,
+            icon=awards.first_icon,
+            name=f"1st Place - {competition.name}",
+        )
+
+        response = self.mutate(
+            login_user=admin,
+            variables={
+                "input": {
+                    "competition": self.to_global_id(
+                        CompetitionType,
+                        competition.id,
+                    ),
+                }
+            },
+        )
+
+        result = response["awardCompetitionTrophies"]
+
+        assert result["success"] is True
+        assert result["deletedTrophyIds"] == [str(mismatched_trophy.id)]
+        assert result["createdTrophyCount"] == 1
+
+        corrected_trophy = Trophy.objects.get(
+            competition_participation=participation,
+            condition=TrophyCondition.FIRST_PLACE,
+        )
+
+        assert corrected_trophy.bot == bot
+        assert corrected_trophy.competition_participation.bot == bot
+        assert corrected_trophy.icon == awards.first_icon
 
     def test_repeated_award_request_does_not_duplicate_trophies(
         self,
@@ -1229,6 +1438,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [bot],
         )
 
@@ -1248,7 +1458,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         assert first_response["awardCompetitionTrophies"]["createdTrophyCount"] == 1
 
-        assert Trophy.objects.filter(competition=competition).count() == 1
+        assert Trophy.objects.filter(competition_participation__competition=competition).count() == 1
 
         second_response = self.mutate(
             login_user=admin,
@@ -1262,7 +1472,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert second["deletedTrophyCount"] == 0
 
         # Most important assertion: no duplicate trophy.
-        assert Trophy.objects.filter(competition=competition).count() == 1
+        assert Trophy.objects.filter(competition_participation__competition=competition).count() == 1
 
     def test_non_admin_cannot_award(
         self,
@@ -1363,6 +1573,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [bot],
         )
 
@@ -1390,7 +1601,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert result["message"] == "The competition does not have an award set."
 
         assert not Trophy.objects.filter(
-            competition=competition
+            competition_participation__competition=competition
         ).exists()
 
         competition.refresh_from_db()
@@ -1415,6 +1626,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         mock_rankings(
             monkeypatch,
+            competition,
             [bot],
         )
 
@@ -1443,7 +1655,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert result["success"] is False
         assert result["message"] == COMPETITION_CLOSED_MESSAGE
 
-        assert not Trophy.objects.filter(competition=competition).exists()
+        assert not Trophy.objects.filter(competition_participation__competition=competition).exists()
 
         competition.refresh_from_db()
         assert competition.awards_given is False

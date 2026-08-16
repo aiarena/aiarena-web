@@ -3,7 +3,7 @@ import logging
 from django.db import models
 
 from .bot import Bot
-from .competition import Competition
+from .competition_participation import CompetitionParticipation
 from .trophy_icon import TrophyIcon
 
 
@@ -30,7 +30,7 @@ class TrophyCondition(models.TextChoices):
 
 
 class Trophy(models.Model):
-    """An award given to bots."""
+    """An award given to a bot, optionally tied to a competition participation."""
 
     icon = models.ForeignKey(
         TrophyIcon,
@@ -49,13 +49,14 @@ class Trophy(models.Model):
         max_length=64,
     )
 
-    competition = models.ForeignKey(
-        Competition,
-        on_delete=models.PROTECT,
+    competition_participation = models.ForeignKey(
+        CompetitionParticipation,
+        on_delete=models.SET_NULL,
         related_name="trophies",
         blank=True,
         null=True,
     )
+
 
     condition = models.CharField(
         max_length=64,

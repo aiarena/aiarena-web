@@ -38,7 +38,7 @@ from aiarena.core.models.trophy import TrophyCondition
 class Command(BaseCommand):
     help = (
         "Conservatively derive competition AwardSets from existing "
-        "competition trophies and their condition-to-icon mappings."
+        "competition participation trophies and their condition-to-icon mappings."
     )
 
     # Historical Trophy.condition values that are equivalent to current
@@ -122,14 +122,16 @@ class Command(BaseCommand):
 
         trophies = (
             Trophy.objects.filter(
-                competition__in=competitions,
+                competition_participation__competition__in=competitions,
             )
             .select_related(
-                "competition",
+                "competition_participation",
+                "competition_participation__competition",
+                "competition_participation__bot",
                 "icon",
             )
             .order_by(
-                "competition_id",
+                "competition_participation__competition_id",
                 "condition",
                 "id",
             )
@@ -138,7 +140,9 @@ class Command(BaseCommand):
         trophies_by_competition = defaultdict(list)
 
         for trophy in trophies:
-            trophies_by_competition[trophy.competition_id].append(trophy)
+            trophies_by_competition[
+                trophy.competition_participation.competition_id
+            ].append(trophy)
 
         existing_sets_by_signature = self.get_existing_award_sets_by_signature()
 
@@ -294,7 +298,7 @@ class Command(BaseCommand):
         trophies,
     ):
         """
-        Analyze all trophies for one competition.
+        Analyze all trophies belonging to participations in one competition.
 
         This function deliberately rejects the entire competition if any
         linked trophy cannot be interpreted safely.
