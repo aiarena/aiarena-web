@@ -581,8 +581,8 @@ class IncorrectCompetitionTrophyType(graphene.ObjectType):
     icon_name = graphene.String()
     icon_image = graphene.String()
 
-    competition_id = graphene.ID(required=True)
-    competition_name = graphene.String(required=True)
+    competition_id = graphene.ID()
+    competition_name = graphene.String()
 
     participated = graphene.Boolean(required=True)
     placement = graphene.Int()
@@ -611,7 +611,7 @@ class CheckCompetitionTrophies(CleanedInputMutation):
     )
     message = graphene.String(required=True)
 
-    awards_given = graphene.Boolean(required=True)
+    awards_given = graphene.DateTime()
 
     expected_trophy_count = graphene.Int(required=True)
     existing_trophy_count = graphene.Int(required=True)
@@ -731,7 +731,7 @@ class AwardCompetitionTrophies(CleanedInputMutation):
     success = graphene.Boolean(required=True)
     message = graphene.String(required=True)
 
-    awards_given = graphene.Boolean(required=True)
+    awards_given = graphene.DateTime()
 
     created_trophy_count = graphene.Int(required=True)
     deleted_trophy_count = graphene.Int(required=True)

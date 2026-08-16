@@ -98,7 +98,7 @@ def configure_competition(
 
     competition.status = status
     competition.award_set = awards.award_set
-    competition.awards_given = False
+    competition.awards_given = None
     competition.save(
         update_fields=[
             "status",
@@ -1028,7 +1028,7 @@ class TestCheckCompetitionTrophies(GraphQLTest):
             name=f"1st Place - {competition.name}",
         )
 
-        assert competition.awards_given is False
+        assert competition.awards_given is None
 
         response = self.mutate(
             login_user=admin,
@@ -1047,7 +1047,7 @@ class TestCheckCompetitionTrophies(GraphQLTest):
         assert result["status"] == "AWARDED"
 
         competition.refresh_from_db()
-        assert competition.awards_given is True
+        assert competition.awards_given is not None
 
 
 class TestAwardCompetitionTrophies(GraphQLTest):
@@ -1143,7 +1143,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert second.icon == awards.second_icon
 
         competition.refresh_from_db()
-        assert competition.awards_given is True
+        assert competition.awards_given is not None
 
     def test_award_removes_incorrect_and_creates_correct(
         self,
@@ -1236,7 +1236,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         )
 
         competition.refresh_from_db()
-        assert competition.awards_given is True
+        assert competition.awards_given is not None
 
     def test_does_not_touch_bot_trophy_without_competition_participation(
         self,
@@ -1501,7 +1501,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert Trophy.objects.count() == before
 
         competition.refresh_from_db()
-        assert competition.awards_given is False
+        assert competition.awards_given is None
 
     def test_anonymous_cannot_award(
         self,
@@ -1527,7 +1527,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert Trophy.objects.count() == before
 
         competition.refresh_from_db()
-        assert competition.awards_given is False
+        assert competition.awards_given is None
 
     def test_invalid_competition_id_cannot_mutate_data(
         self,
@@ -1563,7 +1563,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
 
         competition.status = "closed"
         competition.award_set = None
-        competition.awards_given = False
+        competition.awards_given = None
         competition.save(
             update_fields=[
                 "status",
@@ -1604,7 +1604,7 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert not Trophy.objects.filter(competition_participation__competition=competition).exists()
 
         competition.refresh_from_db()
-        assert competition.awards_given is False
+        assert competition.awards_given is None
 
     def test_open_competition_cannot_be_awarded(
         self,
@@ -1657,4 +1657,4 @@ class TestAwardCompetitionTrophies(GraphQLTest):
         assert not Trophy.objects.filter(competition_participation__competition=competition).exists()
 
         competition.refresh_from_db()
-        assert competition.awards_given is False
+        assert competition.awards_given is None

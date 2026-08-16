@@ -241,7 +241,7 @@ class CompetitionType(DjangoObjectTypeWithUID):
     wiki_article = graphene.String()
 
     award_set = graphene.Field("aiarena.graphql.AwardSetType")
-    awards_given = graphene.Boolean(required=True)
+    awards_given = graphene.DateTime()
 
     class Meta:
         model = models.Competition

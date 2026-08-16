@@ -11,7 +11,6 @@ import TrophyStatusMessage from "./TrophyStatusMessage";
 import useCompetitionTrophyActions from "./useCompetitionTrophyActions";
 import { CompetitionDetail } from "./utils/CompetitionDetail";
 import { StatusBadge } from "./utils/StatusBadge.";
-import { BooleanBadge } from "./utils/BooleanBadge";
 import { formatDateTime } from "./utils/formatDateTime";
 
 interface CompetitionTrophyModalProps {
@@ -113,15 +112,14 @@ export default function CompetitionTrophyModal({
               value={competition.awardSet?.name ?? "Not assigned"}
             />
 
-            <div>
-              <dt className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                Awards given
-              </dt>
-
-              <dd className="mt-2">
-                <BooleanBadge value={competition.awardsGiven} />
-              </dd>
-            </div>
+            <CompetitionDetail
+              label="Awards given"
+              value={
+                competition.awardsGiven
+                  ? formatDateTime(competition.awardsGiven)
+                  : "Not awarded"
+              }
+            />
 
             <CompetitionDetail
               label="Created"
@@ -202,7 +200,8 @@ export default function CompetitionTrophyModal({
 
           {competition.awardsGiven && (
             <p className="mt-3 text-center text-xs text-gray-400">
-              Trophy awards have already been recorded for this competition.
+              Trophy awards were recorded{" "}
+              {formatDateTime(competition.awardsGiven)}.
             </p>
           )}
         </section>

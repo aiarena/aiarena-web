@@ -3,6 +3,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from django.db import transaction
+from django.utils import timezone
 
 from aiarena.core.models import Competition, CompetitionParticipation, Trophy
 from aiarena.core.models.trophy import TrophyCondition
@@ -649,9 +650,8 @@ def check_competition_trophies(
         )
 
     # All expected trophies exist and are correct.
-    # Keep awards_given synchronized with actual trophy state.
-    if not competition.awards_given:
-        competition.awards_given = True
+    if competition.awards_given is None:
+        competition.awards_given = timezone.now()
         competition.save(update_fields=["awards_given"])
 
     return CompetitionTrophyCheckReport(
@@ -707,7 +707,7 @@ def award_competition_trophies(
     - Deletes trophies identified as incorrect.
     - Creates trophies identified as missing.
     - Leaves correct trophies unchanged.
-    - Marks awards_given=True after reconciliation.
+    - Sets awards_given to the award timestamp after reconciliation.
     """
     locked_competition = Competition.objects.select_for_update().get(pk=competition.pk)
 
@@ -761,10 +761,8 @@ def award_competition_trophies(
     if final_report.status != "AWARDED":
         raise CompetitionTrophyAwardError("Trophy reconciliation did not produce a valid awarded state.")
 
-    # check_competition_trophies() normally updates this,
-    # but retain the explicit guarantee here too.
-    if not locked_competition.awards_given:
-        locked_competition.awards_given = True
+    if locked_competition.awards_given is None:
+        locked_competition.awards_given = timezone.now()
         locked_competition.save(update_fields=["awards_given"])
 
     return CompetitionTrophyAwardReport(

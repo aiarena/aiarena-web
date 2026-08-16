@@ -46,7 +46,10 @@ class Competition(models.Model, LockableModelMixin):
         blank=True,
         null=True,
     )
-    awards_given = models.BooleanField(default=False)
+    awards_given = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
 
     max_active_rounds = models.IntegerField(default=2, blank=True)
     wiki_article = models.OneToOneField(Article, on_delete=models.PROTECT, blank=True, null=True)

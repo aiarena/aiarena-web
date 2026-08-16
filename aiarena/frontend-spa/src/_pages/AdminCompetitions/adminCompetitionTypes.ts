@@ -39,8 +39,8 @@ export type IncorrectTrophy = {
   readonly iconName: string | null;
   readonly iconImage: string | null;
 
-  readonly competitionId: string;
-  readonly competitionName: string;
+  readonly competitionId: string | null;
+  readonly competitionName: string | null;
 
   readonly participated: boolean;
   readonly placement: number | null;

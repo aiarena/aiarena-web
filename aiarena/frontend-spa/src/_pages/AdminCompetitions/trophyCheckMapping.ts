@@ -58,8 +58,8 @@ export function mapTrophyCheckPayload(
           iconName: trophy.iconName ?? null,
           iconImage: trophy.iconImage ?? null,
 
-          competitionId: trophy.competitionId,
-          competitionName: trophy.competitionName,
+          competitionId: trophy.competitionId ?? null,
+          competitionName: trophy.competitionName ?? null,
 
           participated: trophy.participated,
           placement: trophy.placement ?? null,

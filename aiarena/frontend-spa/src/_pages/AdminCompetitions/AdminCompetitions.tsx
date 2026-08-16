@@ -11,7 +11,6 @@ import { AdminCompetition, TrophyCheckResult } from "./adminCompetitionTypes";
 import { AdminCompetitionsQuery } from "./__generated__/AdminCompetitionsQuery.graphql";
 import { StatusBadge } from "./utils/StatusBadge.";
 import { DateValue } from "./utils/DateValue";
-import { BooleanBadge } from "./utils/BooleanBadge";
 
 const EMPTY_CHECK_RESULT: TrophyCheckResult = {
   status: "idle",
@@ -77,7 +76,7 @@ export default function AdminCompetitions() {
 
     setSelectedCompetition({
       ...selectedCompetition,
-      awardsGiven: true,
+      awardsGiven: new Date().toISOString(),
     });
   };
 
@@ -175,8 +174,12 @@ export default function AdminCompetitions() {
                       )}
                     </td>
 
-                    <td className="px-5 py-4">
-                      <BooleanBadge value={competition.awardsGiven} />
+                    <td className="whitespace-nowrap px-5 py-4 text-sm text-neutral-300">
+                      {competition.awardsGiven ? (
+                        <DateValue value={competition.awardsGiven} />
+                      ) : (
+                        <span className="text-neutral-500">Not awarded</span>
+                      )}
                     </td>
 
                     <td className="px-5 py-4 text-right">
