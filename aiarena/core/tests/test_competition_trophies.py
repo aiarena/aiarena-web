@@ -748,14 +748,15 @@ class TestCheckCompetitionTrophies(GraphQLTest):
             status="closed",
         )
 
-        # Only bot participates.
+        # Only bot appears in the current rankings, but other_bot has a
+        # historical participation in this competition.
         mock_rankings(
             monkeypatch,
             competition,
             [bot],
         )
 
-        other_participation = CompetitionParticipation.objects.get(
+        other_participation = CompetitionParticipation.objects.create(
             competition=competition,
             bot=other_bot,
         )

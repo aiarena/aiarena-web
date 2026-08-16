@@ -568,6 +568,7 @@ def check_competition_trophies(
             duplicate_ids = [trophy.id for trophy in matching_trophies]
 
             incorrect_trophy_records.extend(matching_trophies)
+            missing_trophies.append(expected)
 
             issues.append(
                 f"{expected.bot_name} has duplicate "
@@ -577,9 +578,11 @@ def check_competition_trophies(
             continue
 
         trophy = matching_trophies[0]
+        needs_replacement = False
 
         if trophy.bot_id != expected.bot_id:
             incorrect_trophy_records.append(trophy)
+            needs_replacement = True
 
             issues.append(
                 f"Trophy {trophy.id} is linked to bot "
@@ -590,6 +593,7 @@ def check_competition_trophies(
 
         if trophy.icon_id != expected.icon_id:
             incorrect_trophy_records.append(trophy)
+            needs_replacement = True
 
             actual_icon = trophy.icon.name if trophy.icon else "no icon"
 
@@ -599,6 +603,9 @@ def check_competition_trophies(
                 f"'{actual_icon}', but "
                 f"'{expected.icon_name}' is expected."
             )
+
+        if needs_replacement:
+            missing_trophies.append(expected)
 
     for key, trophies in existing_by_key.items():
         if key in expected_by_key:
