@@ -28,8 +28,9 @@ import WinsByTime from "./_pages/Rework/CompetitionParticipation/Pages/WinsByTim
 import CompetitionParticipationSideNav from "./_pages/Rework/CompetitionParticipation/CompetitionParticipationSideNav";
 import CompetitionParticipationTopNav from "./_components/_nav/CompetitionParticipationTopNav";
 import Matchups from "./_pages/Rework/CompetitionParticipation/Pages/Matchups";
-import AdminStats from "./_pages/AdminStats/AdminStats";
-import AdminCompetitions from "./_pages/AdminCompetitions/AdminCompetitions";
+import AdminLayout from "./AdminLayout";
+import AdminStatsPage from "./_pages/AdminStats/AdminStatsPage";
+import AdminCompetitionsPage from "./_pages/AdminCompetitions/AdminCompetitionsPage";
 
 export default function App() {
   return (
@@ -77,8 +78,11 @@ export default function App() {
           <Route path="maps" element={<Maps />} />
           <Route path="matchups" element={<Matchups />} />
         </Route>
-        <Route path="adminstats" element={<AdminStats />} />
-        <Route path="admincompetitions" element={<AdminCompetitions />} />
+        <Route path="management" element={<AdminLayout />}>
+          <Route index element={<Navigate to="statistics" replace />} />
+          <Route path="statistics" element={<AdminStatsPage />} />
+          <Route path="competitions" element={<AdminCompetitionsPage />} />
+        </Route>
       </Route>
 
       <Route element={<DashboardLayout />} path="dashboard">

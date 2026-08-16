@@ -1681,6 +1681,7 @@ class Viewer(graphene.ObjectType):
     last_name = graphene.String()
     linked_discord = graphene.Boolean()
     linked_patreon = graphene.Boolean()
+    is_superuser = graphene.Boolean(required=True)
 
     @staticmethod
     def resolve_id(root: models.User, info, **args):
@@ -1751,6 +1752,10 @@ class Viewer(graphene.ObjectType):
     @staticmethod
     def resolve_linked_patreon(root: models.User, info):
         return getattr(root, "patreonaccountbind", None) is not None
+
+    @staticmethod
+    def resolve_is_superuser(root: models.User, info):
+        return root.is_superuser
 
 
 class Query(graphene.ObjectType):

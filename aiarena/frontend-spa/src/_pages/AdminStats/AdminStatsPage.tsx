@@ -1,21 +1,17 @@
-import { Suspense } from "react";
-
 import AdminStats from "./AdminStats";
-import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function AdminStatsPage() {
   return (
-    <ErrorBoundaryWrapper>
-      <Suspense fallback={<DisplaySkeleton height={558} />}>
-        <div className="flex flex-col gap-6">
-          <h1 className="text-2xl font-semibold text-neutral-100">
-            Admin statistics
-          </h1>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="text-xl font-semibold text-neutral-100">Statistics</h2>
 
-          <AdminStats />
-        </div>
-      </Suspense>
-    </ErrorBoundaryWrapper>
+        <p className="mt-1 text-sm text-neutral-400">
+          Usage, registrations, supporter activity, and platform statistics.
+        </p>
+      </div>
+
+      <AdminStats />
+    </div>
   );
 }
