@@ -1,16 +1,10 @@
 import { graphql, useFragment } from "react-relay";
 
-import type {
-  // CompetitionCard_competition$data,
-  CompetitionCard_competition$key,
-} from "./__generated__/CompetitionCard_competition.graphql";
+import type { CompetitionCard_competition$key } from "./__generated__/CompetitionCard_competition.graphql";
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import clsx from "clsx";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
-// import CompetitionParticipantCount from "@/_components/_display/CompetitionParticipantCount";
-// import { Suspense } from "react";
-// import LoadingDots from "@/_components/_display/LoadingDots";
 import { Link } from "react-router";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 
@@ -37,22 +31,6 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
     `,
     data,
   );
-
-  // function getGame(competition: CompetitionCard_competition$data) {
-  //   if (competition.game === "StarCraft II") return "starcraft";
-  //   return "starcraft";
-  // }
-  // function getMode(competition: CompetitionCard_competition$data) {
-  //   if (competition.gameMode === "Melee") return "melee";
-  //   if (competition.gameMode === "Micro") return "micro";
-
-  //   return "melee";
-  // }
-  // function getCompetitionImage(competition: CompetitionCard_competition$data) {
-  //   return `${getGame(competition)}_${getMode(competition)}.webp`;
-  // }
-
-  // const imgSrc = `${getPublicPrefix()}/competitions/${getCompetitionImage(competition)}`;
 
   function GenerateCompetitionImage() {
     return (
@@ -81,7 +59,6 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
       <div id="image" className="col-span-1 m-4 lg:p-0 md:p-8 p-2">
         <GenerateCompetitionImage />
       </div>
-
       <div id="content" className="col-span-2 flex min-w-0 gap-8">
         <div id="competition_metadata" className="w-full pl-4">
           <div>
@@ -108,12 +85,6 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
             </div>
 
             <div id="populated_stats" className="text-gray-300 ml-2">
-              {/* <div className="flex items-center gap-2">
-                <span className="text-gray-400">Bots:</span>
-                <Suspense fallback={<LoadingDots />}>
-                  <CompetitionParticipantCount competitionId={competition.id} />
-                </Suspense>
-              </div> */}
               <p>
                 <span className="text-gray-400">Round:</span>{" "}
                 <span className="text-white">
@@ -128,9 +99,10 @@ export default function CompetitionCard({ data }: CompetitionCardProps) {
           </div>
         </div>
       </div>
-
       {/* Col 4 reserved for new feature */}
-      <div id="leaderboards" className="col-span-1"></div>
+      <div className="col-span-1 flex items-end justify-end p-4">
+        <span className="text-sm ">View Competition &rarr;</span>
+      </div>
     </Link>
   );
 }

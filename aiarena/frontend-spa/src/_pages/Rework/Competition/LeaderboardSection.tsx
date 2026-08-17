@@ -14,25 +14,26 @@ import LoadingDots from "@/_components/_display/LoadingDots";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
-import {
-  RankingsSection_competition$data,
-  RankingsSection_competition$key,
-} from "./__generated__/RankingsSection_competition.graphql";
+
 import EloTrendIcon from "@/_components/_display/EloTrendIcon";
 import BotIcon from "@/_components/_display/BotIcon";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import { Link } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
+import {
+  LeaderboardSection_competition$data,
+  LeaderboardSection_competition$key,
+} from "./__generated__/LeaderboardSection_competition.graphql";
 
-interface RankingsSectionProps {
-  competition: RankingsSection_competition$key;
+interface LeaderboardSectionProps {
+  competition: LeaderboardSection_competition$key;
 }
 
 type ParticipationType = NonNullable<
   NonNullable<
     NonNullable<
-      RankingsSection_competition$data["participants"]
+      LeaderboardSection_competition$data["participants"]
     >["edges"][number]
   >["node"]
 >;
@@ -48,24 +49,26 @@ type DivisionHeaderRow = {
   id: string;
 };
 
-export type RankingsRow = ParticipantRow | DivisionHeaderRow;
+export type LeaderboardRow = ParticipantRow | DivisionHeaderRow;
 
-export default function RankingsSection({ competition }: RankingsSectionProps) {
+export default function LeaderboardSection({
+  competition,
+}: LeaderboardSectionProps) {
   const [columnVisibility, setColumnVisibility] =
     useStateWithLocalStorage<VisibilityState>(
-      "Competition_RankingsSection_ColumnVisibility",
+      "Competition_LeaderboardSection_ColumnVisibility",
       {},
     );
   const { data, loadNext, hasNext } = usePaginationFragment(
     graphql`
-      fragment RankingsSection_competition on CompetitionType
-      @refetchable(queryName: "CompetitionRankingsPaginationQuery")
+      fragment LeaderboardSection_competition on CompetitionType
+      @refetchable(queryName: "CompetitionLeaderboardPaginationQuery")
       @argumentDefinitions(
         cursor: { type: "String" }
         first: { type: "Int", defaultValue: 50 }
       ) {
         participants(first: $first, after: $cursor)
-          @connection(key: "RankingsSection_competition_participants") {
+          @connection(key: "LeaderboardSection_competition_participants") {
           edges {
             node {
               divisionNum
@@ -96,19 +99,19 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
     competition,
   );
 
-  const rankingsData = useMemo(
+  const LeaderboardData = useMemo(
     () => getNodes<ParticipationType>(data?.participants),
     [data],
   );
 
-  const tableData: RankingsRow[] = useMemo(() => {
-    if (!rankingsData) return [];
+  const tableData: LeaderboardRow[] = useMemo(() => {
+    if (!LeaderboardData) return [];
 
-    const result: RankingsRow[] = [];
+    const result: LeaderboardRow[] = [];
     let lastDivision: number | null = null;
     let rank = 0;
 
-    for (const row of rankingsData) {
+    for (const row of LeaderboardData) {
       const division = row.divisionNum ?? null;
 
       if (division !== lastDivision) {
@@ -129,9 +132,9 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
     }
 
     return result;
-  }, [rankingsData]);
+  }, [LeaderboardData]);
 
-  const columnHelper = useMemo(() => createColumnHelper<RankingsRow>(), []);
+  const columnHelper = useMemo(() => createColumnHelper<LeaderboardRow>(), []);
   const columns = useMemo(
     () => [
       columnHelper.display({
@@ -158,7 +161,9 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           const bot = original.bot;
 
           const label = bot.name ?? "";
-          const href = reverseUrl("bot", { pk: getIDFromBase64(bot.id, "BotType") });
+          const href = reverseUrl("bot", {
+            pk: getIDFromBase64(bot.id, "BotType"),
+          });
           const aria = `View bot profile for ${bot.name}`;
 
           return (
@@ -238,7 +243,9 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
           const user = original.bot.user;
 
           const label = "";
-          const href = reverseUrl("author", { pk: getIDFromBase64(user.id, "UserType") });
+          const href = reverseUrl("author", {
+            pk: getIDFromBase64(user.id, "UserType"),
+          });
           const aria = `View user profile for ${user.username}`;
           const children = (
             <span className="flex gap-1 items-center">
@@ -341,7 +348,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
     },
   });
 
-  const hasItems = rankingsData.length > 0;
+  const hasItems = LeaderboardData.length > 0;
 
   return (
     <div>

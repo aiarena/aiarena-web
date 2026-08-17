@@ -1,19 +1,19 @@
-import RankingsSection from "./RankingsSection";
+import LeaderboardSection from "./LeaderboardSection";
 import { useParams } from "react-router";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import FetchError from "@/_components/_display/FetchError";
-import { CompetitionRankingsQuery } from "./__generated__/CompetitionRankingsQuery.graphql";
+import { CompetitionLeaderboardQuery } from "./__generated__/CompetitionLeaderboardQuery.graphql";
 
-export default function CompetitionRankings() {
+export default function CompetitionLeaderboard() {
   const { competitionId } = useParams<{ competitionId: string }>();
 
-  const rankings = useLazyLoadQuery<CompetitionRankingsQuery>(
+  const rankings = useLazyLoadQuery<CompetitionLeaderboardQuery>(
     graphql`
-      query CompetitionRankingsQuery($id: ID!) {
+      query CompetitionLeaderboardQuery($id: ID!) {
         node(id: $id) {
           ... on CompetitionType {
-            ...RankingsSection_competition
+            ...LeaderboardSection_competition
           }
         }
       }
@@ -26,7 +26,7 @@ export default function CompetitionRankings() {
   }
 
   return rankings.node ? (
-    <RankingsSection competition={rankings.node} />
+    <LeaderboardSection competition={rankings.node} />
   ) : (
     <p>No rankings yet...</p>
   );

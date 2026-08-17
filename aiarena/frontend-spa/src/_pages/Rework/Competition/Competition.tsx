@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import CompetitionInformation from "./CompetitionInformation";
-import CompetitionRankings from "./CompetitionRankings";
+import CompetitionLeaderboard from "./CompetitionLeaderboard";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
@@ -21,14 +21,16 @@ export default function Competition() {
         </Suspense>
       </div>
       <div className="mb-8">
-        <h4 className="mb-4">Rankings</h4>
+        <h4 className="mb-4" id="leaderboard">
+          Leaderboard
+        </h4>
         <Suspense
           fallback={
             <DisplaySkeleton height={1600} styles={SkeletonCardShadow} />
           }
         >
-          <ErrorBoundaryWrapper componentName="competition rankings">
-            <CompetitionRankings />
+          <ErrorBoundaryWrapper componentName="competition leaderboards">
+            <CompetitionLeaderboard />
           </ErrorBoundaryWrapper>
         </Suspense>
       </div>
