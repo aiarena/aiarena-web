@@ -175,13 +175,28 @@ class BotID(TypeModelChoice):
 
 
 class AwardSetItemType(DjangoObjectTypeWithUID):
+    trophy_icon_name = graphene.String()
+    trophy_icon_image = graphene.String()
+    condition_display = graphene.String()
+
     class Meta:
         model = models.AwardSetItem
         fields = [
             "condition",
-            "trophy_icon",
         ]
         connection_class = CountingConnection
+
+    @staticmethod
+    def resolve_trophy_icon_name(root: models.AwardSetItem, info):
+        return root.trophy_icon.name if root.trophy_icon else None
+
+    @staticmethod
+    def resolve_trophy_icon_image(root: models.AwardSetItem, info):
+        return root.trophy_icon.image.url if root.trophy_icon and root.trophy_icon.image else None
+
+    @staticmethod
+    def resolve_condition_display(root: models.AwardSetItem, info):
+        return root.get_condition_display()
 
 
 class AwardSetType(DjangoObjectTypeWithUID):
