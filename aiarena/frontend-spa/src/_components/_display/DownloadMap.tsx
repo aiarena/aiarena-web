@@ -9,7 +9,7 @@ export default function DownloadMap({
 }) {
   return (
     <a href={`${downloadLink}`} className="flex gap-1 items-center">
-      <ArrowDownCircleIcon height={18} /> {name}
+      <ArrowDownCircleIcon className="h-[18px] w-[18px] shrink-0" /> {name}
     </a>
   );
 }

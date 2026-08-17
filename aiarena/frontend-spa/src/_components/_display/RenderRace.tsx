@@ -42,7 +42,7 @@ export function RenderRace({
           alt={race.name + "-Icon"}
           title={race.name || ""}
           className={clsx(
-            "mr-2 h-[25px] w-[25px]",
+            "mr-2 h-[22px] w-[22px] shrink-0",
             races[race.label].appendStyle,
           )}
         />
