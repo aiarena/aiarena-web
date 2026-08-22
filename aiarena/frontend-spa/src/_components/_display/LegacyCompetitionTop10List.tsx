@@ -50,7 +50,14 @@ const LegacyCompetitonTop10List: React.FC = () => {
   }
 
   const activeCompetitions = getNodes(data.competitions);
-
+  if (activeCompetitions.length === 0) {
+    return (
+      <div>
+        <WrappedTitle title="Competitions" font="font-bold" />
+        <div className="text-center">No active competitions.</div>
+      </div>
+    );
+  }
   const handleDotClick = (index: number) => {
     setCurrentIndex(index);
   };
