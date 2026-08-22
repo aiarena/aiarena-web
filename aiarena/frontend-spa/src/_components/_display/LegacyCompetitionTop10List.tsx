@@ -16,7 +16,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
     graphql`
       query LegacyCompetitionTop10ListQuery {
         competitions(
-          statusIn: ["open, closing"]
+          statusIn: ["open", "closing"]
           orderBy: "-date_created"
           first: 3
         ) {
