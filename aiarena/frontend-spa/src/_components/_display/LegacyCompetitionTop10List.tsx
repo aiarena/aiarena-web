@@ -15,7 +15,11 @@ const LegacyCompetitonTop10List: React.FC = () => {
   const data = useLazyLoadQuery<LegacyCompetitionTop10ListQuery>(
     graphql`
       query LegacyCompetitionTop10ListQuery {
-        competitions(status: OPEN, orderBy: "-date_created", first: 1) {
+        competitions(
+          statusIn: ["open, closing"]
+          orderBy: "-date_created"
+          first: 3
+        ) {
           edges {
             node {
               name
@@ -50,6 +54,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
   }
 
   const activeCompetitions = getNodes(data.competitions);
+
   if (activeCompetitions.length === 0) {
     return (
       <div>
@@ -58,6 +63,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
       </div>
     );
   }
+
   const handleDotClick = (index: number) => {
     setCurrentIndex(index);
   };
