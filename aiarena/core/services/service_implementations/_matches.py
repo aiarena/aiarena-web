@@ -316,8 +316,13 @@ class Matches:
                 )
             active_participants = placement_participants + existing_participants
             n_active_participants = len(active_participants)
-            # Update number of divisions
-            if competition.should_split_divisions(n_active_participants) or competition.should_merge_divisions(
+            # Update number of divisions. Manual mode intentionally retains the
+            # existing split/merge behaviour as the administrator fallback.
+            automatic_division_sizes = None
+            if competition.division_sizing_mode == "automatic":
+                automatic_division_sizes = competition.automatic_division_sizes(n_active_participants)
+                competition.n_divisions = len(automatic_division_sizes)
+            elif competition.should_split_divisions(n_active_participants) or competition.should_merge_divisions(
                 n_active_participants
             ):
                 if new_round.number > 1 and n_active_participants > competition.target_division_size:
@@ -329,11 +334,20 @@ class Matches:
                     competition.n_divisions = 1
             # Update bot division numbers
             updated_participants = []
-            div_size, rem = divmod(n_active_participants, competition.n_divisions)
-            divs = [
-                active_participants[i * div_size + min(i, rem) : (i + 1) * div_size + min(i + 1, rem)]
-                for i in range(competition.n_divisions)
-            ]
+            if automatic_division_sizes is None:
+                div_size, rem = divmod(n_active_participants, competition.n_divisions)
+                divs = [
+                    active_participants[i * div_size + min(i, rem) : (i + 1) * div_size + min(i + 1, rem)]
+                    for i in range(competition.n_divisions)
+                ]
+            else:
+                # active_participants is bottom-to-top; the calculated sizes are
+                # top-to-bottom, so consume them in reverse order.
+                divs = []
+                start = 0
+                for division_size in reversed(automatic_division_sizes):
+                    divs.append(active_participants[start : start + division_size])
+                    start += division_size
             current_div_num = competition.n_divisions - 1 + CompetitionParticipation.MIN_DIVISION
             for d in divs:
                 for p in d:

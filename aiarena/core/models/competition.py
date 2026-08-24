@@ -20,6 +20,11 @@ logger = logging.getLogger(__name__)
 class Competition(models.Model, LockableModelMixin):
     """Represents a competition of play in the context of a ladder"""
 
+    DIVISION_SIZING_MODES = (
+        ("manual", "Manual"),
+        ("automatic", "Automatic (~20 bots per division)"),
+    )
+
     COMPETITION_STATUSES = (
         ("created", "Created"),  # The initial state for a competition. Functionally identical to paused.
         ("frozen", "Frozen"),  # While a competition is frozen, no matches are played
@@ -56,6 +61,13 @@ class Competition(models.Model, LockableModelMixin):
     interest = models.IntegerField(default=0, blank=True)
 
     # Defines target number of divisions to create when a new cycle begins.
+    # Manual mode preserves the historic target/cap based behaviour. Automatic
+    # mode calculates the division count from the active participant count.
+    division_sizing_mode = models.CharField(
+        max_length=16,
+        choices=DIVISION_SIZING_MODES,
+        default="manual",
+    )
     target_n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     # Defines the minimum size of each division, also defines when divisions will split.
@@ -78,6 +90,20 @@ class Competition(models.Model, LockableModelMixin):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def automatic_division_sizes(n_bots):
+        """Return top-to-bottom division sizes for ~20-bot automatic sizing."""
+        n_divisions = max(1, (n_bots + 10) // 20)
+        base_size, remainder = divmod(n_bots, n_divisions)
+        sizes = [base_size] * n_divisions
+
+        # Assign odd bots from the centre outwards. On an equal-distance tie,
+        # the higher division (the lower list index) receives the bot first.
+        centre_out = sorted(range(n_divisions), key=lambda index: (abs(index - (n_divisions - 1) / 2), index))
+        for index in centre_out[:remainder]:
+            sizes[index] += 1
+        return sizes
 
     def should_split_divisions(self, n_bots):
         return (

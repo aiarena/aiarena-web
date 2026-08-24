@@ -190,6 +190,7 @@ class TestingClient:
                 "game_mode": game_mode_id,
                 "playable_races": playable_race_ids,
                 "require_trusted_infrastructure": require_trusted_infrastructure,
+                "division_sizing_mode": "manual",
                 **kwargs,
             },
         )
@@ -206,6 +207,7 @@ class TestingClient:
             "competition": competition_id,
             "name": competition.name,  # required by the form
             "game_mode": competition.game_mode_id,  # required by the form
+            "division_sizing_mode": competition.division_sizing_mode,
             # if this isn't set here, it reverts to false - I don't understand why :(
             "indepth_bot_statistics_enabled": competition.indepth_bot_statistics_enabled,
         }
