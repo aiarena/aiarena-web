@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0087_alter_arenaclientstatus_options_and_more"),
+        ("core", "0088_awardset_competition_awards_given_and_more"),
     ]
 
     operations = [
