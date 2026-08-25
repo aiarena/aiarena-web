@@ -147,6 +147,10 @@ export default function BotSettingsModal({
                             !bot.botZipPubliclyDownloadable,
                         },
                       },
+                      onCompleted: (...args) => {
+                        onCompleted(...args);
+                      },
+                      onError,
                     })
                   }
                   disabled={updating}
@@ -173,6 +177,10 @@ export default function BotSettingsModal({
                             !bot.botDataPubliclyDownloadable,
                         },
                       },
+                      onCompleted: (...args) => {
+                        onCompleted(...args);
+                      },
+                      onError,
                     })
                   }
                   disabled={updating}
