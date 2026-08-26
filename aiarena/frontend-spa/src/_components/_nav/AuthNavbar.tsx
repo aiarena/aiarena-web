@@ -23,38 +23,35 @@ export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
   );
 
   const baseClasses = mobile
-    ? "block w-full bg-darken-3 hover:bg-darken-4 py-2 text-white hover:text-slate-300 border-b-2"
-    : "py-2 text-white border-b-2";
+    ? "animate-press block w-full bg-darken-3 hover:bg-darken-4 py-2 text-white hover:text-slate-300 border-b-2"
+    : "animate-press inline-block py-[0.3em] text-white border-b-2";
 
   const activeBorder = "border-customGreen";
+
   const inactiveBorder = mobile
     ? "border-transparent"
     : "border-transparent hover:border-customGreen";
 
-  return (
-    <li>
-      {data.viewer?.user ? (
-        <NavLink
-          to={reverseUrl("dashboard_root")}
-          className={({ isActive }) =>
-            clsx(baseClasses, isActive ? activeBorder : inactiveBorder)
-          }
-        >
-          Dashboard
-        </NavLink>
-      ) : (
-        <a
-          href={reverseUrl("login")}
-          className={clsx(
-            baseClasses,
-            window.location.pathname === reverseUrl("login")
-              ? activeBorder
-              : inactiveBorder,
-          )}
-        >
-          Login
-        </a>
+  return data.viewer?.user ? (
+    <NavLink
+      to={reverseUrl("dashboard_root")}
+      className={({ isActive }) =>
+        clsx(baseClasses, isActive ? activeBorder : inactiveBorder)
+      }
+    >
+      Dashboard
+    </NavLink>
+  ) : (
+    <a
+      href={reverseUrl("login")}
+      className={clsx(
+        baseClasses,
+        window.location.pathname === reverseUrl("login")
+          ? activeBorder
+          : inactiveBorder,
       )}
-    </li>
+    >
+      Login
+    </a>
   );
 }

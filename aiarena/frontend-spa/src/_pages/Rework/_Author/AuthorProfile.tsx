@@ -3,6 +3,8 @@ import { getDateToLocale } from "@/_lib/dateUtils";
 import AvatarWithBorder from "@/_components/_display/AvatarWithBorder";
 import { AuthorProfile_user$key } from "./__generated__/AuthorProfile_user.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
+import MainButton from "@/_components/_actions/MainButton";
+import { NavLink } from "react-router";
 
 export interface AuthorProps {
   author: AuthorProfile_user$key;
@@ -34,7 +36,7 @@ export default function AuthorProfile(props: AuthorProps) {
         }
       }
     `,
-    props.author
+    props.author,
   );
   const bots = getNodes(author?.bots);
   const trophies = bots.flatMap((bot) => getNodes(bot.trophies));
@@ -44,6 +46,27 @@ export default function AuthorProfile(props: AuthorProps) {
       <div className="flex items-start gap-2">
         <div className="flex flex-col items-center">
           <AvatarWithBorder user={author} size="lg" />
+        </div>
+        <div>
+          {" "}
+          <MainButton text="Button" />
+          <button className="animate-press block w-full bg-darken-3 py-2 text-white">
+            Native Button
+          </button>
+          <NavLink
+            to="#"
+            onClick={(e) => e.preventDefault()}
+            className="animate-press block w-full bg-darken-3 py-2 text-white text-center"
+          >
+            NavLink
+          </NavLink>
+          <a
+            href="#"
+            onClick={(e) => e.preventDefault()}
+            className="animate-press block w-full bg-darken-3 py-2 text-white text-center"
+          >
+            Anchor
+          </a>
         </div>
 
         <div className="flex flex-col justify-between flex-1 ml-4 mr-8  min-w-0">

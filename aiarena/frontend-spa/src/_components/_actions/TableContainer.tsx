@@ -135,7 +135,7 @@ export function TableContainer<T>({
                               "w-full",
                               "justify-between",
                               header.column.getCanSort()
-                                ? ""
+                                ? "animate-press-small"
                                 : "text-white font-medium",
                               "mr-5",
                               "group",

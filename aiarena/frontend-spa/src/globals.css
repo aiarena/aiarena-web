@@ -104,6 +104,43 @@
   }
 }
 
+
+/* Click animations */
+a {
+  transition: transform 100ms ease-out;
+  touch-action: manipulation;
+  }
+a:active {
+  transform: scale(0.95);
+}
+
+button {
+  transition: transform 100ms ease-out;
+  touch-action: manipulation;
+  }
+button:active {
+  transform: scale(0.95);
+}
+
+@utility animate-press {
+  transition: transform 100ms ease-out;
+  touch-action: manipulation;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+@utility animate-press-small {
+  transition: transform 100ms ease-out;
+  touch-action: manipulation;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/*  */
 body {
   color: rgb(225, 225, 225); /* Apply the white text color */
   background: linear-gradient(rgb(12, 12, 12), rgb(20, 20, 20));
@@ -111,9 +148,9 @@ body {
 
 a {
   color: rgba(134, 194, 50, 1);
-  /* color: theme(colors.cusotm green) */
   text-decoration: none;
 }
+
 
 a:hover {
   color: white;
@@ -125,28 +162,6 @@ a:hover {
   overflow-y: auto;
 }
 
-/* a:hover .video-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  color: white;
-  z-index: 1; 
-  pointer-events: none; 
-}
-
-.video-overlay * {
-  pointer-events: auto;
-} */
-/* 
-nav {
-  position: relative;
-  z-index: 10; } */
-/* 
-nav .block {
-  z-index: 20; 
-} */
 
 /* Hide video overlay when mobile navbar is active */
 @media (max-width: 768px) {
@@ -201,6 +216,7 @@ nav .block {
     color: rgba(154, 210, 70, 1);
   }
 }
+
 
 .animate-sine-wave {
   animation: sine-wave 5s ease-in-out infinite;

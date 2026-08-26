@@ -81,11 +81,11 @@ export default function MainButton({
         type={type}
         onClick={handleClick}
         className={clsx(
-          "relative z-10 rounded-full px-6 py-2 font-semibold text-white transition duration-300 ease-in-out",
+          "animate-press relative z-10 rounded-full px-6 py-2 font-semibold text-white transition duration-300 ease-in-out",
           "shadow-sm shadow-black hover:shadow-customGreen",
           "border-3 border-customGreen bg-darken-2 hover:bg-transparent",
           "transform backdrop-blur-sm",
-          className
+          className,
         )}
       >
         {text}

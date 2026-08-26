@@ -41,7 +41,9 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
       </span>
       <div className="col-span-4">
         <p className="truncate font-medium">
-          <Link to={competitionLink}>{data.competition.name}</Link>
+          <Link className="inline-block" to={competitionLink}>
+            {data.competition.name}
+          </Link>
         </p>
         <div className="flex flex-wrap gap-4">
           <div>
@@ -67,6 +69,7 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
               })}
               aria-label={"View Stats"}
               title={`View Stats`}
+              className="inline-block"
             >
               View Stats
             </Link>

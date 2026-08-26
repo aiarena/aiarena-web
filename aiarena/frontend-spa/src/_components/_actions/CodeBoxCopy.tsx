@@ -27,9 +27,9 @@ export const CodeBoxCopy: React.FC<CodeBoxCopyProps> = ({ children }) => {
       onClick={handleCopy}
       title="Copy text"
     >
-      <span className="absolute top-2 right-2 group-hover:text-gray-400 text-xs px-2 py-1 rounded transition-colors duration-150">
+      <button className="absolute top-2 right-2 group-hover:text-gray-400 text-xs px-2 py-1 rounded transition-colors duration-150">
         <ClipboardDocumentIcon className="h-4 w-4" />
-      </span>
+      </button>
 
       <pre ref={preRef} className="whitespace-pre-wrap font-mono">
         {children}

@@ -113,7 +113,6 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
                 className="font-semibold text-gray-200 truncate mr-2"
                 to={href}
                 role="cell"
-                target="_blank"
                 aria-label={aria}
                 title={`${label}`}
               >
