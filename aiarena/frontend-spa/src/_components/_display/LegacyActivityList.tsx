@@ -62,6 +62,7 @@ const LegacyActivityList: React.FC = () => {
         <Link
           to={reverseUrl("bot", { pk: getIDFromBase64(botId, "BotType") })}
           aria-label={`View bot profile for ${botName}`}
+          className="inline-block"
         >
           {botName}
         </Link>{" "}
@@ -74,6 +75,7 @@ const LegacyActivityList: React.FC = () => {
             pk: getIDFromBase64(botAuthorId, "UserType"),
           })}
           aria-label={`View user profile for ${botAuthorName}`}
+          className="inline-block"
         >
           {botAuthorName}
         </Link>{" "}

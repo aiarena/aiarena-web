@@ -78,7 +78,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
           to={reverseUrl("competition", {
             pk: getIDFromBase64(competition.id, "CompetitionType"),
           })}
-          className="font-bold"
+          className="font-bold inline-block"
         >
           {competition.name}
         </Link>
@@ -114,6 +114,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
                     pk: getIDFromBase64(participant.bot.id, "BotType"),
                   })}
                   aria-label={`View bot profile for ${participant.bot.name}`}
+                  className="inline-block"
                 >
                   {participant.bot.name}
                 </Link>

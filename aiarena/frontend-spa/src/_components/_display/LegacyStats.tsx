@@ -19,7 +19,7 @@ const LegacyStats: React.FC = () => {
         }
       }
     `,
-    {}
+    {},
   );
 
   if (!data.stats) {
@@ -87,6 +87,7 @@ const LegacyStats: React.FC = () => {
                     title={`${row.label}`}
                     aria-label={`Navigate to ${row.label}`}
                     href={`${row.link}`}
+                    className="inline-block"
                   >
                     {row.label}
                   </a>
