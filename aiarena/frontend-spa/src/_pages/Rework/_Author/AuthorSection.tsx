@@ -9,6 +9,7 @@ import FetchError from "@/_components/_display/FetchError";
 
 export default function AuthorSection() {
   const { userId: authorId } = useParams<{ userId: string }>();
+
   const data = useLazyLoadQuery<AuthorSectionQuery>(
     graphql`
       query AuthorSectionQuery($id: ID!) {
@@ -22,14 +23,22 @@ export default function AuthorSection() {
     `,
     { id: getBase64FromID(authorId!, "UserType") || "" },
   );
+
   if (!data.node) {
     return <FetchError type="author" />;
   }
 
   return (
     <>
-      <AuthorProfile author={data.node} />
-      <AuthorBotsTable data={data.node} />
+      <div className="mb-8">
+        <h4 className="mb-4">Author</h4>
+        <AuthorProfile author={data.node} />
+      </div>
+
+      <div className="mb-8">
+        <h4 className="mb-4">Bots</h4>
+        <AuthorBotsTable data={data.node} />
+      </div>
     </>
   );
 }

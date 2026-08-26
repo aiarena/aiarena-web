@@ -10,10 +10,17 @@ export default function AuthorPage() {
     <div className="max-w-7xl mx-auto">
       <Suspense
         fallback={
-          <div className="grid gap-8">
-            <DisplaySkeleton height={190} styles={SkeletonBoxShadow} />
-            <DisplaySkeleton height={200} styles={SkeletonCardShadow} />
-          </div>
+          <>
+            <div className="mb-8">
+              <h4 className="mb-4">Author</h4>
+              <DisplaySkeleton height={190} styles={SkeletonBoxShadow} />
+            </div>
+
+            <div className="mb-8">
+              <h4 className="mb-4">Bots</h4>
+              <DisplaySkeleton height={200} styles={SkeletonCardShadow} />
+            </div>
+          </>
         }
       >
         <ErrorBoundaryWrapper componentName="author">
