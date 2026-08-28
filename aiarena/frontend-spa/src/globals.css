@@ -106,39 +106,36 @@
 
 
 /* Click animations */
-a {
-  transition: transform 100ms ease-out;
+
+a,
+button {
+  transition: opacity 100ms ease-out;
   touch-action: manipulation;
-  }
-a:active {
-  transform: scale(0.95);
 }
 
-button {
-  transition: transform 100ms ease-out;
-  touch-action: manipulation;
-  }
+a:active,
 button:active {
-  transform: scale(0.95);
+  opacity: 0.65;
 }
 
 @utility animate-press {
-  transition: transform 100ms ease-out;
+  transition: opacity 100ms ease-out;
   touch-action: manipulation;
 
   &:active {
-    transform: scale(0.95);
+    opacity: 0.65;
   }
 }
 
 @utility animate-press-small {
-  transition: transform 100ms ease-out;
+  transition: opacity 100ms ease-out;
   touch-action: manipulation;
 
   &:active {
-    transform: scale(0.98);
+    opacity: 0.8;
   }
 }
+
 
 /*  */
 body {
