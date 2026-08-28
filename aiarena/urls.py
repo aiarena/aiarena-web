@@ -28,11 +28,19 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions
 
 from aiarena.frontend import views as core_views
-from aiarena.sitemaps import StaticViewSitemap
+from aiarena.sitemaps import (
+    AuthorSitemap,
+    BotSitemap,
+    CompetitionSitemap,
+    StaticViewSitemap,
+)
 
 
 sitemaps = {
     "static": StaticViewSitemap,
+    "bots": BotSitemap,
+    "authors": AuthorSitemap,
+    "competitions": CompetitionSitemap,
 }
 
 schema_view = get_schema_view(
