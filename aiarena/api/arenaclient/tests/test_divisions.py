@@ -60,20 +60,22 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         _check(competition, 30, [6, 9, 12], [4, 7, 10])
 
     def test_automatic_division_sizes(self):
-        # Sizes are ordered top division to bottom division. This also proves
-        # the count is round-half-up(N / 20), rather than Python's banker's round.
+        # Sizes are ordered bottom division to top division. This also proves
+        # the count is round-half-up(N / target), rather than Python's banker's round.
         expected_sizes = {
             5: [5],
             30: [15, 15],
-            50: [17, 17, 16],
+            50: [16, 17, 17],
             70: [17, 18, 18, 17],
             80: [20, 20, 20, 20],
             110: [18, 18, 19, 19, 18, 18],
-            170: [19, 19, 19, 19, 19, 19, 19, 19, 18],
+            170: [18, 19, 19, 19, 19, 19, 19, 19, 19],
             200: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
         }
         for n_bots, sizes in expected_sizes.items():
-            self.assertEqual(Competition.automatic_division_sizes(n_bots), sizes)
+            self.assertEqual(Competition.automatic_division_sizes(n_bots, 20), sizes)
+
+        self.assertEqual(Competition.automatic_division_sizes(45, 15), [15, 15, 15])
 
     def test_automatic_mode_generates_dynamic_divisions(self):
         competition = self._set_up_competition(1, 2)
