@@ -47,27 +47,6 @@ export default function AuthorProfile(props: AuthorProps) {
         <div className="flex flex-col items-center">
           <AvatarWithBorder user={author} size="lg" />
         </div>
-        <div>
-          {" "}
-          <MainButton text="Button" />
-          <button className="animate-press block w-full bg-darken-3 py-2 text-white">
-            Native Button
-          </button>
-          <NavLink
-            to="#"
-            onClick={(e) => e.preventDefault()}
-            className="animate-press block w-full bg-darken-3 py-2 text-white text-center"
-          >
-            NavLink
-          </NavLink>
-          <a
-            href="#"
-            onClick={(e) => e.preventDefault()}
-            className="animate-press block w-full bg-darken-3 py-2 text-white text-center"
-          >
-            Anchor
-          </a>
-        </div>
 
         <div className="flex flex-col justify-between flex-1 ml-4 mr-8  min-w-0">
           <div className="min-w-0">
