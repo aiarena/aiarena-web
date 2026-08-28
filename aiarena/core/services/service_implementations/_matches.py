@@ -320,7 +320,9 @@ class Matches:
             # existing split/merge behaviour as the administrator fallback.
             automatic_division_sizes = None
             if competition.division_sizing_mode == "automatic":
-                automatic_division_sizes = competition.automatic_division_sizes(n_active_participants)
+                automatic_division_sizes = competition.automatic_division_sizes(
+                    n_active_participants, competition.automatic_target_division_size
+                )
                 competition.n_divisions = len(automatic_division_sizes)
             elif competition.should_split_divisions(n_active_participants) or competition.should_merge_divisions(
                 n_active_participants
@@ -341,11 +343,10 @@ class Matches:
                     for i in range(competition.n_divisions)
                 ]
             else:
-                # active_participants is bottom-to-top; the calculated sizes are
-                # top-to-bottom, so consume them in reverse order.
+                # Both active participants and calculated sizes are bottom-to-top.
                 divs = []
                 start = 0
-                for division_size in reversed(automatic_division_sizes):
+                for division_size in automatic_division_sizes:
                     divs.append(active_participants[start : start + division_size])
                     start += division_size
             current_div_num = competition.n_divisions - 1 + CompetitionParticipation.MIN_DIVISION
