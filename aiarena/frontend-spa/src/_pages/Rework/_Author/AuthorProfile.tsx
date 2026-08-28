@@ -3,8 +3,6 @@ import { getDateToLocale } from "@/_lib/dateUtils";
 import AvatarWithBorder from "@/_components/_display/AvatarWithBorder";
 import { AuthorProfile_user$key } from "./__generated__/AuthorProfile_user.graphql";
 import { getNodes } from "@/_lib/relayHelpers";
-import MainButton from "@/_components/_actions/MainButton";
-import { NavLink } from "react-router";
 
 export interface AuthorProps {
   author: AuthorProfile_user$key;
