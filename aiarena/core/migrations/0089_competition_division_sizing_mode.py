@@ -13,9 +13,14 @@ class Migration(migrations.Migration):
             model_name="competition",
             name="division_sizing_mode",
             field=models.CharField(
-                choices=[("manual", "Manual"), ("automatic", "Automatic (~20 bots per division)")],
+                choices=[("manual", "Manual"), ("automatic", "Automatic")],
                 default="manual",
                 max_length=16,
             ),
+        ),
+        migrations.AddField(
+            model_name="competition",
+            name="automatic_target_division_size",
+            field=models.IntegerField(blank=True, default=20, validators=[models.Min(2)]),
         ),
     ]
