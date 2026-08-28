@@ -76,18 +76,19 @@ export default function UserBotHeader(props: UserBotHeaderProps) {
           </div>
 
           {/* Settings Button */}
-
-          <MutedButton
-            onClick={() => setSettingsModalOpen(true)}
-            title="Bot Settings"
-          >
-            Edit Bot
-            <PencilIcon
-              aria-label="Settings icon"
-              className="size-5  text-white"
-              role="img"
-            />
-          </MutedButton>
+          <span>
+            <MutedButton
+              onClick={() => setSettingsModalOpen(true)}
+              title="Bot Settings"
+            >
+              Edit Bot
+              <PencilIcon
+                aria-label="Settings icon"
+                className="size-5  text-white"
+                role="img"
+              />
+            </MutedButton>
+          </span>
         </div>
 
         <div className="justify-between flex">
