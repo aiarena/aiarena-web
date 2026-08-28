@@ -22,7 +22,7 @@ class Competition(models.Model, LockableModelMixin):
 
     DIVISION_SIZING_MODES = (
         ("manual", "Manual"),
-        ("automatic", "Automatic (~20 bots per division)"),
+        ("automatic", "Automatic"),
     )
 
     COMPETITION_STATUSES = (
@@ -72,6 +72,8 @@ class Competition(models.Model, LockableModelMixin):
     n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     # Defines the minimum size of each division, also defines when divisions will split.
     target_division_size = models.IntegerField(default=2, validators=[MinValueValidator(2)], blank=True)
+    # Defines the desired number of bots in each automatically sized division.
+    automatic_target_division_size = models.IntegerField(default=20, validators=[MinValueValidator(2)], blank=True)
     # Defines the number of rounds between division updates.
     rounds_per_cycle = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     # Tracks the number of rounds that have completed this cycle.
@@ -92,18 +94,19 @@ class Competition(models.Model, LockableModelMixin):
         return self.name
 
     @staticmethod
-    def automatic_division_sizes(n_bots):
-        """Return top-to-bottom division sizes for ~20-bot automatic sizing."""
-        n_divisions = max(1, (n_bots + 10) // 20)
+    def automatic_division_sizes(n_bots, target_division_size):
+        """Return bottom-to-top division sizes for automatic sizing."""
+        n_divisions = max(1, (n_bots + target_division_size // 2) // target_division_size)
         base_size, remainder = divmod(n_bots, n_divisions)
         sizes = [base_size] * n_divisions
 
-        # Assign odd bots from the centre outwards. On an equal-distance tie,
-        # the higher division (the lower list index) receives the bot first.
+        # Allocate extra bots in top-to-bottom domain order, from the centre
+        # outwards. On an equal-distance tie, the higher division receives the
+        # bot first. Return in the scheduler's bottom-to-top order.
         centre_out = sorted(range(n_divisions), key=lambda index: (abs(index - (n_divisions - 1) / 2), index))
         for index in centre_out[:remainder]:
             sizes[index] += 1
-        return sizes
+        return list(reversed(sizes))
 
     def should_split_divisions(self, n_bots):
         return (
