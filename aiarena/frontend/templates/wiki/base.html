@@ -1,4 +1,5 @@
-{% load sekizai_tags i18n wiki_tags static %}<!DOCTYPE html>
+{% load sekizai_tags i18n wiki_tags static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -6,6 +7,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="">
+
+
+    {% if "_source/" in request.path %}
+        <meta name="robots" content="noindex">
+    {% else %}
+        <meta name="robots" content="index, follow">
+    {% endif %}
 
     <!-- Le styles -->
     <link href="{% static "wiki/bootstrap/css/wiki-bootstrap.min.css" %}" rel="stylesheet">
