@@ -5,7 +5,18 @@
 <head>
     {% load static %}
     <title>{% block title %}AI Arena{% endblock %}</title>
-    <meta name="description" content="A StarCraft 2 AI versus AI competition">
+
+    {% block meta_description %}
+        <meta
+            name="description"
+            content="The StarCraft II AI bot ladder. Compete with AI bots in Python, .NET, Java, and more. Develop your bot and watch it battle on AI Arena."
+        >
+    {% endblock %}
+
+    {% block robots %}
+        <meta name="robots" content="index, follow">
+    {% endblock %}
+    
     <meta name=”robots” content="index, follow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
