@@ -77,6 +77,7 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
                   label
                   id
                 }
+                botZipUpdated
                 user {
                   id
                   username
@@ -276,6 +277,22 @@ export default function RankingsSection({ competition }: RankingsSectionProps) {
         },
         meta: { priority: 3 },
         size: 90,
+      }),
+
+      columnHelper.display({
+        id: "lastUpdated",
+        header: "Last Updated",
+        enableSorting: false,
+        cell: ({ row }) => {
+          const original = row.original;
+          if (original.__kind !== "participant") return null;
+
+          const lastUpdated = original.bot.botZipUpdated;
+          if (!lastUpdated) return "--";
+
+          return new Date(lastUpdated).toISOString().slice(0, 10);
+        },
+        meta: { priority: 4 },
       }),
 
       columnHelper.display({
