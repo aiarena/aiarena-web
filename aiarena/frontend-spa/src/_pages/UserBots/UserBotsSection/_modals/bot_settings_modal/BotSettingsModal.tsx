@@ -244,7 +244,6 @@ export default function BotSettingsModal({
                     onCompleted: (...args) => {
                       const success = onCompleted(...args);
                       if (success) setBotZipFile(null);
-                      onCompleted(...args);
                     },
                     onError,
                   });
@@ -307,7 +306,6 @@ export default function BotSettingsModal({
                     onCompleted: (...args) => {
                       const success = onCompleted(...args);
                       if (success) setBotDataFile(null);
-                      onCompleted(...args);
                     },
                     onError,
                   });
