@@ -6,9 +6,6 @@
 {% endblock %}
 
 {% block content %}
-{% load i18n core_filters url_utils %}
-
-{% block content %}
     {% with requested_count=requested_matches.count %}
         {% if requested_count > 0 or round_list.count > 0 %}
             {% if requested_count > 0 %}
