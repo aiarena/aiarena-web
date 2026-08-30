@@ -245,8 +245,8 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                   </span>
                 </div>
 
-                <a
-                  href={reverseUrl("competition_stats_root", {
+                <Link
+                  to={reverseUrl("competition_stats_root", {
                     pk: getIDFromBase64(
                       competitionParticipation.id,
                       "CompetitionParticipationType",
@@ -254,7 +254,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                   })}
                 >
                   Explore more stats
-                </a>
+                </Link>
               </div>
             </div>
           );
