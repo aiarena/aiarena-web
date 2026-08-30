@@ -44,11 +44,7 @@ import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStor
 
 interface BotResultsTableProps {
   data: BotResultsTbody_bot$key;
-  origin?: "bot" | "competition";
-  filterPreset?: {
-    competitionId?: string;
-    competitionName?: string;
-  };
+  filterPreset?: { competitionId?: string; competitionName?: string };
   onApplyFilters?: (next: ResultsFilters, replace?: boolean) => void;
   initialFilters?: ResultsFilters;
   onApplySort?: (next: SortingState, replace?: boolean) => void;
@@ -121,8 +117,8 @@ export interface ResultsFilters {
   mapName: string | undefined;
   competitionId: string | undefined;
   competitionName: string | undefined;
-  matchStartedAfter: string | undefined;
-  matchStartedBefore: string | undefined;
+  matchStartedAfter: string | undefined; // ISO string
+  matchStartedBefore: string | undefined; // ISO string
   tags: string | undefined;
   searchOnlyMyTags: boolean | undefined;
   showEveryonesTags: boolean | undefined;
@@ -168,16 +164,6 @@ export default function BotResultsTable(props: BotResultsTableProps) {
 
   const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
-  const withFilterPreset = (next: ResultsFilters): ResultsFilters => {
-    if (props.origin !== "competition" || !props.filterPreset) {
-      return next;
-    }
-    return {
-      ...next,
-      competitionId: props.filterPreset.competitionId,
-      competitionName: props.filterPreset.competitionName,
-    };
-  };
 
   const defaultFilters: ResultsFilters = {
     opponentName: undefined,
@@ -205,36 +191,16 @@ export default function BotResultsTable(props: BotResultsTableProps) {
   };
 
   const [filters, setFilters] = useState<ResultsFilters>(() => {
-    const initial = props.initialFilters
-      ? {
-          ...defaultFilters,
-          ...props.initialFilters,
-        }
+    return props.initialFilters
+      ? { ...defaultFilters, ...props.initialFilters }
       : defaultFilters;
-    return withFilterPreset(initial);
   });
 
   useEffect(() => {
-    if (props.initialSorting) {
-      setSorting(props.initialSorting);
-    }
+    if (props.initialSorting) setSorting(props.initialSorting);
   }, [props.initialSorting]);
 
-  useEffect(() => {
-    if (!props.initialFilters) {
-      return;
-    }
-    setFilters(
-      withFilterPreset({
-        ...defaultFilters,
-        ...props.initialFilters,
-      }),
-    );
-  }, [props.initialFilters]);
-
   const columnHelper = createColumnHelper<BotResultsRow>();
-  const enableAdvancedSorting = props.origin === "competition";
-
   const columns = useMemo(
     () => [
       columnHelper.accessor((row) => row.match.id, {
@@ -243,13 +209,8 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         enableSorting: true,
         cell: (info) => {
           const label = getIDFromBase64(info.getValue(), "MatchType") || "";
-          const href = reverseUrl("match", {
-            pk: getIDFromBase64(info.getValue(), "MatchType"),
-          });
-          const aria = `View match details for Match ID ${getIDFromBase64(
-            info.getValue(),
-            "MatchType",
-          )}`;
+          const href = reverseUrl("match", { pk: getIDFromBase64(info.getValue(), "MatchType") });
+          const aria = `View match details for Match ID ${getIDFromBase64(info.getValue(), "MatchType")}`;
 
           return (
             <span className="flex justify-between">
@@ -276,7 +237,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         {
           id: "opponent",
           header: "Opponent",
-          enableSorting: enableAdvancedSorting,
+          enableSorting: false,
           cell: (info) => {
             const bot = info.row.original.bot;
             const participant1 = info.row.original.match?.participant1;
@@ -322,7 +283,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         {
           id: "opponent_race",
           header: "Opponent Race",
-          enableSorting: enableAdvancedSorting,
+          enableSorting: false,
           cell: (info) => {
             const bot = info.row.original.bot;
             const participant1 = info.row.original.match?.participant1;
@@ -335,20 +296,18 @@ export default function BotResultsTable(props: BotResultsTableProps) {
 
             return <RenderRace race={opponent?.playsRace} />;
           },
-          meta: {
-            priority: 1,
-          },
+          meta: { priority: 1 },
           size: 50,
         },
       ),
       columnHelper.accessor((row) => row.result ?? "", {
         id: "result",
         header: "Result",
-        enableSorting: enableAdvancedSorting,
-        cell: (info) => <RenderResult result={info.getValue()} />,
-        meta: {
-          priority: 1,
+        enableSorting: false,
+        cell: (info) => {
+          return <RenderResult result={info.getValue()} />;
         },
+        meta: { priority: 1 },
         size: 50,
       }),
 
@@ -356,41 +315,38 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         (row) =>
           getBotEloChange(
             row.match.result?.participant1,
-
             row.match.result?.participant2,
             row.bot,
           )?.eloChange,
         {
           id: "elo_change",
           header: "Elo +/-",
-          enableSorting: enableAdvancedSorting,
-          cell: (info) => <EloChange delta={info.getValue()} />,
-          meta: {
-            priority: 1,
+          enableSorting: false,
+          cell: (info) => {
+            return <EloChange delta={info.getValue()} />;
           },
+          meta: { priority: 1 },
           size: 50,
         },
       ),
       columnHelper.accessor((row) => row.resultCause, {
         id: "cause",
         header: "Cause",
-        enableSorting: enableAdvancedSorting,
+        enableSorting: false,
         cell: (info) => {
           if (info.getValue()) {
             return <RenderResultCause cause={info.getValue()} />;
+          } else {
+            return info.row.original.match.status;
           }
-          return info.row.original.match.status;
         },
-        meta: {
-          priority: 1,
-        },
-
+        meta: { priority: 1 },
         size: 100,
       }),
       columnHelper.accessor((row) => row.avgStepTime ?? "", {
         id: "step",
         header: "Avg Step",
-        enableSorting: enableAdvancedSorting,
+        enableSorting: false,
         cell: (info) => {
           if (info.getValue()) {
             return <StepTime time={info.getValue()} />;
@@ -404,7 +360,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         {
           id: "duration",
           header: "Duration",
-          enableSorting: enableAdvancedSorting,
+          enableSorting: false,
           cell: (info) => {
             return info.getValue();
           },
@@ -415,7 +371,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       columnHelper.accessor((row) => row.match.result?.created ?? "", {
         id: "date",
         header: "Date",
-        enableSorting: enableAdvancedSorting,
+        enableSorting: false,
         cell: (info) => {
           return getDateTimeISOString(info.getValue()) || "";
         },
@@ -499,7 +455,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       columnHelper.accessor((row) => row.match.tags ?? "", {
         id: "tags",
         header: "Tags",
-        enableSorting: enableAdvancedSorting,
+        enableSorting: false,
         cell: (info) => {
           const nodes = getNodes(info.row.original.match.tags);
 
@@ -514,7 +470,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         meta: { priority: 1 },
       }),
     ],
-    [columnHelper, enableAdvancedSorting],
+    [columnHelper],
   );
 
   const headerTable = useReactTable({
@@ -529,17 +485,12 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       columnVisibility: columnVisibility ?? undefined,
     },
 
-    state: {
-      columnVisibility: columnVisibility ?? {},
-      columnSizing,
-      sorting,
-    },
+    state: { columnVisibility: columnVisibility ?? {}, columnSizing, sorting },
     onColumnVisibilityChange: (updater) => {
       const next =
         typeof updater === "function"
           ? updater(columnVisibility ?? {})
           : updater;
-
       setColumnVisibility(next);
     },
     onColumnSizingChange: setColumnSizing,
@@ -554,12 +505,10 @@ export default function BotResultsTable(props: BotResultsTableProps) {
       });
     },
   });
-
   function apply(next: ResultsFilters, replace = true) {
-    const nextFilters = withFilterPreset(next);
-    setFilters(nextFilters);
-    props.onApplyFilters?.(nextFilters, replace);
-    runRefetch(nextFilters, sorting);
+    setFilters(next);
+    props.onApplyFilters?.(next, replace);
+    runRefetch(next, sorting);
   }
 
   const refetchFnRef = useRef<null | ((args: BotResultsRefetchArgs) => void)>(
@@ -568,18 +517,11 @@ export default function BotResultsTable(props: BotResultsTableProps) {
 
   function runRefetch(nextFilters: ResultsFilters, nextSorting: SortingState) {
     const fn = refetchFnRef.current;
-    if (!fn) {
-      return;
-    }
-    const filtersWithPreset = withFilterPreset(nextFilters);
+    if (!fn) return;
 
     const orderBy = parseSort(BotResultsTableSortingMap, nextSorting) || "-id";
 
-    fn({
-      filters: filtersWithPreset,
-
-      orderBy,
-    });
+    fn({ filters: nextFilters, orderBy });
   }
   const allColumns = headerTable.getAllLeafColumns();
   const visibleColumnCount = allColumns.filter((c) => c.getIsVisible()).length;
@@ -589,12 +531,6 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     "includeQueued",
     "includeFinished",
   ]);
-
-  if (props.origin === "competition") {
-    excludedKeys.add("competitionId");
-
-    excludedKeys.add("competitionName");
-  }
 
   const filterIsActive = Object.entries(filters).some(
     ([key, value]) => !excludedKeys.has(key) && value !== undefined,
@@ -608,7 +544,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           <div className="flex flex-wrap gap-2">
             <button
               className={clsx(
-                "inline-flex items-center justify-center gap-x-1.5 rounded-md border-2 transition duration-100 ease-in-out transform",
+                "inline-flex items-center  justify-center gap-x-1.5 rounded-md border-2 transition duration-100 ease-in-out transform",
                 "px-2 py-2 font-semibold bg-neutral-900 shadow-xs border",
                 filterIsActive
                   ? "border-customGreen text-gray-200"
@@ -622,10 +558,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             <ButtonToggle
               active={filters.includeQueued}
               onClick={() =>
-                apply({
-                  ...filters,
-                  includeQueued: !filters.includeQueued,
-                })
+                apply({ ...filters, includeQueued: !filters.includeQueued })
               }
               text="Queued"
             />
@@ -633,10 +566,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             <ButtonToggle
               active={filters.includeStarted}
               onClick={() =>
-                apply({
-                  ...filters,
-                  includeStarted: !filters.includeStarted,
-                })
+                apply({ ...filters, includeStarted: !filters.includeStarted })
               }
               text="Playing"
             />
@@ -644,16 +574,14 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             <ButtonToggle
               active={filters.includeFinished}
               onClick={() =>
-                apply({
-                  ...filters,
-                  includeFinished: !filters.includeFinished,
-                })
+                apply({ ...filters, includeFinished: !filters.includeFinished })
               }
               text="Finished"
             />
             <ButtonToggle
               active={props.sinceUpdated?.sinceUpdated ?? false}
               onClick={() => {
+                console.log(props.sinceUpdated);
                 props.setSinceUpdated({
                   sinceUpdated: !props.sinceUpdated?.sinceUpdated,
                 });
@@ -682,10 +610,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             fragmentRef={props.data}
             columnCount={visibleColumnCount}
             columns={columns as unknown as ColumnDef<BotResultsRow, unknown>[]}
-            state={{
-              columnVisibility: columnVisibility ?? {},
-              columnSizing,
-            }}
+            state={{ columnVisibility: columnVisibility ?? {}, columnSizing }}
             onState={{
               setColumnVisibility: (updater) => {
                 const next =
@@ -715,8 +640,6 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         onApply={(next) => apply(next, true)}
         botZipUpdated={props.botZipUpdated}
         sinceUpdated={props.sinceUpdated?.sinceUpdated}
-        hideCompetitionFilter={props.origin === "competition"}
-        competitionPreset={props.filterPreset}
       />
     </div>
   );

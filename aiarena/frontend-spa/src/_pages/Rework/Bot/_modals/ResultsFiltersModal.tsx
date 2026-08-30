@@ -32,11 +32,6 @@ interface ResultsFiltersModalProps {
   onApply: (next: ResultsFilters) => void;
   botZipUpdated: string;
   sinceUpdated: boolean | undefined;
-  hideCompetitionFilter?: boolean;
-  competitionPreset?: {
-    competitionId?: string;
-    competitionName?: string;
-  };
 }
 
 export default function ResultsFiltersModal({
@@ -47,8 +42,6 @@ export default function ResultsFiltersModal({
   onApply,
   botZipUpdated,
   sinceUpdated,
-  hideCompetitionFilter = false,
-  competitionPreset,
 }: ResultsFiltersModalProps) {
   const data = useLazyLoadQuery<ResultsFiltersModalQuery>(
     graphql`
@@ -84,17 +77,7 @@ export default function ResultsFiltersModal({
     };
 
   const handleApply = () => {
-    const nextFilters =
-      hideCompetitionFilter && competitionPreset
-        ? {
-            ...filters,
-            matchType: undefined,
-            competitionId: competitionPreset.competitionId,
-            competitionName: competitionPreset.competitionName,
-          }
-        : filters;
-
-    onApply(nextFilters);
+    onApply(filters);
     onClose();
   };
 
@@ -106,17 +89,8 @@ export default function ResultsFiltersModal({
       opponentId: undefined,
       opponentPlaysRaceId: undefined,
       opponentPlaysRaceName: undefined,
-
-      competitionId:
-        hideCompetitionFilter && competitionPreset
-          ? competitionPreset.competitionId
-          : undefined,
-
-      competitionName:
-        hideCompetitionFilter && competitionPreset
-          ? competitionPreset.competitionName
-          : undefined,
-
+      competitionId: undefined,
+      competitionName: undefined,
       result: undefined,
       cause: undefined,
       avgStepTimeMin: undefined,
@@ -175,7 +149,7 @@ export default function ResultsFiltersModal({
             role="group"
             aria-labelledby="filter-opponent-race-label"
           >
-            <label id="filter-opponent-race-label" className="font-medium">
+            <label id="filter-opponent-race-label" className=" font-medium">
               Opponent Race
             </label>
             <SearchList
@@ -228,9 +202,9 @@ export default function ResultsFiltersModal({
 
                 if (displayVal) {
                   return displayVal.name;
+                } else {
+                  return "";
                 }
-
-                return "";
               }}
               options={resultOptions}
               placeholder="Any result..."
@@ -264,9 +238,9 @@ export default function ResultsFiltersModal({
 
                 if (displayVal) {
                   return displayVal.name;
+                } else {
+                  return "";
                 }
-
-                return "";
               }}
               options={resultCauseOptions}
               placeholder="Any result cause..."
@@ -432,44 +406,39 @@ export default function ResultsFiltersModal({
         </div>
         <SectionDivider color="gray" className="pb-1" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {!hideCompetitionFilter && (
-            <>
-              {/* Match Type */}
-              <div
-                className="flex flex-col gap-1"
-                role="group"
-                aria-labelledby="filter-matchtype-label"
-              >
-                <label id="filter-matchtype-label" className="font-medium">
-                  Match Origin
-                </label>
-                <SearchList
-                  value={{ id: filters.matchType || "" }}
-                  setValue={(option) =>
-                    setFilters((f) => ({
-                      ...f,
-                      matchType: (option?.id ??
-                        "") as HardcodedMatchTypeOptions,
-                    }))
-                  }
-                  setQuery={() => {}}
-                  displayValue={(value) => {
-                    const displayVal = matchTypeOptions.find(
-                      (i) => i.id === value?.id,
-                    );
+          {/* Match Type */}
+          <div
+            className="flex flex-col gap-1"
+            role="group"
+            aria-labelledby="filter-matchtype-label"
+          >
+            <label id="filter-matchtype-label" className=" font-medium">
+              Match Origin
+            </label>
+            <SearchList
+              value={{ id: filters.matchType || "" }}
+              setValue={(option) =>
+                setFilters((f) => ({
+                  ...f,
+                  matchType: (option?.id ?? "") as HardcodedMatchTypeOptions,
+                }))
+              }
+              setQuery={() => {}}
+              displayValue={(value) => {
+                const displayVal = matchTypeOptions.find(
+                  (i) => i.id === value?.id,
+                );
 
-                    if (displayVal) {
-                      return displayVal.name;
-                    }
-
-                    return "";
-                  }}
-                  options={matchTypeOptions}
-                  placeholder="Any match origin..."
-                />
-              </div>
-            </>
-          )}
+                if (displayVal) {
+                  return displayVal.name;
+                } else {
+                  return "";
+                }
+              }}
+              options={matchTypeOptions}
+              placeholder="Any match origin..."
+            />
+          </div>
 
           {/* Map */}
           <div
@@ -495,40 +464,37 @@ export default function ResultsFiltersModal({
             </label>
           </div>
 
-          {!hideCompetitionFilter && (
-            <div
-              className="flex flex-col gap-1 md:col-span-2"
-              role="group"
-              aria-labelledby="filter-competition-label"
-            >
-              <label className="flex flex-col gap-1">
-                <span className="font-medium">Competition</span>
-                <CompetitionSearchList
-                  value={{
-                    id: filters.competitionId || "",
-                    name: filters.competitionName || "",
-                  }}
-                  setValue={(val) =>
-                    setFilters((f: ResultsFilters) => ({
-                      ...f,
-                      competitionId: val?.id,
-                      competitionName: val?.name,
-                    }))
-                  }
-                  relayRootQuery={data}
-                />
-              </label>
-            </div>
-          )}
+          {/* Competition */}
+          <div
+            className="flex flex-col gap-1 md:col-span-2"
+            role="group"
+            aria-labelledby="filter-competition-label"
+          >
+            <label className="flex flex-col gap-1">
+              <span className="font-medium">Competition</span>
+              <CompetitionSearchList
+                value={{
+                  id: filters.competitionId || "",
+                  name: filters.competitionName || "",
+                }}
+                setValue={(val) =>
+                  setFilters((f: ResultsFilters) => ({
+                    ...f,
+                    competitionId: val?.id,
+                    competitionName: val?.name,
+                  }))
+                }
+                relayRootQuery={data}
+              />
+            </label>
+          </div>
         </div>
-
         <SectionDivider color="gray" className="pb-1" />
 
         {/* Tags */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1 md:col-span-2">
             <label className="font-medium">Tags</label>
-
             <input
               type="text"
               value={filters.tags ?? ""}
@@ -555,7 +521,6 @@ export default function ResultsFiltersModal({
               }
               className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
             />
-
             <span className="text-sm text-gray-200">
               Show Everyone&apos;s Tags
             </span>
@@ -573,7 +538,6 @@ export default function ResultsFiltersModal({
               }
               className="h-4 w-4 rounded border-neutral-700 bg-neutral-900"
             />
-
             <span className="text-sm text-gray-200">Search Only My Tags</span>
           </label>
         </div>

@@ -4,10 +4,6 @@ export const statsSideNavbarLinks = [
     state: "overview",
   },
   {
-    name: "Results",
-    state: "results",
-  },
-  {
     name: "Maps",
     state: "maps",
   },
