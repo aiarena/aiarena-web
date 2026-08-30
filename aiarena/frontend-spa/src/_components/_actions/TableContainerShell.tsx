@@ -39,7 +39,7 @@ export function TableContainerShell<T>({
     <div className={clsx(className)}>
       <div
         className={clsx(
-          "overflow-x-auto rounded-2xl border border-neutral-800 backdrop-blur-lg bg-darken-2 shadow-lg shadow-black",
+          "overflow-x-auto rounded-2xl border border-neutral-800 bg-neutral-900 shadow-lg shadow-black",
           `min-h-[${minHeight}vh]`,
         )}
       >
