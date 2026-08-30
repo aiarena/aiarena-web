@@ -67,7 +67,7 @@ export function TableContainer<T>({
 
       <div
         className={clsx(
-          "overflow-x-auto rounded-2xl border border-neutral-800 backdrop-blur-lg bg-darken-2 shadow-lg shadow-black",
+          "overflow-x-auto rounded-2xl border border-neutral-800  bg-neutral-900 shadow-lg shadow-black",
           `min-h-[${minHeight}vh]`,
         )}
       >
@@ -245,7 +245,7 @@ export function TableContainer<T>({
                       return (
                         <tr
                           key={row.id}
-                          className="even:bg-darken-4 odd:bg-darken hover:bg-darken-3 border-b border-gray-700"
+                          className="even:bg-darken-4 odd:bg-darken hover:bg-darken-3 border-b border-neutral-700"
                         >
                           {row.getVisibleCells().map((cell) => (
                             <td
