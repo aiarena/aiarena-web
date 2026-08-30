@@ -14,10 +14,16 @@ import DropdownButton from "@/_components/_actions/DropdownButton";
 import Searchbar from "@/_components/_actions/Searchbar";
 import MainButton from "@/_components/_actions/MainButton";
 import DisplaySkeletonUserBots from "@/_components/_display/_skeletons/DisplaySkeletonUserBots";
+import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 
 interface UserBotsSectionProps {
   viewer: UserBotsSection_viewer$key;
 }
+
+type BotOrderBy = {
+  display: string;
+  value: string;
+};
 
 export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
   const viewer = useFragment(
@@ -39,15 +45,22 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
 
   const [isUploadBotModalOpen, setUploadBotModalOpen] = useState(false);
   const [searchBarValue, setSearchBarValue] = useState("");
-  const [orderBy, setOrderBy] = useState({ display: "Order By", value: "" });
+
+  const [orderBy, setOrderBy] = useStateWithLocalStorage<BotOrderBy>(
+    "UserBots_OrderBy",
+    {
+      display: "Order By",
+      value: "",
+    },
+  );
 
   return (
     <section aria-labelledby="user-bots-heading">
-      <div className="flex flex-wrap-reverse w-fullitems-start">
+      <div className="flex flex-wrap-reverse w-full items-start">
         {/* Display active competition limit and current active competitions */}
         <div className="flex gap-4 flex-wrap pb-4">
           <div className="block">
-            {/*  Below section can also be deffered with Relay 19.0 */}
+            {/* Below section can also be deferred with Relay 19.0 */}
             <p className="pb-1">
               <span
                 className={clsx(
@@ -67,18 +80,19 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
               / {viewer.activeBotParticipationLimit} active competition
               participations.
             </p>
+
             <WantMore />
           </div>
         </div>
+
         <div
-          className="flex flex-wrap gap-4 ml-auto mb-4 mb-0"
+          className="flex flex-wrap gap-4 ml-auto mb-4"
           role="group"
           aria-label="Bot filtering and sorting controls"
         >
-          {viewer.user?.bots?.totalCount &&
-          viewer.user?.bots?.totalCount >= 1 ? (
+          {viewer.user?.bots?.totalCount && viewer.user.bots.totalCount >= 1 ? (
             <>
-              <Dropdown title={orderBy.display}>
+              <Dropdown title={orderBy?.display ?? "Order By"}>
                 <DropdownButton
                   onClick={() =>
                     setOrderBy({
@@ -86,7 +100,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
                       value: "-total_active_competition_participations",
                     })
                   }
-                  title={"Active Participations"}
+                  title="Active Participations"
                 />
 
                 <DropdownButton
@@ -96,8 +110,9 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
                       value: "-bot_zip_updated",
                     })
                   }
-                  title={"Last Zip Updated"}
+                  title="Last Zip Updated"
                 />
+
                 <DropdownButton
                   onClick={() =>
                     setOrderBy({
@@ -105,9 +120,10 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
                       value: "created",
                     })
                   }
-                  title={"First Created"}
+                  title="First Created"
                 />
               </Dropdown>
+
               <Searchbar
                 value={searchBarValue}
                 onChange={setSearchBarValue}
@@ -116,6 +132,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
               />
             </>
           ) : null}
+
           <div role="group" aria-label="Bot actions">
             <MainButton
               onClick={() => setUploadBotModalOpen(true)}
@@ -131,12 +148,13 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
           <UserBotsList
             user={viewer.user}
             searchBarValue={searchBarValue}
-            orderBy={orderBy.value}
+            orderBy={orderBy?.value ?? ""}
           />
         ) : (
           <></>
         )}
       </Suspense>
+
       <UploadBotModal
         isOpen={isUploadBotModalOpen}
         onClose={() => setUploadBotModalOpen(false)}
