@@ -12,6 +12,7 @@ import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import { getDotColor } from "@/_lib/getDotColor";
 import clsx from "clsx";
 import { Link } from "react-router";
+import EloTrendIcon from "../EloTrendIcon";
 
 interface UserBotCompetitionProps {
   bot: UserBotCompetitions_bot$key;
@@ -33,6 +34,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                 name
                 status
               }
+              trend
               elo
               divisionNum
               crashPerc
@@ -46,7 +48,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
         ...JoinCompetitionModal_bot
       }
     `,
-    props.bot
+    props.bot,
   );
 
   const compData = getNodes(bot.competitionParticipations);
@@ -71,7 +73,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
       <div
         className={clsx(
           "flex justify-between flex-wrap w-full gap-4",
-          hasActiveCompetitions && "mb-2 border-b border-gray-800 pb-2"
+          hasActiveCompetitions && "mb-2 border-b border-gray-800 pb-2",
         )}
       >
         {hasActiveCompetitions ? (
@@ -111,7 +113,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
         {displayCompetitions.map((competitionParticipation) => {
           const dotColor = getDotColor(
             competitionParticipation.active,
-            competitionParticipation.competition.status ?? ""
+            competitionParticipation.competition.status ?? "",
           );
 
           return (
@@ -133,7 +135,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                     to={reverseUrl("competition", {
                       pk: getIDFromBase64(
                         competitionParticipation.competition.id,
-                        "CompetitionType"
+                        "CompetitionType",
                       ),
                     })}
                     className="text-sm font-semibold"
@@ -142,7 +144,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                   </Link>
                 </div>
                 <div className="text-sm text-left flex flex-wrap">
-                  <span className="font-bold text-gray-300 mr-4 block">
+                  <span className="font-bold text-gray-300 mr-4 flex gap-2">
                     Division:{" "}
                     <span className="font-normal">
                       {competitionParticipation.divisionNum == 0
@@ -150,10 +152,14 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                         : competitionParticipation.divisionNum}
                     </span>
                   </span>
-                  <span className="font-bold text-gray-300 mr-4 block">
+                  <span className="font-bold text-gray-300 mr-4 flex gap-2">
                     Current ELO:{" "}
-                    <span className="font-normal">
+                    <span className="font-normal flex items-center gap-1">
                       {competitionParticipation.elo}
+                      <EloTrendIcon
+                        trend={competitionParticipation.trend}
+                        size={16}
+                      />
                     </span>
                   </span>
                 </div>
@@ -223,7 +229,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                       "size-5",
                       competitionParticipation.crashCount > 0
                         ? "text-red-500"
-                        : "text-gray-300"
+                        : "text-gray-300",
                     )}
                   />
                   <span className="font-bold">Crashes:</span>
@@ -232,7 +238,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                       "font-medium",
                       competitionParticipation.crashCount > 0
                         ? "text-red-500"
-                        : "text-gray-300"
+                        : "text-gray-300",
                     )}
                   >
                     {competitionParticipation.crashCount}
@@ -243,7 +249,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                   href={reverseUrl("competition_stats_root", {
                     pk: getIDFromBase64(
                       competitionParticipation.id,
-                      "CompetitionParticipationType"
+                      "CompetitionParticipationType",
                     ),
                   })}
                 >

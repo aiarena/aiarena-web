@@ -8,37 +8,43 @@ import {
 
 export default function EloTrendIcon({
   trend,
+  size = 22,
 }: {
   trend: number | null | undefined;
+  size?: number;
 }) {
   if (trend) {
     return (
       <span>
         {trend >= 30 ? (
-          <ArrowUpIcon height={22} width={22} className="text-customGreen" />
+          <ArrowUpIcon
+            height={size}
+            width={size}
+            className="text-customGreen"
+          />
         ) : trend >= 15 && trend < 30 ? (
           <ArrowTrendingUpIcon
-            height={22}
-            width={22}
+            height={size}
+            width={size}
             className="text-customGreen"
           />
         ) : trend <= -15 && trend > -30 ? (
           <ArrowTrendingDownIcon
-            height={22}
-            width={22}
+            height={size}
+            width={size}
             className="text-red-400"
           />
         ) : trend <= -30 ? (
-          <ArrowDownIcon height={22} width={22} className="text-red-400" />
+          <ArrowDownIcon height={size} width={size} className="text-red-400" />
         ) : (
-          <ArrowRightIcon height={22} width={22} />
+          <ArrowRightIcon height={size} width={size} />
         )}
       </span>
     );
   } else {
     return (
       <span>
-        <ArrowRightIcon height={22} width={22} />
+        <ArrowRightIcon height={size} width={size} />
       </span>
     );
   }
