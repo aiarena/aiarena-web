@@ -1,32 +1,39 @@
 import { Link } from "react-router";
-import { reverseUrl } from "@/_lib/reverseUrl";
 
-export default function PageNotFound() {
+export default function PageNotFound({
+  redirect,
+}: {
+  redirect: { url: string; label: string };
+}) {
   return (
-    <div className="flex flex-col items-center justify-center flex-grow text-center relative min-h-[60em]">
-      <h1
-        className="text-9xl font-extrabold tracking-widest relative"
-        aria-label="Error 404: Page Not Found"
-      >
-        404
-        <span
-          className="border-4  border-customGreen bg-neutral-900 px-3 py-1 text-sm font-semibold tracking-normal rounded rotate-6 absolute top-16 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
-          aria-hidden="true"
+    <div className="flex items-center justify-center min-h-[inherit] text-center relative">
+      <div>
+        <h1
+          className="text-9xl font-extrabold tracking-widest relative"
+          aria-label="Error 404: Page Not Found"
         >
-          Page Not Found
-        </span>
-      </h1>
-      <p className="text-lg mt-12 mb-10">
-        Sorry, we couldn&apos;t find the page you&apos;re looking for.
-      </p>
-      <Link to={reverseUrl("dashboard_root")}>
-        <span
-          className="hover:border-4 border-4 border-customGreen bg-neutral-900 hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform"
-          aria-label="Navigate back to the main dashboard with your bots"
-        >
-          Back to Bots
-        </span>
-      </Link>
+          404
+          <span
+            className="border-4 border-customGreen bg-neutral-900 px-3 py-1 text-sm font-semibold tracking-normal rounded rotate-6 absolute top-16 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+            aria-hidden="true"
+          >
+            Page Not Found
+          </span>
+        </h1>
+
+        <p className="text-lg mt-12 mb-10">
+          Sorry, we couldn&apos;t find the page you&apos;re looking for.
+        </p>
+
+        <Link to={redirect.url}>
+          <span
+            className="hover:border-4 border-4 border-customGreen bg-neutral-900 hover:bg-transparent hover:border-customGreen text-white font-semibold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform"
+            aria-label={`Navigate back to ${redirect.label}`}
+          >
+            Back to {redirect.label}
+          </span>
+        </Link>
+      </div>
     </div>
   );
 }

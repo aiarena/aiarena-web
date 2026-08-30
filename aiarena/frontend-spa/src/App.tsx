@@ -31,6 +31,7 @@ import Matchups from "./_pages/Rework/CompetitionParticipation/Pages/Matchups";
 import AdminLayout from "./AdminLayout";
 import AdminStatsPage from "./_pages/AdminStats/AdminStatsPage";
 import AdminCompetitionsPage from "./_pages/AdminCompetitions/AdminCompetitionsPage";
+import { reverseUrl } from "./_lib/reverseUrl";
 
 export default function App() {
   return (
@@ -93,12 +94,37 @@ export default function App() {
         {getFeatureFlags().examples && (
           <Route path="examples" element={<Examples />} />
         )}
-        <Route path="*" element={<PageNotFound />} />
+        <Route
+          path="*"
+          element={
+            <PageNotFound
+              redirect={{
+                label: "bots",
+                url: reverseUrl("dashboard_root"),
+              }}
+            />
+          }
+        />
       </Route>
 
       {/* <Route path="dashboard/rework">
         <Route element={<RootLayout />}></Route>
       </Route> */}
+
+      {/* Global catch-all — MUST stay last */}
+      <Route element={<RootWithPaddingLayout />}>
+        <Route
+          path="*"
+          element={
+            <PageNotFound
+              redirect={{
+                label: "home",
+                url: "/",
+              }}
+            />
+          }
+        />
+      </Route>
     </Routes>
   );
 }
