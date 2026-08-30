@@ -1,46 +1,98 @@
 import { useParams, useSearchParams } from "react-router";
-
 import { Suspense, useCallback, useMemo } from "react";
 
 import BotResultsTable, {
   ResultsFilters,
 } from "./BotResultsTable/BotResultsTable";
+
 import {
   BOT_RESULTTABLE_SORT_KEY,
   BotResultsTableSortingMap,
   decodeFiltersFromSearchParams,
   encodeFiltersToSearchParams,
 } from "./BotResultsTable/botResultTableSearchParams";
+
 import { SortingState, VisibilityState } from "@tanstack/react-table";
+
 import {
   decodeSortingFromSearchParams,
   encodeSortingToSearchParams,
 } from "@/_lib/searchParamsUtils";
+
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import FetchError from "@/_components/_display/FetchError";
 import { BotResultsQuery } from "./__generated__/BotResultsQuery.graphql";
+
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
+type Props = {
+  botZipUpdated: string;
+  botId?: string;
+  origin?: "bot" | "competition";
+  competition?: {
+    id: string;
+    name: string;
+  };
+};
+
 export default function BotResults({
   botZipUpdated,
-}: {
-  botZipUpdated: string;
-}) {
-  const { botId } = useParams<{ botId: string }>();
+  botId,
+  origin = "bot",
+  competition,
+}: Props) {
+  const { botId: routeBotId } = useParams<{
+    botId: string;
+  }>();
+
   const [searchParams, setSearchParams] = useSearchParams();
+
   const [sinceUpdated, setSinceUpdated] =
     useStateWithLocalStorage<VisibilityState>(
       "Bot_BotResultsTable_SinceUpdated",
       {},
     );
 
-  const id = getBase64FromID(botId!, "BotType") || "";
-  // const allowedSortIds = useMemo(() => new Set(["id", "date"]), []);
-  const allowedSortIds = useMemo(() => new Set(["-id"]), []);
+  const id = botId ?? getBase64FromID(routeBotId ?? "", "BotType") ?? "";
+
+  const competitionId =
+    origin === "competition" && competition?.id ? competition.id : undefined;
+
+  const filterPreset = useMemo(
+    () =>
+      competitionId
+        ? {
+            competitionId,
+            competitionName: competition?.name,
+          }
+        : undefined,
+    [competitionId, competition?.name],
+  );
+
+  const allowedSortIds = useMemo(
+    () =>
+      origin === "competition"
+        ? new Set([
+            "id",
+            "opponent",
+            "opponent_race",
+            "result",
+            "elo_change",
+            "cause",
+            "step",
+            "duration",
+            "date",
+            "tags",
+          ])
+        : new Set(["id"]),
+    [origin],
+  );
+
   const urlSorting = useMemo(
     () =>
       decodeSortingFromSearchParams(
@@ -61,10 +113,30 @@ export default function BotResults({
     [searchParams, botZipUpdated, sinceUpdated],
   );
 
+  const effectiveFilters = useMemo<ResultsFilters>(
+    () => ({
+      ...urlFilters,
+
+      ...(filterPreset
+        ? {
+            competitionId: filterPreset.competitionId,
+
+            competitionName: filterPreset.competitionName,
+          }
+        : {}),
+    }),
+    [urlFilters, filterPreset],
+  );
+
   const urlOrderBy = useMemo(() => {
     const s = urlSorting?.[0];
-    if (!s) return "-id";
+
+    if (!s) {
+      return "-id";
+    }
+
     const backendField = BotResultsTableSortingMap[s.id] ?? "-id";
+
     return s.desc ? `-${backendField}` : backendField;
   }, [urlSorting]);
 
@@ -131,39 +203,73 @@ export default function BotResults({
       cursor: null,
       first: 50,
       orderBy: urlOrderBy,
-      opponentId: urlFilters.opponentId,
-      opponentPlaysRace: urlFilters.opponentPlaysRaceId,
-      result: urlFilters.result?.toLowerCase(),
-      cause: urlFilters.cause?.toLowerCase(),
-      avgStepTimeMin: urlFilters.avgStepTimeMin ?? null,
-      avgStepTimeMax: urlFilters.avgStepTimeMax ?? null,
-      gameTimeMin: urlFilters.gameTimeMin,
-      gameTimeMax: urlFilters.gameTimeMax,
-      matchType: urlFilters.matchType?.toLowerCase(),
-      mapName: urlFilters.mapName,
-      competitionId: urlFilters.competitionId,
-      matchStartedAfter: urlFilters.matchStartedAfter
-        ? urlFilters.matchStartedAfter
-        : sinceUpdated?.sinceUpdated
-          ? botZipUpdated
-          : null,
-      matchStartedBefore: urlFilters.matchStartedBefore,
-      tags: urlFilters.tags,
-      searchOnlyMyTags: urlFilters.searchOnlyMyTags ?? false,
-      showEveryonesTags: urlFilters.showEveryonesTags ?? false,
-      includeStarted: urlFilters.includeStarted ?? false,
-      includeQueued: urlFilters.includeQueued ?? false,
-      includeFinished: urlFilters.includeFinished ?? true,
+
+      opponentId: effectiveFilters.opponentId || null,
+
+      opponentPlaysRace: effectiveFilters.opponentPlaysRaceId || null,
+
+      result: effectiveFilters.result?.toLowerCase() || null,
+
+      cause: effectiveFilters.cause?.toLowerCase() || null,
+
+      avgStepTimeMin: effectiveFilters.avgStepTimeMin ?? null,
+
+      avgStepTimeMax: effectiveFilters.avgStepTimeMax ?? null,
+
+      gameTimeMin: effectiveFilters.gameTimeMin ?? null,
+
+      gameTimeMax: effectiveFilters.gameTimeMax ?? null,
+
+      matchType: effectiveFilters.matchType?.toLowerCase() || null,
+
+      mapName: effectiveFilters.mapName || null,
+
+      competitionId: effectiveFilters.competitionId || null,
+
+      matchStartedAfter:
+        effectiveFilters.matchStartedAfter ||
+        (sinceUpdated?.sinceUpdated ? botZipUpdated : null),
+
+      matchStartedBefore: effectiveFilters.matchStartedBefore || null,
+
+      tags: effectiveFilters.tags || null,
+
+      searchOnlyMyTags: effectiveFilters.searchOnlyMyTags ?? false,
+
+      showEveryonesTags: effectiveFilters.showEveryonesTags ?? false,
+
+      includeStarted: effectiveFilters.includeStarted ?? false,
+
+      includeQueued: effectiveFilters.includeQueued ?? false,
+
+      includeFinished: effectiveFilters.includeFinished ?? true,
     },
   );
 
   const applyFiltersToUrl = useCallback(
     (next: ResultsFilters, replace = false) => {
-      const nextSearchParam = encodeFiltersToSearchParams(next, searchParams);
-      setSearchParams(nextSearchParam, { replace });
+      const filters: ResultsFilters = filterPreset
+        ? {
+            ...next,
+
+            competitionId: filterPreset.competitionId,
+
+            competitionName: filterPreset.competitionName,
+          }
+        : next;
+
+      const nextSearchParam = encodeFiltersToSearchParams(
+        filters,
+        searchParams,
+      );
+
+      setSearchParams(nextSearchParam, {
+        replace,
+      });
     },
-    [searchParams, setSearchParams],
+    [filterPreset, searchParams, setSearchParams],
   );
+
   const applySortingToUrl = useCallback(
     (next: SortingState, replace = false) => {
       const nextSearchParam = encodeSortingToSearchParams(
@@ -171,7 +277,10 @@ export default function BotResults({
         searchParams,
         BOT_RESULTTABLE_SORT_KEY,
       );
-      setSearchParams(nextSearchParam, { replace });
+
+      setSearchParams(nextSearchParam, {
+        replace,
+      });
     },
     [searchParams, setSearchParams],
   );
@@ -182,17 +291,19 @@ export default function BotResults({
 
   return (
     <Suspense
-      key={botId}
+      key={id}
       fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
     >
       <ErrorBoundaryWrapper>
         <BotResultsTable
           data={resultData.node}
+          origin={origin}
+          filterPreset={filterPreset}
           onApplyFilters={applyFiltersToUrl}
           onApplySort={applySortingToUrl}
           sinceUpdated={sinceUpdated}
           setSinceUpdated={setSinceUpdated}
-          initialFilters={urlFilters}
+          initialFilters={effectiveFilters}
           initialSorting={urlSorting}
           botZipUpdated={botZipUpdated}
         />

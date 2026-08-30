@@ -6,9 +6,12 @@ import AuthorProfile from "./AuthorProfile";
 import { AuthorSectionQuery } from "./__generated__/AuthorSectionQuery.graphql";
 import AuthorBotsTable from "./AuthorBots";
 import FetchError from "@/_components/_display/FetchError";
+import AuthorMatchRequests from "./AuthorMatchRequests";
 
 export default function AuthorSection() {
-  const { userId: authorId } = useParams<{ userId: string }>();
+  const { userId: authorId } = useParams<{
+    userId: string;
+  }>();
 
   const data = useLazyLoadQuery<AuthorSectionQuery>(
     graphql`
@@ -17,11 +20,14 @@ export default function AuthorSection() {
           ... on UserType {
             ...AuthorProfile_user
             ...AuthorBotsTable_user
+            ...AuthorMatchRequests_user
           }
         }
       }
     `,
-    { id: getBase64FromID(authorId!, "UserType") || "" },
+    {
+      id: getBase64FromID(authorId!, "UserType") || "",
+    },
   );
 
   if (!data.node) {
@@ -32,12 +38,20 @@ export default function AuthorSection() {
     <>
       <div className="mb-8">
         <h4 className="mb-4">Author</h4>
+
         <AuthorProfile author={data.node} />
       </div>
 
       <div className="mb-8">
         <h4 className="mb-4">Bots</h4>
+
         <AuthorBotsTable data={data.node} />
+      </div>
+
+      <div className="mb-8">
+        <h4 className="mb-4">Match Requests</h4>
+
+        <AuthorMatchRequests data={data.node} />
       </div>
     </>
   );

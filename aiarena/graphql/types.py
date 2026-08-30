@@ -606,8 +606,21 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
 
 
 class MatchParticipationFilterSet(FilterSet):
+    ORDER_BY_FIELDS = (
+        "id",
+        "opponent_name",
+        "opponent_plays_race_name",
+        "result",
+        "elo_change",
+        "result_cause",
+        "avg_step_time",
+        "match__result__game_steps",
+        "match__result__created",
+        "match__tags__tag__name",
+    )
+
     order_by = OrderingFilter(
-        fields=["id", "match__result__created"],
+        fields=ORDER_BY_FIELDS,
         method="filter_order_by",
     )
     opponent_id = django_filters.CharFilter(method="filter_opponent_id")
@@ -670,18 +683,21 @@ class MatchParticipationFilterSet(FilterSet):
 
     def filter_order_by(self, queryset, name, value):
         order_fields = value if isinstance(value, list) else [value]
+        allowed_fields = set(self.ORDER_BY_FIELDS)
 
-        normalized = []
-        for field in order_fields:
-            # if field in {"id", "-id", "match__result__created", "-match__result__created"}:
-            if field in {"id", "-id"}:
-                normalized.append(field)
+        competition_id = self.form.cleaned_data.get("competition_id")
+
+        if not competition_id and any(field.lstrip("-") != "id" for field in order_fields):
+            raise ValueError("Sorting by fields other than 'id' requires competition_id.")
+
+        if any(field.lstrip("-") in {"opponent_name", "opponent_plays_race_name"} for field in order_fields):
+            queryset = self._with_opponent_annotation(queryset)
+
+        normalized = [field for field in order_fields if field.lstrip("-") in allowed_fields]
 
         if not normalized:
-            # normalized = ["-match__result__created", "-id"]
             normalized = ["-id"]
-
-        elif all(f not in {"id", "-id"} for f in normalized):
+        elif all(field.lstrip("-") != "id" for field in normalized):
             normalized.append("-id")
 
         return queryset.order_by(*normalized)
@@ -752,6 +768,12 @@ class MatchParticipationFilterSet(FilterSet):
             opponent_plays_race=Subquery(
                 opponent_qs.values("bot__plays_race_id")[:1],
                 output_field=IntegerField(),
+            ),
+            opponent_plays_race_name=Subquery(
+                opponent_qs.annotate(
+                    lower_race_name=Lower("bot__plays_race__label"),
+                ).values("lower_race_name")[:1],
+                output_field=CharField(),
             ),
             opponent_id=Subquery(
                 opponent_qs.values("bot__id")[:1],
@@ -1639,6 +1661,10 @@ class UserType(DjangoObjectTypeWithUID):
     # put data everyone should be able view here.
 
     bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
+    requested_matches = DjangoFilterConnectionField(
+        "aiarena.graphql.MatchType",
+        filterset_class=MatchFilterSet,
+    )
     avatar_url = graphene.String()
 
     class Meta:
@@ -1649,6 +1675,10 @@ class UserType(DjangoObjectTypeWithUID):
     @staticmethod
     def resolve_bots(root: models.User, info, **args):
         return root.bots.select_related("user", "plays_race").order_by("-bot_zip_updated")
+
+    @staticmethod
+    def resolve_requested_matches(root: models.User, info, **args):
+        return root.requested_matches.order_by("-started", "-id")
 
     @staticmethod
     def resolve_avatar_url(root: models.User, info):

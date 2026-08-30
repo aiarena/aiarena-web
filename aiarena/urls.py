@@ -112,6 +112,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("competitions/stats/<int:pk>/overview/elograph", core_views.frontend, name="competition_stats_elograph"),
     path("competitions/stats/<int:pk>/overview/winsbytime", core_views.frontend, name="competition_stats_winsbytime"),
     path("competitions/stats/<int:pk>/overview/winsbyrace", core_views.frontend, name="competition_stats_winsbyrace"),
+    path("competitions/stats/<int:pk>/results", core_views.frontend, name="competition_stats_results"),
     path("competitions/stats/<int:pk>/maps", core_views.frontend, name="competition_stats_maps"),
     path("competitions/stats/<int:pk>/matchups", core_views.frontend, name="competition_stats_matchups"),
     path("competitions/stats/<int:pk>/<path:rest>", core_views.frontend, name="bot_competition_stats"),
