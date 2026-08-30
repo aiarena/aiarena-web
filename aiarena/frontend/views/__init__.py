@@ -17,6 +17,8 @@ from .competition_participation_update import CompetitionParticipationUpdate
 from .frontend import frontend
 from .graphql import CustomGraphQLView
 from .health_check import health_check, health_check_with_db
+from .http_403 import react_403
+from .http_404 import react_404
 from .http_500 import http_500
 from .index import Index
 from .match_detail import MatchDetail, MatchTagFormView

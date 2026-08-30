@@ -139,11 +139,12 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     # Serves any other dashboard sub-path on a cold load (incl. React's own 404). Not
     # reversible to a specific path — the named entries above are the reverse targets.
     re_path("^dashboard/.*", core_views.frontend, name="dashboard"),
-    # Global catch-all — MUST stay last
-    re_path(r"^.*$", core_views.frontend, name="frontend_catchall"),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )  # https://stackoverflow.com/questions/5517950/django-media-url-and-media-root
+
+handler403 = core_views.http_403.react_403
+handler404 = core_views.http_404.react_404
 
 if settings.DJDT:
     # debug_toolbar isn't in INSTALLED_APPS outside of DJDT (see aiarena/settings/__init__.py),
