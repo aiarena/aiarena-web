@@ -11,7 +11,7 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import clsx from "clsx";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { parseSort } from "@/_lib/tanstack_utils";
 
@@ -168,41 +168,47 @@ export default function BotResultsTable(props: BotResultsTableProps) {
 
   const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
   const [isFiltersModalOpen, setIsFiltersModalOpen] = useState(false);
-  const withFilterPreset = (next: ResultsFilters): ResultsFilters => {
-    if (props.origin !== "competition" || !props.filterPreset) {
-      return next;
-    }
-    return {
-      ...next,
-      competitionId: props.filterPreset.competitionId,
-      competitionName: props.filterPreset.competitionName,
-    };
-  };
+  const withFilterPreset = useCallback(
+    (next: ResultsFilters): ResultsFilters => {
+      if (props.origin !== "competition" || !props.filterPreset) {
+        return next;
+      }
+      return {
+        ...next,
+        competitionId: props.filterPreset.competitionId,
+        competitionName: props.filterPreset.competitionName,
+      };
+    },
+    [props.origin, props.filterPreset],
+  );
 
-  const defaultFilters: ResultsFilters = {
-    opponentName: undefined,
-    opponentId: undefined,
-    opponentPlaysRaceId: undefined,
-    opponentPlaysRaceName: undefined,
-    result: undefined,
-    cause: undefined,
-    avgStepTimeMin: undefined,
-    avgStepTimeMax: undefined,
-    gameTimeMin: undefined,
-    gameTimeMax: undefined,
-    matchType: undefined,
-    mapName: undefined,
-    competitionId: props.filterPreset?.competitionId || undefined,
-    competitionName: props.filterPreset?.competitionName || undefined,
-    matchStartedAfter: props.sinceUpdated ? props.botZipUpdated : undefined,
-    matchStartedBefore: undefined,
-    tags: undefined,
-    searchOnlyMyTags: undefined,
-    showEveryonesTags: undefined,
-    includeStarted: false,
-    includeQueued: false,
-    includeFinished: true,
-  };
+  const defaultFilters = useMemo<ResultsFilters>(
+    () => ({
+      opponentName: undefined,
+      opponentId: undefined,
+      opponentPlaysRaceId: undefined,
+      opponentPlaysRaceName: undefined,
+      result: undefined,
+      cause: undefined,
+      avgStepTimeMin: undefined,
+      avgStepTimeMax: undefined,
+      gameTimeMin: undefined,
+      gameTimeMax: undefined,
+      matchType: undefined,
+      mapName: undefined,
+      competitionId: props.filterPreset?.competitionId || undefined,
+      competitionName: props.filterPreset?.competitionName || undefined,
+      matchStartedAfter: props.sinceUpdated ? props.botZipUpdated : undefined,
+      matchStartedBefore: undefined,
+      tags: undefined,
+      searchOnlyMyTags: undefined,
+      showEveryonesTags: undefined,
+      includeStarted: false,
+      includeQueued: false,
+      includeFinished: true,
+    }),
+    [props.filterPreset, props.sinceUpdated, props.botZipUpdated],
+  );
 
   const [filters, setFilters] = useState<ResultsFilters>(() => {
     const initial = props.initialFilters
@@ -230,7 +236,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         ...props.initialFilters,
       }),
     );
-  }, [props.initialFilters]);
+  }, [props.initialFilters, defaultFilters, withFilterPreset]);
 
   const columnHelper = createColumnHelper<BotResultsRow>();
   const enableAdvancedSorting = props.origin === "competition";
