@@ -32,6 +32,7 @@ import AdminLayout from "./AdminLayout";
 import AdminStatsPage from "./_pages/AdminStats/AdminStatsPage";
 import AdminCompetitionsPage from "./_pages/AdminCompetitions/AdminCompetitionsPage";
 import { reverseUrl } from "./_lib/reverseUrl";
+import CompetitionParticipationResults from "./_pages/Rework/CompetitionParticipation/Pages/CompetitionParticipationResults";
 
 export default function App() {
   return (
@@ -76,6 +77,7 @@ export default function App() {
             <Route path="winsbyrace" element={<WinsByRace />} />
           </Route>
 
+          <Route path="results" element={<CompetitionParticipationResults />} />
           <Route path="maps" element={<Maps />} />
           <Route path="matchups" element={<Matchups />} />
         </Route>

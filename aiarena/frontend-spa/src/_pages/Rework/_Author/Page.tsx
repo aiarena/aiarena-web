@@ -20,6 +20,10 @@ export default function AuthorPage() {
               <h4 className="mb-4">Bots</h4>
               <DisplaySkeleton height={200} styles={SkeletonCardShadow} />
             </div>
+            <div className="mb-8">
+              <h4 className="mb-4">Match Requests</h4>
+              <DisplaySkeleton height={600} styles={SkeletonCardShadow} />
+            </div>
           </>
         }
       >
