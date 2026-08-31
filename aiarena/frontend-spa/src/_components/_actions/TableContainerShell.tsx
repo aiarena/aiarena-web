@@ -129,18 +129,15 @@ export function TableContainerShell<T>({
                               )}
                               {header.column.getCanSort() && (
                                 <>
-                                  {header.column.getIsSorted() === "asc" ? (
+                                  {header.column.getIsSorted() === "desc" ? (
                                     <span>
-                                      <ArrowUpIcon className="size-5 group-hover:hidden" />
-                                      <ArrowDownIcon className="size-5 hidden group-hover:inline" />
+                                      <ArrowUpIcon className="size-5" />
                                     </span>
-                                  ) : header.column.getIsSorted() === "desc" ? (
+                                  ) : header.column.getIsSorted() === "asc" ? (
                                     <span>
-                                      <ArrowDownIcon className="size-5 opacity-100 group-hover:opacity-0" />
+                                      <ArrowDownIcon className="size-5 " />
                                     </span>
-                                  ) : (
-                                    <ArrowUpIcon className="size-5 opacity-0 group-hover:opacity-100" />
-                                  )}
+                                  ) : null}
                                 </>
                               )}
                             </div>
