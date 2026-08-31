@@ -111,7 +111,7 @@ export default function Bot() {
           ) : (
             <span>Stats Page</span>
           )}{" "}
-          — it supports all sorts.
+          — it support sorting on all fields.
         </p>
       </div>
       {!loadResults ? (

@@ -24,6 +24,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
       fragment UserBotCompetitions_bot on BotType {
         id
         name
+
         competitionParticipations {
           edges {
             node {
@@ -34,7 +35,6 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                 name
                 status
               }
-              trend
               elo
               divisionNum
               crashPerc
@@ -45,6 +45,18 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
             }
           }
         }
+
+        activeCompetitionParticipations: competitionParticipations(
+          active: true
+        ) {
+          edges {
+            node {
+              id
+              trend
+            }
+          }
+        }
+
         ...JoinCompetitionModal_bot
       }
     `,
@@ -52,13 +64,25 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
   );
 
   const compData = getNodes(bot.competitionParticipations);
+  const activeCompetitionData = getNodes(bot.activeCompetitionParticipations);
+
   const [displayAllCompetitions, setDisplayAllCompetitions] = useState(false);
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
     useState(false);
   const [isJoinCompetitionModalLoading, setIsJoinCompetitionModalLoading] =
     useState(false);
 
-  const activeCompetitions = (compData ?? []).filter((e) => e.active);
+  const trendByParticipationId = new Map(
+    activeCompetitionData.map((competitionParticipation) => [
+      competitionParticipation.id,
+      competitionParticipation.trend,
+    ]),
+  );
+
+  const activeCompetitions = compData.filter(
+    (competitionParticipation) => competitionParticipation.active,
+  );
+
   const displayCompetitions = displayAllCompetitions
     ? compData
     : activeCompetitions;
@@ -87,6 +111,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
             consider joining a competition.
           </p>
         )}
+
         <div className="flex flex-wrap gap-4">
           {hasInactiveCompetitions && (
             <label className="flex items-center gap-2 cursor-pointer">
@@ -99,6 +124,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
               <span>Show All</span>
             </label>
           )}
+
           <SquareButton
             text="Edit Participations"
             onClick={() => setJoinCompetitionModalOpen(true)}
@@ -108,13 +134,15 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
         </div>
       </div>
 
-      {/* List Active Competitions */}
+      {/* Competitions List */}
       <div className="space-y-4">
         {displayCompetitions.map((competitionParticipation) => {
           const dotColor = getDotColor(
             competitionParticipation.active,
             competitionParticipation.competition.status ?? "",
           );
+
+          const trend = trendByParticipationId.get(competitionParticipation.id);
 
           return (
             <div
@@ -125,12 +153,15 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
               <div className="space-y-2">
                 <div className="flex items-center space-x-2 border-b border-gray-600 pb-2">
                   <div
-                    title={`Competition Status: ${competitionParticipation.competition.status} \nParticipating: ${
+                    title={`Competition Status: ${
+                      competitionParticipation.competition.status
+                    } \nParticipating: ${
                       competitionParticipation.active ? "Yes" : "No"
                     }`}
                   >
                     <ActiveDot color={dotColor} />
                   </div>
+
                   <Link
                     to={reverseUrl("competition", {
                       pk: getIDFromBase64(
@@ -143,6 +174,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                     {competitionParticipation.competition.name}
                   </Link>
                 </div>
+
                 <div className="text-sm text-left flex flex-wrap">
                   <span className="font-bold text-gray-300 mr-4 flex gap-2">
                     Division:{" "}
@@ -152,14 +184,15 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                         : competitionParticipation.divisionNum}
                     </span>
                   </span>
+
                   <span className="font-bold text-gray-300 mr-4 flex gap-2">
                     Current ELO:{" "}
                     <span className="font-normal flex items-center gap-1">
                       {competitionParticipation.elo}
-                      <EloTrendIcon
-                        trend={competitionParticipation.trend}
-                        size={16}
-                      />
+
+                      {competitionParticipation.active && trend != null && (
+                        <EloTrendIcon trend={trend} size={16} />
+                      )}
                     </span>
                   </span>
                 </div>
@@ -190,6 +223,7 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                       d="M10 8l6 4-6 4V8z"
                     />
                   </svg>
+
                   <span className="font-bold">Matches:</span>
                   <span>{competitionParticipation.matchCount}</span>
                 </div>
@@ -210,11 +244,15 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                       d="M4 4v6h6M20 20v-6h-6M7.778 16.222a8.002 8.002 0 0011.446 0m.007-8.444a8.002 8.002 0 00-11.46 0"
                     />
                   </svg>
+
                   <span className="font-bold">Win/Loss:</span>
+
                   <span className="text-customGreen font-medium">
                     {(competitionParticipation.winPerc ?? 0).toFixed(1)}%
                   </span>
+
                   <span>/</span>
+
                   <span className="text-red-500 font-medium">
                     {(competitionParticipation.lossPerc ?? 0).toFixed(1)}%
                   </span>
@@ -232,7 +270,9 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
                         : "text-gray-300",
                     )}
                   />
+
                   <span className="font-bold">Crashes:</span>
+
                   <span
                     className={clsx(
                       "font-medium",
