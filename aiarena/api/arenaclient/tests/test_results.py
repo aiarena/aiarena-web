@@ -111,7 +111,7 @@ class ResultsTestCase(LoggedInMixin, TransactionTestCase):
         not_started_match = Match.objects.filter(started__isnull=True, result__isnull=True).first()
 
         # should fail
-        response = self._post_to_results(not_started_match.id, "Player1Win", expected_code=500)
+        response = self._post_to_results(not_started_match.id, "Player1Win", expected_code=409)
         self.assertTrue("detail" in response.data)
         self.assertEqual("Unable to log result: Bot bot1 is not currently in this match!", response.data["detail"])
 
