@@ -1,6 +1,7 @@
 import json
 from datetime import timedelta
 from io import StringIO
+from unittest import mock
 
 from django.core import serializers
 from django.core.management import CommandError, call_command
@@ -17,6 +18,7 @@ from aiarena.core.models import (
     Match,
     MatchParticipation,
     Result,
+    Round,
     User,
 )
 from aiarena.core.services import ladders
@@ -210,6 +212,58 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
             out = StringIO()
             call_command("finalizecompetition", "--competitionid", competition.id, stdout=out)
             self.assertIn(f"WARNING: Competition {competition.id} is already finalized. Skipping...", out.getvalue())
+
+    def test_deletecompetition_nonexistent(self):
+        with self.assertRaisesMessage(CommandError, "Competition with id 999999 does not exist."):
+            call_command("deletecompetition", "999999")
+
+    def test_deletecompetition_cancelled_when_confirmation_does_not_match(self):
+        competition = Competition.objects.get(name="Competition 1")
+
+        out = StringIO()
+        with mock.patch("builtins.input", return_value="not the competition name"):
+            call_command("deletecompetition", competition.id, stdout=out)
+
+        self.assertIn("Deletion cancelled.", out.getvalue())
+        self.assertTrue(Competition.objects.filter(id=competition.id).exists())
+
+    def test_deletecompetition(self):
+        NUM_MATCHES = 6  # one full round for the 4 active bots in this fixture (see _generate_files_to_cleanup)
+        participants, results = self._generate_files_to_cleanup(NUM_MATCHES)
+        competition = Competition.objects.get(name="Competition 1")
+
+        # capture file references before deletion, since the rows won't exist afterwards to look them up again
+        replay_file = results.first().replay_file
+        arenaclient_log = results.first().arenaclient_log
+        match_log = participants.first().match_log
+        self.assertTrue(replay_file.storage.exists(replay_file.name))
+        self.assertTrue(arenaclient_log.storage.exists(arenaclient_log.name))
+        self.assertTrue(match_log.storage.exists(match_log.name))
+
+        out = StringIO()
+        with mock.patch("builtins.input", return_value=competition.name):
+            call_command("deletecompetition", competition.id, stdout=out)
+
+        self.assertIn(f"Competition {competition.id} (Competition 1) deleted.", out.getvalue())
+
+        self.assertFalse(Competition.objects.filter(id=competition.id).exists())
+        self.assertFalse(Round.objects.filter(competition_id=competition.id).exists())
+        self.assertFalse(Match.objects.filter(round__competition_id=competition.id).exists())
+        self.assertFalse(CompetitionParticipation.objects.filter(competition_id=competition.id).exists())
+
+        # the replay, arena client log and match log files should have been removed from storage too
+        self.assertFalse(replay_file.storage.exists(replay_file.name))
+        self.assertFalse(arenaclient_log.storage.exists(arenaclient_log.name))
+        self.assertFalse(match_log.storage.exists(match_log.name))
+
+    def test_deletecompetition_noinput(self):
+        competition = Competition.objects.get(name="Competition 1")
+
+        out = StringIO()
+        call_command("deletecompetition", competition.id, "--noinput", stdout=out)
+
+        self.assertIn(f"Competition {competition.id} (Competition 1) deleted.", out.getvalue())
+        self.assertFalse(Competition.objects.filter(id=competition.id).exists())
 
     def test_generatestats_competition(self):
         self._generate_full_data_set()
