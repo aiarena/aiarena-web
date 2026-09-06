@@ -5,6 +5,8 @@ import { getBase64FromID } from "@/_lib/relayHelpers";
 import FetchError from "@/_components/_display/FetchError";
 import { CompetitionParticipationResultsQuery } from "./__generated__/CompetitionParticipationResultsQuery.graphql";
 import BotResults from "../../Bot/BotResults";
+import { Suspense } from "react";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 
 export default function CompetitionParticipationResults() {
   const { id } = useParams<{ id: string }>();
@@ -38,15 +40,23 @@ export default function CompetitionParticipationResults() {
 
   return (
     <div className="px-2 pb-8">
-      <BotResults
-        origin="competition"
-        botId={data.node.bot.id}
-        botZipUpdated={data.node.bot.botZipUpdated}
-        competition={{
-          id: data.node.competition.id,
-          name: data.node.competition.name,
-        }}
-      />
+      <Suspense
+        fallback={
+          <div className="flex flex-col gap-4">
+            <DisplaySkeleton height={1200} />
+          </div>
+        }
+      >
+        <BotResults
+          origin="competition"
+          botId={data.node.bot.id}
+          botZipUpdated={data.node.bot.botZipUpdated}
+          competition={{
+            id: data.node.competition.id,
+            name: data.node.competition.name,
+          }}
+        />
+      </Suspense>
     </div>
   );
 }
