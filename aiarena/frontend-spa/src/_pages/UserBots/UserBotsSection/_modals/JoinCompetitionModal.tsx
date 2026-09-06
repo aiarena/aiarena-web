@@ -12,6 +12,7 @@ import Modal from "@/_components/_actions/Modal";
 import { JoinCompetitionModalMutation } from "./__generated__/JoinCompetitionModalMutation.graphql";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
+import { Link } from "react-router";
 
 interface JoinCompetitionModalProps {
   bot: JoinCompetitionModal_bot$key;
@@ -146,15 +147,15 @@ export default function JoinCompetitionModal({
             >
               <div className="block">
                 <div>
-                  <a
-                    href={reverseUrl("competition", {
+                  <Link
+                    to={reverseUrl("competition", {
                       pk: getIDFromBase64(comp.id, "CompetitionType"),
                     })}
                     target="_blank"
                     className="font-bold"
                   >
                     {comp.name}
-                  </a>
+                  </Link>
                   <p>{comp.status}</p>
                 </div>
               </div>
