@@ -25,6 +25,14 @@ export default function EloGraph() {
             competition {
               id
               name
+              rounds {
+                edges {
+                  node {
+                    number
+                    started
+                  }
+                }
+              }
             }
             elo
             ...EloChart_node
@@ -61,7 +69,7 @@ export default function EloGraph() {
           {data.node.bot ? (
             <div className="flex flex-col gap-4">
               <>
-                <EloChart data={data.node} />
+                <EloChart data={data.node} rounds={data.node.competition?.rounds?.edges ?? []} />
                 <Summary data={data.node} />
               </>
             </div>
