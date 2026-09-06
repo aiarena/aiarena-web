@@ -94,7 +94,6 @@ export default function EloChart(props: EloChartProps) {
 
   const roundAnnotations: Record<string, object> = {};
   if (eloChart?.roundStarts) {
-    console.log("yes.", eloChart);
     for (const round of eloChart.roundStarts) {
       if (round == null) continue;
       roundAnnotations[`round_${round.number}`] = {
