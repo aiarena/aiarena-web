@@ -513,7 +513,6 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
                 last_updated = candidate_last_updated
             else:
                 last_updated = None
-
             datasets = [
                 {
                     "label": "ELO",
@@ -523,10 +522,21 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
                 }
             ]
 
+            round_starts = None
+            if competition.round_set.count() < 30:
+                round_starts = [
+                    {
+                        "number": r.number,
+                        "started": r.started.timestamp() * 1000,
+                    }
+                    for r in competition.round_set.order_by("started")
+                ]
+
         return {
             "title": "ELO over time",
             "lastUpdated": last_updated,
             "data": {"datasets": datasets},
+            "roundStarts": round_starts,
         }
 
     @staticmethod

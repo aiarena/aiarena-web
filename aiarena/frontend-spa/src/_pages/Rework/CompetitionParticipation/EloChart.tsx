@@ -1,6 +1,6 @@
 import { graphql, useFragment } from "react-relay";
 import { EloChart_node$key } from "./__generated__/EloChart_node.graphql";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 import {
   Chart as ChartJS,
@@ -28,12 +28,6 @@ ChartJS.register(
 
 interface EloChartProps {
   data: EloChart_node$key;
-  rounds: ReadonlyArray<{
-    readonly node: {
-      readonly number: number;
-      readonly started: string;
-    } | null | undefined;
-  } | null | undefined>;
 }
 
 export default function EloChart(props: EloChartProps) {
@@ -53,6 +47,10 @@ export default function EloChart(props: EloChartProps) {
                 y
               }
             }
+          }
+          roundStarts {
+            number
+            started
           }
         }
       }
@@ -78,9 +76,6 @@ export default function EloChart(props: EloChartProps) {
       ],
     };
   }, [dataset0]);
-  useEffect(() => {
-    console.log(chartData);
-  }, [chartData]);
 
   if (!chartData)
     return (
@@ -98,27 +93,29 @@ export default function EloChart(props: EloChartProps) {
     eloChart?.lastUpdated != null ? Number(eloChart.lastUpdated) : null;
 
   const roundAnnotations: Record<string, object> = {};
-  for (const edge of props.rounds) {
-    const round = edge?.node;
-    if (!round) continue;
-    roundAnnotations[`round_${round.number}`] = {
-      type: "line" as const,
-      scaleID: "x",
-      value: new Date(round.started).getTime(),
-      borderColor: "rgba(100,149,237,0.5)",
-      borderWidth: 1,
-      borderDash: [4, 4],
-      label: {
-        display: true,
-        content: round.number === 1 ? "Round 1" : `${round.number}`,
-        position: "start" as const,
-        yAdjust: -8,
-        backgroundColor: "rgba(0,0,0,0.6)",
-        color: "rgba(100,149,237,0.9)",
-        padding: 4,
-        font: { size: 10 },
-      },
-    };
+  if (eloChart?.roundStarts) {
+    console.log("yes.", eloChart);
+    for (const round of eloChart.roundStarts) {
+      if (round == null) continue;
+      roundAnnotations[`round_${round.number}`] = {
+        type: "line" as const,
+        scaleID: "x",
+        value: round.started,
+        borderColor: "rgba(125,125,125,0.5)",
+        borderWidth: 1,
+        borderDash: [4, 4],
+        label: {
+          display: true,
+          content: `Round ${round.number}`,
+          position: "start" as const,
+          yAdjust: -8,
+          backgroundColor: "rgba(0,0,0,0.6)",
+          color: "rgba(134,194,50,0.9)",
+          padding: 4,
+          font: { size: 10 },
+        },
+      };
+    }
   }
 
   return (

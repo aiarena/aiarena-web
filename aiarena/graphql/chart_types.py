@@ -18,10 +18,16 @@ class EloChartDataType(graphene.ObjectType):
     datasets = graphene.List(EloDatasetType, required=True)
 
 
+class RoundStartType(graphene.ObjectType):
+    number = graphene.Int(required=True)
+    started = graphene.Float(required=True)
+
+
 class EloChartType(graphene.ObjectType):
     title = graphene.String(required=True)
     lastUpdated = graphene.Float()
     data = graphene.Field(EloChartDataType, required=True)
+    roundStarts = graphene.List(RoundStartType)
 
 
 ## Winrate By Time
