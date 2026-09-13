@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import F, Prefetch, Sum
 
 from constance import config
-from rest_framework.exceptions import APIException
 
 from aiarena.core.models import (
     BotCrashLimitAlert,
@@ -21,6 +20,7 @@ from aiarena.core.models import (
 from aiarena.core.services import bot_statistics, bots, competitions
 from aiarena.core.utils import parse_tags
 
+from .exceptions import ResultSubmissionConflict
 from .serializers import (
     SubmitResultBotSerializer,
     SubmitResultParticipationSerializer,
@@ -121,7 +121,7 @@ def submit_result(result_submission: ResultSubmission):
             f"A result was submitted for match {result_submission.match.id}, "
             f"which Bot {result_submission.p1_instance.bot.name} isn't currently in!"
         )
-        raise APIException(
+        raise ResultSubmissionConflict(
             f"Unable to log result: Bot {result_submission.p1_instance.bot.name} is not currently in this match!"
         )
     if not result_submission.p2_instance.bot.is_in_match(result_submission.match.id):
@@ -129,7 +129,7 @@ def submit_result(result_submission: ResultSubmission):
             f"A result was submitted for match {result_submission.match.id}, "
             f"which Bot {result_submission.p2_instance.bot.name} isn't currently in!"
         )
-        raise APIException(
+        raise ResultSubmissionConflict(
             f"Unable to log result: Bot {result_submission.p2_instance.bot.name} is not currently in this match!"
         )
     bot1 = None
