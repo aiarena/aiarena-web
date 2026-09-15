@@ -20,6 +20,11 @@ logger = logging.getLogger(__name__)
 class Competition(models.Model, LockableModelMixin):
     """Represents a competition of play in the context of a ladder"""
 
+    DIVISION_SIZING_MODES = (
+        ("manual", "Manual"),
+        ("automatic", "Automatic"),
+    )
+
     COMPETITION_STATUSES = (
         ("created", "Created"),  # The initial state for a competition. Functionally identical to paused.
         ("frozen", "Frozen"),  # While a competition is frozen, no matches are played
@@ -56,10 +61,19 @@ class Competition(models.Model, LockableModelMixin):
     interest = models.IntegerField(default=0, blank=True)
 
     # Defines target number of divisions to create when a new cycle begins.
+    # Manual mode preserves the historic target/cap based behaviour. Automatic
+    # mode calculates the division count from the active participant count.
+    division_sizing_mode = models.CharField(
+        max_length=16,
+        choices=DIVISION_SIZING_MODES,
+        default="manual",
+    )
     target_n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     n_divisions = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     # Defines the minimum size of each division, also defines when divisions will split.
     target_division_size = models.IntegerField(default=2, validators=[MinValueValidator(2)], blank=True)
+    # Defines the desired number of bots in each automatically sized division.
+    automatic_target_division_size = models.IntegerField(default=20, validators=[MinValueValidator(2)], blank=True)
     # Defines the number of rounds between division updates.
     rounds_per_cycle = models.IntegerField(default=1, validators=[MinValueValidator(1)], blank=True)
     # Tracks the number of rounds that have completed this cycle.
@@ -78,6 +92,21 @@ class Competition(models.Model, LockableModelMixin):
 
     def __str__(self):
         return self.name
+
+    @staticmethod
+    def automatic_division_sizes(n_bots, target_division_size):
+        """Return bottom-to-top division sizes for automatic sizing."""
+        n_divisions = max(1, (n_bots + target_division_size // 2) // target_division_size)
+        base_size, remainder = divmod(n_bots, n_divisions)
+        sizes = [base_size] * n_divisions
+
+        # Allocate extra bots in top-to-bottom domain order, from the centre
+        # outwards. On an equal-distance tie, the higher division receives the
+        # bot first. Return in the scheduler's bottom-to-top order.
+        centre_out = sorted(range(n_divisions), key=lambda index: (abs(index - (n_divisions - 1) / 2), index))
+        for index in centre_out[:remainder]:
+            sizes[index] += 1
+        return list(reversed(sizes))
 
     def should_split_divisions(self, n_bots):
         return (
