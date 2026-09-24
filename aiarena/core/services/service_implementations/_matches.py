@@ -199,7 +199,7 @@ class Matches:
                         (last_match_start_times.get(b, epoch) for b in bots_in_match),
                         default=epoch,
                     )
-                    return (-data_enabled_count, most_recent_last_match)
+                    return -data_enabled_count, most_recent_last_match
 
                 available_ladder_matches_to_play.sort(key=match_sort_key)
 
