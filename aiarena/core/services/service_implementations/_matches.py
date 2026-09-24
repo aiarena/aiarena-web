@@ -1,6 +1,6 @@
 import logging
 import random
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from django.db import transaction
 from django.db.models import Count, Max
@@ -37,77 +37,25 @@ from .internal.rounds import update_round_if_completed
 
 logger = logging.getLogger(__name__)
 
-# Starting width of the time window used by _last_ladder_match_starts, doubled on
-# each attempt. Sized so a single attempt normally suffices: bots eligible for a
-# ladder match are ones actively playing the current round, so their previous match
-# is at most a round-drain old.
-_LAST_MATCH_WINDOW_START = timedelta(hours=6)
-# Widening is far cheaper than an extra round trip, so grow aggressively.
-_LAST_MATCH_WINDOW_GROWTH = 8
-# The first match on record was played in December 2019, and matches are only ever
-# appended, so a window reaching back this far can no longer exclude anything.
-_ARENA_EPOCH = datetime(2019, 1, 1, tzinfo=UTC)
+# How far back _last_ladder_match_starts looks. Only recent history matters for
+# picking which ladder match to start next, and bounding it keeps the query cheap.
+_LAST_MATCH_WINDOW = timedelta(hours=6)
 
 
 def _last_ladder_match_starts(bot_ids) -> dict:
-    """Map each bot id to the start time of its most recent ladder match.
-
-    Bots with no ladder match at all are absent from the result.
-
-    Queried over a time window that widens until every bot is accounted for,
-    rather than in one pass over all history. The unwindowed form has to scan both
-    tables in full -- restricting to ladder matches that have started excludes
-    almost nothing, so there is no selective index for the planner to use, and it
-    joins millions of rows only to aggregate them down to one per bot.
-
-    A bot missing from a window proves that window was too narrow, so widening
-    until none are missing yields the same answer as the unwindowed query would,
-    without needing to assume how quickly rounds currently drain. Once the window
-    reaches back further than any match on record it stops being a restriction at
-    all and is dropped, which both terminates the search and leaves the result
-    exact for a bot that genuinely has not played in a very long time.
+    """Map each bot id to the start time of its most recent ladder match within
+    the last `_LAST_MATCH_WINDOW`.
     """
-    now = timezone.now()
-    remaining = set(bot_ids)
-    last_starts = {}
-    window = _LAST_MATCH_WINDOW_START
-
-    while remaining:
-        participations = (
-            MatchParticipation.objects.filter(bot_id__in=remaining)
-            .exclude(match__round=None)
-            .exclude(match__started=None)
+    return dict(
+        MatchParticipation.objects.filter(
+            bot_id__in=bot_ids,
+            match__round__isnull=False,
+            match__started__gte=timezone.now() - _LAST_MATCH_WINDOW,
         )
-
-        # Once the window reaches past the start of the project the filter cannot
-        # exclude anything, so drop it and let this be the final, exact pass.
-        cutoff = now - window
-        bounded = cutoff > _ARENA_EPOCH
-        if bounded:
-            participations = participations.filter(match__started__gte=cutoff)
-
-        found = dict(
-            participations.values("bot_id")
-            .annotate(last_start=Max("match__started"))
-            .values_list("bot_id", "last_start")
-        )
-        last_starts.update(found)
-        remaining -= found.keys()
-
-        if not bounded:
-            # Searched all of history; whatever is still missing has never played.
-            break
-
-        if found:
-            window *= _LAST_MATCH_WINDOW_GROWTH
-        else:
-            # A pass that turns up nothing suggests the rest are bots that have not
-            # played in a long time, or at all. Stepping the window out towards them
-            # one multiple at a time would cost a query each, so go straight to the
-            # exact pass -- by now it is selective enough to use the bot_id index.
-            window = now - _ARENA_EPOCH
-
-    return last_starts
+        .values("bot_id")
+        .annotate(last_start=Max("match__started"))
+        .values_list("bot_id", "last_start")
+    )
 
 
 class Matches:
