@@ -759,8 +759,12 @@ class TestUpdateBot(GraphQLTest):
         assert bot.bot_data_publicly_downloadable is False
         assert bot.get_wiki_article().current_revision.content == ""
 
-        old_bot_zip_hash = bot.bot_zip
-        old_bot_data_hash = bot.bot_data
+        new_bot_zip = python_zip_file(run_py=b'print("Proxy Rax")')
+        new_bot_data = python_zip_file()
+        new_bot_zip_content, new_bot_data_content = new_bot_zip.read(), new_bot_data.read()
+        new_bot_zip.seek(0)
+        new_bot_data.seek(0)
+        assert bot.bot_zip.read() != new_bot_zip_content
 
         self.mutate(
             login_user=user,
@@ -777,8 +781,8 @@ class TestUpdateBot(GraphQLTest):
                 }
             },
             files={
-                "input.botZip": python_zip_file(),
-                "input.botData": python_zip_file(),
+                "input.botZip": new_bot_zip,
+                "input.botData": new_bot_data,
             },
         )
 
@@ -788,8 +792,8 @@ class TestUpdateBot(GraphQLTest):
         assert bot.bot_data_enabled is True
         assert bot.bot_data_publicly_downloadable is True
         assert bot.get_wiki_article().current_revision.content == "#1Some Content"
-        assert bot.bot_zip != old_bot_zip_hash
-        assert bot.bot_data != old_bot_data_hash
+        assert bot.bot_zip.read() == new_bot_zip_content
+        assert bot.bot_data.read() == new_bot_data_content
 
     def test_update_bot_invalid_bot_zip(self, user, bot, invalid_python_zip_file):
         """
