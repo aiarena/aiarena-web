@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.db import connection, transaction
 
 from aiarena.core.models import Competition, CompetitionParticipation, Match, MatchParticipation, Result, Round
 
@@ -65,16 +66,29 @@ class Command(BaseCommand):
                 f"\nType the competition's name ('{competition.name}') to confirm deletion, "
                 f"or anything else to cancel: "
             )
+            # Close it so Django opens a fresh one on the next query, to avoid the slow query killer killing our conn.
+            connection.close()
         else:
             confirm = competition.name
 
         if confirm == competition.name:
             self._delete_storage_files(competition)
             competition_id, competition_name = competition.id, competition.name
+            self._delete_rounds(competition)
             competition.delete()
             self.stdout.write(self.style.SUCCESS(f"Competition {competition_id} ({competition_name}) deleted."))
         else:
             self.stdout.write("Deletion cancelled.")
+
+    def _delete_rounds(self, competition):
+        # Deleting the competition in one go would cascade through every match in a single huge transaction,
+        # so delete it a round at a time to keep each transaction (and its statements) small and hopefully
+        # avoid the slow query killer killing our connection.
+        round_ids = list(Round.objects.filter(competition=competition).values_list("id", flat=True))
+        for index, round_id in enumerate(round_ids, start=1):
+            with transaction.atomic():
+                Round.objects.filter(id=round_id).delete()
+            self.stdout.write(f"Deleted round {index}/{len(round_ids)}.")
 
     def _delete_storage_files(self, competition):
         results = Result.objects.filter(match__round__competition=competition).exclude(
