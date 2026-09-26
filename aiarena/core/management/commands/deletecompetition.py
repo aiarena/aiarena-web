@@ -4,6 +4,9 @@ from django.db import connection, transaction
 from aiarena.core.models import Competition, CompetitionParticipation, Match, MatchParticipation, Result, Round
 
 
+PROGRESS_INTERVAL = 1000  # how many storage files to clean between progress messages
+
+
 class Command(BaseCommand):
     help = (
         "Permanently deletes a competition, along with all its rounds, matches, participations, "
@@ -89,26 +92,37 @@ class Command(BaseCommand):
             with transaction.atomic():
                 Round.objects.filter(id=round_id).delete()
             self.stdout.write(f"Deleted round {index}/{len(round_ids)}.")
+            self.stdout.flush()
 
     def _delete_storage_files(self, competition):
         results = Result.objects.filter(match__round__competition=competition).exclude(
             replay_file="", arenaclient_log=""
         )
+        total_results = results.count()
         cleaned_results = 0
-        for result in results.iterator():
+        for index, result in enumerate(results.iterator(), start=1):
             replay_cleaned = result.clean_replay_file()
             log_cleaned = result.clean_arenaclient_log()
             if replay_cleaned or log_cleaned:
                 result.save()
                 cleaned_results += 1
+            self._report_progress("results", index, total_results)
         if cleaned_results:
             self.stdout.write(f"Cleaned up storage files for {cleaned_results} results.")
 
         participations = MatchParticipation.objects.filter(match__round__competition=competition).exclude(match_log="")
+        total_participations = participations.count()
         cleaned_participations = 0
-        for participation in participations.iterator():
+        for index, participation in enumerate(participations.iterator(), start=1):
             if participation.clean_match_log():
                 participation.save()
                 cleaned_participations += 1
+            self._report_progress("match logs", index, total_participations)
         if cleaned_participations:
             self.stdout.write(f"Cleaned up match logs for {cleaned_participations} participations.")
+
+    def _report_progress(self, label, done, total):
+        if done % PROGRESS_INTERVAL == 0 or done == total:
+            self.stdout.write(f"Cleaning {label}: {done}/{total}")
+            # flush so progress shows up promptly even when stdout isn't a terminal
+            self.stdout.flush()
