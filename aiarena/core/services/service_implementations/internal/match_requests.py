@@ -46,6 +46,8 @@ def handle_request_matches(
     map_selection_type,
     map_pool,
     chosen_map,
+    bot1_args="",
+    bot2_args="",
 ):
     if not config.ALLOW_REQUESTED_MATCHES:
         raise MatchRequestException("Sorry. Requested matches are currently disabled.")
@@ -78,6 +80,8 @@ def handle_request_matches(
                     opponent=opponent,
                     map=_get_map(map_selection_type, map_pool, chosen_map),
                     game_mode=None,
+                    bot1_args=bot1_args,
+                    bot2_args=bot2_args,
                 )
             )
     else:  # specific_matchup
@@ -92,12 +96,14 @@ def handle_request_matches(
                     opponent=opponent,
                     map=_get_map(map_selection_type, map_pool, chosen_map),
                     game_mode=None,
+                    bot1_args=bot1_args,
+                    bot2_args=bot2_args,
                 )
             )
     return match_list
 
 
-def handle_request_match(bot, game_mode, map, opponent, user):
+def handle_request_match(bot, game_mode, map, opponent, user, bot1_args="", bot2_args=""):
     # if map is none, a game mode must be supplied and a random map gets chosen
     if map is None:
         if game_mode:
@@ -113,4 +119,6 @@ def handle_request_match(bot, game_mode, map, opponent, user):
         bot1_update_data=False,
         bot2_update_data=False,
         require_trusted_arenaclient=False,
+        bot1_args=bot1_args,
+        bot2_args=bot2_args,
     )

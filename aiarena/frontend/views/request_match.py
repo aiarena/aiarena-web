@@ -9,9 +9,11 @@ from django.views.generic import FormView
 from constance import config
 from django_select2.forms import Select2Widget
 
+from aiarena.core.bot_args import MAX_LENGTH as BOT_ARGS_MAX_LENGTH
 from aiarena.core.exceptions import MatchRequestException
 from aiarena.core.models import Bot, Map, MapPool
 from aiarena.core.services import match_requests, supporters
+from aiarena.core.validators import validate_bot_args
 
 
 class BotWidget(Select2Widget):
@@ -43,6 +45,11 @@ class RequestMatchForm(forms.Form):
 
         # Pre fill the map pool selection, for user convenience
         self.initial["map_pool"] = MapPool.objects.filter(id=config.MATCH_REQUESTS_PREFILL_MAP_POOL_ID).first()
+
+        # Removed rather than hidden, so a disabled feature can't be posted to.
+        if not config.ALLOW_MATCH_REQUEST_BOT_ARGS:
+            del self.fields["bot1_args"]
+            del self.fields["bot2_args"]
 
     MATCHUP_TYPE_CHOICES = (
         ("specific_matchup", "Specific Matchup"),
@@ -88,6 +95,25 @@ class RequestMatchForm(forms.Form):
     )
 
     match_count = forms.IntegerField(min_value=1, initial=1)
+
+    bot1_args = forms.CharField(
+        label="Bot 1 Arguments",
+        required=False,
+        max_length=BOT_ARGS_MAX_LENGTH,
+        validators=[validate_bot_args],
+        help_text=(
+            "Optional. Passed to bot 1 verbatim as extra command line arguments, split the way a "
+            'shell would - quote to include spaces: --message="good luck"'
+        ),
+    )
+
+    bot2_args = forms.CharField(
+        label="Bot 2 Arguments",
+        required=False,
+        max_length=BOT_ARGS_MAX_LENGTH,
+        validators=[validate_bot_args],
+        help_text="Optional. Same, for bot 2.",
+    )
 
     def clean_matchup_race(self):
         """If matchup_type isn't set, assume it's any"""
@@ -154,6 +180,8 @@ class RequestMatch(LoginRequiredMixin, FormView):
             map_selection_type = form.cleaned_data["map_selection_type"]
             map_pool = form.cleaned_data["map_pool"]
             chosen_map = form.cleaned_data["map"]
+            bot1_args = form.cleaned_data.get("bot1_args", "")
+            bot2_args = form.cleaned_data.get("bot2_args", "")
 
             match_list = match_requests.request_matches(
                 self.request.user.websiteuser,
@@ -165,6 +193,8 @@ class RequestMatch(LoginRequiredMixin, FormView):
                 map_selection_type,
                 map_pool,
                 chosen_map,
+                bot1_args,
+                bot2_args,
             )
             message = ""
             for match in match_list:

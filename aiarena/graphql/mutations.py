@@ -34,6 +34,7 @@ from aiarena.core.services.service_implementations._competition_trophies import 
     check_competition_trophies,
 )
 from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
+from aiarena.core.validators import clean_requested_bot_args
 from aiarena.graphql.common import (
     BaseMutation,
     CleanedInputMutation,
@@ -62,6 +63,17 @@ class RequestMatchInput(CleanedInputType):
     map_selection_type = graphene.String()
     map_pool = MapPoolID(default=None)
     chosen_map = MapID(default=None)
+    bot1_args = graphene.String(
+        default_value="",
+        description=(
+            "Optional extra command line for bot 1, passed to it verbatim. The arena client splits "
+            "it into arguments the way a shell would, so quote to include spaces."
+        ),
+    )
+    bot2_args = graphene.String(
+        default_value="",
+        description="Optional extra command line for bot 2. See bot1Args.",
+    )
 
     class Meta:
         required_fields = [
@@ -70,6 +82,14 @@ class RequestMatchInput(CleanedInputType):
             "match_count",
             "map_selection_type",
         ]
+
+    @staticmethod
+    def clean_bot1_args(bot1_args: str, info):
+        return clean_requested_bot_args(bot1_args)
+
+    @staticmethod
+    def clean_bot2_args(bot2_args: str, info):
+        return clean_requested_bot_args(bot2_args)
 
     def clean(self, info):
         if not self.map_pool and not self.chosen_map:
@@ -106,6 +126,8 @@ class RequestMatch(CleanedInputMutation):
                 map_selection_type=input_object.map_selection_type,
                 map_pool=input_object.map_pool,
                 chosen_map=input_object.chosen_map,
+                bot1_args=input_object.bot1_args,
+                bot2_args=input_object.bot2_args,
             )
 
             return cls(errors=[], match=matches)
