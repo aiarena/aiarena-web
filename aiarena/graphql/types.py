@@ -9,6 +9,7 @@ from datetime import timedelta
 from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db.models import CharField, Count, F, IntegerField, OuterRef, Prefetch, Q, Subquery, Value
 from django.db.models.functions import Lower, TruncDate
 from django.utils import timezone
@@ -16,10 +17,11 @@ from django.utils import timezone
 import django_filters
 import graphene
 from avatar.models import Avatar
+from constance import config
 from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
-from graphql_relay import from_global_id
+from graphql_relay import cursor_to_offset, from_global_id
 from rest_framework.authtoken.models import Token
 
 from aiarena.core import models
@@ -311,7 +313,12 @@ class CompetitionType(DjangoObjectTypeWithUID):
         info,
         **args,
     ):
-        return ladders.get_competition_display_full_rankings(root).calculate_trend(root)
+        cache_key = f"graphql:competition:{root.id}:participants"
+        participants = cache.get(cache_key)
+        if participants is None:
+            participants = ladders.get_competition_display_full_rankings(root).calculate_trend(root)
+            cache.set(cache_key, participants, config.FULL_LADDER_CACHE_TIME)
+        return participants
 
     @staticmethod
     def resolve_wiki_article(
@@ -495,8 +502,14 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
         if competition.statistics_finalized:
             return None
 
+        cache_key = f"graphql:competition:{competition.id}:bot:{root.bot_id}:elo-chart"
+        cached_chart = cache.get(cache_key)
+        if cached_chart is not None:
+            return cached_chart
+
         gen = EloGraphsGenerator(root)
         elo_data = gen._get_elo_data(root.bot, competition.id)
+        round_starts = None
 
         if not elo_data:
             last_updated = None
@@ -532,18 +545,25 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
                     for r in competition.round_set.order_by("started")
                 ]
 
-        return {
+        chart = {
             "title": "ELO over time",
             "lastUpdated": last_updated,
             "data": {"datasets": datasets},
             "roundStarts": round_starts,
         }
+        cache.set(cache_key, chart, config.BOT_COMP_STATS_CACHE_TIME)
+        return chart
 
     @staticmethod
     def resolve_winrate_chart_data(root, info, **args):
         competition = root.competition
         if competition.statistics_finalized:
             return None
+
+        cache_key = f"graphql:competition:{competition.id}:bot:{root.bot_id}:winrate-chart"
+        cached_chart = cache.get(cache_key)
+        if cached_chart is not None:
+            return cached_chart
 
         gen = EloGraphsGenerator(root)
         data = gen._get_winrate_data(root.bot.id, competition.id)
@@ -566,7 +586,7 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
                 "datalabels": {"align": "center", "anchor": "center"},
             }
 
-        return {
+        chart = {
             "title": "Result vs Match Duration",
             "data": {
                 "labels": labels,
@@ -578,6 +598,8 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
                 ],
             },
         }
+        cache.set(cache_key, chart, config.BOT_COMP_STATS_CACHE_TIME)
+        return chart
 
     @staticmethod
     def resolve_race_matchup(root, info, **args):
@@ -1371,16 +1393,33 @@ class StatsType(graphene.ObjectType):
     matches_started = graphene.Int()
 
     @staticmethod
-    def resolve_match_count_1h(root, info, **args):
-        return Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=1)).count()
+    def _cached_count(cache_key, queryset):
+        count = cache.get(cache_key)
+        if count is None:
+            count = queryset.count()
+            cache.set(cache_key, count, config.GRAPHQL_STATS_CACHE_TIME)
+        return count
 
-    @staticmethod
-    def resolve_match_count_24h(root, info, **args):
-        return Result.objects.only("id").filter(created__gte=timezone.now() - timedelta(hours=24)).count()
+    @classmethod
+    def resolve_match_count_1h(cls, root, info, **args):
+        return cls._cached_count(
+            "graphql:stats:match-count-1h",
+            Result.objects.filter(created__gte=timezone.now() - timedelta(hours=1)),
+        )
 
-    @staticmethod
-    def resolve_arenaclients(root, info, **args):
-        return User.objects.only("id").filter(type="ARENA_CLIENT", is_active=True).count()
+    @classmethod
+    def resolve_match_count_24h(cls, root, info, **args):
+        return cls._cached_count(
+            "graphql:stats:match-count-24h",
+            Result.objects.filter(created__gte=timezone.now() - timedelta(hours=24)),
+        )
+
+    @classmethod
+    def resolve_arenaclients(cls, root, info, **args):
+        return cls._cached_count(
+            "graphql:stats:arenaclients",
+            User.objects.filter(type="ARENA_CLIENT", is_active=True),
+        )
 
     @staticmethod
     def resolve_random_supporter(root, info, **args):
@@ -1394,19 +1433,25 @@ class StatsType(graphene.ObjectType):
     def resolve_date_time(root, info, **args):
         return timezone.now()
 
-    @staticmethod
-    def resolve_matches_queued(root, info, **args):
-        return Match.objects.filter(
-            result__isnull=True,
-            started__isnull=True,
-        ).count()
+    @classmethod
+    def resolve_matches_queued(cls, root, info, **args):
+        return cls._cached_count(
+            "graphql:stats:matches-queued",
+            Match.objects.filter(
+                result__isnull=True,
+                started__isnull=True,
+            ),
+        )
 
-    @staticmethod
-    def resolve_matches_started(root, info, **args):
-        return Match.objects.filter(
-            result__isnull=True,
-            started__isnull=False,
-        ).count()
+    @classmethod
+    def resolve_matches_started(cls, root, info, **args):
+        return cls._cached_count(
+            "graphql:stats:matches-started",
+            Match.objects.filter(
+                result__isnull=True,
+                started__isnull=False,
+            ),
+        )
 
 
 class AdminStatsPoint(graphene.ObjectType):
@@ -1798,6 +1843,14 @@ class Viewer(graphene.ObjectType):
         return root.is_superuser
 
 
+class CachedResultPage(list):
+    """Bounded cached result page that preserves the full connection count."""
+
+    def __init__(self, values=(), total_count=0):
+        super().__init__(values)
+        self.total_count = total_count
+
+
 class Query(graphene.ObjectType):
     bot_race = DjangoFilterConnectionField("aiarena.graphql.BotRaceType")
     bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
@@ -1807,7 +1860,7 @@ class Query(graphene.ObjectType):
     match = DjangoFilterConnectionField("aiarena.graphql.MatchType")
     news = DjangoFilterConnectionField("aiarena.graphql.NewsType")
     node = graphene.relay.Node.Field()
-    results = DjangoFilterConnectionField("aiarena.graphql.ResultType")
+    results = DjangoConnectionField("aiarena.graphql.ResultType")
     rounds = DjangoFilterConnectionField("aiarena.graphql.RoundsType")
     stats = graphene.Field(StatsType)
     stats_for_admins = graphene.Field("aiarena.graphql.StatsForAdmins")
@@ -1847,7 +1900,7 @@ class Query(graphene.ObjectType):
 
     @staticmethod
     def resolve_results(root, info, **args):
-        return (
+        queryset = (
             models.Result.objects.all()
             .order_by("-created")
             .select_related(
@@ -1867,6 +1920,46 @@ class Query(graphene.ObjectType):
                 )
             )
         )
+
+        # The SPA only pages forward. Cache a bounded window, plus one row so
+        # Relay can still calculate hasNextPage correctly. Deep/alternate
+        # pagination falls back to the normal queryset rather than growing a
+        # large padded cache value.
+        first = args.get("first")
+        after = args.get("after")
+        if (
+            isinstance(first, int)
+            and first > 0
+            and args.get("last") is None
+            and args.get("before") is None
+            and args.get("offset") is None
+        ):
+            try:
+                slice_start = cursor_to_offset(after) + 1 if after else 0
+            except (TypeError, ValueError):
+                return queryset
+
+            if slice_start <= 1000:
+                cache_key = f"graphql:results:page:{after or 'start'}:{first}"
+                cached_page = cache.get(cache_key)
+                if cached_page is not None:
+                    return cached_page
+
+                count_key = "graphql:results:count"
+                total_count = cache.get(count_key)
+                if total_count is None:
+                    total_count = queryset.count()
+                    cache.set(count_key, total_count, config.GRAPHQL_RESULTS_CACHE_TIME)
+
+                page = list(queryset[slice_start : slice_start + first + 1])
+                cached_page = CachedResultPage(
+                    ([None] * slice_start) + page,
+                    total_count=total_count,
+                )
+                cache.set(cache_key, cached_page, config.GRAPHQL_RESULTS_CACHE_TIME)
+                return cached_page
+
+        return queryset
 
     @staticmethod
     def resolve_rounds(root, info, **args):

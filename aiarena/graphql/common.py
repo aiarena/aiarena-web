@@ -43,6 +43,9 @@ class CountingConnection(graphene.relay.Connection):
         return result
 
     def resolve_total_count(self, *_) -> int:
+        if hasattr(self.iterable, "total_count"):
+            return self.iterable.total_count
+
         if isinstance(self.iterable, QuerySet):
             return self.iterable.count()
 
