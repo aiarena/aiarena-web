@@ -9,8 +9,9 @@ from constance import config
 from rest_framework.authtoken.models import Token
 
 from aiarena import settings
+from aiarena.api.arenaclient.common.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.testing_utils import AcApiTestingClient
-from aiarena.core.models import ArenaClient, Competition, GameMode, Match, Round
+from aiarena.core.models import ArenaClient, Competition, GameMode, Match, Result, Round
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.services import match_requests
 from aiarena.core.tests.test_mixins import LoggedInMixin
@@ -427,6 +428,33 @@ class ArenaClientLimitTests(LoggedInMixin, TransactionTestCase):
         self.assertEqual(self._competition_id(self.client_b.post_to_matches()), other.id)
         again = self.client_a.post_to_matches()
         self.assertEqual(again.data["id"], held.id)
+
+    def test_timeout_cancelled_match_frees_the_window_immediately(self):
+        limited = self._make_comp("Limited", bot_count=4, limit=1)
+        held = self._match(self.client_a.post_to_matches())
+        self.assertEqual(held.round.competition_id, limited.id)
+
+        other = self._make_comp("Other", bot_count=2, owner=self.staffUser1)
+        # While A holds the only slot, C is steered to the other competition.
+        self.assertEqual(self._competition_id(self.client_c.post_to_matches()), other.id)
+
+        # The timeout job cancels A's match. A crashed client must not keep its slot for another window.
+        held.result = Result.objects.create(type="MatchCancelled", game_steps=0)
+        held.save()
+        self.assertEqual(ACCoordinator._active_claimers(limited), [])
+        self.assertEqual(self._competition_id(self.client_b.post_to_matches()), limited.id)
+
+    def test_active_claimers_only_reads_the_timeout_window(self):
+        limited = self._make_comp("Limited", bot_count=4, limit=2)
+        old = self._match(self.client_a.post_to_matches())
+        self.client_a.submit_result(old.id, "Player1Win")
+        self.assertEqual(ACCoordinator._active_claimers(limited), [self.ac_a.id])
+
+        self._age_result(Match.objects.get(id=old.id))
+        current = self._match(self.client_b.post_to_matches())
+        # A's finished match is outside the window; only B, who holds an unfinished one, is listed.
+        self.assertEqual(current.assigned_to_id, self.ac_b.id)
+        self.assertEqual(ACCoordinator._active_claimers(limited), [self.ac_b.id])
 
     def test_admin_form_round_trips_the_limit(self):
         comp = self._make_comp("Editable", bot_count=2)
