@@ -14,7 +14,9 @@ if TYPE_CHECKING:
 import logging
 
 from django.db import connection, transaction
+from django.db.models import Min
 from django.db.models.signals import pre_save
+from django.utils import timezone
 
 from constance import config
 
@@ -48,31 +50,42 @@ class ACCoordinator:
         return None
 
     @staticmethod
-    def next_competition_match(arenaclient: ArenaClient):
+    def next_competition_match(arenaclient: ArenaClient, *, idle: bool = False):
         competition_ids = ACCoordinator._get_competition_priority_order()
-        for id in competition_ids:
-            competition = Competition.objects.get(id=id)
-            # This excludes non-trusted clients from competitions requiring trusted infrastructure
-            if arenaclient.trusted or competition.require_trusted_infrastructure == arenaclient.trusted:
-                # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
-                with transaction.atomic():
-                    # this call will apply a select for update, so we do it inside an atomic block
-                    has_matches = competitions.check_has_matches_to_play_and_apply_locks(competition)
+        for competition_id in competition_ids:
+            competition = Competition.objects.get(id=competition_id)
+            # This excludes non-trusted clients from competitions requiring trusted infrastructure.
+            # The idle pass uses the same check: a client that fails it never fills in.
+            if not ACCoordinator._trusted_for_competition(arenaclient, competition):
+                continue
+            if not idle and not ACCoordinator._prefers_client(arenaclient, competition):
+                ACCoordinator._log_limit_skip(competition)
+                continue
+            # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
+            with transaction.atomic():
+                # this call will apply a select for update, so we do it inside an atomic block
+                has_matches = competitions.check_has_matches_to_play_and_apply_locks(competition)
 
-                    if has_matches:
-                        try:
-                            match = matches.start_next_match_for_competition(arenaclient, competition)
+                if not has_matches:
+                    continue
+                # Re-read after the participant lock so two clients cannot both join a limit of one
+                # on the preferred pass. The idle pass does not re-check: overflow is allowed.
+                if not idle and not ACCoordinator._prefers_client(arenaclient, competition):
+                    ACCoordinator._log_limit_skip(competition)
+                    continue
+                try:
+                    match = matches.start_next_match_for_competition(arenaclient, competition)
 
-                            return match
-                        except (
-                            NoMaps,
-                            NotEnoughAvailableBots,
-                            MaxActiveRounds,
-                            CompetitionPaused,
-                            CompetitionClosing,
-                        ) as e:
-                            logger.debug(f"Skipping competition {id}: {e}")
-                            continue
+                    return match
+                except (
+                    NoMaps,
+                    NotEnoughAvailableBots,
+                    MaxActiveRounds,
+                    CompetitionPaused,
+                    CompetitionClosing,
+                ) as e:
+                    logger.debug(f"Skipping competition {competition_id}: {e}")
+                    continue
 
         return None
 
@@ -82,7 +95,69 @@ class ACCoordinator:
 
         if requested_match is not None:
             return requested_match
-        return ACCoordinator.next_competition_match(arenaclient)
+        # Preferred pass: respect the cap while this client has any other legal match.
+        match = ACCoordinator.next_competition_match(arenaclient, idle=False)
+        if match is not None:
+            return match
+        # Idle pass: nothing else to play, so a capped competition is fair game.
+        return ACCoordinator.next_competition_match(arenaclient, idle=True)
+
+    @staticmethod
+    def _trusted_for_competition(arenaclient: ArenaClient, competition: Competition) -> bool:
+        return arenaclient.trusted or competition.require_trusted_infrastructure == arenaclient.trusted
+
+    @staticmethod
+    def _log_limit_skip(competition: Competition):
+        logger.debug(
+            f"Skipping competition {competition.id}: "
+            f"arena client limit {competition.arena_client_limit} prefers other clients."
+        )
+
+    @staticmethod
+    def _prefers_client(arenaclient: ArenaClient, competition: Competition) -> bool:
+        """True when this client may start a new ladder match on the preferred pass.
+
+        A blank limit prefers every eligible client. Otherwise the window is the first
+        ``arena_client_limit`` non-stale claimers, in the order they first started a
+        ladder match. A short window admits the next poller.
+        """
+        limit = competition.arena_client_limit
+        if limit is None:
+            return True
+        claim_order, non_stale = ACCoordinator._ladder_roster(competition)
+        allowed = [client_id for client_id in claim_order if client_id in non_stale][:limit]
+        if arenaclient.id in allowed:
+            return True
+        return len(non_stale) < limit
+
+    @staticmethod
+    def _ladder_roster(competition: Competition) -> tuple[list[int], set[int]]:
+        """Claim order and the non-stale subset for one competition's ladder matches.
+
+        Requested matches are not part of the roster. A claimer is non-stale while they
+        hold an unfinished ladder match here, or submitted a result inside the match timeout.
+        """
+        ladder = Match.objects.filter(
+            round__competition=competition,
+            requested_by__isnull=True,
+            assigned_to__isnull=False,
+            started__isnull=False,
+        )
+        claim_order = list(
+            ladder.values("assigned_to_id")
+            .annotate(first_started=Min("started"))
+            .order_by("first_started", "assigned_to_id")
+            .values_list("assigned_to_id", flat=True)
+        )
+        if not claim_order:
+            return [], set()
+
+        cutoff = timezone.now() - config.TIMEOUT_MATCHES_AFTER
+        active = set(ladder.filter(result__isnull=True).values_list("assigned_to_id", flat=True))
+        recent = set(
+            ladder.filter(result__isnull=False, result__created__gte=cutoff).values_list("assigned_to_id", flat=True)
+        )
+        return claim_order, active | recent
 
     @staticmethod
     def next_match(arenaclient: ArenaClient, only_unfinished_matches: bool) -> Match | None:

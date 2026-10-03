@@ -69,6 +69,16 @@ class Competition(models.Model, LockableModelMixin):
     # List of which bot races are playable in this competition. When left blank, all races are playable.
     playable_races = models.ManyToManyField(BotRace, blank=True)
     require_trusted_infrastructure = models.BooleanField(default=True)
+    arena_client_limit = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1)],
+        help_text=(
+            "Blank means every eligible client. A number is how many clients are preferred, in first-claim "
+            "order, while they have other matches to play. A client with nothing else to play may still take a match."
+        ),
+    )
+    """Preferred arena clients for new ladder matches. Blank means every eligible client."""
     statistics_finalized = models.BooleanField(default=False)
     """Marks that this competition's statistics have been finalized and therefore cannot be modified."""
     competition_finalized = models.BooleanField(default=False)

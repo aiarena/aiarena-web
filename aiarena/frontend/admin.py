@@ -336,6 +336,7 @@ class CompetitionAdmin(admin.ModelAdmin):
         "date_closed",
         "status",
         "max_active_rounds",
+        "arena_client_limit",
         "interest",
     )
 
