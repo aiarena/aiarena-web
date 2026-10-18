@@ -24,6 +24,7 @@ class PatreonBindView(View):
         return redirect(
             "https://www.patreon.com/oauth2/authorize"
             "?response_type=code"
+            "&scope=identity"
             "&client_id="
             + config.PATREON_CLIENT_ID
             + "&redirect_uri=https%3A%2F%2F"
