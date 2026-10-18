@@ -627,6 +627,13 @@ MATCH_REQUEST_LIMIT_GOLD_TIER = 600
 MATCH_REQUEST_LIMIT_PLATINUM_TIER = 2000
 MATCH_REQUEST_LIMIT_DIAMOND_TIER = 8000
 
+# Download rate limiting.
+# Observation trial (step 1): a single hardcoded limit applied to every tier, with
+# accounting recorded but never enforced, so we can compare the proposed per-tier
+# limits against real usage before switching enforcement on.
+DOWNLOAD_RATE_LIMIT_HOURLY_KB = 100 * 1024  # 100 MB
+DOWNLOAD_RATE_LIMIT_MONTHLY_KB = 1024 * 1024  # 1 GB
+
 SENTRY_DSN = None
 
 SILENCED_SYSTEM_CHECKS = [
