@@ -1,9 +1,8 @@
 from __future__ import annotations
 
+from collections import Counter
+from collections.abc import Iterable, Mapping
 from typing import TYPE_CHECKING
-
-from django.core.cache import cache
-from django.dispatch import receiver
 
 from aiarena.core.services import competitions
 
@@ -13,8 +12,8 @@ if TYPE_CHECKING:
 
 import logging
 
-from django.db import connection, transaction
-from django.db.models.signals import pre_save
+from django.db import transaction
+from django.db.models import Count, Q
 
 from constance import config
 
@@ -33,6 +32,53 @@ from .exceptions import LadderDisabled
 
 logger = logging.getLogger(__name__)
 
+SCHEDULABLE_COMPETITION_STATUSES = ("open", "closing", "paused")
+RECENT_MATCH_WINDOW = 100
+
+
+def rank_competitions(entitlements: Mapping[int, int], recent_competition_ids: Iterable[int]) -> list[int]:
+    """Competition ids ordered by who is furthest below their entitled share of new matches.
+
+    ``entitlements`` maps competition id to active participants times weight. Competitions are sorted by
+    recent match count per entitlement (lowest first), then larger entitlement, then id. A competition
+    with no positive entitlement sorts after all others. Ids in ``recent_competition_ids`` that are not
+    in ``entitlements`` are ignored.
+    """
+    recent_counts = Counter(recent_competition_ids)
+
+    def sort_key(competition_id: int):
+        entitlement = entitlements[competition_id]
+        if entitlement <= 0:
+            return 1, 0.0, 0, competition_id
+        return 0, recent_counts[competition_id] / entitlement, -entitlement, competition_id
+
+    return sorted(entitlements, key=sort_key)
+
+
+def competition_priority_order() -> list[int]:
+    """Ids of the competitions with active participants, in the order new ladder matches should be offered.
+
+    Computed on every call. The recent window covers far less time than a useful cache lifetime, so a cached
+    order goes stale and lets whichever competition is on top take every client.
+    """
+    schedulable = (
+        Competition.objects.filter(status__in=SCHEDULABLE_COMPETITION_STATUSES)
+        .annotate(active_participants=Count("participations", filter=Q(participations__active=True)))
+        .filter(active_participants__gte=1)
+        .values_list("id", "active_participants", "scheduling_weight")
+    )
+    entitlements = {
+        competition_id: active_participants * (weight if weight is not None else Competition.DEFAULT_SCHEDULING_WEIGHT)
+        for competition_id, active_participants, weight in schedulable
+    }
+
+    recent_competition_ids = list(
+        Match.objects.filter(started__isnull=False, round__competition__status__in=SCHEDULABLE_COMPETITION_STATUSES)
+        .order_by("-started")
+        .values_list("round__competition_id", flat=True)[:RECENT_MATCH_WINDOW]
+    )
+    return rank_competitions(entitlements, recent_competition_ids)
+
 
 class ACCoordinator:
     """Coordinates all the Arena Clients and which matches they play."""
@@ -49,32 +95,35 @@ class ACCoordinator:
 
     @staticmethod
     def next_competition_match(arenaclient: ArenaClient):
-        competition_ids = ACCoordinator._get_competition_priority_order()
-        for id in competition_ids:
-            competition = Competition.objects.get(id=id)
-            # This excludes non-trusted clients from competitions requiring trusted infrastructure
-            if arenaclient.trusted or competition.require_trusted_infrastructure == arenaclient.trusted:
-                # this atomic block is done inside the for loop so that we don't hold onto a lock for a single competition
-                with transaction.atomic():
-                    # this call will apply a select for update, so we do it inside an atomic block
-                    has_matches = competitions.check_has_matches_to_play_and_apply_locks(competition)
-
-                    if has_matches:
-                        try:
-                            match = matches.start_next_match_for_competition(arenaclient, competition)
-
-                            return match
-                        except (
-                            NoMaps,
-                            NotEnoughAvailableBots,
-                            MaxActiveRounds,
-                            CompetitionPaused,
-                            CompetitionClosing,
-                        ) as e:
-                            logger.debug(f"Skipping competition {id}: {e}")
-                            continue
+        for competition_id in competition_priority_order():
+            competition = Competition.objects.get(id=competition_id)
+            # This excludes non-trusted clients from competitions requiring trusted infrastructure.
+            if not ACCoordinator._trusted_for_competition(arenaclient, competition):
+                continue
+            match = ACCoordinator._try_start_match(arenaclient, competition)
+            if match is not None:
+                return match
 
         return None
+
+    @staticmethod
+    def _try_start_match(arenaclient: ArenaClient, competition: Competition) -> Match | None:
+        # this atomic block is done per competition so that we don't hold onto a lock for a single competition
+        with transaction.atomic():
+            # this call will apply a select for update, so we do it inside an atomic block
+            if not competitions.check_has_matches_to_play_and_apply_locks(competition):
+                return None
+            try:
+                return matches.start_next_match_for_competition(arenaclient, competition)
+            except (
+                NoMaps,
+                NotEnoughAvailableBots,
+                MaxActiveRounds,
+                CompetitionPaused,
+                CompetitionClosing,
+            ) as e:
+                logger.debug(f"Skipping competition {competition.id}: {e}")
+                return None
 
     @staticmethod
     def next_new_match(arenaclient: ArenaClient):
@@ -83,6 +132,10 @@ class ACCoordinator:
         if requested_match is not None:
             return requested_match
         return ACCoordinator.next_competition_match(arenaclient)
+
+    @staticmethod
+    def _trusted_for_competition(arenaclient: ArenaClient, competition: Competition) -> bool:
+        return arenaclient.trusted or competition.require_trusted_infrastructure == arenaclient.trusted
 
     @staticmethod
     def next_match(arenaclient: ArenaClient, only_unfinished_matches: bool) -> Match | None:
@@ -107,79 +160,3 @@ class ACCoordinator:
                 return None  # Return None so we don't try to start a new match
         # Trying a new match
         return ACCoordinator.next_new_match(arenaclient)
-
-    @staticmethod
-    def _get_competition_priority_order():
-        """
-        Returns a list of competition ids in priority order with respect to the current number of active participants
-         in each competition verses each competition's share of the most recent 100 matches.
-         In otherwords, campetitions with higher active participant counts should play more matches overall.
-        :return:
-        """
-
-        competition_priority_order = cache.get("competition_priority_order")
-        if not competition_priority_order:
-            with connection.cursor() as cursor:
-                # I don't know why but for some reason CTEs didn't work so here; have a massive query.
-                cursor.execute(
-                    """
-                    select perc_active.competition_id
-                    from (select competition_id, 
-                    competition_participations.competition_participations_cnt / cast(total_active_cnt as float) as perc_active
-                          from (select cp.competition_id, count(cp.competition_id) competition_participations_cnt
-                                from core_competitionparticipation cp
-                                         join core_competition cc on cp.competition_id = cc.id
-                                where cp.active
-                                  and cc.status in ('open', 'closing', 'paused')
-                                group by cp.competition_id) as competition_participations
-                                   join
-                               (select count(*) total_active_cnt
-                                from core_competitionparticipation cp
-                                         join core_competition cc on cp.competition_id = cc.id
-                                where cp.active
-                                  and cc.status in ('open', 'closing', 'paused')) as competition_participations_total on 1=1) as perc_active
-                             left join
-                         (select competition_id, perc_recent_matches_cnt / cast(recent_matches_total_cnt as float) as perc_recent_matches
-                          from (select competition_id,
-                                       count(competition_id)       perc_recent_matches_cnt,
-                                       (select count(*)
-                                        from (select competition_id
-                                              from core_match cm
-                                                       join core_round cr on cm.round_id = cr.id
-                                                       join core_competition cc on cr.competition_id = cc.id
-                                              where cm.started is not null
-                                                and cc.status in ('open', 'closing', 'paused')
-                                              order by cm.started desc
-                                              limit 100) matches2) recent_matches_total_cnt
-                                from (select competition_id
-                                      from core_match cm
-                                               join core_round cr on cm.round_id = cr.id
-                                               join core_competition cc on cr.competition_id = cc.id
-                                      where cm.started is not null
-                                        and cc.status in ('open', 'closing', 'paused')
-                                      order by cm.started desc
-                                      limit 100) matches
-                                group by competition_id) as recent_matches) as perc_recent_matches
-                         on perc_recent_matches.competition_id = perc_active.competition_id
-                    order by COALESCE(perc_recent_matches, 0) - perc_active
-                """
-                )
-                competition_priority_order = [row[0] for row in cursor.fetchall()]  # return competition ids
-                cache.set(
-                    "competition_priority_order",
-                    competition_priority_order,
-                    config.COMPETITION_PRIORITY_ORDER_CACHE_TIME,
-                )
-
-        return competition_priority_order
-
-
-@receiver(pre_save, sender=Competition)
-def post_save_competition(sender, instance, **kwargs):
-    # if it's not a new instance...
-    if instance.id is not None:
-        previous = Competition.objects.get(id=instance.id)
-        if previous.status != instance.status and cache.has_key("competition_priority_order"):
-            cache.delete(
-                "competition_priority_order"
-            )  # if the status changed, bust our competition_priority_order cache

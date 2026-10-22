@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 class Competition(models.Model, LockableModelMixin):
     """Represents a competition of play in the context of a ladder"""
 
+    DEFAULT_SCHEDULING_WEIGHT = 100
+
     COMPETITION_STATUSES = (
         ("created", "Created"),  # The initial state for a competition. Functionally identical to paused.
         ("frozen", "Frozen"),  # While a competition is frozen, no matches are played
@@ -69,6 +71,19 @@ class Competition(models.Model, LockableModelMixin):
     # List of which bot races are playable in this competition. When left blank, all races are playable.
     playable_races = models.ManyToManyField(BotRace, blank=True)
     require_trusted_infrastructure = models.BooleanField(default=True)
+    # TODO(make-not-null): Remove null=True in a follow-up migration after deploy
+    scheduling_weight = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        default=DEFAULT_SCHEDULING_WEIGHT,
+        validators=[MinValueValidator(1)],
+        help_text=(
+            "New ladder matches are shared between competitions in proportion to active participants times this "
+            "weight, so 100 is normal and 50 halves this competition's share. Weights count matches, not how "
+            "long they take."
+        ),
+    )
+    """Relative share of new ladder matches. Blank is treated as the default."""
     statistics_finalized = models.BooleanField(default=False)
     """Marks that this competition's statistics have been finalized and therefore cannot be modified."""
     competition_finalized = models.BooleanField(default=False)

@@ -289,10 +289,6 @@ CONSTANCE_CONFIG = {
     "PROJECT_FINANCE_LINK": ("", "Link to the projects finance data."),
     "PUBLIC_BANNER_MESSAGE": ("", "Message displayed publicly at the top of the website."),
     "LOGGED_IN_BANNER_MESSAGE": ("", "Message displayed to logged in users at the top of the website."),
-    "COMPETITION_PRIORITY_ORDER_CACHE_TIME": (
-        3600,
-        "In seconds, how long to cache the result of the AC API competition priority order calculation.",
-    ),
     "TOP10_CACHE_TIME": (180, "How long to cache top10 competition results for"),
     "NEWS_CACHE_TIME": (300, "How long to cache news for"),
     "GAME_AVAILABLE_CACHE_TIME": (60, "How long to cache NoGameAvailable response for"),
@@ -331,7 +327,6 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "TIMEOUT_MATCHES_AFTER",
         "BOT_CONSECUTIVE_CRASH_LIMIT",
         "REISSUE_UNFINISHED_MATCHES",
-        "COMPETITION_PRIORITY_ORDER_CACHE_TIME",
     ),
     "Integrations": (
         "DISCORD_CLIENT_ID",
