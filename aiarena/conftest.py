@@ -1,9 +1,12 @@
 import io
 import zipfile
 
+from django.conf import settings as django_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+import boto3
 import pytest
+from moto import mock_aws
 
 from aiarena.core.models import (
     ArenaClient,
@@ -20,6 +23,17 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.tests.base import BrowserHelper
+
+
+@pytest.fixture(autouse=True)
+def fake_s3():
+    """Every test gets its own empty fake S3 (moto), which the test settings point file storage at."""
+    with mock_aws():
+        boto3.client("s3", region_name=django_settings.AWS_S3_REGION_NAME).create_bucket(
+            Bucket=django_settings.AWS_STORAGE_BUCKET_NAME,
+            CreateBucketConfiguration={"LocationConstraint": django_settings.AWS_S3_REGION_NAME},
+        )
+        yield
 
 
 @pytest.fixture
@@ -113,10 +127,10 @@ def node_js_zip_file():
 
 @pytest.fixture
 def python_zip_file():
-    def _make_zip():
+    def _make_zip(run_py: bytes = b'print("12 Pool")'):
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-            zf.writestr("run.py", b'print("12 Pool")')
+            zf.writestr("run.py", run_py)
         buffer.seek(0)
         return SimpleUploadedFile("bot.zip", buffer.read(), content_type="application/zip")
 

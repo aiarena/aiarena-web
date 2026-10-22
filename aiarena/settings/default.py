@@ -415,6 +415,22 @@ STATICFILES_DIRS = [
 # public media
 MEDIA_URL = "/media/"
 
+# S3 file storage. Only takes effect where the S3 backends are selected (production, and tests, which run against a
+# fake S3); that environment also sets the bucket names and credentials.
+AWS_S3_FILE_OVERWRITE = True
+AWS_PRIVATE_S3_FILE_OVERWRITE = True
+AWS_S3_REGION_NAME = "eu-central-1"
+AWS_S3_OBJECT_PARAMETERS = {"ACL": "private"}
+AWS_S3_ADDRESSING_STYLE = "virtual"
+AWS_PRIVATE_S3_ADDRESSING_STYLE = "virtual"
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_PRIVATE_S3_SIGNATURE_VERSION = "s3v4"
+AWS_PRIVATE_S3_ENCRYPTION = True
+AWS_QUERYSTRING_AUTH = True
+AWS_QUERYSTRING_EXPIRE = 60 * 60
+AWS_LOCATION = "media/"
+AWS_PRIVATE_LOCATION = "private-media/"
+
 # Random scripts such as SQL
 SCRIPTS_ROOT = BASE_DIR / "scripts"
 

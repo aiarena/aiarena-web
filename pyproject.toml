@@ -102,6 +102,7 @@ dev = [
     "ecs-deployer-boto3==0.4.0",
     "jinja2==3.1.6",
     "jsonschema==4.25.1",
+    "moto[s3]==5.2.3",
     "pydantic==2.13.4",
     "pytest==8.4.2",
     "pytest-django==4.11.1",

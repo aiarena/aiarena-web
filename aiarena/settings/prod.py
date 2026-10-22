@@ -91,11 +91,11 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 # Django Storages & django-private-storage configuration #
 ##########################################################
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+STORAGES = {
+    "default": {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
 PRIVATE_STORAGE_CLASS = "private_storage.storage.s3boto3.PrivateS3BotoStorage"
-
-AWS_S3_FILE_OVERWRITE = True
-AWS_PRIVATE_S3_FILE_OVERWRITE = True
 
 WIKI_STORAGE_BACKEND = SimpleLazyObject(lambda: import_string("storages.backends.s3boto3.S3Boto3Storage")())
 WIKI_ATTACHMENTS_LOCAL_PATH = False
@@ -106,18 +106,6 @@ AWS_PRIVATE_STORAGE_BUCKET_NAME = os.environ.get("MEDIA_BUCKET")
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_S3_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_S3_SECRET_ACCESS_KEY")
-
-AWS_S3_REGION_NAME = "eu-central-1"
-AWS_S3_OBJECT_PARAMETERS = {"ACL": "private"}
-AWS_S3_ADDRESSING_STYLE = "virtual"
-AWS_PRIVATE_S3_ADDRESSING_STYLE = "virtual"
-AWS_S3_SIGNATURE_VERSION = "s3v4"
-AWS_PRIVATE_S3_SIGNATURE_VERSION = "s3v4"
-AWS_PRIVATE_S3_ENCRYPTION = True
-AWS_QUERYSTRING_AUTH = True
-AWS_QUERYSTRING_EXPIRE = 60 * 60
-AWS_LOCATION = "media/"
-AWS_PRIVATE_LOCATION = "private-media/"
 
 
 # Sentry configuration

@@ -1,6 +1,8 @@
-from unittest import mock
+from django.core.files.base import ContentFile
 
-from aiarena.core.models import ArenaClient, TemporaryUpload
+import requests
+
+from aiarena.core.models import ArenaClient, Bot, TemporaryUpload
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.graphql import MatchType, TemporaryUploadType
 from aiarena.graphql.common import NOT_LOGGED_IN_MESSAGE
@@ -22,17 +24,21 @@ class TestRequestUploadUrls(GraphQLTest):
     """
 
     def test_happy_path(self, arenaclient_user):
-        fake_url = "https://example.invalid/temp-uploads/abc?signed=1"
-        with mock.patch.object(TemporaryUpload, "generate_presigned_put_url", return_value=fake_url):
-            response = self.mutate(
-                login_user=arenaclient_user,
-                variables={"input": {"count": 3}},
-            )
+        response = self.mutate(
+            login_user=arenaclient_user,
+            variables={"input": {"count": 3}},
+        )
 
-        uploads = response["requestUploadUrls"]["uploads"]
-        assert len(uploads) == 3
-        assert all(u["uploadUrl"] == fake_url for u in uploads)
-        assert TemporaryUpload.objects.filter(uploaded_by=arenaclient_user).count() == 3
+        upload_urls = [u["uploadUrl"] for u in response["requestUploadUrls"]["uploads"]]
+        uploads = TemporaryUpload.objects.filter(uploaded_by=arenaclient_user)
+        assert len(upload_urls) == uploads.count() == 3
+
+        # Each URL is a working presigned PUT for its own upload record's key.
+        for upload in uploads:
+            [url] = [url for url in upload_urls if upload.file.name in url]
+            assert not upload.exists_in_storage()
+            requests.put(url, data=b"uploaded by the arena client").raise_for_status()
+            assert upload.exists_in_storage()
 
     def test_count_too_high(self, arenaclient_user):
         self.mutate(
@@ -85,10 +91,8 @@ class TestGetNextMatch(GraphQLTest):
 
 
 class TestSubmitResult(GraphQLTest):
-    """GraphQL-level coverage of SubmitResult's access guards. The full
-    result-processing happy path is exercised by the arena-client integration
-    tests; here we pin the security boundaries: who may submit, for which match,
-    and with whose uploads."""
+    """SubmitResult end to end against fake S3 (files are uploaded to presigned URLs, then copied into place), plus
+    the security boundaries: who may submit, for which match, and with whose uploads."""
 
     mutation_name = "submitResult"
     # language=graphql
@@ -104,6 +108,87 @@ class TestSubmitResult(GraphQLTest):
         queued_match.assigned_to = arenaclient_user
         queued_match.save()
         return queued_match
+
+    @staticmethod
+    def _upload(arenaclient_user, content: bytes) -> TemporaryUpload:
+        """Upload a file the way an arena client does: to a presigned URL."""
+        upload = TemporaryUpload.create_for_upload(arenaclient_user)
+        requests.put(upload.generate_presigned_put_url(), data=content).raise_for_status()
+        return upload
+
+    def _submit_with_all_files(self, arenaclient_user, match) -> dict[str, TemporaryUpload]:
+        uploads = {
+            field: self._upload(arenaclient_user, f"{field} content".encode())
+            for field in ["replayFile", "arenaclientLog", "bot1Data", "bot2Data", "bot1Log", "bot2Log"]
+        }
+        self.mutate(
+            login_user=arenaclient_user,
+            variables={
+                "input": {
+                    "match": self.to_global_id(MatchType, match.id),
+                    "type": "Player1Win",
+                    "gameSteps": 1000,
+                    **{field: self.to_global_id(TemporaryUploadType, upload.id) for field, upload in uploads.items()},
+                }
+            },
+        )
+        return uploads
+
+    @staticmethod
+    def _give_bot_data(bot: Bot, content: bytes) -> str:
+        bot.bot_data = ContentFile(content, name="data.zip")
+        bot.save()
+        return bot.bot_data.name
+
+    def test_submit_result_with_files(
+        self, arenaclient_user, queued_match, bot, other_bot, django_capture_on_commit_callbacks
+    ):
+        match = self._assigned_match(arenaclient_user, queued_match)
+        old_bot1_data = self._give_bot_data(bot, b"old bot1 data")
+        old_bot2_data = self._give_bot_data(other_bot, b"old bot2 data")
+        private_storage = Bot._meta.get_field("bot_data").storage
+
+        with django_capture_on_commit_callbacks(execute=True):
+            uploads = self._submit_with_all_files(arenaclient_user, match)
+
+        match.refresh_from_db()
+        result = match.result
+        assert result.type == "Player1Win"
+        assert result.replay_file.read() == b"replayFile content"
+        assert result.arenaclient_log.read() == b"arenaclientLog content"
+
+        p1 = match.matchparticipation_set.get(participant_number=1)
+        p2 = match.matchparticipation_set.get(participant_number=2)
+        assert p1.match_log.read() == b"bot1Log content"
+        assert p2.match_log.read() == b"bot2Log content"
+
+        # New bot data is in place, and the files it replaced are gone.
+        bot.refresh_from_db()
+        other_bot.refresh_from_db()
+        assert bot.bot_data.read() == b"bot1Data content"
+        assert other_bot.bot_data.read() == b"bot2Data content"
+        assert not private_storage.exists(old_bot1_data)
+        assert not private_storage.exists(old_bot2_data)
+
+        # The temporary uploads are cleaned up, both the records and the files.
+        assert not TemporaryUpload.objects.exists()
+        assert not any(upload.exists_in_storage() for upload in uploads.values())
+
+    def test_requested_match_does_not_update_bot_data(
+        self, arenaclient_user, queued_match, bot, user, django_capture_on_commit_callbacks
+    ):
+        match = self._assigned_match(arenaclient_user, queued_match)
+        match.requested_by = user
+        match.save()
+        old_bot1_data = self._give_bot_data(bot, b"old bot1 data")
+
+        with django_capture_on_commit_callbacks(execute=True):
+            self._submit_with_all_files(arenaclient_user, match)
+
+        bot.refresh_from_db()
+        assert bot.bot_data.name == old_bot1_data
+        assert bot.bot_data.read() == b"old bot1 data"
+        assert not TemporaryUpload.objects.exists()
 
     def test_not_authenticated(self, db):
         self.mutate(

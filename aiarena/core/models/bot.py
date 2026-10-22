@@ -4,7 +4,7 @@ import uuid
 from zipfile import BadZipFile, ZipFile
 
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Sum
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
@@ -235,6 +235,7 @@ class Bot(models.Model, LockableModelMixin):
 
 _UNSAVED_BOT_ZIP_FILEFIELD = "unsaved_bot_zip_filefield"
 _UNSAVED_BOT_DATA_FILEFIELD = "unsaved_bot_data_filefield"
+_PREVIOUS_BOT_DATA_NAME = "previous_bot_data_name"
 
 
 # The following methods will temporarily store the bot_zip and bot_data files while we wait for the Bot model to be
@@ -249,6 +250,14 @@ def pre_save_bot(sender, instance, **kwargs):
         instance.bot_zip = None
         instance.bot_zip_updated = timezone.now()
 
+    # Remember which bot_data file is currently stored, so it can be deleted once it's been replaced.
+    if instance.pk:
+        setattr(
+            instance,
+            _PREVIOUS_BOT_DATA_NAME,
+            Bot.objects.filter(pk=instance.pk).values_list("bot_data", flat=True).first(),
+        )
+
     # bot data
     if not instance.pk and not hasattr(instance, _UNSAVED_BOT_DATA_FILEFIELD) and instance.bot_data:
         setattr(instance, _UNSAVED_BOT_DATA_FILEFIELD, instance.bot_data)
@@ -261,6 +270,12 @@ def pre_save_bot(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Bot)
 def post_save_bot(sender, instance, created, **kwargs):
+    # Delete the replaced bot_data file, but only once the DB points at the new one.
+    previous_bot_data_name = instance.__dict__.pop(_PREVIOUS_BOT_DATA_NAME, None)
+    if previous_bot_data_name and previous_bot_data_name != instance.bot_data.name:
+        storage = sender._meta.get_field("bot_data").storage
+        transaction.on_commit(lambda: storage.delete(previous_bot_data_name))
+
     # bot zip
     if created and hasattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD):
         instance.bot_zip = getattr(instance, _UNSAVED_BOT_ZIP_FILEFIELD)

@@ -514,18 +514,13 @@ class SubmitResult(CleanedInputMutation):
         match.result = result
         match.save()
 
-        # Update bot data if applicable (capture old paths for cleanup after commit)
-        old_bot_data_keys = []
+        # Update bot data if applicable (the Bot model deletes the replaced file after commit)
         match_is_requested = match.is_requested
         if p1.use_bot_data and p1.update_bot_data and not match_is_requested and input_object.bot1_data:
-            if p1.bot.bot_data:
-                old_bot_data_keys.append(p1.bot.bot_data.name)
             cls._copy_upload(input_object.bot1_data, p1.bot.bot_data)
             p1.bot.save()
 
         if p2.use_bot_data and p2.update_bot_data and not match_is_requested and input_object.bot2_data:
-            if p2.bot.bot_data:
-                old_bot_data_keys.append(p2.bot.bot_data.name)
             cls._copy_upload(input_object.bot2_data, p2.bot.bot_data)
             p2.bot.save()
 
@@ -547,15 +542,8 @@ class SubmitResult(CleanedInputMutation):
                 if upload is not None:
                     upload.delete_from_storage()
                     upload.delete()
-            # Delete old bot_data files that were replaced
-            storage = Bot._meta.get_field("bot_data").storage
-            for key in old_bot_data_keys:
-                storage.delete(key)
 
-        # Clean up after transaction commits. If we started deleting old files, and it fails in the middle,
-        # we can no longer go back to the old state (ie we deleted bot data for bot1, but failed when trying to delete
-        # bot data for bot2). This will leave orphaned files in S3, but will result in a correct and consistent state
-        # in the database overall.
+        # Clean up after transaction commits, so a rollback never leaves the result pointing at deleted uploads.
         transaction.on_commit(cleanup)
 
         return cls(result=result, errors=[])
