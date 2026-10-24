@@ -7,6 +7,7 @@ import { ArrowDownCircleIcon } from "@heroicons/react/20/solid";
 import { useState } from "react";
 import CompetitionRoundsModal from "./_modals/CompetitionRoundsModal";
 import MutedButton from "@/_components/_actions/MutedButton";
+import { getFeatureFlags } from "@/_data/featureFlags";
 
 interface CompetitionInformationSectionProps {
   competiton: CompetitionInformationSection_competition$key;
@@ -29,6 +30,22 @@ export default function CompetitionInformationSection({
         dateOpened
         game
         gameMode
+
+        awardSet {
+          name
+          items {
+            edges {
+              node {
+                id
+                condition
+                trophyCondition
+                trophyIconName
+                trophyIconImage
+              }
+            }
+          }
+        }
+
         maps {
           edges {
             node {
@@ -40,6 +57,7 @@ export default function CompetitionInformationSection({
           }
           totalCount
         }
+
         status
       }
     `,
@@ -70,6 +88,7 @@ export default function CompetitionInformationSection({
             <h3 className="col-span-1 text-sm font-semibold tracking-wide text-gray-400 uppercase mb-3">
               Details
             </h3>
+
             <dl className="space-y-2 text-sm sm:text-base p-4">
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Game</dt>
@@ -105,8 +124,21 @@ export default function CompetitionInformationSection({
                   {data.status}
                 </dd>
               </div>
-              <div className="flex gap-2 justify-center">
-                <span className="flex-1 text-gray-100 font-bold my-2">
+              <div className="flex flex-col gap-2 justify-center">
+                <span className="flex-1 text-gray-100 font-bold ">
+                  <MutedButton
+                    title="View Leaderboard"
+                    onClick={() => {
+                      document.getElementById("leaderboard")?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }}
+                  >
+                    View Leaderboard
+                  </MutedButton>
+                </span>
+                <span className="flex-1 text-gray-100 font-bold">
                   <MutedButton
                     title="View Rounds"
                     onClick={() => setIsRoundsModalOpen(true)}
@@ -115,16 +147,15 @@ export default function CompetitionInformationSection({
                   </MutedButton>
                 </span>
               </div>
-
               <hr className="border-neutral-700 my-3" />
-
               <div>
                 <span className="w-32 text-gray-400 flex">Maps</span>
-                <ul className="ml-4 mt-2 inline-block ">
-                  {data.maps?.totalCount && data.maps?.totalCount >= 0 ? (
+
+                <ul className="ml-4 mt-2 inline-block">
+                  {data.maps?.totalCount && data.maps.totalCount >= 0 ? (
                     <>
                       {data.maps.edges.map((map) => (
-                        <li key={map?.node?.id} className="text-gray-100 ">
+                        <li key={map?.node?.id} className="text-gray-100">
                           <a
                             href={`${map?.node?.downloadLink}`}
                             className="flex gap-1 items-center"
@@ -140,13 +171,56 @@ export default function CompetitionInformationSection({
                   )}
                 </ul>
               </div>
+              {getFeatureFlags().trophies &&
+              data.awardSet?.items?.edges?.length ? (
+                <>
+                  <hr className="border-neutral-700 my-3" />
+
+                  <div>
+                    <span className="w-32 text-gray-400 flex">Awards</span>
+
+                    <ul className="mt-3 space-y-3 ml-4">
+                      {data.awardSet.items.edges.map((award) => {
+                        const item = award?.node;
+
+                        if (!item) {
+                          return null;
+                        }
+
+                        return (
+                          <li key={item.id} className="flex items-center gap-3">
+                            {item.trophyIconImage && (
+                              <img
+                                src={item.trophyIconImage}
+                                alt={
+                                  item.trophyIconName ||
+                                  item.trophyCondition ||
+                                  "Trophy"
+                                }
+                                className="h-10 w-10 object-contain"
+                              />
+                            )}
+
+                            <div className="min-w-0">
+                              <div className="text-gray-100 font-medium">
+                                {item.trophyCondition}
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                </>
+              ) : null}
             </dl>
           </div>
 
           <div className="col-span-2">
-            <h3 className=" text-sm font-semibold tracking-wide text-gray-400 uppercase mb-3">
+            <h3 className="text-sm font-semibold tracking-wide text-gray-400 uppercase mb-3">
               Information
             </h3>
+
             {data.wikiArticle ? (
               <div className="prose prose-invert max-w-none text-sm sm:text-base">
                 <MarkdownDisplay markdown={data.wikiArticle} />
@@ -159,6 +233,7 @@ export default function CompetitionInformationSection({
           </div>
         </div>
       </div>
+
       {isRoundsModalOpen && (
         <CompetitionRoundsModal
           competition={data}
