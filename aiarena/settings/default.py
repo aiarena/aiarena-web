@@ -607,6 +607,10 @@ if crontab:
             "task": "aiarena.core.tasks.flush_api_usage",
             "schedule": crontab(minute="1-59/5"),  # :01, :06, :11... — one minute after each 5-min bucket closes.
         },
+        "prune_download_records": {
+            "task": "aiarena.core.tasks.prune_download_records",
+            "schedule": crontab(minute=23, hour=3),  # Daily, off-peak.
+        },
     }
 
 CELERY_TASK_ROUTES = {
@@ -642,6 +646,18 @@ MATCH_REQUEST_LIMIT_SILVER_TIER = 200
 MATCH_REQUEST_LIMIT_GOLD_TIER = 600
 MATCH_REQUEST_LIMIT_PLATINUM_TIER = 2000
 MATCH_REQUEST_LIMIT_DIAMOND_TIER = 8000
+
+# Download rate limiting.
+# Observation trial (step 1): a single hardcoded limit applied to every tier, with
+# accounting recorded but never enforced, so we can compare the proposed per-tier
+# limits against real usage before switching enforcement on.
+DOWNLOAD_RATE_LIMIT_HOURLY_KB = 100 * 1024  # 100 MB
+DOWNLOAD_RATE_LIMIT_MONTHLY_KB = 1024 * 1024  # 1 GB
+
+# How many calendar months of download accounting to keep. The limit itself only
+# needs the current month; the extra history is for insight / reconciling against
+# the AWS bill, and is pruned daily (see prunedownloadrecords).
+DOWNLOAD_RECORD_RETENTION_MONTHS = 3
 
 SENTRY_DSN = None
 

@@ -27,6 +27,7 @@ from aiarena.core.models import BotRace, Match, MatchParticipation, Result, Temp
 from aiarena.core.models.result import STEPS_PER_SECOND
 from aiarena.core.s3_helpers import get_file_s3_url_with_content_disposition
 from aiarena.core.services import ladders, match_requests, supporters, users
+from aiarena.core.services.download_rate_limiting import check_download_rate_limit
 from aiarena.core.services.service_implementations.internal.statistics.elo_graphs_generator import EloGraphsGenerator
 from aiarena.frontend.templatetags.url_utils import get_absolute_url
 from aiarena.frontend.views.bot_detail import RelativeResultFilter
@@ -155,6 +156,7 @@ class BotType(DjangoObjectTypeWithUID):
             return None
         if not root.can_download_bot_zip(info.context.user):
             return None
+        check_download_rate_limit(info.context.user, root.bot_zip)
         return get_file_s3_url_with_content_disposition(root.bot_zip, f"{root.name}.zip")
 
     @staticmethod
@@ -163,6 +165,7 @@ class BotType(DjangoObjectTypeWithUID):
             return None
         if not root.can_download_bot_data(info.context.user):
             return None
+        check_download_rate_limit(info.context.user, root.bot_data)
         return get_file_s3_url_with_content_disposition(root.bot_data, f"{root.name}_data.zip")
 
     @staticmethod
@@ -1202,6 +1205,7 @@ class MapType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_download_link(root: models.Map, info, **args):
+        check_download_rate_limit(info.context.user, root.file)
         return info.context.build_absolute_uri(root.file.url)
 
 
@@ -1271,6 +1275,7 @@ class ResultType(DjangoObjectTypeWithUID):
             return None
 
         try:
+            check_download_rate_limit(info.context.user, file)
             return file.url
         except Exception:
             return None
@@ -1283,6 +1288,7 @@ class ResultType(DjangoObjectTypeWithUID):
             return None
 
         try:
+            check_download_rate_limit(info.context.user, file)
             return file.url
         except Exception:
             return None
