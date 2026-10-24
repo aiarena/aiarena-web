@@ -12,34 +12,57 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="DownloadRateLimit",
+            name="DownloadRecord",
             fields=[
                 ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
-                ("is_shared_anonymous", models.BooleanField(default=False)),
-                ("last_hour", models.CharField(blank=True, max_length=13)),
-                ("last_month", models.CharField(blank=True, max_length=7)),
-                ("hourly_downloads_kb", models.IntegerField(default=0)),
-                ("monthly_downloads_kb", models.IntegerField(default=0)),
-                ("granted_downloads", models.IntegerField(default=0)),
-                ("denied_downloads", models.IntegerField(default=0)),
+                ("size_kb", models.IntegerField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "user",
-                    models.OneToOneField(
+                    models.ForeignKey(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="download_rate_limit",
+                        related_name="download_records",
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
             ],
         ),
-        migrations.AddConstraint(
-            model_name="downloadratelimit",
-            constraint=models.UniqueConstraint(
-                condition=models.Q(("is_shared_anonymous", True)),
-                fields=("is_shared_anonymous",),
-                name="single_anonymous_download_bucket",
-            ),
+        migrations.CreateModel(
+            name="DownloadDenial",
+            fields=[
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("window", models.CharField(max_length=13)),
+                ("count", models.IntegerField(default=0)),
+                ("size_kb", models.IntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="download_denials",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+            ],
+        ),
+        migrations.AddIndex(
+            model_name="downloadrecord",
+            index=models.Index(fields=["user", "created_at"], name="dlrecord_user_created"),
+        ),
+        migrations.AddIndex(
+            model_name="downloadrecord",
+            index=models.Index(fields=["created_at"], name="dlrecord_created"),
+        ),
+        migrations.AddIndex(
+            model_name="downloaddenial",
+            index=models.Index(fields=["user", "window"], name="dldenial_user_window"),
+        ),
+        migrations.AddIndex(
+            model_name="downloaddenial",
+            index=models.Index(fields=["created_at"], name="dldenial_created"),
         ),
     ]

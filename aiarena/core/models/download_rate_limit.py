@@ -5,64 +5,91 @@ from django.db import models
 
 
 HOUR_WINDOW_FORMAT = "%Y-%m-%d-%H"
-MONTH_WINDOW_FORMAT = "%Y-%m"
 
 
 def current_hour_window(now: datetime.datetime | None = None) -> str:
-    """UTC hour window string, e.g. "2026-10-18-23"."""
+    """UTC hour-window string, e.g. "2026-10-18-23" -- the denial counter's bucket."""
     now = now or datetime.datetime.now(tz=datetime.UTC)
     return now.astimezone(datetime.UTC).strftime(HOUR_WINDOW_FORMAT)
 
 
-def current_month_window(now: datetime.datetime | None = None) -> str:
-    """UTC month window string, e.g. "2026-10"."""
-    now = now or datetime.datetime.now(tz=datetime.UTC)
-    return now.astimezone(datetime.UTC).strftime(MONTH_WINDOW_FORMAT)
+def hour_window_start(now: datetime.datetime | None = None) -> datetime.datetime:
+    """Start of the current calendar UTC hour."""
+    now = (now or datetime.datetime.now(tz=datetime.UTC)).astimezone(datetime.UTC)
+    return now.replace(minute=0, second=0, microsecond=0)
 
 
-class DownloadRateLimit(models.Model):
-    """Per-user download accounting for rate limiting.
+def month_window_start(now: datetime.datetime | None = None) -> datetime.datetime:
+    """Start of the current calendar UTC month."""
+    now = (now or datetime.datetime.now(tz=datetime.UTC)).astimezone(datetime.UTC)
+    return now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-    One row per user; a single row with user=NULL is the shared anonymous bucket.
-    Window columns are UTC strings compared by exact match ("YYYY-MM-DD-HH",
-    "YYYY-MM"); volumes are kilobytes rounded up per file, which keeps them within a
-    4-byte integer even at the largest monthly tier.
+
+class DownloadRecord(models.Model):
+    """One row per metered download that moves bytes (i.e. is within limits).
+
+    The limit decision sums `size_kb` over the current calendar hour and month for a
+    user; a NULL user is the shared anonymous bucket. Over-limit attempts are NOT
+    rowed here -- they are tallied on DownloadDenial instead, so a flood of
+    rejections can never bloat this table. Sizes are kilobytes (rounded up per file)
+    to stay within a 4-byte integer even at the largest tier.
     """
 
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
         on_delete=models.CASCADE,
-        related_name="download_rate_limit",
+        related_name="download_records",
     )
-    # Vehicle for the partial unique index that enforces a single anonymous bucket
-    # row. Postgres treats multiple NULLs in a unique index as distinct, so a unique
-    # index on `user` alone would not stop duplicate anonymous rows. Django 5's
-    # UniqueConstraint(nulls_distinct=False) would let us drop this column and key
-    # the index directly on a NULL `user` -- worth revisiting when the team discusses
-    # upgrading to Django 5.
-    is_shared_anonymous = models.BooleanField(default=False)
-
-    last_hour = models.CharField(max_length=13, blank=True)
-    last_month = models.CharField(max_length=7, blank=True)
-
-    hourly_downloads_kb = models.IntegerField(default=0)
-    monthly_downloads_kb = models.IntegerField(default=0)
-
-    # Cumulative counts within the current monthly window (reset on month rollover).
-    granted_downloads = models.IntegerField(default=0)
-    denied_downloads = models.IntegerField(default=0)
+    size_kb = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["is_shared_anonymous"],
-                condition=models.Q(is_shared_anonymous=True),
-                name="single_anonymous_download_bucket",
-            )
+        indexes = [
+            # Per-user window sums (the hot-path limit decision).
+            models.Index(fields=["user", "created_at"], name="dlrecord_user_created"),
+            # Cross-user aggregation (e.g. by day, to reconcile with the AWS bill)
+            # and the retention prune, both of which range on time alone.
+            models.Index(fields=["created_at"], name="dlrecord_created"),
         ]
 
     def __str__(self):
         who = "anonymous" if self.user_id is None else self.user.username
-        return f"DownloadRateLimit({who})"
+        return f"DownloadRecord({who}, {self.size_kb} KB)"
+
+
+class DownloadDenial(models.Model):
+    """Per-(user, hour) tally of downloads that would be / are denied.
+
+    Denials collapse into counters rather than rows: a client hammering a rejected
+    endpoint a million times an hour increments one row instead of inserting a
+    million. `size_kb` accumulates the would-be (observe mode) or avoided
+    (enforcement) bytes, so overrun is quantifiable and reconcilable against the AWS
+    bill. There is deliberately no unique constraint -- a boundary race may create a
+    duplicate (user, window) row, which is harmless because reads aggregate.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="download_denials",
+    )
+    window = models.CharField(max_length=13)  # UTC hour, "YYYY-MM-DD-HH"
+    count = models.IntegerField(default=0)
+    size_kb = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            # Upsert lookup on the hot path.
+            models.Index(fields=["user", "window"], name="dldenial_user_window"),
+            # Retention prune ranges on time alone.
+            models.Index(fields=["created_at"], name="dldenial_created"),
+        ]
+
+    def __str__(self):
+        who = "anonymous" if self.user_id is None else self.user.username
+        return f"DownloadDenial({who}, {self.window}, {self.count})"

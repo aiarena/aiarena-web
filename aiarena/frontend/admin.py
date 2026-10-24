@@ -21,7 +21,8 @@ from aiarena.core.models import (
     CompetitionBotMapStats,
     CompetitionBotMatchupStats,
     CompetitionParticipation,
-    DownloadRateLimit,
+    DownloadDenial,
+    DownloadRecord,
     Map,
     MapPool,
     Match,
@@ -463,31 +464,25 @@ class CompetitionParticipationAdmin(admin.ModelAdmin):
     list_select_related = ["competition", "bot"]
 
 
-@admin.register(DownloadRateLimit)
-class DownloadRateLimitAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "is_shared_anonymous",
-        "last_hour",
-        "last_month",
-        "hourly_downloads_kb",
-        "monthly_downloads_kb",
-        "granted_downloads",
-        "denied_downloads",
-    )
-    list_filter = ("is_shared_anonymous",)
+@admin.register(DownloadRecord)
+class DownloadRecordAdmin(admin.ModelAdmin):
+    list_display = ("user", "size_kb", "created_at")
+    list_filter = ("created_at",)
     search_fields = ("user__username",)
     list_select_related = ("user",)
-    readonly_fields = (
-        "user",
-        "is_shared_anonymous",
-        "last_hour",
-        "last_month",
-        "hourly_downloads_kb",
-        "monthly_downloads_kb",
-        "granted_downloads",
-        "denied_downloads",
-    )
+    readonly_fields = ("user", "size_kb", "created_at")
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(DownloadDenial)
+class DownloadDenialAdmin(admin.ModelAdmin):
+    list_display = ("user", "window", "count", "size_kb", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__username", "window")
+    list_select_related = ("user",)
+    readonly_fields = ("user", "window", "count", "size_kb", "created_at")
 
     def has_add_permission(self, request):
         return False
