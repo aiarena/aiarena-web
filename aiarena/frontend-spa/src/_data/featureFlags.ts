@@ -1,6 +1,7 @@
 const defaultFlags = {
   examples: false,
   reactRework: false,
+  trophies: false,
 };
 
 type FeatureFlags = Record<keyof typeof defaultFlags, boolean>;

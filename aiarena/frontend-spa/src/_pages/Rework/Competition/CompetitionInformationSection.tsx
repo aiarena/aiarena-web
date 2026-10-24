@@ -7,6 +7,7 @@ import { ArrowDownCircleIcon } from "@heroicons/react/20/solid";
 import { useState } from "react";
 import CompetitionRoundsModal from "./_modals/CompetitionRoundsModal";
 import MutedButton from "@/_components/_actions/MutedButton";
+import { getFeatureFlags } from "@/_data/featureFlags";
 
 interface CompetitionInformationSectionProps {
   competiton: CompetitionInformationSection_competition$key;
@@ -37,7 +38,7 @@ export default function CompetitionInformationSection({
               node {
                 id
                 condition
-                conditionDisplay
+                trophyCondition
                 trophyIconName
                 trophyIconImage
               }
@@ -93,42 +94,36 @@ export default function CompetitionInformationSection({
                 <dt className="w-32 text-gray-400">Game</dt>
                 <dd className="flex-1 text-gray-100">{data.game || "--"}</dd>
               </div>
-
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Game Mode</dt>
                 <dd className="flex-1 text-gray-100">
                   {data.gameMode || "--"}
                 </dd>
               </div>
-
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Created</dt>
                 <dd className="flex-1 text-gray-100">
                   {getDateTimeISOString(data.dateCreated) || "--"}
                 </dd>
               </div>
-
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Opened</dt>
                 <dd className="flex-1 text-gray-100">
                   {getDateTimeISOString(data.dateOpened) || "--"}
                 </dd>
               </div>
-
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Closed</dt>
                 <dd className="flex-1 text-gray-100">
                   {getDateTimeISOString(data.dateClosed) || "--"}
                 </dd>
               </div>
-
               <div className="flex gap-2">
                 <dt className="w-32 text-gray-400">Status</dt>
                 <dd className="flex-1 text-gray-100 font-bold">
                   {data.status}
                 </dd>
               </div>
-
               <div className="flex flex-col gap-2 justify-center">
                 <span className="flex-1 text-gray-100 font-bold ">
                   <MutedButton
@@ -152,9 +147,7 @@ export default function CompetitionInformationSection({
                   </MutedButton>
                 </span>
               </div>
-
               <hr className="border-neutral-700 my-3" />
-
               <div>
                 <span className="w-32 text-gray-400 flex">Maps</span>
 
@@ -178,8 +171,8 @@ export default function CompetitionInformationSection({
                   )}
                 </ul>
               </div>
-
-              {data.awardSet?.items?.edges?.length ? (
+              {getFeatureFlags().trophies &&
+              data.awardSet?.items?.edges?.length ? (
                 <>
                   <hr className="border-neutral-700 my-3" />
 
@@ -201,7 +194,7 @@ export default function CompetitionInformationSection({
                                 src={item.trophyIconImage}
                                 alt={
                                   item.trophyIconName ||
-                                  item.conditionDisplay ||
+                                  item.trophyCondition ||
                                   "Trophy"
                                 }
                                 className="h-10 w-10 object-contain"
@@ -210,7 +203,7 @@ export default function CompetitionInformationSection({
 
                             <div className="min-w-0">
                               <div className="text-gray-100 font-medium">
-                                {item.conditionDisplay}
+                                {item.trophyCondition}
                               </div>
                             </div>
                           </li>
