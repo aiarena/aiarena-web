@@ -16,6 +16,7 @@ from django.utils import timezone
 import django_filters
 import graphene
 from avatar.models import Avatar
+from constance import config
 from django_filters import FilterSet, OrderingFilter
 from graphene_django import DjangoConnectionField
 from graphene_django.filter import DjangoFilterConnectionField
@@ -1091,7 +1092,18 @@ class MatchType(DjangoObjectTypeWithUID):
 
     class Meta:
         model = models.Match
-        fields = ["status", "result", "map", "created", "started", "requested_by", "assigned_to", "round"]
+        fields = [
+            "status",
+            "result",
+            "map",
+            "created",
+            "started",
+            "requested_by",
+            "assigned_to",
+            "round",
+            "bot1_args",
+            "bot2_args",
+        ]
         filterset_class = MatchFilterSet
         connection_class = CountingConnection
 
@@ -1713,6 +1725,10 @@ class Viewer(graphene.ObjectType):
     active_bot_participation_limit = graphene.Int()
     request_matches_limit = graphene.Int(required=True)
     request_matches_count_left = graphene.Int(required=True)
+    request_match_bot_args_enabled = graphene.Boolean(
+        required=True,
+        description="Whether requested matches may carry extra command line arguments for the bots.",
+    )
     requested_matches = DjangoFilterConnectionField("aiarena.graphql.MatchType", filterset_class=MatchFilterSet)
     receive_email_comms = graphene.Boolean()
     last_login = graphene.DateTime()
@@ -1731,6 +1747,10 @@ class Viewer(graphene.ObjectType):
     @staticmethod
     def resolve_user(root: models.User, info, **args):
         return root
+
+    @staticmethod
+    def resolve_request_match_bot_args_enabled(root: models.User, info, **args):
+        return config.ALLOW_MATCH_REQUEST_BOT_ARGS
 
     @staticmethod
     def resolve_api_token(root: models.User, info):

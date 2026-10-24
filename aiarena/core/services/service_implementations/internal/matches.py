@@ -19,6 +19,8 @@ def create(
     bot2_use_data=None,
     bot2_update_data=None,
     require_trusted_arenaclient=True,
+    bot1_args="",
+    bot2_args="",
 ):
     with transaction.atomic():
         if bot1_use_data is None:
@@ -30,7 +32,12 @@ def create(
         if bot2_update_data is None:
             bot2_update_data = bot2.bot_data_enabled
         match = Match.objects.create(
-            map=map, round=round, requested_by=requested_by, require_trusted_arenaclient=require_trusted_arenaclient
+            map=map,
+            round=round,
+            requested_by=requested_by,
+            require_trusted_arenaclient=require_trusted_arenaclient,
+            bot1_args=bot1_args,
+            bot2_args=bot2_args,
         )
         MatchParticipation.objects.create(
             match=match,
