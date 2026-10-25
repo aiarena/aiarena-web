@@ -6,7 +6,6 @@ from graphene_file_upload.django import FileUploadGraphQLView
 from graphql import GraphQLError
 
 from aiarena.core.exceptions import AIArenaException
-from aiarena.graphql.common import AccessDenied
 
 
 class CustomGraphQLView(FileUploadGraphQLView):
@@ -27,7 +26,7 @@ class CustomGraphQLView(FileUploadGraphQLView):
     def _capture_sentry_exceptions(self, errors):
         for error in errors:
             exc = getattr(error, "original_error", None) or error
-            if isinstance(exc, AccessDenied):
+            if isinstance(exc, tuple(self.whitelisted_errors)):
                 continue
             if settings.DEBUG:
                 raise exc
