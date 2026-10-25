@@ -25,6 +25,4 @@ class Command(BaseCommand):
         )
         records, _ = DownloadRecord.objects.filter(created_at__lt=cutoff).delete()
         denials, _ = DownloadDenial.objects.filter(created_at__lt=cutoff).delete()
-        self.stdout.write(
-            f"Pruned {records} download records and {denials} denial counters before {cutoff:%Y-%m-%d}."
-        )
+        self.stdout.write(f"Pruned {records} download records and {denials} denial counters before {cutoff:%Y-%m-%d}.")
