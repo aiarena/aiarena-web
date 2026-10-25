@@ -6,7 +6,6 @@ from django.test import TestCase, TransactionTestCase
 
 from constance import config
 
-from aiarena import settings
 from aiarena.core.models import (
     Bot,
     Competition,
@@ -18,7 +17,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.models.game_mode import GameMode
-from aiarena.core.services import match_requests
+from aiarena.core.services import match_requests, supporters
 from aiarena.core.tests.test_mixins import BaseTestMixin, FullDataSetMixin, LoggedInMixin, MatchReadyMixin
 from aiarena.core.tests.testing_utils import TestAssetPaths
 from aiarena.core.utils import calculate_md5
@@ -41,8 +40,9 @@ class BotTestCase(LoggedInMixin, TestCase):
         competition = self._create_game_mode_and_open_competition()
 
         # test max bots for user
+        active_bots_limit = supporters.get_active_bots_limit(self.regularUser1)
         for i in range(0, config.MAX_USER_BOT_COUNT):
-            if i < settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_FREE_TIER:
+            if i < active_bots_limit:
                 self._create_active_bot_for_competition(competition.id, self.regularUser1, f"testbot{i}")
             else:
                 self._create_bot(self.regularUser1, f"testbot{i}")
@@ -71,25 +71,25 @@ class BotTestCase(LoggedInMixin, TestCase):
         cp.full_clean()
 
         """
-        Try to activate a bot for a user that already has 4 active participations
+        Try to activate a bot for a user that already has the maximum active participations
         """
         with self.assertRaisesMessage(
             ValidationError,
             "Too many active participations already exist for this user."
-            " You are allowed 4 active participations in competitions.",
+            f" You are allowed {active_bots_limit} active participations in competitions.",
         ):
             cp.active = True
             cp.full_clean()  # causes validation to run
 
         """
-        Try to join a bot to a new competition for a user that already has 4 active participations
+        Try to join a bot to a new competition for a user that already has the maximum active participations
         """
         game_mode = GameMode.objects.get()
         another_competition = self._create_open_competition(game_mode.id, name="Another Competition")
         with self.assertRaisesMessage(
             ValidationError,
             "Too many active participations already exist for this user."
-            " You are allowed 4 active participations in competitions.",
+            f" You are allowed {active_bots_limit} active participations in competitions.",
         ):
             cp = CompetitionParticipation.objects.create(competition=another_competition, bot=inactive_bot, active=True)
             cp.full_clean()  # causes validation to run
