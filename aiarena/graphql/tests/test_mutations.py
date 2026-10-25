@@ -5,6 +5,7 @@ import pytest
 from rest_framework.authtoken.models import Token
 
 from aiarena.core.models import Bot, CompetitionParticipation, Match, MatchParticipation
+from aiarena.core.services import supporters
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.graphql import BotType, CompetitionType, MapPoolType, MapType
 from aiarena.graphql.common import NO_ACCESS_MESSAGE_PREFIX, NOT_LOGGED_IN_MESSAGE
@@ -510,11 +511,10 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
     def test_update_competition_participation_insufficient_free_competitions(self, competition, bot, user, bot_factory):
         assert CompetitionParticipation.objects.filter(bot__user=user).count() == 0
 
-        # Creating 4 bots
-        bot_names = {0: "Zergelito", 1: "Probelito", 2: "Marinolito", 3: "Dronelito"}
-        for i in range(4):
-            bot_name = bot_names[i]
-            extra_bot = bot_factory(user=user, name=bot_name)
+        # Fill up the user's active participation allowance
+        bot_limit = supporters.get_active_bots_limit(user)
+        for i in range(bot_limit):
+            extra_bot = bot_factory(user=user, name=f"ExtraBot{i}")
             assert not CompetitionParticipation.objects.filter(bot=extra_bot, competition=competition).exists()
             self.mutate(
                 login_user=user,
@@ -529,7 +529,7 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
             )
             assert CompetitionParticipation.objects.filter(bot=extra_bot, competition=competition).exists()
 
-        # Test that the 5th bot isn't created
+        # Test that the next participation isn't created
         self.mutate(
             login_user=user,
             expected_status=200,
