@@ -32,7 +32,7 @@ from deploy.stack_outputs import StackOutputs
 
 
 CLOUD_IMAGE_TAG = "latest"
-NGINX_IMAGE = "fholzer/nginx-brotli:v1.26.2"
+NGINX_IMAGE = "fholzer/nginx-brotli:v1.28.3"
 
 CAPACITY_PROVIDER_STRATEGY = [
     CapacityProviderStrategyItem(capacity_provider="FARGATE_SPOT", weight=1),
