@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
 
 import Modal from "@/_components/_actions/Modal";
@@ -31,7 +32,6 @@ export default function MoreParticipationsModal(
   );
 
   const discordBonus = viewer.activeBotParticipationDiscordBonus;
-  const showDiscordBonus = !viewer.linkedDiscord && discordBonus > 0;
 
   return (
     <Modal
@@ -40,24 +40,30 @@ export default function MoreParticipationsModal(
       title="Get more active participations"
     >
       <div className="mb-6">
-        {showDiscordBonus ? (
+        {discordBonus > 0 ? (
           <>
-            <a
-              href={reverseUrl("discord_bind_index")}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 border border-customGreen/50 bg-darken-4 px-3 py-2 text-white hover:bg-darken-6"
-            >
-              <img
-                src={`${getPublicPrefix()}/social_icons/discord-icon.svg`}
-                alt=""
-                className="h-6 w-6"
-              />
-              <span className="grow">Link Discord</span>
-              <span className="text-lg font-bold text-customGreen">
-                +{discordBonus}
-              </span>
-            </a>
+            {viewer.linkedDiscord ? (
+              <div className="flex items-center gap-3 border border-customGreen bg-customGreen/10 px-3 py-2 text-white">
+                <DiscordIcon linked />
+                <span className="grow">Discord linked</span>
+                <span className="text-lg font-bold text-customGreen">
+                  +{discordBonus}
+                </span>
+              </div>
+            ) : (
+              <a
+                href={reverseUrl("discord_bind_index")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 border border-customGreen/50 bg-darken-4 px-3 py-2 text-white hover:bg-darken-6"
+              >
+                <DiscordIcon linked={false} />
+                <span className="grow">Link Discord</span>
+                <span className="text-lg font-bold text-customGreen">
+                  +{discordBonus}
+                </span>
+              </a>
+            )}
 
             <SectionDivider color="gray" className="my-4 pb-1" />
           </>
@@ -127,5 +133,23 @@ function SupporterTiers() {
         );
       })}
     </ul>
+  );
+}
+
+function DiscordIcon({ linked }: { linked: boolean }) {
+  return (
+    <span className="relative h-6 w-6 shrink-0">
+      <img
+        src={`${getPublicPrefix()}/social_icons/discord-icon.svg`}
+        alt=""
+        className="h-6 w-6"
+      />
+      {linked ? (
+        <CheckCircleIcon
+          aria-label="Linked"
+          className="absolute -right-1.5 -bottom-1.5 h-4 w-4 rounded-full bg-neutral-900 text-customGreen"
+        />
+      ) : null}
+    </span>
   );
 }
