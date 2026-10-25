@@ -44,6 +44,8 @@ class SupportersImpl(Supporters):
         if limit is None:
             return None  # no limit
         else:
+            if getattr(user, "discord_user", None) is not None:
+                limit += settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DISCORD_BONUS
             return limit + user.extra_active_competition_participations
 
     def get_requested_matches_limit(self, user: User):
