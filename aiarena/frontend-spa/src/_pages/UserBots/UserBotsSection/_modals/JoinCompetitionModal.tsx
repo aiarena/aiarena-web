@@ -52,8 +52,8 @@ export default function JoinCompetitionModal({
     useLazyLoadQuery<JoinCompetitionModalCompetitionsQuery>(
       graphql`
         query JoinCompetitionModalCompetitionsQuery {
-          competitions(
-            statusIn: ["open"]
+            competitions(
+            statusIn: ["open", "created"]
             orderBy: "-date_created"
             first: 20
           ) {
