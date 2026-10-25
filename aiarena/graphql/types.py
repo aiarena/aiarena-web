@@ -1718,6 +1718,16 @@ class UserType(DjangoObjectTypeWithUID):
         return None  # Return None if no avatar exists. However, we probably want to return the default avatar.
 
 
+class SupporterTierType(graphene.ObjectType):
+    level = graphene.String(required=True)
+    name = graphene.String(required=True)
+    active_bot_participation_limit = graphene.Int(required=True)
+
+    @staticmethod
+    def resolve_active_bot_participation_limit(root: dict, info, **args):
+        return root["active_bots_limit"]
+
+
 class Viewer(graphene.ObjectType):
     # This is the private viewer user type.
     # Put data only the logged in user should be able view here.
@@ -1727,6 +1737,7 @@ class Viewer(graphene.ObjectType):
     email = graphene.String()
     active_bot_participations = graphene.Int()
     active_bot_participation_limit = graphene.Int()
+    active_bot_participation_discord_bonus = graphene.Int(required=True)
     request_matches_limit = graphene.Int(required=True)
     request_matches_count_left = graphene.Int(required=True)
     requested_matches = DjangoFilterConnectionField("aiarena.graphql.MatchType", filterset_class=MatchFilterSet)
@@ -1768,6 +1779,10 @@ class Viewer(graphene.ObjectType):
     @staticmethod
     def resolve_active_bot_participation_limit(root: models.User, info, **args):
         return supporters.get_active_bots_limit(root)
+
+    @staticmethod
+    def resolve_active_bot_participation_discord_bonus(root: models.User, info, **args):
+        return settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DISCORD_BONUS
 
     @staticmethod
     def resolve_request_matches_limit(root: models.User, info, **args):
@@ -1827,6 +1842,7 @@ class Query(graphene.ObjectType):
     rounds = DjangoFilterConnectionField("aiarena.graphql.RoundsType")
     stats = graphene.Field(StatsType)
     stats_for_admins = graphene.Field("aiarena.graphql.StatsForAdmins")
+    supporter_tiers = graphene.List(graphene.NonNull(SupporterTierType), required=True)
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
     viewer = graphene.Field("aiarena.graphql.Viewer")
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
@@ -1891,6 +1907,10 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_stats(root, info, **args):
         return StatsType()
+
+    @staticmethod
+    def resolve_supporter_tiers(root, info, **args):
+        return supporters.get_tiers()
 
     @staticmethod
     def resolve_stats_for_admins(

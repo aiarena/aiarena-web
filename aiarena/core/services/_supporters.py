@@ -21,6 +21,17 @@ class Supporters(ABC):
         pass
 
     @abstractmethod
+    def get_tiers(self) -> list[dict]:
+        """Return every supporter tier, cheapest first, with its benefits.
+
+        Returns:
+            list of dict: Each has `level`, `name` and `active_bots_limit`.
+            These are the base tier limits, before per-user bonuses (Discord,
+            extras).
+        """
+        pass
+
+    @abstractmethod
     def get_requested_matches_limit(self, user) -> int | None:
         """Return the maximum number of periodic requested matches allowed.
 

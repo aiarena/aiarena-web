@@ -8,7 +8,7 @@ import { UserBotsSection_viewer$key } from "./__generated__/UserBotsSection_view
 import UserBotsList from "./UserBotsSection/UserBotsList";
 
 import clsx from "clsx";
-import WantMore from "@/_components/_display/WantMore";
+import WantMoreParticipations from "./UserBotsSection/WantMoreParticipations";
 import Dropdown from "@/_components/_actions/Dropdown";
 import DropdownButton from "@/_components/_actions/DropdownButton";
 import Searchbar from "@/_components/_actions/Searchbar";
@@ -31,6 +31,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
       fragment UserBotsSection_viewer on Viewer {
         activeBotParticipations
         activeBotParticipationLimit
+        ...WantMoreParticipations_viewer
 
         user {
           ...UserBotsList_user
@@ -81,7 +82,7 @@ export const UserBotsSection: React.FC<UserBotsSectionProps> = (props) => {
               participations.
             </p>
 
-            <WantMore />
+            <WantMoreParticipations viewer={viewer} />
           </div>
         </div>
 

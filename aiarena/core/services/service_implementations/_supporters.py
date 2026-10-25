@@ -44,7 +44,20 @@ class SupportersImpl(Supporters):
         if limit is None:
             return None  # no limit
         else:
+            if getattr(user, "discord_user", None) is not None:
+                limit += settings.MAX_USER_BOT_PARTICIPATIONS_ACTIVE_DISCORD_BONUS
             return limit + user.extra_active_competition_participations
+
+    def get_tiers(self) -> list[dict]:
+        names = dict(User.PATREON_LEVELS)
+        return [
+            {
+                "level": level,
+                "name": names[level],
+                "active_bots_limit": benefits["active_bots_limit"],
+            }
+            for level, benefits in BENEFITS_MAP.items()
+        ]
 
     def get_requested_matches_limit(self, user: User):
         return BENEFITS_MAP[user.patreon_level]["requested_matches_limit"] + user.extra_periodic_match_requests
