@@ -6,6 +6,7 @@ from graphene_file_upload.django import FileUploadGraphQLView
 from graphql import GraphQLError
 
 from aiarena.core.exceptions import AIArenaException
+from aiarena.graphql.common import AccessDenied
 
 
 class CustomGraphQLView(FileUploadGraphQLView):
@@ -14,6 +15,7 @@ class CustomGraphQLView(FileUploadGraphQLView):
     whitelisted_errors = [
         AIArenaException,
         ValidationError,
+        AccessDenied,
         GraphQLError,
     ]
 
