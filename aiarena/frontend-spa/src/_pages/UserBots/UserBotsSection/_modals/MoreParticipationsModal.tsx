@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { graphql, useFragment, useLazyLoadQuery } from "react-relay";
-import clsx from "clsx";
 
 import Modal from "@/_components/_actions/Modal";
 import SquareButton from "@/_components/_actions/SquareButton";
@@ -26,9 +25,6 @@ export default function MoreParticipationsModal(
       fragment MoreParticipationsModal_viewer on Viewer {
         linkedDiscord
         activeBotParticipationDiscordBonus
-        user {
-          patreonLevel
-        }
       }
     `,
     props.viewer,
@@ -67,7 +63,7 @@ export default function MoreParticipationsModal(
           </>
         ) : null}
 
-        <h3 className="mb-2 font-semibold">Support us on Patreon</h3>
+        <h3 className="mb-2 font-semibold">Support on Patreon</h3>
 
         {/* Only fetch the tiers once the modal is actually opened. */}
         {props.isOpen ? (
@@ -78,9 +74,7 @@ export default function MoreParticipationsModal(
               </div>
             }
           >
-            <SupporterTiers
-              currentLevel={viewer.user?.patreonLevel?.toLowerCase() ?? null}
-            />
+            <SupporterTiers />
           </Suspense>
         ) : null}
 
@@ -96,7 +90,7 @@ export default function MoreParticipationsModal(
   );
 }
 
-function SupporterTiers({ currentLevel }: { currentLevel: string | null }) {
+function SupporterTiers() {
   const data = useLazyLoadQuery<MoreParticipationsModalTiersQuery>(
     graphql`
       query MoreParticipationsModalTiersQuery {
@@ -112,35 +106,26 @@ function SupporterTiers({ currentLevel }: { currentLevel: string | null }) {
 
   return (
     <ul className="flex flex-col">
-      {data.supporterTiers
-        .filter((tier) => tier.level !== "none")
-        .map((tier) => (
-          <li
-            key={tier.level}
-            className={clsx(
-              "flex items-center gap-3 border px-3 py-2",
-              tier.level === currentLevel
-                ? "border-customGreen/50 bg-customGreen/10"
-                : "border-transparent",
+      {data.supporterTiers.map((tier) => {
+        const isFree = tier.level === "none";
+        return (
+          <li key={tier.level} className="flex items-center gap-3 px-3 py-2">
+            {isFree ? (
+              <span className="h-6 w-6" />
+            ) : (
+              <img
+                src={`${getPublicPrefix()}/bot-icons/${tier.level}.png`}
+                alt=""
+                className="h-6 w-6"
+              />
             )}
-          >
-            <img
-              src={`${getPublicPrefix()}/bot-icons/${tier.level}.png`}
-              alt=""
-              className="h-6 w-6"
-            />
-            <span className="grow">
-              {tier.name}
-              {tier.level === currentLevel ? (
-                <span className="ml-2 text-xs text-gray-400">current</span>
-              ) : null}
-            </span>
+            <span className="grow">{isFree ? "Free" : tier.name}</span>
             <span className="text-lg font-bold tabular-nums text-white">
               {tier.activeBotParticipationLimit.toLocaleString()}
             </span>
           </li>
-        ))}
+        );
+      })}
     </ul>
   );
 }
-
