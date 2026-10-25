@@ -21,11 +21,10 @@ from rest_framework.authtoken.models import Token
 from aiarena.api.arenaclient.common.ac_coordinator import ACCoordinator
 from aiarena.api.arenaclient.common.exceptions import LadderDisabled
 from aiarena.api.arenaclient.common.result_submission_handler import process_competition_result, update_match_tags
-from aiarena.core.exceptions import BotUploadsDisabled, CompetitionClosed, CompetitionClosing, MatchRequestException
+from aiarena.core.exceptions import BotUploadsDisabled, MatchRequestException
 from aiarena.core.models import Match, Result, TemporaryUpload
 from aiarena.core.models.bot import Bot
 from aiarena.core.models.bot_race import BotRace
-from aiarena.core.models.competition import Competition
 from aiarena.core.models.competition_participation import CompetitionParticipation
 from aiarena.core.services import bots, supporters
 from aiarena.core.services.service_implementations._competition_trophies import (
@@ -121,17 +120,6 @@ class UpdateCompetitionParticipationInput(CleanedInputType):
 
     class Meta:
         required_fields = ["bot", "competition"]
-
-    @staticmethod
-    def clean_competition(competition: Competition, info):
-        """Additional validation on the resolved Competition instance."""
-        if competition.status in ["closing"]:
-            raise CompetitionClosing
-
-        if competition.status in ["closed"]:
-            raise CompetitionClosed
-
-        return competition
 
 
 class UpdateCompetitionParticipation(CleanedInputMutation):

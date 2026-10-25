@@ -394,17 +394,37 @@ class TestUpdateCompetitionParticipation(GraphQLTest):
 
     def test_join_closed_competiton(self, competition_factory, game_mode, bot):
         closed_competition = competition_factory(name="A closed Competition", status="closed", game_mode=game_mode)
-        assert not CompetitionParticipation.objects.filter(bot=bot, competition=closed_competition).exists()
-        # Create a competition participation
         self.mutate(
             login_user=bot.user,
             expected_status=200,
             variables={
-                "input": {"competition": self.to_global_id(CompetitionType, closed_competition.id), "active": True}
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, closed_competition.id),
+                    "active": True,
+                }
             },
-            expected_errors_like={"This competition is closed."},
+            expected_errors_like=["That competition is not accepting new participants."],
         )
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=closed_competition).exists()
+
+    def test_reactivate_in_closed_competition(self, competition_factory, game_mode, bot):
+        closed_competition = competition_factory(name="A closed Competition", status="closed", game_mode=game_mode)
+        participation = CompetitionParticipation.objects.create(bot=bot, competition=closed_competition, active=False)
+        self.mutate(
+            login_user=bot.user,
+            expected_status=200,
+            variables={
+                "input": {
+                    "bot": self.to_global_id(BotType, bot.id),
+                    "competition": self.to_global_id(CompetitionType, closed_competition.id),
+                    "active": True,
+                }
+            },
+            expected_errors_like=["That competition is not accepting new participants."],
+        )
+        participation.refresh_from_db()
+        assert not participation.active
 
     def test_required_field_not_specified(self, competition, bot):
         assert not CompetitionParticipation.objects.filter(bot=bot, competition=competition).exists()
