@@ -84,7 +84,7 @@ export default function LeaderboardSection({
                 user {
                   id
                   username
-                  ...BotIcon_user
+                  ...PatreonIcon_user
                 }
                 type
               }

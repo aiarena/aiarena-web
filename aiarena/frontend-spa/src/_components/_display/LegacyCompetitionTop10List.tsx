@@ -31,7 +31,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
                       id
                       name
                       user {
-                        ...BotIcon_user
+                        ...PatreonIcon_user
                       }
                     }
                     trend
