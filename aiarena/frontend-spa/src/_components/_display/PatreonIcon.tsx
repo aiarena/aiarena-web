@@ -10,7 +10,7 @@ interface PatreonIconProps {
 export default function PatreonIcon(props: PatreonIconProps) {
   const user = useFragment(
     graphql`
-      fragment BotIcon_user on UserType {
+      fragment PatreonIcon_user on UserType {
         patreonLevel
       }
     `,
