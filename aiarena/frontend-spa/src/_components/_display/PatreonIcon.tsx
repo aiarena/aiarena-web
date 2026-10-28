@@ -3,11 +3,11 @@ import { graphql, useFragment } from "react-relay";
 import { BotIcon_user$key } from "./__generated__/BotIcon_user.graphql";
 import clsx from "clsx";
 
-interface BotIconProps {
+interface PatreonIconProps {
   user: BotIcon_user$key;
 }
 
-export default function PatreonIcon(props: BotIconProps) {
+export default function PatreonIcon(props: PatreonIconProps) {
   const user = useFragment(
     graphql`
       fragment BotIcon_user on UserType {
