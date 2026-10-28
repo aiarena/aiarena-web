@@ -1,10 +1,10 @@
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { graphql, useFragment } from "react-relay";
-import { BotIcon_user$key } from "./__generated__/BotIcon_user.graphql";
 import clsx from "clsx";
+import { PatreonIcon_user$key } from "./__generated__/PatreonIcon_user.graphql";
 
 interface PatreonIconProps {
-  user: BotIcon_user$key;
+  user: PatreonIcon_user$key;
 }
 
 export default function PatreonIcon(props: PatreonIconProps) {
