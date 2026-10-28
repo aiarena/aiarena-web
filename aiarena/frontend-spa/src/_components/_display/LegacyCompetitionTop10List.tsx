@@ -4,7 +4,7 @@ import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import WrappedTitle from "./WrappedTitle";
 import { LegacyCompetitionTop10ListQuery } from "./__generated__/LegacyCompetitionTop10ListQuery.graphql";
-import BotIcon from "./BotIcon";
+import PatreonIcon from "./PatreonIcon";
 import clsx from "clsx";
 
 import EloTrendIcon from "./EloTrendIcon";
@@ -106,7 +106,7 @@ const LegacyCompetitonTop10List: React.FC = () => {
             >
               <td className="text-center">{idx + 1}</td>
               <td className="m-auto">
-                <BotIcon user={participant.bot.user} />
+                <PatreonIcon user={participant.bot.user} />
               </td>
               <td>
                 <Link

@@ -1,19 +1,20 @@
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 import { graphql, useFragment } from "react-relay";
 import { BotIcon_user$key } from "./__generated__/BotIcon_user.graphql";
+import clsx from "clsx";
 
 interface BotIconProps {
   user: BotIcon_user$key;
 }
 
-export default function BotIcon(props: BotIconProps) {
+export default function PatreonIcon(props: BotIconProps) {
   const user = useFragment(
     graphql`
       fragment BotIcon_user on UserType {
         patreonLevel
       }
     `,
-    props.user
+    props.user,
   );
   if (
     user.patreonLevel === "NONE" ||
@@ -23,14 +24,13 @@ export default function BotIcon(props: BotIconProps) {
     return null;
   } else {
     return (
-      <div>
-        <img
-          src={`${getPublicPrefix()}/bot-icons/${user.patreonLevel.toLowerCase()}.png`}
-          alt={`${user.patreonLevel.toLowerCase()} icon`}
-          width={22}
-          height={22}
-        />
-      </div>
+      <img
+        src={`${getPublicPrefix()}/bot-icons/${user.patreonLevel.toLowerCase()}.png`}
+        alt={`${user.patreonLevel.toLowerCase()} icon`}
+        width={22}
+        height={22}
+        className={clsx("mr-2")}
+      />
     );
   }
 }

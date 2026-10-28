@@ -16,7 +16,7 @@ import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
 
 import EloTrendIcon from "@/_components/_display/EloTrendIcon";
-import BotIcon from "@/_components/_display/BotIcon";
+import PatreonIcon from "@/_components/_display/PatreonIcon";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import { Link } from "react-router";
@@ -249,8 +249,8 @@ export default function LeaderboardSection({
           });
           const aria = `View user profile for ${user.username}`;
           const children = (
-            <span className="flex gap-1 items-center">
-              <BotIcon user={user} /> {user.username}
+            <span className="flex">
+              <PatreonIcon user={user} /> <p>{user.username}</p>
             </span>
           );
 
