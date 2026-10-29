@@ -119,7 +119,7 @@ class CompetitionParticipation(models.Model, LockableModelMixin):
         super().save(*args, **kwargs)
 
     def validate_competition_accepting_new_participants(self):
-        if not self.active and not self.competition.is_accepting_new_participants:
+        if self.active and not self.competition.is_accepting_new_participants:
             raise ValidationError("That competition is not accepting new participants.")
 
     def validate_race_restrictions(self):
