@@ -217,8 +217,23 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         with self.assertRaisesMessage(CommandError, "Competition with id 999999 does not exist."):
             call_command("deletecompetition", "999999")
 
+    def test_deletecompetition_refused_when_deletion_not_allowed(self):
+        participants, results = self._generate_files_to_cleanup(6)
+        competition = Competition.objects.get(name="Competition 1")
+        replay_file = results.first().replay_file
+
+        with self.assertRaisesMessage(CommandError, "does not allow deletion"):
+            call_command("deletecompetition", competition.id, "--noinput")
+
+        # nothing should have been touched, including storage files
+        self.assertTrue(Competition.objects.filter(id=competition.id).exists())
+        self.assertTrue(Round.objects.filter(competition_id=competition.id).exists())
+        self.assertTrue(replay_file.storage.exists(replay_file.name))
+
     def test_deletecompetition_cancelled_when_confirmation_does_not_match(self):
         competition = Competition.objects.get(name="Competition 1")
+        competition.deletion_allowed = True
+        competition.save()
 
         out = StringIO()
         with mock.patch("builtins.input", return_value="not the competition name"):
@@ -231,6 +246,8 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
         NUM_MATCHES = 6  # one full round for the 4 active bots in this fixture (see _generate_files_to_cleanup)
         participants, results = self._generate_files_to_cleanup(NUM_MATCHES)
         competition = Competition.objects.get(name="Competition 1")
+        competition.deletion_allowed = True
+        competition.save()
 
         # capture file references before deletion, since the rows won't exist afterwards to look them up again
         replay_file = results.first().replay_file
@@ -258,6 +275,8 @@ class ManagementCommandTests(MatchReadyMixin, TransactionTestCase):
 
     def test_deletecompetition_noinput(self):
         competition = Competition.objects.get(name="Competition 1")
+        competition.deletion_allowed = True
+        competition.save()
 
         out = StringIO()
         call_command("deletecompetition", competition.id, "--noinput", stdout=out)

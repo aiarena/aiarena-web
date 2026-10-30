@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 
+from aiarena.core.exceptions import CompetitionDeletionNotAllowed
 from aiarena.core.models import Competition, CompetitionParticipation, Match, MatchParticipation, Result, Round
 
 
@@ -29,6 +30,11 @@ class Command(BaseCommand):
             competition = Competition.objects.get(id=options["competition_id"])
         except Competition.DoesNotExist:
             raise CommandError(f"Competition with id {options['competition_id']} does not exist.")
+
+        # Check up front: storage files and rounds are deleted before the competition row itself,
+        # so relying on the model's delete guard alone would leave a half-deleted competition.
+        if not competition.deletion_allowed:
+            raise CommandError(str(CompetitionDeletionNotAllowed(competition)))
 
         round_count = Round.objects.filter(competition=competition).count()
         match_count = Match.objects.filter(round__competition=competition).count()

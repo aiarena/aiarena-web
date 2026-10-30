@@ -2,12 +2,13 @@ import logging
 
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from wiki.models import Article, ArticleRevision
 
+from ..exceptions import CompetitionDeletionNotAllowed
 from .award_set import AwardSet
 from .bot_race import BotRace
 from .game_mode import GameMode
@@ -75,6 +76,9 @@ class Competition(models.Model, LockableModelMixin):
     """Marks that this competition has been finalized, and it's round and match data purged."""
     indepth_bot_statistics_enabled = models.BooleanField(default=True)
     """Whether to generate and display indepth bot statistics for this competition."""
+    # TODO(make-not-null): Remove null=True in a follow-up migration after deploy
+    deletion_allowed = models.BooleanField(null=True, default=False)
+    """Must be explicitly set before this competition can be deleted. Guards against accidental deletion."""
 
     def __str__(self):
         return self.name
@@ -192,3 +196,10 @@ def pre_save_competition(sender, instance, **kwargs):
     # automatically create a wiki article for this competition if it doesn't exists
     if instance.get_wiki_article() is None:
         instance.create_competition_wiki_article()
+
+
+@receiver(pre_delete, sender=Competition)
+def pre_delete_competition(sender, instance, **kwargs):
+    # pre_delete also fires for queryset and cascaded deletes, so this guards every deletion path.
+    if not instance.deletion_allowed:
+        raise CompetitionDeletionNotAllowed(instance)

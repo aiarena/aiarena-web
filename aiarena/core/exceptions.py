@@ -30,6 +30,14 @@ class CompetitionClosed(AIArenaException):
         super().__init__("This competition is closed.")
 
 
+class CompetitionDeletionNotAllowed(AIArenaException):
+    def __init__(self, competition):
+        super().__init__(
+            f"Competition {competition.id} ({competition.name}) does not allow deletion. "
+            f"Set its deletion_allowed flag first if you really intend to delete it."
+        )
+
+
 class NoMaps(AIArenaException):
     def __init__(self):
         super().__init__("There are no active maps available for a match.")

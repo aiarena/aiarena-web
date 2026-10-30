@@ -2,14 +2,17 @@ import os
 
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.db import transaction
 from django.test import TestCase, TransactionTestCase
 
 from constance import config
 
+from aiarena.core.exceptions import CompetitionDeletionNotAllowed
 from aiarena.core.models import (
     Bot,
     Competition,
     CompetitionParticipation,
+    Game,
     Map,
     Match,
     Round,
@@ -371,3 +374,36 @@ class CompetitionsTestCase(FullDataSetMixin, TransactionTestCase):
         a_terran_bot = Bot.objects.filter(plays_race=terran).first()
         cp = CompetitionParticipation.objects.create(bot=a_terran_bot, competition=competition)
         cp.full_clean()  # causes validation to run
+
+
+class CompetitionDeletionTestCase(TestCase):
+    """Competitions can only be deleted once their deletion_allowed flag is set."""
+
+    def setUp(self):
+        game = Game.objects.create(name="StarCraft II", map_file_extension=".SC2Map")
+        self.game_mode = GameMode.objects.create(name="Melee", game=game)
+        self.competition = Competition.objects.create(name="Competition 1", game_mode=self.game_mode)
+
+    def test_delete_refused_when_not_allowed(self):
+        # atomic so the aborted delete doesn't poison the test's own transaction
+        with self.assertRaises(CompetitionDeletionNotAllowed), transaction.atomic():
+            self.competition.delete()
+        self.assertTrue(Competition.objects.filter(id=self.competition.id).exists())
+
+    def test_queryset_delete_refused_when_not_allowed(self):
+        # atomic so the aborted delete doesn't poison the test's own transaction
+        with self.assertRaises(CompetitionDeletionNotAllowed), transaction.atomic():
+            Competition.objects.filter(id=self.competition.id).delete()
+        self.assertTrue(Competition.objects.filter(id=self.competition.id).exists())
+
+    def test_cascade_delete_refused_when_not_allowed(self):
+        # atomic so the aborted delete doesn't poison the test's own transaction
+        with self.assertRaises(CompetitionDeletionNotAllowed), transaction.atomic():
+            self.game_mode.delete()
+        self.assertTrue(Competition.objects.filter(id=self.competition.id).exists())
+
+    def test_delete_succeeds_when_allowed(self):
+        self.competition.deletion_allowed = True
+        self.competition.save()
+        self.competition.delete()
+        self.assertFalse(Competition.objects.filter(name="Competition 1").exists())

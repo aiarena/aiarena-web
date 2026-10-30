@@ -1,4 +1,5 @@
 from django.test import TestCase, TransactionTestCase
+from django.urls import reverse
 
 from aiarena.core.models import ArenaClient, Bot, Competition, Match, Result, Round
 from aiarena.core.tests.test_mixins import FullDataSetMixin
@@ -48,6 +49,22 @@ class AdminMethodsTestCase(FullDataSetMixin, TestCase):
             "closing",
             msg=f"failed responsechange<closing> on Competition<{competition}> Using the admin interface ",
         )
+
+    def test_admin_competition_delete_refused_when_not_allowed(self):
+        competition = Competition.objects.create(name="Deletable?", game_mode=Competition.objects.first().game_mode)
+        url = reverse("admin:core_competition_delete", args=(competition.pk,))
+
+        self.assertEqual(self.client.post(url, {"post": "yes"}).status_code, 403)
+        self.assertTrue(Competition.objects.filter(id=competition.id).exists())
+
+    def test_admin_competition_delete_when_allowed(self):
+        competition = Competition.objects.create(
+            name="Deletable", game_mode=Competition.objects.first().game_mode, deletion_allowed=True
+        )
+        url = reverse("admin:core_competition_delete", args=(competition.pk,))
+
+        self.client.post(url, {"post": "yes"})
+        self.assertFalse(Competition.objects.filter(id=competition.id).exists())
 
 
 class PageRenderTestCase(FullDataSetMixin, TransactionTestCase):
