@@ -62,6 +62,17 @@
                     <div class="flex-row--title">Match Count</div>
                     <div class="flex-row">{{ form.match_count }}</div>
                 </label>
+                {% if config.ALLOW_MATCH_REQUEST_BOT_ARGS %}
+                    <label class="flex-row-short">
+                        <div class="flex-row--title">{{ form.bot1_args.label }}</div>
+                        <div class="flex-row">{{ form.bot1_args }}</div>
+                    </label>
+                    <label class="flex-row-short">
+                        <div class="flex-row--title">{{ form.bot2_args.label }}</div>
+                        <div class="flex-row">{{ form.bot2_args }}</div>
+                    </label>
+                    <div class="flex-row">{{ form.bot1_args.help_text }}</div>
+                {% endif %}
                 <div class="flex-row">
                     <input id="submit-button" type="submit" value="{% trans 'Request Match' %}"
                             {% if user.match_request_count_left <= 0 %} disabled="" {% endif %}/>
