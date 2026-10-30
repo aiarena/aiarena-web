@@ -76,8 +76,7 @@ class Competition(models.Model, LockableModelMixin):
     """Marks that this competition has been finalized, and it's round and match data purged."""
     indepth_bot_statistics_enabled = models.BooleanField(default=True)
     """Whether to generate and display indepth bot statistics for this competition."""
-    # TODO(make-not-null): Remove null=True in a follow-up migration after deploy
-    deletion_allowed = models.BooleanField(null=True, default=False)
+    deletion_allowed = models.BooleanField(default=False)
     """Must be explicitly set before this competition can be deleted. Guards against accidental deletion."""
 
     def __str__(self):
