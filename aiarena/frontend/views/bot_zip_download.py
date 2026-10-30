@@ -4,6 +4,9 @@ from aiarena.core.models import Bot
 
 
 class BotZipDownloadView(PrivateStorageDetailView):
+    # Legacy app-proxied download, NOT metered against the rate limit. Should migrate
+    # to a presigned S3 URL via the GraphQL `botZipUrl` field (metered there), after
+    # which this path can be removed.
     model = Bot
     model_file_field = "bot_zip"
 

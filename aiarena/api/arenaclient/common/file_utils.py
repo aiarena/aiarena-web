@@ -1,6 +1,14 @@
 from rest_framework.reverse import reverse
 
 from aiarena.core.s3_helpers import get_file_s3_url_with_content_disposition, is_s3_file
+from aiarena.core.services.download_rate_limiting import check_download_rate_limit
+
+
+def _request_user(request, context):
+    req = request
+    if req is None and context is not None:
+        req = context.get("request")
+    return getattr(req, "user", None)
 
 
 def get_bot_zip_url(bot, match_id, request=None, context=None):
@@ -17,6 +25,7 @@ def get_bot_zip_url(bot, match_id, request=None, context=None):
         str: URL to the bot zip file
     """
     if is_s3_file(bot.bot_zip):
+        check_download_rate_limit(_request_user(request, context), bot.bot_zip)
         return get_file_s3_url_with_content_disposition(bot.bot_zip, f"{bot.name}.zip")
     else:
         from aiarena.core.models import MatchParticipation
@@ -58,6 +67,7 @@ def get_bot_data_url(bot, match_id, request=None, context=None):
 
     if p.use_bot_data and p.bot.bot_data:
         if is_s3_file(bot.bot_data):
+            check_download_rate_limit(_request_user(request, context), bot.bot_data)
             return get_file_s3_url_with_content_disposition(bot.bot_data, f"{bot.name}_data.zip")
         else:
             # Use the provided request or extract it from context

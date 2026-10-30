@@ -21,6 +21,8 @@ from aiarena.core.models import (
     CompetitionBotMapStats,
     CompetitionBotMatchupStats,
     CompetitionParticipation,
+    DownloadDenial,
+    DownloadRecord,
     Map,
     MapPool,
     Match,
@@ -460,6 +462,30 @@ class CompetitionParticipationAdmin(admin.ModelAdmin):
     list_filter = ("competition", "bot")
     search_fields = ("slug",)
     list_select_related = ["competition", "bot"]
+
+
+@admin.register(DownloadRecord)
+class DownloadRecordAdmin(admin.ModelAdmin):
+    list_display = ("user", "size_kb", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__username",)
+    list_select_related = ("user",)
+    readonly_fields = ("user", "size_kb", "created_at")
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(DownloadDenial)
+class DownloadDenialAdmin(admin.ModelAdmin):
+    list_display = ("user", "window", "count", "size_kb", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("user__username", "window")
+    list_select_related = ("user",)
+    readonly_fields = ("user", "window", "count", "size_kb", "created_at")
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(Game)
