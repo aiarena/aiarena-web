@@ -59,6 +59,49 @@ class CompetitionsDivisionsTestCase(MatchReadyMixin, TransactionTestCase):
         competition.target_division_size = 3
         _check(competition, 30, [6, 9, 12], [4, 7, 10])
 
+    def test_automatic_division_sizes(self):
+        # Sizes are ordered bottom division to top division. This also proves
+        # the count is round-half-up(N / target), rather than Python's banker's round.
+        expected_sizes = {
+            5: [5],
+            30: [15, 15],
+            50: [16, 17, 17],
+            70: [17, 18, 18, 17],
+            80: [20, 20, 20, 20],
+            110: [18, 18, 19, 19, 18, 18],
+            170: [18, 19, 19, 19, 19, 19, 19, 19, 19],
+            200: [20, 20, 20, 20, 20, 20, 20, 20, 20, 20],
+        }
+        for n_bots, sizes in expected_sizes.items():
+            self.assertEqual(Competition.automatic_division_sizes(n_bots, 20), sizes)
+
+        self.assertEqual(Competition.automatic_division_sizes(45, 15), [15, 15, 15])
+
+    def test_automatic_mode_generates_dynamic_divisions(self):
+        competition = self._set_up_competition(1, 2)
+        competition.division_sizing_mode = "automatic"
+        competition.save(update_fields=["division_sizing_mode"])
+
+        for user_index in range(10):
+            user = User.objects.create_user(
+                username=f"automatic_user{user_index}",
+                password="x",
+                email=f"automatic_user{user_index}@dev.aiarena.net",
+            )
+            for bot_index in range(5):
+                self._create_active_bot_for_competition(competition.id, user, f"automaticBot{user_index}_{bot_index}")
+
+        self._post_to_matches()
+        competition.refresh_from_db()
+        division_counts = {}
+        for division_num in CompetitionParticipation.objects.filter(competition=competition, active=True).values_list(
+            "division_num", flat=True
+        ):
+            division_counts[division_num] = division_counts.get(division_num, 0) + 1
+
+        self.assertEqual(competition.n_divisions, 3)
+        self.assertEqual(division_counts, {1: 17, 2: 17, 3: 16})
+
     def _get_div_participant_count(self, competition):
         div_participants = dict()
         current_elo = -1
