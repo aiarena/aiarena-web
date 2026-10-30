@@ -358,6 +358,12 @@ class CompetitionAdmin(admin.ModelAdmin):
     change_form_template = "admin/change_form_competition.html"
     form = CompetitionAdminForm
 
+    def has_delete_permission(self, request, obj=None):
+        # Also covers the bulk delete action, which checks this per object.
+        if obj is not None and not obj.deletion_allowed:
+            return False
+        return super().has_delete_permission(request, obj)
+
     def response_change(self, request, obj):
         if "_open-competition" in request.POST:
             error = obj.open()
