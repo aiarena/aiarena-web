@@ -75,6 +75,29 @@ class Competition(models.Model, LockableModelMixin):
     """Marks that this competition has been finalized, and it's round and match data purged."""
     indepth_bot_statistics_enabled = models.BooleanField(default=True)
     """Whether to generate and display indepth bot statistics for this competition."""
+    schedule = models.ForeignKey(
+        "CompetitionSchedule",
+        on_delete=models.PROTECT,
+        related_name="competitions",
+        null=True,
+        blank=True,
+    )
+    scheduled_start = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    scheduled_end = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["schedule", "scheduled_start"],
+                name="unique_scheduled_competition",
+            ),
+        ]
 
     def __str__(self):
         return self.name

@@ -458,3 +458,24 @@ def kill_slow_queries(timeout=settings.SQL_TIME_LIMIT):
         with sentry_sdk.push_scope() as scope:
             scope.set_context("query", query)
             sentry_sdk.capture_message("Slow query killed")
+
+
+from celery import shared_task
+
+
+@shared_task
+def competition_schedule():
+    """
+    Process scheduled competition lifecycle events.
+
+    Responsibilities:
+    - Create competitions when their scheduled start time arrives.
+    - Open scheduled competitions.
+    - Start closing competitions when their scheduled end time arrives.
+    - Finish closing competitions once all rounds are complete.
+    """
+    from aiarena.core.services.service_implementations.internal.competition_scheduler import (
+        process_competition_schedules,
+    )
+
+    process_competition_schedules()
