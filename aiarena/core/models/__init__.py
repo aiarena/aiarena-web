@@ -8,10 +8,10 @@ from .bot import Bot
 from .bot_crash_limit_alert import BotCrashLimitAlert
 from .bot_race import BotRace
 from .competition import Competition
-from .competition_schedule import CompetitionSchedule
 from .competition_bot_map_stats import CompetitionBotMapStats
 from .competition_bot_matchup_stats import CompetitionBotMatchupStats
 from .competition_participation import CompetitionParticipation
+from .competition_schedule import CompetitionSchedule
 from .game import Game
 from .game_mode import GameMode
 from .map import Map

@@ -1,5 +1,4 @@
 import logging
-from datetime import timedelta
 
 from django.db import transaction
 from django.db.models import Q
@@ -35,16 +34,12 @@ def create_competition(schedule, start, end):
     )
 
     # Copy playable races from the schedule.
-    competition.playable_races.set(
-        schedule.playable_races.all()
-    )
+    competition.playable_races.set(schedule.playable_races.all())
 
     error = competition.open()
 
     if error:
-        raise RuntimeError(
-            f"Failed to open competition {competition.pk}: {error}"
-        )
+        raise RuntimeError(f"Failed to open competition {competition.pk}: {error}")
 
     logger.info(
         "Created and opened competition %s from schedule %s",
@@ -63,11 +58,7 @@ def process_schedule(schedule_id, now):
     within its scheduled start/end window.
     """
     with transaction.atomic():
-        schedule = (
-            CompetitionSchedule.objects
-            .select_for_update()
-            .get(pk=schedule_id)
-        )
+        schedule = CompetitionSchedule.objects.select_for_update().get(pk=schedule_id)
 
         if not schedule.enabled:
             return
@@ -91,6 +82,7 @@ def process_schedule(schedule_id, now):
 
             create_competition(schedule, start, end)
 
+
 def close_competition(competition):
     """
     Progress a scheduled competition towards closure.
@@ -103,10 +95,7 @@ def close_competition(competition):
         error = competition.start_closing()
 
         if error:
-            raise RuntimeError(
-                f"Failed to start closing competition "
-                f"{competition.pk}: {error}"
-            )
+            raise RuntimeError(f"Failed to start closing competition {competition.pk}: {error}")
 
         logger.info(
             "Competition %s started closing",
@@ -121,6 +110,7 @@ def close_competition(competition):
                 "Competition %s closed",
                 competition.name,
             )
+
 
 def process_competition_schedules():
     """
