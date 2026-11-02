@@ -7,6 +7,7 @@ from aiarena.core.models import Competition, CompetitionSchedule, Round
 from aiarena.core.services.service_implementations.internal.competition_scheduler import (
     process_competition_schedules,
 )
+from aiarena.core.tasks import competition_schedule
 
 
 NOON = time(12, 0)
@@ -154,3 +155,59 @@ def test_incomplete_round_holds_competition_in_closing(make_schedule):
     competition.refresh_from_db()
     assert competition.status == "closed"
     assert competition.date_closed.date() == date(2027, 5, 3)
+
+
+def test_schedule_crossing_new_year(make_schedule):
+    """A Dec -> Jan competition is named for, and owned by, the year it started in."""
+    make_schedule("TEST Winter {year}", start=(12, 1), end=(1, 31))
+
+    simulate(1, start=datetime(2027, 12, 1, 12, tzinfo=UTC))
+    # Ticks after New Year must recognise the running competition as last year's,
+    # not create a second one.
+    simulate(3, start=datetime(2028, 1, 15, 12, tzinfo=UTC))
+    assert timeline() == {"TEST Winter 2027": (date(2027, 12, 1), None, "open")}
+
+    simulate(1, start=datetime(2028, 1, 31, 12, tzinfo=UTC))
+    assert timeline() == {"TEST Winter 2027": (date(2027, 12, 1), date(2028, 1, 31), "closed")}
+
+
+def test_scheduler_catches_up_after_downtime(make_schedule):
+    """If beat was down at the scheduled start, the next tick inside the window still creates it."""
+    make_schedule(f"{LADDER} Season 1", start=(2, 1), end=(4, 31))
+
+    tick(datetime(2027, 3, 15, 12, tzinfo=UTC))
+
+    assert timeline() == {"TEST Sc2 AI Arena 2027 Season 1": (date(2027, 3, 15), None, "open")}
+
+
+def test_failing_schedule_does_not_block_others(make_schedule):
+    """One broken schedule is logged and rolled back; the rest of the tick carries on."""
+    make_schedule("TEST Broken {year}", start=(2, 1), end=(4, 30))
+    make_schedule("TEST Healthy {year}", start=(2, 1), end=(4, 30))
+
+    real_open = Competition.open
+
+    def open_or_fail(competition):
+        if competition.name.startswith("TEST Broken"):
+            return "simulated failure"
+        return real_open(competition)
+
+    with mock.patch.object(Competition, "open", open_or_fail):
+        tick(datetime(2027, 2, 1, 12, tzinfo=UTC))
+
+    # The broken schedule's half-created competition is rolled back with its transaction,
+    # so the next tick retries it rather than finding a stuck "created" competition.
+    assert timeline() == {"TEST Healthy 2027": (date(2027, 2, 1), None, "open")}
+
+    tick(datetime(2027, 2, 2, 12, tzinfo=UTC))
+    assert timeline()["TEST Broken 2027"] == (date(2027, 2, 2), None, "open")
+
+
+def test_celery_task_runs_the_scheduler(make_schedule):
+    """The beat entry point drives the same pass; called directly, like the other task tests."""
+    make_schedule(f"{LADDER} Season 1", start=(2, 1), end=(4, 31))
+
+    with mock.patch("django.utils.timezone.now", return_value=datetime(2027, 2, 1, 12, tzinfo=UTC)):
+        competition_schedule()
+
+    assert timeline() == {"TEST Sc2 AI Arena 2027 Season 1": (date(2027, 2, 1), None, "open")}

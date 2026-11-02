@@ -18,10 +18,10 @@ from aiarena.core.models import (
     Bot,
     BotCrashLimitAlert,
     Competition,
-    CompetitionSchedule,
     CompetitionBotMapStats,
     CompetitionBotMatchupStats,
     CompetitionParticipation,
+    CompetitionSchedule,
     Map,
     MapPool,
     Match,
@@ -821,6 +821,7 @@ class WebsiteUserAdmin(ApiUsageAdminMixin, admin.ModelAdmin):
 
     ban_users.short_description = "Ban selected users (deactivate and disable all their bot participations)"
 
+
 @admin.register(CompetitionSchedule)
 class CompetitionScheduleAdmin(admin.ModelAdmin):
     list_display = (
@@ -855,9 +856,7 @@ class CompetitionScheduleAdmin(admin.ModelAdmin):
 
     filter_horizontal = ("playable_races",)
 
-    readonly_fields = (
-        "generated_competitions_count",
-    )
+    readonly_fields = ("generated_competitions_count",)
 
     fieldsets = (
         (
@@ -911,9 +910,7 @@ class CompetitionScheduleAdmin(admin.ModelAdmin):
         (
             "Playable Races",
             {
-                "fields": (
-                    "playable_races",
-                ),
+                "fields": ("playable_races",),
             },
         ),
         (
@@ -928,9 +925,7 @@ class CompetitionScheduleAdmin(admin.ModelAdmin):
         (
             "Generated Competitions",
             {
-                "fields": (
-                    "generated_competitions_count",
-                ),
+                "fields": ("generated_competitions_count",),
                 "classes": ("collapse",),
             },
         ),
@@ -938,19 +933,11 @@ class CompetitionScheduleAdmin(admin.ModelAdmin):
 
     @admin.display(description="Starts")
     def start_schedule(self, obj):
-        return (
-            f"{obj.start_month:02d}/"
-            f"{obj.start_day:02d} "
-            f"{obj.start_time:%H:%M}"
-        )
+        return f"{obj.start_month:02d}/{obj.start_day:02d} {obj.start_time:%H:%M}"
 
     @admin.display(description="Ends")
     def end_schedule(self, obj):
-        return (
-            f"{obj.end_month:02d}/"
-            f"{obj.end_day:02d} "
-            f"{obj.end_time:%H:%M}"
-        )
+        return f"{obj.end_month:02d}/{obj.end_day:02d} {obj.end_time:%H:%M}"
 
     @admin.display(description="Generated competitions")
     def generated_competitions_count(self, obj):

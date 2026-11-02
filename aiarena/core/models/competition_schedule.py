@@ -2,7 +2,7 @@ import calendar
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -24,7 +24,6 @@ class CompetitionSchedule(models.Model):
         max_length=50,
         help_text="Supports {year}, e.g. Championship {year}",
     )
-
 
     enabled = models.BooleanField(default=True)
 
@@ -53,10 +52,9 @@ class CompetitionSchedule(models.Model):
         validators=[MinValueValidator(1), MaxValueValidator(31)],
     )
     start_time = models.TimeField(
-    default="00:00",
-    help_text="Time the competition opens (UTC).",
+        default="00:00",
+        help_text="Time the competition opens (UTC).",
     )
-
 
     end_month = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(12)],
@@ -124,14 +122,14 @@ class CompetitionSchedule(models.Model):
         last_day = calendar.monthrange(year, month)[1]
 
         return datetime(
-        year=year,
-        month=month,
-        day=min(day, last_day),
-        hour=time.hour,
-        minute=time.minute,
-        second=time.second,
-        tzinfo=timezone.get_default_timezone(),
-    )
+            year=year,
+            month=month,
+            day=min(day, last_day),
+            hour=time.hour,
+            minute=time.minute,
+            second=time.second,
+            tzinfo=timezone.get_default_timezone(),
+        )
 
     def get_start(self, year):
         return self.resolve_date(
@@ -161,17 +159,15 @@ class CompetitionSchedule(models.Model):
             )
 
         return end
-    
+
     def get_competition_name(self, year):
         name = self.name.replace("{year}", str(year))
 
         if len(name) > 50:
-            raise ValidationError(
-                "Generated competition name exceeds 50 characters."
-            )
+            raise ValidationError("Generated competition name exceeds 50 characters.")
 
         return name
-    
+
     def clean(self):
         super().clean()
 
@@ -193,6 +189,4 @@ class CompetitionSchedule(models.Model):
             self.get_start(2024)
             self.get_end(2024)
         except (ValueError, OverflowError) as exc:
-            raise ValidationError(
-                f"Invalid competition schedule: {exc}"
-            )
+            raise ValidationError(f"Invalid competition schedule: {exc}")
