@@ -234,6 +234,11 @@ CONSTANCE_CONFIG = {
         0,
         "The ID of the map pool that should be selected by default when requesting matches.",
     ),
+    "ALLOW_MATCH_REQUEST_BOT_ARGS": (
+        False,
+        "Whether users can attach extra command line arguments for the bots to a requested match. "
+        "Only turn this on once the arena clients running matches are able to pass them on.",
+    ),
     "REQUESTED_MATCHES_LIMIT_PERIOD": (
         timedelta(days=30),
         "The period length for which a users match request limit applies.",
@@ -317,6 +322,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
     "Match Requests": (
         "REQUESTED_MATCHES_LIMIT_PERIOD",
         "MATCH_REQUESTS_PREFILL_MAP_POOL_ID",
+        "ALLOW_MATCH_REQUEST_BOT_ARGS",
     ),
     "File size limits": (
         "BOT_ZIP_SIZE_LIMIT_IN_MB_FREE_TIER",

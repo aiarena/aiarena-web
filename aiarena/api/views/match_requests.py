@@ -47,9 +47,13 @@ class MatchRequestsViewSet(viewsets.ViewSet):
             bot1 = serializer.validated_data["bot1"]
             bot2 = serializer.validated_data["bot2"]
             map_instance = serializer.validated_data.get("map")
+            bot1_args = serializer.validated_data.get("bot1_args", "")
+            bot2_args = serializer.validated_data.get("bot2_args", "")
 
             try:
-                match = match_requests.request_match(request.user, bot1, bot2, map_instance)
+                match = match_requests.request_match(
+                    request.user, bot1, bot2, map_instance, bot1_args=bot1_args, bot2_args=bot2_args
+                )
                 return Response(
                     {"message": "Match requested successfully", "match_id": match.id}, status=status.HTTP_201_CREATED
                 )

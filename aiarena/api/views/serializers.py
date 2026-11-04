@@ -48,6 +48,7 @@ from aiarena.core.models import (
 )
 from aiarena.core.models.bot_race import BotRace
 from aiarena.core.services import bots
+from aiarena.core.validators import clean_requested_bot_args
 from aiarena.patreon.models import PatreonUnlinkedDiscordUID
 
 
@@ -94,6 +95,27 @@ class RequestMatchSerializer(serializers.Serializer):
     bot1 = serializers.PrimaryKeyRelatedField(queryset=Bot.objects.all())
     bot2 = serializers.PrimaryKeyRelatedField(queryset=Bot.objects.all())
     map = serializers.PrimaryKeyRelatedField(queryset=Map.objects.all())
+    bot1_args = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text=(
+            "Optional extra command line for bot 1, passed to the bot verbatim. It is split into "
+            'arguments the way a shell would, so quote to include spaces: --message="good luck"'
+        ),
+    )
+    bot2_args = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="",
+        help_text="Optional extra command line for bot 2. See bot1_args.",
+    )
+
+    def validate_bot1_args(self, value):
+        return clean_requested_bot_args(value)
+
+    def validate_bot2_args(self, value):
+        return clean_requested_bot_args(value)
 
 
 class TrophySerializer(serializers.ModelSerializer):
