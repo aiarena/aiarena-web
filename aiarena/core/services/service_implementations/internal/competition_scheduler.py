@@ -4,6 +4,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from wiki.models import ArticleRevision
+
 from aiarena.core.models import Competition, CompetitionSchedule
 
 
@@ -35,6 +37,13 @@ def create_competition(schedule, start, end):
 
     # Copy playable races from the schedule.
     competition.playable_races.set(schedule.playable_races.all())
+
+    # Copy the description from the schedule.
+    revision = ArticleRevision()
+    revision.inherit_predecessor(competition.wiki_article)
+    revision.title = competition.name
+    revision.content = schedule.wiki_article_content.replace("{year}", str(start.year))
+    competition.wiki_article.add_revision(revision)
 
     error = competition.open()
 

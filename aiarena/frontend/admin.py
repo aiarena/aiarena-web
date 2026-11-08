@@ -822,8 +822,17 @@ class WebsiteUserAdmin(ApiUsageAdminMixin, admin.ModelAdmin):
     ban_users.short_description = "Ban selected users (deactivate and disable all their bot participations)"
 
 
+class CompetitionScheduleAdminForm(forms.ModelForm):
+    class Meta:
+        model = CompetitionSchedule
+        exclude = []
+        widgets = {"wiki_article_content": getEditor().get_widget()}
+
+
 @admin.register(CompetitionSchedule)
 class CompetitionScheduleAdmin(admin.ModelAdmin):
+    form = CompetitionScheduleAdminForm
+
     list_display = (
         "name",
         "game_mode",
@@ -868,6 +877,12 @@ class CompetitionScheduleAdmin(admin.ModelAdmin):
                     "game_mode",
                     "award_set",
                 ),
+            },
+        ),
+        (
+            "Description",
+            {
+                "fields": ("wiki_article_content",),
             },
         ),
         (

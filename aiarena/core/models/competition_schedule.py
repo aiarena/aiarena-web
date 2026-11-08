@@ -1,5 +1,5 @@
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -20,12 +20,21 @@ class CompetitionSchedule(models.Model):
     using these settings.
     """
 
+    MAX_DURATION = timedelta(days=7 * 31)
+
     name = models.CharField(
         max_length=50,
         help_text="Supports {year}, e.g. Championship {year}",
     )
 
     enabled = models.BooleanField(default=True)
+
+    wiki_article_content = models.TextField(
+        blank=True,
+        default="",
+        verbose_name="Description article content",
+        help_text="Copied into each generated competition's wiki article. Supports {year}.",
+    )
 
     game_mode = models.ForeignKey(
         GameMode,
@@ -186,7 +195,13 @@ class CompetitionSchedule(models.Model):
             return
 
         try:
-            self.get_start(2024)
-            self.get_end(2024)
+            start = self.get_start(2024)
+            end = self.get_end(2024)
         except (ValueError, OverflowError) as exc:
             raise ValidationError(f"Invalid competition schedule: {exc}")
+
+        if end - start > self.MAX_DURATION:
+            raise ValidationError(
+                f"A competition can run at most {self.MAX_DURATION.days} days (7 x 31). "
+                "Note: an end at or before the start is read as the following year."
+            )

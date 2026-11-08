@@ -1,6 +1,8 @@
 from datetime import UTC, date, datetime, time, timedelta
 from unittest import mock
 
+from django.core.exceptions import ValidationError
+
 import pytest
 
 from aiarena.core.models import Competition, CompetitionSchedule, Round
@@ -17,17 +19,17 @@ SIM_DAYS = 700  # 2027-01-01 .. 2028-11-30
 
 @pytest.fixture
 def make_schedule(game_mode):
-    def _make_schedule(name, start, end, **kwargs):
+    def _make_schedule(name, start, end, start_time=NOON, end_time=NOON, **kwargs):
         (start_month, start_day), (end_month, end_day) = start, end
         return CompetitionSchedule.objects.create(
             name=name,
             game_mode=game_mode,
             start_month=start_month,
             start_day=start_day,
-            start_time=NOON,
+            start_time=start_time,
             end_month=end_month,
             end_day=end_day,
-            end_time=NOON,
+            end_time=end_time,
             **kwargs,
         )
 
@@ -171,6 +173,22 @@ def test_schedule_crossing_new_year(make_schedule):
     assert timeline() == {"TEST Winter 2027": (date(2027, 12, 1), date(2028, 1, 31), "closed")}
 
 
+def test_schedule_description_is_copied_to_wiki_article(make_schedule):
+    make_schedule(
+        "TEST Described {year}",
+        start=(3, 1),
+        end=(4, 1),
+        wiki_article_content="The {year} ladder. Played using standard SC2 melee map rules.",
+    )
+
+    simulate(1, start=datetime(2027, 3, 1, 12, tzinfo=UTC))
+
+    competition = Competition.objects.get(name="TEST Described 2027")
+    revision = competition.wiki_article.current_revision
+    assert revision.content == "The 2027 ladder. Played using standard SC2 melee map rules."
+    assert revision.title == "TEST Described 2027"
+
+
 def test_scheduler_catches_up_after_downtime(make_schedule):
     """If beat was down at the scheduled start, the next tick inside the window still creates it."""
     make_schedule(f"{LADDER} Season 1", start=(2, 1), end=(4, 31))
@@ -178,6 +196,54 @@ def test_scheduler_catches_up_after_downtime(make_schedule):
     tick(datetime(2027, 3, 15, 12, tzinfo=UTC))
 
     assert timeline() == {"TEST Sc2 AI Arena 2027 Season 1": (date(2027, 3, 15), None, "open")}
+
+
+def test_no_competition_created_after_window_ended(make_schedule):
+    """Catch-up only applies inside the window: a first tick after the end creates nothing."""
+    make_schedule(f"{LADDER} Season 1", start=(2, 1), end=(4, 30))
+
+    tick(datetime(2027, 4, 30, 12, tzinfo=UTC))  # end is exclusive
+    tick(datetime(2027, 5, 15, 12, tzinfo=UTC))
+
+    assert timeline() == {}
+
+
+def schedule(start, end, start_time=NOON, end_time=NOON):
+    (start_month, start_day), (end_month, end_day) = start, end
+    return CompetitionSchedule(
+        start_month=start_month,
+        start_day=start_day,
+        start_time=start_time,
+        end_month=end_month,
+        end_day=end_day,
+        end_time=end_time,
+    )
+
+
+@pytest.mark.parametrize(
+    "start, end, start_time, end_time",
+    [
+        ((1, 1), (8, 5), NOON, NOON),  # exactly 217 days (2024 is the reference year)
+        ((7, 31), (2, 31), NOON, NOON),  # into next year
+        ((12, 1), (1, 31), NOON, NOON),  # crossing new year
+    ],
+)
+def test_schedule_within_max_duration_is_valid(start, end, start_time, end_time):
+    schedule(start, end, start_time, end_time).clean()
+
+
+@pytest.mark.parametrize(
+    "start, end, start_time, end_time",
+    [
+        ((1, 1), (8, 5), NOON, time(12, 1)),  # one minute over 217 days
+        ((1, 1), (12, 31), NOON, NOON),
+        ((11, 8), (11, 8), time(10, 50), time(9, 0)),  # end before start wraps to ~1 year
+        ((11, 8), (11, 8), NOON, NOON),  # end == start wraps to exactly 1 year
+    ],
+)
+def test_schedule_longer_than_max_duration_is_invalid(start, end, start_time, end_time):
+    with pytest.raises(ValidationError, match="at most 217 days"):
+        schedule(start, end, start_time, end_time).clean()
 
 
 def test_failing_schedule_does_not_block_others(make_schedule):
