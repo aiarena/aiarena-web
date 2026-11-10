@@ -16,6 +16,10 @@
   --font-quicksand: "Quicksand", sans-serif;
   --font-gugi: "Gugi", cursive;
 
+  /* Between Tailwind's 2xl (1.5rem) and 3xl (1.875rem). */
+  --text-2\.5xl: 1.6875rem;
+  --text-2\.5xl--line-height: 2.125rem;
+
   --color-customGreen: rgba(134, 194, 50, 1);
   --color-customGreen-dark: rgba(94, 140, 30, 1);
   --color-customGreen-dark-2: rgba(97, 137, 47, 0.7);

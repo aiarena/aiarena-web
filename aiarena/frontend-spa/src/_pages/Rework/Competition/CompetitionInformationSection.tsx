@@ -8,6 +8,7 @@ import { useState } from "react";
 import CompetitionRoundsModal from "./_modals/CompetitionRoundsModal";
 import MutedButton from "@/_components/_actions/MutedButton";
 import { getFeatureFlags } from "@/_data/featureFlags";
+import { getPublicPrefix } from "@/_lib/getPublicPrefix";
 
 interface CompetitionInformationSectionProps {
   competiton: CompetitionInformationSection_competition$key;
@@ -72,11 +73,18 @@ export default function CompetitionInformationSection({
           "shadow-lg shadow-black p-6 sm:p-8",
         )}
       >
-        <div className="items-baseline gap-2 mb-6">
-          <div className="flex">
+        <div className="items-baseline gap-2 mb-10">
+          <div className="flex items-center gap-4">
+            <img
+              className="invert"
+              src={`${getPublicPrefix()}/assets_logo/ai-arena-logo.svg`}
+              alt=""
+              width={35}
+              height={35}
+            />
             <h2
               id="bot-information-heading"
-              className="text-xl sm:text-2xl font-semibold text-white"
+              className="text-2xl sm:text-2.5xl font-semibold text-white"
             >
               {data.name}
             </h2>
