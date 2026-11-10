@@ -1,23 +1,27 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
 import InformationSection from "./InformationSection";
 import { BotQuery } from "./__generated__/BotQuery.graphql";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 
-import { useState } from "react";
-import { getBase64FromID } from "@/_lib/relayHelpers";
+import { Suspense, useState } from "react";
+import {
+  getBase64FromID,
+  getIDFromBase64,
+  getNodes,
+} from "@/_lib/relayHelpers";
 import BotCompetitionsTable from "./BotCompetitionsTable";
 import FetchError from "@/_components/_display/FetchError";
 
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
-// import BotResults from "./BotResults";
-// import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-// import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
-// import { reverseUrl } from "@/_lib/reverseUrl";
+import BotResults from "./BotResults";
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import { reverseUrl } from "@/_lib/reverseUrl";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
   const [onlyActive, setOnlyActive] = useState(false);
-  // const [loadResults, setLoadResults] = useState(false);
+  const [loadResults, setLoadResults] = useState(false);
 
   const data = useLazyLoadQuery<BotQuery>(
     graphql`
@@ -45,16 +49,16 @@ export default function Bot() {
     return <FetchError type="bot" />;
   }
 
-  // const firstActiveCompetition = getNodes(data.node.activeCompetitions)[0];
+  const firstActiveCompetition = getNodes(data.node.activeCompetitions)[0];
 
-  // const statsResultsLink = firstActiveCompetition
-  //   ? `${reverseUrl("competition_stats_root", {
-  //       pk: getIDFromBase64(
-  //         firstActiveCompetition.id,
-  //         "CompetitionParticipationType",
-  //       ),
-  //     })}results`
-  //   : undefined;
+  const statsResultsLink = firstActiveCompetition
+    ? `${reverseUrl("competition_stats_root", {
+        pk: getIDFromBase64(
+          firstActiveCompetition.id,
+          "CompetitionParticipationType",
+        ),
+      })}results`
+    : undefined;
 
   return (
     <>
@@ -92,8 +96,7 @@ export default function Bot() {
           />
         </div>
       </div>
-      {/* Dont enable this unless explicitly asked for - it breaks the website.  */}
-      {/* <div className="mb-4 mt-8 flex gap-4 break-words items-baseline align-baseline">
+      <div className="mb-4 mt-8 flex gap-4 break-words items-baseline align-baseline">
         <h4>Results</h4>
 
         <p className="text-sm text-gray-300">
@@ -129,7 +132,7 @@ export default function Bot() {
         >
           <BotResults botZipUpdated={data.node.botZipUpdated} />
         </Suspense>
-      )} */}
+      )}
     </>
   );
 }
