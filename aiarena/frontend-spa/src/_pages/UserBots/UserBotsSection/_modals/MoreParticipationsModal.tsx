@@ -26,12 +26,16 @@ export default function MoreParticipationsModal(
       fragment MoreParticipationsModal_viewer on Viewer {
         linkedDiscord
         activeBotParticipationDiscordBonus
+        user {
+          patreonLevel
+        }
       }
     `,
     props.viewer,
   );
 
   const discordBonus = viewer.activeBotParticipationDiscordBonus;
+  const currentTierLevel = (viewer.user?.patreonLevel ?? "NONE").toLowerCase();
 
   return (
     <Modal
@@ -80,7 +84,7 @@ export default function MoreParticipationsModal(
               </div>
             }
           >
-            <SupporterTiers />
+            <SupporterTiers currentTierLevel={currentTierLevel} />
           </Suspense>
         ) : null}
 
@@ -96,7 +100,7 @@ export default function MoreParticipationsModal(
   );
 }
 
-function SupporterTiers() {
+function SupporterTiers({ currentTierLevel }: { currentTierLevel: string }) {
   const data = useLazyLoadQuery<MoreParticipationsModalTiersQuery>(
     graphql`
       query MoreParticipationsModalTiersQuery {
@@ -114,8 +118,16 @@ function SupporterTiers() {
     <ul className="flex flex-col">
       {data.supporterTiers.map((tier) => {
         const isFree = tier.level === "none";
+        const isCurrent = tier.level === currentTierLevel;
         return (
-          <li key={tier.level} className="flex items-center gap-3 px-3 py-2">
+          <li
+            key={tier.level}
+            className={`flex items-center gap-3 border px-3 py-2 ${
+              isCurrent
+                ? "border-customGreen bg-customGreen/10 text-white"
+                : "border-transparent"
+            }`}
+          >
             {isFree ? (
               <span className="h-6 w-6" />
             ) : (
