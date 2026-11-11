@@ -1,18 +1,12 @@
 import { Suspense, useState } from "react";
-import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
-import { reverseUrl } from "@/_lib/reverseUrl";
 import { graphql, useFragment } from "react-relay";
-import ActiveDot from "../ActiveDot";
+import { getNodes } from "@/_lib/relayHelpers";
 import SquareButton from "@/_components/_actions/SquareButton";
 import JoinCompetitionModal from "@/_pages/UserBots/UserBotsSection/_modals/JoinCompetitionModal";
 import SuspenseGetLoading from "@/_components/_actions/SuspenseGetLoading";
 import { UserBotCompetitions_bot$key } from "./__generated__/UserBotCompetitions_bot.graphql";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
-import { getDotColor } from "@/_lib/getDotColor";
 import clsx from "clsx";
-import { Link } from "react-router";
-import EloTrendIcon from "../EloTrendIcon";
+import UserBotParticipationCard from "./UserBotParticipationCard";
 
 interface UserBotCompetitionProps {
   bot: UserBotCompetitions_bot$key;
@@ -25,34 +19,13 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
         id
         name
 
-        competitionParticipations {
-          edges {
-            node {
-              active
-              id
-              competition {
-                id
-                name
-                status
-              }
-              elo
-              divisionNum
-              crashPerc
-              crashCount
-              matchCount
-              winPerc
-              lossPerc
-            }
-          }
-        }
-
         activeCompetitionParticipations: competitionParticipations(
           active: true
         ) {
           edges {
             node {
               id
-              trend
+              ...UserBotParticipationCard_participation
             }
           }
         }
@@ -63,33 +36,14 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
     props.bot,
   );
 
-  const compData = getNodes(bot.competitionParticipations);
-  const activeCompetitionData = getNodes(bot.activeCompetitionParticipations);
+  const activeCompetitions = getNodes(bot.activeCompetitionParticipations);
 
-  const [displayAllCompetitions, setDisplayAllCompetitions] = useState(false);
   const [isJoinCompetitionModalOpen, setJoinCompetitionModalOpen] =
     useState(false);
   const [isJoinCompetitionModalLoading, setIsJoinCompetitionModalLoading] =
     useState(false);
 
-  const trendByParticipationId = new Map(
-    activeCompetitionData.map((competitionParticipation) => [
-      competitionParticipation.id,
-      competitionParticipation.trend,
-    ]),
-  );
-
-  const activeCompetitions = compData.filter(
-    (competitionParticipation) => competitionParticipation.active,
-  );
-
-  const displayCompetitions = displayAllCompetitions
-    ? compData
-    : activeCompetitions;
-
   const hasActiveCompetitions = activeCompetitions.length > 0;
-  const hasInactiveCompetitions =
-    compData.length - activeCompetitions.length > 0;
 
   return (
     <div className="p-2 bg-darken-4 rounded-b-lg">
@@ -112,193 +66,22 @@ export default function UserBotCompetitions(props: UserBotCompetitionProps) {
           </p>
         )}
 
-        <div className="flex flex-wrap gap-4">
-          {hasInactiveCompetitions && (
-            <label className="flex items-center gap-2 cursor-pointer">
-              <SimpleToggle
-                enabled={displayAllCompetitions}
-                onChange={() =>
-                  setDisplayAllCompetitions(!displayAllCompetitions)
-                }
-              />
-              <span>Show All</span>
-            </label>
-          )}
-
-          <SquareButton
-            text="Edit Participations"
-            onClick={() => setJoinCompetitionModalOpen(true)}
-            isLoading={isJoinCompetitionModalLoading}
-            textColor="dim"
-          />
-        </div>
+        <SquareButton
+          text="Edit Participations"
+          onClick={() => setJoinCompetitionModalOpen(true)}
+          isLoading={isJoinCompetitionModalLoading}
+          textColor="dim"
+        />
       </div>
 
       {/* Competitions List */}
       <div className="space-y-4">
-        {displayCompetitions.map((competitionParticipation) => {
-          const dotColor = getDotColor(
-            competitionParticipation.active,
-            competitionParticipation.competition.status ?? "",
-          );
-
-          const trend = trendByParticipationId.get(competitionParticipation.id);
-
-          return (
-            <div
-              key={competitionParticipation.id}
-              className="border border-neutral-700 rounded-sm transition-all shadow-lg shadow-black p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              {/* Left Column */}
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2 border-b border-gray-600 pb-2">
-                  <div
-                    title={`Competition Status: ${
-                      competitionParticipation.competition.status
-                    } \nParticipating: ${
-                      competitionParticipation.active ? "Yes" : "No"
-                    }`}
-                  >
-                    <ActiveDot color={dotColor} />
-                  </div>
-
-                  <Link
-                    to={reverseUrl("competition", {
-                      pk: getIDFromBase64(
-                        competitionParticipation.competition.id,
-                        "CompetitionType",
-                      ),
-                    })}
-                    className="text-sm font-semibold"
-                  >
-                    {competitionParticipation.competition.name}
-                  </Link>
-                </div>
-
-                <div className="text-sm text-left flex flex-wrap">
-                  <span className="font-bold text-gray-300 mr-4 flex gap-2">
-                    Division:{" "}
-                    <span className="font-normal">
-                      {competitionParticipation.divisionNum == 0
-                        ? "Placements"
-                        : competitionParticipation.divisionNum}
-                    </span>
-                  </span>
-
-                  <span className="font-bold text-gray-300 mr-4 flex gap-2">
-                    Current ELO:{" "}
-                    <span className="font-normal flex items-center gap-1">
-                      {competitionParticipation.elo}
-
-                      {competitionParticipation.active && trend != null && (
-                        <EloTrendIcon trend={trend} size={16} />
-                      )}
-                    </span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Right Column */}
-              <div className="space-y-2 text-sm text-gray-300">
-                {/* Match Count */}
-                <div className="flex items-center space-x-2 flex-wrap">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-gray-300"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="9"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M10 8l6 4-6 4V8z"
-                    />
-                  </svg>
-
-                  <span className="font-bold">Matches:</span>
-                  <span>{competitionParticipation.matchCount}</span>
-                </div>
-
-                {/* Win/Loss */}
-                <div className="flex items-center space-x-2 flex-wrap">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-gray-300"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4 4v6h6M20 20v-6h-6M7.778 16.222a8.002 8.002 0 0011.446 0m.007-8.444a8.002 8.002 0 00-11.46 0"
-                    />
-                  </svg>
-
-                  <span className="font-bold">Win/Loss:</span>
-
-                  <span className="text-customGreen font-medium">
-                    {(competitionParticipation.winPerc ?? 0).toFixed(1)}%
-                  </span>
-
-                  <span>/</span>
-
-                  <span className="text-red-500 font-medium">
-                    {(competitionParticipation.lossPerc ?? 0).toFixed(1)}%
-                  </span>
-                </div>
-
-                {/* Crashes */}
-                <div className="flex items-center space-x-2 flex-wrap">
-                  <ExclamationTriangleIcon
-                    aria-label="Danger icon"
-                    role="img"
-                    className={clsx(
-                      "size-5",
-                      competitionParticipation.crashCount > 0
-                        ? "text-red-500"
-                        : "text-gray-300",
-                    )}
-                  />
-
-                  <span className="font-bold">Crashes:</span>
-
-                  <span
-                    className={clsx(
-                      "font-medium",
-                      competitionParticipation.crashCount > 0
-                        ? "text-red-500"
-                        : "text-gray-300",
-                    )}
-                  >
-                    {competitionParticipation.crashCount}
-                  </span>
-                </div>
-
-                <Link
-                  to={reverseUrl("competition_stats_root", {
-                    pk: getIDFromBase64(
-                      competitionParticipation.id,
-                      "CompetitionParticipationType",
-                    ),
-                  })}
-                >
-                  Explore more stats
-                </Link>
-              </div>
-            </div>
-          );
-        })}
+        {activeCompetitions.map((competitionParticipation) => (
+          <UserBotParticipationCard
+            key={competitionParticipation.id}
+            participation={competitionParticipation}
+          />
+        ))}
       </div>
 
       {/* Join Competition Modal */}

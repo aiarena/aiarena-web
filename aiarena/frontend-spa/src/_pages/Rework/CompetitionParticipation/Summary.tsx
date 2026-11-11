@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { graphql, useFragment } from "react-relay";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import ResultSplitBar from "@/_components/_display/ResultSplitBar";
 import type { Summary_node$key } from "./__generated__/Summary_node.graphql";
 
 type SummaryProps = {
@@ -124,21 +125,11 @@ export default function Summary(props: SummaryProps) {
                 </div>
               ))}
             </div>
-            <div
-              className="flex h-2.5 w-full overflow-hidden rounded-full bg-neutral-800"
-              role="img"
-              aria-label={results
-                .map((r) => `${fmtPct(r.pct)} ${r.name.toLowerCase()}`)
-                .join(", ")}
-            >
-              {results.map((r) => (
-                <div
-                  key={r.name}
-                  className={r.color}
-                  style={{ width: `${r.pct}%` }}
-                />
-              ))}
-            </div>
+            <ResultSplitBar
+              winPerc={data.winPerc}
+              tiePerc={data.tiePerc}
+              lossPerc={data.lossPerc}
+            />
             <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm tabular-nums text-gray-400">
               {results.map((r) => (
                 <span key={r.name} className="flex items-center gap-1.5">

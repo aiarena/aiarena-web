@@ -4,6 +4,7 @@ import { BotParticipationCard_bot$key } from "./__generated__/BotParticipationCa
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import AiArenaLoading from "@/_components/_display/AiArenaLoading";
+import AiGlowButton from "@/_components/_actions/AiGlowButton";
 
 interface BotParticipationCardProps {
   data: BotParticipationCard_bot$key;
@@ -33,6 +34,11 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
   const competitionLink = reverseUrl("competition", {
     pk: getIDFromBase64(data.competition.id, "CompetitionType"),
   });
+
+  const participationId = getIDFromBase64(
+    data.id,
+    "CompetitionParticipationType",
+  );
 
   return (
     <div className="grid grid-cols-5 rounded-2xl border border-neutral-800 bg-darken-2 backdrop-blur-sm  mr-2 shadow-lg bg-blur-2xl py-2">
@@ -64,15 +70,24 @@ export default function BotParticipationCard(props: BotParticipationCardProps) {
               </dd>
             </div>
             <Link
-              to={reverseUrl("competition_stats_root", {
-                pk: getIDFromBase64(data.id, "CompetitionParticipationType"),
-              })}
+              to={reverseUrl("competition_stats_root", { pk: participationId })}
               aria-label={"View Stats"}
               title={`View Stats`}
               className="inline-block"
             >
               View Stats
             </Link>
+          </div>
+          {/* One text-line tall, so the button centers on the Elo / View Stats line */}
+          <div className="self-end flex h-6 items-center">
+            <AiGlowButton
+              to={reverseUrl("competition_stats_results", {
+                pk: participationId,
+              })}
+              title="View Results"
+            >
+              View Results
+            </AiGlowButton>
           </div>
         </div>
       </div>

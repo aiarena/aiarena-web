@@ -468,3 +468,90 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   filter: invert(1) brightness(1.2) opacity(0.8);
   cursor: pointer;
 }
+
+/* AI glow button: a thin green border with a soft light gliding around it.
+   Kept slow and linear to match the site's other ambient motion. Hover only
+   brightens (via a transition) — changing animation timing on hover makes the
+   sweep jump position. */
+
+@property --ai-glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes ai-glow-spin {
+  to {
+    --ai-glow-angle: 360deg;
+  }
+}
+
+@keyframes ai-glow-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(134, 194, 50, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(134, 194, 50, 0.32);
+  }
+}
+
+@keyframes ai-glow-text {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.ai-glow {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgb(10, 14, 8), rgb(10, 14, 8)) padding-box,
+    conic-gradient(
+        from var(--ai-glow-angle),
+        rgba(134, 194, 50, 0.25) 0deg,
+        rgba(134, 194, 50, 0.25) 150deg,
+        rgba(154, 210, 70, 0.6) 230deg,
+        rgba(200, 245, 140, 1) 290deg,
+        rgba(154, 210, 70, 0.6) 330deg,
+        rgba(134, 194, 50, 0.25) 360deg
+      )
+      border-box;
+  animation:
+    ai-glow-spin 6s linear infinite,
+    ai-glow-breathe 6s ease-in-out infinite;
+  transition:
+    filter 300ms ease,
+    transform 150ms ease;
+}
+
+.ai-glow:hover {
+  filter: brightness(1.8);
+}
+
+.ai-glow:active {
+  transform: scale(0.98);
+}
+
+.ai-glow-text {
+  background: linear-gradient(
+      90deg,
+      rgba(134, 194, 50, 1) 0%,
+      rgba(190, 235, 130, 1) 25%,
+      rgba(134, 194, 50, 1) 50%,
+      rgba(190, 235, 130, 1) 75%,
+      rgba(134, 194, 50, 1) 100%
+    )
+    0 0 / 200% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: ai-glow-text 8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-glow,
+  .ai-glow-text {
+    animation: none;
+  }
+}

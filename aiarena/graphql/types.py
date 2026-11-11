@@ -517,6 +517,7 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
         if not elo_data:
             last_updated = None
             datasets = []
+            round_starts = None
 
         else:
             xs_ms = [e[2].timestamp() * 1000 for e in elo_data]
