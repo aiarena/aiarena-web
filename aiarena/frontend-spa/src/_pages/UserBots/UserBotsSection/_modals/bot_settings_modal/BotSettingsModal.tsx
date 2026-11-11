@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { graphql, useFragment, useMutation } from "react-relay";
+import WikiLink from "@/_components/_display/WikiLink";
 import { BotSettingsModal_bot$key } from "./__generated__/BotSettingsModal_bot.graphql";
 import Modal from "@/_components/_actions/Modal";
 import { BotSettingsModalMutation } from "./__generated__/BotSettingsModalMutation.graphql";
@@ -201,13 +202,7 @@ export default function BotSettingsModal({
                   <FolderOpenIcon className="size-5 m-1" />
                   Bot Zip
                 </h3>
-                <a
-                  href="/wiki/bot-development/getting-started/#wiki-toc-bot-zip"
-                  target="_blank"
-                  className="pt-1"
-                >
-                  Wiki
-                </a>
+                <WikiLink article="botZip" className="pt-1" />
               </div>
 
               <SquareButton
@@ -262,13 +257,7 @@ export default function BotSettingsModal({
                   <FolderOpenIcon className="size-5 m-1" />
                   Bot Data
                 </h3>
-                <a
-                  href="/wiki/bot-development/getting-started/#wiki-toc-bot-data"
-                  target="_blank"
-                  className="pt-1"
-                >
-                  Wiki
-                </a>
+                <WikiLink article="botData" className="pt-1" />
               </div>
 
               <SquareButton

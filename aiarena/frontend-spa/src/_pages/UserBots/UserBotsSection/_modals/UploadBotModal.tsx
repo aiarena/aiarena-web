@@ -7,6 +7,7 @@ import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
 import { UploadBotModalMutation } from "./__generated__/UploadBotModalMutation.graphql";
 import Form from "@/_components/_actions/Form";
 import { UploadFile } from "@/_components/_actions/UploadFile";
+import WikiLink from "@/_components/_display/WikiLink";
 import { useRelayConnectionID } from "@/_components/_contexts/RelayConnectionIDContext/useRelayConnectionID";
 import { CONNECTION_KEYS } from "@/_components/_contexts/RelayConnectionIDContext/RelayConnectionIDKeys";
 import { BOT_TYPES } from "@/_data/BOT_TYPES";
@@ -188,9 +189,12 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
           </div>
 
           <div className="block mb-4">
-            <label htmlFor="bot-zip" className="block mb-2">
-              <span className="text-gray-300">Bot ZIP:</span>
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <label htmlFor="bot-zip" className="text-gray-300">
+                Bot ZIP:
+              </label>
+              <WikiLink article="botZip" />
+            </div>
             <UploadFile
               id="bot-zip"
               accept=".zip"
@@ -219,6 +223,7 @@ export default function UploadBotModal({ isOpen, onClose }: UploadBotModal) {
                   className="w-5 h-5 ml-2"
                   aria-describedby="bot-data-help"
                 />
+                <WikiLink article="botData" className="ml-3" />
               </div>
               <div id="bot-data-help" className="sr-only">
                 Allow your bot to store and access persistent data between
