@@ -95,7 +95,6 @@ export default function ResultsTable(props: ResultsTableProps) {
     `,
     props.data,
   );
-  console.log(data);
   type ResultType = NonNullable<
     NonNullable<
       NonNullable<ResultsTable_node$data["results"]>["edges"][number]
@@ -246,13 +245,16 @@ export default function ResultsTable(props: ResultsTableProps) {
         },
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => formatGameTime(row.gameTimeFormatted ?? ""), {
-        id: "gameTimeFormatted",
-        header: "Duration",
-        enableSorting: false,
-        cell: (info) => info.getValue(),
-        meta: { priority: 1 },
-      }),
+      columnHelper.accessor(
+        (row) => formatGameTime(row.gameTimeFormatted ?? ""),
+        {
+          id: "gameTimeFormatted",
+          header: "Duration",
+          enableSorting: false,
+          cell: (info) => info.getValue(),
+          meta: { priority: 1 },
+        },
+      ),
 
       columnHelper.accessor((row) => row.created ?? "", {
         id: "created",
