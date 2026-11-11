@@ -369,6 +369,7 @@ export default function ResultsTable(props: ResultsTableProps) {
         isOpen={isWatchGamesModalOpen}
         onClose={() => setIsWatchGamesModalOpen(false)}
       />
+      <div>Force</div>
     </div>
   );
 }
