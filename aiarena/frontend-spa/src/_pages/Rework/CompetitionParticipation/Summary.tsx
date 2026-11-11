@@ -1,7 +1,11 @@
 import clsx from "clsx";
 import { graphql, useFragment } from "react-relay";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
-import ResultSplitBar from "@/_components/_display/ResultSplitBar";
+import ResultSplitBar, {
+  CRASH_FILL,
+  LOSS_FILL,
+  WIN_FILL,
+} from "@/_components/_display/ResultSplitBar";
 import type { Summary_node$key } from "./__generated__/Summary_node.graphql";
 
 type SummaryProps = {
@@ -47,7 +51,7 @@ export default function Summary(props: SummaryProps) {
       count: data.winCount,
       pct: data.winPerc,
       rateLabel: "Win rate",
-      color: "bg-customGreen",
+      color: WIN_FILL,
       valueColor: "text-customGreen",
     },
     {
@@ -63,7 +67,7 @@ export default function Summary(props: SummaryProps) {
       count: data.lossCount,
       pct: data.lossPerc,
       rateLabel: "Loss rate",
-      color: "bg-red-500",
+      color: LOSS_FILL,
       valueColor: "text-red-500",
     },
   ];
@@ -89,7 +93,7 @@ export default function Summary(props: SummaryProps) {
             </span>
             <span className="text-sm text-gray-400">
               {atPeak ? (
-                <span className="text-customGreen">At peak</span>
+                <span className="text-gray-100">At peak</span>
               ) : (
                 <>
                   Peak{" "}
@@ -129,6 +133,7 @@ export default function Summary(props: SummaryProps) {
               winPerc={data.winPerc}
               tiePerc={data.tiePerc}
               lossPerc={data.lossPerc}
+              crashPerc={crashPerc ?? 0}
             />
             <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm tabular-nums text-gray-400">
               {results.map((r) => (
@@ -142,6 +147,15 @@ export default function Summary(props: SummaryProps) {
                   {r.name} <span className="text-gray-100">{r.count}</span>
                 </span>
               ))}
+              {crashes > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className={clsx("inline-block size-2.5 rounded-sm", CRASH_FILL)}
+                  />
+                  of which crashes{" "}
+                  <span className="text-gray-100">{crashes}</span>
+                </span>
+              )}
             </div>
             <span className="text-sm text-gray-400">
               {data.matchCount} matches

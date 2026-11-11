@@ -140,6 +140,7 @@ export default function UserBotParticipationCard(
             winPerc={participation.winPerc}
             tiePerc={participation.tiePerc}
             lossPerc={participation.lossPerc}
+            crashPerc={participation.crashPerc}
           />
           <span className="text-xs tabular-nums text-gray-300">
             {participation.winCount}W · {participation.tieCount}T ·{" "}
@@ -180,7 +181,7 @@ export default function UserBotParticipationCard(
             to={reverseUrl(`competition_stats_${link.state}`, {
               pk: participationPk,
             })}
-            className="rounded-full border border-neutral-600 bg-neutral-800 px-3 py-1 text-sm font-medium text-gray-100 transition-colors hover:border-customGreen hover:text-white"
+            className="rounded-full border border-neutral-600 bg-neutral-900 px-3 py-1 text-sm font-medium text-gray-100 transition-colors hover:border-customGreen hover:text-white"
           >
             {link.name}
           </Link>
