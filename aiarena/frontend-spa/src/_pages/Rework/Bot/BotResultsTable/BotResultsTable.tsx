@@ -272,7 +272,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           );
         },
         meta: { priority: 1 },
-        size: 50,
+        size: 100,
       }),
 
       columnHelper.accessor(
@@ -318,7 +318,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
             );
           },
           meta: { priority: 1 },
-          size: 100,
+          size: 180,
         },
       ),
       columnHelper.accessor(
@@ -391,7 +391,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           priority: 1,
         },
 
-        size: 100,
+        size: 200,
       }),
       columnHelper.accessor((row) => row.avgStepTime ?? "", {
         id: "step",
@@ -426,7 +426,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           return getDateTimeISOString(info.getValue()) || "";
         },
         meta: { priority: 1 },
-        size: 50,
+        size: 200,
       }),
       columnHelper.accessor((row) => row.match.result?.replayFile ?? "", {
         id: "replay",
@@ -462,7 +462,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           }
         },
         meta: { priority: 1 },
-        size: 50,
+        size: 98,
       }),
       columnHelper.accessor((row) => row.matchLog ?? "", {
         id: "log",
@@ -518,6 +518,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
           );
         },
         meta: { priority: 1 },
+        size: 50,
       }),
     ],
     [columnHelper, enableAdvancedSorting],
