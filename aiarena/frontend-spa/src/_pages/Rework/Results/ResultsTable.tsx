@@ -31,6 +31,7 @@ import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 import timeAgoShort from "@/_lib/timeAgoSort";
+import { formatGameTime } from "@/_lib/formatGameTime";
 
 interface ResultsTableProps {
   data: ResultsTable_node$key;
@@ -245,7 +246,7 @@ export default function ResultsTable(props: ResultsTableProps) {
         },
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.gameTimeFormatted ?? "", {
+      columnHelper.accessor((row) => formatGameTime(row.gameTimeFormatted ?? ""), {
         id: "gameTimeFormatted",
         header: "Duration",
         enableSorting: false,

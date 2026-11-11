@@ -41,6 +41,7 @@ import { BotResultsTableSortingMap } from "./botResultTableSearchParams";
 import TagSummaryWithModal from "./TagSummaryModal";
 import { Link } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
+import { formatGameTime } from "@/_lib/formatGameTime";
 
 interface BotResultsTableProps {
   data: BotResultsTbody_bot$key;
@@ -406,7 +407,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
         size: 50,
       }),
       columnHelper.accessor(
-        (row) => row.match.result?.gameTimeFormatted ?? "",
+        (row) => formatGameTime(row.match.result?.gameTimeFormatted ?? ""),
         {
           id: "duration",
           header: "Duration",

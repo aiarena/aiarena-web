@@ -4,6 +4,7 @@ import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import { getDateTimeISOString } from "@/_lib/dateUtils";
 import { Link } from "react-router";
+import { formatGameTime } from "@/_lib/formatGameTime";
 
 interface MatchInfoProps {
   match: MatchInfo_match$key;
@@ -108,7 +109,11 @@ export default function MatchInfo(props: MatchInfoProps) {
 
         <div className="flex gap-2">
           <dt className="w-32 text-gray-400">Duration</dt>
-          <dd>{match.result?.gameTimeFormatted || "--"}</dd>
+          <dd>
+            {match.result?.gameTimeFormatted
+              ? formatGameTime(match.result.gameTimeFormatted)
+              : "--"}
+          </dd>
         </div>
         <div className="flex gap-2">
           <dt className="w-32 text-gray-400">Map</dt>

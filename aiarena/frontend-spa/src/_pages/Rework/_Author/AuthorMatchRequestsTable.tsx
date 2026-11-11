@@ -34,6 +34,7 @@ import {
   AuthorMatchRequestsTable_user$data,
   AuthorMatchRequestsTable_user$key,
 } from "./__generated__/AuthorMatchRequestsTable_user.graphql";
+import { formatGameTime } from "@/_lib/formatGameTime";
 
 interface AuthorMatchRequestsTableProps {
   data: AuthorMatchRequestsTable_user$key;
@@ -332,7 +333,9 @@ export default function AuthorMatchRequestsTable(
         },
       }),
 
-      columnHelper.accessor((row) => row.result?.gameTimeFormatted ?? "", {
+      columnHelper.accessor(
+        (row) => formatGameTime(row.result?.gameTimeFormatted ?? ""),
+        {
         id: "gameTime",
         header: "Duration",
         enableSorting: false,

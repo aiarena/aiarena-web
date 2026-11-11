@@ -37,6 +37,7 @@ import { RenderRace } from "@/_components/_display/RenderRace";
 import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 import TagSummaryWithModal from "../Rework/Bot/BotResultsTable/TagSummaryModal";
 import DownloadMap from "@/_components/_display/DownloadMap";
+import { formatGameTime } from "@/_lib/formatGameTime";
 
 interface UserMatchRequestsTableProps {
   viewer: UserMatchRequestsTable_viewer$key;
@@ -292,7 +293,9 @@ export default function UserMatchRequestsTable(
 
         meta: { priority: 1 },
       }),
-      columnHelper.accessor((row) => row.result?.gameTimeFormatted ?? "", {
+      columnHelper.accessor(
+        (row) => formatGameTime(row.result?.gameTimeFormatted ?? ""),
+        {
         id: "gameTime",
         header: "Duration",
         enableSorting: false,
