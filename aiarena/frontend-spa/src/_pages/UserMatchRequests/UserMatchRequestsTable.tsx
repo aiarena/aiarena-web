@@ -153,7 +153,7 @@ export default function UserMatchRequestsTable(
     () => [
       columnHelper.accessor((row) => row.id, {
         id: "id",
-        header: "ID",
+        header: "Match ID",
         cell: (info) => {
           const label = getIDFromBase64(info.getValue(), "MatchType") || "";
           const href = reverseUrl("match", { pk: getIDFromBase64(info.getValue(), "MatchType") });

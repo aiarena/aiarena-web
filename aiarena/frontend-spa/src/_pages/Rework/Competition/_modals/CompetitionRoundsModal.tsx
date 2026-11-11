@@ -81,7 +81,7 @@ export default function CompetitionRoundsModal(
     () => [
       columnHelper.accessor((row) => row.number || "", {
         id: "id",
-        header: "Id",
+        header: "Round",
         enableSorting: false,
         cell: (info) => {
           const label = `Round ${info.getValue()}`;

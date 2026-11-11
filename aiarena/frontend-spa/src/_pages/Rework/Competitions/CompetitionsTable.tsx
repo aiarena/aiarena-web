@@ -98,7 +98,7 @@ export default function CompetitionsTable(props: CompetitionsTableProps) {
     () => [
       columnHelper.accessor((row) => row.id, {
         id: "id",
-        header: "ID",
+        header: "Competition ID",
         cell: (info) => {
           const label =
             getIDFromBase64(info.getValue(), "CompetitionType") || "";

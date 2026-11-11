@@ -246,7 +246,7 @@ export default function BotResultsTable(props: BotResultsTableProps) {
     () => [
       columnHelper.accessor((row) => row.match.id, {
         id: "id",
-        header: "ID",
+        header: "Match ID",
         enableSorting: true,
         cell: (info) => {
           const label = getIDFromBase64(info.getValue(), "MatchType") || "";

@@ -112,7 +112,7 @@ export default function ResultsTable(props: ResultsTableProps) {
     () => [
       columnHelper.accessor((row) => row.participant1?.match.id, {
         id: "id",
-        header: "ID",
+        header: "Match ID",
         enableSorting: false,
         cell: (info) => {
           const matchId = getIDFromBase64(info.getValue(), "MatchType");
