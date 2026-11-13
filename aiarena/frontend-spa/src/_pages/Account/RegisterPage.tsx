@@ -70,22 +70,27 @@ export default function RegisterPage() {
         submitTitle="Register"
       >
         <AccountInput
-          id="username"
-          label="Username"
-          value={username}
-          onChange={setUsername}
-          autoComplete="username"
-          autoFocus
-          errors={byField.username}
-        />
-        <AccountInput
           id="email"
           label="Email"
           type="email"
           value={email}
           onChange={setEmail}
           autoComplete="email"
+          autoFocus
           errors={byField.email}
+        />
+        {/* Username sits directly above the password on purpose: password
+            managers pair a new password with the nearest text field above it,
+            so this stays the saved login's username (the login page only
+            accepts usernames) without marking it autocomplete="username",
+            which made browsers offer saved logins (often emails) here. */}
+        <AccountInput
+          id="username"
+          label="Username"
+          value={username}
+          onChange={setUsername}
+          autoComplete="off"
+          errors={byField.username}
         />
         <AccountInput
           id="password1"
