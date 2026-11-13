@@ -13,6 +13,17 @@ export function FormAlert({ messages }: { messages: readonly string[] }) {
   );
 }
 
+/** Shown wherever we've just sent an email: emails go out from a background
+ * queue, so they don't arrive the instant the page says "sent". */
+export function EmailDelayNote() {
+  return (
+    <p className="mt-2 text-gray-300">
+      We're sending the email now. It can take a few minutes to arrive -
+      remember to also check your spam folder.
+    </p>
+  );
+}
+
 /** A success / info panel that replaces a form once it's done its job. */
 export function FormSuccess({ children }: { children: React.ReactNode }) {
   return (
