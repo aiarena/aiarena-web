@@ -20,6 +20,9 @@ import { RequestMatchModalQuery } from "./__generated__/RequestMatchModalQuery.g
 import useStateWithSessionStorage from "@/_components/_hooks/useStateWithSessionStorage";
 import { useSnackbar } from "notistack";
 
+// Mirrors MAX_LENGTH in aiarena/core/bot_args.py — the server rejects anything longer.
+const BOT_ARGS_MAX_LENGTH = 500;
+
 interface UploadBotModal {
   isOpen: boolean;
   onClose: () => void;
@@ -52,9 +55,22 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
   const [selectedMapPool, setSelectedMapPool] =
     useStateWithSessionStorage<MapPoolType | null>("mapPool");
 
+  const [bot1Args, setBot1Args] = useStateWithSessionStorage<string>(
+    "bot1Args",
+    "",
+  );
+
+  const [bot2Args, setBot2Args] = useStateWithSessionStorage<string>(
+    "bot2Args",
+    "",
+  );
+
   const data = useLazyLoadQuery<RequestMatchModalQuery>(
     graphql`
       query RequestMatchModalQuery {
+        viewer {
+          requestMatchBotArgsEnabled
+        }
         ...BotSearchList
         ...MapPoolSearchList
         ...MapSearchList
@@ -62,6 +78,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
     `,
     {},
   );
+
+  const botArgsEnabled = data.viewer?.requestMatchBotArgsEnabled ?? false;
 
   const [requestMatch, updating] = useMutation<RequestMatchModalMutation>(
     graphql`
@@ -181,6 +199,8 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
                 : undefined,
             mapPool:
               mapSelectionType === "map_pool" ? selectedMapPool?.id : undefined,
+            bot1Args: botArgsEnabled ? bot1Args?.trim() || "" : "",
+            bot2Args: botArgsEnabled ? bot2Args?.trim() || "" : "",
           },
         },
         onCompleted: (...args) => {
@@ -301,6 +321,41 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
             </label>
           ) : null}
         </div>
+
+        {botArgsEnabled ? (
+          <div className="mt-4 flex flex-col gap-2">
+            <label className="flex flex-col gap-1">
+              <span className="font-medium">Bot 1 Arguments</span>
+              <input
+                type="text"
+                value={bot1Args ?? ""}
+                maxLength={BOT_ARGS_MAX_LENGTH}
+                placeholder={'--build="example build"'}
+                onChange={(e) => setBot1Args(e.target.value)}
+                aria-describedby="bot-args-help"
+              />
+            </label>
+
+            <label className="flex flex-col gap-1">
+              <span className="font-medium">Bot 2 Arguments</span>
+              <input
+                type="text"
+                value={bot2Args ?? ""}
+                maxLength={BOT_ARGS_MAX_LENGTH}
+                placeholder={'--opponent="example opponent"'}
+                onChange={(e) => setBot2Args(e.target.value)}
+                aria-describedby="bot-args-help"
+              />
+            </label>
+
+            <span id="bot-args-help" className="text-sm text-gray-400">
+              Optional. Each is passed to that bot verbatim as extra command
+              line arguments, split the way a shell would — so quote to include
+              spaces: <code>--message=&quot;good luck&quot;</code>. Arguments
+              the arena client sets itself can&apos;t be overridden.
+            </span>
+          </div>
+        ) : null}
       </Form>
     </Modal>
   );
