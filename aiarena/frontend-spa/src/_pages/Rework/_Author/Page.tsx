@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import AuthorSection from "./AuthorSection";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 import { SkeletonBoxShadow } from "@/_components/_display/_skeletons/SkeletonBoxShadow";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
@@ -18,11 +18,11 @@ export default function AuthorPage() {
 
             <div className="mb-8">
               <h4 className="mb-4">Bots</h4>
-              <DisplaySkeleton height={200} styles={SkeletonCardShadow} />
+              <DisplaySkeletonTable columns={5} rows={4} />
             </div>
             <div className="mb-8">
               <h4 className="mb-4">Match Requests</h4>
-              <DisplaySkeleton height={600} styles={SkeletonCardShadow} />
+              <DisplaySkeletonTable columns={9} rows={12} />
             </div>
           </>
         }

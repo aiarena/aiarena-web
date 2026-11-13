@@ -24,11 +24,10 @@ import { graphql, useLazyLoadQuery } from "react-relay";
 import FetchError from "@/_components/_display/FetchError";
 import { BotResultsQuery } from "./__generated__/BotResultsQuery.graphql";
 
-import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
+import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 
 type Props = {
   botZipUpdated: string;
@@ -292,7 +291,7 @@ export default function BotResults({
   return (
     <Suspense
       key={id}
-      fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
+      fallback={<DisplaySkeletonTable columns={12} rows={15} />}
     >
       <ErrorBoundaryWrapper>
         <BotResultsTable

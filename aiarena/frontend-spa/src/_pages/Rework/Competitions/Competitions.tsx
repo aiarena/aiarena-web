@@ -7,6 +7,7 @@ import FetchError from "@/_components/_display/FetchError";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
+import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 
 export default function Competitions() {
   const data = useLazyLoadQuery<CompetitionsQuery>(
@@ -50,9 +51,7 @@ export default function Competitions() {
         <div className="mb-16 ">
           <h4 className="mb-4">Legacy Competitions</h4>
           <Suspense
-            fallback={
-              <DisplaySkeleton height={600} styles={SkeletonCardShadow} />
-            }
+            fallback={<DisplaySkeletonTable columns={5} rows={10} />}
           >
             <ErrorBoundaryWrapper componentName="legacy competitions">
               <CompetitionsTable data={data} />

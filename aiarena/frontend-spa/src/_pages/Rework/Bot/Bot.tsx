@@ -14,9 +14,8 @@ import FetchError from "@/_components/_display/FetchError";
 
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import BotResults from "./BotResults";
-import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 import { reverseUrl } from "@/_lib/reverseUrl";
+import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
@@ -126,9 +125,7 @@ export default function Bot() {
         </div>
       ) : (
         <Suspense
-          fallback={
-            <DisplaySkeleton height={800} styles={SkeletonCardShadow} />
-          }
+          fallback={<DisplaySkeletonTable columns={12} rows={15} />}
         >
           <BotResults botZipUpdated={data.node.botZipUpdated} />
         </Suspense>

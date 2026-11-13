@@ -1,14 +1,13 @@
 import { Suspense } from "react";
 
 import Bots from "./Bots";
-import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
+import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 
 export default function BotsPage() {
   return (
     <Suspense
-      fallback={<DisplaySkeleton height={600} styles={SkeletonCardShadow} />}
+      fallback={<DisplaySkeletonTable columns={5} rows={20} />}
     >
       <ErrorBoundaryWrapper componentName="bots">
         <Bots />

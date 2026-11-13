@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Bot from "./Bot";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
@@ -24,12 +25,12 @@ export default function BotPage() {
               </div>
               <div>
                 <h4 className="mb-4">Competition Participations</h4>
-                <DisplaySkeleton height={300} styles={SkeletonCardShadow} />
+                <DisplaySkeletonTable columns={7} rows={4} />
               </div>
             </div>
             <div>
               <h4 className="mb-4 mt-8">Results</h4>
-              <DisplaySkeleton height={1200} styles={SkeletonCardShadow} />
+              <DisplaySkeletonTable columns={12} rows={15} />
             </div>
           </>
         }

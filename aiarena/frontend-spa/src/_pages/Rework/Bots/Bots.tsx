@@ -6,8 +6,7 @@ import Searchbar from "@/_components/_actions/Searchbar";
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import BotsTable from "./BotsTable";
 import FetchError from "@/_components/_display/FetchError";
-import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
-import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
+import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 
 export default function Bots() {
   const data = useLazyLoadQuery<BotsQuery>(
@@ -33,9 +32,7 @@ export default function Bots() {
         </h2>
 
         <Suspense
-          fallback={
-            <DisplaySkeleton height={1600} styles={SkeletonCardShadow} />
-          }
+          fallback={<DisplaySkeletonTable columns={5} rows={20} />}
         >
           <BotsTable
             data={data}

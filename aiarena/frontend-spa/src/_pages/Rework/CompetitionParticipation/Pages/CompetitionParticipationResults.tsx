@@ -1,14 +1,24 @@
+import { Suspense } from "react";
 import { graphql, useLazyLoadQuery } from "react-relay";
 import { useParams } from "react-router";
 
 import { getBase64FromID } from "@/_lib/relayHelpers";
 import FetchError from "@/_components/_display/FetchError";
-import { CompetitionParticipationResultsQuery } from "./__generated__/CompetitionParticipationResultsQuery.graphql";
+import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 import BotResults from "../../Bot/BotResults";
-import { Suspense } from "react";
-import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
+import { CompetitionParticipationResultsQuery } from "./__generated__/CompetitionParticipationResultsQuery.graphql";
 
 export default function CompetitionParticipationResults() {
+  return (
+    <div className="px-2 pb-8">
+      <Suspense fallback={<DisplaySkeletonTable columns={12} rows={20} />}>
+        <ParticipationResults />
+      </Suspense>
+    </div>
+  );
+}
+
+function ParticipationResults() {
   const { id } = useParams<{ id: string }>();
 
   const data = useLazyLoadQuery<CompetitionParticipationResultsQuery>(
@@ -29,9 +39,7 @@ export default function CompetitionParticipationResults() {
         }
       }
     `,
-    {
-      id: getBase64FromID(`${id}`, "CompetitionParticipationType") || "",
-    },
+    { id: getBase64FromID(`${id}`, "CompetitionParticipationType") || "" },
   );
 
   if (!data.node || !data.node.bot || !data.node.competition) {
@@ -39,24 +47,14 @@ export default function CompetitionParticipationResults() {
   }
 
   return (
-    <div className="px-2 pb-8">
-      <Suspense
-        fallback={
-          <div className="flex flex-col gap-4">
-            <DisplaySkeleton height={1200} />
-          </div>
-        }
-      >
-        <BotResults
-          origin="competition"
-          botId={data.node.bot.id}
-          botZipUpdated={data.node.bot.botZipUpdated}
-          competition={{
-            id: data.node.competition.id,
-            name: data.node.competition.name,
-          }}
-        />
-      </Suspense>
-    </div>
+    <BotResults
+      origin="competition"
+      botId={data.node.bot.id}
+      botZipUpdated={data.node.bot.botZipUpdated}
+      competition={{
+        id: data.node.competition.id,
+        name: data.node.competition.name,
+      }}
+    />
   );
 }
