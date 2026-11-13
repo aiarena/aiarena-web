@@ -23,6 +23,7 @@ from aiarena.core import traffic
 from aiarena.core.middleware import API_USAGE_KEY_PREFIX, raw_time_spent_in_queue_key
 from aiarena.core.models import ApiUsage, Competition
 from aiarena.core.services import competitions
+from aiarena.core.services.service_implementations.internal.competition_scheduler import process_competition_schedules
 from aiarena.core.utils import ReprJSONEncoder, monitoring_minute_key, sql
 from aiarena.loggers import logger
 
@@ -458,3 +459,8 @@ def kill_slow_queries(timeout=settings.SQL_TIME_LIMIT):
         with sentry_sdk.push_scope() as scope:
             scope.set_context("query", query)
             sentry_sdk.capture_message("Slow query killed")
+
+
+@app.task(ignore_result=True)
+def competition_schedule():
+    process_competition_schedules()

@@ -8,7 +8,6 @@ DJDT = True
 SECRET_KEY = "django-insecure-t*4r1u49=a!ah1!z8ydsaajr!lv-f(@r07lm)-9fro_9&67xqd"
 
 ALLOWED_HOSTS = ["*"]
-
 #################################
 # Django Storages & django-private-storage configuration #
 #################################

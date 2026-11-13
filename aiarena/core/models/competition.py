@@ -79,6 +79,29 @@ class Competition(models.Model, LockableModelMixin):
     # TODO(make-not-null): Remove null=True in a follow-up migration after deploy
     deletion_allowed = models.BooleanField(null=True, default=False)
     """Must be explicitly set before this competition can be deleted. Guards against accidental deletion."""
+    schedule = models.ForeignKey(
+        "CompetitionSchedule",
+        on_delete=models.PROTECT,
+        related_name="competitions",
+        null=True,
+        blank=True,
+    )
+    scheduled_start = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    scheduled_end = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["schedule", "scheduled_start"],
+                name="unique_scheduled_competition",
+            ),
+        ]
 
     def __str__(self):
         return self.name

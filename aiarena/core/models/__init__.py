@@ -11,6 +11,7 @@ from .competition import Competition
 from .competition_bot_map_stats import CompetitionBotMapStats
 from .competition_bot_matchup_stats import CompetitionBotMatchupStats
 from .competition_participation import CompetitionParticipation
+from .competition_schedule import CompetitionSchedule
 from .game import Game
 from .game_mode import GameMode
 from .map import Map
@@ -41,6 +42,7 @@ __all__ = [
     "BotCrashLimitAlert",
     "BotRace",
     "Competition",
+    "CompetitionSchedule",
     "CompetitionBotMapStats",
     "CompetitionBotMatchupStats",
     "CompetitionParticipation",
