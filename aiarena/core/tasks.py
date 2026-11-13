@@ -439,6 +439,11 @@ def timeout_overtime_matches():
 
 
 @app.task(ignore_result=True)
+def prune_download_records():
+    management.call_command("prunedownloadrecords")
+
+
+@app.task(ignore_result=True)
 def kill_slow_queries(timeout=settings.SQL_TIME_LIMIT):
     db_name = settings.DATABASES["default"]["NAME"]
     db_user = settings.DATABASES["default"]["USER"]
