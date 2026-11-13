@@ -11,6 +11,8 @@ from registration.models import RegistrationProfile
 
 from aiarena.core.models import WebsiteUser
 from aiarena.core.tests.base import GraphQLTest
+from aiarena.core.utils import camel_case
+from aiarena.graphql.account_mutations import UpdateAccountSettings
 from aiarena.graphql.common import NOT_LOGGED_IN_MESSAGE
 
 
@@ -365,6 +367,58 @@ class TestUpdateAccountSettings(GraphQLTest):
         self.mutate(login_user=user, variables={"input": {"receiveEmailComms": False}})
         other_user.refresh_from_db()
         assert other_user.receive_email_comms
+
+    def test_input_exposes_exactly_the_editable_fields(self, db):
+        """The public input type and the mutation's allowlist must match: adding
+        an input field without allowlisting it (or vice versa) fails here, so
+        widening what users can change is always a deliberate, reviewed edit."""
+        data = self.query(
+            query="""
+                { __type(name: "UpdateAccountSettingsInput") { inputFields { name } } }
+            """
+        )
+        exposed = {f["name"] for f in data["__type"]["inputFields"]}
+
+        assert exposed == {camel_case(f) for f in UpdateAccountSettings.EDITABLE_FIELDS}
+        assert exposed == {"receiveEmailComms"}
+
+    @pytest.mark.parametrize(
+        "field, value",
+        [
+            ("patreonLevel", "diamond"),
+            ("email", "attacker@example.com"),
+            ("username", "hijacked"),
+            ("isStaff", True),
+            ("isSuperuser", True),
+            ("syncPatreonStatus", False),
+        ],
+    )
+    def test_non_editable_fields_are_rejected_and_unchanged(self, user, field, value):
+        """Sending any field outside the allowlist is rejected by schema
+        validation, and nothing on the user changes, including the editable
+        field sent alongside it."""
+        before = {
+            f: getattr(user, f)
+            for f in [
+                "patreon_level",
+                "email",
+                "username",
+                "is_staff",
+                "is_superuser",
+                "sync_patreon_status",
+                "receive_email_comms",
+            ]
+        }
+
+        self.mutate(
+            login_user=user,
+            variables={"input": {"receiveEmailComms": False, field: value}},
+            expected_status=400,
+            expected_errors_like=[f"Field '{field}' is not defined by type 'UpdateAccountSettingsInput'"],
+        )
+
+        user.refresh_from_db()
+        assert {f: getattr(user, f) for f in before} == before
 
     def test_anonymous_is_denied(self, user):
         self.mutate(

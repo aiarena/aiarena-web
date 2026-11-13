@@ -95,6 +95,16 @@ the contents of `TemporaryUpload`s named by ID into the result, and each upload'
 could reference another's upload by ID (sequential PK, guessable) and graft its
 contents into their submission.
 
+### Self-update mutations write only an explicit allowlist
+
+A mutation that lets users edit their *own* account has no object to authorize —
+the risk is instead *which fields* it writes. The user model carries things owned
+by other flows (email, Patreon level, staff flags), so such a mutation declares an
+explicit allowlist of editable fields and writes only those, never a generic
+"copy every input field onto the model" loop. A test pins the public input type
+to that allowlist, so widening what a user can change is always a deliberate,
+reviewed edit, and sending any other field is rejected and changes nothing.
+
 ### Field-level reads are the real read-side boundary
 
 Objects are public, but specific *fields* are not — e.g. a bot's zip is

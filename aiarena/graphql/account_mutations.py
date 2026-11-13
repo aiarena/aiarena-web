@@ -287,12 +287,21 @@ class ChangePassword(CleanedInputMutation):
 
 
 class UpdateAccountSettingsInput(CleanedInputType):
+    # Every field here must also be listed in UpdateAccountSettings.EDITABLE_FIELDS
+    # (a test enforces the two match).
     receive_email_comms = graphene.Boolean()
 
 
 class UpdateAccountSettings(CleanedInputMutation):
     """Update the signed-in user's own account preferences. Acts only on the
-    caller, so there is no object to authorize beyond login-by-default."""
+    caller, so there is no object to authorize beyond login-by-default.
+
+    Only the fields in ``EDITABLE_FIELDS`` can ever be written. Everything else
+    on the user (email, Patreon level, staff flags, ...) is owned by other flows
+    and must not be settable from here.
+    """
+
+    EDITABLE_FIELDS = ("receive_email_comms",)
 
     class Meta:
         input_class = UpdateAccountSettingsInput
@@ -301,9 +310,11 @@ class UpdateAccountSettings(CleanedInputMutation):
     def perform_mutate(cls, info: graphene.ResolveInfo, input_object):
         user = info.context.user
         update_fields = []
-        if input_object.receive_email_comms is not None:
-            user.receive_email_comms = input_object.receive_email_comms
-            update_fields.append("receive_email_comms")
+        for field in cls.EDITABLE_FIELDS:
+            value = getattr(input_object, field, None)
+            if value is not None:
+                setattr(user, field, value)
+                update_fields.append(field)
         if update_fields:
             user.save(update_fields=update_fields)
         return cls(errors=[], viewer=user)
