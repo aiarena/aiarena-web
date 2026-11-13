@@ -1,4 +1,5 @@
 import re
+from unittest import mock
 
 from django.contrib.auth import get_user
 from django.contrib.auth.tokens import default_token_generator
@@ -10,6 +11,7 @@ import pytest
 from registration.models import RegistrationProfile
 
 from aiarena.core.models import WebsiteUser
+from aiarena.core.tasks import send_email
 from aiarena.core.tests.base import GraphQLTest
 from aiarena.core.utils import camel_case
 from aiarena.graphql.account_mutations import UpdateAccountSettings
@@ -198,6 +200,28 @@ class TestRegister(GraphQLTest):
         assert len(mailoutbox) == 1
         assert mailoutbox[0].to == ["newbie@example.com"]
         # The email links to the SPA activation page for this account's key.
+        assert reverse("registration_activate", args=[profile.activation_key]) in mailoutbox[0].body
+
+    def test_activation_email_is_queued_not_sent_in_the_request(
+        self, db, settings, mailoutbox, django_capture_on_commit_callbacks
+    ):
+        """With the production email backend, registering only queues the
+        activation email for a worker, so a slow SMTP server can't hold up the
+        request; the worker then sends it unchanged."""
+        settings.EMAIL_BACKEND = "aiarena.core.email.CeleryEmailBackend"
+        settings.CELERY_EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+        with mock.patch("aiarena.core.tasks.send_email.delay") as delay:
+            with django_capture_on_commit_callbacks(execute=True):
+                self.mutate(variables=self._input())
+
+        assert mailoutbox == []
+        assert delay.call_count == 1
+        queued = delay.call_args.args[0]
+        assert queued.to == ["newbie@example.com"]
+
+        send_email(queued)
+        profile = RegistrationProfile.objects.get(user__username="newbie")
         assert reverse("registration_activate", args=[profile.activation_key]) in mailoutbox[0].body
 
     def test_mismatched_passwords_are_rejected(self, db, mailoutbox):

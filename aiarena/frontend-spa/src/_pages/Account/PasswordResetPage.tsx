@@ -6,7 +6,7 @@ import useBackendErrors from "@/_lib/useBackendErrors";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import AccountCard from "./_components/AccountCard";
 import AccountInput from "./_components/AccountInput";
-import { FormAlert, FormSuccess } from "./_components/FormMessages";
+import { EmailDelayNote, FormAlert, FormSuccess } from "./_components/FormMessages";
 import { splitAccountErrors } from "./_components/splitAccountErrors";
 import { PasswordResetPageMutation } from "./__generated__/PasswordResetPageMutation.graphql";
 
@@ -53,6 +53,7 @@ export default function PasswordResetPage() {
         <FormSuccess>
           If <strong>{email}</strong> belongs to an account, a password reset
           link is on its way. It can be used once.
+          <EmailDelayNote />
         </FormSuccess>
       ) : (
         <>

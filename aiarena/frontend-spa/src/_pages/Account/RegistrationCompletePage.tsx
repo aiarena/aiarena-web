@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import AccountCard from "./_components/AccountCard";
-import { FormSuccess } from "./_components/FormMessages";
+import { EmailDelayNote, FormSuccess } from "./_components/FormMessages";
 
 export default function RegistrationCompletePage() {
   // Set by the register page; absent on a hard refresh, so fall back to generic copy.
@@ -20,6 +20,7 @@ export default function RegistrationCompletePage() {
         We've sent an activation link to{" "}
         {email ? <strong>{email}</strong> : "your email address"}. Open it to
         activate your account, then log in.
+        <EmailDelayNote />
       </FormSuccess>
     </AccountCard>
   );

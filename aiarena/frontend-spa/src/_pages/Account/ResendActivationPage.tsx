@@ -6,7 +6,7 @@ import useBackendErrors from "@/_lib/useBackendErrors";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import AccountCard from "./_components/AccountCard";
 import AccountInput from "./_components/AccountInput";
-import { FormAlert, FormSuccess } from "./_components/FormMessages";
+import { EmailDelayNote, FormAlert, FormSuccess } from "./_components/FormMessages";
 import { splitAccountErrors } from "./_components/splitAccountErrors";
 import { ResendActivationPageMutation } from "./__generated__/ResendActivationPageMutation.graphql";
 
@@ -52,6 +52,7 @@ export default function ResendActivationPage() {
         <FormSuccess>
           If <strong>{email}</strong> belongs to an account that isn't
           activated yet, a new activation link is on its way.
+          <EmailDelayNote />
         </FormSuccess>
       ) : (
         <>

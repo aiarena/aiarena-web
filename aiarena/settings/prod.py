@@ -80,7 +80,10 @@ CACHES = {
 ##################
 
 DEFAULT_FROM_EMAIL = "AI Arena <noreply@aiarena.net>"
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Emails are queued and sent by a Celery worker (default queue), so a slow
+# SMTP server never holds up a web request. The worker sends via SMTP.
+EMAIL_BACKEND = "aiarena.core.email.CeleryEmailBackend"
+CELERY_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
