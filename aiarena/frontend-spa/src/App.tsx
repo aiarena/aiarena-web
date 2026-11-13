@@ -33,6 +33,14 @@ import AdminStatsPage from "./_pages/AdminStats/AdminStatsPage";
 import AdminCompetitionsPage from "./_pages/AdminCompetitions/AdminCompetitionsPage";
 import { reverseUrl } from "./_lib/reverseUrl";
 import CompetitionParticipationResults from "./_pages/Rework/CompetitionParticipation/Pages/CompetitionParticipationResults";
+import LoginPage from "./_pages/Account/LoginPage";
+import RegisterPage from "./_pages/Account/RegisterPage";
+import RegistrationCompletePage from "./_pages/Account/RegistrationCompletePage";
+import ActivateAccountPage from "./_pages/Account/ActivateAccountPage";
+import ResendActivationPage from "./_pages/Account/ResendActivationPage";
+import PasswordResetPage from "./_pages/Account/PasswordResetPage";
+import PasswordResetConfirmPage from "./_pages/Account/PasswordResetConfirmPage";
+import PasswordChangePage from "./_pages/Account/PasswordChangePage";
 
 export default function App() {
   return (
@@ -54,6 +62,25 @@ export default function App() {
         <Route path="bots/:botId" element={<BotPage />} />
         <Route path="matches/:matchId" element={<MatchPage />} />
         <Route path="developers" element={<DevelopersPage />} />
+        <Route path="accounts">
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route
+            path="register/complete"
+            element={<RegistrationCompletePage />}
+          />
+          <Route path="activate/resend" element={<ResendActivationPage />} />
+          <Route
+            path="activate/:activationKey"
+            element={<ActivateAccountPage />}
+          />
+          <Route path="password_reset" element={<PasswordResetPage />} />
+          <Route
+            path="reset/:uidb64/:token"
+            element={<PasswordResetConfirmPage />}
+          />
+          <Route path="password_change" element={<PasswordChangePage />} />
+        </Route>
         <Route
           path="competitions/stats/:id"
           element={<CompetitionParticipationSideNav />}

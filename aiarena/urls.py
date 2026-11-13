@@ -18,6 +18,7 @@ from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, re_path
 from django.views.generic.base import TemplateView
@@ -73,8 +74,19 @@ urlpatterns = [  # todo: replace usage of url with path for all these
         core_views.frontend,
         name="management_competitions",
     ),
-    path("accounts/", include("registration.backends.default.urls")),
-    path("accounts/", include("django.contrib.auth.urls")),
+    # Account pages render in the SPA and talk to the account GraphQL mutations.
+    # Paths and names match the old django-registration / django.contrib.auth
+    # views, so links already sent in emails keep working.
+    path("accounts/login/", core_views.frontend, name="login"),
+    path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("accounts/register/", core_views.frontend, name="registration_register"),
+    path("accounts/register/complete/", core_views.frontend, name="registration_complete"),
+    # `resend/` must precede the `<activation_key>` catch.
+    path("accounts/activate/resend/", core_views.frontend, name="registration_resend_activation"),
+    path("accounts/activate/<activation_key>/", core_views.frontend, name="registration_activate"),
+    path("accounts/password_reset/", core_views.frontend, name="password_reset"),
+    path("accounts/reset/<uidb64>/<token>/", core_views.frontend, name="password_reset_confirm"),
+    path("accounts/password_change/", core_views.frontend, name="password_change"),
     path("", core_views.frontend, name="home"),
     path("api/", include("aiarena.api.urls")),
     path("graphql/", core_views.CustomGraphQLView.as_view(graphiql=True), name="graphql"),

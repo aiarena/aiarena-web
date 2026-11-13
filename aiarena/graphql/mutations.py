@@ -7,13 +7,11 @@
 # (This step happens in CI/CD too.)
 # =============================================================================
 
-from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
 import graphene
 from constance import config
-from graphene_django.types import ErrorType
 from graphene_file_upload.scalars import Upload
 from graphql import GraphQLError
 from rest_framework.authtoken.models import Token
@@ -33,6 +31,17 @@ from aiarena.core.services.service_implementations._competition_trophies import 
     check_competition_trophies,
 )
 from aiarena.core.services.service_implementations.internal.match_requests import handle_request_matches
+from aiarena.graphql.account_mutations import (
+    ActivateAccount,
+    ChangePassword,
+    PasswordSignIn,
+    Register,
+    RequestPasswordReset,
+    ResendActivationEmail,
+    ResetPassword,
+    SignOut,
+    UpdateAccountSettings,
+)
 from aiarena.graphql.common import (
     BaseMutation,
     CleanedInputMutation,
@@ -270,44 +279,6 @@ class UpdateBot(CleanedInputMutation):
             raise ValidationError(join_deep_errors_to_string(e))
 
         return cls(errors=[])
-
-
-class PasswordSignInInput(CleanedInputType):
-    username = graphene.String()
-    password = graphene.String()
-
-
-class PasswordSignIn(CleanedInputMutation):
-    class Meta:
-        input_class = PasswordSignInInput
-        # Anonymous by necessity: the caller is signing in, so they aren't
-        # authenticated yet at entry.
-        allow_anonymous = True
-
-    @classmethod
-    def perform_mutate(cls, info: graphene.ResolveInfo, input_object):
-        if user := authenticate(
-            username=input_object.username,
-            password=input_object.password,
-        ):
-            login(request=info.context, user=user)
-        else:
-            return cls(
-                errors=[
-                    ErrorType(
-                        field="__all__",
-                        messages=["Incorrect email or password"],
-                    )
-                ]
-            )
-
-        return cls(errors=[])
-
-
-class SignOut(BaseMutation):
-    def mutate(self, info: graphene.ResolveInfo) -> "SignOut":
-        logout(request=info.context)
-        return SignOut(errors=[])
 
 
 class RegenerateApiToken(BaseMutation):
@@ -775,8 +746,16 @@ class Mutation(graphene.ObjectType):
     upload_bot = UploadBot.Field()
     update_bot = UpdateBot.Field()
     update_competition_participation = UpdateCompetitionParticipation.Field()
+    # Account mutations (see account_mutations.py)
     password_sign_in = PasswordSignIn.Field()
     sign_out = SignOut.Field()
+    register = Register.Field()
+    activate_account = ActivateAccount.Field()
+    resend_activation_email = ResendActivationEmail.Field()
+    request_password_reset = RequestPasswordReset.Field()
+    reset_password = ResetPassword.Field()
+    change_password = ChangePassword.Field()
+    update_account_settings = UpdateAccountSettings.Field()
     regenerate_api_token = RegenerateApiToken.Field()
     check_competition_trophies = CheckCompetitionTrophies.Field()
     award_competition_trophies = AwardCompetitionTrophies.Field()

@@ -8,10 +8,15 @@ arena-client API is separate (`aiarena/api/`).
 Every mutation inherits from `BaseMutation`, which enforces authentication
 **before** the mutation body runs. You don't write a login check — it's the
 default. A mutation opts out only by setting `allow_anonymous = True` in its
-`Meta`, which should be reserved for actions that are *unauthenticated by
-definition*: signing in is the only legitimate case (you can't be logged in
-while logging in). Everything else — including sign-out and token regeneration —
-is a normal authenticated mutation.
+`Meta`, which is reserved for actions that are *unauthenticated by definition*:
+the caller can't be signed in because the action is what gets them an account
+or back into one.
+
+That's a **closed list**, and all of it lives in the account-mutations module:
+signing in, registering, activating an account, resending the activation email,
+requesting a password reset, and completing a password reset. Nothing else —
+including sign-out, password change and token regeneration — is anonymous; they
+are normal authenticated mutations.
 
 Resist the pull to mark a mutation `allow_anonymous` and then re-check auth by
 hand in the body (e.g. returning a "you're not signed in" payload). That opts
@@ -19,8 +24,10 @@ out of the secure default only to reimplement it worse. Denying a logged-out
 caller at the gate is the honest behavior: a frontend with stale auth state
 learns its session is gone, instead of getting a no-op that reports success.
 
-`PasswordSignIn` should be the only `allow_anonymous` mutation in the schema. If
-you're adding a second, that's a strong signal to stop and reconsider.
+If you're adding an anonymous mutation that isn't one of the account flows
+above, that's a strong signal to stop and reconsider. Anonymous account flows
+must also not reveal whether an email address is registered: "resend
+activation" and "request password reset" report success either way.
 
 ## What a mutation returns
 
@@ -87,6 +94,16 @@ the contents of `TemporaryUpload`s named by ID into the result, and each upload'
 `clean_*` guard verifies `uploaded_by == caller`. Without that, one arena client
 could reference another's upload by ID (sequential PK, guessable) and graft its
 contents into their submission.
+
+### Self-update mutations write only an explicit allowlist
+
+A mutation that lets users edit their *own* account has no object to authorize —
+the risk is instead *which fields* it writes. The user model carries things owned
+by other flows (email, Patreon level, staff flags), so such a mutation declares an
+explicit allowlist of editable fields and writes only those, never a generic
+"copy every input field onto the model" loop. A test pins the public input type
+to that allowlist, so widening what a user can change is always a deliberate,
+reviewed edit, and sending any other field is rejected and changes nothing.
 
 ### Field-level reads are the real read-side boundary
 
