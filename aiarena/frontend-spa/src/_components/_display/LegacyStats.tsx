@@ -3,6 +3,7 @@ import WrappedTitle from "./WrappedTitle";
 import { LegacyStatsQuery } from "./__generated__/LegacyStatsQuery.graphql";
 import FetchError from "./FetchError";
 import { reverseUrl } from "@/_lib/reverseUrl";
+import { Link } from "react-router";
 
 const LegacyStats: React.FC = () => {
   const data = useLazyLoadQuery<LegacyStatsQuery>(
@@ -83,14 +84,14 @@ const LegacyStats: React.FC = () => {
             >
               <td className="pl-3 font-semibold">
                 {row.link ? (
-                  <a
+                  <Link
                     title={`${row.label}`}
                     aria-label={`Navigate to ${row.label}`}
-                    href={`${row.link}`}
+                    to={`${row.link}`}
                     className="inline-block"
                   >
                     {row.label}
-                  </a>
+                  </Link>
                 ) : (
                   row.label
                 )}

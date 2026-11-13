@@ -12,6 +12,7 @@ import AuthorsPage from "./_pages/Rework/Authors/Page";
 import BotsPage from "./_pages/Rework/Bots/Page";
 import ArenaClientsPage from "./_pages/Rework/ArenaClients/Page";
 import ArenaClientPage from "./_pages/Rework/_ArenaClient/Page";
+import MatchQueuePage from "./_pages/Rework/MatchQueue/Page";
 import RootLayout from "./RootLayout";
 import ResultsPage from "./_pages/Rework/Results/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
@@ -66,6 +67,7 @@ export default function App() {
           path="arenaclients/:arenaClientId"
           element={<ArenaClientPage />}
         />
+        <Route path="match-queue" element={<MatchQueuePage />} />
         <Route path="bots/:botId" element={<BotPage />} />
         <Route path="matches/:matchId" element={<MatchPage />} />
         <Route path="developers" element={<DevelopersPage />} />

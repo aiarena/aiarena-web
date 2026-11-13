@@ -1487,6 +1487,65 @@ class TemporaryUploadID(TypeModelChoice):
     graphql_type = TemporaryUploadType
 
 
+def unfinished_matches(matches):
+    """`matches` that have no result yet, in queue order (running matches by
+    start time, then queued ones), with everything the queue shows loaded up
+    front so listing them doesn't cost queries per row."""
+    return (
+        matches.filter(result__isnull=True)
+        .select_related("map", "assigned_to")
+        .prefetch_related(
+            Prefetch(
+                "matchparticipation_set",
+                queryset=models.MatchParticipation.objects.select_related("bot"),
+                to_attr="prefetched_participations",
+            )
+        )
+        .order_by(F("started").asc(nulls_last=True), F("id").asc())
+    )
+
+
+class MatchQueueRoundType(graphene.ObjectType):
+    round = graphene.Field("aiarena.graphql.RoundsType", required=True)
+    matches = graphene.List(
+        graphene.NonNull("aiarena.graphql.MatchType"),
+        required=True,
+        description="The round's matches without a result yet, in queue order",
+    )
+
+    @staticmethod
+    def resolve_matches(root, info, **args):
+        return unfinished_matches(models.Match.objects.filter(round=root.round))
+
+
+class MatchQueueType(graphene.ObjectType):
+    """Every match waiting to be played or currently being played."""
+
+    # Plain lists rather than paginated connections: a single round can hold
+    # more unfinished matches than a connection page allows (100), and the
+    # queue is shown, and filtered, as a whole.
+
+    requested_matches = graphene.List(
+        graphene.NonNull("aiarena.graphql.MatchType"),
+        required=True,
+        description="Requested matches (those outside any round) without a result yet, in queue order",
+    )
+    rounds = graphene.List(
+        graphene.NonNull(MatchQueueRoundType),
+        required=True,
+        description="Incomplete rounds, oldest first, each with its unfinished matches",
+    )
+
+    @staticmethod
+    def resolve_requested_matches(root, info, **args):
+        return unfinished_matches(models.Match.objects.filter(round__isnull=True))
+
+    @staticmethod
+    def resolve_rounds(root, info, **args):
+        rounds = models.Round.objects.filter(complete=False).select_related("competition").order_by("id")
+        return [MatchQueueRoundType(round=round) for round in rounds]
+
+
 class StatsType(graphene.ObjectType):
     match_count_1h = graphene.Int()
     match_count_24h = graphene.Int()
@@ -1958,6 +2017,7 @@ class Query(graphene.ObjectType):
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
     viewer = graphene.Field("aiarena.graphql.Viewer")
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
+    match_queue = graphene.Field(MatchQueueType, required=True)
 
     @staticmethod
     def resolve_arena_clients(root, info, **args):
@@ -2001,6 +2061,10 @@ class Query(graphene.ObjectType):
     @staticmethod
     def resolve_rounds(root, info, **args):
         return models.Round.objects.all().order_by("-started")
+
+    @staticmethod
+    def resolve_match_queue(root, info, **args):
+        return MatchQueueType()
 
     @staticmethod
     def resolve_stats(root, info, **args):

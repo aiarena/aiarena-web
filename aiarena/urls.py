@@ -94,7 +94,7 @@ urlpatterns = [  # todo: replace usage of url with path for all these
     path("results/", core_views.frontend, name="results"),
     path("arenaclients/", core_views.frontend, name="arenaclients"),
     path("arenaclients/<int:pk>/", core_views.frontend, name="arenaclient"),
-    path("match-queue/", core_views.MatchQueue.as_view(), name="match_queue"),
+    path("match-queue/", core_views.frontend, name="match_queue"),
     path("stream/", TemplateView.as_view(template_name="stream.html"), name="stream"),
     path("bots/", core_views.frontend, name="bots"),
     path("bots/downloadable/", core_views.BotDownloadableList.as_view(), name="bots_downloadable"),

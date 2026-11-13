@@ -21,7 +21,6 @@ from .http_500 import http_500
 from .index import Index
 from .match_detail import MatchDetail, MatchTagFormView
 from .match_log_download import MatchLogDownloadView
-from .match_queue import MatchQueue
 from .project_finance import project_finance
 from .recent_results import RecentResults
 from .request_match import RequestMatch
