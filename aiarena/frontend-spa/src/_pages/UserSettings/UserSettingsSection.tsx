@@ -1,20 +1,19 @@
-import { graphql, useFragment, useMutation } from "react-relay";
+import { graphql, useFragment } from "react-relay";
 
 import { getDateToLocale } from "@/_lib/dateUtils";
 import { UserSettingsSection_viewer$key } from "./__generated__/UserSettingsSection_viewer.graphql";
 import AvatarWithBorder from "@/_components/_display/AvatarWithBorder";
 import SectionDivider from "@/_components/_display/SectionDivider";
-import SocialLinkCard from "@/_components/_display/SocialLinkCard";
-import { footerLinks } from "@/_data/footerLinks";
-import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
-import { UserSettingsSectionLogoutMutation } from "./__generated__/UserSettingsSectionLogoutMutation.graphql";
-import LoadingSpinner from "@/_components/_display/LoadingSpinnerGray";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
-import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import TokenReveal from "@/_components/_actions/TokenReveal";
 import RegenerateTokenButton from "@/_components/_actions/RegenerateTokenButton";
 import SquareButton from "@/_components/_actions/SquareButton";
 import { reverseUrl } from "@/_lib/reverseUrl";
+import AccountSettingsCard from "./_components/AccountSettingsCard";
+import SettingsCard from "./_components/SettingsCard";
+import SettingsToggleRow from "./_components/SettingsToggleRow";
+import SettingsGroup from "./_components/SettingsGroup";
+
 interface UserSettingsSectionProps {
   viewer: UserSettingsSection_viewer$key;
 }
@@ -25,13 +24,11 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
       fragment UserSettingsSection_viewer on Viewer {
         ...TokenReveal_viewer
         ...RegenerateTokenButton_viewer
-        receiveEmailComms
+        ...AccountSettingsCard_viewer
         lastLogin
         dateJoined
         firstName
         lastName
-        linkedDiscord
-        linkedPatreon
         user {
           username
           patreonLevel
@@ -42,55 +39,10 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
     props.viewer,
   );
 
-  const [logout, updating] = useMutation<UserSettingsSectionLogoutMutation>(
-    graphql`
-      mutation UserSettingsSectionLogoutMutation {
-        signOut {
-          errors {
-            messages
-            field
-          }
-        }
-      }
-    `,
-  );
   const [hideSpoilers, setHideSpoilers] = useStateWithLocalStorage<boolean>(
     "Profile_Hide_Spoilers",
     false,
   );
-
-  const { onCompleted, onError } = useSnackbarErrorHandlers(
-    "signOut",
-    "Successfully logged out! Redirecting...",
-  );
-
-  const handleLogout = () => {
-    logout({
-      variables: {},
-      onCompleted: (...args) => {
-        const success = onCompleted(...args);
-        if (success) {
-          window.location.href = reverseUrl("home");
-        }
-      },
-      onError,
-    });
-  };
-
-  const handleLinkDiscord = () => {
-    window.open(reverseUrl("discord_bind_index"), "_blank", "noopener,noreferrer");
-  };
-  const handleUnlinkDiscord = () => {
-    window.open(reverseUrl("unlink_discord"), "_blank", "noopener,noreferrer");
-  };
-
-  const handleLinkPatreon = () => {
-    window.open(reverseUrl("patreon_bind_index"), "_blank", "noopener,noreferrer");
-  };
-
-  const handleUnlinkPatreon = () => {
-    window.open(reverseUrl("unlink_patreon"), "_blank", "noopener,noreferrer");
-  };
 
   const StatusInfo = () => {
     return (
@@ -106,21 +58,6 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
         <div className="flex" role="listitem">
           <dt className="w-36 font-medium text-white">Last Login:</dt>
           <dd>{getDateToLocale(viewer.lastLogin)}</dd>
-        </div>
-        <div className="flex" role="listitem">
-          <dt className="w-36 font-medium text-white">Receive Emails:</dt>
-          <dd>{viewer.receiveEmailComms ? "Yes" : "No"}</dd>
-        </div>
-        <div className="grid gap-4">
-          <a id="change_password" href={reverseUrl("password_change")}>
-            Change password
-          </a>
-          <button
-            onClick={handleLogout}
-            className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400 w-24 flex justify-around"
-          >
-            {!updating ? <p>Logout</p> : <LoadingSpinner color="white" />}
-          </button>
         </div>
       </dl>
     );
@@ -174,91 +111,39 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
             </div>
           </div>
           <SectionDivider className="pb-4" />
-          <div className="gap-4 flex flex-col max-w-[26em]">
-            <SocialLinkCard
-              title="Discord"
-              iconPath={
-                footerLinks.socialLinks.find((it) => it.name == "Discord")?.icon
-              }
-            >
-              {viewer.linkedDiscord ? (
-                <button
-                  onClick={handleUnlinkDiscord}
-                  className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
-                >
-                  Unlink
-                </button>
-              ) : (
-                <button
-                  onClick={handleLinkDiscord}
-                  className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
-                >
-                  Link
-                </button>
-              )}
-            </SocialLinkCard>
-            <SocialLinkCard
-              title="Patreon"
-              iconPath={
-                footerLinks.socialLinks.find((it) => it.name == "Patreon")?.icon
-              }
-              invert
-            >
-              {viewer.linkedPatreon ? (
-                <button
-                  onClick={handleUnlinkPatreon}
-                  className="text-white bg-red-500 px-2 py-0.5 rounded hover:bg-red-400"
-                >
-                  Unlink
-                </button>
-              ) : (
-                <button
-                  onClick={handleLinkPatreon}
-                  className="text-white bg-indigo-500 px-2 py-0.5 rounded hover:bg-indigo-400"
-                >
-                  Link
-                </button>
-              )}
-            </SocialLinkCard>
+          {/* Masonry-style columns: cards differ a lot in height, so a grid would
+              leave gaps beside the tall Account card; columns pack them. */}
+          <div className="columns-1 md:columns-2 2xl:columns-3 gap-6 [&>*]:mb-6 [&>*]:break-inside-avoid">
+            <AccountSettingsCard viewer={viewer} />
 
-            {/* API Token */}
-            <div className="bg-darken-2 border border-neutral-600 shadow-lg shadow-black rounded-md backdrop-blur-sm">
-              <h3 className="mt-1 ml-2 text-base font-semibold ">API Token</h3>
-              <div className=" p-4">
+            <SettingsCard title="API Token">
+              <SettingsGroup title="Your token">
                 <TokenReveal viewer={viewer} />
+                <RegenerateTokenButton viewer={viewer} outerClassName="self-start" />
+              </SettingsGroup>
 
-                <RegenerateTokenButton viewer={viewer} outerClassName="mt-3" />
-
-                <p className="text-sm text-gray-300 mt-3">
+              <SettingsGroup title="GraphQL API">
+                <p className="text-sm text-gray-300">
                   For deeper queries, fewer requests, and an interactive
                   playground, check out our new GraphQL API.
                 </p>
-
                 <SquareButton
                   href={reverseUrl("developers")}
                   text="API docs →"
-                  outerClassName="mt-2"
+                  outerClassName="self-start"
                 />
-              </div>
-            </div>
+              </SettingsGroup>
+            </SettingsCard>
 
-            {/* Website settings */}
-            <div className="bg-darken-2 border border-neutral-600 shadow-lg shadow-black rounded-md backdrop-blur-sm">
-              <h3 className="mt-1 ml-2 text-base font-semibold">Website settings</h3>
-
-              <div className="p-4">
-                <div className="flex items-center justify-between gap-4 bg-black text-gray-300 px-2 py-2 rounded text-sm">
-                  <span>Hide spoilers</span>
-
-                  <SimpleToggle
-                    enabled={hideSpoilers ?? false}
-                    onChange={setHideSpoilers}
-                  />
-
-                </div>
-              </div>
-            </div>
-
+            <SettingsCard title="Website settings">
+              <SettingsGroup title="Display">
+                <SettingsToggleRow
+                  label="Hide spoilers"
+                  enabled={hideSpoilers ?? false}
+                  onChange={setHideSpoilers}
+                />
+              </SettingsGroup>
+            </SettingsCard>
           </div>
         </div>
       </div>

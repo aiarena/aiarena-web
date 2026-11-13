@@ -28,9 +28,12 @@ class BrowserHelper:
 
     def log_in(self, user: WebsiteUser, page: Page):
         page.goto(self.reverse("login"))
-        page.get_by_label("Username:").fill("billy")
-        page.get_by_label("Password:").fill("guest")
+        page.get_by_label("Username").fill("billy")
+        page.get_by_label("Password").fill("guest")
         page.get_by_role("button", name="Log in").click()
+        # The SPA login page does a full navigation home once signed in; wait for
+        # it so the caller's next `goto` doesn't race the sign-in request.
+        page.wait_for_url(self.reverse("home"))
 
 
 class GraphQLTest:

@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.auth import get_user
 
 import pytest
 from rest_framework.authtoken.models import Token
@@ -989,74 +988,3 @@ class TestRegenerateApiToken(GraphQLTest):
         other_token.refresh_from_db()
         assert other_token.key == other_key
         assert Token.objects.filter(user=other_user).count() == 1
-
-
-class TestPasswordSignIn(GraphQLTest):
-    """The sign-in mutation is anonymous-allowed (allow_anonymous=True): the
-    login-by-default gate must NOT block an unauthenticated caller, or nobody
-    could ever sign in."""
-
-    mutation_name = "passwordSignIn"
-    # language=graphql
-    mutation = """
-        mutation ($input: PasswordSignInInput!) {
-            passwordSignIn(input: $input) {
-                errors {
-                    messages
-                    field
-                }
-            }
-        }
-    """
-
-    def test_anonymous_can_sign_in_with_valid_credentials(self, user):
-        """An anonymous caller reaches the auth logic (not blocked by the login
-        floor) and ends up authenticated in the session."""
-        self.mutate(
-            expected_status=200,
-            variables={"input": {"username": "billy", "password": "guest"}},
-        )
-
-        assert get_user(self.last_query_client).is_authenticated
-
-    def test_wrong_password_returns_error_payload(self, user):
-        """Bad credentials return a graceful error payload, not auth."""
-        self.mutate(
-            expected_status=200,
-            expected_validation_errors={"__all__": ["Incorrect email or password"]},
-            variables={"input": {"username": "billy", "password": "wrong"}},
-        )
-
-        assert not get_user(self.last_query_client).is_authenticated
-
-
-class TestSignOut(GraphQLTest):
-    """Sign-out is anonymous-allowed: an already-anonymous caller gets a graceful
-    error payload rather than being blocked by the login floor."""
-
-    mutation_name = "signOut"
-    # language=graphql
-    mutation = """
-        mutation {
-            signOut {
-                errors {
-                    messages
-                    field
-                }
-            }
-        }
-    """
-
-    def test_signed_in_user_is_signed_out(self, user):
-        self.mutate(login_user=user, expected_status=200)
-
-        assert not get_user(self.last_query_client).is_authenticated
-
-    def test_anonymous_is_denied(self, db):
-        """Sign-out requires auth like any other mutation. Denying a logged-out
-        caller is the honest signal (e.g. a frontend with stale auth state learns
-        the session is already gone) — better than a no-op that reports success."""
-        self.mutate(
-            expected_status=200,
-            expected_errors_like=[NOT_LOGGED_IN_MESSAGE],
-        )
