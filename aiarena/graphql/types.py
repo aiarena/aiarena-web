@@ -1287,8 +1287,14 @@ class ArenaClientType(DjangoObjectTypeWithUID):
         required=True,
         description="Matches currently assigned to this client that don't have a result yet",
     )
-    results = DjangoConnectionField(
-        "aiarena.graphql.ResultType", description="Results of matches assigned to this client, newest first"
+    # A plain list of the latest results, not a paginated connection: a
+    # connection counts its whole queryset on every request, and a busy client
+    # has ~300k results, which made this page take ~20s in production. The old
+    # arena client page also showed only the latest 100.
+    recent_results = graphene.List(
+        graphene.NonNull("aiarena.graphql.ResultType"),
+        required=True,
+        description="The latest 100 results of matches assigned to this client, newest first",
     )
 
     class Meta:
@@ -1328,7 +1334,7 @@ class ArenaClientType(DjangoObjectTypeWithUID):
         return Coalesce(Subquery(recent, output_field=IntegerField()), 0)
 
     # The counts (matches_1h / matches_24h / matches_total) are what the client
-    # *submitted*; the results list is every match *assigned* to it. They differ
+    # *submitted*; the recent results are matches *assigned* to it. They differ
     # by the client's timeouts: matches it was given but never reported back,
     # which the system cancels with no submitter. Those show in the list (it's
     # the client's match history) but aren't counted as matches it submitted.
@@ -1353,8 +1359,8 @@ class ArenaClientType(DjangoObjectTypeWithUID):
         )
 
     @staticmethod
-    def resolve_results(root: models.ArenaClient, info, **args):
-        return with_result_list_relations(arena_clients.get_assigned_matches_results_queryset(root))
+    def resolve_recent_results(root: models.ArenaClient, info, **args):
+        return with_result_list_relations(arena_clients.get_assigned_matches_results_queryset(root))[:100]
 
 
 class NewsType(DjangoObjectTypeWithUID):

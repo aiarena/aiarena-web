@@ -58,9 +58,6 @@ export default function ArenaClientHeader(props: ArenaClientHeaderProps) {
 
       <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center">
         <div className="relative flex h-20 w-20 shrink-0 items-center justify-center">
-          {active && (
-            <span className="absolute inset-0 rounded-full bg-customGreen/20 animate-ping" />
-          )}
           <span
             className={clsx(
               "absolute inset-0 rounded-full border-2",

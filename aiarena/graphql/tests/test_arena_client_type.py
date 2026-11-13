@@ -1,5 +1,7 @@
 from datetime import timedelta
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from aiarena.core.models import ArenaClient, Match, MatchParticipation, Result
@@ -85,7 +87,7 @@ class TestArenaClients(GraphQLTest):
             "matches24h",
             "matchesTotal",
             "assignedMatches",
-            "results",
+            "recentResults",
         }
 
 
@@ -102,14 +104,10 @@ class TestArenaClientDetail(GraphQLTest):
                         participant2 { name }
                         map { name }
                     }
-                    results(first: 10) {
-                        edges {
-                            node {
-                                type
-                                participant1 { bot { name } }
-                                participant2 { bot { name } }
-                            }
-                        }
+                    recentResults {
+                        type
+                        participant1 { bot { name } }
+                        participant2 { bot { name } }
                     }
                 }
             }
@@ -141,7 +139,7 @@ class TestArenaClientDetail(GraphQLTest):
         assert client["assignedMatches"] == [
             {"participant1": {"name": bot.name}, "participant2": {"name": other_bot.name}, "map": {"name": map.name}}
         ]
-        results = [edge["node"] for edge in client["results"]["edges"]]
+        results = client["recentResults"]
         # Newest first.
         assert [r["type"] for r in results] == ["ERROR", "MATCHCANCELLED"]
         assert results[0]["participant1"] == {"bot": {"name": bot.name}}
@@ -172,7 +170,7 @@ class TestArenaClientDetail(GraphQLTest):
         # Submitted: the played match and `assigned_elsewhere`.
         assert client["matchesTotal"] == 2
         # Assigned, newest first: `timed_out` and the played match.
-        listed = [edge["node"] for edge in client["results"]["edges"]]
+        listed = client["recentResults"]
         assert [r["type"] for r in listed] == ["MATCHCANCELLED", "ERROR"]
 
     def test_other_clients_matches_are_not_included(self, arenaclient_user, admin_user, bot, other_bot, map):
@@ -185,4 +183,36 @@ class TestArenaClientDetail(GraphQLTest):
 
         assert client["matchesTotal"] == 0
         assert client["assignedMatches"] == []
-        assert client["results"]["edges"] == []
+        assert client["recentResults"] == []
+
+
+class TestArenaClientRecentResults(GraphQLTest):
+    # language=graphql
+    query_text = """
+        query ($id: ID!) {
+            node(id: $id) {
+                ... on ArenaClientType {
+                    recentResults { gameSteps }
+                }
+            }
+        }
+    """
+
+    def test_lists_only_the_latest_100_without_counting(self, arenaclient_user, map):
+        """Capped at the newest 100, and never counted: counting a busy
+        client's ~300k results is what made this page take ~20s."""
+        for steps in range(101):
+            result = Result.objects.create(type="MatchCancelled", game_steps=steps, submitted_by=arenaclient_user)
+            Match.objects.create(map=map, assigned_to=arenaclient_user, result=result)
+
+        with CaptureQueriesContext(connection) as queries:
+            data = self.query(
+                self.query_text, variables={"id": self.to_global_id(ArenaClientType, arenaclient_user.id)}
+            )
+
+        steps = [r["gameSteps"] for r in data["node"]["recentResults"]]
+        # Newest first, and the oldest (game_steps=0) didn't make the cut.
+        assert steps == list(range(100, 0, -1))
+        # Django's .count() aliases its result "__count"; nothing may count the
+        # client's results. (The 1h/24h numbers are subqueries, not .count().)
+        assert not [q["sql"] for q in queries if '"__count"' in q["sql"] and "core_match" in q["sql"]]
