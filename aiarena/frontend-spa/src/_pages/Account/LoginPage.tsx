@@ -10,13 +10,6 @@ import { FormAlert } from "./_components/FormMessages";
 import { splitAccountErrors } from "./_components/splitAccountErrors";
 import { LoginPageMutation } from "./__generated__/LoginPageMutation.graphql";
 
-/** Only follow `?next=` to a path on this site, never to another origin. */
-function safeNext(next: string | null): string {
-  return next && next.startsWith("/") && !next.startsWith("//")
-    ? next
-    : reverseUrl("home");
-}
-
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const [username, setUsername] = useState("");
@@ -25,6 +18,7 @@ export default function LoginPage() {
   const [signIn, signingIn] = useMutation<LoginPageMutation>(graphql`
     mutation LoginPageMutation($input: PasswordSignInInput!) {
       passwordSignIn(input: $input) {
+        redirectTo
         errors {
           field
           messages
@@ -42,12 +36,16 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     signIn({
-      variables: { input: { username, password } },
-      onCompleted: (...args) => {
-        if (onCompleted(...args)) {
-          // A full navigation, not client-side routing: signing in rotates the
-          // CSRF token, and the next page may be server-rendered.
-          window.location.assign(safeNext(searchParams.get("next")));
+      variables: {
+        input: { username, password, nextUrl: searchParams.get("next") },
+      },
+      onCompleted: (response, errors) => {
+        const redirectTo = response.passwordSignIn?.redirectTo;
+        if (onCompleted(response, errors) && redirectTo) {
+          // The backend validated `next` (or chose the default page), so just
+          // go there. A full navigation, not client-side routing: signing in
+          // rotates the CSRF token, and the next page may be server-rendered.
+          window.location.assign(redirectTo);
         }
       },
       onError,

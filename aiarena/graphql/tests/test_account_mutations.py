@@ -55,6 +55,67 @@ class TestPasswordSignIn(GraphQLTest):
         assert not get_user(self.last_query_client).is_authenticated
 
 
+class TestPasswordSignInRedirect(GraphQLTest):
+    """After signing in, the client goes to `redirectTo`. The requested `nextUrl`
+    is only honoured when it's a safe same-site URL; anything else falls back
+    to the default page, so `?next=` can't be used as an open redirect."""
+
+    mutation_name = "passwordSignIn"
+    # language=graphql
+    mutation = """
+        mutation ($input: PasswordSignInInput!) {
+            passwordSignIn(input: $input) {
+                redirectTo
+                errors {
+                    messages
+                    field
+                }
+            }
+        }
+    """
+
+    def _redirect_to(self, next_url):
+        variables = {"input": {"username": "billy", "password": "guest", "nextUrl": next_url}}
+        return self.mutate(variables=variables)["passwordSignIn"]["redirectTo"]
+
+    @pytest.mark.parametrize(
+        "next_url",
+        [
+            "/dashboard/",
+            "/bots/42/?tab=matches",
+            # Same host as the request (the test client's), so allowed.
+            "http://testserver/dashboard/",
+        ],
+    )
+    def test_safe_next_url_is_followed(self, user, next_url):
+        assert self._redirect_to(next_url) == next_url
+
+    @pytest.mark.parametrize(
+        "next_url",
+        [
+            "//evil.com",
+            "/\\evil.com",
+            "/\t/evil.com",
+            "/\n/evil.com",
+            "https://evil.com/",
+            "javascript:alert(1)",
+        ],
+    )
+    def test_unsafe_next_url_falls_back_to_default(self, user, next_url):
+        assert self._redirect_to(next_url) == reverse("home")
+
+    @pytest.mark.parametrize("next_url", [None, ""])
+    def test_missing_next_url_goes_to_default(self, user, next_url):
+        assert self._redirect_to(next_url) == reverse("home")
+
+    def test_failed_sign_in_has_no_redirect(self, user):
+        response = self.mutate(
+            variables={"input": {"username": "billy", "password": "wrong", "nextUrl": "/dashboard/"}},
+            expected_validation_errors={"__all__": ["Incorrect username or password"]},
+        )
+        assert response["passwordSignIn"]["redirectTo"] is None
+
+
 class TestSignOut(GraphQLTest):
     """Sign-out is anonymous-allowed: an already-anonymous caller gets a graceful
     error payload rather than being blocked by the login floor."""

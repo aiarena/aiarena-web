@@ -13,8 +13,9 @@ from django.contrib.auth import authenticate, login, logout, update_session_auth
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
+from django.shortcuts import resolve_url
 from django.utils.encoding import force_str
-from django.utils.http import urlsafe_base64_decode
+from django.utils.http import url_has_allowed_host_and_scheme, urlsafe_base64_decode
 
 import graphene
 from graphene_django.types import ErrorType
@@ -48,9 +49,26 @@ def _form_errors(form) -> list[ErrorType]:
 class PasswordSignInInput(CleanedInputType):
     username = graphene.String()
     password = graphene.String()
+    # Where the caller wants to go after signing in (the login page's `?next=`).
+    next_url = graphene.String()
+
+
+def _safe_redirect_url(request, next_url: str | None) -> str:
+    """``next_url`` if it's safe to send the user to, else the default
+    post-login page. Same check as Django's LoginView, so `?next=` can never
+    send a freshly signed-in user to another site (open redirect)."""
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return next_url
+    return resolve_url(settings.LOGIN_REDIRECT_URL)
 
 
 class PasswordSignIn(CleanedInputMutation):
+    # Computed by the server, not an object the client could fetch: the
+    # frontend navigates here unconditionally after a successful sign-in.
+    redirect_to = graphene.String()
+
     class Meta:
         input_class = PasswordSignInInput
         # Anonymous by necessity: the caller is signing in, so they aren't
@@ -67,7 +85,7 @@ class PasswordSignIn(CleanedInputMutation):
         else:
             return cls(errors=_error("Incorrect username or password"))
 
-        return cls(errors=[])
+        return cls(errors=[], redirect_to=_safe_redirect_url(info.context, input_object.next_url))
 
 
 class SignOut(BaseMutation):
