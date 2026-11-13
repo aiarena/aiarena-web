@@ -1,6 +1,4 @@
 # ruff: noqa: F401
-from .arena_client_detail import ArenaClientView
-from .arena_client_list import ArenaClients
 from .author_detail import AuthorDetail
 from .author_list import AuthorList
 from .bot_competition_stats_detail import BotCompetitionStatsDetail

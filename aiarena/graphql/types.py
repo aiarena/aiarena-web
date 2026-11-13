@@ -10,7 +10,7 @@ from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 from django.conf import settings
 from django.db.models import CharField, Count, F, IntegerField, OuterRef, Prefetch, Q, Subquery, Value
-from django.db.models.functions import Lower, TruncDate
+from django.db.models.functions import Coalesce, Lower, TruncDate
 from django.utils import timezone
 
 import django_filters
@@ -26,7 +26,7 @@ from aiarena.core import models
 from aiarena.core.models import BotRace, Match, MatchParticipation, Result, TemporaryUpload, User
 from aiarena.core.models.result import STEPS_PER_SECOND
 from aiarena.core.s3_helpers import get_file_s3_url_with_content_disposition
-from aiarena.core.services import ladders, match_requests, supporters, users
+from aiarena.core.services import arena_clients, ladders, match_requests, supporters, users
 from aiarena.core.services.service_implementations.internal.statistics.elo_graphs_generator import EloGraphsGenerator
 from aiarena.frontend.templatetags.url_utils import get_absolute_url
 from aiarena.frontend.views.bot_detail import RelativeResultFilter
@@ -1247,6 +1247,116 @@ class MapPoolID(TypeModelChoice):
     graphql_type = MapPoolType
 
 
+def with_result_list_relations(results):
+    """Newest-first results with everything a results table shows loaded up
+    front (match, winner, both participants and their bots), so listing them
+    doesn't cost queries per row."""
+    return (
+        results.order_by("-created")
+        .select_related(
+            "match",
+            "winner",
+            "submitted_by",
+        )
+        .prefetch_related(
+            Prefetch(
+                "match__matchparticipation_set",
+                queryset=models.MatchParticipation.objects.select_related(
+                    "bot",
+                    "bot__plays_race",
+                    "bot__user",
+                ).order_by("participant_number"),
+                to_attr="prefetched_participations",
+            )
+        )
+    )
+
+
+class ArenaClientType(DjangoObjectTypeWithUID):
+    """A machine that plays ladder matches for the arena."""
+
+    # Arena clients are user accounts under the hood, so `fields` below is an
+    # explicit allowlist: nothing else on the account (email, login state,
+    # tokens, ...) may be exposed through this type.
+
+    matches_1h = graphene.Int(required=True, description="Results this client submitted in the last hour")
+    matches_24h = graphene.Int(required=True, description="Results this client submitted in the last 24 hours")
+    matches_total = graphene.Int(required=True, description="Results this client has ever submitted")
+    assigned_matches = graphene.List(
+        graphene.NonNull("aiarena.graphql.MatchType"),
+        required=True,
+        description="Matches currently assigned to this client that don't have a result yet",
+    )
+    results = DjangoConnectionField(
+        "aiarena.graphql.ResultType", description="Results of matches assigned to this client, newest first"
+    )
+
+    class Meta:
+        model = models.ArenaClient
+        fields = [
+            "username",
+            "trusted",
+            "owner",
+        ]
+        filter_fields = []
+        connection_class = CountingConnection
+
+    @classmethod
+    def get_queryset(cls, queryset, info):
+        # Applies to node lookups and connections alike, so the counts below
+        # are always annotated, never fetched per client.
+        now = timezone.now()
+        return queryset.select_related("owner").annotate(
+            matches_1h=cls._results_submitted_since(now - timedelta(hours=1)),
+            matches_24h=cls._results_submitted_since(now - timedelta(hours=24)),
+        )
+
+    @staticmethod
+    def _results_submitted_since(since):
+        """Count of results the client submitted since `since`, as a subquery
+        whose WHERE clause holds the time limit, so Postgres reads only recent
+        results via the `created` index. A Count over the reverse relation with
+        a `filter=` puts the limit inside the aggregate instead, which joins and
+        sorts every result the client has ever submitted (millions of rows)."""
+        recent = (
+            Result.objects.filter(submitted_by_id=OuterRef("pk"), created__gte=since)
+            .order_by()
+            .values("submitted_by_id")
+            .annotate(n=Count("id"))
+            .values("n")
+        )
+        return Coalesce(Subquery(recent, output_field=IntegerField()), 0)
+
+    # The counts (matches_1h / matches_24h / matches_total) are what the client
+    # *submitted*; the results list is every match *assigned* to it. They differ
+    # by the client's timeouts: matches it was given but never reported back,
+    # which the system cancels with no submitter. Those show in the list (it's
+    # the client's match history) but aren't counted as matches it submitted.
+
+    @staticmethod
+    def resolve_matches_total(root: models.ArenaClient, info, **args):
+        return models.Result.objects.filter(submitted_by=root).count()
+
+    @staticmethod
+    def resolve_assigned_matches(root: models.ArenaClient, info, **args):
+        return (
+            arena_clients.get_incomplete_assigned_matches_queryset(root)
+            .select_related("map")
+            .prefetch_related(
+                Prefetch(
+                    "matchparticipation_set",
+                    queryset=models.MatchParticipation.objects.select_related("bot"),
+                    to_attr="prefetched_participations",
+                )
+            )
+            .order_by("started", "id")
+        )
+
+    @staticmethod
+    def resolve_results(root: models.ArenaClient, info, **args):
+        return with_result_list_relations(arena_clients.get_assigned_matches_results_queryset(root))
+
+
 class NewsType(DjangoObjectTypeWithUID):
     class Meta:
         model = models.News
@@ -1831,6 +1941,7 @@ class Viewer(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
+    arena_clients = DjangoFilterConnectionField("aiarena.graphql.ArenaClientType")
     bot_race = DjangoFilterConnectionField("aiarena.graphql.BotRaceType")
     bots = DjangoFilterConnectionField("aiarena.graphql.BotType")
     competitions = DjangoFilterConnectionField("aiarena.graphql.CompetitionType")
@@ -1847,6 +1958,11 @@ class Query(graphene.ObjectType):
     users = DjangoFilterConnectionField("aiarena.graphql.UserType")
     viewer = graphene.Field("aiarena.graphql.Viewer")
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
+
+    @staticmethod
+    def resolve_arena_clients(root, info, **args):
+        # Only clients currently in service, as the old arena clients page showed.
+        return models.ArenaClient.objects.filter(is_active=True).order_by("username")
 
     @staticmethod
     def resolve_bot_race(root, info, **args):
@@ -1880,26 +1996,7 @@ class Query(graphene.ObjectType):
 
     @staticmethod
     def resolve_results(root, info, **args):
-        return (
-            models.Result.objects.all()
-            .order_by("-created")
-            .select_related(
-                "match",
-                "winner",
-                "submitted_by",
-            )
-            .prefetch_related(
-                Prefetch(
-                    "match__matchparticipation_set",
-                    queryset=models.MatchParticipation.objects.select_related(
-                        "bot",
-                        "bot__plays_race",
-                        "bot__user",
-                    ).order_by("participant_number"),
-                    to_attr="prefetched_participations",
-                )
-            )
-        )
+        return with_result_list_relations(models.Result.objects.all())
 
     @staticmethod
     def resolve_rounds(root, info, **args):

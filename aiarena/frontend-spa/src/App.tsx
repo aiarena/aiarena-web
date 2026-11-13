@@ -10,6 +10,8 @@ import UserBotsPage from "./_pages/UserBots/UserBotsPage";
 import UserSettingsPage from "./_pages/UserSettings/UserSettingsPage";
 import AuthorsPage from "./_pages/Rework/Authors/Page";
 import BotsPage from "./_pages/Rework/Bots/Page";
+import ArenaClientsPage from "./_pages/Rework/ArenaClients/Page";
+import ArenaClientPage from "./_pages/Rework/_ArenaClient/Page";
 import RootLayout from "./RootLayout";
 import ResultsPage from "./_pages/Rework/Results/Page";
 import CompetitionsPage from "./_pages/Rework/Competitions/Page";
@@ -59,6 +61,11 @@ export default function App() {
         />
         <Route path="rounds/:roundId" element={<RoundsPage />} />
         <Route path="bots" element={<BotsPage />} />
+        <Route path="arenaclients" element={<ArenaClientsPage />} />
+        <Route
+          path="arenaclients/:arenaClientId"
+          element={<ArenaClientPage />}
+        />
         <Route path="bots/:botId" element={<BotPage />} />
         <Route path="matches/:matchId" element={<MatchPage />} />
         <Route path="developers" element={<DevelopersPage />} />

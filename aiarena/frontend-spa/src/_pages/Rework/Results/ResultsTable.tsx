@@ -1,18 +1,10 @@
 import { graphql, usePaginationFragment } from "react-relay";
 import {
-  createColumnHelper,
   getCoreRowModel,
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-
-import { getIDFromBase64, getNodes } from "@/_lib/relayHelpers";
-import { reverseUrl } from "@/_lib/reverseUrl";
-import clsx from "clsx";
-
 import { Suspense, useMemo, useState, useTransition } from "react";
-
-import { getMatchResultParsed } from "@/_lib/parseMatchResult";
 
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import NoMoreItems from "@/_components/_display/NoMoreItems";
@@ -20,18 +12,15 @@ import LoadingMoreItems from "@/_components/_display/LoadingMoreItems";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import LoadingDots from "@/_components/_display/LoadingDots";
 import { useInfiniteScroll } from "@/_components/_hooks/useInfiniteScroll";
+import { ResultsTable_node$key } from "./__generated__/ResultsTable_node.graphql";
+import { getNodes } from "@/_lib/relayHelpers";
 import {
-  ResultsTable_node$data,
-  ResultsTable_node$key,
-} from "./__generated__/ResultsTable_node.graphql";
-import { formatWinnerName } from "@/_components/_display/formatWinnerName";
+  readResultRow,
+  useResultColumns,
+} from "@/_components/_display/resultsTable/resultColumns";
 import WatchYourGamesButton from "@/_components/_actions/WatchYourGamesButton";
 import WatchGamesModal from "@/_pages/UserMatchRequests/UserMatchRequests/_modals/WatchGamesModal";
-import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
-import timeAgoShort from "@/_lib/timeAgoSort";
-import { formatGameTime } from "@/_lib/formatGameTime";
 
 interface ResultsTableProps {
   data: ResultsTable_node$key;
@@ -56,38 +45,7 @@ export default function ResultsTable(props: ResultsTableProps) {
           @connection(key: "ResultsTable_node_results") {
           edges {
             node {
-              created
-              gameSteps
-              id
-              participant1 {
-                bot {
-                  id
-                  name
-                }
-                match {
-                  id
-                }
-                eloChange
-              }
-              participant2 {
-                bot {
-                  id
-                  name
-                }
-
-                eloChange
-              }
-              replayFile
-              winner {
-                id
-              }
-              type
-
-              winner {
-                name
-              }
-              started
-              gameTimeFormatted
+              ...resultColumns_result
             }
           }
         }
@@ -95,217 +53,15 @@ export default function ResultsTable(props: ResultsTableProps) {
     `,
     props.data,
   );
-  type ResultType = NonNullable<
-    NonNullable<
-      NonNullable<ResultsTable_node$data["results"]>["edges"][number]
-    >["node"]
-  >;
   const [isWatchGamesModalOpen, setIsWatchGamesModalOpen] = useState(false);
 
   const [isPending] = useTransition();
-  const matchData = useMemo(() => getNodes<ResultType>(data?.results), [data]);
-
-  const columnHelper = createColumnHelper<ResultType>();
-
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor((row) => row.participant1?.match.id, {
-        id: "id",
-        header: "Match ID",
-        enableSorting: false,
-        cell: (info) => {
-          const matchId = getIDFromBase64(info.getValue(), "MatchType");
-          if (!matchId) {
-            return null;
-          }
-          return (
-            <Link
-              className="font-semibold text-gray-200 truncate mr-2"
-              to={reverseUrl("match", { pk: matchId })}
-              role="cell"
-              aria-label={`View match details for Result ID ${info.getValue()}`}
-              title={matchId}
-            >
-              {matchId}
-            </Link>
-          );
-        },
-
-        meta: { priority: 1 },
-      }),
-      columnHelper.accessor((row) => row.participant1?.bot.name || "", {
-        id: "participant1",
-        header: "Bot",
-        enableSorting: false,
-        cell: (info) => {
-          const participant1 = info.row.original.participant1;
-          const display_value = formatWinnerName(
-            info.row.original.winner?.name,
-            participant1?.bot.name,
-          );
-          const appendOnEnd = (
-            <span
-              className={clsx({
-                "text-red-400":
-                  participant1?.eloChange && participant1?.eloChange < 0,
-              })}
-            >
-              {participant1?.eloChange}
-            </span>
-          );
-          const children = display_value;
-          const label = children ? children : participant1?.bot.name || "";
-          const botId = getIDFromBase64(participant1?.bot.id, "BotType");
-
-          return (
-            <span className="flex justify-between">
-              {botId ? (
-                <Link
-                  className="font-semibold text-gray-200 truncate mr-2"
-                  to={reverseUrl("bot", { pk: botId })}
-                  role="cell"
-                  aria-label={`View bot profile for ${participant1?.bot.name}, Bot`}
-                  title={`${participant1?.bot.name || ""}`}
-                >
-                  {label}
-                </Link>
-              ) : (
-                <span className="font-semibold text-gray-200 truncate mr-2">
-                  {label}
-                </span>
-              )}
-              {appendOnEnd}
-            </span>
-          );
-        },
-        meta: { priority: 1 },
-      }),
-
-      columnHelper.accessor((row) => row.participant2?.bot.name || "", {
-        id: "participant2",
-        header: "Opponent",
-        enableSorting: false,
-        cell: (info) => {
-          const participant2 = info.row.original.participant2;
-
-          const display_value = formatWinnerName(
-            info.row.original?.winner?.name,
-            info.row.original.participant2?.bot.name,
-          );
-
-          const appendOnEnd = (
-            <span
-              className={clsx({
-                "text-red-400":
-                  participant2?.eloChange && participant2?.eloChange < 0,
-              })}
-            >
-              {participant2?.eloChange}
-            </span>
-          );
-          const children = display_value;
-          const label = children ? children : participant2?.bot.name || "";
-          const botId = getIDFromBase64(participant2?.bot.id, "BotType");
-
-          return (
-            <span className="flex justify-between">
-              {botId ? (
-                <Link
-                  className="font-semibold text-gray-200 truncate mr-2"
-                  to={reverseUrl("bot", { pk: botId })}
-                  role="cell"
-                  aria-label={`View bot profile for ${participant2?.bot.name}, Bot`}
-                  title={`${participant2?.bot.name || ""}`}
-                >
-                  {label}
-                </Link>
-              ) : (
-                <span className="font-semibold text-gray-200 truncate mr-2">
-                  {label}
-                </span>
-              )}
-              {appendOnEnd}
-            </span>
-          );
-        },
-
-        meta: { priority: 1 },
-      }),
-      columnHelper.accessor((row) => row.type ?? "", {
-        id: "type",
-        header: "Result",
-        enableSorting: false,
-        cell: (info) => {
-          const getResult = getMatchResultParsed(
-            info.getValue(),
-            info.row.original.participant1?.bot.name,
-            info.row.original.participant2?.bot.name,
-          );
-          return getResult != "" ? getResult : "In Queue";
-        },
-        meta: { priority: 1 },
-      }),
-      columnHelper.accessor(
-        (row) => formatGameTime(row.gameTimeFormatted ?? ""),
-        {
-          id: "gameTimeFormatted",
-          header: "Duration",
-          enableSorting: false,
-          cell: (info) => info.getValue(),
-          meta: { priority: 1 },
-        },
-      ),
-
-      columnHelper.accessor((row) => row.created ?? "", {
-        id: "created",
-        header: "Created",
-        enableSorting: false,
-        cell: (info) => {
-          const rawTime = info.getValue();
-          return rawTime ? `${timeAgoShort(rawTime)} ago` : "In Queue";
-        },
-        meta: { priority: 1 },
-      }),
-
-      columnHelper.accessor((row) => row.replayFile || "", {
-        id: "replayFile",
-        header: "Replay",
-        enableSorting: false,
-        cell: (info) => {
-          const replayFile = info.row.original.replayFile;
-          if (!replayFile) {
-            return "";
-          }
-
-          const label = "Download";
-          const href = `${replayFile}`;
-          const aria = `Get Replay for ${getIDFromBase64(info.row.original.id, "ResultType")}`;
-          const children = (
-            <span className="flex items-center gap-1">
-              <ArrowDownCircleIcon height={18} /> Replay
-            </span>
-          );
-
-          return (
-            <span className="flex justify-between">
-              <Link
-                className="font-semibold text-gray-200 truncate mr-2"
-                to={href}
-                role="cell"
-                aria-label={aria}
-                title={`${label}`}
-              >
-                {children ? children : label}
-              </Link>
-            </span>
-          );
-        },
-
-        meta: { priority: 1 },
-      }),
-    ],
-    [columnHelper],
+  const matchData = useMemo(
+    () => getNodes(data?.results).map(readResultRow),
+    [data],
   );
+
+  const columns = useResultColumns();
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
 
