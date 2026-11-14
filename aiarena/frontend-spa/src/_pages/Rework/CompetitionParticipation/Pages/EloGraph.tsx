@@ -11,6 +11,25 @@ import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function EloGraph() {
+  return (
+    <div className="px-2 pb-8">
+      <Suspense
+        fallback={
+          <div className="flex flex-col gap-4">
+            <DisplaySkeleton height={500} />
+            <DisplaySkeleton height={300} />
+          </div>
+        }
+      >
+        <ErrorBoundaryWrapper componentName="elo graph">
+          <EloGraphContent />
+        </ErrorBoundaryWrapper>
+      </Suspense>
+    </div>
+  );
+}
+
+function EloGraphContent() {
   const { id } = useParams<{ id: string }>();
   const data = useLazyLoadQuery<EloGraphQuery>(
     graphql`
@@ -48,32 +67,9 @@ export default function EloGraph() {
   }
 
   return (
-    <div className="px-2 pb-8">
-      <Suspense
-        fallback={
-          <div className="flex flex-col gap-4">
-            <DisplaySkeleton height={500} />
-            <DisplaySkeleton height={300} />
-          </div>
-        }
-      >
-        <ErrorBoundaryWrapper componentName="elo graph">
-          {data.node.bot ? (
-            <div className="flex flex-col gap-4">
-              <>
-                <EloChart data={data.node} />
-                <Summary data={data.node} />
-              </>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-400">
-                Competition participation not found
-              </p>
-            </div>
-          )}
-        </ErrorBoundaryWrapper>
-      </Suspense>
+    <div className="flex flex-col gap-4">
+      <EloChart data={data.node} />
+      <Summary data={data.node} />
     </div>
   );
 }

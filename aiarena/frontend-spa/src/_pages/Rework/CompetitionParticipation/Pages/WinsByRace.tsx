@@ -15,6 +15,20 @@ import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCa
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function WinsByRace() {
+  return (
+    <div className="px-2 pb-8">
+      <Suspense
+        fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
+      >
+        <ErrorBoundaryWrapper componentName="wins by race">
+          <WinsByRaceContent />
+        </ErrorBoundaryWrapper>
+      </Suspense>
+    </div>
+  );
+}
+
+function WinsByRaceContent() {
   const { id } = useParams<{ id: string }>();
   const data = useLazyLoadQuery<WinsByRaceQuery>(
     graphql`
@@ -50,47 +64,25 @@ export default function WinsByRace() {
   }
 
   return (
-    <div className="px-2 pb-8">
-      <Suspense
-        fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
-      >
-        <ErrorBoundaryWrapper componentName="wins by time">
-          {data.node.bot ? (
-            <div className="flex flex-col gap-4">
-              <>
-                {data.viewer?.user?.patreonLevel === "NONE" ||
-                data.viewer == null ? (
-                  <div
-                    className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8 flex items-center justify-center"
-                    style={{ height: 558 }}
-                  >
-                    <NoItemsInListMessage className="m-auto">
-                      <div className="block">
-                        <p>
-                          This feature is only available to Patreon Supporters
-                        </p>
-                        <a href={socialLinks["patreon"]} target="_blank">
-                          Patreon
-                        </a>
-                      </div>
-                    </NoItemsInListMessage>
-                  </div>
-                ) : (
-                  <RaceMatchupChart data={data.node} />
-                )}
-
-                <Summary data={data.node} />
-              </>
+    <div className="flex flex-col gap-4">
+      {data.viewer?.user?.patreonLevel === "NONE" || data.viewer == null ? (
+        <div
+          className="rounded-xl border border-neutral-800 bg-darken-2 backdrop-blur-lg shadow-lg p-4 pt-8 flex items-center justify-center"
+          style={{ height: 558 }}
+        >
+          <NoItemsInListMessage className="m-auto">
+            <div className="block">
+              <p>This feature is only available to Patreon Supporters</p>
+              <a href={socialLinks["patreon"]} target="_blank">
+                Patreon
+              </a>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-400">
-                Competition participation not found
-              </p>
-            </div>
-          )}
-        </ErrorBoundaryWrapper>
-      </Suspense>
+          </NoItemsInListMessage>
+        </div>
+      ) : (
+        <RaceMatchupChart data={data.node} />
+      )}
+      <Summary data={data.node} />
     </div>
   );
 }

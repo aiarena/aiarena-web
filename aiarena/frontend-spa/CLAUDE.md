@@ -101,6 +101,14 @@ section fetch its own data under `Suspense`, with a skeleton fallback. The
 renders immediately, each section suspends on its own data, and Relay's store
 caches it so revisiting a section doesn't refetch.
 
+The query must run in a component *below* the section's own `Suspense`, never in
+the component that renders that boundary. A query in the boundary's owner
+suspends past it, up to whatever shell boundary sits above — so the section's
+tailored skeleton never shows, and on tab switches (router navigations are
+transitions, which won't re-show an already-visible fallback) the old tab just
+lingers with no loading state at all. Hence the `Page` wrapper + inner content
+component split: the wrapper renders `Suspense`, the inner one queries.
+
 ### Mutations
 
 Every mutation exposes three fields on its result, regardless of what it does:

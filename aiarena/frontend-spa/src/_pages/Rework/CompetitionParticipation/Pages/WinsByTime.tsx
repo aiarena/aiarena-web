@@ -12,6 +12,20 @@ import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCa
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 
 export default function WinsByTime() {
+  return (
+    <div className="px-2 pb-8">
+      <Suspense
+        fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
+      >
+        <ErrorBoundaryWrapper componentName="wins by time">
+          <WinsByTimeContent />
+        </ErrorBoundaryWrapper>
+      </Suspense>
+    </div>
+  );
+}
+
+function WinsByTimeContent() {
   const { id } = useParams<{ id: string }>();
   const data = useLazyLoadQuery<WinsByTimeQuery>(
     graphql`
@@ -47,27 +61,9 @@ export default function WinsByTime() {
   }
 
   return (
-    <div className="px-2 pb-8">
-      <Suspense
-        fallback={<DisplaySkeleton height={800} styles={SkeletonCardShadow} />}
-      >
-        <ErrorBoundaryWrapper componentName="wins by time">
-          {data.node.bot ? (
-            <div className="flex flex-col gap-4">
-              <>
-                <WinsByTimeChart data={data.node} />
-                <Summary data={data.node} />
-              </>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-400">
-                Competition participation not found
-              </p>
-            </div>
-          )}
-        </ErrorBoundaryWrapper>
-      </Suspense>
+    <div className="flex flex-col gap-4">
+      <WinsByTimeChart data={data.node} />
+      <Summary data={data.node} />
     </div>
   );
 }
