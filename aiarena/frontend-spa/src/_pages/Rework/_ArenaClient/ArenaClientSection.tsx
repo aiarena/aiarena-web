@@ -45,8 +45,7 @@ export default function ArenaClientSection() {
 
       <section className="mb-8" aria-labelledby="recent-results-heading">
         <h4 id="recent-results-heading" className="mb-4">
-          Recent Results{" "}
-          <span className="text-sm text-gray-400">(latest 100)</span>
+          Recent Results
         </h4>
         <ArenaClientResults arenaClient={data.node} />
       </section>

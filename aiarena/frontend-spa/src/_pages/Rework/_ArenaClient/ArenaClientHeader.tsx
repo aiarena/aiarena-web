@@ -100,9 +100,6 @@ export default function ArenaClientHeader(props: ArenaClientHeaderProps) {
               {client.owner.username}
             </Link>
           </p>
-          <p className={clsx("mt-1 text-sm", active ? "text-customGreen" : "text-gray-400")}>
-            {active ? "Playing matches" : "No matches in the last hour"}
-          </p>
         </div>
 
         {/* These count results the client submitted. The results list below

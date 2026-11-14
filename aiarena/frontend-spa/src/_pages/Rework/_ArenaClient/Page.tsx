@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 
 import ArenaClientSection from "./ArenaClientSection";
+import AssignedMatchSkeleton from "./AssignedMatchSkeleton";
 import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import { SkeletonBoxShadow } from "@/_components/_display/_skeletons/SkeletonBoxShadow";
-import { SkeletonCardShadow } from "@/_components/_display/_skeletons/SkeletonCardShadow";
 import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
 import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 
@@ -18,7 +18,7 @@ export default function ArenaClientPage() {
             </div>
             <div className="mb-8">
               <h4 className="mb-4">Assigned Matches</h4>
-              <DisplaySkeleton height={30} styles={SkeletonCardShadow} />
+              <AssignedMatchSkeleton />
             </div>
             <div className="mb-8">
               <h4 className="mb-4">Recent Results</h4>
