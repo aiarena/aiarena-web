@@ -1347,11 +1347,11 @@ class ArenaClientType(DjangoObjectTypeWithUID):
     def resolve_assigned_matches(root: models.ArenaClient, info, **args):
         return (
             arena_clients.get_incomplete_assigned_matches_queryset(root)
-            .select_related("map")
+            .select_related("map", "round__competition", "requested_by")
             .prefetch_related(
                 Prefetch(
                     "matchparticipation_set",
-                    queryset=models.MatchParticipation.objects.select_related("bot"),
+                    queryset=models.MatchParticipation.objects.select_related("bot", "bot__plays_race", "bot__user"),
                     to_attr="prefetched_participations",
                 )
             )
