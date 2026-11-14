@@ -123,6 +123,11 @@ export default function AccountSettingsCard(props: AccountSettingsCardProps) {
   const navigateTo = (url: string) => () => {
     window.location.href = url;
   };
+  // Patreon unlinking is still the server-rendered confirm page; open it in a
+  // new tab rather than navigating the SPA away.
+  const openInNewTab = (url: string) => () => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
   const socialIcon = (name: string) =>
     footerLinks.socialLinks.find((it) => it.name == name)?.icon;
 
@@ -159,7 +164,7 @@ export default function AccountSettingsCard(props: AccountSettingsCardProps) {
           invertIcon
           linked={Boolean(viewer.linkedPatreon)}
           onLink={navigateTo(reverseUrl("patreon_bind_index"))}
-          onUnlink={navigateTo(reverseUrl("unlink_patreon"))}
+          onUnlink={openInNewTab(reverseUrl("unlink_patreon"))}
         />
       </SettingsGroup>
 

@@ -1,4 +1,5 @@
 import pytest
+from discord_bind.models import DiscordUser
 from playwright.sync_api import Page, expect
 from rest_framework.authtoken.models import Token
 
@@ -61,3 +62,27 @@ def test_unlinking_patreon_asks_first(page: Page, bh: BrowserHelper, user):
         page.get_by_role("dialog").get_by_role("button", name="Unlink").click()
     unlink_page.value.wait_for_load_state("commit")
     assert unlink_page.value.url.startswith(bh.reverse("unlink_patreon"))
+
+
+def test_unlinking_discord_asks_first(page: Page, bh: BrowserHelper, user):
+    DiscordUser.objects.create(user=user, uid="1")
+    bh.log_in(user, page)
+    page.goto(bh.reverse("dashboard_profile"))
+    discord_row = page.locator("div", has_text="Discord").filter(has=page.get_by_role("button", name="Unlink")).last
+
+    # Cancelling leaves the link alone.
+    discord_row.get_by_role("button", name="Unlink").click()
+    dialog = page.get_by_role("dialog")
+    expect(dialog).to_contain_text("Unlink Discord?")
+    dialog.get_by_role("button", name="Cancel").click()
+    expect(dialog).to_have_count(0)
+    assert DiscordUser.objects.filter(user=user).exists()
+
+    # Confirming unlinks in place, without leaving the page.
+    discord_row.get_by_role("button", name="Unlink").click()
+    page.get_by_role("dialog").get_by_role("button", name="Unlink").click()
+    expect(page.get_by_text("Discord unlinked.")).to_be_visible()
+    relinkable = page.locator("div", has_text="Discord").filter(has=page.get_by_role("button", name="Link", exact=True))
+    expect(relinkable.last).to_contain_text("Not linked")
+    assert page.url.startswith(bh.reverse("dashboard_profile"))
+    assert not DiscordUser.objects.filter(user=user).exists()

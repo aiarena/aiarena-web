@@ -1292,7 +1292,7 @@ class ArenaClientType(DjangoObjectTypeWithUID):
         required=True,
         description="The latest 100 results of matches assigned to this client, newest first",
     )
-    
+
     # Arena clients are user accounts under the hood, so `fields` below is an
     # explicit allowlist: nothing else on the account (email, login state,
     # tokens, ...) may be exposed through this type.
