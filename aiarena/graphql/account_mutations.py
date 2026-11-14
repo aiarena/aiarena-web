@@ -1,5 +1,5 @@
 """Account mutations: sign in/out, registration + activation, password reset and change,
-and unlinking Discord.
+and unlinking Discord/Patreon.
 
 All but sign-out and password change are anonymous by definition — see the
 "Login is required by default" section of this package's CLAUDE.md.
@@ -340,7 +340,7 @@ class UpdateAccountSettings(CleanedInputMutation):
 
 
 # =============================================================================
-# Discord
+# Linked accounts (Discord, Patreon)
 # =============================================================================
 
 
@@ -354,3 +354,14 @@ class UnlinkDiscord(BaseMutation):
         # deleted binding; reload it so `linkedDiscord` reads back as false.
         user.refresh_from_db()
         return UnlinkDiscord(errors=[])
+
+
+class UnlinkPatreon(BaseMutation):
+    """The SPA's equivalent of UnlinkPatreonView: delete the caller's Patreon binding."""
+
+    def mutate(self, info: graphene.ResolveInfo) -> "UnlinkPatreon":
+        user = info.context.user
+        user.patreonaccountbind.delete()
+        # Same as UnlinkDiscord: reload so `linkedPatreon` reads back as false.
+        user.refresh_from_db()
+        return UnlinkPatreon(errors=[])

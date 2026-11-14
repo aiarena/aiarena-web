@@ -48,20 +48,22 @@ def test_unlinking_patreon_asks_first(page: Page, bh: BrowserHelper, user):
     page.goto(bh.reverse("dashboard_profile"))
     patreon_row = page.locator("div", has_text="Patreon").filter(has=page.get_by_role("button", name="Unlink")).last
 
-    # Cancelling opens nothing.
+    # Cancelling leaves the link alone.
     patreon_row.get_by_role("button", name="Unlink").click()
     dialog = page.get_by_role("dialog")
     expect(dialog).to_contain_text("Unlink Patreon?")
     dialog.get_by_role("button", name="Cancel").click()
     expect(dialog).to_have_count(0)
-    assert len(page.context.pages) == 1
+    assert PatreonAccountBind.objects.filter(user=user).exists()
 
-    # Confirming opens the unlink page.
+    # Confirming unlinks in place, without leaving the page.
     patreon_row.get_by_role("button", name="Unlink").click()
-    with page.context.expect_page() as unlink_page:
-        page.get_by_role("dialog").get_by_role("button", name="Unlink").click()
-    unlink_page.value.wait_for_load_state("commit")
-    assert unlink_page.value.url.startswith(bh.reverse("unlink_patreon"))
+    page.get_by_role("dialog").get_by_role("button", name="Unlink").click()
+    expect(page.get_by_text("Patreon unlinked.")).to_be_visible()
+    relinkable = page.locator("div", has_text="Patreon").filter(has=page.get_by_role("button", name="Link", exact=True))
+    expect(relinkable.last).to_contain_text("Not linked")
+    assert page.url.startswith(bh.reverse("dashboard_profile"))
+    assert not PatreonAccountBind.objects.filter(user=user).exists()
 
 
 def test_unlinking_discord_asks_first(page: Page, bh: BrowserHelper, user):

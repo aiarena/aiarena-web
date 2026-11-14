@@ -15,6 +15,7 @@ from aiarena.core.tests.base import GraphQLTest
 from aiarena.core.utils import camel_case
 from aiarena.graphql.account_mutations import UpdateAccountSettings
 from aiarena.graphql.common import NOT_LOGGED_IN_MESSAGE
+from aiarena.patreon.models import PatreonAccountBind
 
 
 class TestPasswordSignIn(GraphQLTest):
@@ -512,6 +513,32 @@ class TestUnlinkDiscord(GraphQLTest):
         assert not DiscordUser.objects.filter(user=user).exists()
         assert DiscordUser.objects.filter(user=other_user).exists()
         assert response["unlinkDiscord"]["viewer"]["linkedDiscord"] is False
+
+    def test_anonymous_is_denied(self, db):
+        self.mutate(expected_errors_like=[NOT_LOGGED_IN_MESSAGE])
+
+
+class TestUnlinkPatreon(GraphQLTest):
+    mutation_name = "unlinkPatreon"
+    # language=graphql
+    mutation = f"""
+        mutation {{
+            unlinkPatreon {{
+                viewer {{ linkedPatreon }}
+                {ERRORS}
+            }}
+        }}
+    """
+
+    def test_unlinks_only_the_callers_patreon(self, user, other_user):
+        PatreonAccountBind.objects.create(user=user, access_token="a", refresh_token="r")
+        PatreonAccountBind.objects.create(user=other_user, access_token="a", refresh_token="r")
+
+        response = self.mutate(login_user=user)
+
+        assert not PatreonAccountBind.objects.filter(user=user).exists()
+        assert PatreonAccountBind.objects.filter(user=other_user).exists()
+        assert response["unlinkPatreon"]["viewer"]["linkedPatreon"] is False
 
     def test_anonymous_is_denied(self, db):
         self.mutate(expected_errors_like=[NOT_LOGGED_IN_MESSAGE])
