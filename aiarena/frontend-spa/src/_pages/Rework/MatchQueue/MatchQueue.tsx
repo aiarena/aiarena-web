@@ -91,16 +91,20 @@ export default function MatchQueue() {
           filter={filter}
           title={
             <>
-              <Link to={reverseUrl("round", { pk: getIDFromBase64(round.id, "RoundsType") })}>
-                Round {round.number}
-              </Link>{" "}
-              <span className="text-gray-400">·</span>{" "}
               <Link
                 to={reverseUrl("competition", {
                   pk: getIDFromBase64(round.competition.id, "CompetitionType"),
                 })}
               >
                 {round.competition.name}
+              </Link>{" "}
+              <span className="text-gray-400">·</span>{" "}
+              <Link
+                to={reverseUrl("round", {
+                  pk: getIDFromBase64(round.id, "RoundsType"),
+                })}
+              >
+                Round {round.number}
               </Link>
             </>
           }
