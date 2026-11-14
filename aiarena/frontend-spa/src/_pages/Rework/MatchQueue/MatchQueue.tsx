@@ -8,6 +8,7 @@ import Searchbar from "@/_components/_actions/Searchbar";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import { MatchQueueQuery } from "./__generated__/MatchQueueQuery.graphql";
 import MatchQueueTable from "./MatchQueueTable";
+import MatchQueueStats from "./MatchQueueStats";
 
 export default function MatchQueue() {
   const { matchQueue } = useLazyLoadQuery<MatchQueueQuery>(
@@ -58,14 +59,14 @@ export default function MatchQueue() {
   return (
     <section aria-labelledby="match-queue-heading">
       <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
+        <div className="flex flex-wrap items-center gap-4">
           <h2 id="match-queue-heading" className="text-2xl font-semibold">
             Match Queue
           </h2>
-          <p className="text-sm text-gray-300">
-            {allMatches.length} matches waiting: {running} running,{" "}
-            {allMatches.length - running} queued
-          </p>
+          <MatchQueueStats
+            running={running}
+            queued={allMatches.length - running}
+          />
         </div>
         <Searchbar
           value={filter}

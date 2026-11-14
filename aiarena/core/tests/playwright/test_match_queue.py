@@ -25,9 +25,10 @@ def test_match_queue_page(page: Page, bh: BrowserHelper, competition, bot, other
 
     page.goto(bh.reverse("match_queue"))
 
-    expect(page.get_by_text("2 matches waiting: 1 running, 1 queued")).to_be_visible()
+    expect(page.get_by_role("group", name="Running").get_by_role("definition")).to_have_text("1")
+    expect(page.get_by_role("group", name="Queued").get_by_role("definition")).to_have_text("1")
     expect(page.get_by_role("heading", name="Requested matches")).to_be_visible()
-    expect(page.get_by_role("heading", name=f"Round {round.number} · {competition.name}")).to_be_visible()
+    expect(page.get_by_role("heading", name=f"{competition.name} · Round {round.number}")).to_be_visible()
 
     requested_row = page.get_by_role("row").filter(has_text=str(requested.id)).filter(has_text="ac1")
     expect(requested_row).to_contain_text(bot.name)
@@ -42,7 +43,7 @@ def test_match_queue_page(page: Page, bh: BrowserHelper, competition, bot, other
     expect(requested_row).to_be_visible()
     expect(in_round_row).to_have_count(0)
     # The round has nothing left that matches, so its whole section is hidden.
-    expect(page.get_by_role("heading", name=f"Round {round.number} · {competition.name}")).to_have_count(0)
+    expect(page.get_by_role("heading", name=f"{competition.name} · Round {round.number}")).to_have_count(0)
 
     page.screenshot(path=".scratch/match_queue_page.png", full_page=True)
 

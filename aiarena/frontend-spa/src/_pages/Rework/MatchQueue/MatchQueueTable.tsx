@@ -12,7 +12,7 @@ import {
 
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
-import timeAgoShort from "@/_lib/timeAgoSort";
+import TimeAgo from "@/_components/_display/TimeAgo";
 import { TableContainer } from "@/_components/_actions/TableContainer";
 import {
   MatchQueueTable_matches$data,
@@ -109,7 +109,9 @@ export default function MatchQueueTable(props: MatchQueueTableProps) {
         header: "Started",
         cell: (info) =>
           info.getValue() ? (
-            `${timeAgoShort(info.getValue())} ago`
+            <>
+              <TimeAgo since={info.getValue()} /> ago
+            </>
           ) : (
             <span className="text-gray-400">Queued</span>
           ),
