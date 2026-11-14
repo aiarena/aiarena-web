@@ -1,6 +1,8 @@
+import { useState } from "react";
 import clsx from "clsx";
 
 import SquareButton from "@/_components/_actions/SquareButton";
+import ConfirmModal from "@/_components/_actions/ConfirmModal";
 
 interface LinkedAccountRowProps {
   name: string;
@@ -19,6 +21,8 @@ export default function LinkedAccountRow({
   onLink,
   onUnlink,
 }: LinkedAccountRowProps) {
+  const [confirmingUnlink, setConfirmingUnlink] = useState(false);
+
   return (
     <div className="flex items-center justify-between gap-4 bg-black text-gray-300 px-2 py-2 rounded text-sm">
       <span className="flex items-center gap-2">
@@ -37,10 +41,26 @@ export default function LinkedAccountRow({
         </span>
       </span>
       {linked ? (
-        <SquareButton onClick={onUnlink} color="red" text="Unlink" />
+        <SquareButton
+          onClick={() => setConfirmingUnlink(true)}
+          color="red"
+          text="Unlink"
+        />
       ) : (
         <SquareButton onClick={onLink} text="Link" />
       )}
+      <ConfirmModal
+        isOpen={confirmingUnlink}
+        onClose={() => setConfirmingUnlink(false)}
+        onConfirm={onUnlink}
+        title={`Unlink ${name}?`}
+        confirmText="Unlink"
+      >
+        <p>
+          Your AI Arena account will no longer be connected to your {name}{" "}
+          account. You can link it again at any time.
+        </p>
+      </ConfirmModal>
     </div>
   );
 }

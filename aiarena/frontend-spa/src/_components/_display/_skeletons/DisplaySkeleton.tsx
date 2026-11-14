@@ -6,15 +6,20 @@ export default function DisplaySkeleton({
   count = undefined,
   styles,
   circle,
+  baseColor = "#18191E",
+  highlightColor = "#22232B",
 }: {
   height?: number;
   width?: number;
   count?: number;
   circle?: boolean;
   styles?: CSSProperties;
+  /** Override the bar colours, e.g. lighter bars on a lighter surface. */
+  baseColor?: string;
+  highlightColor?: string;
 }) {
   return (
-    <SkeletonTheme baseColor="#18191E" highlightColor="#22232B">
+    <SkeletonTheme baseColor={baseColor} highlightColor={highlightColor}>
       <p>
         <Skeleton
           height={height}

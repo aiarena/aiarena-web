@@ -70,7 +70,7 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
       </h2>
       {/* sidesection */}
       <div className="lg:flex lg:flex-row lg:gap-4">
-        <div className="relative m-0 md:m-3">
+        <div className="relative m-0 md:m-3 lg:shrink-0">
           <div className="flex justify-center">
             {viewer?.user ? (
               <AvatarWithBorder user={viewer.user} size="xl" />
@@ -83,8 +83,9 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           <div className="hidden lg:block mt-4"></div>
         </div>
 
-        {/* mainsection */}
-        <div className="w-full">
+        {/* mainsection: takes the space left beside the avatar column (min-w-0
+            lets it shrink; w-full would be the whole row and overflow it) */}
+        <div className="min-w-0 lg:flex-1">
           <div className="lg:block lg:text-left flex justify-center">
             <div className="leading-tight py-4">
               <h4
@@ -112,8 +113,10 @@ export default function UserSettingsSection(props: UserSettingsSectionProps) {
           </div>
           <SectionDivider className="pb-4" />
           {/* Masonry-style columns: cards differ a lot in height, so a grid would
-              leave gaps beside the tall Account card; columns pack them. */}
-          <div className="columns-1 md:columns-2 2xl:columns-3 gap-6 [&>*]:mb-6 [&>*]:break-inside-avoid">
+              leave gaps beside the tall Account card; columns pack them. The
+              breakpoints are late because the dashboard nav and the avatar
+              column already take ~450px of the viewport. */}
+          <div className="columns-1 xl:columns-2 2xl:columns-3 gap-6 [&>*]:mb-6 [&>*]:break-inside-avoid">
             <AccountSettingsCard viewer={viewer} />
 
             <SettingsCard title="API Token">
