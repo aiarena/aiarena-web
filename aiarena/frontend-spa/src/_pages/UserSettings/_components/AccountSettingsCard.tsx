@@ -1,4 +1,7 @@
+import { useEffect } from "react";
 import { graphql, useFragment, useMutation } from "react-relay";
+import { useSearchParams } from "react-router";
+import { useSnackbar } from "notistack";
 
 import SquareButton from "@/_components/_actions/SquareButton";
 import useSnackbarErrorHandlers from "@/_lib/useSnackbarErrorHandlers";
@@ -13,6 +16,37 @@ import { AccountSettingsCardUpdateMutation } from "./__generated__/AccountSettin
 import { AccountSettingsCardSignOutMutation } from "./__generated__/AccountSettingsCardSignOutMutation.graphql";
 import { AccountSettingsCardUnlinkDiscordMutation } from "./__generated__/AccountSettingsCardUnlinkDiscordMutation.graphql";
 import { AccountSettingsCardUnlinkPatreonMutation } from "./__generated__/AccountSettingsCardUnlinkPatreonMutation.graphql";
+
+// The Patreon OAuth callback redirects back here with
+// `?link_error=patreon` when linking failed.
+const LINK_PROVIDER_NAMES: Record<string, string> = {
+  patreon: "Patreon",
+};
+
+function useLinkErrorSnackbar() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { enqueueSnackbar } = useSnackbar();
+  const provider = searchParams.get("link_error");
+
+  useEffect(() => {
+    if (provider === null) {
+      return;
+    }
+    const name = LINK_PROVIDER_NAMES[provider] ?? "your account";
+    enqueueSnackbar(
+      `Sorry, there was an issue linking ${name}. Please try again later. If this issue persists, please contact an admin via Discord.`,
+      { variant: "error", preventDuplicate: true },
+    );
+    // Drop the param so a refresh doesn't repeat the message.
+    setSearchParams(
+      (params) => {
+        params.delete("link_error");
+        return params;
+      },
+      { replace: true },
+    );
+  }, [provider, enqueueSnackbar, setSearchParams]);
+}
 
 interface AccountSettingsCardProps {
   viewer: AccountSettingsCard_viewer$key;
@@ -30,6 +64,8 @@ export default function AccountSettingsCard(props: AccountSettingsCardProps) {
     `,
     props.viewer,
   );
+
+  useLinkErrorSnackbar();
 
   const [updateSettings, updatingSettings] =
     useMutation<AccountSettingsCardUpdateMutation>(graphql`
@@ -139,7 +175,8 @@ export default function AccountSettingsCard(props: AccountSettingsCardProps) {
   };
 
   // Linking is a server-rendered OAuth round trip: leave the SPA for it, and
-  // the server redirects back here, so the page reloads with the new status.
+  // the server redirects back here, so the page reloads with the new status
+  // (and a `link_error` param if it failed — see useLinkErrorSnackbar).
   const navigateTo = (url: string) => () => {
     window.location.href = url;
   };

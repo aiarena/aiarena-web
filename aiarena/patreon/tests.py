@@ -1,5 +1,11 @@
-from django.test import SimpleTestCase
+from unittest import mock
 
+from django.test import SimpleTestCase
+from django.urls import reverse
+
+import pytest
+
+from aiarena.patreon.models import PatreonAccountBind
 from aiarena.patreon.patreon import get_identity_paid_tier_title, get_patron_discord_uids
 
 
@@ -63,3 +69,60 @@ class PatronDiscordUidsTests(SimpleTestCase):
             ],
         }
         self.assertEqual(get_patron_discord_uids(members_page), [{"patreon_user_id": "u1", "discord_uid": "d1"}])
+
+
+class TestPatreonCallback:
+    """The OAuth callback links the account and lands back on the SPA settings page."""
+
+    @staticmethod
+    def call(client, tokens, params=None):
+        with mock.patch("aiarena.patreon.views.PatreonOAuth.get_tokens", return_value=tokens):
+            return client.get(reverse("patreon_oauth_redirect"), params or {"code": "abc"})
+
+    def test_success_links_and_redirects_to_dashboard(self, client, user):
+        client.force_login(user)
+        with mock.patch.object(PatreonAccountBind, "update_user_patreon_tier"):
+            response = self.call(client, {"access_token": "a", "refresh_token": "r"})
+
+        assert response.status_code == 302
+        assert response.url == reverse("dashboard_profile")
+        bind = PatreonAccountBind.objects.get(user=user)
+        assert (bind.access_token, bind.refresh_token) == ("a", "r")
+
+    def test_tier_update_failure_still_links(self, client, user):
+        client.force_login(user)
+        with mock.patch.object(PatreonAccountBind, "update_user_patreon_tier", side_effect=RuntimeError):
+            response = self.call(client, {"access_token": "a", "refresh_token": "r"})
+
+        assert response.url == reverse("dashboard_profile")
+        assert PatreonAccountBind.objects.filter(user=user).exists()
+
+    def test_missing_tokens_reports_error(self, client, user):
+        client.force_login(user)
+        response = self.call(client, {"error": "invalid_grant"})
+
+        assert response.url == reverse("dashboard_profile") + "?link_error=patreon"
+        assert not PatreonAccountBind.objects.filter(user=user).exists()
+
+    def test_token_exchange_crash_reports_error(self, client, user):
+        client.force_login(user)
+        with mock.patch("aiarena.patreon.views.PatreonOAuth.get_tokens", side_effect=RuntimeError):
+            response = client.get(reverse("patreon_oauth_redirect"), {"code": "abc"})
+
+        assert response.url == reverse("dashboard_profile") + "?link_error=patreon"
+        assert not PatreonAccountBind.objects.filter(user=user).exists()
+
+    def test_cancelled_consent_is_not_an_error(self, client, user):
+        client.force_login(user)
+        response = self.call(client, {}, params={"error": "access_denied"})
+
+        assert response.url == reverse("dashboard_profile")
+        assert not PatreonAccountBind.objects.filter(user=user).exists()
+
+    @pytest.mark.django_db
+    def test_anonymous_is_sent_to_login(self, client):
+        response = self.call(client, {"access_token": "a", "refresh_token": "r"})
+
+        assert response.status_code == 302
+        assert response.url.startswith(reverse("login"))
+        assert not PatreonAccountBind.objects.exists()
