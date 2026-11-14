@@ -7,7 +7,7 @@ import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import { getMatchResultParsed } from "@/_lib/parseMatchResult";
-import timeAgoShort from "@/_lib/timeAgoSort";
+import TimeAgo from "@/_components/_display/TimeAgo";
 import { formatGameTime } from "@/_lib/formatGameTime";
 import ResultBotCell from "./ResultBotCell";
 import {
@@ -133,7 +133,13 @@ export function useResultColumns() {
         enableSorting: false,
         cell: (info) => {
           const rawTime = info.getValue();
-          return rawTime ? `${timeAgoShort(rawTime)} ago` : "In Queue";
+          return rawTime ? (
+            <>
+              <TimeAgo since={rawTime} /> ago
+            </>
+          ) : (
+            "In Queue"
+          );
         },
         meta: { priority: 1 },
       }),

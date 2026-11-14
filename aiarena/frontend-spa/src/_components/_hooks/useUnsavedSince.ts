@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import useNow from "./useNow";
+
 export default function useUnsavedSince(isUnsaved: boolean) {
   const [baseline, setBaseline] = useState<number | null>(null);
-  const [now, setNow] = useState<number>(() => Date.now());
   const prevRef = useRef<boolean>(isUnsaved);
 
   useEffect(() => {
@@ -12,11 +13,7 @@ export default function useUnsavedSince(isUnsaved: boolean) {
     prevRef.current = isUnsaved;
   }, [isUnsaved]);
 
-  useEffect(() => {
-    if (!isUnsaved) return;
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, [isUnsaved]);
+  const now = useNow(isUnsaved);
 
   const seconds = useMemo(() => {
     if (!isUnsaved || !baseline) return 0;

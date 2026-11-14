@@ -1,11 +1,11 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 import { graphql, useFragment } from "react-relay";
 import { Link } from "react-router";
 import clsx from "clsx";
 
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
-import timeAgoShort from "@/_lib/timeAgoSort";
+import TimeAgo from "@/_components/_display/TimeAgo";
 import NoItemsInListMessage from "@/_components/_display/NoItemsInListMessage";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import RenderCodeLanguage from "@/_components/_display/RenderCodeLanguage";
@@ -20,17 +20,6 @@ interface AssignedMatchesProps {
 
 type AssignedMatch = AssignedMatches_arenaClient$data["assignedMatches"][number];
 type Bot = AssignedMatch["participant1"];
-
-/** Time since `since` (e.g. "4m 12s"), re-rendering every second. */
-function useElapsed(since: string | null | undefined) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!since) return;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, [since]);
-  return since ? timeAgoShort(since, now) : null;
-}
 
 /** A "Label value" row under the bot name, e.g. "Race [icon] Zerg". */
 function BotDetail({ label, children }: { label: string; children: ReactNode }) {
@@ -90,7 +79,6 @@ function BotSide({ bot, align }: { bot: Bot; align: "left" | "right" }) {
 }
 
 function AssignedMatchCard({ match }: { match: AssignedMatch }) {
-  const elapsed = useElapsed(match.started);
   const matchId = getIDFromBase64(match.id, "MatchType");
 
   return (
@@ -134,7 +122,7 @@ function AssignedMatchCard({ match }: { match: AssignedMatch }) {
         {match.started ? (
           <span className="flex items-center gap-2 rounded-full border border-customGreen/60 bg-customGreen/10 px-3 py-0.5 text-sm text-customGreen">
             <span className="h-2 w-2 rounded-full bg-customGreen" aria-hidden="true" />
-            In progress · {elapsed}
+            In progress · <TimeAgo since={match.started} />
           </span>
         ) : (
           <span className="rounded-full border border-neutral-600 bg-neutral-800 px-3 py-0.5 text-sm text-gray-400">
