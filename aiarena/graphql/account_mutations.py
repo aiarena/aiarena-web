@@ -1,4 +1,5 @@
-"""Account mutations: sign in/out, registration + activation, password reset and change.
+"""Account mutations: sign in/out, registration + activation, password reset and change,
+and unlinking Discord.
 
 All but sign-out and password change are anonymous by definition — see the
 "Login is required by default" section of this package's CLAUDE.md.
@@ -336,3 +337,20 @@ class UpdateAccountSettings(CleanedInputMutation):
         if update_fields:
             user.save(update_fields=update_fields)
         return cls(errors=[], viewer=user)
+
+
+# =============================================================================
+# Discord
+# =============================================================================
+
+
+class UnlinkDiscord(BaseMutation):
+    """The SPA's equivalent of UnlinkDiscordView: delete the caller's Discord binding."""
+
+    def mutate(self, info: graphene.ResolveInfo) -> "UnlinkDiscord":
+        user = info.context.user
+        user.discord_user.delete()
+        # `viewer` resolves to this same user instance, which still caches the
+        # deleted binding; reload it so `linkedDiscord` reads back as false.
+        user.refresh_from_db()
+        return UnlinkDiscord(errors=[])

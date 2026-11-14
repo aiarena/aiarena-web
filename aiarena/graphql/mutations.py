@@ -40,6 +40,7 @@ from aiarena.graphql.account_mutations import (
     ResendActivationEmail,
     ResetPassword,
     SignOut,
+    UnlinkDiscord,
     UpdateAccountSettings,
 )
 from aiarena.graphql.common import (
@@ -756,6 +757,7 @@ class Mutation(graphene.ObjectType):
     reset_password = ResetPassword.Field()
     change_password = ChangePassword.Field()
     update_account_settings = UpdateAccountSettings.Field()
+    unlink_discord = UnlinkDiscord.Field()
     regenerate_api_token = RegenerateApiToken.Field()
     check_competition_trophies = CheckCompetitionTrophies.Field()
     award_competition_trophies = AwardCompetitionTrophies.Field()

@@ -11,6 +11,7 @@ import SettingsToggleRow from "./SettingsToggleRow";
 import { AccountSettingsCard_viewer$key } from "./__generated__/AccountSettingsCard_viewer.graphql";
 import { AccountSettingsCardUpdateMutation } from "./__generated__/AccountSettingsCardUpdateMutation.graphql";
 import { AccountSettingsCardSignOutMutation } from "./__generated__/AccountSettingsCardSignOutMutation.graphql";
+import { AccountSettingsCardUnlinkDiscordMutation } from "./__generated__/AccountSettingsCardUnlinkDiscordMutation.graphql";
 
 interface AccountSettingsCardProps {
   viewer: AccountSettingsCard_viewer$key;
@@ -58,6 +59,26 @@ export default function AccountSettingsCard(props: AccountSettingsCardProps) {
       }
     `);
 
+  const [unlinkDiscord] =
+    useMutation<AccountSettingsCardUnlinkDiscordMutation>(graphql`
+      mutation AccountSettingsCardUnlinkDiscordMutation {
+        unlinkDiscord {
+          viewer {
+            ...AccountSettingsCard_viewer
+          }
+          errors {
+            messages
+            field
+          }
+        }
+      }
+    `);
+
+  const unlinkDiscordHandlers = useSnackbarErrorHandlers(
+    "unlinkDiscord",
+    "Discord unlinked.",
+  );
+
   const updateHandlers = useSnackbarErrorHandlers(
     "updateAccountSettings",
     "Email preference saved.",
@@ -97,10 +118,10 @@ export default function AccountSettingsCard(props: AccountSettingsCardProps) {
     });
   };
 
-  // Linking/unlinking goes through server-rendered OAuth flows, so they open
-  // in a new tab rather than navigating the SPA away.
-  const openInNewTab = (url: string) => () => {
-    window.open(url, "_blank", "noopener,noreferrer");
+  // Linking is a server-rendered OAuth round trip: leave the SPA for it, and
+  // the server redirects back here, so the page reloads with the new status.
+  const navigateTo = (url: string) => () => {
+    window.location.href = url;
   };
   const socialIcon = (name: string) =>
     footerLinks.socialLinks.find((it) => it.name == name)?.icon;
@@ -121,16 +142,24 @@ export default function AccountSettingsCard(props: AccountSettingsCardProps) {
           name="Discord"
           iconPath={socialIcon("Discord")}
           linked={Boolean(viewer.linkedDiscord)}
-          onLink={openInNewTab(reverseUrl("discord_bind_index"))}
-          onUnlink={openInNewTab(reverseUrl("unlink_discord"))}
+          onLink={navigateTo(reverseUrl("discord_bind_index"))}
+          onUnlink={() =>
+            unlinkDiscord({
+              variables: {},
+              onCompleted: (...args) => {
+                unlinkDiscordHandlers.onCompleted(...args);
+              },
+              onError: unlinkDiscordHandlers.onError,
+            })
+          }
         />
         <LinkedAccountRow
           name="Patreon"
           iconPath={socialIcon("Patreon")}
           invertIcon
           linked={Boolean(viewer.linkedPatreon)}
-          onLink={openInNewTab(reverseUrl("patreon_bind_index"))}
-          onUnlink={openInNewTab(reverseUrl("unlink_patreon"))}
+          onLink={navigateTo(reverseUrl("patreon_bind_index"))}
+          onUnlink={navigateTo(reverseUrl("unlink_patreon"))}
         />
       </SettingsGroup>
 

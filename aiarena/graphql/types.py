@@ -1275,10 +1275,6 @@ def with_result_list_relations(results):
 class ArenaClientType(DjangoObjectTypeWithUID):
     """A machine that plays ladder matches for the arena."""
 
-    # Arena clients are user accounts under the hood, so `fields` below is an
-    # explicit allowlist: nothing else on the account (email, login state,
-    # tokens, ...) may be exposed through this type.
-
     matches_1h = graphene.Int(required=True, description="Results this client submitted in the last hour")
     matches_24h = graphene.Int(required=True, description="Results this client submitted in the last 24 hours")
     matches_total = graphene.Int(required=True, description="Results this client has ever submitted")
@@ -1296,6 +1292,10 @@ class ArenaClientType(DjangoObjectTypeWithUID):
         required=True,
         description="The latest 100 results of matches assigned to this client, newest first",
     )
+    
+    # Arena clients are user accounts under the hood, so `fields` below is an
+    # explicit allowlist: nothing else on the account (email, login state,
+    # tokens, ...) may be exposed through this type.
 
     class Meta:
         model = models.ArenaClient

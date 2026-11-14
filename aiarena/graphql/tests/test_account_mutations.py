@@ -7,6 +7,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 import pytest
+from discord_bind.models import DiscordUser
 from registration.models import RegistrationProfile
 
 from aiarena.core.models import WebsiteUser
@@ -488,3 +489,29 @@ class TestUpdateAccountSettings(GraphQLTest):
         )
         user.refresh_from_db()
         assert user.receive_email_comms
+
+
+class TestUnlinkDiscord(GraphQLTest):
+    mutation_name = "unlinkDiscord"
+    # language=graphql
+    mutation = f"""
+        mutation {{
+            unlinkDiscord {{
+                viewer {{ linkedDiscord }}
+                {ERRORS}
+            }}
+        }}
+    """
+
+    def test_unlinks_only_the_callers_discord(self, user, other_user):
+        DiscordUser.objects.create(user=user, uid="1")
+        DiscordUser.objects.create(user=other_user, uid="2")
+
+        response = self.mutate(login_user=user)
+
+        assert not DiscordUser.objects.filter(user=user).exists()
+        assert DiscordUser.objects.filter(user=other_user).exists()
+        assert response["unlinkDiscord"]["viewer"]["linkedDiscord"] is False
+
+    def test_anonymous_is_denied(self, db):
+        self.mutate(expected_errors_like=[NOT_LOGGED_IN_MESSAGE])
