@@ -9,6 +9,7 @@ from statistics import quantiles
 from django.conf import settings
 from django.core import management
 from django.core.cache import caches
+from django.core.mail import get_connection
 
 import boto3
 import sentry_sdk
@@ -431,6 +432,20 @@ def generate_stats_graphsonly():
 @app.task(ignore_result=True)
 def refresh_patreon_tiers():
     management.call_command("refreshpatreontiers")
+
+
+@app.task(
+    ignore_result=True,
+    # SMTP failures are usually transient (timeouts, the server refusing a
+    # connection); retry with backoff rather than dropping the email.
+    autoretry_for=(OSError,),
+    retry_backoff=30,
+    max_retries=5,
+)
+def send_email(message):
+    """Send one queued email (see aiarena.core.email.CeleryEmailBackend)."""
+    with get_connection(settings.CELERY_EMAIL_BACKEND) as connection:
+        connection.send_messages([message])
 
 
 @app.task(ignore_result=True)
