@@ -18,7 +18,7 @@ export function FormAlert({ messages }: { messages: readonly string[] }) {
 export function EmailDelayNote() {
   return (
     <p className="mt-2 text-gray-300">
-      We're sending the email now. It can take a few minutes to arrive -
+      We're sending the email now. It can take up to 5 minutes to arrive -
       remember to also check your spam folder.
     </p>
   );

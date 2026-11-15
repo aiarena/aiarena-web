@@ -46,4 +46,4 @@ def test_register_lands_on_check_your_email(page: Page, bh: BrowserHelper, db):
     page.wait_for_url(bh.reverse("registration_complete"))
     status = page.get_by_role("status")
     expect(status).to_contain_text("newbie@example.com")
-    expect(status).to_contain_text("can take a few minutes")
+    expect(status).to_contain_text("can take up to 5 minutes")
