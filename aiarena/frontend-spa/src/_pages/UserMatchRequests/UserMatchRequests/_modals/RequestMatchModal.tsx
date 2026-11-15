@@ -78,36 +78,7 @@ export default function RequestMatchModal({ isOpen, onClose }: UploadBotModal) {
               connections: $connections
               edgeTypeName: "MatchTypeEdge"
             ) {
-            id
-            participant1 {
-              id
-              name
-            }
-            participant2 {
-              id
-              name
-            }
-            result {
-              type
-              winner {
-                name
-              }
-            }
-            map {
-              name
-            }
-            tags {
-              edges {
-                node {
-                  id
-                  tag
-                  user {
-                    id
-                  }
-                }
-              }
-            }
-            started
+            ...MatchRequestsTable_matches
           }
           errors {
             field

@@ -1,4 +1,4 @@
-import { CoreResultTypeChoices } from "@/_pages/UserMatchRequests/__generated__/UserMatchRequestsTable_viewer.graphql";
+import { CoreResultTypeChoices } from "@/_components/_display/__generated__/MatchRequestsTable_matches.graphql";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 export function getMatchResultParsed(
