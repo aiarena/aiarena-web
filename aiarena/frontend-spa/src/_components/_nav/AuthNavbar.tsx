@@ -6,9 +6,13 @@ import { reverseUrl } from "@/_lib/reverseUrl";
 
 interface AuthNavbarProps {
   mobile?: boolean;
+  onClick?: () => void;
 }
 
-export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
+export default function AuthNavbar({
+  mobile = false,
+  onClick,
+}: AuthNavbarProps) {
   const data = useLazyLoadQuery<AuthNavbarQuery>(
     graphql`
       query AuthNavbarQuery {
@@ -35,6 +39,7 @@ export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
   return data.viewer?.user ? (
     <NavLink
       to={reverseUrl("dashboard_root")}
+      onClick={onClick}
       className={({ isActive }) =>
         clsx(baseClasses, isActive ? activeBorder : inactiveBorder)
       }
@@ -44,6 +49,7 @@ export default function AuthNavbar({ mobile = false }: AuthNavbarProps) {
   ) : (
     <a
       href={reverseUrl("login")}
+      onClick={onClick}
       className={clsx(
         baseClasses,
         window.location.pathname === reverseUrl("login")

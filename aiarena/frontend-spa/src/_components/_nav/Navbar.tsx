@@ -205,7 +205,7 @@ function Navbar() {
               >
                 <li className="text-l p-2 text-center w-full">
                   <ErrorBoundaryWrapper>
-                    <AuthNavbar mobile />
+                    <AuthNavbar mobile onClick={handleMobileNavItemClick} />
                   </ErrorBoundaryWrapper>
                 </li>
               </Suspense>
