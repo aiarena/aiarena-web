@@ -117,3 +117,10 @@ class TestBotRequestedMatches(GraphQLTest):
         match = self._match(bot, other_bot, map, requested_by=None)
 
         assert self._requested(bot) == [{"databaseId": match.id, "requestedBy": None}]
+
+    def test_excludes_matches_older_than_a_year(self, bot, other_bot, user, map):
+        recent = self._match(bot, other_bot, map, requested_by=user)
+        old = self._match(bot, other_bot, map, requested_by=user)
+        Match.objects.filter(id=old.id).update(created=timezone.now() - timedelta(days=400))
+
+        assert self._requested(bot) == [{"databaseId": recent.id, "requestedBy": {"username": user.username}}]

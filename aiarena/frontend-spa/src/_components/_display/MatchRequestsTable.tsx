@@ -6,7 +6,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { ReactNode, useEffect, useMemo, useState, useTransition } from "react";
+import { ReactNode, useMemo, useState, useTransition } from "react";
 import { Link } from "react-router";
 import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
 
@@ -362,11 +362,17 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
   const [showEveryonesTags, setShowEveryonesTags] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
+  const refetchWith = (
+    nextSorting: SortingState,
+    nextShowEveryonesTags: boolean,
+  ) => {
     startTransition(() => {
-      refetch({ orderBy: parseSort(SORTING_MAP, sorting), showEveryonesTags });
+      refetch({
+        orderBy: parseSort(SORTING_MAP, nextSorting),
+        showEveryonesTags: nextShowEveryonesTags,
+      });
     });
-  }, [sorting, showEveryonesTags, refetch]);
+  };
 
   const table = useReactTable({
     data: matches as MatchRow[],
@@ -382,7 +388,11 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
       sorting,
       columnVisibility: columnVisibility ?? {},
     },
-    onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      const next = typeof updater === "function" ? updater(sorting) : updater;
+      setSorting(next);
+      refetchWith(next, showEveryonesTags);
+    },
     onColumnVisibilityChange: (updater) => {
       const next =
         typeof updater === "function"
@@ -412,7 +422,11 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
                 </span>
                 <SimpleToggle
                   enabled={showEveryonesTags}
-                  onChange={() => setShowEveryonesTags((prev) => !prev)}
+                  onChange={() => {
+                    const next = !showEveryonesTags;
+                    setShowEveryonesTags(next);
+                    refetchWith(sorting, next);
+                  }}
                 />
               </div>
             </div>
