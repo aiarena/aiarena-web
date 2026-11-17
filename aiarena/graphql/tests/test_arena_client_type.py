@@ -85,7 +85,6 @@ class TestArenaClients(GraphQLTest):
             "owner",
             "matches1h",
             "matches24h",
-            "matches1y",
             "assignedMatches",
             "recentResults",
         }
@@ -98,7 +97,7 @@ class TestArenaClientDetail(GraphQLTest):
             node(id: $id) {
                 ... on ArenaClientType {
                     username
-                    matches1y
+                    matches1h
                     assignedMatches {
                         participant1 { name }
                         participant2 { name }
@@ -134,7 +133,7 @@ class TestArenaClientDetail(GraphQLTest):
         client = self._client(arenaclient_user)
 
         assert client["username"] == "ac1"
-        assert client["matches1y"] == 2
+        assert client["matches1h"] == 2
         # Only the unfinished match is "assigned"; finished ones are results.
         assert client["assignedMatches"] == [
             {"participant1": {"name": bot.name}, "participant2": {"name": other_bot.name}, "map": {"name": map.name}}
@@ -168,7 +167,7 @@ class TestArenaClientDetail(GraphQLTest):
         client = self._client(arenaclient_user)
 
         # Submitted: the played match and `assigned_elsewhere`.
-        assert client["matches1y"] == 2
+        assert client["matches1h"] == 2
         # Assigned, newest first: `timed_out` and the played match.
         listed = client["recentResults"]
         assert [r["type"] for r in listed] == ["MATCHCANCELLED", "ERROR"]
@@ -181,13 +180,13 @@ class TestArenaClientDetail(GraphQLTest):
 
         client = self._client(arenaclient_user)
 
-        assert client["matches1y"] == 0
+        assert client["matches1h"] == 0
         assert client["assignedMatches"] == []
         assert client["recentResults"] == []
 
     def test_history_older_than_a_year_is_excluded(self, arenaclient_user, queued_match, bot, other_bot, map):
-        """Count, assigned matches and results only reach back one year, so
-        none of them scan a busy client's whole history."""
+        """Assigned matches and results only reach back one year, so neither
+        scans a busy client's whole history."""
         queued_match.assigned_to = arenaclient_user
         queued_match.save()
         old = self._finished_match(arenaclient_user, bot, other_bot, map, "Error")
@@ -198,7 +197,6 @@ class TestArenaClientDetail(GraphQLTest):
 
         client = self._client(arenaclient_user)
 
-        assert client["matches1y"] == 1
         assert client["assignedMatches"] == []
         assert [r["type"] for r in client["recentResults"]] == ["MATCHCANCELLED"]
 

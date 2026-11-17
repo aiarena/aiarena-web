@@ -47,8 +47,11 @@ interface MatchRequestsTableProps {
   /** localStorage key for the column visibility; one per page. */
   columnVisibilityKey: string;
   emptyMessage: ReactNode;
-  /** On a bot's page the requester isn't implied by the page, so show it. */
-  showRequestedBy?: boolean;
+  /** On a bot's page, which lists competition and requested games alike, show
+   *  where each match came from: its competition, or who requested it. */
+  showOrigin?: boolean;
+  /** Shown while the next page loads, e.g. "Loading more matches...". */
+  loadingMoreMessage: string;
 }
 
 type MatchRow = MatchRequestsTable_matches$data[number];
@@ -118,6 +121,12 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
           id
           username
         }
+        round {
+          competition {
+            id
+            name
+          }
+        }
         participant1 {
           id
           name
@@ -165,7 +174,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
     props.matches,
   );
 
-  const { hasNext, loadNext, refetch, showRequestedBy = false } = props;
+  const { hasNext, loadNext, refetch, showOrigin = false } = props;
 
   const [columnVisibility, setColumnVisibility] =
     useStateWithLocalStorage<VisibilityState>(props.columnVisibilityKey, {});
@@ -228,31 +237,52 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
         meta: { priority: 1 },
       }),
 
-      ...(showRequestedBy
+      ...(showOrigin
         ? [
-            columnHelper.accessor((row) => row.requestedBy?.username ?? "", {
-              id: "requestedBy",
-              header: "Requested by",
-              enableSorting: false,
-              cell: (info) => {
-                const requester = info.row.original.requestedBy;
-                if (!requester) {
-                  return <span className="text-gray-400">Unknown</span>;
-                }
-                return (
-                  <Link
-                    className="font-semibold text-gray-200 truncate"
-                    to={reverseUrl("author", {
-                      pk: getIDFromBase64(requester.id, "UserType"),
-                    })}
-                    title={requester.username}
-                  >
-                    {requester.username}
-                  </Link>
-                );
+            columnHelper.accessor(
+              (row) =>
+                row.round?.competition?.name ?? row.requestedBy?.username ?? "",
+              {
+                id: "origin",
+                header: "Origin",
+                enableSorting: false,
+                cell: (info) => {
+                  const competition = info.row.original.round?.competition;
+                  if (competition) {
+                    return (
+                      <Link
+                        className="font-semibold text-gray-200 truncate"
+                        to={reverseUrl("competition", {
+                          pk: getIDFromBase64(
+                            competition.id,
+                            "CompetitionType",
+                          ),
+                        })}
+                        title={competition.name}
+                      >
+                        {competition.name}
+                      </Link>
+                    );
+                  }
+                  const requester = info.row.original.requestedBy;
+                  if (!requester) {
+                    return <span className="text-gray-400">Unknown</span>;
+                  }
+                  return (
+                    <Link
+                      className="font-semibold text-gray-200 truncate"
+                      to={reverseUrl("author", {
+                        pk: getIDFromBase64(requester.id, "UserType"),
+                      })}
+                      title={requester.username}
+                    >
+                      {requester.username}
+                    </Link>
+                  );
+                },
+                meta: { priority: 1 },
               },
-              meta: { priority: 1 },
-            }),
+            ),
           ]
         : []),
 
@@ -353,7 +383,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
         meta: { priority: 1 },
       }),
     ],
-    [hideSpoilers, showRequestedBy],
+    [hideSpoilers, showOrigin],
   );
 
   const { loadMoreRef } = useInfiniteScroll(() => loadNext(50), hasNext);
@@ -438,7 +468,7 @@ export default function MatchRequestsTable(props: MatchRequestsTableProps) {
 
       {hasNext ? (
         <div className="flex justify-center mt-6" ref={loadMoreRef}>
-          <LoadingMoreItems loadingMessage="Loading more match requests..." />
+          <LoadingMoreItems loadingMessage={props.loadingMoreMessage} />
         </div>
       ) : hasItems ? (
         <div className="mt-8">

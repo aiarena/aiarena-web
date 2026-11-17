@@ -64,6 +64,7 @@ export default function UserMatchRequestsTable(
       refetch={refetchMatches}
       columnVisibilityKey="UserMatchRequests_UserMatchRequestsTable_ColumnVisibility"
       emptyMessage={<p>Request your first match, and it will show up here.</p>}
+      loadingMoreMessage="Loading more match requests..."
     />
   );
 }
