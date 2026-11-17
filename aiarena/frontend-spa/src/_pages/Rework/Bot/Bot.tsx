@@ -1,23 +1,26 @@
 import { graphql, useLazyLoadQuery } from "react-relay";
 import InformationSection from "./InformationSection";
 import { BotQuery } from "./__generated__/BotQuery.graphql";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 
 import { Suspense, useState } from "react";
-import { getBase64FromID } from "@/_lib/relayHelpers";
+import {
+  getBase64FromID,
+  getIDFromBase64,
+  getNodes,
+} from "@/_lib/relayHelpers";
 import BotCompetitionsTable from "./BotCompetitionsTable";
 import FetchError from "@/_components/_display/FetchError";
 
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
+import BotResults from "./BotResults";
+import { reverseUrl } from "@/_lib/reverseUrl";
 import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
-import ErrorBoundaryWrapper from "@/_lib/ErrorBoundary";
-import BotMatchRequests from "./BotMatchRequests";
 
 export default function Bot() {
   const { botId } = useParams<{ botId: string }>();
   const [onlyActive, setOnlyActive] = useState(false);
-
-  const id = getBase64FromID(botId!, "BotType") || "";
+  const [loadResults, setLoadResults] = useState(false);
 
   const data = useLazyLoadQuery<BotQuery>(
     graphql`
@@ -26,60 +29,107 @@ export default function Bot() {
           ... on BotType {
             ...InformationSection_bot
             ...BotCompetitionsTable_bot
+            botZipUpdated
+            activeCompetitions: competitionParticipations(active: true) {
+              edges {
+                node {
+                  id
+                }
+              }
+            }
           }
         }
       }
     `,
-    { id },
+    { id: getBase64FromID(botId!, "BotType") || "" },
   );
 
   if (!data.node) {
     return <FetchError type="bot" />;
   }
 
+  const firstActiveCompetition = getNodes(data.node.activeCompetitions)[0];
+
+  const statsResultsLink = firstActiveCompetition
+    ? `${reverseUrl("competition_stats_root", {
+        pk: getIDFromBase64(
+          firstActiveCompetition.id,
+          "CompetitionParticipationType",
+        ),
+      })}results`
+    : undefined;
+
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h4 className="mb-4">Bot information</h4>
-        <InformationSection bot={data.node} />
-      </div>
+    <>
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h4 className="mb-4">Bot information</h4>
+          <InformationSection bot={data.node} />
+        </div>
 
-      <div>
-        <h4 className="mb-4">Competition Participations</h4>
-        <BotCompetitionsTable
-          bot={data.node}
-          onlyActive={onlyActive}
-          appendHeader={
-            <div
-              className="flex gap-4 items-center"
-              role="group"
-              aria-label="Bot filtering controls"
-            >
-              <div className="flex items-center gap-2">
-                <label
-                  htmlFor="downloadable-toggle"
-                  className="text-sm font-medium text-gray-300"
-                >
-                  Only active
-                </label>
-                <SimpleToggle
-                  enabled={onlyActive}
-                  onChange={() => setOnlyActive(!onlyActive)}
-                />
+        <div>
+          <h4 className="mb-4">Competition Participations</h4>
+          <BotCompetitionsTable
+            bot={data.node}
+            onlyActive={onlyActive}
+            appendHeader={
+              <div
+                className="flex gap-4 items-center"
+                role="group"
+                aria-label="Bot filtering controls"
+              >
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="downloadable-toggle"
+                    className="text-sm font-medium text-gray-300"
+                  >
+                    Only active
+                  </label>
+                  <SimpleToggle
+                    enabled={onlyActive}
+                    onChange={() => setOnlyActive(!onlyActive)}
+                  />
+                </div>
               </div>
-            </div>
-          }
-        />
+            }
+          />
+        </div>
       </div>
+      <div className="mb-4 mt-8 flex gap-4 break-words items-baseline align-baseline">
+        <h4>Results</h4>
 
-      <div className="mt-8">
-        <h4 className="mb-4">Match Requests</h4>
-        <Suspense fallback={<DisplaySkeletonTable columns={10} rows={5} />}>
-          <ErrorBoundaryWrapper>
-            <BotMatchRequests botId={id} />
-          </ErrorBoundaryWrapper>
-        </Suspense>
+        <p className="text-sm text-gray-300">
+          * Match Result from competitions are also available at:{" "}
+          {statsResultsLink ? (
+            <Link
+              to={statsResultsLink}
+              className="font-medium text-customGreen hover:text-white"
+            >
+              Stats Page
+            </Link>
+          ) : (
+            <span>Stats Page</span>
+          )}{" "}
+          — it support sorting on all fields.
+        </p>
       </div>
-    </div>
+      {!loadResults ? (
+        <div className="flex flex-col items-start gap-3">
+          <button
+            type="button"
+            onClick={() => setLoadResults(true)}
+            className="rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 font-semibold text-gray-200 transition hover:border-customGreen"
+          >
+            Load Bot Results
+          </button>
+        </div>
+      ) : (
+        <Suspense
+          fallback={<DisplaySkeletonTable columns={12} rows={15} />}
+        >
+          <BotResults botZipUpdated={data.node.botZipUpdated} />
+        </Suspense>
+      )}
+    </>
   );
 }

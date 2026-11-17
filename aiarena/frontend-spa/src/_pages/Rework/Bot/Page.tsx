@@ -27,10 +27,10 @@ export default function BotPage() {
                 <h4 className="mb-4">Competition Participations</h4>
                 <DisplaySkeletonTable columns={7} rows={4} />
               </div>
-              <div>
-                <h4 className="mb-4">Match Requests</h4>
-                <DisplaySkeletonTable columns={10} rows={5} />
-              </div>
+            </div>
+            <div>
+              <h4 className="mb-4 mt-8">Results</h4>
+              <DisplaySkeletonTable columns={12} rows={15} />
             </div>
           </>
         }

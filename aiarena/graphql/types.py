@@ -101,10 +101,6 @@ class BotType(DjangoObjectTypeWithUID):
     competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
     wiki_article = graphene.String()
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
-    requested_matches = DjangoFilterConnectionField(
-        "aiarena.graphql.MatchType",
-        description="Matches this bot played outside any competition round, newest first",
-    )
     trophies = DjangoConnectionField("aiarena.graphql.TrophyType")
     bot_zip_url = graphene.String(description="Presigned URL to download the bot zip file")
     bot_data_url = graphene.String(description="Presigned URL to download the bot data file")
@@ -152,15 +148,6 @@ class BotType(DjangoObjectTypeWithUID):
             "match__round__competition",
             "match__result",
         )
-
-    @staticmethod
-    def resolve_requested_matches(root: models.Bot, info, **args):
-        # "Outside a round", not "has a requester": requested_by is SET_NULL, so a
-        # deleted requester would otherwise make their matches vanish from here.
-        return models.Match.objects.filter(
-            id__in=root.matchparticipation_set.values("match_id"),
-            round__isnull=True,
-        ).order_by("-started", "-id")
 
     @staticmethod
     def resolve_bot_zip_url(root: models.Bot, info, **args):
