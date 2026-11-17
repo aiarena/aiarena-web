@@ -30,8 +30,6 @@ type ArenaClient = NonNullable<
 const columnHelper = createColumnHelper<ArenaClient>();
 
 export default function ArenaClientsTable(props: ArenaClientsTableProps) {
-  // Only active clients are listed, and there are only ever a handful, so one
-  // page holds them all; sorting happens client-side.
   const data = useFragment(
     graphql`
       fragment ArenaClientsTable_node on Query {

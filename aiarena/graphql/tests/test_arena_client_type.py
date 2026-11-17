@@ -85,7 +85,6 @@ class TestArenaClients(GraphQLTest):
             "owner",
             "matches1h",
             "matches24h",
-            "matchesTotal",
             "assignedMatches",
             "recentResults",
         }
@@ -98,7 +97,7 @@ class TestArenaClientDetail(GraphQLTest):
             node(id: $id) {
                 ... on ArenaClientType {
                     username
-                    matchesTotal
+                    matches24h
                     assignedMatches {
                         participant1 { name }
                         participant2 { name }
@@ -134,7 +133,7 @@ class TestArenaClientDetail(GraphQLTest):
         client = self._client(arenaclient_user)
 
         assert client["username"] == "ac1"
-        assert client["matchesTotal"] == 2
+        assert client["matches24h"] == 2
         # Only the unfinished match is "assigned"; finished ones are results.
         assert client["assignedMatches"] == [
             {"participant1": {"name": bot.name}, "participant2": {"name": other_bot.name}, "map": {"name": map.name}}
@@ -168,7 +167,7 @@ class TestArenaClientDetail(GraphQLTest):
         client = self._client(arenaclient_user)
 
         # Submitted: the played match and `assigned_elsewhere`.
-        assert client["matchesTotal"] == 2
+        assert client["matches24h"] == 2
         # Assigned, newest first: `timed_out` and the played match.
         listed = client["recentResults"]
         assert [r["type"] for r in listed] == ["MATCHCANCELLED", "ERROR"]
@@ -181,7 +180,7 @@ class TestArenaClientDetail(GraphQLTest):
 
         client = self._client(arenaclient_user)
 
-        assert client["matchesTotal"] == 0
+        assert client["matches24h"] == 0
         assert client["assignedMatches"] == []
         assert client["recentResults"] == []
 

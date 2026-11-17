@@ -1277,7 +1277,6 @@ class ArenaClientType(DjangoObjectTypeWithUID):
 
     matches_1h = graphene.Int(required=True, description="Results this client submitted in the last hour")
     matches_24h = graphene.Int(required=True, description="Results this client submitted in the last 24 hours")
-    matches_total = graphene.Int(required=True, description="Results this client has ever submitted")
     assigned_matches = graphene.List(
         graphene.NonNull("aiarena.graphql.MatchType"),
         required=True,
@@ -1333,15 +1332,11 @@ class ArenaClientType(DjangoObjectTypeWithUID):
         )
         return Coalesce(Subquery(recent, output_field=IntegerField()), 0)
 
-    # The counts (matches_1h / matches_24h / matches_total) are what the client
+    # The counts (matches_1h / matches_24h) are what the client
     # *submitted*; the recent results are matches *assigned* to it. They differ
     # by the client's timeouts: matches it was given but never reported back,
     # which the system cancels with no submitter. Those show in the list (it's
     # the client's match history) but aren't counted as matches it submitted.
-
-    @staticmethod
-    def resolve_matches_total(root: models.ArenaClient, info, **args):
-        return models.Result.objects.filter(submitted_by=root).count()
 
     @staticmethod
     def resolve_assigned_matches(root: models.ArenaClient, info, **args):
