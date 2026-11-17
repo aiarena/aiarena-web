@@ -4,6 +4,7 @@ import { BotQuery } from "./__generated__/BotQuery.graphql";
 import { Link, useParams } from "react-router";
 
 import { Suspense, useState } from "react";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import {
   getBase64FromID,
   getIDFromBase64,
@@ -14,7 +15,7 @@ import FetchError from "@/_components/_display/FetchError";
 
 import SimpleToggle from "@/_components/_actions/_toggle/SimpleToggle";
 import BotResults from "./BotResults";
-import { reverseUrl } from "@/_lib/reverseUrl";
+import { reverseUrl } from "@/_lib/reverseUrl"; 
 import DisplaySkeletonTable from "@/_components/_display/_skeletons/DisplaySkeletonTable";
 
 export default function Bot() {
@@ -95,38 +96,43 @@ export default function Bot() {
           />
         </div>
       </div>
-      <div className="mb-4 mt-8 flex gap-4 break-words items-baseline align-baseline">
+      <div className="mb-4 mt-8 flex flex-wrap items-center gap-x-4 gap-y-3">
         <h4>Results</h4>
 
-        <p className="text-sm text-gray-300">
-          * Match Result from competitions are also available at:{" "}
-          {statsResultsLink ? (
-            <Link
-              to={statsResultsLink}
-              className="font-medium text-customGreen hover:text-white"
-            >
-              Stats Page
-            </Link>
-          ) : (
-            <span>Stats Page</span>
-          )}{" "}
-          — it support sorting on all fields.
-        </p>
+        <div
+          role="note"
+          className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-darken-2 px-3 py-2 text-sm text-gray-300 shadow-lg shadow-black backdrop-blur"
+        >
+          <InformationCircleIcon
+            aria-hidden="true"
+            className="h-5 w-5 shrink-0 text-customGreen"
+          />
+          <p>
+            Competition results are also available on the{" "}
+            {statsResultsLink ? (
+              <Link
+                to={statsResultsLink}
+                className="font-semibold text-customGreen hover:text-white"
+              >
+                Stats page
+              </Link>
+            ) : (
+              <span className="font-semibold text-gray-200">Stats page</span>
+            )}
+            .
+          </p>
+        </div>
       </div>
       {!loadResults ? (
-        <div className="flex flex-col items-start gap-3">
-          <button
-            type="button"
-            onClick={() => setLoadResults(true)}
-            className="rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2 font-semibold text-gray-200 transition hover:border-customGreen"
-          >
-            Load Bot Results
-          </button>
-        </div>
-      ) : (
-        <Suspense
-          fallback={<DisplaySkeletonTable columns={12} rows={15} />}
+        <button
+          type="button"
+          onClick={() => setLoadResults(true)}
+          className="w-full rounded-lg border border-neutral-700 bg-darken-2 px-6 py-5 text-lg font-semibold text-gray-200 shadow-lg shadow-black backdrop-blur transition-colors hover:border-customGreen hover:text-white focus:outline-none focus-visible:border-customGreen"
         >
+          Load Bot Results
+        </button>
+      ) : (
+        <Suspense fallback={<DisplaySkeletonTable columns={12} rows={15} />}>
           <BotResults botZipUpdated={data.node.botZipUpdated} />
         </Suspense>
       )}
