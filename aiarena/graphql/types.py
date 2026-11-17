@@ -103,7 +103,7 @@ class BotType(DjangoObjectTypeWithUID):
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
     requested_matches = DjangoFilterConnectionField(
         "aiarena.graphql.MatchType",
-        description="Matches this bot played outside any competition round in the last year, newest first",
+        description="Matches this bot played outside any competition round, newest first",
     )
     trophies = DjangoConnectionField("aiarena.graphql.TrophyType")
     bot_zip_url = graphene.String(description="Presigned URL to download the bot zip file")
@@ -157,11 +157,9 @@ class BotType(DjangoObjectTypeWithUID):
     def resolve_requested_matches(root: models.Bot, info, **args):
         # "Outside a round", not "has a requester": requested_by is SET_NULL, so a
         # deleted requester would otherwise make their matches vanish from here.
-        return within_match_history(
-            models.Match.objects.filter(
-                id__in=root.matchparticipation_set.values("match_id"),
-                round__isnull=True,
-            )
+        return models.Match.objects.filter(
+            id__in=root.matchparticipation_set.values("match_id"),
+            round__isnull=True,
         ).order_by("-started", "-id")
 
     @staticmethod
@@ -647,17 +645,6 @@ class CompetitionParticipationType(DjangoObjectTypeWithUID):
                 }
 
 
-# Hard floor on how far back match history (participations, arena client
-# results/assignments) can be queried. Keeps every query (counts, ordering,
-# filters) bounded to a recent window of these ever-growing tables.
-MATCH_HISTORY_MAX_AGE = timedelta(days=365)
-
-
-def within_match_history(matches):
-    """Limit a Match queryset to the window `MATCH_HISTORY_MAX_AGE` allows."""
-    return matches.filter(created__gte=timezone.now() - MATCH_HISTORY_MAX_AGE)
-
-
 class MatchParticipationFilterSet(FilterSet):
     ORDER_BY_FIELDS = (
         "id",
@@ -761,7 +748,6 @@ class MatchParticipationFilterSet(FilterSet):
     @property
     def qs(self):
         qs = super().qs
-        qs = qs.filter(match__created__gte=timezone.now() - MATCH_HISTORY_MAX_AGE)
         qs = self._apply_match_state_filters(qs)
 
         qs = qs.select_related(
@@ -1304,11 +1290,11 @@ class ArenaClientType(DjangoObjectTypeWithUID):
 
     matches_1h = graphene.Int(required=True, description="Results this client submitted in the last hour")
     matches_24h = graphene.Int(required=True, description="Results this client submitted in the last 24 hours")
-    matches_1y = graphene.Int(required=True, description="Results this client submitted in the last year")
+    matches_total = graphene.Int(required=True, description="Results this client has ever submitted")
     assigned_matches = graphene.List(
         graphene.NonNull("aiarena.graphql.MatchType"),
         required=True,
-        description="Matches assigned to this client in the last year that don't have a result yet",
+        description="Matches currently assigned to this client that don't have a result yet",
     )
     # A plain list of the latest results, not a paginated connection: a
     # connection counts its whole queryset on every request, and a busy client
@@ -1317,7 +1303,7 @@ class ArenaClientType(DjangoObjectTypeWithUID):
     recent_results = graphene.List(
         graphene.NonNull("aiarena.graphql.ResultType"),
         required=True,
-        description="The latest 100 results (from the last year) of matches assigned to this client, newest first",
+        description="The latest 100 results of matches assigned to this client, newest first",
     )
 
     # Arena clients are user accounts under the hood, so `fields` below is an
@@ -1360,22 +1346,20 @@ class ArenaClientType(DjangoObjectTypeWithUID):
         )
         return Coalesce(Subquery(recent, output_field=IntegerField()), 0)
 
-    # The counts (matches_1h / matches_24h / matches_1y) are what the client
+    # The counts (matches_1h / matches_24h / matches_total) are what the client
     # *submitted*; the recent results are matches *assigned* to it. They differ
     # by the client's timeouts: matches it was given but never reported back,
     # which the system cancels with no submitter. Those show in the list (it's
     # the client's match history) but aren't counted as matches it submitted.
 
     @staticmethod
-    def resolve_matches_1y(root: models.ArenaClient, info, **args):
-        return models.Result.objects.filter(
-            submitted_by=root, created__gte=timezone.now() - MATCH_HISTORY_MAX_AGE
-        ).count()
+    def resolve_matches_total(root: models.ArenaClient, info, **args):
+        return models.Result.objects.filter(submitted_by=root).count()
 
     @staticmethod
     def resolve_assigned_matches(root: models.ArenaClient, info, **args):
         return (
-            within_match_history(arena_clients.get_incomplete_assigned_matches_queryset(root))
+            arena_clients.get_incomplete_assigned_matches_queryset(root)
             .select_related("map", "round__competition", "requested_by")
             .prefetch_related(
                 Prefetch(
@@ -1389,10 +1373,7 @@ class ArenaClientType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_recent_results(root: models.ArenaClient, info, **args):
-        results = arena_clients.get_assigned_matches_results_queryset(root).filter(
-            created__gte=timezone.now() - MATCH_HISTORY_MAX_AGE
-        )
-        return with_result_list_relations(results)[:100]
+        return with_result_list_relations(arena_clients.get_assigned_matches_results_queryset(root))[:100]
 
 
 class NewsType(DjangoObjectTypeWithUID):
@@ -1912,7 +1893,7 @@ class UserType(DjangoObjectTypeWithUID):
 
     @staticmethod
     def resolve_requested_matches(root: models.User, info, **args):
-        return within_match_history(root.requested_matches).order_by("-started", "-id")
+        return root.requested_matches.order_by("-started", "-id")
 
     @staticmethod
     def resolve_avatar_url(root: models.User, info):
@@ -2002,7 +1983,7 @@ class Viewer(graphene.ObjectType):
 
     @staticmethod
     def resolve_requested_matches(root: models.User, info, **args):
-        return within_match_history(root.requested_matches).order_by("-started", "-id")
+        return root.requested_matches.order_by("-started", "-id")
 
     @staticmethod
     def resolve_receive_email_comms(root: models.User, info):
