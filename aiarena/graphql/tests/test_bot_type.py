@@ -71,16 +71,15 @@ class TestBotFileUrls(GraphQLTest):
         assert self._file_urls(bot, login_user=user)["botDataUrl"] is None
 
 
-class TestBotMatches(GraphQLTest):
-    """matches lists every game the bot played in the last year, wherever it sits in the match,
-    optionally narrowed to requested or competition games with matchType."""
+class TestBotRequestedMatches(GraphQLTest):
+    """requestedMatches lists the bot's matches outside any competition round, wherever it sits in the match."""
 
     # language=graphql
     query_text = """
-        query ($id: ID!, $matchType: String) {
+        query ($id: ID!) {
             node(id: $id) {
                 ... on BotType {
-                    matches(matchType: $matchType) {
+                    requestedMatches {
                         edges { node { databaseId requestedBy { username } } }
                     }
                 }
@@ -94,41 +93,34 @@ class TestBotMatches(GraphQLTest):
         MatchParticipation.objects.create(match=match, participant_number=2, bot=bot2)
         return match
 
-    def _match_ids(self, bot, match_type=None) -> list[int]:
-        variables = {"id": self.to_global_id(BotType, bot.id), "matchType": match_type}
-        data = self.query(self.query_text, variables=variables)
-        return [edge["node"]["databaseId"] for edge in data["node"]["matches"]["edges"]]
+    def _requested(self, bot) -> list[dict]:
+        data = self.query(self.query_text, variables={"id": self.to_global_id(BotType, bot.id)})
+        return [edge["node"] for edge in data["node"]["requestedMatches"]["edges"]]
 
-    def test_lists_requested_and_competition_matches_on_either_side_newest_first(
+    def test_lists_requested_matches_on_either_side_newest_first(
         self, bot, other_bot, bot_factory, user, other_user, map, competition
     ):
         now = timezone.now()
         third_bot = bot_factory(other_user, "Third_Bot")
-        as_participant1 = self._match(bot, other_bot, map, requested_by=user, started=now - timedelta(hours=2))
-        as_participant2 = self._match(other_bot, bot, map, requested_by=other_user, started=now - timedelta(hours=1))
-        competition_game = self._match(
-            bot, other_bot, map, round=Round.objects.create(competition=competition), started=now
-        )
+        as_participant1 = self._match(bot, other_bot, map, requested_by=user, started=now - timedelta(hours=1))
+        as_participant2 = self._match(other_bot, bot, map, requested_by=other_user, started=now)
+        self._match(bot, other_bot, map, round=Round.objects.create(competition=competition))  # competition game
         self._match(other_bot, third_bot, map, requested_by=user)  # doesn't involve this bot
 
-        assert self._match_ids(bot) == [competition_game.id, as_participant2.id, as_participant1.id]
+        assert self._requested(bot) == [
+            {"databaseId": as_participant2.id, "requestedBy": {"username": other_user.username}},
+            {"databaseId": as_participant1.id, "requestedBy": {"username": user.username}},
+        ]
 
-    def test_match_type_narrows_to_requested_or_competition(self, bot, other_bot, user, map, competition):
-        requested = self._match(bot, other_bot, map, requested_by=user)
-        competition_game = self._match(bot, other_bot, map, round=Round.objects.create(competition=competition))
-
-        assert self._match_ids(bot, "requested") == [requested.id]
-        assert self._match_ids(bot, "competition") == [competition_game.id]
-
-    def test_requested_keeps_matches_whose_requester_was_deleted(self, bot, other_bot, map):
+    def test_keeps_matches_whose_requester_was_deleted(self, bot, other_bot, map):
         """requested_by is SET_NULL, so "outside a round" is what makes a match a requested one."""
         match = self._match(bot, other_bot, map, requested_by=None)
 
-        assert self._match_ids(bot, "requested") == [match.id]
+        assert self._requested(bot) == [{"databaseId": match.id, "requestedBy": None}]
 
     def test_excludes_matches_older_than_a_year(self, bot, other_bot, user, map):
         recent = self._match(bot, other_bot, map, requested_by=user)
         old = self._match(bot, other_bot, map, requested_by=user)
         Match.objects.filter(id=old.id).update(created=timezone.now() - timedelta(days=400))
 
-        assert self._match_ids(bot) == [recent.id]
+        assert self._requested(bot) == [{"databaseId": recent.id, "requestedBy": {"username": user.username}}]

@@ -55,7 +55,6 @@ export default function AuthorMatchRequestsTable(
       refetch={refetchMatches}
       columnVisibilityKey="Author_AuthorMatchRequestsTable_ColumnVisibility"
       emptyMessage={<p>This author has not requested any matches.</p>}
-      loadingMoreMessage="Loading more match requests..."
     />
   );
 }

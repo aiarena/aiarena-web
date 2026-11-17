@@ -41,6 +41,8 @@ export default function ArenaClientHeader(props: ArenaClientHeaderProps) {
           username
         }
         matches1h
+        matches24h
+        matches1y
       }
     `,
     props.arenaClient,
@@ -100,15 +102,17 @@ export default function ArenaClientHeader(props: ArenaClientHeaderProps) {
           </p>
         </div>
 
-        {/* Counts results the client submitted. The results list below shows
-            every match assigned to it, which also includes matches it timed
-            out on. */}
+        {/* These count results the client submitted. The results list below
+            shows every match assigned to it, which also includes matches it
+            timed out on, so its length can exceed "Last year". */}
         <figure>
           <figcaption className="mb-1 text-xs text-gray-400">
             Results submitted
           </figcaption>
           <div className="flex flex-wrap gap-3">
             <Stat label="Last hour" value={client.matches1h} />
+            <Stat label="Last 24h" value={client.matches24h} />
+            <Stat label="Last year" value={client.matches1y} />
           </div>
         </figure>
       </div>

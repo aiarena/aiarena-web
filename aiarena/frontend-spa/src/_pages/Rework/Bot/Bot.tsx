@@ -73,7 +73,7 @@ export default function Bot() {
       </div>
 
       <div className="mt-8">
-        <h4 className="mb-4">All Games (Last Year)</h4>
+        <h4 className="mb-4">Match Requests</h4>
         <Suspense fallback={<DisplaySkeletonTable columns={10} rows={5} />}>
           <ErrorBoundaryWrapper>
             <BotMatchRequests botId={id} />

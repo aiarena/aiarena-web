@@ -24,12 +24,12 @@ export default function BotMatchRequestsTable(
         orderBy: { type: "String" }
         showEveryonesTags: { type: "Boolean", defaultValue: false }
       ) {
-        matches(
+        requestedMatches(
           first: $first
           after: $cursor
           orderBy: $orderBy
           showEveryonesTags: $showEveryonesTags
-        ) @connection(key: "BotMatchRequestsTable_bot_matches") {
+        ) @connection(key: "BotMatchRequestsTable_bot_requestedMatches") {
           edges {
             node {
               ...MatchRequestsTable_matches
@@ -49,14 +49,13 @@ export default function BotMatchRequestsTable(
 
   return (
     <MatchRequestsTable
-      matches={getNodes(data.matches)}
+      matches={getNodes(data.requestedMatches)}
       hasNext={hasNext}
       loadNext={loadNext}
       refetch={refetchMatches}
       columnVisibilityKey="Bot_BotMatchRequestsTable_ColumnVisibility"
-      emptyMessage={<p>This bot hasn't played any matches in the last year.</p>}
-      loadingMoreMessage="Loading more matches..."
-      showOrigin
+      emptyMessage={<p>No matches have been requested with this bot.</p>}
+      showRequestedBy
     />
   );
 }

@@ -101,9 +101,9 @@ class BotType(DjangoObjectTypeWithUID):
     competition_participations = DjangoFilterConnectionField("aiarena.graphql.CompetitionParticipationType")
     wiki_article = graphene.String()
     match_participations = DjangoFilterConnectionField("aiarena.graphql.MatchParticipationType")
-    matches = DjangoFilterConnectionField(
+    requested_matches = DjangoFilterConnectionField(
         "aiarena.graphql.MatchType",
-        description="Matches this bot played in the last year, requested and competition alike, newest first",
+        description="Matches this bot played outside any competition round in the last year, newest first",
     )
     trophies = DjangoConnectionField("aiarena.graphql.TrophyType")
     bot_zip_url = graphene.String(description="Presigned URL to download the bot zip file")
@@ -154,9 +154,14 @@ class BotType(DjangoObjectTypeWithUID):
         )
 
     @staticmethod
-    def resolve_matches(root: models.Bot, info, **args):
+    def resolve_requested_matches(root: models.Bot, info, **args):
+        # "Outside a round", not "has a requester": requested_by is SET_NULL, so a
+        # deleted requester would otherwise make their matches vanish from here.
         return within_match_history(
-            models.Match.objects.filter(id__in=root.matchparticipation_set.values("match_id"))
+            models.Match.objects.filter(
+                id__in=root.matchparticipation_set.values("match_id"),
+                round__isnull=True,
+            )
         ).order_by("-started", "-id")
 
     @staticmethod
@@ -1028,27 +1033,14 @@ class MatchFilterSet(FilterSet):
 
     show_everyones_tags = django_filters.BooleanFilter(method="noop_bool")
 
-    # Unset means both kinds.
-    match_type = django_filters.ChoiceFilter(choices=RelativeResultFilter.MATCH_TYPES, method="filter_match_type")
-
     class Meta:
         model = models.Match
         fields = [
             "order_by",
             "show_everyones_tags",
-            "match_type",
         ]
 
     def noop_bool(self, queryset, name, value):
-        return queryset
-
-    def filter_match_type(self, queryset, name, value):
-        # "Outside a round", not "has a requester": requested_by is SET_NULL, so a
-        # deleted requester would otherwise make their matches vanish from "requested".
-        if value == "requested":
-            return queryset.filter(round__isnull=True)
-        if value == "competition":
-            return queryset.filter(round__isnull=False)
         return queryset
 
     def filter_order_by(self, queryset, name, value):
@@ -1312,6 +1304,7 @@ class ArenaClientType(DjangoObjectTypeWithUID):
 
     matches_1h = graphene.Int(required=True, description="Results this client submitted in the last hour")
     matches_24h = graphene.Int(required=True, description="Results this client submitted in the last 24 hours")
+    matches_1y = graphene.Int(required=True, description="Results this client submitted in the last year")
     assigned_matches = graphene.List(
         graphene.NonNull("aiarena.graphql.MatchType"),
         required=True,
@@ -1367,11 +1360,17 @@ class ArenaClientType(DjangoObjectTypeWithUID):
         )
         return Coalesce(Subquery(recent, output_field=IntegerField()), 0)
 
-    # The counts (matches_1h / matches_24h) are what the client
+    # The counts (matches_1h / matches_24h / matches_1y) are what the client
     # *submitted*; the recent results are matches *assigned* to it. They differ
     # by the client's timeouts: matches it was given but never reported back,
     # which the system cancels with no submitter. Those show in the list (it's
     # the client's match history) but aren't counted as matches it submitted.
+
+    @staticmethod
+    def resolve_matches_1y(root: models.ArenaClient, info, **args):
+        return models.Result.objects.filter(
+            submitted_by=root, created__gte=timezone.now() - MATCH_HISTORY_MAX_AGE
+        ).count()
 
     @staticmethod
     def resolve_assigned_matches(root: models.ArenaClient, info, **args):
