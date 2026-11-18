@@ -595,6 +595,10 @@ if crontab:
             "task": "aiarena.core.tasks.competitions_monitoring",
             "schedule": timedelta(minutes=1),
         },
+        "competition_schedule": {
+            "task": "aiarena.core.tasks.competition_schedule",
+            "schedule": timedelta(minutes=1),
+        },
         "refresh_patreon_tiers": {
             "task": "aiarena.core.tasks.refresh_patreon_tiers",
             "schedule": crontab(minute=0, hour=0),  # Every day at 00:00

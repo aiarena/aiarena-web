@@ -21,6 +21,7 @@ from aiarena.core.models import (
     CompetitionBotMapStats,
     CompetitionBotMatchupStats,
     CompetitionParticipation,
+    CompetitionSchedule,
     Map,
     MapPool,
     Match,
@@ -42,10 +43,6 @@ from aiarena.core.models.game import Game
 from aiarena.core.models.game_mode import GameMode
 from aiarena.core.services import competitions, matches
 from aiarena.patreon.models import PatreonAccountBind, PatreonUnlinkedDiscordUID
-
-
-admin.site.site_header = "AiArena Admin"
-admin.site.site_title = "AiArena Admin"
 
 
 class ApiUsageAdminMixin:
@@ -823,3 +820,143 @@ class WebsiteUserAdmin(ApiUsageAdminMixin, admin.ModelAdmin):
         )
 
     ban_users.short_description = "Ban selected users (deactivate and disable all their bot participations)"
+
+
+class CompetitionScheduleAdminForm(forms.ModelForm):
+    class Meta:
+        model = CompetitionSchedule
+        exclude = []
+        widgets = {"wiki_article_content": getEditor().get_widget()}
+
+
+@admin.register(CompetitionSchedule)
+class CompetitionScheduleAdmin(admin.ModelAdmin):
+    form = CompetitionScheduleAdminForm
+
+    list_display = (
+        "name",
+        "game_mode",
+        "start_schedule",
+        "end_schedule",
+        "enabled",
+    )
+
+    list_display_links = ("name",)
+
+    list_filter = (
+        "enabled",
+        "game_mode",
+        "start_month",
+        "end_month",
+    )
+
+    search_fields = (
+        "name",
+        "game_mode__name",
+    )
+
+    list_editable = ("enabled",)
+
+    ordering = (
+        "start_month",
+        "start_day",
+        "start_time",
+    )
+
+    filter_horizontal = ("playable_races",)
+
+    readonly_fields = ("generated_competitions_count",)
+
+    fieldsets = (
+        (
+            "General",
+            {
+                "fields": (
+                    "name",
+                    "enabled",
+                    "game_mode",
+                    "award_set",
+                ),
+            },
+        ),
+        (
+            "Description",
+            {
+                "fields": ("wiki_article_content",),
+            },
+        ),
+        (
+            "Annual Schedule",
+            {
+                "description": (
+                    "The schedule repeats every year. "
+                    "Days exceeding the number of days in a month "
+                    "are automatically adjusted to the last valid day. "
+                    "For example, February 31 becomes February 28 or 29. "
+                    "All times are in UTC."
+                ),
+                "fields": (
+                    (
+                        "start_month",
+                        "start_day",
+                        "start_time",
+                    ),
+                    (
+                        "end_month",
+                        "end_day",
+                        "end_time",
+                    ),
+                ),
+            },
+        ),
+        (
+            "Competition Configuration",
+            {
+                "fields": (
+                    "max_active_rounds",
+                    "target_n_divisions",
+                    "n_divisions",
+                    "target_division_size",
+                    "rounds_per_cycle",
+                    "n_placements",
+                ),
+            },
+        ),
+        (
+            "Playable Races",
+            {
+                "fields": ("playable_races",),
+            },
+        ),
+        (
+            "Infrastructure & Statistics",
+            {
+                "fields": (
+                    "require_trusted_infrastructure",
+                    "indepth_bot_statistics_enabled",
+                ),
+            },
+        ),
+        (
+            "Generated Competitions",
+            {
+                "fields": ("generated_competitions_count",),
+                "classes": ("collapse",),
+            },
+        ),
+    )
+
+    @admin.display(description="Starts")
+    def start_schedule(self, obj):
+        return f"{obj.start_month:02d}/{obj.start_day:02d} {obj.start_time:%H:%M}"
+
+    @admin.display(description="Ends")
+    def end_schedule(self, obj):
+        return f"{obj.end_month:02d}/{obj.end_day:02d} {obj.end_time:%H:%M}"
+
+    @admin.display(description="Generated competitions")
+    def generated_competitions_count(self, obj):
+        if not obj.pk:
+            return 0
+
+        return obj.competitions.count()
