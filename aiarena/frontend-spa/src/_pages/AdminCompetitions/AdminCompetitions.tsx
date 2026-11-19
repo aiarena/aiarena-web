@@ -41,7 +41,7 @@ export default function AdminCompetitions() {
     `,
     {},
     {
-      fetchPolicy: "network-only",
+      fetchPolicy: "store-and-network",
     },
   );
 

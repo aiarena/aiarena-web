@@ -82,7 +82,9 @@ function AdminLayoutContent() {
         </nav>
       </div>
 
-      <Outlet />
+      <Suspense fallback={<DisplaySkeleton height={558} />}>
+        <Outlet />
+      </Suspense>
     </div>
   );
 }

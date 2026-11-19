@@ -1,3 +1,6 @@
+import { Suspense } from "react";
+
+import DisplaySkeleton from "@/_components/_display/_skeletons/DisplaySkeleton";
 import AdminCompetitions from "./AdminCompetitions";
 
 export default function AdminCompetitionsPage() {
@@ -13,7 +16,9 @@ export default function AdminCompetitionsPage() {
         </p>
       </div>
 
-      <AdminCompetitions />
+      <Suspense fallback={<DisplaySkeleton height={558} />}>
+        <AdminCompetitions />
+      </Suspense>
     </div>
   );
 }
