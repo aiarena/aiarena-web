@@ -1,4 +1,4 @@
-import { statsSideNavbarLinks } from "@/_pages/Rework/CompetitionParticipation/StatsSideNavbarLinks";
+import { statsSideNavbarLinks } from "@/_pages/CompetitionParticipation/StatsSideNavbarLinks";
 import clsx from "clsx";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 import { NavLink } from "react-router";

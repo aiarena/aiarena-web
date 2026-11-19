@@ -5,7 +5,7 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { getIDFromBase64 } from "@/_lib/relayHelpers";
 import { reverseUrl } from "@/_lib/reverseUrl";
 import { getDotColor } from "@/_lib/getDotColor";
-import { statsSideNavbarLinks } from "@/_pages/Rework/CompetitionParticipation/StatsSideNavbarLinks";
+import { statsSideNavbarLinks } from "@/_pages/CompetitionParticipation/StatsSideNavbarLinks";
 import ActiveDot from "../ActiveDot";
 import EloTrendIcon from "../EloTrendIcon";
 import ResultSplitBar from "../ResultSplitBar";

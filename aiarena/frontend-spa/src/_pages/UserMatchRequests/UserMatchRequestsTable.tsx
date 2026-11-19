@@ -35,7 +35,7 @@ import { Link } from "react-router";
 import useStateWithLocalStorage from "@/_components/_hooks/useStateWithLocalStorage";
 import { RenderRace } from "@/_components/_display/RenderRace";
 import { ArrowDownCircleIcon } from "@heroicons/react/24/outline";
-import TagSummaryWithModal from "../Rework/Bot/BotResultsTable/TagSummaryModal";
+import TagSummaryWithModal from "../Bot/BotResultsTable/TagSummaryModal";
 import DownloadMap from "@/_components/_display/DownloadMap";
 import { formatGameTime } from "@/_lib/formatGameTime";
 

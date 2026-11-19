@@ -1,4 +1,4 @@
-import { Tag } from "@/_pages/Rework/Bot/BotResultsTable/BotResultsTable";
+import { Tag } from "@/_pages/Bot/BotResultsTable/BotResultsTable";
 import { useMemo } from "react";
 
 export default function useParseUtils({ tagNodes }: { tagNodes: Tag[] }) {

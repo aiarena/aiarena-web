@@ -1,5 +1,5 @@
 import { getPublicPrefix } from "@/_lib/getPublicPrefix";
-import { CoreBotRaceLabelChoices } from "@/_pages/Rework/Bots/__generated__/BotsTable_node.graphql";
+import { CoreBotRaceLabelChoices } from "@/_pages/Bots/__generated__/BotsTable_node.graphql";
 import { ReactNode } from "react";
 import clsx from "clsx";
 
