@@ -16,7 +16,7 @@ export const STATS_PERIODS: readonly {
   value: StatsPeriod;
   label: string;
   days: number | null;
-  timeUnit: "day" | "month" | "year";
+  timeUnit: BucketUnit;
 }[] = [
   { value: "7d", label: "Last 7 days", days: 7, timeUnit: "day" },
   { value: "30d", label: "Last 30 days", days: 30, timeUnit: "day" },
@@ -197,5 +197,84 @@ export function stackedDataset(
     backgroundColor: fillColor,
     fill: true,
     stack: "stack",
+  };
+}
+
+export type BucketUnit = "day" | "month" | "year";
+
+function toBucketStart(timestamp: number, unit: BucketUnit): number {
+  const date = new Date(timestamp);
+
+  switch (unit) {
+    case "day":
+      return timestamp;
+    case "month":
+      return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1);
+    case "year":
+      return Date.UTC(date.getUTCFullYear(), 0, 1);
+  }
+}
+
+function nextBucketStart(bucketStart: number, unit: BucketUnit): number {
+  const date = new Date(bucketStart);
+
+  switch (unit) {
+    case "day":
+      return bucketStart + DAY_IN_MS;
+    case "month":
+      return Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1);
+    case "year":
+      return Date.UTC(date.getUTCFullYear() + 1, 0, 1);
+  }
+}
+
+/**
+ * Every bucket start from `start` through today, so empty days/months still
+ * get a (zero) bar instead of the axis silently skipping them.
+ */
+export function createBuckets(start: number, unit: BucketUnit): number[] {
+  const end = getTodayUtcTimestamp();
+  const buckets: number[] = [];
+
+  for (
+    let bucket = toBucketStart(start, unit);
+    bucket <= end;
+    bucket = nextBucketStart(bucket, unit)
+  ) {
+    buckets.push(bucket);
+  }
+
+  return buckets;
+}
+
+/** Non-cumulative counts per bucket, for days on or after `periodStart`. */
+export function toBucketedSeries(
+  buckets: readonly number[],
+  dailyCounts: DailyCounts,
+  unit: BucketUnit,
+  periodStart: number | null,
+): ChartPoint[] {
+  const totals = new Map<number, number>(buckets.map((b) => [b, 0]));
+
+  for (const [date, count] of dailyCounts) {
+    if (periodStart !== null && date < periodStart) continue;
+
+    const bucket = toBucketStart(date, unit);
+    if (totals.has(bucket)) {
+      totals.set(bucket, (totals.get(bucket) ?? 0) + count);
+    }
+  }
+
+  return buckets.map((bucket) => ({ x: bucket, y: totals.get(bucket) ?? 0 }));
+}
+
+export function barDataset(label: string, color: string, data: ChartPoint[]) {
+  return {
+    label,
+    data,
+    borderColor: color,
+    backgroundColor: color,
+    borderRadius: 2,
+    maxBarThickness: 24,
   };
 }

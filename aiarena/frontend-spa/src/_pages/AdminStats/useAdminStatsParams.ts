@@ -4,6 +4,7 @@ import { STATS_PERIODS, StatsPeriod } from "./adminStatsSeries";
 
 export const ADMIN_STATS_TABS = [
   { value: "totals", label: "Totals" },
+  { value: "activity", label: "Activity" },
   { value: "percentages", label: "Percentages" },
   { value: "patreon", label: "Patreon pledge" },
 ] as const;

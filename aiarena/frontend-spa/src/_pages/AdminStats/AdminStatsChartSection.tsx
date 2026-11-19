@@ -1,4 +1,5 @@
 import {
+  BarElement,
   ChartData,
   Chart as ChartJS,
   ChartOptions,
@@ -11,10 +12,13 @@ import {
   Tooltip,
   TooltipItem,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 import "chartjs-adapter-date-fns";
 
+import { BucketUnit, ChartPoint } from "./adminStatsSeries";
+
 ChartJS.register(
+  BarElement,
   LineElement,
   PointElement,
   LinearScale,
@@ -31,19 +35,33 @@ export type StatsTotalCard = {
   color: string;
 };
 
-interface AdminStatsChartSectionProps {
+type StatsChartType = "line" | "bar";
+
+type AdminStatsChartSectionProps = {
   description?: string;
   cards: readonly StatsTotalCard[];
-  data: ChartData<"line", { x: number; y: number }[]>;
-  timeUnit: "day" | "month" | "year";
+  timeUnit: BucketUnit;
   yTitle: string;
   gridColor: string;
   stacked?: boolean;
   yMax?: number;
   formatTick?: (value: number | string) => string;
-  formatTooltipLabel?: (item: TooltipItem<"line">) => string;
-  formatTooltipFooter?: (items: TooltipItem<"line">[]) => string;
-}
+  formatTooltipLabel?: (item: TooltipItem<StatsChartType>) => string;
+  formatTooltipFooter?: (items: TooltipItem<StatsChartType>[]) => string;
+} & (
+  | { type?: "line"; data: ChartData<"line", ChartPoint[]> }
+  | {
+      /** One bar per time bucket (`timeUnit`), not one per day. */
+      type: "bar";
+      data: ChartData<"bar", ChartPoint[]>;
+    }
+);
+
+const TOOLTIP_FORMATS: Record<BucketUnit, string> = {
+  day: "PP",
+  month: "MMM yyyy",
+  year: "yyyy",
+};
 
 const TEXT_COLOR = "#f3f4f6";
 
@@ -68,7 +86,9 @@ function TotalCard({ card }: { card: StatsTotalCard }) {
 export default function AdminStatsChartSection(
   props: AdminStatsChartSectionProps,
 ) {
-  const options: ChartOptions<"line"> = {
+  const isBar = props.type === "bar";
+
+  const options: ChartOptions<StatsChartType> = {
     animation: false,
     responsive: true,
     maintainAspectRatio: false,
@@ -83,9 +103,12 @@ export default function AdminStatsChartSection(
       x: {
         type: "time",
         stacked: props.stacked,
+        // Bars centre on their bucket instead of overhanging the axis edges.
+        offset: isBar,
         time: {
           unit: props.timeUnit,
-          tooltipFormat: "PP",
+          // A line point is a day; a bar is a whole day/month/year bucket.
+          tooltipFormat: isBar ? TOOLTIP_FORMATS[props.timeUnit] : "PP",
         },
         ticks: {
           color: TEXT_COLOR,
@@ -145,7 +168,11 @@ export default function AdminStatsChartSection(
         className="rounded-xl border border-neutral-800 bg-darken-2 p-4 pt-6 shadow-lg backdrop-blur-lg"
         style={{ height: 558 }}
       >
-        <Line data={props.data} options={options} />
+        {props.type === "bar" ? (
+          <Bar data={props.data} options={options} />
+        ) : (
+          <Line data={props.data} options={options} />
+        )}
       </div>
     </div>
   );

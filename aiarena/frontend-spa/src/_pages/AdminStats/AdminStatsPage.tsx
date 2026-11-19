@@ -2,6 +2,7 @@ import clsx from "clsx";
 
 import ButtonToggle from "@/_components/_actions/_toggle/ButtonToggle";
 import { STATS_PERIODS } from "./adminStatsSeries";
+import AdminStatsActivityTab from "./AdminStatsActivityTab";
 import AdminStatsPatreonTab from "./AdminStatsPatreonTab";
 import AdminStatsPercentagesTab from "./AdminStatsPercentagesTab";
 import AdminStatsTotalsTab from "./AdminStatsTotalsTab";
@@ -55,6 +56,7 @@ export default function AdminStatsPage() {
       </nav>
 
       {tab === "totals" && <AdminStatsTotalsTab />}
+      {tab === "activity" && <AdminStatsActivityTab />}
       {tab === "percentages" && <AdminStatsPercentagesTab />}
       {tab === "patreon" && <AdminStatsPatreonTab />}
     </div>
