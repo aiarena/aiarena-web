@@ -11,3 +11,8 @@ class NoGameForClient(APIException):
     status_code = 200
     default_detail = "No game available for client."
     default_code = "no_game_available"
+
+
+class ResultSubmissionConflict(APIException):
+    status_code = 409
+    default_code = "result_submission_conflict"
